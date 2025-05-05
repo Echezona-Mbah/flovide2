@@ -36,20 +36,20 @@ Route::group(['middleware'=> ['auth:sanctum']],function(){
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);
     // api routes for bank acccount details 
-    Route::post('auth/bank-account', [add_bank_accountController::class, 'store']);
-    Route::get('auth/show-bank-accounts', [add_bank_accountController::class, 'show']);
-    Route::delete('auth/delete-account/{id}', [add_bank_accountController::class, 'destroy']);
-    Route::delete('auth/delete-accounts', [add_bank_accountController::class, 'destroyAll']);
-    Route::put('auth/bank-account/{id}', [add_bank_accountController::class, 'update']);
+    Route::post('business/bank-account', [add_bank_accountController::class, 'store']);
+    Route::get('business/show-bank-accounts', [add_bank_accountController::class, 'show']);
+    Route::delete('business/delete-account/{id}', [add_bank_accountController::class, 'destroy']);
+    Route::delete('business/delete-accounts', [add_bank_accountController::class, 'destroyAll']);
+    Route::put('business/bank-account/{id}', [add_bank_accountController::class, 'update']);
     // api routes for sub accounts details
-    Route::post('auth/subaccounts', [SubAccountController::class, 'store']);
-    Route::get('auth/show-subaccounts', [SubAccountController::class, 'show']);
-    Route::put('auth/update-subaccount/{id}', [SubAccountController::class, 'update']);
-    Route::delete('auth/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
-    Route::delete('auth/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
+    Route::post('business/subaccounts', [SubAccountController::class, 'store']);
+    Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
+    Route::put('business/update-subaccount/{id}', [SubAccountController::class, 'update']);
+    Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
+    Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
     // api for transaction history 
-    Route::get('auth/show-transactions', [Transaction_history_Controller::class, 'showalltransaction']);
-    Route::post('auth/transactions', [Transaction_history_Controller::class, 'storetransaction']);
+    Route::get('business/show-transactions', [Transaction_history_Controller::class, 'showalltransaction']);
+    Route::post('business/transactions', [Transaction_history_Controller::class, 'storetransaction']);
 
 
 
