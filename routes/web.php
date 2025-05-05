@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BusinessController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,4 +18,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->group(function () {
+    Route::get('/payout', [BusinessController::class, 'payouts'])->name('payouts');
+    Route::get('/subaccount', [BusinessController::class, 'subaccount'])->name('subaccount');
+});
+
+require __DIR__ . '/auth.php';

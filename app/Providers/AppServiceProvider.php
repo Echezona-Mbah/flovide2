@@ -8,11 +8,24 @@ use Illuminate\Support\Facades\Route;
 class AppServiceProvider extends ServiceProvider
 {
     /**
+     * The namespace for the application's controllers.
+     *
+     * @var string|null
+     */
+    protected $namespace = 'App\\Http\\Controllers';
+    /**
      * Register any application services.
      */
     public function register(): void
     {
         //
+    }
+
+    protected function mapWebRoutes()
+    {
+        Route::middleware('web') // Apply the 'web' middleware group
+            ->namespace($this->namespace)
+            ->group(base_path('routes/web.php')); // Path to the web.php routes file
     }
 
     /**

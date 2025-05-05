@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\business;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use App\Models\TransactionHistory;
 use Illuminate\Support\Facades\Auth;
 
 class Transaction_history_Controller extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
+    
     public function showalltransaction()
     {
         $transactions = TransactionHistory::where('user_id', Auth::user()->id)->orderBy('time', 'desc')->get();
