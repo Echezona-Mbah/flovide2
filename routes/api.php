@@ -5,7 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\business\add_bank_accountController;
 use App\Http\Controllers\business\SubAccountController;
-use App\Http\Controllers\business\Transaction_history_Controller;
+use App\Http\Controllers\business\TransactionHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,8 +48,8 @@ Route::group(['middleware'=> ['auth:sanctum']],function(){
     Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
     Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
     // api for transaction history 
-    Route::get('business/show-transactions', [Transaction_history_Controller::class, 'showalltransaction']);
-    Route::post('business/transactions', [Transaction_history_Controller::class, 'storetransaction']);
+    Route::get('business/show-transactions', [TransactionHistoryController::class, 'showalltransaction']);
+    Route::post('business/transactions', [TransactionHistoryController::class, 'storeTransaction']);
 
 
 
