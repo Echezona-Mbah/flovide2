@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\business;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\BankAccount;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Auth;
 class add_bank_accountController extends Controller
 {
     //
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

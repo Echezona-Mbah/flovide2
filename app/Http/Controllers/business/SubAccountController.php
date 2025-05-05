@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\business;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use App\Models\Subaccount;
 use Illuminate\Support\Facades\Auth;
 
 class SubAccountController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+    }
+    
     public function store(Request $request)
     {
         $request->validate([
@@ -67,9 +72,12 @@ class SubAccountController extends Controller
 
             // $subaccount->update($request->all());
             $subaccount->update($request->only([
-                'bank_name', 'bank_country', 'account_number', 'account_name'
+                'bank_name',
+                'bank_country',
+                'account_number',
+                'account_name'
             ]));
-            
+
             return response()->json([
                 'message' => 'Subaccount updated successfully.',
                 'data' => $subaccount
