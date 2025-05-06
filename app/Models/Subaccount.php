@@ -11,7 +11,8 @@ class Subaccount extends Model
         'account_number',
         'account_name',
         'bank_name',
-        'bank_country'
+        'bank_country',
+        'default'
     ];
 
     protected $casts = [

@@ -154,8 +154,7 @@
             </div>
         </header>
         <section class=" relative  w-full">
-            <section
-                class="flex w-full flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
+            <section class="flex w-full flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
                 <!-- Left form -->
                 <section class="max-w-7xl mx-auto flex w-full flex-col md:flex-row gap-14">
                     <!-- Left form section -->
@@ -164,16 +163,30 @@
                         <p class="text-gray-500 mb-8">
                             You can split out-going funds between subaccounts and your payout account.
                         </p>
-                
-                        <form class="space-y-6">
+                        @if($errors->any())
+                            <div class="text-red-600 mb-2">
+                                <ul class="list-disc pl-5">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        
+                        @if(session('success'))
+                            <div class="text-green-600 mb-2">{{ session('success') }}</div>
+                        @endif
+
+                        <form method="POST" action="{{ route('business.store') }}" class="space-y-6">
+                            @csrf
+
                             <div>
                                 <label for="bank" class="block text-gray-600 text-sm mb-1 font-semibold">Bank</label>
-                                <select id="bank" name="bank"
-                                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                    <option selected disabled>Select your bank</option>
-                                    <option>GTB</option>
-                                    <option>Zenith</option>
-                                    <option>UBA</option>
+                                <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <option value="" selected disabled>Select your bank</option>
+                                    <option value="GTB">GTB</option>
+                                    <option value="Zenith">Zenith</option>
+                                    <option value="UBA">UBA</option>
                                 </select>
                             </div>
                 
@@ -181,12 +194,11 @@
                                 <label for="country" class="block text-gray-600 text-sm mb-1 font-semibold">
                                     In what country is your bank located?
                                 </label>
-                                <select id="country" name="country"
-                                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                    <option selected disabled>Select country</option>
-                                    <option>Nigeria</option>
-                                    <option>Ghana</option>
-                                    <option>Kenya</option>
+                                <select id="country" name="bank_country" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <option value="" selected disabled>Select country</option>
+                                    <option value="Nigeria">Nigeria</option>
+                                    <option value="Ghana">Ghana</option>
+                                    <option value="Kenya">Kenya</option>
                                 </select>
                             </div>
                 
@@ -194,20 +206,17 @@
                                 <label for="account-number" class="block text-gray-600 text-sm mb-1 font-semibold">
                                     Bank account number
                                 </label>
-                                <input type="text" id="account-number" name="account-number" placeholder="12345678"
-                                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                <input type="text" id="account-number" name="account_number" placeholder="12345678" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                             </div>
                 
                             <div>
                                 <label for="account-name" class="block text-gray-600 text-sm mb-1 font-semibold">
                                     Bank account name
                                 </label>
-                                <input type="text" id="account-name" name="account-name" placeholder="John Doe"
-                                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                <input type="text" id="account-name" name="account_name" placeholder="John Doe" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                             </div>
                 
-                            <button type="submit"
-                                class="bg-blue-200 text-blue-900 font-semibold rounded-full px-6 py-2 hover:bg-blue-300 transition">
+                            <button type="submit" class="bg-blue-200 text-blue-900 font-semibold rounded-full px-6 py-2 hover:bg-blue-300 transition">
                                 Add Account
                             </button>
                         </form>
@@ -217,69 +226,128 @@
                     <section class="flex-1 max-w-lg bg-gray-100 rounded-2xl p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="font-semibold text-gray-900">Subaccounts</h2>
-                            <button type="button"
-                                class="flex items-center gap-2 text-red-600 bg-white rounded-full px-4 py-1 text-sm font-semibold hover:bg-red-50 transition">
+                            <button type="button" class="delete-all-btn flex items-center gap-2 text-red-600 bg-white rounded-full px-4 py-1 text-sm font-semibold hover:bg-red-50 transition">
                                 <i class="fas fa-trash-alt"></i> Delete All
                             </button>
                         </div>
                 
                         <ul class="space-y-3">
-                            <li
-                                class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
-                                <div class="flex items-center gap-3">
-                                    <span>2100048486</span>
-                                    <span
-                                        class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">GTB</span>
-                                </div>
-                                <div class="flex items-center gap-4 text-gray-400">
-                                    <button aria-label="Edit 2100048486 GTB" class="hover:text-gray-600">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                    <button aria-label="Delete 2100048486 GTB" class="hover:text-gray-600">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </li>
-                
-                            <li
-                                class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
-                                <div class="flex items-center gap-3">
-                                    <span>2100048486</span>
-                                    <span
-                                        class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">Zenith</span>
-                                </div>
-                                <div class="flex items-center gap-4 text-gray-400">
-                                    <button aria-label="Edit 2100048486 Zenith" class="hover:text-gray-600">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                    <button aria-label="Delete 2100048486 Zenith" class="hover:text-gray-600">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </li>
-                
-                            <li
-                                class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
-                                <div class="flex items-center gap-3">
-                                    <span>12345678901</span>
-                                    <span
-                                        class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">UBA</span>
-                                </div>
-                                <div class="flex items-center gap-4 text-gray-400">
-                                    <button aria-label="Edit 12345678901 UBA" class="hover:text-gray-600">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                    <button aria-label="Delete 12345678901 UBA" class="hover:text-gray-600">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </li>
+                            @if($subaccounts->isEmpty())
+                                <p>No Sub bank account found.</p>
+                            @else
+                                @foreach($subaccounts as $account)
+                                    <li class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
+                                        <div class="flex items-center gap-3">
+                                            <span>{{ Crypt::decryptString($account->account_number) }}</span>
+                                            <span class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">{{ $account->bank_name }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-gray-400">
+                                            <button aria-label="" class="hover:text-gray-600">
+                                                <a href="{{ route('business.subaccountEdit', $account->id) }}">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                            </button>
+                                            <button aria-label="" class="hover:text-gray-600 delete-icon" data-id="{{ $account->id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </li>
+                                @endforeach
+
+                            @endif
+                            
+                            
                         </ul>
                     </section>
                 </section>
             </section>
     </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+
+        document.querySelector('.delete-all-btn').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will delete all your saved Sub bank accounts!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete all!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/business/delete-subaccounts/delete-all', {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        Swal.fire('Deleted!', 'All your bank accounts have been deleted.', 'success').then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(err => {
+                        Swal.fire('Error!', 'Something went wrong.', 'error');
+                        console.log(err);
+                    });
+                }
+            });
+        });
+
+
+        document.querySelectorAll('.delete-icon').forEach((button) => {
+            button.addEventListener('click', function() {
+                const accountId = this.getAttribute('data-id');  
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You won\'t be able to revert this!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/business/deleteSubaccount/${accountId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status == 'success') {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your bank account has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); 
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error deleting your bank account.',
+                                    'error'
+                                );
+                                console.log(data);
+                            }
+                        })
+                        .catch(error => console.log('Error:', error));
+                    }
+                });
+            });
+        });
+
+
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebarBtn');
         const closeBtn = document.getElementById('closeSidebarBtn');
