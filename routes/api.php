@@ -3,7 +3,7 @@
 use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\business\add_bank_accountController;
+use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
 use Illuminate\Http\Request;
@@ -29,18 +29,15 @@ Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verify
 Route::post('/auth/reset-password', [ForgetPasswordController::class, 'resetPassword']);
 
 
-
-
-
-Route::group(['middleware'=> ['auth:sanctum']],function(){
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);
     // api routes for bank acccount details 
-    Route::post('business/bank-account', [add_bank_accountController::class, 'store']);
-    Route::get('business/show-bank-accounts', [add_bank_accountController::class, 'show']);
-    Route::delete('business/delete-account/{id}', [add_bank_accountController::class, 'destroy']);
-    Route::delete('business/delete-accounts', [add_bank_accountController::class, 'destroyAll']);
-    Route::put('business/bank-account/{id}', [add_bank_accountController::class, 'update']);
+    Route::post('business/bank-account', [addBankAccountController::class, 'store']);
+    Route::get('business/show-bank-accounts', [addBankAccountController::class, 'payouts']);
+    Route::delete('business/delete-account/{id}', [addBankAccountController::class, 'destroy']);
+    Route::delete('business/delete-accounts', [addBankAccountController::class, 'destroyAll']);
+    Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
     // api routes for sub accounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
@@ -52,8 +49,4 @@ Route::group(['middleware'=> ['auth:sanctum']],function(){
     Route::post('business/transactions', [TransactionHistoryController::class, 'storeTransaction']);
 
 
-
-
-
 });
-

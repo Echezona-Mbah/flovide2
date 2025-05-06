@@ -17,7 +17,7 @@ class LoginController extends Controller
     
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-                        $token = $user->createToken('API Token')->plainTextToken;
+                $token = $user->createToken('API Token')->plainTextToken;
                 $filteredUser = [
                 'id' => $user->id,
                 'business_name' => $user->business_name,

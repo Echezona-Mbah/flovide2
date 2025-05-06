@@ -12,6 +12,9 @@
         body {
             font-family: "Outfit", sans-serif;
         }
+        .set-default-btn{
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -162,13 +165,32 @@
                             <p class="text-gray-500 mb-8 text-sm max-w-md">
                                 You can make withdrawals directly into any payout account of your choice.
                             </p>
+
+                            @if($errors->any())
+                                <div class="text-red-600 mb-2">
+                                    <ul class="list-disc pl-5">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            
+                            @if(session('success'))
+                                <div class="text-green-600 mb-2">{{ session('success') }}</div>
+                            @endif
                         
-                            <form class="space-y-6">
+                            <form method="POST" action="{{ route('business.update', $bankAccount->id) }}" class="space-y-6">
+                                @csrf
+                                @method('PUT')
+                        
                                 <div>
                                     <label for="bank" class="block text-gray-600 text-sm mb-1 font-medium">Bank</label>
-                                    <select id="bank" name="bank"
-                                        class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        <option value="{{ old('bank_name', $bankAccount->bank_name) }}">{{ old('bank_name', $bankAccount->bank_name) }}</option>
                                         <option>GTBank</option>
+                                        <option>UBA</option>
+                                        <option>Zenith</option>
                                     </select>
                                 </div>
                         
@@ -176,9 +198,11 @@
                                     <label for="country" class="block text-gray-600 text-sm mb-1 font-medium">
                                         In what country is your bank located?
                                     </label>
-                                    <select id="country" name="country"
-                                        class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <select id="country" name="bank_country" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        <option value="{{ old('bank_country', $bankAccount->bank_country) }}">{{ old('bank_country', $bankAccount->bank_country) }}</option>
                                         <option>Nigeria</option>
+                                        <option>Ghana</option>
+                                        <option>USA</option>
                                     </select>
                                 </div>
                         
@@ -186,16 +210,14 @@
                                     <label for="account-number" class="block text-gray-600 text-sm mb-1 font-medium">
                                         Bank account number
                                     </label>
-                                    <input type="text" id="account-number" name="account-number" value="2100048486"
-                                        class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($bankAccount->account_number)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                 </div>
                         
                                 <div>
                                     <label for="account-name" class="block text-gray-600 text-sm mb-1 font-medium">
                                         Bank account name
                                     </label>
-                                    <input type="text" id="account-name" name="account-name" value="Matthew Miller"
-                                        class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $bankAccount->account_name) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                 </div>
                         
                                 <div class="flex gap-4">
@@ -203,10 +225,11 @@
                                         class="bg-blue-300 text-blue-800 font-semibold px-6 py-2 rounded-full text-sm hover:bg-blue-400 transition">
                                         Update Account
                                     </button>
-                                    <button type="button"
-                                        class="border border-gray-300 rounded-full px-6 py-2 text-sm font-normal hover:bg-gray-100 transition">
-                                        Cancel
-                                    </button>
+                                    <a href="{{ route("business.payouts") }}">
+                                        <button type="button" class="border border-gray-300 rounded-full px-6 py-2 text-sm font-normal hover:bg-gray-100 transition">
+                                            Cancel
+                                        </button>
+                                    </a>
                                 </div>
                             </form>
                         </section>
@@ -216,96 +239,53 @@
                                 <h3 class="font-semibold text-base text-[#1E1E1E]">
                                     Payout Accounts
                                 </h3>
-                                <button aria-label="Delete All Payout Accounts"
-                                    class="flex items-center gap-1 text-[#D92D20] text-sm font-semibold rounded-md px-3 py-1 border border-[#D92D20] whitespace-nowrap">
+                                <button aria-label="Delete All Payout Accounts" class="delete-all-btn flex items-center gap-1 text-[#D92D20] text-sm font-semibold rounded-md px-3 py-1 border border-[#D92D20] whitespace-nowrap">
                                     <i class="fas fa-trash-alt">
                                     </i>
                                     Delete All
                                 </button>
                             </div>
-                            <div aria-label="List of payout accounts"
-                                class="bg-[#F7F7F7] rounded-xl p-2 md:p-5 flex flex-col gap-3 max-w-full lg:max-w-lg overflow-x-scroll md:overflow-hidden">
-                                <div aria-label="Payout account 2100048486 GTBank payout account selected"
-                                    class="flex items-center gap-4 bg-white rounded-lg py-3 px-4 max-w-full">
-                                    <div aria-hidden="true"
-                                        class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#E6F4F1] flex-shrink-0">
-                                        <i class="fas fa-check text-[#00875F] text-lg">
-                                        </i>
+                            <div aria-label="List of payout accounts" class="bg-[#F7F7F7] rounded-xl p-2 md:p-5 flex flex-col gap-3 max-w-full lg:max-w-lg overflow-x-scroll md:overflow-hidden">
+                                <p id="default-message" class="mt-4 text-green-600 font-medium hidden"></p>
+                                @foreach($allUserAccounts as $account)
+                                    @if($account->default)
+                                        <div aria-label="Payout account 2100048486 GTBank payout account selected" class="flex items-center gap-4 bg-white rounded-lg py-3 px-4 max-w-full">
+                                            <div aria-hidden="true" class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#E6F4F1] flex-shrink-0">
+                                                <i class="fas fa-check text-[#00875F] text-lg">
+                                                </i>
+                                            </div>
+                                    @else
+                                        <div aria-label="" class="flex items-center gap-4 bg-[#E9E9E9] rounded-lg py-3 px-4 max-w-full">
+                                            <div aria-hidden="true" data-id="{{ $account->id }}" class="set-default-btn flex items-center justify-center w-9 h-9 rounded-lg bg-[#C4C4C4] flex-shrink-0">
+                                                <i class="fas fa-check text-[#6B6B6B] text-lg"></i>
+                                            </div>
+                                    @endif
+                                        <span class="font-normal text-base text-[#1E1E1E] select-none">
+                                            {{ Crypt::decryptString($account->account_number) }}
+                                        </span>
+                                        <span
+                                            class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
+                                            {{ $account->bank_name }}
+                                        </span>
+                                        @if($account->default)
+                                            <span class="text-xs font-semibold text-[#00875F] bg-[#E6F4F1] rounded-full py-1 px-2 flex items-center gap-1 whitespace-nowrap">
+                                                <i class="fas fa-university text-xs"></i>
+                                                PAYOUT ACCOUNT
+                                            </span>
+                                        @endif
+                                        @if ($account->id !== $bankAccount->id)
+                                            <button class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
+                                                <a href="{{ route('business.edit', $account->id) }}">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                            </button>
+                                            <button class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0 delete-icon"  data-id="{{ $account->id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        @endif
                                     </div>
-                                    <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                        2100048486
-                                    </span>
-                                    <span
-                                        class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
-                                        GTBank
-                                    </span>
-                                    <span
-                                        class="text-xs font-semibold text-[#00875F] bg-[#E6F4F1] rounded-full py-1 px-2 flex items-center gap-1 whitespace-nowrap">
-                                        <i class="fas fa-university text-xs">
-                                        </i>
-                                        PAYOUT ACCOUNT
-                                    </span>
-                                    <button aria-label="Edit payout account 2100048486 GTBank"
-                                        class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-pencil-alt">
-                                        </i>
-                                    </button>
-                                    <button aria-label="Delete payout account 2100048486 GTBank"
-                                        class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-trash-alt">
-                                        </i>
-                                    </button>
-                                </div>
-                                <div aria-label="Payout account 2100048486 Zenith"
-                                    class="flex items-center gap-4 bg-[#E9E9E9] rounded-lg py-3 px-4 max-w-full">
-                                    <div aria-hidden="true"
-                                        class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#C4C4C4] flex-shrink-0">
-                                        <i class="fas fa-check text-[#6B6B6B] text-lg">
-                                        </i>
-                                    </div>
-                                    <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                        2100048486
-                                    </span>
-                                    <span
-                                        class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
-                                        Zenith
-                                    </span>
-                                    <button aria-label="Edit payout account 2100048486 Zenith"
-                                        class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-pencil-alt">
-                                        </i>
-                                    </button>
-                                    <button aria-label="Delete payout account 2100048486 Zenith"
-                                        class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-trash-alt">
-                                        </i>
-                                    </button>
-                                </div>
-                                <div aria-label="Payout account 12345678901 UBA"
-                                    class="flex items-center gap-4 bg-[#E9E9E9] rounded-lg py-3 px-4 max-w-full">
-                                    <div aria-hidden="true"
-                                        class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#C4C4C4] flex-shrink-0">
-                                        <i class="fas fa-check text-[#6B6B6B] text-lg">
-                                        </i>
-                                    </div>
-                                    <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                        12345678901
-                                    </span>
-                                    <span
-                                        class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
-                                        UBA
-                                    </span>
-                                    <button aria-label="Edit payout account 12345678901 UBA"
-                                        class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-pencil-alt">
-                                        </i>
-                                    </button>
-                                    <button aria-label="Delete payout account 12345678901 UBA"
-                                        class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                        <i class="fas fa-trash-alt">
-                                        </i>
-                                    </button>
-                                </div>
+                                @endforeach
+                                
                             </div>
                         </section>
                     </section>
@@ -314,9 +294,113 @@
     </main>
 
     <!-- Main content end -->
-
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        document.querySelectorAll('.set-default-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.dataset.id;  // Get the account ID
+        
+                // Send AJAX request to set the default
+                fetch(`/business/bank-accounts/${id}/set-default`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // const msg = document.getElementById('default-message');
+                    // msg.textContent = data.message;
+                    // msg.classList.remove('hidden');
+                    Swal.fire('Set!', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                })
+                .catch(err => console.log(err));
+            });
+        });
+
+        document.querySelectorAll('.delete-icon').forEach((button) => {
+            button.addEventListener('click', function() {
+                const accountId = this.getAttribute('data-id');  
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You won\'t be able to revert this!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/business/delete-account/${accountId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status == 'success') {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your bank account has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); 
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error deleting your bank account.',
+                                    'error'
+                                );
+                                console.log(data);
+                            }
+                        })
+                        .catch(error => console.log('Error:', error));
+                    }
+                });
+            });
+        });
+
+
+        document.querySelector('.delete-all-btn').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will delete all your saved bank accounts!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete all!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/business/bank-accounts/delete-all', {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        Swal.fire('Deleted!', 'All your bank accounts have been deleted.', 'success').then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(err => {
+                        Swal.fire('Error!', 'Something went wrong.', 'error');
+                        console.log(err);
+                    });
+                }
+            });
+        });
+
+
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebarBtn');
         const closeBtn = document.getElementById('closeSidebarBtn');
