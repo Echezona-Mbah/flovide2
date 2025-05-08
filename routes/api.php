@@ -45,7 +45,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
     Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
     // api for transaction history 
-    Route::get('business/show-transactions', [TransactionHistoryController::class, 'showalltransaction']);
+    Route::get('business/showTransactions', [TransactionHistoryController::class, 'showAllTransactions']);
+    Route::get('business/userTransactions', [TransactionHistoryController::class, 'transaction']);
+    Route::get('business/userTransactions/{id}', [TransactionHistoryController::class, 'UserTransaction']);
     Route::post('business/transactions', [TransactionHistoryController::class, 'storeTransaction']);
 
 

@@ -9,16 +9,19 @@ use Illuminate\Support\Facades\Auth;
 use App\Rules\ValidAmountBasedOnType;
 use App\Rules\ValidTransactionReference;
 
+// use Carbon\Carbon;
+
 class TransactionHistoryController extends Controller
 {
+
     public function __construct()
     {
-        $this->middleware('auth:sanctum');
+        $this->middleware('auth:' . (request()->is('api/*') ? 'sanctum' : 'web'));
     }
-    
-    public function showalltransaction()
+
+    public function transaction()
     {
-        $transactions = TransactionHistory::where('user_id', Auth::user()->id)->orderBy('time', 'desc')->get();
+        $transactions = TransactionHistory::where('user_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'message' => 'Transactions retrieved successfully.',
@@ -26,11 +29,40 @@ class TransactionHistoryController extends Controller
         ]);
     }
 
+    public function showAllTransactions()
+    {
+        $transactions = TransactionHistory::orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'message' => 'All transactions retrieved successfully.',
+            'data' => $transactions
+        ]);
+    }
+
+
+    public function UserTransaction($id)
+    {
+        $transaction = TransactionHistory::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->first();
+
+        if (!$transaction) {
+            return response()->json([
+                'message' => 'Transaction not found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'User Transaction retrieved successfully.',
+            'data' => $transaction
+        ]);
+    }
+
+
     public function storeTransaction(Request $request)
     {
         $validated = $request->validate([
             'type' => ['required', 'in:credit,debit'],
-            'date' => ['required', 'date', 'before_or_equal:today'], // Can't be future date
             'sender' => ['nullable', 'string', 'max:255'],
             'recipient' => ['nullable', 'string', 'max:255'],
             'amount' => [
@@ -38,16 +70,15 @@ class TransactionHistoryController extends Controller
                 'numeric',
                 'min:0.01',
                 'max:1000000000',
-                new ValidAmountBasedOnType($request->type, $request->currency) // Custom rule
+                new ValidAmountBasedOnType($request->type, $request->currency)
             ],
             'status' => ['required', 'in:pending,successful,failed'],
             'reference' => [
                 'required',
                 'string',
                 'unique:transactions_history,reference',
-                new ValidTransactionReference() // Custom rule for format
+                new ValidTransactionReference()
             ],
-            'time' => ['required', 'date_format:Y-m-d H:i:s', 'before_or_equal:now'],
         ]);
 
         $transaction = TransactionHistory::create(array_merge($validated, [
