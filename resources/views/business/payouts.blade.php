@@ -54,7 +54,7 @@
                 </i>
                 Subaccounts
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route("business.transactionHistory") }}">
                 <i class="fas fa-history text-base">
                 </i>
                 Transaction History
