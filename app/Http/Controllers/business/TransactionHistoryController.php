@@ -21,13 +21,23 @@ class TransactionHistoryController extends Controller
 
     public function transaction()
     {
-        $transactions = TransactionHistory::where('user_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+        $transactions = TransactionHistory::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return response()->json([
-            'message' => 'Transactions retrieved successfully.',
-            'data' => $transactions
-        ]);
+        if (request()->wantsJson()) {
+            return response()->json([
+                'message' => 'Transactions retrieved successfully.',
+                'data' => $transactions
+            ]);
+        } else {
+
+            $latestTransaction = $transactions->first();
+            // return view('business.transactionHistory', ['transactions' => $transactions]);
+            return view('business.transactionHistory', compact('transactions', 'latestTransaction'));
+        }
     }
+
 
     public function showAllTransactions()
     {
@@ -63,8 +73,11 @@ class TransactionHistoryController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', 'in:credit,debit'],
-            'sender' => ['nullable', 'string', 'max:255'],
-            'recipient' => ['nullable', 'string', 'max:255'],
+            'sender' => ['required', 'string', 'max:255'],
+            'sender_id' => ['nullable', 'exists:users,id'],
+            'recipient' => ['required', 'string', 'max:255'],
+            'recipient_id' => ['nullable', 'exists:users,id'],
+            'method' => ['required', 'in:transfer,withdrawal,deposit'],
             'amount' => [
                 'required',
                 'numeric',
@@ -72,6 +85,7 @@ class TransactionHistoryController extends Controller
                 'max:1000000000',
                 new ValidAmountBasedOnType($request->type, $request->currency)
             ],
+            'currency' => ['required', 'string', 'in:USD,GBP,EUR,NGN,CAD,AUD'],
             'status' => ['required', 'in:pending,successful,failed'],
             'reference' => [
                 'required',

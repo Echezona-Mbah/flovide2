@@ -16,8 +16,12 @@ class TransactionHistory extends Model
         'user_id',
         'type',
         'sender',
+        'sender_id',
         'recipient',
+        'recipient_id',
+        'method',
         'amount',
+        'currency',
         'status',
         'reference'
     ];
