@@ -170,7 +170,8 @@
                             <option value="all">All transactions</option>
                             <option value="deposit">Deposits</option>
                             <option value="withdrawal">Withdrawals</option>
-                            <option value="transfer">Transfers</option>
+                            <option value="successful">Successful</option>
+                            <option value="failed">Failed</option>
                         </select>
                     </form>
                 
@@ -194,7 +195,7 @@
                                 @foreach($transactions as $index => $transaction)
                                     <tr class="alpha cursor-pointer {{ $index === 0 ? 'bg-blue-50' : '' }}"
                                         data-amount="{{ $transaction->amount }}" data-currency="{{ $transaction->currency }}" data-reference="{{ $transaction->reference }}"
-                                        data-method="{{ $transaction->method }}" data-status="{{ $transaction->status }}"data-sender="{{ $transaction->sender_id == Auth::id() ? 'Self' : $transaction->sender }}"
+                                        data-method="{{ $transaction->method }}" data-status="{{ $transaction->status }}" data-sender="{{ $transaction->sender_id == Auth::id() ? 'Self' : $transaction->sender }}"
                                         data-recipient="{{ $transaction->recipient_id == Auth::id() ? 'Self' : $transaction->recipient }}" data-created-at="{{ \Carbon\Carbon::parse($transaction->created_at)->format('H:i:s M j, Y') }}">
 
                                         @if($transaction->method == "deposit")
@@ -380,19 +381,21 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('search');
-            const filterSelect = document.getElementById('filter');
+            const filterSelect = document.getElementById('filter'); // handles both method and status
             const rows = document.querySelectorAll('tbody tr.alpha');
 
             function filterTransactions() {
                 const searchTerm = searchInput.value.toLowerCase();
-                const filterMethod = filterSelect.value;
+                const selectedFilter = filterSelect.value;
 
                 rows.forEach(row => {
                     const method = row.dataset.method.toLowerCase();
+                    const status = row.dataset.status.toLowerCase();
                     const rowText = row.textContent.toLowerCase();
 
                     const matchesSearch = rowText.includes(searchTerm);
-                    const matchesFilter = filterMethod === 'all' || method === filterMethod;
+
+                    const matchesFilter = selectedFilter === 'all' || method === selectedFilter || status === selectedFilter;
 
                     if (matchesSearch && matchesFilter) {
                         row.style.display = '';
@@ -401,7 +404,8 @@
                     }
                 });
             }
-                searchInput.addEventListener('input', filterTransactions);
+
+            searchInput.addEventListener('input', filterTransactions);
             filterSelect.addEventListener('change', filterTransactions);
         });
 
