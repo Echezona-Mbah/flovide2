@@ -4,12 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Customer extends Model
+class Beneficia extends Model
 {
     protected $fillable = [
-        'customer_name',
-        'email',
-        'phone',
         'bank',
         'country_id',
         'account_number',
@@ -26,4 +23,9 @@ class Customer extends Model
     {
         return $this->belongsTo(Countries::class,'country_id');
     }
+
+    
+    protected $table ='beneficias';
+
+    protected $primaryKey ='id';
 }

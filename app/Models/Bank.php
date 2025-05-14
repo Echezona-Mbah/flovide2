@@ -4,18 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Customer extends Model
+class Bank extends Model
 {
-    protected $fillable = [
-        'customer_name',
-        'email',
-        'phone',
-        'bank',
-        'country_id',
-        'account_number',
-        'account_name',
-        'user_id',
-    ];
+    protected $fillable = ['name', 'country_code'];
 
     public function user()
     {
