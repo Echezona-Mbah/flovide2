@@ -59,11 +59,13 @@ Route::middleware('auth')->group(function () {
     // customer
         // beneficias
     Route::get('/customer', [AddCustomerController::class, 'index'])->name('customer');
-    Route::get('/add_beneficias', [AddBeneficiariesController::class, 'create'])->name('add_beneficias.create');
-    Route::post('/add_beneficias', [AddBeneficiariesController::class, 'store'])->name('add_beneficias.store');
-    Route::get('/beneficias/{id}/edit', [AddBeneficiariesController::class, 'edit'])->name('beneficias.edit'); 
-    Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update');
-    Route::delete('/beneficia/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficia.destroy');
+    Route::get('/customers/{id}', [AddCustomerController::class, 'show']);
+    Route::get('/add_customer', [AddCustomerController::class, 'create'])->name('add_customer.create');
+    Route::post('/add_customer', [AddCustomerController::class, 'store'])->name('add_customer.store');
+    Route::get('/customer/{id}/json', [AddCustomerController::class, 'json']);
+    Route::get('/customer/{id}/edit', [AddCustomerController::class, 'edit'])->name('customer.edit'); 
+    Route::put('/customer/{id}', [AddCustomerController::class, 'update'])->name('customer.update');
+    Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
 
 
 

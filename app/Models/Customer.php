@@ -26,4 +26,9 @@ class Customer extends Model
     {
         return $this->belongsTo(Countries::class,'country_id');
     }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class,'name');
+    }
 }
