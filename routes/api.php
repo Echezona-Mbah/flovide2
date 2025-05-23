@@ -6,6 +6,10 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\Business\AddBeneficiariesController;
+use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\Business\BillPaymentController;
+use App\Http\Controllers\Business\SubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +53,39 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('business/userTransactions', [TransactionHistoryController::class, 'transaction']);
     Route::get('business/userTransactions/{id}', [TransactionHistoryController::class, 'UserTransaction']);
     Route::post('business/transactions', [TransactionHistoryController::class, 'storeTransaction']);
+
+    Route::get('/beneficias', [AddBeneficiariesController::class, 'index']);
+    Route::post('/add-baneficia', [AddBeneficiariesController::class, 'store']);
+    Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
+    Route::delete('beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
+
+
+    Route::get('/customers', [AddCustomerController::class, 'index']);
+    Route::post('/add-customers', [AddCustomerController::class, 'store']);
+    Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
+    Route::delete('customers/{id}', [AddCustomerController::class, 'destroy'])->name('customers.destroy');
+
+
+    Route::get('/subscriptions', [SubscriptionController::class, 'index']);
+    Route::post('/add-subscriptions', [SubscriptionController::class, 'store']);
+    Route::put('subscriptions/{id}', [SubscriptionController::class, 'update']);
+    Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'destroy']);
+
+
+    Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
+    Route::post('/Dstvverify', [BillPaymentController::class, 'verify']);
+    Route::post('/Dstvpay', [BillPaymentController::class, 'store']);
+    Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
+
+
+
+
+
+
+
+
+
+
 
 
 });
