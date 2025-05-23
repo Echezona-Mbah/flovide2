@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\HtmlMinifier;
+use App\Http\Middleware\SecurityHeaders;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -44,7 +46,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/resetPassword', [ForgetPasswordController::class, 'resetPassword']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', HtmlMinifier::class])->group(function () {
     // Route::get('/dashboard', [RegisteredUserController::class, 'show'])->name('dashboard');
     Route::get('/verifyemail', [RegisteredUserController::class, 'showverifyEmail'])->name('verifyemail');
     Route::post('/verifyemail/{email}', [RegisteredUserController::class, 'verifyEmail'])->name('verifyemail.submit');
