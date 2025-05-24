@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\HtmlMinifier;
+use App\Http\Middleware\SecurityHeaders;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -44,7 +46,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/resetPassword', [ForgetPasswordController::class, 'resetPassword']);
 });
 
-Route::middleware('auth')->group(function () {
+
+Route::middleware(['auth', HtmlMinifier::class])->group(function () {
     // Route::get('/dashboard', [RegisteredUserController::class, 'show'])->name('dashboard');
     Route::get('/verifyemail', [RegisteredUserController::class, 'showverifyEmail'])->name('verifyemail');
     Route::post('/verifyemail/{email}', [RegisteredUserController::class, 'verifyEmail'])->name('verifyemail.submit');
@@ -59,11 +62,13 @@ Route::middleware('auth')->group(function () {
     // customer
         // beneficias
     Route::get('/customer', [AddCustomerController::class, 'index'])->name('customer');
-    Route::get('/add_beneficias', [AddBeneficiariesController::class, 'create'])->name('add_beneficias.create');
-    Route::post('/add_beneficias', [AddBeneficiariesController::class, 'store'])->name('add_beneficias.store');
-    Route::get('/beneficias/{id}/edit', [AddBeneficiariesController::class, 'edit'])->name('beneficias.edit'); 
-    Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update');
-    Route::delete('/beneficia/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficia.destroy');
+    Route::get('/customers/{id}', [AddCustomerController::class, 'show']);
+    Route::get('/add_customer', [AddCustomerController::class, 'create'])->name('add_customer.create');
+    Route::post('/add_customer', [AddCustomerController::class, 'store'])->name('add_customer.store');
+    Route::get('/customer/{id}/json', [AddCustomerController::class, 'json']);
+    Route::get('/customer/{id}/edit', [AddCustomerController::class, 'edit'])->name('customer.edit'); 
+    Route::put('/customer/{id}', [AddCustomerController::class, 'update'])->name('customer.update');
+    Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
 
 
 
