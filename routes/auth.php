@@ -10,8 +10,11 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\business\SubAccountController;
+use App\Http\Controllers\business\TransactionHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -46,12 +49,35 @@ Route::middleware('guest')->group(function () {
     Route::post('/resetPassword', [ForgetPasswordController::class, 'resetPassword']);
 });
 
+// HtmlMinifier::class
+Route::middleware(['auth'])->group(function () {
 
-Route::middleware(['auth', HtmlMinifier::class])->group(function () {
-    // Route::get('/dashboard', [RegisteredUserController::class, 'show'])->name('dashboard');
+    Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
+    Route::post('/payout', [addBankAccountController::class, 'store'])->name('store');
+    Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
+    Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
+    Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
+    Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
+    Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
+
+
+    //subaccount
+    Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
+    Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
+    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('store');
+    Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
+    Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
+    Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
+    Route::post('/bankSubAccounts/{id}/set-default', [SubAccountController::class, 'setDefault'])->name('setDefault');
+
+    //transaction history
+    Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');
+
+
     Route::get('/verifyemail', [RegisteredUserController::class, 'showverifyEmail'])->name('verifyemail');
     Route::post('/verifyemail/{email}', [RegisteredUserController::class, 'verifyEmail'])->name('verifyemail.submit');
     Route::post('/resend-otp/{email}', [RegisteredUserController::class, 'resendOtp'])->name('resend.otp');
+
     // beneficias
     Route::get('/beneficias', [AddBeneficiariesController::class, 'index'])->name('beneficias');
     Route::get('/add_beneficias', [AddBeneficiariesController::class, 'create'])->name('add_beneficias.create');
@@ -59,8 +85,11 @@ Route::middleware(['auth', HtmlMinifier::class])->group(function () {
     Route::get('/beneficias/{id}/edit', [AddBeneficiariesController::class, 'edit'])->name('beneficias.edit'); 
     Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update');
     Route::delete('/beneficia/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficia.destroy');
+    Route::get('/beneficiaries/search', [AddBeneficiariesController::class, 'search'])->name('beneficiaries.search');
+
+
+
     // customer
-        // beneficias
     Route::get('/customer', [AddCustomerController::class, 'index'])->name('customer');
     Route::get('/customers/{id}', [AddCustomerController::class, 'show']);
     Route::get('/add_customer', [AddCustomerController::class, 'create'])->name('add_customer.create');
@@ -69,6 +98,10 @@ Route::middleware(['auth', HtmlMinifier::class])->group(function () {
     Route::get('/customer/{id}/edit', [AddCustomerController::class, 'edit'])->name('customer.edit'); 
     Route::put('/customer/{id}', [AddCustomerController::class, 'update'])->name('customer.update');
     Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
+    Route::get('/customer/search', [AddCustomerController::class, 'search'])->name('customer.search');
+    Route::get('/customer/export-csv', [AddCustomerController::class, 'exportCsv'])->name('customer.export.csv');
+
+
 
 
 

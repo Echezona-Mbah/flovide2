@@ -38,6 +38,7 @@ class addBankAccountController extends Controller
 
     public function store(Request $request)
     {
+        
         $validated = $request->validate([
             'account_name' => 'required|string|max:255',
             'account_number' => ['required', 'regex:/^\d{10}$/'],
@@ -56,7 +57,7 @@ class addBankAccountController extends Controller
         ]);
 
         $user = Auth::user();
-
+        // dd($user);
         // Check if user already has a bank account
         $isFirst = BankAccount::where('user_id', $user->id)->count() === 0;
 
