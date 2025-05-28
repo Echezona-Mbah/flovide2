@@ -17,17 +17,20 @@ class SubAccountController extends Controller
 
     public function subaccount()
     {
+     
         $user = Auth::user();
-
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
 
         if ($subaccounts->isEmpty()) {
             session()->flash('info', 'You have not added any subaccounts yet.');
         }
+        // dd(' $user');
 
         return view('business.subaccount', [
             'subaccounts' => $subaccounts
         ]);
+
+        
     }
 
     public function store(Request $request)
