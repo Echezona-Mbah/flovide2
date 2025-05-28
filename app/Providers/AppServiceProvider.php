@@ -66,11 +66,11 @@ class AppServiceProvider extends ServiceProvider
 
               // Force HTTPS in production
              if (app()->environment('production')) {
-                URL::forceScheme('https');
+                URL::forceScheme('http');
             }
     
             // Add global security headers to all responses
-            app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
+            // app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
 
                 // Register security headers middleware only in production (optional)
             // if (App::environment('production')) {
