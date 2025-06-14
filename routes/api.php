@@ -71,11 +71,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('subscriptions/{id}', [SubscriptionController::class, 'update']);
     Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'destroy']);
 
-
+   // DSTV
     Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
     Route::post('/Dstvverify', [BillPaymentController::class, 'verify']);
     Route::post('/Dstvpay', [BillPaymentController::class, 'store']);
     Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
+
+    // Elecricity
+    Route::post('/electricity_verify', [BillPaymentController::class, 'verifyElectricity']);
+
 
 
 

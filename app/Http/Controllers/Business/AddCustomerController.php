@@ -8,13 +8,14 @@ use App\Models\Countries;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Response;
 
 class AddCustomerController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user();
-        $customers = Customer::where('user_id', $user->id)->get();
+        $customers = Customer::where('user_id', $user->id)->paginate(5);
       
 
         if ($request->expectsJson()) {
@@ -55,7 +56,7 @@ class AddCustomerController extends Controller
         $countries = Countries::all();
         $banks = Bank::all();
         $customers = Customer::where('user_id', $user->id)
-        ->get();
+        ->paginate(5);
         return view('business.add_customer',compact('countries', 'banks','customers'));
     }
 
@@ -121,7 +122,7 @@ class AddCustomerController extends Controller
         $countries = Countries::all();
         $banks = Bank::all();
         $customeres = Customer::where('user_id', $user->id)
-        ->get();
+        ->paginate(5);
         return view('business.edit_customer', compact('customer', 'countries', 'banks','customeres'));
     }
 
@@ -198,4 +199,53 @@ class AddCustomerController extends Controller
         }
         return redirect()->route('customer')->with('status', 'Customer deleted successfully');
     }
+
+
+    public function search(Request $request)
+    {
+        $query = $request->query('query');
+    
+        $customers = Customer::where('customer_name', 'LIKE', "%{$query}%")
+            ->orWhere('email', 'LIKE', "%{$query}%")
+            ->orWhere('phone', 'LIKE', "%{$query}%")
+            ->get();
+    
+        return response()->json($customers);
+    }
+
+    public function exportCsv()
+    {
+        $customers = Customer::all(); // ✅ Not ->find($id)
+
+    
+        $filename = "customers.csv";
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+    
+        $columns = ['Customer Name', 'Email', 'Phone', 'Date Added'];
+    
+        $callback = function () use ($customers, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+    
+            foreach ($customers as $customer) {
+                fputcsv($file, [
+                    $customer->customer_name,
+                    $customer->email,
+                    $customer->phone,
+                    $customer->created_at->format('M d, Y'),
+                ]);
+            }
+    
+            fclose($file);
+        };
+    
+        return response()->stream($callback, 200, $headers);
+    }
+    
 }

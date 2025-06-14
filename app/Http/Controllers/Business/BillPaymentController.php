@@ -25,6 +25,19 @@ class BillPaymentController extends Controller
         return view('billpayments.index', compact('payments'));
     }
 
+    public function indexElectricity(Request $request)
+    {
+        $payments = BillPayment::where('user_id', $request->user()?->id ?? auth()->id())
+            ->latest()
+            ->get();
+
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $payments], 200);
+        }
+
+        return view('billpayments.index', compact('payments'));
+    }
+
 
     public function getVariations(Request $request)
     {
@@ -44,6 +57,8 @@ class BillPaymentController extends Controller
     
         return view('billpayments.variations', ['response' => $response]);
     }
+
+
     
 
 
@@ -69,6 +84,36 @@ class BillPaymentController extends Controller
             'type' => 'smartcard',
         ])->json();
        // dd(env('VTPASS_API_URL') . '/merchant-verify');
+
+
+        if ($request->expectsJson()) {
+            return response()->json($response);
+        }
+
+        return view('billpayments.verify', ['response' => $response]);
+    }
+
+    public function verifyElectricity(Request $request)
+    {
+        $rules = [
+            'billers_code' => 'required|string',
+            'service_id' => 'required|string',
+            'type' => 'required|string',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        $response = Http::withBasicAuth(env('VTPASS_USERNAME'), env('VTPASS_PASSWORD'))
+        ->post(env('VTPASS_API_URL') . '/merchant-verify', [
+            'billersCode' => $request->billers_code,
+            'serviceID' => $request->service_id,
+            'type' => $request->type,
+        ])->json();
 
 
         if ($request->expectsJson()) {
@@ -145,7 +190,6 @@ class BillPaymentController extends Controller
     // Delete a payment record
     public function destroy(Request $request, BillPayment $billPayment)
     {
-        // Only allow owner to delete
         if ($billPayment->user_id !== ($request->user()?->id ?? auth()->id())) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
