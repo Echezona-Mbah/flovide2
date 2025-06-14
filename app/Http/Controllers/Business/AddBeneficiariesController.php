@@ -16,7 +16,7 @@ class AddBeneficiariesController extends Controller
         $user = auth()->user();
     
         $beneficias = Beneficia::where('user_id', $user->id)
-                        ->get();
+        ->paginate(3);
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Beneficia records retrieved successfully',
@@ -34,7 +34,7 @@ class AddBeneficiariesController extends Controller
         $countries = Countries::all();
         $banks = Bank::all();
         $beneficiaries = Beneficia::where('user_id', $user->id)
-        ->get();
+        ->paginate(3);;
         return view('business.add_beneficia',compact('countries', 'banks','beneficiaries'));
     }
 
@@ -87,13 +87,15 @@ class AddBeneficiariesController extends Controller
     public function edit($id)
     {
         $user = auth()->user();
-        $beneficia = Beneficia::findOrFail($id);
+        $beneficia = Beneficia::where('user_id', $user->id)->where('id', $id)->firstOrFail();
         $countries = Countries::all();
         $banks = Bank::all();
-        $beneficiaries = Beneficia::where('user_id', $user->id)
-        ->get();
-        return view('business.edit_beneficia', compact('beneficia', 'countries', 'banks','beneficiaries'));
+        $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(3);
+    
+        return view('business.edit_beneficia', compact('beneficia', 'countries', 'banks', 'beneficiaries'));
     }
+    
+    
     
     
 
@@ -173,7 +175,22 @@ class AddBeneficiariesController extends Controller
         return redirect()->route('customers.index')->with('status', 'Beneficia deleted successfully');
     }
     
-
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+    
+        $beneficiaries = Beneficia::with('country')
+            ->where('account_name', 'like', "%{$query}%")
+            ->orWhere('bank', 'like', "%{$query}%")
+            ->orWhere('account_number', 'like', "%{$query}%")
+            ->orWhereHas('country', function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%");
+            })
+            ->get();
+    
+        return response()->json($beneficiaries);
+    }
+    
 
 
     
