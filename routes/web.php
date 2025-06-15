@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\business\InvoicesController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

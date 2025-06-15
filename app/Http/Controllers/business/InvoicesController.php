@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Business;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\Invoices;
@@ -18,8 +20,14 @@ class InvoicesController extends Controller
             return response()->json($invoices);
         } else {
             $invoices = Invoices::with('client')->where('user_id', $user->id)->latest()->paginate(10);
-            // return view('invoices.index', compact('invoices'));
+            return view('business.invoicesList', compact('invoices'));
         }
+    }
+
+    public function create()
+    {
+        // return create page view
+        return view('business.createInvoice');
     }
 
 

@@ -46,7 +46,7 @@
             </a>
 
 
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('invoices.index') }}">
                 <i class="fas fa-file-invoice text-base">
                 </i>
                 Invoices
