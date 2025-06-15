@@ -15,6 +15,7 @@ use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\business\InvoicesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -72,6 +73,17 @@ Route::middleware(['auth'])->group(function () {
 
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');
+    
+    //invoices section
+    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/invoices/search', [InvoicesController::class, 'search'])->name('invoices.search');
+    Route::get('/invoices/export-csv', [InvoicesController::class, 'exportCsv'])->name('invoices.export.csv');
 
 
     Route::get('/verifyemail', [RegisteredUserController::class, 'showverifyEmail'])->name('verifyemail');
