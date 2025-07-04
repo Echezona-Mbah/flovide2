@@ -190,7 +190,7 @@
 
                 const responseDiv = document.getElementById('responseMessage');
 
-                fetch('{{ route('business.store') }}', {
+                fetch('{{ route('payout.store') }}', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',

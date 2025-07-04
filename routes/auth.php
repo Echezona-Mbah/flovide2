@@ -54,7 +54,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
-    Route::post('/payout', [addBankAccountController::class, 'store'])->name('store');
+    Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
     Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
     Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
     Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
