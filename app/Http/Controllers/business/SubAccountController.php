@@ -150,10 +150,15 @@ class SubAccountController extends Controller
 
         $deletedCount = Subaccount::where('user_id', $user->id)->delete();
 
-        return response()->json([
-            'message' => 'All your bank accounts have been deleted.',
-            'deleted_count' => $deletedCount
-        ], 200);
+        if($deletedCount === 0){
+            return response()->json(["status" => "error", "message" => "No Subaccount to delete"], 404);
+        }else{
+            return response()->json([
+                'status' => 'success',
+                'message' => 'All your bank accounts have been deleted.',
+                'deleted_count' => $deletedCount
+            ], 200);
+        }
     }
 
     public function setDefault(Request $request, $id)

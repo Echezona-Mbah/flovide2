@@ -38,7 +38,7 @@ class addBankAccountController extends Controller
 
     public function store(Request $request)
     {
-        
+
         $validated = $request->validate([
             'account_name' => 'required|string|max:255',
             'account_number' => ['required', 'regex:/^\d{10}$/'],
@@ -82,22 +82,6 @@ class addBankAccountController extends Controller
         ], 201);
     }
 
-    // public function show()
-    // {
-    //     $bankAccount = BankAccount::where('user_id', Auth::user()->id)->get();
-
-    //     if ($bankAccount->isEmpty()) {
-    //         return response()->json(['message' => 'No Bank Account found.'], 404);
-    //     } else {
-
-    //         return response()->json([
-    //             'message' => 'Bank Accounts retrieved successfully.',
-    //             'data' => $bankAccount,
-    //         ]);
-    //     }
-    // }
-
-
     public function destroy($id)
     {
         $account = BankAccount::find($id);
@@ -130,7 +114,7 @@ class addBankAccountController extends Controller
 
         $deletedCount = BankAccount::where('user_id', $user->id)->delete();
 
-        if ($deletedCount->isEmpty()) {
+        if ($deletedCount === 0) {
             return response()->json(['message' => 'No accounts to delete.'], 404);
         } else {
 
@@ -187,7 +171,12 @@ class addBankAccountController extends Controller
 
     public function edit($id)
     {
-        $bankAccount = BankAccount::findOrFail($id);
+        // $bankAccount = BankAccount::findOrFail($id);
+        $bankAccount = BankAccount::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
 
         if ($bankAccount->user_id !== Auth::id()) {
             abort(403, 'Unauthorized access.');
@@ -200,7 +189,11 @@ class addBankAccountController extends Controller
 
     public function setDefault(Request $request, $id)
     {
-        $account = BankAccount::findOrFail($id);
+        // $account = BankAccount::findOrFail($id);
+        $account = BankAccount::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->whereNull('deleted_at')
+            ->firstOrFail();
 
         if ($account->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
