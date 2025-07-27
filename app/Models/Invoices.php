@@ -3,19 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Customer;
+use App\Models\InvoiceItem;
 
 class Invoices extends Model
 {
+   use HasFactory;
+
     protected $fillable = [
-        'invoice_number',
-        'customer_id',
-        'amount',
-        'status',
+        'user_id', 
+        'invoice_number', 
+        'billed_to', 
+        'address', 
+        'due_date', 
+        'currency', 
+        'note'
     ];
 
-    public function Customer()
+    public function items()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->hasMany(InvoiceItem::class, 'invoice_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
