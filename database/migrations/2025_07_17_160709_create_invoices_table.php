@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             $table->string('invoice_number')->unique();
-            $table->decimal('amount', 10, 2);
-            $table->enum('status', ['pending', 'paid', 'overdue', 'cancelled']);
+            $table->string('billed_to');
+            $table->text('address')->nullable();
+            $table->date('due_date');
+            $table->string('currency', 10)->default('USD');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

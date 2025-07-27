@@ -16,10 +16,10 @@ class InvoicesController extends Controller
         $user = Auth::user();
 
         if ($request->expectsJson()) {
-            $invoices = Invoices::with('client')->where('user_id', $user->id)->latest()->paginate(10);
+            $invoices = Invoices::with('user')->where('user_id', $user->id)->latest()->paginate(10);
             return response()->json($invoices);
         } else {
-            $invoices = Invoices::with('client')->where('user_id', $user->id)->latest()->paginate(10);
+            $invoices = Invoices::with('user')->where('user_id', $user->id)->latest()->paginate(10);
             return view('business.invoicesList', compact('invoices'));
         }
     }
@@ -34,15 +34,44 @@ class InvoicesController extends Controller
 
     public function store(Request $request)
     {
+    //    dd($request->all());
+        // Validate the request
         $validated = $request->validate([
             'invoice_number' => 'required|unique:invoices',
-            'customer_id' => 'required|exists:customer,id',
-            'amount' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,paid,overdue,cancelled'
+            'billed_to' => 'required|string',
+            'due_date' => 'required|date',
+            'address' => 'nullable|string',
+            'currency' => 'required|string|max:10',
+            'note' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.item_name' => 'required|string',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.rate_enabled' => 'required|boolean',
+            'items.*.rate' => 'nullable|numeric',
+            'items.*.total' => 'required|numeric',
         ]);
 
-        $invoice = Invoices::create($validated);
-        return response()->json(['message' => 'Invoice created', 'data' => $invoice], 201);
+        $invoice = Invoices::create([
+            'user_id' => Auth::id(),
+            'invoice_number' => $validated['invoice_number'],
+            'billed_to' => $validated['billed_to'],
+            'address' => $validated['address'] ?? null,
+            'due_date' => $validated['due_date'],
+            'currency' => $validated['currency'],
+            'note' => $validated['note'] ?? null,
+        ]);
+
+        foreach ($validated['items'] as $item) {
+            $invoice->items()->create([
+                'item_name' => $item['item_name'],
+                'qty' => $item['qty'],
+                'rate' => $item['rate_enabled'] ? $item['rate'] : null,
+                'total' => $item['total'],
+                'rate_enabled' => $item['rate_enabled'],
+            ]);
+        }
+
+        return response()->json(['status' => 'success', 'invoice_id' => $invoice->id]);
     }
 
     public function show($id)
