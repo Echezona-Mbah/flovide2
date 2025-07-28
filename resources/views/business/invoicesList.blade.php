@@ -20,8 +20,7 @@
             @include('business.header_notifical')
         </header>
         <section class=" relative w-full">
-            <section
-                class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute w-full overflow-x-hidden right-[-2.3vw]">
+            <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute w-full overflow-x-hidden right-[-2.3vw]">
                 <section class="flex flex-col md:flex-row gap-10 w-full mx-auto max-w-full min-h-screen px-4 md:px-8">
                     <div class="w-full py-6">
                         <!-- Top Filters -->
@@ -32,23 +31,18 @@
                                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                                         <i class="fas fa-search"></i>
                                     </span>
-                                    <input type="text" placeholder="Search Invoices"
-                                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                                    <input type="text" id="invoiceSearch" placeholder="Search Invoices" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
                                 </div>
 
                                 <!-- Filter Buttons -->
-                                <div
-                                    class="flex rounded-lg overflow-hidden border border-gray-300 text-sm font-semibold w-full sm:w-auto">
-                                    <button
-                                        class="bg-white text-black px-4 py-2 font-semibold border-r border-gray-300">
+                                <div class="flex rounded-lg  border border-gray-300 text-sm font-semibold w-full sm:w-auto" id="filterButtons">
+                                    <button class="filter-btn bg-white text-black px-4 py-2 font-semibold border-r border-gray-300" data-filter="all">
                                         All
                                     </button>
-                                    <button
-                                        class="bg-gray-100 text-gray-400 px-4 py-2 border-r border-gray-300 cursor-not-allowed"
-                                        disabled>
+                                    <button class="filter-btn bg-gray-100 text-gray-400 px-4 py-2 border-r border-gray-300" data-filter="overdue">
                                         Overdue
                                     </button>
-                                    <button class="bg-gray-100 text-gray-400 px-4 py-2 cursor-not-allowed" disabled>
+                                    <button class="filter-btn bg-gray-100 text-gray-400 px-4 py-2 border-r border-gray-300" data-filter="paid">
                                         Paid
                                     </button>
                                 </div>
@@ -83,13 +77,35 @@
 
                                     @forelse($invoices as $invoice)
 
-                                    <tr>
+                                    <tr class="invoice-row" data-status="{{ strtolower($invoice->status) }}" data-invoice="{{ strtolower($invoice->invoice_number . ' ' . $invoice->billed_to) }}">
                                         <td class="font-semibold pl-2 py-3">{{ $invoice->invoice_number }}</td>
                                         <td class="py-3">{{ $invoice->billed_to ?? 'N/A' }}</td>
                                         <td class="py-3 font-semibold">{{ $invoice->created_at->format('d M Y') }}</td>
                                         <td class="py-3">-</td>
-                                        <td class="py-3 font-semibold">£ {{ number_format($invoice->amount, 2) }}</td>
-                                        <td class="py-3 text-orange-500 font-semibold">{{ ucfirst($invoice->status ?? 'Overdue') }}
+                                        @php
+                                            $symbols = [
+                                                'USD' => '$',
+                                                'GBP' => '£',
+                                                'EUR' => '€',
+                                                'NGN' => '₦',
+                                                'JPY' => '¥',
+                                                'CAD' => 'C$',
+                                                'AUD' => 'A$',
+                                            ];
+
+                                            $currencySymbol = $symbols[$invoice->currency] ?? $invoice->currency;
+                                        @endphp
+                                        <td class="py-3 font-semibold">{{ $currencySymbol }} {{ number_format($invoice->amount, 2) }}</td>
+                                        {{-- <td class="py-3 text-orange-500 font-semibold">{{ ucfirst($invoice->status ?? 'Overdue') }} --}}
+                                        @php
+                                            $status = $invoice->status ?? 'Overdue';
+                                            $statusClass = $status === 'paid' ? 'text-green-500' : 'text-orange-500';
+                                        @endphp
+
+                                        <td class="py-3 font-semibold {{ $statusClass }}">
+                                            {{ ucfirst($status) }}
+                                        </td>
+
                                         </td>
                                         <td class="py-3 pr-2">
                                             <button
@@ -190,7 +206,54 @@
                 sidebar.classList.add('-translate-x-full');
             }
         });
+
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-white', 'text-black');
+                        btn.classList.add('bg-gray-100', 'text-gray-400');
+                    });
+
+                    button.classList.remove('bg-gray-100', 'text-gray-400');
+                    button.classList.add('bg-white', 'text-black');
+
+                    // Filter invoices based on the selected filter
+                    const filter = button.getAttribute('data-filter');
+                    document.querySelectorAll('.invoice-row').forEach(row => {
+                        const status = row.getAttribute('data-status');
+                        if (filter === 'all' || status === filter) {
+                            row.classList.remove('hidden');
+                        } else {
+                            row.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+
+            
+            const searchInput = document.getElementById('invoiceSearch');
+
+            searchInput.addEventListener('input', () => {
+                const term = searchInput.value.trim().toLowerCase();
+
+                document.querySelectorAll('.invoice-row').forEach(row => {
+                    const keywords = row.getAttribute('data-invoice');
+                    if (keywords.includes(term)) {
+                        row.classList.remove('hidden');
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+            });
+        });
     </script>
+
 </body>
 
 </html>
