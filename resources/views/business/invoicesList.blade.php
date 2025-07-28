@@ -39,6 +39,9 @@
                                     <button class="filter-btn bg-white text-black px-4 py-2 font-semibold border-r border-gray-300" data-filter="all">
                                         All
                                     </button>
+                                    <button class="filter-btn bg-gray-100 text-gray-400 px-4 py-2 border-r border-gray-300" data-filter="draft">
+                                        Draft
+                                    </button>
                                     <button class="filter-btn bg-gray-100 text-gray-400 px-4 py-2 border-r border-gray-300" data-filter="overdue">
                                         Overdue
                                     </button>
@@ -96,23 +99,32 @@
                                             $currencySymbol = $symbols[$invoice->currency] ?? $invoice->currency;
                                         @endphp
                                         <td class="py-3 font-semibold">{{ $currencySymbol }} {{ number_format($invoice->amount, 2) }}</td>
-                                        {{-- <td class="py-3 text-orange-500 font-semibold">{{ ucfirst($invoice->status ?? 'Overdue') }} --}}
+                                        
                                         @php
                                             $status = $invoice->status ?? 'Overdue';
-                                            $statusClass = $status === 'paid' ? 'text-green-500' : 'text-orange-500';
+
+                                            if ($status === 'paid') {
+                                                $statusClass = 'text-green-500';
+                                            } elseif ($status === 'draft') {
+                                                $statusClass = 'text-gray-500';
+                                            } else {
+                                                $statusClass = 'text-orange-500';
+                                            }
                                         @endphp
 
                                         <td class="py-3 font-semibold {{ $statusClass }}">
                                             {{ ucfirst($status) }}
                                         </td>
 
-                                        </td>
                                         <td class="py-3 pr-2">
-                                            <button
-                                                class="text-gray-400 bg-gray-100 px-2 py-1 rounded-full hover:bg-gray-200 focus:outline-none"
-                                                aria-label="Actions">
+                                            <button onclick="toggleMenu(this)" class="text-gray-400 bg-gray-100 px-2 py-1 rounded-full hover:bg-gray-200 focus:outline-none" aria-label="Actions">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
+                                            <!-- Hidden Action Menu -->
+                                            <div class="action-menu absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50 hidden">
+                                                <button onclick="editInvoice('{{ $invoice->id }}')" class="block w-full text-left px-4 py-2 hover:bg-gray-100">Edit invoice</button>
+                                                <button onclick="deleteInvoice('{{ $invoice->id }}')" class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">Delete invoice</button>
+                                            </div>
                                         </td>
                                     </tr>
                                     @empty
@@ -236,7 +248,7 @@
             });
 
 
-            
+
             const searchInput = document.getElementById('invoiceSearch');
 
             searchInput.addEventListener('input', () => {
@@ -252,6 +264,78 @@
                 });
             });
         });
+
+
+        // Toggle action menu
+        function toggleMenu(button) {
+            // Close all open menus first
+            document.querySelectorAll('.action-menu').forEach(menu => menu.classList.add('hidden'));
+
+            // Toggle this menu
+            const menu = button.nextElementSibling;
+            menu.classList.toggle('hidden');
+
+            //Close on outside click
+            document.addEventListener('click', function handleOutsideClick(e) {
+                if (!button.parentElement.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    document.removeEventListener('click', handleOutsideClick);
+                }
+            });
+        }
+
+        function editInvoice(id) {
+            if (!id) {
+                console.warn('Invalid invoice ID');
+                return;
+            }
+            // Redirect to edit invoice page
+            window.location.href = `/invoices/${id}/edit`;
+        }
+
+        function deleteInvoice(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This invoice will be permanently deleted.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/invoices/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                    }).then(res => {
+                        if (res.ok) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Invoice has been deleted.',
+                                icon: 'success',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                showConfirmButton: false,
+                                willClose: () => {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Failed to delete invoice.',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+                
+            });
+        }
     </script>
 
 </body>

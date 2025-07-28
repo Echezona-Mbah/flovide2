@@ -44,6 +44,7 @@ class InvoicesController extends Controller
             'currency' => 'required|string|max:10',
             'note' => 'nullable|string',
             'amount' => 'required|numeric|min:0',
+            'status' => 'required|in:draft,sent',
             'items' => 'required|array|min:1',
             'items.*.item_name' => 'required|string',
             'items.*.qty' => 'required|integer|min:1',
@@ -61,7 +62,7 @@ class InvoicesController extends Controller
             'currency' => $validated['currency'],
             'note' => $validated['note'] ?? null,
             'amount' => $validated['amount'],
-            'status' => 'paid',
+            'status' => $validated['status'],
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -96,10 +97,43 @@ class InvoicesController extends Controller
         return response()->json(['message' => 'Invoice updated', 'data' => $invoice]);
     }
 
-    public function destroy($id)
+    public function edit(Request $request, $id)
+    {
+        $invoice = Invoices::with('items')->findOrFail($id);
+
+        //check if the user owns the invoice
+        if ($invoice->user_id !== Auth::id()) {
+            if ($request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+            abort(403, 'Unauthorized');
+        }
+        // If it's an API request, return JSON data
+        if (request()->expectsJson()) {
+            return response()->json($invoice);
+        }
+        // Otherwise, return the edit view
+        return view('business.editInvoice', compact('invoice'));
+    }
+
+
+    public function destroy(Request $request, $id)
     {
         $invoice = Invoices::findOrFail($id);
-        $invoice->delete();
-        return response()->json(['message' => 'Invoice deleted']);
+
+        if ($invoice->user_id !== Auth::id()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+            abort(403, 'Unauthorized');
+        }
+
+        $invoice->delete(); // Soft delete
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Invoice deleted successfully.']);
+        }
+
+        return redirect()->back()->with('success', 'Invoice deleted successfully.');
     }
 }
