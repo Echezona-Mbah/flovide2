@@ -34,7 +34,7 @@ class InvoicesController extends Controller
 
     public function store(Request $request)
     {
-    //    dd($request->all());
+        //    dd($request->all());
         // Validate the request
         $validated = $request->validate([
             'invoice_number' => 'required|unique:invoices',
@@ -43,6 +43,7 @@ class InvoicesController extends Controller
             'address' => 'nullable|string',
             'currency' => 'required|string|max:10',
             'note' => 'nullable|string',
+            'amount' => 'required|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.item_name' => 'required|string',
             'items.*.qty' => 'required|integer|min:1',
@@ -59,6 +60,8 @@ class InvoicesController extends Controller
             'due_date' => $validated['due_date'],
             'currency' => $validated['currency'],
             'note' => $validated['note'] ?? null,
+            'amount' => $validated['amount'],
+            'status' => 'paid',
         ]);
 
         foreach ($validated['items'] as $item) {

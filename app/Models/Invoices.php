@@ -18,7 +18,9 @@ class Invoices extends Model
         'address', 
         'due_date', 
         'currency', 
-        'note'
+        'note',
+        'amount',
+        'status'
     ];
 
     public function items()

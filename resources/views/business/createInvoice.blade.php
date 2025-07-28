@@ -96,8 +96,10 @@
                                     </div>
 
                                     <div class="mb-6">
-                                        <label for="currency" class="block mb-1 text-xs font-semibold text-gray-700">Currency</label>
-                                        <select id="currency" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
+                                        <label for="currency"
+                                            class="block mb-1 text-xs font-semibold text-gray-700">Currency</label>
+                                        <select id="currency"
+                                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
                                             aria-label="Currency">
                                             <option value="GBP" selected>🇬🇧 British Pound</option>
                                             <option value="USD">🇺🇸 US Dollar</option>
@@ -474,10 +476,13 @@
                         total
                     });
                 });
+                
+                // Calculate total amount from items
+                payload.amount = payload.items.reduce((sum, item) => sum + item.total, 0);
 
                 if (hasError || payload.items.length === 0) {
                     return; // Stop if validation failed
-                }
+                }   
                 // Log payload for debugging
                 // console.log("Payload to send:", payload);
 
@@ -488,7 +493,8 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
                         },
                         body: JSON.stringify(payload)
                     });
@@ -532,7 +538,8 @@
                 }
 
                 function showMessage(message, type = 'success') {
-                    const container = document.getElementById(type === 'success' ? 'successCon' : 'errorCon');
+                    const container = document.getElementById(type === 'success' ? 'successCon' :
+                        'errorCon');
                     container.textContent = message;
                     container.classList.remove('hidden');
                     setTimeout(() => {
