@@ -119,29 +119,29 @@
 
                                         <section class="overflow-auto itemslistSection">
                                             <!-- Item 1 -->
-                                            <div class="grid grid-cols-[3fr_1fr_1fr_1fr] items-center gap-3 mb-3"
-                                                aria-label="Invoice item 1">
-                                                <label for="item1"
-                                                    class="text-xs font-semibold text-gray-700 block">Item</label>
-                                                <label for="qty1"
-                                                    class="text-xs font-semibold text-gray-700 block text-center">QTY</label>
-                                                <label for="rate1"
-                                                    class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
-                                                <label for="total1"
-                                                    class="text-xs font-semibold text-gray-700 block text-center">Total</label>
+                                            <div class="grid grid-cols-[3fr_1fr_1fr_1fr] items-center gap-3 mb-3" aria-label="Invoice item 1">
+                                                <label for="item1" class="text-xs font-semibold text-gray-700 block">Item</label>
+                                                <label for="qty1" class="text-xs font-semibold text-gray-700 block text-center">QTY</label>
+                                                <label for="rate1" class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
+                                                <label for="total1" class="text-xs font-semibold text-gray-700 block text-center">Total</label>
 
-                                                <input id="item1" type="text" value="" placeholder="Item description" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
-                                                    aria-label="Item description" />
-                                                <input id="qty1" type="number" value="1" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
-                                                    aria-label="Quantity" />
+                                                <input id="item1" type="text" value="" placeholder="Item description" class="item-name rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" aria-label="Item description" />
+                                                <input id="qty1" type="number" value="1" class="item-qty rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" aria-label="Quantity" />
                                                 <div class="flex justify-center items-center">
                                                     <div class="rate-toggle relative inline-block w-10 h-5 bg-gray-300 rounded-full cursor-pointer" role="switch" aria-checked="false">
                                                         <div class="dot absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform"></div>
                                                     </div>
-                                                    <input id="rate1" type="number" value="0" class="rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
+                                                    <input id="rate1" type="number" value="0" class="item-rate rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
                                                 </div>
-                                                <input id="total1" type="text" value="0" disabled class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed"
-                                                    aria-label="Total" />
+                                                <div class="flex justify-center items-center gap-3">
+                                                    {{-- Total input --}}
+                                                    <input id="total1" type="text" value="0" disabled class="item-total rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed" aria-label="Total" />
+                                                    {{-- create trash button --}}
+                                                    <button type="button" id="delete1" class="text-black-500 border-gray-300 bg-gray-300 px-3 py-2 rounded-md hover:text-red-700 transition-colors">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                    <div></div>
+                                                </div>
                                             </div>
                                         </section>
                                     </div>
@@ -156,7 +156,7 @@
                                         <div id="successCon" class="hidden text-green-600 text-sm font-semibold"></div>
                                         <div id="errorCon" class="hidden text-red-600 text-sm font-semibold"></div>
                                     </div>
-                                    <input type="hidden" name="status" id="invoiceStatus" value="sent">
+                                    <input type="hidden" name="status" id="invoiceStatus" value="pending">
                                     <div class="flex gap-4 mt-3 flex-wrap">
                                         <button type="submit" class="rounded-full bg-[#BFDBFE] text-[#1E40AF] px-6 py-2 text-sm font-semibold hover:bg-[#93c5fd] transition-colors">
                                             Create Invoice
@@ -168,116 +168,7 @@
                                 </form>
                             </section>
 
-                            <!-- Right preview -->
-                            {{-- <section class="flex-1 max-w-full lg:max-w-[600px] bg-[#F3F4F6] rounded-xl md:p-6 p-2 select-text" aria-label="Invoice preview">
-                                <h3 class="font-semibold text-sm mb-3">Preview</h3>
-                                <div class="bg-white rounded-xl md:p-6 p-2 space-y-6 max-w-full overflow-hidden" aria-label="Invoice preview content">
-                                    <div class="flex justify-between items-center">
-                                        <h2 class="font-extrabold text-3xl leading-tight">Invoice</h2>
-                                        <div class="flex flex-col items-center text-center">
-                                            <div
-                                                class="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center mb-1">
-                                                <div class="w-4 h-4 rounded-full bg-black"></div>
-                                            </div>
-                                            <span class="text-xs font-semibold">Nexus Global</span>
-                                            <span
-                                                class="text-[10px] text-gray-400 leading-tight">hi@nexusglobal.com</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between text-xs text-gray-700">
-                                        <div class="flex items-center gap-1">
-                                            <span>Invoice number</span>
-                                            <span class="font-semibold">NEXG-IN001</span>
-                                        </div>
-                                        <div></div>
-                                    </div>
-
-                                    <div class="border border-gray-300 rounded-md overflow-hidden text-xs text-gray-700">
-                                        <div class="grid grid-cols-2 border-b border-gray-300">
-                                            <div class="p-3 border-r border-gray-300">
-                                                <p class="font-semibold mb-1">Billed To</p>
-                                                <p>florence@gmail.com</p>
-                                            </div>
-                                            <div class="p-3">
-                                                <p class="font-semibold mb-1">Due Date</p>
-                                                <p class="font-semibold">27 August, 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="p-3 text-xs font-semibold">
-                                            <p>Address</p>
-                                            <p class="font-semibold">
-                                                2972 Westheimer Rd. Santa Ana, Illinois 85486
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <table
-                                        class="w-full border border-gray-300 text-xs text-gray-700 border-collapse overflow-auto">
-                                        <thead>
-                                            <tr class="bg-gray-100 border-b border-gray-300">
-                                                <th class="border-r border-gray-300 p-2 text-left">Items</th>
-                                                <th class="border-r border-gray-300 p-2 text-center">QTY</th>
-                                                <th class="border-r border-gray-300 p-2 text-center">Rate</th>
-                                                <th class="p-2 text-center">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr class="border-b border-gray-300">
-                                                <td class="border-r border-gray-300 p-2">UX/UI Design</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">100</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">85</td>
-                                                <td class="p-2 text-center">£ 8,500</td>
-                                            </tr>
-                                            <tr class="border-b border-gray-300">
-                                                <td class="border-r border-gray-300 p-2">Site deployment</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">1</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">-</td>
-                                                <td class="p-2 text-center">£ 500</td>
-                                            </tr>
-                                            <tr class="border-b border-gray-300">
-                                                <td class="border-r border-gray-300 p-2">Macbook Pro 2024</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">1</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">-</td>
-                                                <td class="p-2 text-center">£ 2,800</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border-r border-gray-300 p-2">
-                                                    Mobile app development
-                                                </td>
-                                                <td class="border-r border-gray-300 p-2 text-center">250</td>
-                                                <td class="border-r border-gray-300 p-2 text-center">90</td>
-                                                <td class="p-2 text-center">£ 22,500</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                    <div
-                                        class="border border-gray-300 rounded-md p-4 text-xs text-gray-700 max-w-[280px] ml-auto">
-                                        <div class="flex justify-between mb-2">
-                                            <span>Subtotal</span>
-                                            <span>Total</span>
-                                        </div>
-                                        <div class="flex justify-between mb-2">
-                                            <span>Tax</span>
-                                            <span>£ 0.00</span>
-                                        </div>
-                                        <div class="flex justify-between font-semibold text-gray-900">
-                                            <span>Total</span>
-                                            <span>£ 34,300</span>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="border border-gray-300 rounded-md p-3 text-[10px] text-gray-700 max-w-[400px]">
-                                        <p class="font-semibold mb-1">Note:</p>
-                                        <p>
-                                            Note that the “QTY” field for all items except site deployment and
-                                            Macbook Pro 2024, refers to the number of work hours spent.
-                                        </p>
-                                    </div>
-                                </div>
-                            </section> --}}
+                            <!-- Right summary -->
                         </section>
                     </div>
                 </section>
@@ -340,15 +231,21 @@
                         <label for="rate1" class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
                         <label for="total1" class="text-xs font-semibold text-gray-700 block text-center">Total</label>
 
-                        <input id="item${itemIndex}" type="text" placeholder="Item description" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:ring-1 focus:ring-[#3B82F6]" />
-                        <input id="qty${itemIndex}" type="number" value="1" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-center text-gray-900 qty" />
+                        <input id="item${itemIndex}" type="text" placeholder="Item description" class="item-name rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:ring-1 focus:ring-[#3B82F6]" />
+                        <input id="qty${itemIndex}" type="number" value="1" class="item-qty rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-center text-gray-900 qty" />
                         <div class="flex justify-center items-center">
                             <div class="rate-toggle relative inline-block w-10 h-5 bg-gray-300 rounded-full cursor-pointer" role="switch" aria-checked="false">
                                 <div class="dot absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform"></div>
                             </div>
-                            <input id="rate${itemIndex}" type="number" value="0" class="rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
+                            <input id="rate${itemIndex}" type="number" value="0" class="item-rate rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
                         </div>
-                        <input id="total${itemIndex}" type="text" value="0" disabled class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50" />
+                        <div class="flex justify-center items-center gap-3">
+                            <input id="total${itemIndex}" type="text" value="0" disabled class="item-total rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed" aria-label="Total" />
+                            <button type="button" id="delete${itemIndex}" class="text-black-500 border-gray-300 bg-gray-300 px-3 py-2 rounded-md hover:text-red-700 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <div></div>
+                        </div>
                     `;
                 itemContainer.appendChild(newRow);
                 attachEvents(newRow, itemIndex);
@@ -359,14 +256,14 @@
                 const rateInput = row.querySelector(`#rate${index}`);
                 const totalInput = row.querySelector(`#total${index}`);
                 const toggle = row.querySelector('.rate-toggle');
+                const deleteBtn = row.querySelector(`#delete${index}`);
 
                 qtyInput.addEventListener('input', updateTotal);
                 rateInput.addEventListener('input', updateTotal);
 
                 function updateTotal() {
                     const qty = parseFloat(qtyInput.value) || 0;
-                    const rate = toggle.getAttribute('aria-checked') === 'true' ? parseFloat(rateInput.value) || 0 :
-                        0;
+                    const rate = toggle.getAttribute('aria-checked') === 'true' ? parseFloat(rateInput.value) || 0 : 0;
                     totalInput.value = (qty * rate).toFixed(2);
                 }
 
@@ -378,6 +275,10 @@
                     updateTotal();
                 });
 
+                // Delete button functionality
+                deleteBtn.addEventListener('click', () => {
+                    row.remove();
+                });
                 updateTotal();
             }
 
@@ -401,8 +302,7 @@
                 // Basic top-level validation
                 if (!invoiceNumber || !billedTo || !dueDate || !address || !currency) {
                     let errorCon = document.getElementById('errorCon');
-                    errorCon.textContent =
-                        "Please fill in all invoice details (Billed To, Invoice Number, Due Date, Address, Currency).";
+                    errorCon.textContent = "Please fill in all invoice details (Billed To, Invoice Number, Due Date, Address, Currency).";
                     errorCon.classList.remove('hidden');
                     setTimeout(() => {
                         errorCon.textContent = '';
@@ -426,11 +326,11 @@
                 let hasError = false;
 
                 rows.forEach((row, index) => {
-                    const itemName = row.querySelector(`#item${index + 1}`)?.value.trim();
-                    const qtyVal = row.querySelector(`#qty${index + 1}`)?.value;
+                    const itemName = row.querySelector('.item-name')?.value.trim();
+                    const qtyVal = row.querySelector('.item-qty')?.value;
                     const qty = parseInt(qtyVal);
-                    const rateInput = row.querySelector(`#rate${index + 1}`);
-                    const totalInput = row.querySelector(`#total${index + 1}`);
+                    const rateInput = row.querySelector('.item-rate');
+                    const totalInput = row.querySelector('.item-total');
                     const toggle = row.querySelector('[role="switch"]');
 
                     const rateEnabled = toggle?.getAttribute('aria-checked') === 'true';
@@ -438,12 +338,10 @@
                     const total = parseFloat(totalInput?.value?.replace(/,/g, '') || 0);
 
                     // Validate item inputs
-                    if (!itemName || isNaN(qty) || qty <= 0 || (rateEnabled && (rate === null ||
-                            rate < 0))) {
+                    if (!itemName || isNaN(qty) || qty <= 0 || (rateEnabled && (rate === null || rate < 0))) {
                         hasError = true;
                         let errorCon = document.getElementById('errorCon');
-                        errorCon.textContent =
-                            `Please check item ${index + 1}: Ensure item name, valid quantity, and rate (if enabled) are provided.`;
+                        errorCon.textContent = `Please check item ${index + 1}: Ensure item name, valid quantity, and rate (if enabled) are provided.`;
                         errorCon.classList.remove('hidden');
                         setTimeout(() => {
                             errorCon.textContent = '';
@@ -461,14 +359,16 @@
                     });
                 });
 
+
                 // Calculate total amount from items
                 payload.amount = payload.items.reduce((sum, item) => sum + item.total, 0);
 
                 if (hasError || payload.items.length === 0) {
                     return; // Stop if validation failed
-                }   
-                // Log payload for debugging
-                // console.log("Payload to send:", payload);
+                }
+
+                //invoiceStatus data
+                msg = invoiceStatus == "pending" ? "Invoice created successfully!" : "Invoice saved as draft successfully!";
 
                 // Proceed with API call
                 try {
@@ -488,11 +388,9 @@
 
                         if (response.ok) {
                             // Successful response
-                            console.log(result);
-                            // showMessage("Invoice created successfully!", 'success');
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Invoice created successfully!',
+                                text: msg,
                                 icon: 'success',
                                 timer: 3000,
                                 showConfirmButton: false,

@@ -84,7 +84,7 @@
                                         <td class="font-semibold pl-2 py-3">{{ $invoice->invoice_number }}</td>
                                         <td class="py-3">{{ $invoice->billed_to ?? 'N/A' }}</td>
                                         <td class="py-3 font-semibold">{{ $invoice->created_at->format('d M Y') }}</td>
-                                        <td class="py-3">-</td>
+                                        <td class="py-3">{{ $invoice->updated_at->format('d M Y') }}</td>
                                         @php
                                             $symbols = [
                                                 'USD' => '$',

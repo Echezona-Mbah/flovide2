@@ -56,7 +56,7 @@
                                     <span class="w-3 h-3 rounded-full {{ $statusColor }}"></span>
                                     <span class="text-sm text-gray-600 select-text">{{ $status }}</span>
                                 </div>
-                                <button {{ $statusEnable }} class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
+                                <button {{ $statusEnable }}  onclick="copyLink()" class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
                                     <i class="far fa-copy"></i>
                                     <span class="hidden md:flex">Copy Link</span>
                                 </button>
@@ -66,6 +66,7 @@
                             <!-- Left form -->
                             <section class="flex-1 max-w-full lg:max-w-[600px] space-y-6">
                                 <form id="invoiceForm" method="POST">
+                                    @method('PUT')
                                     @csrf <!-- CSRF token for form submission -->
                                     <!-- Invoice Details -->
                                     <div>
@@ -129,22 +130,26 @@
                                                     <label for="rate{{ $itemIndex }}" class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
                                                     <label for="total{{ $itemIndex }}" class="text-xs font-semibold text-gray-700 block text-center">Total</label>
 
-                                                    <input id="item{{ $itemIndex }}" type="text" value="{{ $item->item_name }}" placeholder="Item description"
-                                                        class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" />
+                                                    <input id="item{{ $itemIndex }}" type="text" value="{{ $item->item_name }}" placeholder="Item description" class="item-name rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" />
 
-                                                    <input id="qty{{ $itemIndex }}" type="number" value="{{ $item->qty }}"
-                                                        class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" />
+                                                    <input id="qty{{ $itemIndex }}" type="number" value="{{ $item->qty }}" class="item-qty rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]" />
 
                                                     <div class="flex justify-center items-center">
-                                                        <div class="rate-toggle relative inline-block w-10 h-5 {{ $item->rate_enabled ? 'bg-blue-500' : 'bg-gray-300' }} rounded-full cursor-pointer"
-                                                            role="switch" aria-checked="{{ $item->rate_enabled ? 'true' : 'false' }}">
+                                                        <div class="rate-toggle relative inline-block w-10 h-5 {{ $item->rate_enabled ? 'bg-blue-500' : 'bg-gray-300' }} rounded-full cursor-pointer" role="switch" aria-checked="{{ $item->rate_enabled ? 'true' : 'false' }}">
                                                             <div class="dot absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform"></div>
                                                         </div>
-                                                        <input id="rate{{ $itemIndex }}" type="number" value="{{ $item->rate ?? 0 }}"
-                                                            class="rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
+                                                        <input id="rate{{ $itemIndex }}" type="number" value="{{ $item->rate ?? 0 }}" class="item-rate rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
                                                     </div>
 
-                                                    <input id="total{{ $itemIndex }}" type="text" value="{{ number_format($item->total, 2) }}" disabled class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed" />
+                                                    <div class="flex justify-center items-center gap-3">
+                                                        {{-- Total input --}}
+                                                        <input id="total{{ $itemIndex }}" type="text" value="0" disabled class="item-total rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed" aria-label="Total" />
+                                                        {{-- create trash button --}}
+                                                        <button type="button" id="delete{{ $itemIndex }}" class="text-black-500 border-gray-300 bg-gray-300 px-3 py-2 rounded-md hover:text-red-700 transition-colors">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                        <div></div>
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </section>
@@ -166,11 +171,14 @@
                                         if($invoice->status === 'draft') {
                                             $buttontext = 'Create Invoice';
                                             $buttontext2 = 'Save Invoice';
+                                            $invoiceStatus = 'draft';
                                         } else {
                                             $buttontext = 'Update Invoice';
                                             $buttontext2 = 'Saved as Draft';
+                                            $invoiceStatus = 'pending';
                                         }
                                     @endphp
+                                    <input type="hidden" name="status" id="invoiceStatus" value="{{ $invoiceStatus }}">
                                     <div class="flex gap-4 mt-3 flex-wrap">
                                         <button type="submit" class="rounded-full bg-[#BFDBFE] text-[#1E40AF] px-6 py-2 text-sm font-semibold hover:bg-[#93c5fd] transition-colors">
                                             {{ $buttontext }}
@@ -183,22 +191,18 @@
                             </section>
 
                             <!-- Right preview -->
-                            <section
-                                class="flex-1 max-w-full lg:max-w-[600px] bg-[#F3F4F6] rounded-xl md:p-6 p-2 select-text"
-                                aria-label="Invoice preview">
+                            <section class="flex-1 max-w-full lg:max-w-[600px] bg-[#F3F4F6] rounded-xl md:p-6 p-2 select-text" aria-label="Invoice preview">
                                 <h3 class="font-semibold text-sm mb-3">Preview</h3>
                                 <div class="bg-white rounded-xl md:p-6 p-2 space-y-6 max-w-full overflow-hidden"
                                     aria-label="Invoice preview content">
                                     <div class="flex justify-between items-center">
                                         <h2 class="font-extrabold text-3xl leading-tight">Invoice</h2>
                                         <div class="flex flex-col items-center text-center">
-                                            <div
-                                                class="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center mb-1">
+                                            <div class="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center mb-1">
                                                 <div class="w-4 h-4 rounded-full bg-black"></div>
                                             </div>
                                             <span class="text-xs font-semibold">Nexus Global</span>
-                                            <span
-                                                class="text-[10px] text-gray-400 leading-tight">hi@nexusglobal.com</span>
+                                            <span class="text-[10px] text-gray-400 leading-tight">hi@nexusglobal.com</span>
                                         </div>
                                     </div>
 
@@ -210,8 +214,7 @@
                                         <div></div>
                                     </div>
 
-                                    <div
-                                        class="border border-gray-300 rounded-md overflow-hidden text-xs text-gray-700">
+                                    <div class="border border-gray-300 rounded-md overflow-hidden text-xs text-gray-700">
                                         <div class="grid grid-cols-2 border-b border-gray-300">
                                             <div class="p-3 border-r border-gray-300">
                                                 <p class="font-semibold mb-1">Billed To</p>
@@ -315,7 +318,31 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        //store the original invoice data
+        window.originalInvoice = {
+            invoice_number: @json($invoice->invoice_number),
+            billed_to: @json($invoice->billed_to),
+            due_date: @json($invoice->due_date ? $invoice->due_date->format('Y-m-d') : ''),
+            address: @json($invoice->address),
+            currency: @json($invoice->currency),
+            note: @json($invoice->note),
+            status: @json($invoice->status),
+            items: @json($invoice->items->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'item_name' => $item->item_name,
+                    'qty' => (int) $item->qty,
+                    'rate_enabled' => (bool) $item->rate_enabled,
+                    'rate' => $item->rate_enabled ? (float) $item->rate : null,
+                    'total' => (float) $item->total,
+                ];
+            })),
+        };
+
+
+
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebarBtn');
         const closeBtn = document.getElementById('closeSidebarBtn');
@@ -366,15 +393,21 @@
                         <label for="rate1" class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
                         <label for="total1" class="text-xs font-semibold text-gray-700 block text-center">Total</label>
 
-                        <input id="item${itemIndex}" type="text" placeholder="Item description" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:ring-1 focus:ring-[#3B82F6]" />
-                        <input id="qty${itemIndex}" type="number" value="1" class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-center text-gray-900 qty" />
+                        <input id="item${itemIndex}" type="text" placeholder="Item description" class="item-name rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:ring-1 focus:ring-[#3B82F6]" />
+                        <input id="qty${itemIndex}" type="number" value="1" class="item-qty rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-center text-gray-900 qty" />
                         <div class="flex justify-center items-center">
                             <div class="rate-toggle relative inline-block w-10 h-5 bg-gray-300 rounded-full cursor-pointer" role="switch" aria-checked="false">
                                 <div class="dot absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform"></div>
                             </div>
-                            <input id="rate${itemIndex}" type="number" value="0" class="rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
+                            <input id="rate${itemIndex}" type="number" value="0" class="item-rate rate rounded-md w-40 border ml-2 px-3 py-2 text-sm text-center" />
                         </div>
-                        <input id="total${itemIndex}" type="text" value="0" disabled class="rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50" />
+                        <div class="flex justify-center items-center gap-3">
+                            <input id="total${itemIndex}" type="text" value="0" disabled class="item-total rounded-md w-40 border border-gray-300 px-3 py-2 text-sm text-gray-400 text-center bg-gray-50 cursor-not-allowed" aria-label="Total" />
+                            <button type="button" id="delete${itemIndex}" class="text-black-500 border-gray-300 bg-gray-300 px-3 py-2 rounded-md hover:text-red-700 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <div></div>
+                        </div>
                     `;
                 itemContainer.appendChild(newRow);
                 attachEvents(newRow, itemIndex);
@@ -385,14 +418,14 @@
                 const rateInput = row.querySelector(`#rate${index}`);
                 const totalInput = row.querySelector(`#total${index}`);
                 const toggle = row.querySelector('.rate-toggle');
+                const deleteBtn = row.querySelector(`#delete${index}`);
 
                 qtyInput.addEventListener('input', updateTotal);
                 rateInput.addEventListener('input', updateTotal);
 
                 function updateTotal() {
                     const qty = parseFloat(qtyInput.value) || 0;
-                    const rate = toggle.getAttribute('aria-checked') === 'true' ? parseFloat(rateInput.value) || 0 :
-                        0;
+                    const rate = toggle.getAttribute('aria-checked') === 'true' ? parseFloat(rateInput.value) || 0 : 0;
                     totalInput.value = (qty * rate).toFixed(2);
                 }
 
@@ -404,6 +437,10 @@
                     updateTotal();
                 });
 
+                // Delete button functionality
+                deleteBtn.addEventListener('click', () => {
+                    row.remove();
+                });
                 updateTotal();
             }
 
@@ -422,20 +459,14 @@
                 const address = document.querySelector('#address').value.trim();
                 const currency = document.querySelector('#currency').value;
                 const note = document.querySelector('#note').value.trim();
+                const invoiceStatus = document.querySelector('#invoiceStatus').value.trim();
 
-                // Basic top-level validation
                 if (!invoiceNumber || !billedTo || !dueDate || !address || !currency) {
-                    let errorCon = document.getElementById('errorCon');
-                    errorCon.textContent =
-                        "Please fill in all invoice details (Billed To, Invoice Number, Due Date, Address, Currency).";
-                    errorCon.classList.remove('hidden');
-                    setTimeout(() => {
-                        errorCon.textContent = '';
-                        errorCon.classList.add('hidden');
-                    }, 5000);
+                    showMessage("Please fill in all invoice details (Billed To, Invoice Number, Due Date, Address, Currency).", 'error');
                     return;
                 }
 
+                const rows = document.querySelectorAll('[aria-label^="Invoice item"]');
                 const payload = {
                     invoice_number: invoiceNumber,
                     billed_to: billedTo,
@@ -443,40 +474,34 @@
                     address,
                     currency,
                     note,
-                    items: []
+                    status: invoiceStatus,
+                    items: [],
+                    deleted_item_ids: []
                 };
 
-                const rows = document.querySelectorAll('[aria-label^="Invoice item"]');
                 let hasError = false;
 
                 rows.forEach((row, index) => {
-                    const itemName = row.querySelector(`#item${index + 1}`)?.value.trim();
-                    const qtyVal = row.querySelector(`#qty${index + 1}`)?.value;
+                    const itemId = row.getAttribute('data-item-id') || null;
+                    const itemName = row.querySelector('.item-name')?.value.trim();
+                    const qtyVal = row.querySelector('.item-qty')?.value;
                     const qty = parseInt(qtyVal);
-                    const rateInput = row.querySelector(`#rate${index + 1}`);
-                    const totalInput = row.querySelector(`#total${index + 1}`);
+                    const rateInput = row.querySelector('.item-rate');
+                    const totalInput = row.querySelector('.item-total');
                     const toggle = row.querySelector('[role="switch"]');
 
                     const rateEnabled = toggle?.getAttribute('aria-checked') === 'true';
                     const rate = rateEnabled ? parseFloat(rateInput?.value || 0) : null;
                     const total = parseFloat(totalInput?.value?.replace(/,/g, '') || 0);
 
-                    // Validate item inputs
-                    if (!itemName || isNaN(qty) || qty <= 0 || (rateEnabled && (rate === null ||
-                            rate < 0))) {
+                    if (!itemName || isNaN(qty) || qty <= 0 || (rateEnabled && (rate === null || rate < 0))) {
                         hasError = true;
-                        let errorCon = document.getElementById('errorCon');
-                        errorCon.textContent =
-                            `Please check item ${index + 1}: Ensure item name, valid quantity, and rate (if enabled) are provided.`;
-                        errorCon.classList.remove('hidden');
-                        setTimeout(() => {
-                            errorCon.textContent = '';
-                            errorCon.classList.add('hidden');
-                        }, 5000);
+                        showMessage(`Please check item ${index + 1}: Ensure item name, valid quantity, and rate (if enabled) are provided.`, 'error');
                         return;
                     }
 
                     payload.items.push({
+                        id: itemId,
                         item_name: itemName,
                         qty,
                         rate_enabled: rateEnabled,
@@ -484,70 +509,63 @@
                         total
                     });
                 });
-                
-                // Calculate total amount from items
+
+                const deletedIds = document.querySelectorAll('input.deleted-item-id');
+                deletedIds.forEach(input => {
+                    payload.deleted_item_ids.push(input.value);
+                });
+
                 payload.amount = payload.items.reduce((sum, item) => sum + item.total, 0);
+                
+                // Validate if there are items to submit
+                if (hasError || payload.items.length === 0) return;
 
-                if (hasError || payload.items.length === 0) {
-                    return; // Stop if validation failed
-                }   
-                // Log payload for debugging
-                // console.log("Payload to send:", payload);
+                // Compare current payload with original data
+                if (!hasInvoiceChanged(payload, window.originalInvoice)) {
+                    showMessage("No changes detected in the invoice.", 'error');
+                    return;
+                }
 
-                // Proceed with API call
                 try {
-                    const response = await fetch("{{ route('invoices.store') }}", {
-                        method: 'POST',
+                    const response = await fetch("{{ route('invoices.update', $invoice->id) }}", {
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content'),
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         },
                         body: JSON.stringify(payload)
                     });
+
                     const text = await response.text();
-                    // Check if response is valid JSON
                     try {
                         const result = JSON.parse(text);
 
                         if (response.ok) {
-                            // Successful response
-                            console.log(result);
-                            // showMessage("Invoice created successfully!", 'success');
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Invoice created successfully!',
+                                text: 'Invoice updated successfully!',
                                 icon: 'success',
                                 timer: 3000,
                                 showConfirmButton: false,
-                                willClose: () => {
-                                    location.reload();
-                                }
+                                willClose: () => location.reload()
                             });
                         } else {
-                            // Laravel validation errors
-                            console.log("Server returned an error:", result);
-                            if (result.errors) {
-                                // Show first error
-                                const firstError = Object.values(result.errors).flat()[0];
-                                showMessage(firstError, 'error');
-                            } else {
-                                showMessage("An unknown error occurred.", 'error');
-                            }
+                            const firstError = result.errors ? Object.values(result.errors).flat()[0] : "An unknown error occurred.";
+                            showMessage(firstError, 'error');
                         }
-                    } catch (jsonError) {
-                        console.log("Server returned non-JSON response:", text);
-                        showMessage("Unexpected server error. Check console.", 'error');
+                    } catch {
+                        console.log("Non-JSON response:", text);
+                        showMessage("Unexpected server response. Check console.", 'error');
                     }
+
                 } catch (err) {
                     console.log(err);
                     showMessage("Error connecting to server. Try again.", 'error');
                 }
 
                 function showMessage(message, type = 'success') {
-                    const container = document.getElementById(type === 'success' ? 'successCon' :
-                        'errorCon');
+                    const container = document.getElementById(type === 'success' ? 'successCon' : 'errorCon');
                     container.textContent = message;
                     container.classList.remove('hidden');
                     setTimeout(() => {
@@ -555,9 +573,70 @@
                         container.classList.add('hidden');
                     }, 5000);
                 }
+
+                function hasInvoiceChanged(current, original) {
+                    const fieldsToCompare = ['invoice_number', 'billed_to', 'due_date', 'address', 'currency', 'note', 'status'];
+
+                    for (let key of fieldsToCompare) {
+                        if (current[key] !== original[key]) return true;
+                    }
+
+                    const origItems = original.items || [];
+                    const currItems = current.items || [];
+
+                    if (currItems.length !== origItems.length) return true;
+
+                    for (let currItem of currItems) {
+                        const origItem = origItems.find(i => String(i.id) === String(currItem.id));
+                        if (!origItem) return true;
+
+                        if (
+                            currItem.item_name !== origItem.item_name ||
+                            currItem.qty !== origItem.qty ||
+                            currItem.rate_enabled !== origItem.rate_enabled ||
+                            parseFloat(currItem.rate || 0) !== parseFloat(origItem.rate || 0) ||
+                            parseFloat(currItem.total) !== parseFloat(origItem.total)
+                        ) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
             });
 
+
         });
+
+        
+        function copyLink(){
+            const link = 'your-link-to-copy';
+
+            navigator.clipboard.writeText(link).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Link copied to clipboard!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            }).catch(err => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Failed to copy link!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        }
     </script>
 </body>
 
