@@ -139,44 +139,31 @@
 
                         <!-- Pagination -->
                         <section class="absolute bottom-0 w-full md:px-8 py-2 right-0 left-0">
-                            <div
-                                class="flex flex-row  justify-between items-center mt-6 text-gray-500 text-sm font-semibold gap-3 ">
-                                <div class="hidden md:flex">Page 1 of 15</div>
+                            <div class="flex flex-row  justify-between items-center mt-6 text-gray-500 text-sm font-semibold gap-3 ">
+                                <div class="hidden md:flex">Page  {{ $invoices->currentPage() }} of {{ $invoices->lastPage() }}</div>
                                 <nav class="inline-flex space-x-1" aria-label="Pagination">
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                        aria-label="Previous page">
+                                    {{ $invoices->links('pagination::tailwind') }}
+                                    {{-- <button class="border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Previous page">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <button class="border border-gray-300 rounded-lg px-4 py-2 bg-white font-semibold"
-                                        aria-current="page">
+                                    <button class="border border-gray-300 rounded-lg px-4 py-2 bg-white font-semibold" aria-current="page">
                                         1
                                     </button>
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
-                                        disabled>
+                                    <button class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed" disabled>
                                         2
                                     </button>
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
-                                        disabled>
+                                    <button class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed" disabled>
                                         3
                                     </button>
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
-                                        disabled>
+                                    <button class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed" disabled>
                                         ...
                                     </button>
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed"
-                                        disabled>
+                                    <button class="border border-gray-300 rounded-lg px-4 py-2 text-gray-400 cursor-not-allowed" disabled>
                                         15
                                     </button>
-                                    <button
-                                        class="border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                        aria-label="Next page">
+                                    <button class="border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Next page">
                                         <i class="fas fa-chevron-right"></i>
-                                    </button>
+                                    </button> --}}
                                 </nav>
                             </div>
                         </section>
