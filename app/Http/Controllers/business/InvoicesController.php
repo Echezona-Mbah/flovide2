@@ -101,15 +101,13 @@ class InvoicesController extends Controller
     public function update(Request $request, $id)
     {
         //check if the user owns the invoice
-        $invoice = Invoices::findOrFail($id);
+        $invoice = Invoices::with('items')->findOrFail($id); 
         if ($invoice->user_id !== Auth::id()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
             abort(403, 'Unauthorized');
         }
-        
-        $invoice = Invoices::with('items')->findOrFail($id); 
 
         $validated = $request->validate([
             'invoice_number' => 'sometimes|string',
@@ -118,6 +116,7 @@ class InvoicesController extends Controller
             'address' => 'sometimes|string|nullable',
             'currency' => 'sometimes|string',
             'note' => 'sometimes|string|nullable',
+            'amount' => 'required|numeric|min:0',
             'status' => 'sometimes|in:pending,draft',
             'items' => 'sometimes|array|min:1',
             'items.*.id' => 'nullable|integer',
@@ -142,6 +141,16 @@ class InvoicesController extends Controller
                 ];
                 $invoice->$field = $validated[$field];
             }
+        }
+
+        // Recalculate total amount
+        $totalAmount = collect($validated['items'])->sum('total');
+        if ($invoice->amount != $totalAmount) {
+            $changes['amount'] = [
+                'old' => $invoice->amount,
+                'new' => $totalAmount
+            ];
+            $invoice->amount = $totalAmount;
         }
 
         $invoice->save();
@@ -178,13 +187,18 @@ class InvoicesController extends Controller
                 }
             }
 
-            //detect deleted items
-            $updatedIds = collect($validated['items'])->pluck('id')->filter()->all();
-            $deletedItems = $invoice->items()->whereNotIn('id', $updatedIds)->get();
+            // $invoice->load('items');
 
-            foreach ($deletedItems as $deletedItem) {
-                $changes['deleted_item'][] = $deletedItem->toArray();
-                $deletedItem->delete();
+            $existingIds = $originalItems->keys()->all();
+            $updatedIds = collect($validated['items'])->pluck('id')->filter()->all();
+
+            $deletedIds = array_diff($existingIds, $updatedIds);
+            if (!empty($deletedIds)) {
+                $deletedItems = $invoice->items()->whereIn('id', $deletedIds)->get();
+                foreach ($deletedItems as $deletedItem) {
+                    $changes['deleted_item'][] = $deletedItem->toArray();
+                    $deletedItem->delete();
+                }
             }
         }
 
@@ -207,12 +221,28 @@ class InvoicesController extends Controller
             }
             abort(403, 'Unauthorized');
         }
+
+        // Transform invoice items for frontend use
+        $invoiceItems = $invoice->items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'item_name' => $item->item_name,
+                'qty' => (int) $item->qty,
+                'rate_enabled' => (bool) $item->rate_enabled,
+                'rate' => $item->rate_enabled ? (float) $item->rate : null,
+                'total' => (float) $item->total,
+            ];
+        });
+
         // If it's an API request, return JSON data
         if (request()->expectsJson()) {
-            return response()->json($invoice);
+            return response()->json([
+                'invoice' => $invoice,
+                'items' => $invoiceItems,
+            ]);
         }
         // Otherwise, return the edit view
-        return view('business.editInvoice', compact('invoice'));
+        return view('business.editInvoice', compact('invoice', 'invoiceItems'));
     }
 
 

@@ -124,7 +124,7 @@
                                                 @php
                                                     $itemIndex = $index + 1;
                                                 @endphp
-                                                <div class="grid grid-cols-[3fr_1fr_1fr_1fr] items-center gap-3 mb-3" aria-label="Invoice item {{ $itemIndex }}">
+                                                <div class="grid grid-cols-[3fr_1fr_1fr_1fr] items-center gap-3 mb-3"  data-item-id="{{ $item->id }}" aria-label="Invoice item {{ $itemIndex }}">
                                                     <label for="item{{ $itemIndex }}" class="text-xs font-semibold text-gray-700 block">Item</label>
                                                     <label for="qty{{ $itemIndex }}" class="text-xs font-semibold text-gray-700 block text-center">QTY</label>
                                                     <label for="rate{{ $itemIndex }}" class="text-xs font-semibold text-gray-700 block text-center">Rate</label>
@@ -158,9 +158,7 @@
 
                                     <div class="mt-3">
                                         <label for="note" class="block mb-1 text-xs font-semibold text-gray-700">Add a note (optional)</label>
-                                        <textarea id="note" rows="4" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 resize-none focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]">
-                                            {{ $invoice->note }}
-                                        </textarea>
+                                        <textarea id="note" rows="4" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 resize-none focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]">{{ $invoice->note }}</textarea>
                                     </div>
                                     {{-- error and success section  --}}
                                     <div class="flex gap-4 mt-3 flex-wrap">
@@ -174,16 +172,16 @@
                                             $invoiceStatus = 'draft';
                                         } else {
                                             $buttontext = 'Update Invoice';
-                                            $buttontext2 = 'Saved as Draft';
+                                            $buttontext2 = 'Save as Draft';
                                             $invoiceStatus = 'pending';
                                         }
                                     @endphp
                                     <input type="hidden" name="status" id="invoiceStatus" value="{{ $invoiceStatus }}">
                                     <div class="flex gap-4 mt-3 flex-wrap">
-                                        <button type="submit" class="rounded-full bg-[#BFDBFE] text-[#1E40AF] px-6 py-2 text-sm font-semibold hover:bg-[#93c5fd] transition-colors">
+                                        <button type="submit" data-status="{{ $invoice->status === 'draft' ? 'pending' : $invoice->status }}" class="rounded-full bg-[#BFDBFE] text-[#1E40AF] px-6 py-2 text-sm font-semibold hover:bg-[#93c5fd] transition-colors">
                                             {{ $buttontext }}
                                         </button>
-                                        <button type="button" class="rounded-full border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                                        <button type="submit" data-status="draft" class="rounded-full border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
                                             <i class="far fa-file-alt"></i> {{ $buttontext2 }}
                                         </button>
                                     </div>
@@ -318,29 +316,17 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        //store the original invoice data
         window.originalInvoice = {
             invoice_number: @json($invoice->invoice_number),
             billed_to: @json($invoice->billed_to),
-            due_date: @json($invoice->due_date ? $invoice->due_date->format('Y-m-d') : ''),
+            due_date: @json($invoice->due_date),
             address: @json($invoice->address),
             currency: @json($invoice->currency),
             note: @json($invoice->note),
             status: @json($invoice->status),
-            items: @json($invoice->items->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'item_name' => $item->item_name,
-                    'qty' => (int) $item->qty,
-                    'rate_enabled' => (bool) $item->rate_enabled,
-                    'rate' => $item->rate_enabled ? (float) $item->rate : null,
-                    'total' => (float) $item->total,
-                ];
-            })),
+            items: @json($invoiceItems),
         };
-
 
 
         const sidebar = document.getElementById('sidebar');
@@ -376,6 +362,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            
             // Start with the first item already present
             let itemIndex = 1;
 
@@ -449,6 +436,15 @@
                 attachEvents(row, i + 1);
             });
 
+            let clickedStatus = null;
+
+            // Capture which submit button was clicked and get its data-status
+            document.querySelectorAll('button[data-status]').forEach(button => {
+                button.addEventListener('click', function () {
+                    clickedStatus = this.getAttribute('data-status');
+                });
+            });
+
             // Submit form and send JSON payload
             document.querySelector('#invoiceForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -459,7 +455,7 @@
                 const address = document.querySelector('#address').value.trim();
                 const currency = document.querySelector('#currency').value;
                 const note = document.querySelector('#note').value.trim();
-                const invoiceStatus = document.querySelector('#invoiceStatus').value.trim();
+                const invoiceStatus = clickedStatus || 'draft';
 
                 if (!invoiceNumber || !billedTo || !dueDate || !address || !currency) {
                     showMessage("Please fill in all invoice details (Billed To, Invoice Number, Due Date, Address, Currency).", 'error');
@@ -482,7 +478,10 @@
                 let hasError = false;
 
                 rows.forEach((row, index) => {
-                    const itemId = row.getAttribute('data-item-id') || null;
+                    // const itemId = row.getAttribute('data-item-id') || null;
+                    const itemIdRaw = row.getAttribute('data-item-id');
+                    const itemId = (itemIdRaw && itemIdRaw !== "null" && itemIdRaw !== "undefined") ? parseInt(itemIdRaw) : null;
+
                     const itemName = row.querySelector('.item-name')?.value.trim();
                     const qtyVal = row.querySelector('.item-qty')?.value;
                     const qty = parseInt(qtyVal);
@@ -526,6 +525,13 @@
                     return;
                 }
 
+                let statusMessage = {
+                    draft: "Invoice saved as draft successfully!",
+                    pending: "Invoice Created successfully!"
+                };
+
+                // console.log(payload);
+
                 try {
                     const response = await fetch("{{ route('invoices.update', $invoice->id) }}", {
                         method: 'PUT',
@@ -544,7 +550,7 @@
                         if (response.ok) {
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Invoice updated successfully!',
+                                text: statusMessage[invoiceStatus] || "Invoice updated successfully!",
                                 icon: 'success',
                                 timer: 3000,
                                 showConfirmButton: false,
@@ -605,10 +611,8 @@
                 }
             });
 
-
         });
 
-        
         function copyLink(){
             const link = 'your-link-to-copy';
 
@@ -637,7 +641,10 @@
                 });
             });
         }
+
+
     </script>
+
 </body>
 
 </html>
