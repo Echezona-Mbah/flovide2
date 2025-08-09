@@ -190,7 +190,7 @@
 
                 const responseDiv = document.getElementById('responseMessage');
 
-                fetch('{{ route('payout.store') }}', {
+                fetch('/payout', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -216,28 +216,60 @@
 
 
         document.querySelectorAll('.set-default-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const id = this.dataset.id; 
-        
-                fetch(`/business/bank-accounts/${id}/set-default`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // const msg = document.getElementById('default-message');
-                    // msg.textContent = data.message;
-                    // msg.classList.remove('hidden');
-                    Swal.fire('Set!', data.message, 'success').then(() => {
-                        location.reload();
+            button.addEventListener('click', async function () {
+                const id = this.dataset.id;
+
+                try {
+                    const response = await fetch(`/business/bank-accounts/${id}/set-default`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
                     });
-                })
-                .catch(err => console.log(err));
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        // Success toast
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: data.message || 'Bank account set as default successfully!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            didClose: () => location.reload()
+                        });
+                    } else {
+                        // Error toast
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: data.message || 'Failed to set default bank account.',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('Error setting default bank account:', error);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Something went wrong. Please try again.',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
             });
         });
+
 
 
         document.querySelectorAll('.delete-icon').forEach((button) => {
