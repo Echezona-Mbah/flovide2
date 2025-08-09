@@ -204,6 +204,7 @@ class addBankAccountController extends Controller
         $account->save();
 
         return response()->json([
+            'status' => 'success',
             'message' => 'Payout account set.',
             'default_account_id' => $account->id,
         ]);
