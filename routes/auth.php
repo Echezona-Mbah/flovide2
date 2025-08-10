@@ -16,6 +16,7 @@ use App\Http\Controllers\Business\AddCustomerController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
 use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\business\refundsController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -82,8 +83,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
     Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
-    Route::get('/invoices/search', [InvoicesController::class, 'search'])->name('invoices.search');
-    Route::get('/invoices/export-csv', [InvoicesController::class, 'exportCsv'])->name('invoices.export.csv');
+
+    //refund
+    Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
+    Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
+    Route::get('/refunds/{id}', [refundsController::class, 'show'])->name('refund.show');
+    Route::get('/refunds/{id}/edit', [refundsController::class, 'edit'])->name('refund.edit');
+    Route::put('/refunds/{id}', [refundsController::class, 'update'])->name('refund.update');
+    Route::delete('/refunds/{id}', [refundsController::class, 'destroy'])->name('refund.destroy');
+
 
 
     Route::get('/verifyemail', [RegisteredUserController::class, 'showverifyEmail'])->name('verifyemail');
