@@ -8,8 +8,7 @@
         <button aria-label="Open sidebar" id="openSidebarBtn" class="text-[#1E1E1E] focus:outline-none">
             <i class="fas fa-bars text-2xl"></i>
         </button>
-        <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain"
-            height="40" src="../../asserts/dashboard/admin-logo.svg" width="120" />
+        <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain" height="40" src="../../asserts/dashboard/admin-logo.svg" width="120" />
         <div></div>
     </header>
 
@@ -41,7 +40,7 @@
                                 <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
                                     <label for="search" class="sr-only">Search requests</label>
                                     <input id="search" type="search" placeholder="Search requests" class="flex-1 border border-gray-300 rounded-lg py-2 px-4 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                    <button class="border-2 rounded p-2 bg-gray-300" id="openModalBtn">Create Refund</button>
+                                    <button class="border-2 rounded p-2 bg-gray-300" id="openModalBtn">Create a Refund</button>
                                     <select aria-label="Filter requests" id="filter" class="border border-gray-300 rounded-lg py-2 px-4 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="all">All requests</option>
                                         <option value="approved">Approved</option>
@@ -63,7 +62,7 @@
                                         <tbody class="cursor-pointer">
                                             @forelse($refunds as $refund)
                                                 <tr class="refundsDataRow" data-id="{{ $refund->id }}" data-type="{{ ucfirst($refund->type) }}" data-amount="{{ number_format($refund->amount, 2) }}" data-currency="{{ $refund->currency }}" data-reference="{{ $refund->transaction_ref_number }}"
-                                                    data-status="{{ ucfirst($refund->status) }}" data-sender="{{ ucfirst($refund->name) }}" data-reason="{{ $refund->reason }}" data-recipient="{{ ucfirst($refund->recipient) }}">
+                                                    data-status="{{ ucfirst($refund->status) }}" data-action="{{ $refund->action }}" data-created="{{ $refund->created_at }}" data-updated="{{ $refund->updated_at }}" data-sender="{{ ucfirst($refund->name) }}" data-reason="{{ $refund->reason }}" data-recipient="{{ ucfirst($refund->recipient) }}">
                                                     <td class="font-normal pl-2 pr-6 py-3">{{ $refund->name }}</td>
                                                     <td class="pr-6 py-3 font-normal">{{ number_format($refund->amount, 2) . ' '. $refund->currency }}</td>
                                                     @if ($refund->action !== null)
@@ -81,7 +80,7 @@
                                                         </td>
                                                     @else
                                                         <td class="pr-6 py-3">
-                                                            <select class="border border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Select approval status">
+                                                            <select data-id="{{ $refund->id }}" class="border approval-status border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Select approval status">
                                                                 <option value="">Select</option>
                                                                 <option value="approved">Approved</option>
                                                                 <option value="rejected">Rejected</option>
@@ -130,7 +129,8 @@
                                     {{-- refund details  --}}
                                 </section>
                                 <section class="trackerCont">
-                                    <div class="w-full max-w-lg mx-auto bg-white p-6">
+                                    
+                                    {{-- <div class="w-full max-w-lg mx-auto bg-white p-6">
                                         
                                         <!-- Step 1 -->
                                         <div class="relative flex items-start ">
@@ -177,7 +177,7 @@
                                             </div>
                                         </div>
 
-                                    </div>
+                                    </div> --}}
                                 </section>
 
                             </section>
@@ -206,6 +206,12 @@
                 <div>
                     <label class="block mb-1 font-medium">Fullname</label>
                     <input type="text" name="name" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+                </div>
+                <div>
+                    <label class="block mb-1 font-medium">Currency</label>
+                    <select name="currency" id="currency" class="w-full border rounded px-3 py-2 focus:ring">
+                        {{-- populated --}}
+                    </select>
                 </div>
                 <div>
                     <label class="block mb-1 font-medium">Amount</label>
@@ -265,11 +271,17 @@
                 sidebar.classList.add('-translate-x-full');
             }
         });
+
+
+
+        const trackerCont = document.querySelector(".trackerCont");
+        trackerCont.style.display = "none";
+
         document.addEventListener('DOMContentLoaded', function () {
             const refund_details = document.querySelector('.refund-details');
             const rows = document.querySelectorAll('.refundsDataRow');
 
-            refund_details.innerHTML = '<p class="text-gray-300">Choose Approve or Reject to Start Tracking..</p>';
+            refund_details.innerHTML = '';
 
             rows.forEach(row => {
                 row.addEventListener('click', function () {
@@ -281,7 +293,17 @@
                     const reference = this.getAttribute('data-reference');
                     const type = this.getAttribute('data-type');
                     const status = this.getAttribute('data-status');
+                    const action = this.getAttribute('data-action');
+                    const created_at = this.getAttribute('data-created');
+                    const updated_at = this.getAttribute('data-updated');
                     const sender = this.getAttribute('data-sender');
+
+                    const statusIcons = {
+                        Success: `<i class="fas fa-check-double text-green-700"></i><span>Successful</span>`,
+                        Failed: `<i class="fas fa-times-circle text-red-600"></i><span>Failed</span>`,
+                        Pending: `<i class="fas fa-hourglass-half text-yellow-500"></i><span>Pending</span>`,
+                        Processing: `<i class="fas fa-spinner fa-spin text-blue-500"></i><span>Processing</span>`
+                    };
 
                     const detailHTML = `
                         <h2 class="text-2xl font-normal mb-6">${amount + ' ' + currency}</h2>
@@ -307,8 +329,7 @@
                         <div class="mb-6">
                             <p class="text-gray-600 mb-1">Status</p>
                             <div class="flex items-center gap-2 text-gray-900 font-semibold">
-                                <i class="fas fa-check-double text-green-700"></i>
-                                <span>${status}</span>
+                                ${statusIcons[status] || ''}
                             </div>
                         </div>
 
@@ -333,52 +354,123 @@
 
                     // Replace content
                     refund_details.innerHTML = detailHTML;
+
+                    // Populate tracker
+                    let trackerHTML = '';
+                    if (status === 'Pending') {
+                        trackerHTML = '<p class="text-gray-500">Choose Approve or Reject to Start Tracking..</p>';
+                    } else if (status === 'Processing') {
+                        trackerHTML = `
+                            ${step('Refund successfully initiated', created_at, true)}
+                            ${step('Processing', updated_at, true)}
+                            ${step('Refund successful', '', false, false, true, true)}
+                        `;
+                    } else if (status === 'Success') {
+                        trackerHTML = `
+                            ${step('Refund successfully initiated', created_at, true)}
+                            ${step('Processing', updated_at, true)}
+                            ${step('Refund successful', updated_at, true, false, true)}
+                        `;
+                    } else if (status === 'Failed') {
+                        trackerHTML = `
+                            ${step('Refund successfully initiated', created_at, true)}
+                            ${step('Processing', updated_at, true)}
+                            ${step('Refund failed', updated_at, false, true, true)}
+                        `;
+                    }
+
+                    trackerCont.innerHTML = `<div class="w-full max-w-lg mx-auto bg-white p-6">${trackerHTML}</div>`;
                 });
             });
 
+            function step(label, date, done, failed = false, isLast = false, processing = false) {
+                // If the current step is "after" a processing one, force border to gray
+                const borderColor = failed
+                    ? 'border-red-500'
+                    : processing
+                        ? 'border-gray-300'
+                        : done
+                            ? 'border-green-500'
+                            : 'border-gray-300';
+
+                const dotColor = failed
+                    ? 'bg-red-500'
+                    : done
+                        ? 'bg-green-500'
+                        : 'bg-gray-300';
+                return `
+                    <div class="relative flex items-start ${failed ? 'text-red-600' : ''}">
+                        <div class="absolute left-3 top-0 ${isLast ? 'h-3' : 'h-full'} border-l-2 ${borderColor}"></div>
+                        <div class="relative z-10 w-6 h-6 flex items-center justify-center bg-white border-2 ${borderColor} rounded-full">
+                            <div class="w-3 h-3 ${dotColor} rounded-full"></div>
+                        </div>
+                        <div class="ml-4 ${isLast ? '' : 'mb-8'}">
+                            <h3 class="font-medium text-gray-900">${label}</h3>
+                            <p class="text-sm text-gray-500">${date || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
         });
 
+        //filter function
+        document.addEventListener("DOMContentLoaded", function () {
+            const filterSelect = document.getElementById("filter");
+            const searchInput = document.getElementById("search");
+            const rows = document.querySelectorAll(".refundsDataRow");
 
-        document.addEventListener('DOMContentLoaded', function () {
-            
-            // Filter functionality
-            const searchInput = document.getElementById('search');
-            const filterSelect = document.getElementById('filter');
-            const rows = document.querySelectorAll('refundsDataRow');
-
-            function filterTransactions() {
+            function applyFilters() {
+                const selectedStatus = filterSelect.value.toLowerCase();
                 const searchTerm = searchInput.value.toLowerCase();
-                const selectedFilter = filterSelect.value;
 
                 rows.forEach(row => {
-                    const method = row.dataset.type.toLowerCase();
-                    const status = row.dataset.status.toLowerCase();
-                    const rowText = row.textContent.toLowerCase();
+                    const rowStatus = row.dataset.action.toLowerCase();
+                    const rowName = row.dataset.sender.toLowerCase();
+                    const rowAmount = row.dataset.amount.toLowerCase();
+                    const rowReference = row.dataset.reference.toLowerCase();
 
-                    const matchesSearch = rowText.includes(searchTerm);
+                    // Match filter
+                    const statusMatch = (selectedStatus === "all" || rowStatus === selectedStatus);
+                    
+                    // Match search (check in name, amount, and reference)
+                    const searchMatch = (
+                        rowName.includes(searchTerm) ||
+                        rowAmount.includes(searchTerm) ||
+                        rowReference.includes(searchTerm)
+                    );
 
-                    const matchesFilter = selectedFilter === 'all' || method === selectedFilter || status === selectedFilter;
-
-                    if (matchesSearch && matchesFilter) {
-                        row.style.display = '';
+                    // Show or hide based on both
+                    if (statusMatch && searchMatch) {
+                        row.style.display = "";
                     } else {
-                        row.style.display = 'none';
+                        row.style.display = "none";
                     }
                 });
             }
 
-            searchInput.addEventListener('input', filterTransactions);
-            filterSelect.addEventListener('change', filterTransactions);
+            // Listen for changes
+            filterSelect.addEventListener("change", applyFilters);
+            searchInput.addEventListener("input", applyFilters);
         });
+
+
+
         const navBarSection1 = document.querySelector(".navBarSection1");
         const navBarSection2 = document.querySelector(".navBarSection2");
+        // const trackerCont = document.querySelector(".trackerCont");
+        const refund_details_cont = document.querySelector(".refund-details");
         navBarSection1.addEventListener("click", ()=>{
             navBarSection2.classList.remove("bg-white");
             navBarSection1.classList.add("bg-white");
+            trackerCont.style.display = "none";
+            refund_details_cont.style.display = "inline-block";
         });
         navBarSection2.addEventListener("click", ()=>{
             navBarSection1.classList.remove("bg-white");
             navBarSection2.classList.add("bg-white");
+            trackerCont.style.display = "inline-block";
+            refund_details_cont.style.display = "none";
         });
 
 
@@ -412,6 +504,24 @@
         const closeModalBtn = document.getElementById("closeModalBtn");
         const formModal = document.getElementById("formModal");
         const contactForm = document.getElementById("contactForm");
+        const currencySelect = document.getElementById("currency");
+        const currencies = [
+            { code: "", name: "Select Currency" },
+            { code: "NGN", name: "Nigerian Naira" },
+            { code: "USD", name: "US Dollar" },
+            { code: "EUR", name: "Euro" },
+            { code: "GBP", name: "British Pound" },
+            { code: "KES", name: "Kenyan Shilling" },
+            { code: "ZAR", name: "South African Rand" },
+            { code: "GHS", name: "Ghanaian Cedi" }
+        ];
+
+        currencies.forEach(currency => {
+            const option = document.createElement("option");
+            option.value = currency.code;
+            option.textContent = currency.code ? `${currency.code} — ${currency.name}` : currency.name;
+            currencySelect.appendChild(option);
+        });
 
         // Open modal
         openModalBtn.addEventListener("click", () => {
@@ -439,8 +549,9 @@
             const amount = form.amount.value;
             const method = form.method.value;
             const reason = form.message.value;
+            const currency = form.currency.value;
             //validate input
-            if (!name || !amount || !method || !reason) {
+            if (!name || !amount || !method || !reason || !currency) {
                 showToast("All fields are required.", "error");
             }else{
                 const formData = new FormData();
@@ -448,6 +559,7 @@
                 formData.append('amount', amount);
                 formData.append('method', method);
                 formData.append('reason', reason);
+                formData.append('currency', currency);
                 fetch('{{ route("refund.store"); }}', {
                     method: 'POST',
                     headers: {
@@ -460,7 +572,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if(data.status === "success"){
-                        showToast("Refund Created Successfully", "sucess");
+                        showToast("Refund Created Successfully", "success");
                         formModal.classList.add("hidden");
                     }else{
                         showToast(data.message || "An error occurred.", "error");
@@ -475,7 +587,7 @@
 
         });
 
-
+        //copy function
         document.addEventListener('click', function (e) {
             if (e.target.closest('[aria-label="Copy transaction reference number"]')) {
                 const button = e.target.closest('button');
@@ -491,6 +603,58 @@
             }
         });
 
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const approval_status = document.querySelectorAll(".approval-status");
+            approval_status.forEach(select => {
+                select.addEventListener("change", () => {
+                    const refundId = select.dataset.id;
+                    const newStatus = select.value;
+                    if (!newStatus) return;
+                    // console.log(refundId);
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `You are about to mark this refund as "${newStatus}".`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, proceed',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if(result.isConfirmed){
+                            const formData = new FormData();
+                            formData.append("status", newStatus);
+                            fetch(`/refunds/${refundId}/status`, {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if(data.status === "success"){
+                                    showToast(data.message || "Request submitted", "success");
+                                }else{
+                                    showToast(data.message || "An error occured.", "error");
+                                    console.log(data);
+                                }
+                            })
+                            .catch(error => {
+                                console.error(error);
+                                showToast("An error Occured.", "error");
+                            });
+                        }else{
+                            //reset the select option
+                            select.value = "";
+                        }
+                    });
+                });
+            });
+        });
     </script>
 </body>
 

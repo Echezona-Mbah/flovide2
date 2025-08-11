@@ -35,6 +35,7 @@ class refundsController extends Controller
             'fullname' => 'required|string|max:255',
             'amount'   => 'required|numeric|min:0',
             'method'   => 'required|string|max:100',
+            'currency' => 'required|string|in:NGN,USD,EUR,GBP,KES,ZAR,GHS',
             'reason'   => 'required|string|max:500',
         ]);
 
@@ -62,7 +63,7 @@ class refundsController extends Controller
                 'type'   => $validated['method'],
                 'reason'   => $validated['reason'],
                 'transaction_ref_number' => $transactionRef,
-                'currency' => 'NGN',
+                'currency' => $validated['currency'],
                 'recipient' => 'self',
                 'status'   => 'pending', 
             ]);
@@ -91,51 +92,50 @@ class refundsController extends Controller
         }
     }
 
-    public function show($id)
+    public function updateStatus(Request $request, $id)
     {
+        // Validate
+        $validated = $request->validate([
+            'status' => 'required|in:approved,rejected'
+        ]);
 
-        return response()->json(['message' => 'Refund request details for ID: ' . $id], 200);
+        try{
+            $refund = Refund::findOrFail($id);
+            $refund->action = $validated["status"];
+            ($validated["status"] == "rejected") ? $refund->status = "success" : $refund->status = "processing";
+            $refund->save();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Request updated successfully.',
+                ], 200);
+            }
+
+            return redirect()->back()->with('success', 'Request updated successfully.');    
+        }
+        catch (\Exception $e){
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to process request: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to process request: ' . $e->getMessage());
+        }
+
+        
+
     }
 
-    public function update(Request $request, $id)
-    {
-
-        return response()->json(['message' => 'Refund request updated successfully.'], 200);
-    }
-
-    public function destroy($id)
-    {
-
-        return response()->json(['message' => 'Refund request deleted successfully.'], 200);
-    }
-
-    public function create()
-    {
-
-        return view('business.create_refund');
-    }
-
-    public function edit($id)
-    {
-
-        return view('business.edit_refund', ['id' => $id]);
-    }
 
     public function search(Request $request)
     {
 
         $query = $request->input('query');
-        // Perform search logic here, e.g., querying the database
 
         return response()->json(['message' => 'Search results for: ' . $query], 200);
     }
-
-    public function exportCsv()
-    {
-
-        return response()->json(['message' => 'CSV export functionality not implemented yet.'], 501);
-    }
-
-
 
 }

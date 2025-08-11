@@ -87,10 +87,7 @@ Route::middleware(['auth'])->group(function () {
     //refund
     Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
     Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
-    Route::get('/refunds/{id}', [refundsController::class, 'show'])->name('refund.show');
-    Route::get('/refunds/{id}/edit', [refundsController::class, 'edit'])->name('refund.edit');
-    Route::put('/refunds/{id}', [refundsController::class, 'update'])->name('refund.update');
-    Route::delete('/refunds/{id}', [refundsController::class, 'destroy'])->name('refund.destroy');
+    Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
 
 
 
