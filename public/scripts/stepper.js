@@ -212,20 +212,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (step === 2) {
+            const sameAsStreet = document.getElementById('toggle-checkbox').checked;
+            const streetAddressVal = document.getElementById('street_address').value.trim();
+        
             const fields = [
                 { id: 'street_address', errorId: 'error-street-address', message: 'Please enter your street address!' },
                 { id: 'city', errorId: 'error-city', message: 'Please enter your city!' },
                 { id: 'trading_address', errorId: 'error-trading-address', message: 'Please enter your trading address!' },
                 { id: 'message', errorId: 'error-nature-of-business', message: 'Please enter the nature of your business!' }
             ];
-
+        
             fields.forEach(field => {
                 const input = document.getElementById(field.id);
                 const errorContainer = document.getElementById(field.errorId);
                 input.setAttribute('data-error-id', field.errorId);
-
-                const value = input.value.trim();
-
+        
+                let value = input.value.trim();
+        
+                // Handle "Same as street address"
+                if (field.id === 'trading_address' && sameAsStreet) {
+                    value = streetAddressVal;
+                    input.value = value; // update input so it's saved
+                }
+        
                 if (!value) {
                     errorContainer.innerText = field.message;
                     errorContainer.classList.add("error-message");
@@ -237,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+        
 
         if (step === 3) {
             const fields = [
@@ -334,6 +344,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Automatically copy street_address to trading_address if checkbox is checked
+    document.getElementById('toggle-checkbox').addEventListener('change', function () {
+        const streetAddress = document.getElementById('street_address').value.trim();
+        const tradingInput = document.getElementById('trading_address');
+
+        if (this.checked) {
+            tradingInput.value = streetAddress;
+            tradingInput.setAttribute('readonly', true); // optional: prevent manual change
+        } else {
+            tradingInput.value = '';
+            tradingInput.removeAttribute('readonly');
+        }
+    });
+
     
 
     const allFields = document.querySelectorAll('input, select, textarea');

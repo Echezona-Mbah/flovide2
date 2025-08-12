@@ -25,15 +25,46 @@ class RegisterController extends Controller
                     $fail('The email must be a Gmail address.');
                 }
             }],
-            'password' => ['required', 'string', 'min:8', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ],
+            'password_confirmation' => 'required|string|min:8|same:password',
             'typeofuser' => 'required|in:business,personal',
+            'country' => 'required|string|max:255',
+            'business_name' => 'required|string|max:255',
+            'registration_number' => 'required|string|max:255',
+            'incorporation_date' => 'required|date|before_or_equal:today',
+            'business_type' => 'required|string|max:255',
+            'company_url' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^https?:\/\/[^\s\/$.?#].[^\s]*\.(com|org|net|ng|co|biz|info)(\/[^\s]*)?$/i'
+            ],
+            'industry' => 'required|string|max:255',
+            'annual_turnover' => 'required|string|max:255',
+            'street_address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'trading_address' => 'required|string|max:255',
+            'nature_of_business' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'trading_street_address' => 'required|string|max:255',
+            'trading_city' => 'required|string|max:255',
         ], [
             'required' => 'The :attribute field is required.',
             'email' => 'The :attribute must be a valid email address.',
             'email.unique' => 'The :attribute has already been taken.',
             'min' => 'The :attribute must be at least :min characters.',
             'regex' => 'The :attribute must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            'password.confirmed' => 'The password confirmation does not match.',
+            'password_confirmation.same' => 'The confirm password must match the password.'
         ]);
+        
+        
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -47,8 +78,10 @@ class RegisterController extends Controller
             ], 422);
         }
 
-        $otp = $this->generateOTP();
 
+        $otp = $this->generateOTP();
+        // $existingcountry = Countries::where('code', $request->country)->first();
+        // $existingcountryname = $existingcountry->name;
         $user = User::create([
             'countries_id' => $request->country,
             'business_name' => $request->business_name,
@@ -69,9 +102,11 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
             'email_verification_otp' => $otp,
             'email_verification_otp_expires_at' => now()->addMinutes(10),
-            'bvn' => $request->bvn,
             'typeofuser' => $request->typeofuser
         ]);
+
+        
+
 
         Mail::to($user->email)->send(new WelcomeMail($user));
     
