@@ -52,6 +52,7 @@
                                 </tr>
                             @else
                                 @foreach($transactions as $index => $transaction)
+
                                     <tr class="alpha cursor-pointer {{ $index === 0 ? 'bg-blue-50' : '' }}"
                                         data-amount="{{ $transaction->amount }}" data-currency="{{ $transaction->currency }}" data-reference="{{ $transaction->reference }}"
                                         data-method="{{ $transaction->method }}" data-status="{{ $transaction->status }}"data-sender="{{ $transaction->sender_id == Auth::id() ? 'Self' : $transaction->sender }}"
@@ -66,11 +67,13 @@
                                                 <i class="fas fa-arrow-up"></i>
                                             </td>
                                         @endif
+                                           <td class="font-semibold py-3">{{ $transaction->recipient_type }}</td>
+
                                         <td class="font-semibold py-3">{{ \Carbon\Carbon::parse($transaction->created_at)->format('M j, Y') }}</td>
                                         <td class="font-semibold py-3">{{ $transaction->sender_id == Auth::id() ? 'Self' : $transaction->sender  }}</td>
                                         <td class="font-semibold py-3">{{ $transaction->recipient_id == Auth::id() ? 'Self' : $transaction->recipient  }}</td>
                                         <td class="font-semibold py-3">{{ $transaction->amount ." ".  $transaction->currency }}</td>
-                                        @if($transaction->status == "successful")
+                                        @if($transaction->status == "successful" || $transaction->status == "processing")
                                             <td class="pr-2 py-3 text-green-700 flex justify-center" title="Success">
                                                 <i class="fas fa-check-double"></i>
                                             </td>

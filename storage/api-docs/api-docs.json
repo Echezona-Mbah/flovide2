@@ -1,0 +1,315 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Flovide API",
+        "description": "API documentation for Flovide payment system",
+        "contact": {
+            "email": "support@flovide.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api/v1",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/v1/balances": {
+            "get": {
+                "tags": [
+                    "Balances"
+                ],
+                "summary": "Fetch all balances",
+                "description": "Returns a list of balances filtered by currency",
+                "operationId": "5433c69647789107b09b50fe55305602",
+                "parameters": [
+                    {
+                        "name": "currency",
+                        "in": "query",
+                        "description": "Filter by currency code",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "GBP"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of balances",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "format": "uuid"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "currency": {
+                                                "type": "string"
+                                            },
+                                            "balance": {
+                                                "type": "integer"
+                                            },
+                                            "default_currency": {
+                                                "type": "string"
+                                            },
+                                            "default_currency_balance": {
+                                                "type": "integer"
+                                            },
+                                            "addresses": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "created": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Balances"
+                ],
+                "summary": "Create a new balance",
+                "operationId": "92ccaf3b953c6c156f54e59802d69f8d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "currency"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Main"
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "GBP"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Balance created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": "88fe6e8a-bd3b-11e9-821e-4180c1a9232a"
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Main"
+                                        },
+                                        "currency": {
+                                            "type": "string",
+                                            "example": "GBP"
+                                        },
+                                        "balance": {
+                                            "type": "integer",
+                                            "example": 10000
+                                        },
+                                        "default_currency": {
+                                            "type": "string",
+                                            "example": "GBP"
+                                        },
+                                        "default_currency_balance": {
+                                            "type": "integer",
+                                            "example": 10000
+                                        },
+                                        "addresses": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "details": {
+                                                        "properties": {
+                                                            "account_name": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "account_number": {
+                                                                "type": "string",
+                                                                "example": "12345678"
+                                                            },
+                                                            "sort_code": {
+                                                                "type": "string",
+                                                                "example": "000000"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "local"
+                                                    },
+                                                    "supported_channels": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "FP"
+                                                        }
+                                                    },
+                                                    "active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "created": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-05-28T10:00:00+00:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            }
+        },
+        "/api/v1/balances/{id}": {
+            "get": {
+                "tags": [
+                    "Balances"
+                ],
+                "summary": "Fetch single balance",
+                "operationId": "e5f2560c72750b481abc9a5b64139426",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Balance details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "amount": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Balance not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Balances"
+                ],
+                "summary": "Update balance name",
+                "operationId": "97c1354ee00fc0e6ca13b353df19bba5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Main Wallet"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Balance updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Balance not found"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Balances",
+            "description": "Balances"
+        }
+    ]
+}

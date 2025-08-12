@@ -9,7 +9,7 @@
             </button>
         </div>
         <nav class="flex-1 overflow-y-auto px-6 pb-8 space-y-3 text-sm font-normal text-[#4B4B4B]">
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('dashboard') }}">
                 <i class="fas fa-tachometer-alt text-base">
                 </i>
                 Dashboard
@@ -51,12 +51,12 @@
                 </i>
                 Invoices
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('subscriptions') }}">
                 <i class="fas fa-sync-alt text-base">
                 </i>
                 Subscriptions
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('bill_payment') }}">
                 <i class="fas fa-file-invoice-dollar text-base">
                 </i>
                 Bills payment
@@ -71,17 +71,17 @@
                 </i>
                 Refunds
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('chargeback') }}">
                 <i class="fas fa-ban text-base">
                 </i>
                 Chargebacks
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('allvirtualcard') }}">
                 <i class="fas fa-credit-card text-base">
                 </i>
                 Virtual Cards
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('compliance') }}">
                 <i class="fas fa-balance-scale text-base">
                 </i>
                 Compliance
@@ -91,7 +91,7 @@
                 </i>
                 Webhooks
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('organization') }}">
                 <i class="fas fa-building text-base">
                 </i>
                 Your organization
