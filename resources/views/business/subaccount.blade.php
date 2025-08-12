@@ -101,9 +101,16 @@
                                 <p>No Sub bank account found.</p>
                             @else
                                 @foreach($subaccounts as $account)
+                                    @php
+                                        try {
+                                            $accountNumber = Crypt::decryptString($account->account_number);
+                                        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                                            $accountNumber = 'Invalid or Unencrypted';
+                                        }
+                                    @endphp
                                     <li class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
                                         <div class="flex items-center gap-3">
-                                            <span>{{ Crypt::decryptString($account->account_number) }}</span>
+                                            <span>{{ $accountNumber }}</span>
                                             <span class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">{{ $account->bank_name }}</span>
                                         </div>
                                         <div class="flex items-center gap-4 text-gray-400">
@@ -118,11 +125,9 @@
                                         </div>
                                     </li>
                                 @endforeach
-
                             @endif
-                            
-                            
                         </ul>
+                        
                     </section>
                 </section>
             </section>

@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>Sign In</title>
+    <title>Forgot Password</title>
 </head>
 
 <body>
@@ -21,11 +21,13 @@
     <section>
 
         <!-- logo -->
-        <section class="relative">
-            <div class="max-w-[300px] px-10 absolute top-10">
-                <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
-            </div>
-        </section>
+                <section class="relative">
+                <div class="max-w-[300px] px-10 absolute top-10">
+                    <a href="{{ route('personal') }}">
+                        <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
+                    </a>
+                </div>
+            </section>
         <!-- logo end-->
 
 

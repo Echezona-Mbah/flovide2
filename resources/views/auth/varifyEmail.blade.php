@@ -13,7 +13,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Sign Up</title>
+        <title>Varify Email</title>
     </head>
     
     <body>
@@ -22,9 +22,11 @@
         <section>
     
             <!-- logo -->
-            <section class="relative">
+                     <section class="relative">
                 <div class="max-w-[300px] px-10 absolute top-10">
-                    <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
+                    <a href="{{ route('personal') }}">
+                        <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
+                    </a>
                 </div>
             </section>
             <!-- logo end-->
