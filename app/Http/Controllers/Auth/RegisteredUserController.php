@@ -18,6 +18,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
+
 
 class RegisteredUserController extends Controller
 {
@@ -86,6 +88,16 @@ class RegisteredUserController extends Controller
 
         $email = $request->input('email');
         $existingUser = User::where('email', $email)->first();
+        $existingcountry = Countries::where('code', $request->country)->first();
+        $existingcountryname = $existingcountry->name;
+        $existingcountrycurrency_code = $existingcountry->currency_code;
+
+         Log::info('Request data:', ['all_data' => $existingcountrycurrency_code ]);
+        //   dd($existingcountry);
+
+        // dd($existingcountry);
+
+
         
         if ($existingUser) {
             return response()->json([
@@ -94,11 +106,11 @@ class RegisteredUserController extends Controller
             ], 422);
         }
         
-    
+        // dd($request->all());
 
         // Create a new user instance
         $user = new User();
-        $user->countries_id = $validated['country'] ?? null;
+        $user->countries_id = $existingcountryname?? null;
         $user->business_name = $validated['business-name'] ?? null;
         $user->registration_number = $validated['registration-number'] ?? null;
 
@@ -121,6 +133,8 @@ class RegisteredUserController extends Controller
         $user->nature_of_business = $validated['message'] ?? null;
         $user->email = $validated['email'] ?? null;
         $user->state = $validated['state'] ?? null;
+        $user->currency = $existingcountrycurrency_code ?? null;
+
 
         // Validate and set the password if provided
         if (isset($validated['password']) && !empty($validated['password'])) {
@@ -133,6 +147,20 @@ class RegisteredUserController extends Controller
         $user->email_verification_otp_expires_at = now()->addMinutes(5);
 
         $user->save();
+
+        \App\Models\Balance::create([
+            'user_id'  => $user->id,
+            'currency' => $user->currency ?? 'USD',
+            'name'     => 'Main Balance',
+            'balance'  => 0.00,
+        ]);
+
+        \App\Models\TeamMembers::create([
+            'user_id'  => $user->id,
+            'owner_id' => $user->id,
+            'email'     => $user->email,
+            'role'  => $user->role,
+        ]);
         Auth::login($user);
 
         Mail::to($user->email)->send(new WelcomeMail($user));
@@ -145,31 +173,28 @@ class RegisteredUserController extends Controller
         ]);
     }
 
+
+
     public function showverifyEmail()
     {
-        $userEmail = Auth::user()->email;
-        // dd($userEmail);
+        $userEmail = session('user_email');
 
-    
         if (!$userEmail) {
-            if (Auth::check()) {
-                $userEmail = Auth::user()->email;
-            } else {
-                return redirect()->route('login')->with('error', 'Please login first.');
-            }
+            return redirect()->route('login')->with('error', 'Please login first.');
         }
-    
+
         return view('auth.varifyEmail', compact('userEmail'));
     }
 
+
+
+
     public function verifyEmail(Request $request, $email)
     {
-        // Merge the 6 codes into a single OTP
+
         $otp = implode('', $request->code);
 
-        $request->merge([
-            'otp' => $otp
-        ]);
+        $request->merge(['otp' => $otp]);
 
         $request->validate([
             'otp' => 'required|string|min:6',
@@ -182,7 +207,6 @@ class RegisteredUserController extends Controller
         if (!$user) {
             return back()->withErrors(['email' => 'Invalid or expired OTP']);
         }
-       // dd($request->all());
 
         if ($user->email_verification_otp !== $otp) {
             $user->increment('email_verification_attempts');
@@ -198,38 +222,26 @@ class RegisteredUserController extends Controller
             return redirect()->route('login')->with('status', 'Email already verified.');
         }
 
+        // Mark as verified
         $user->update([
             'email_verified_at' => now(),
             'email_verified_status' => 'yes',
             'email_verification_attempts' => 0,
         ]);
 
+        // Automatically log the user in
+        Auth::login($user);
+
+        // dd(($user->countries_id));
+
+    if ($user->countries_id === 'Nigeria') {
+        return redirect()->route('verify_bvn')->with('status', 'Email verified. Please verify your BVN.');
+    }
+
         return redirect()->route('dashboard')->with('status', 'Email verified successfully!');
     }
 
 
-
-    // public function verifyEmailOtp($email, Request $request)
-    // {
-    //     $user = User::where('email', $email)->first();
-
-    //     if (!$user) {
-    //         return redirect()->back()->withErrors('User not found.');
-    //     }
-
-    //     $otp = rand(100000, 999999);
-    //     $expirationTime = now()->addMinutes(5);
-
-    //     $user->update([
-    //         'email_verification_otp' => $otp,
-    //         'email_verification_otp_expires_at' => $expirationTime,
-    //         'email_verification_attempts' => 0,
-    //     ]);
-
-    //     Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
-
-    //     return redirect()->back()->with('status', 'New OTP was sent. Please check your email.');
-    // }
     public function resendOtp($email, Request $request)
     {
         $user = User::where('email', $email)->first();
@@ -251,6 +263,45 @@ class RegisteredUserController extends Controller
     
         return response()->json(['message' => 'OTP has been resent.']);
     }
+
+    public function bvn(){
+        return view('auth.varify-bvn');
+    }
+
+    public function verifyBVN(Request $request)
+    {
+        $request->validate([
+            'bvn' => 'required|digits:11'
+        ]);
+
+        $user = Auth::user();
+        $bvn = $request->bvn;
+
+        try {
+            $response = Http::withToken(env('PAYSTACK_SECRET_KEY'))
+                ->get("https://api.paystack.co/bank/resolve_bvn/{$bvn}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                if (isset($data['status']) && $data['status'] === true) {
+                    // Save BVN and mark status as verified
+                    $user->update([
+                        'bvn' => $bvn,
+                        'bvn_status' => 'verified',
+                    ]);
+
+                    return redirect()->route('dashboard')->with('status', 'BVN verified successfully!');
+                } else {
+                    return redirect()->back()->withErrors(['bvn' => $data['message'] ?? 'Verification failed. Try again.']);
+                }
+            } else {
+                return redirect()->back()->withErrors(['bvn' => 'BVN verification failed. Invalid BVN or server error.']);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['bvn' => 'Something went wrong. Please try again later.']);
+        }
+    }
     
     
 
@@ -265,4 +316,68 @@ class RegisteredUserController extends Controller
     {
         return rand(100000, 999999);
     }
+
+
+
+
+
+    public function fetchBalances()
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
+            'Accept' => 'application/json',
+        ])->get(env('OHENTPAY_BASE_URL') . '/balances');
+    
+        if ($response->successful()) {
+            return $response->json();
+        }
+    
+        return [
+            'error' => true,
+            'message' => $response->body(),
+            'status' => $response->status(),
+        ];
+    }
+    
+
+    public function getBalances()
+    {
+        $data = $this->fetchBalances();
+        return response()->json($data);
+    }
+
+
+    public function createBalance(Request $request)
+    {
+        // Validate input (optional, but recommended)
+        $request->validate([
+            'name' => 'required|string',
+            'currency' => 'required|string',
+            // 'amount' => 'required|numeric',
+        ]);
+    
+        $payload = $request->only(['name', 'currency', 'amount']);
+    
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post(env('OHENTPAY_BASE_URL') . '/balances', $payload);
+    
+        if ($response->successful()) {
+            return response()->json($response->json());
+        } else {
+            return response()->json([
+                'error' => true,
+                'message' => $response->body(),
+                'status' => $response->status(),
+            ], $response->status());
+        }
+    }
+
+
+
+
+
+
 }

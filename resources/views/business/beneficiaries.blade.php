@@ -85,12 +85,16 @@
                                         data-name="{{ $beneficia->account_name }}"
                                         data-bank="{{ $beneficia->bank }}"
                                         data-account="{{ $beneficia->account_number }}"
-                                        data-country="{{ optional($beneficia->country)->name ?? 'N/A' }}"
+                                        data-country="{{ $beneficia->country }}"
+                                        data-alias="{{ $beneficia->alias }}"
+                                        data-type="{{ $beneficia->type }}"
+                                        data-currency="{{ $beneficia->currency }}"
                                         onclick="showDetails(this)">
+
                                         <td class="px-3 py-3">{{ $beneficia->account_name }}</td>
                                         <td class="px-3 py-3">{{ $beneficia->bank }}</td>
                                         <td class="px-3 py-3">{{ $beneficia->account_number }}</td>
-                                        <td class="px-3 py-3">{{ optional($beneficia->country)->name ?? 'N/A' }}</td>
+                                        <td class="px-3 py-3">{{ $beneficia->country }}</td>
                                     </tr>
                                     @empty
                                     <tr>
@@ -108,18 +112,43 @@
                         <section id="beneficiary-details" class="w-full md:w-96 border-l border-gray-200 p-6 md:p-10">
                             <h3 class="font-semibold text-gray-900 mb-6">Beneficiary Details</h3>
                             <h2 id="detail-name" class="text-3xl font-normal mb-6">Select a beneficiary</h2>
+                            
                         
                             <input type="hidden" id="beneficia-id" />
-                        
+
                             <div class="mb-6">
                                 <p class="text-sm text-gray-500 mb-1">Bank</p>
-                                <p id="detail-bank" class="text-base font-normal text-gray-900">-</p>
+                                <p id="detail-bank-name" class="text-base font-normal text-gray-900">-</p>
                             </div>
-                        
+                            
                             <div class="mb-6">
-                                <p class="text-sm text-gray-400 mb-1">Bank country</p>
-                                <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
+                                <p class="text-sm text-gray-500 mb-1">Alias</p>
+                                <p id="detail-alias" class="text-base font-normal text-gray-900">-</p>
                             </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500 mb-1">Account Type</p>
+                                <p id="detail-account-type" class="text-base font-normal text-gray-900">-</p>
+                            </div>
+                            
+                            {{-- <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Country</p>
+                                <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
+                            </div> --}}
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Country</p>
+                                <div class="flex items-center gap-2">
+                                    <img id="detail-country-flag" src="" alt="Country Flag" class="w-5 h-auto rounded shadow" />
+                                    <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
+                                </div>
+                            </div>
+                            
+
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Currency</p>
+                                <p id="detail-currency" class="text-base font-semibold text-gray-900">-</p>
+                            </div>
+                            
                         
                             <div class="mb-10 flex items-center gap-2">
                                 <div>
@@ -134,11 +163,11 @@
                             </div>
                         
                             <div class="flex gap-4">
-                                <a id="edit-link"
+                                {{-- <a id="edit-link"
                                 href="#"
                                 class="inline-flex items-center gap-2 rounded-lg bg-blue-100 px-6 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                 <i class="fas fa-pen"></i> Edit
-                                </a>
+                                </a> --}}
 
                                 <button type="button"
                                     onclick="deleteBeneficia()"
@@ -156,20 +185,34 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
 
     <script>
-    function showDetails(row) {
-        const id = row.dataset.id;
+function showDetails(row) {
+    const id = row.dataset.id;
+    const countryCode = (row.dataset.country || '-').toUpperCase();
 
-        // Update text details
-        document.getElementById('beneficia-id').value = id;
-        document.getElementById('detail-name').textContent = row.dataset.name;
-        document.getElementById('detail-bank').textContent = row.dataset.bank;
-        document.getElementById('detail-account').textContent = row.dataset.account;
-        document.getElementById('detail-country').textContent = row.dataset.country;
+    // Automatically get country name from code using Intl API
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const countryName = regionNames.of(countryCode) || countryCode;
 
-        // Update the edit link
-        const editUrl = `{{ url('beneficias') }}/${id}/edit`;
-        document.getElementById('edit-link').href = editUrl;
-    }
+    document.getElementById('beneficia-id').value = id;
+    document.getElementById('detail-name').textContent = row.dataset.name;
+    document.getElementById('detail-bank-name').textContent = row.dataset.bank;
+    document.getElementById('detail-account').textContent = row.dataset.account;
+    document.getElementById('detail-country').textContent = countryName;
+    document.getElementById('detail-alias').textContent = row.dataset.alias || '-';
+    document.getElementById('detail-account-type').textContent = row.dataset.type || '-';
+    document.getElementById('detail-currency').textContent = row.dataset.currency || '-';
+
+    // Set country flag
+    const flagImg = document.getElementById('detail-country-flag');
+    flagImg.src = `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`;
+    flagImg.alt = `${countryName} Flag`;
+
+    // Edit URL
+    const editUrl = `{{ url('beneficias') }}/${id}/edit`;
+    document.getElementById('edit-link').href = editUrl;
+}
+
+
 
     function copyAccountNumber() {
         const number = document.getElementById('detail-account').textContent;
@@ -179,7 +222,7 @@
     }
 
     
-        function deleteBeneficia() {
+    function deleteBeneficia() {
     const id = document.getElementById('beneficia-id').value;
     if (!id) {
         Swal.fire({
@@ -215,7 +258,8 @@
                 return response.json();
             })
             .then(data => {
-                document.getElementById(`beneficia-row-${id}`).remove();
+                // Safely remove the row if it exists
+                document.getElementById(`beneficia-row-${id}`)?.remove();
 
                 // Reset detail panel
                 document.getElementById('beneficia-id').value = '';
@@ -247,6 +291,7 @@
         }
     });
 }
+
 
     </script>
 
