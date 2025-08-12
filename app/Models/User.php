@@ -21,6 +21,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'country',
+        'countries_id',
         'business_name',
         'registration_number',
         'incorporation_date',
@@ -44,7 +45,20 @@ class User extends Authenticatable
         'email_verified_status',
         'email_verification_attempts',
         'forget_verification_otp',
-        'forgot_password_otp_expires_at'
+        'forgot_password_otp_expires_at',
+        'currency',
+        'balance',
+        'default_currency',
+        'default_currency_balance',
+        'bvn_status',
+        'cac_certificate',
+        'cac_status',
+        'valid_id',
+        'valid_id_status',
+        'tin',
+        'tin_status',
+        'utility_bill',
+        'utility_bill_status'
     ];
 
     /**
@@ -67,6 +81,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'addresses' => 'array',
         ];
     }
+
+    public function balances()
+{
+    return $this->hasMany(Balance::class);
+}
+
 }
