@@ -8,17 +8,30 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+
+
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
-    
+
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
-                $token = $user->createToken('API Token')->plainTextToken;
-                $filteredUser = [
+
+            if ($user->email_verified_status !== 'yes') {
+                Auth::logout(); 
+                return response()->json([
+                    'message' => 'Email not verified. Please verify your email.',
+                    'status' => 'unverified',
+                    'verify_url' => url("/api/auth/verify-email/{$user->email}"),
+                ], 403);
+            }
+
+            $token = $user->createToken('API Token')->plainTextToken;
+
+            $filteredUser = [
                 'id' => $user->id,
                 'business_name' => $user->business_name,
                 'registration_number' => $user->registration_number,
@@ -37,12 +50,12 @@ class LoginController extends Controller
                 'typeofuser' => $user->typeofuser,
                 'bvn' => $user->bvn,
                 'email' => $user->email,
-                'email_verified_status'=> $user->email_verified_status,
-                'forgot_password_token'=> $user->forgot_password_token,
-                'created_at'=> $user->created_at,
-                'updated_at'=> $user->updated_at,
+                'email_verified_status' => $user->email_verified_status,
+                'forgot_password_token' => $user->forgot_password_token,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
             ];
-    
+
             return response()->json([
                 'data' => [
                     'user' => $filteredUser,
@@ -59,5 +72,6 @@ class LoginController extends Controller
             ], 401);
         }
     }
+
     
 }

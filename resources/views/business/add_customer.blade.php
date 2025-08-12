@@ -140,9 +140,11 @@
                                 class="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                                 <option selected disabled>Select country</option>
                                 @foreach($countries as $c)
-                                    <option value="{{ $c->id }}" data-code="{{ $c->code }}" {{ old('country_id', $customer->country_id) == $c->id ? 'selected' : '' }}>
-                                        {{ $c->name }}
-                                    </option>
+                                <option value="{{ $c->id }}" data-code="{{ $c->code }}"
+                                    {{ old('country_id', isset($customer) ? $customer->country_id : '') == $c->id ? 'selected' : '' }}>
+                                    {{ $c->name }}
+                                </option>
+                                
                                 @endforeach
                             </select>
                     
@@ -152,11 +154,11 @@
                                 class="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                                 <option selected disabled>Select your bank</option>
                                 @foreach($banks as $b)
-                                    <option value="{{ $b->name }}"
-                                        data-country="{{ $b->country_code }}"
-                                        {{ old('bank', $customer->bank) == $b->name ? 'selected' : '' }}>
-                                        {{ $b->name }}
-                                    </option>
+                                <option value="{{ $b->name }}" data-country="{{ $b->country_code }}"
+                                    {{ old('bank', isset($customer) ? $customer->bank : '') == $b->name ? 'selected' : '' }}>
+                                    {{ $b->name }}
+                                </option>
+                                
                                 @endforeach
                             </select>
                             <div class="flex flex-col gap-1">

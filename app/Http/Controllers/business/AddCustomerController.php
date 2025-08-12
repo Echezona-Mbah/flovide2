@@ -55,9 +55,9 @@ class AddCustomerController extends Controller
         $user = auth()->user();
         $countries = Countries::all();
         $banks = Bank::all();
-        $customers = Customer::where('user_id', $user->id)
-        ->paginate(5);
-        return view('business.add_customer',compact('countries', 'banks','customers'));
+        $customers = Customer::where('user_id', $user->id)->paginate(5);
+        $customer = null; // Add this line
+        return view('business.add_customer', compact('countries', 'banks', 'customers', 'customer'));
     }
 
     public function store(Request $request)

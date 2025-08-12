@@ -22,14 +22,37 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+    // public function store(LoginRequest $request): RedirectResponse
+    // {
+    //     $request->authenticate();
 
-        session()->flash('status', 'Login successful!');
+    //     session()->flash('status', 'Login successful!');
 
-        return redirect()->intended(route('dashboard', absolute: false));
-    }
+    //     return redirect()->intended(route('dashboard', absolute: false));
+    // }
+
+        public function store(LoginRequest $request): RedirectResponse
+        {
+            $request->authenticate();
+
+            $user = auth()->user(); // Use the authenticated user
+
+            if ($user->email_verified_status !== 'yes') {
+            $email = $user->email;
+            Auth::logout();
+
+            return redirect()->route('verifyemail')->with([
+                'error' => 'You must verify your email before logging in.',
+                'user_email' => $email
+            ]);
+        }
+
+
+    session()->flash('status', 'Login successful!');
+    return redirect()->intended(route('dashboard', absolute: false));
+}
+
+
 
     /**
      * Destroy an authenticated session.
