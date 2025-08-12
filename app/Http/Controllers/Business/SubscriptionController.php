@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
+use App\Models\Countries;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +11,30 @@ use Illuminate\Support\Facades\Validator;
 
 class SubscriptionController extends Controller
 {
+    public function index(Request $request)
+    {
+        
+        $subscriptions = Subscription::where('user_id', $request->user()?->id ?? auth()->id())->get();
+        
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => $subscriptions
+            ], 200);
+        }
+
+        return view('business.subscription', compact('subscriptions')); // Optional Blade view
+    }
+
+
+    public function create() {
+        $countries = Countries::all();
+
+        return view('business.add_subscription',compact('countries'));
+    }
+    
+
+
     public function store(Request $request)
     {
         $rules = [
@@ -37,6 +62,7 @@ class SubscriptionController extends Controller
         if ($request->hasFile('cover_image')) {
             $imagePath = $request->file('cover_image')->store('subscriptions', 'public');
         }
+        // dd($request->all());die();
 
         $subscription = Subscription::create([
             'user_id' => $request->user()?->id ?? auth()->id(),
@@ -55,22 +81,18 @@ class SubscriptionController extends Controller
             ], 201);
         }
 
-        return redirect()->route('subscriptions.create')->with('success', 'Subscription created successfully.');
+        return redirect()->route('add_subscription.create')->with('success', 'Subscription created successfully.');
     }
 
-
-    public function index(Request $request)
+    public function edit($id)
     {
-        $subscriptions = Subscription::where('user_id', $request->user()?->id ?? auth()->id())->get();
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'data' => $subscriptions
-            ], 200);
-        }
-
-        return view('subscriptions.index', compact('subscriptions')); // Optional Blade view
+        $countries = Countries::all();
+        $subscription = Subscription::findOrFail($id);
+    
+        return view('business.edit_subscription', compact('countries', 'subscription'));
     }
+    
+
 
 
     public function update(Request $request, $id)
@@ -87,7 +109,6 @@ class SubscriptionController extends Controller
         ];
 
         $validator = Validator::make($request->all(), $rules);
-
         if ($validator->fails()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
@@ -110,7 +131,7 @@ class SubscriptionController extends Controller
             return response()->json(['message' => 'Subscription updated', 'data' => $subscription], 200);
         }
 
-        return redirect()->route('subscriptions.index')->with('success', 'Subscription updated successfully.');
+        return redirect()->route('subscriptions')->with('success', 'Subscription updated successfully.');
     }
 
     public function destroy(Request $request, $id)
