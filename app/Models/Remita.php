@@ -10,12 +10,18 @@ class Remita extends Model
 {
      use HasFactory, SoftDeletes;
 
+    protected $table = 'remita';
     protected $fillable = [
+        'user_id',
+        'cover_image',
         'title',
         'amount',
         'rrr',
         'service_type',
         'subaccount',
+        'subaccount_name',
+        'subaccount_number',
+        'percentage',
         'currency',
         'visibility',
     ];

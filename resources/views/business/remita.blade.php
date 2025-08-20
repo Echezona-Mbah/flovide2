@@ -1,15 +1,7 @@
 @include('business.head')
 
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-    <!-- Mobile menu button -->
-    <header class="bg-[#E9E9E9] p-4 flex items-center justify-between md:hidden">
-        <button aria-label="Open sidebar" id="openSidebarBtn" class="text-[#1E1E1E] focus:outline-none">
-            <i class="fas fa-bars text-2xl"></i>
-        </button>
-        <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain"
-            height="40" src="../../asserts/dashboard/admin-logo.svg" width="120" />
-        <div></div>
-    </header>
+    
 
     <!-- Mobile menu button -->
     @include('business.header')
@@ -28,8 +20,7 @@
             @include('business.header_notifical')
         </header>
         <section class=" relative w-full">
-            <section
-                class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
+            <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
                 <div class="max-w-[1200px] mx-auto">
                   
                     <div class=" rounded-2xl p-6">
@@ -51,352 +42,65 @@
                         </div>
                         <!-- Cards Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-20">
-                            <!-- Card 1 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div>
-                                        <img alt="Satellite dish with blue sky background"
-                                            class="w-10 h-10 rounded-lg object-cover" height="56"
-                                            src="/src/asserts/dashboard/img1.png" width="56" />
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">30 USD</div>
+                            
+                            @foreach ($remitas as $remita )
+                                <!-- Card 1 -->
+                                <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div>
+                                            @php
+                                                if($remita->cover_image != null){
+                                                    $coverImage = asset('storage/' . $remita->cover_image);
+                                                }else{
+                                                    $coverImage = asset('asserts/dashboard/img1.png');
+                                                }
+                                            @endphp
+                                            <img alt="Satellite dish with blue sky background" class="w-10 h-10 rounded-lg object-cover" height="56" src="{{ $coverImage }}" width="56" />
                                         </div>
-                                        <div
-                                            class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-md leading-tight">Upcoming Food Delivery Subscriptions
-                                    </h3>
-                                </div>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
+                                        <div>
+                                            <div class="flex justify-between items-start">
+                                                <div class="text-lg font-extrabold">{{ number_format($remita->amount, 2) . ' ' . $remita->currency }}</div>
+                                            </div>
+                                            <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div>
                                         </div>
-                                        <div
-                                            class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 2 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div>
-                                        <img alt="Stack of pancakes with strawberries and syrup"
-                                            class="w-10 h-10 rounded-lg object-cover" height="56"
-                                            src="/src/asserts/dashboard/img2.png" width="56" />
                                     </div>
                                     <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">5 GBP</div>
-                                        </div>
-                                        <div
-                                            class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
+                                        <h3 class="font-semibold text-md leading-tight">{{ ucfirst($remita->title) }}</h3>
                                     </div>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-md leading-tight">Delicious Meals Delivered to You
-                                    </h3>
-                                </div>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div
-                                            class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 3 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div>
-                                        <img alt="Chocolate layered cake slice on white plate"
-                                            class="w-10 h-10 rounded-lg object-cover" height="56"
-                                            src="/src/asserts/dashboard/img3.png" width="56" />
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">100 GBP</div>
-                                        </div>
-                                        <div
-                                            class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Yearly</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-md leading-tight">Personalized Meal Deliveries for
-                                        Events</h3>
-                                </div>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div
-                                            class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 4 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
                                     <div
-                                        class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
-                                        <img src="/src/asserts/dashboard/copy.png" alt="">
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">1,000 NGN</div>
+                                        class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
+                                        <div class="flex gap-4 items-center">
+                                            <div class="flex items-center gap-1">
+                                                <img src=" {{ asset("asserts/dashboard/person.png") }}" alt="">
+                                                {{ $payment_count[$remita->id] ?? 0  }}
+                                            </div>
+                                            <div class="bg-[#F9F7E5] {{ $remita->visibility == "Private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
+                                                @if ($remita->visibility == 'Private')
+                                                    <img src="/src/asserts/dashboard/note.png" alt="">
+                                                @else
+                                                    <i class="fas fa-check text-[10px]"></i>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <div
-                                            class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
-                                    </div>
-                                </div>
-
-                                <h3 class="font-semibold text-md leading-tight">Tips for Efficient Remote Food Delivery</h3>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
+                                        <div class="flex gap-4">
+                                            <button class="{{ $remita->visibility == 'Private' ? 'hidden' : '' }}" aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                            <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </button>
                                         </div>
-                                        <div
-                                            class="bg-[#F9F7E5] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                          <img src="/src/asserts/dashboard/note.png" alt="">
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                    
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 5 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
-                                        <img src="/src/asserts/dashboard/copy.png" alt="">
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">5 GBP</div>
-                                        </div>
-                                        <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
-                                    </div>
-                                </div>
-                                
-                                <h3 class="font-semibold text-md leading-tight">Sustainable Food Delivery for a Greener...</h3>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div
-                                            class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 6 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div>
-                                        <img alt="Chocolate layered cake slice on white plate"
-                                            class="w-10 h-10 rounded-lg object-cover" height="56"
-                                            src="/src/asserts/dashboard/img1.png"
-                                            width="56" />
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">5 GBP</div>
-                                        </div>
-                                        <div
-                                            class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-md leading-tight">Quick Guide to Modern Food
-                                        Delivery...</h3>
-                                </div>
-                                <div class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div class="bg-[#F9F7E5] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <img src="/src/asserts/dashboard/note.png" alt="">
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 7 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
-                                        <img src="/src/asserts/dashboard/copy.png" alt="">
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">5 GBP</div>
-                                        </div>
-                                        <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
-                                    </div>
-                                </div>
-
-                                <h3 class="font-semibold text-md leading-tight">Unique Food Delivery Ideas</h3>
-                                <div
-                                    class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div
-                                            class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card 8 -->
-                            <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
-                                <div class="flex justify-between items-center gap-4">
-                                    <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
-                                        <img src="/src/asserts/dashboard/copy.png" alt="">
-                                    </div>
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <div class="text-lg font-extrabold">5 GBP</div>
-                                        </div>
-                                        <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
                                     </div>
                                 </div>
                             
-                                <h3 class="font-semibold text-md leading-tight">Food Delivery Trends in Grocery...</h3>
-                                <div class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
-                                    <div class="flex gap-4 items-center">
-                                        <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
-                                            50
-                                        </div>
-                                        <div class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                            <i class="fas fa-check text-[10px]"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-link"></i>
-                                        </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                            <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Card 9 -->
+                            @endforeach
+                            
+
+                            
                             <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
                                 <div class="flex justify-between items-center gap-4">
                                     <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
-                                        <img src="/src/asserts/dashboard/copy.png" alt="">
+                                        <img src="asserts/dashboard/copy.png" alt="">
                                     </div>
                                     <div>
                                         <div class="flex justify-between items-start">
@@ -411,7 +115,7 @@
                                 <div class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
                                     <div class="flex gap-4 items-center">
                                         <div class="flex items-center gap-1">
-                                            <img src="../../asserts/dashboard/person.png" alt="">
+                                            <img src=" {{ asset("asserts/dashboard/person.png") }}" alt="">
                                             50
                                         </div>
                                         <div class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
@@ -419,12 +123,10 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-4">
-                                        <button aria-label="Link button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                        <button aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                             <i class="fas fa-link"></i>
                                         </button>
-                                        <button aria-label="Next button"
-                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                        <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                             <i class="fas fa-chevron-right"></i>
                                         </button>
                                     </div>
@@ -435,6 +137,7 @@
                     </div>
                 </div>
             </section>
+        </section>
     </main>
     <script>
         const sidebar = document.getElementById('sidebar');
