@@ -24,7 +24,7 @@
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
                 Refunds 
-            </h1>            
+            </h1>
             @include('business.header_notifical')
         </header>
         <section class=" relative w-full">
@@ -507,13 +507,21 @@
         const currencySelect = document.getElementById("currency");
         const currencies = [
             { code: "", name: "Select Currency" },
-            { code: "NGN", name: "Nigerian Naira" },
-            { code: "USD", name: "US Dollar" },
+            { code: "USD", name: "United States Dollar" },
             { code: "EUR", name: "Euro" },
-            { code: "GBP", name: "British Pound" },
-            { code: "KES", name: "Kenyan Shilling" },
+            { code: "JPY", name: "Japanese Yen" },
+            { code: "GBP", name: "British Pound Sterling" },
+            { code: "AUD", name: "Australian Dollar" },
+            { code: "CAD", name: "Canadian Dollar" },
+            { code: "CHF", name: "Swiss Franc" },
+            { code: "CNY", name: "Renminbi (Chinese Yuan)" },
+            { code: "INR", name: "Indian Rupee" },
+            { code: "NGN", name: "Nigerian Naira" },
+            { code: "GHS", name: "Ghanaian Cedi" },
             { code: "ZAR", name: "South African Rand" },
-            { code: "GHS", name: "Ghanaian Cedi" }
+            { code: "KES", name: "Kenyan Shilling" },
+            { code: "XOF", name: "West African CFA Franc" },
+            { code: "XAF", name: "Central African CFA Franc" },
         ];
 
         currencies.forEach(currency => {
@@ -521,6 +529,15 @@
             option.value = currency.code;
             option.textContent = currency.code ? `${currency.code} — ${currency.name}` : currency.name;
             currencySelect.appendChild(option);
+        });
+        document.addEventListener("DOMContentLoaded", () => { 
+            // Enable searchable select
+            if (!currencySelect.tomselect) {
+                new TomSelect("#currency", {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" }
+                });
+            }
         });
 
         // Open modal
@@ -560,7 +577,7 @@
                 formData.append('method', method);
                 formData.append('reason', reason);
                 formData.append('currency', currency);
-                fetch('{{ route("refund.store"); }}', {
+                fetch('{{ route("refund.store") }}', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -656,6 +673,10 @@
             });
         });
     </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
 </body>
 
 </html>
