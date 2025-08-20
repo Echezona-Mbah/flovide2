@@ -1,15 +1,6 @@
 @include('business.head')
 
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-  <!-- Mobile menu button -->
-  <header class="bg-[#E9E9E9] p-4 flex items-center justify-between md:hidden">
-    <button aria-label="Open sidebar" id="openSidebarBtn" class="text-[#1E1E1E] focus:outline-none">
-      <i class="fas fa-bars text-2xl"></i>
-    </button>
-    <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain" height="40"
-      src="../../asserts/dashboard/admin-logo.svg" width="120" />
-    <div></div>
-  </header>
 
   <!-- Mobile menu button -->
   @include('business.header')
@@ -28,11 +19,9 @@
       @include('business.header_notifical')
     </header>
     <section class=" relative w-full ">
-      <section
-        class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
+      <section class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
         <header class="flex items-center gap-4 mb-8">
-          <button aria-label="Back"
-            class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
+          <button aria-label="Back" class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
             <i class="fas fa-chevron-left text-lg"></i>
           </button>
           <h1 class="text-xl font-semibold text-gray-900 select-none">Page details</h1>
@@ -41,8 +30,7 @@
               <span class="w-3 h-3 rounded-full bg-green-700 block"></span>
               <span class="text-gray-700 text-sm select-none">Active</span>
             </div>
-            <button type="button"
-              class="md:flex hidden items-center gap-2 rounded-lg border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button type="button" class="md:flex hidden items-center gap-2 rounded-lg border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
               <i class="far fa-copy"></i>
               Copy Link
             </button>
