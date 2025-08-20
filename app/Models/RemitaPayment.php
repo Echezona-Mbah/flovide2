@@ -14,6 +14,7 @@ class RemitaPayment extends Model
     /**
      * The attributes that are mass assignable.
      */
+    protected $table = 'remita_payments';
     protected $fillable = [
         'remita_id',
         'name',
