@@ -15,11 +15,20 @@ class Subaccount extends Model
         'account_name',
         'bank_name',
         'bank_country',
-        'default'
+        'currency',
+        'bic',
+        'iban',
+        'city',
+        'state',
+        'zipcode',
+        'recipient_address',
+        'default',
     ];
 
     protected $casts = [
         'account_number' => 'encrypted',
+        'bic' => 'encrypted',
+        'iban' => 'encrypted',
     ];
 
 

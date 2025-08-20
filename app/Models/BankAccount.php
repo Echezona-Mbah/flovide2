@@ -20,10 +20,24 @@ class BankAccount extends Model
         'account_number',
         'bank_country',
         'bank_name',
+        'currency',
+        'bic',
+        'iban',
+        'city',
+        'state',
+        'zipcode',
+        'recipient_address',
+        'type',
     ];
+    protected $attributes = [
+        'currency' => 'USD',
+    ];
+
 
     protected $casts = [
         'account_number' => 'encrypted',
+        'iban' => 'encrypted',
+        'bic' => 'encrypted',
     ];
 
     public function user()

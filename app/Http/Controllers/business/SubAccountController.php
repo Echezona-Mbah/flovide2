@@ -38,8 +38,26 @@ class SubAccountController extends Controller
         $validated = $request->validate([
             'account_number' => ['required', 'regex:/^\d{10}$/'],
             'account_name' => 'required|string',
-            'bank_name' => 'required|string',
+            'bank_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\pL\s]+$/u',
+                function ($attribute, $value, $fail) {
+                    if (preg_match('/^\d+$/', $value)) {
+                        $fail('The bank name cannot be just numbers.');
+                    }
+                }
+            ],
             'bank_country' => 'required|string',
+            'bank_country' => 'required|string|size:2', // ISO 2-letter country code
+            'currency' => 'required|string|size:3', // ISO 4217
+            'bic' => 'nullable|string|regex:/^[A-Za-z0-9]{8,11}$/',
+            'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'zipcode' => 'nullable|string|max:20',
+            'recipient_address' => 'nullable|string|max:255',
         ]);
 
         $isFirst = Subaccount::where('user_id', Auth::id())->count() === 0;
@@ -50,11 +68,19 @@ class SubAccountController extends Controller
             'account_name' => $validated['account_name'],
             'bank_name' => $validated['bank_name'],
             'bank_country' => $validated['bank_country'],
+            'currency' => $validated['currency'],
+            'bic' => $validated['bic'] ? Crypt::encryptString($validated['bic']) : null,
+            'iban' => $validated['iban'] ? Crypt::encryptString($validated['iban']) : null,
+            'city' => $validated['city'] ?? null,
+            'state' => $validated['state'] ?? null,
+            'zipcode' => $validated['zipcode'] ?? null,
+            'recipient_address' => $validated['recipient_address'] ?? null,
             'default' => $isFirst,
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
+                'status' => 'success',
                 'message' => 'Subaccount created successfully.',
                 'data' => $subaccount
             ], 201);

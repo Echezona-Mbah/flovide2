@@ -50,15 +50,6 @@
                                 @csrf
                                 @method('PUT')
                         
-                                <div>
-                                    <label for="bank" class="block text-gray-600 text-sm mb-1 font-medium">Bank</label>
-                                    <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                        <option value="{{ old('bank_name', $bankAccount->bank_name) }}">{{ old('bank_name', $bankAccount->bank_name) }}</option>
-                                        <option>GTBank</option>
-                                        <option>UBA</option>
-                                        <option>Zenith</option>
-                                    </select>
-                                </div>
                         
                                 <div>
                                     <label for="country" class="block text-gray-600 text-sm mb-1 font-medium">
@@ -66,9 +57,27 @@
                                     </label>
                                     <select id="country" name="bank_country" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                                         <option value="{{ old('bank_country', $bankAccount->bank_country) }}">{{ old('bank_country', $bankAccount->bank_country) }}</option>
-                                        <option>Nigeria</option>
-                                        <option>Ghana</option>
-                                        <option>USA</option>
+                                        @foreach($countries as $country)
+                                            <option 
+                                             value="{{ $country['country_name'] }}"
+                                             data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
+                                             data-currency="{{ $country['default_currency'] }}"
+                                            >
+                                                {{ $country['country_name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="bank" class="block text-gray-600 text-sm mb-1 font-medium">Bank</label>
+                                    <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                        <option value="{{ old('bank_name', $bankAccount->bank_name) }}">{{ old('bank_name', $bankAccount->bank_name) }}</option>
+                                        @foreach($banks as $bank)
+                                            <option value="{{ $bank->name }}" data-code="{{ $bank->country_code  }}">
+                                                {{ $bank->name }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                         
@@ -76,7 +85,7 @@
                                     <label for="account-number" class="block text-gray-600 text-sm mb-1 font-medium">
                                         Bank account number
                                     </label>
-                                    <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($bankAccount->account_number)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($bankAccount->account_number ?: $bankAccount->iban)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                 </div>
                         
                                 <div>
@@ -87,8 +96,7 @@
                                 </div>
                         
                                 <div class="flex gap-4">
-                                    <button type="submit"
-                                        class="bg-blue-300 text-blue-800 font-semibold px-6 py-2 rounded-full text-sm hover:bg-blue-400 transition">
+                                    <button type="submit" class="bg-blue-300 text-blue-800 font-semibold px-6 py-2 rounded-full text-sm hover:bg-blue-400 transition">
                                         Update Account
                                     </button>
                                     <a href="{{ route("business.payouts") }}">
@@ -127,11 +135,12 @@
                                             </div>
                                     @endif
                                         <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                            {{ Crypt::decryptString($account->account_number) }}
+                                            {{-- {{ Crypt::decryptString($account->account_number) }} --}}
+                                            {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
                                         </span>
                                         <span
                                             class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
-                                            {{ $account->bank_name }}
+                                            {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
                                         </span>
                                         @if($account->default)
                                             <span class="text-xs font-semibold text-[#00875F] bg-[#E6F4F1] rounded-full py-1 px-2 flex items-center gap-1 whitespace-nowrap">
@@ -161,7 +170,20 @@
 
     <!-- Main content end -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
+        //for searching of country name
+        document.addEventListener("DOMContentLoaded", () => { 
+            const countrySelect = document.querySelector("#country");
+            // Enable searchable select
+            if (!countrySelect.tomselect) {
+                new TomSelect("#country", {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" }
+                });
+            }
+        });
+
         document.querySelectorAll('.set-default-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const id = this.dataset.id;  // Get the account ID

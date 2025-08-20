@@ -5,8 +5,10 @@ namespace App\Http\Controllers\business;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\BankAccount;
+use App\Models\Bank;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class addBankAccountController extends Controller
 {
@@ -20,6 +22,15 @@ class addBankAccountController extends Controller
     {
         $user = Auth::user();
         $bankAccounts = BankAccount::where('user_id', $user->id)->get();
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+        $countries = [];
+
+        if ($response->successful()) {
+            $countries = $response->json();
+            // dd($countries);
+        }
+        // Fetch all banks
+        $banks = Bank::all();
 
         if ($request->expectsJson()) {
             if ($bankAccounts->isEmpty()) {
@@ -27,46 +38,80 @@ class addBankAccountController extends Controller
             }
 
             return response()->json([
-                'message' => 'Bank accounts retrieved successfully.',
+                'status' => 'success',
+                'message' => 'Bank accounts and countries retrieved successfully.',
                 'data' => $bankAccounts,
+                'countries' => $countries,
             ], 200);
         }
 
-        return view('business.payouts', ['bankAccounts' => $bankAccounts]);
+        return view('business.payouts', ['bankAccounts' => $bankAccounts, 'countries' => $countries, 'banks' => $banks]);
     }
 
 
     public function store(Request $request)
     {
+        $isDynamic = $request->input('formDynamicFields') === 'true';
 
-        $validated = $request->validate([
-            'account_name' => 'required|string|max:255',
-            'account_number' => ['required', 'regex:/^\d{10}$/'],
-            'bank_country' => 'required|string|max:10',
-            'bank_name' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[\pL\s]+$/u',
-                function ($attribute, $value, $fail) {
-                    if (preg_match('/^\d+$/', $value)) {
-                        $fail('The bank name cannot be just numbers.');
+        if (!$isDynamic) {
+            // Static fields (NGN, GHS, KES accounts)
+            $validated = $request->validate([
+                'account_name' => 'required|string|max:255',
+                'account_number' => ['required', 'regex:/^\d{10}$/'],
+                'bank_country' => 'required|string|max:10',
+                'bank_name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    'regex:/^[\pL\s]+$/u',
+                    function ($attribute, $value, $fail) {
+                        if (preg_match('/^\d+$/', $value)) {
+                            $fail('The bank name cannot be just numbers.');
+                        }
                     }
-                }
-            ],
-        ]);
+                ],
+                'type' => 'required|string|max:10',
+                'currency' => 'nullable|string|size:3',
+                'bic' => 'nullable|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/',
+                'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zipcode' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:255',
+            ]);
+        } else {
+            // Dynamic fields (AU_AUD, US_USD, etc.)
+            $validated = $request->validate([
+                'bank_country' => 'required|string|max:10',
+                'currency' => 'required|string|size:3', // ISO 4217 currency code
+                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
+                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zipcode' => 'required|string|max:20',
+                'address' => 'required|string|max:255',
+                'type' => 'required|string|max:10',
+            ]);
+        }
 
         $user = Auth::user();
-        // dd($user);
-        // Check if user already has a bank account
+
         $isFirst = BankAccount::where('user_id', $user->id)->count() === 0;
 
         $bankAccount = BankAccount::create([
             'user_id' => $user->id,
-            'account_name' => $validated['account_name'],
-            'account_number' => Crypt::encryptString($validated['account_number']),
-            'bank_country' => $validated['bank_country'],
-            'bank_name' => $validated['bank_name'],
+            'account_name' => $validated['account_name'] ?? null,
+            'account_number' => isset($validated['account_number']) ? Crypt::encryptString($validated['account_number']) : "",
+            'bank_country' => $validated['bank_country'] ?? "",
+            'bank_name' => $validated['bank_name'] ?? "",
+            'currency' => $validated['currency'],
+            'bic' => isset($validated['bic']) ? Crypt::encryptString($validated['bic']) : null,
+            'iban' => isset($validated['iban']) ? Crypt::encryptString($validated['iban']) : null,
+            'city' => $validated['city'] ?? null,
+            'state' => $validated['state'] ?? null,
+            'zipcode' => $validated['zipcode'] ?? null,
+            'recipient_address' => $validated['address'] ?? null,
+            'type' => $validated['type'] ?? null,
             'default' => $isFirst
         ]);
 
@@ -76,11 +121,12 @@ class addBankAccountController extends Controller
             'data' => [
                 'id' => $bankAccount->id,
                 'account_name' => $bankAccount->account_name,
-                'account_number' => substr($validated['account_number'], -4),
+                'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
                 'bank_name' => $bankAccount->bank_name,
             ]
         ], 201);
     }
+
 
     public function destroy($id)
     {
@@ -174,9 +220,17 @@ class addBankAccountController extends Controller
         // $bankAccount = BankAccount::findOrFail($id);
         $bankAccount = BankAccount::where('id', $id)
             ->where('user_id', Auth::id())
-            ->whereNull('deleted_at')
-            ->firstOrFail();
+            ->whereNull('deleted_at')->firstOrFail();
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+        $countries = [];
 
+        if ($response->successful()) {
+            $countries = $response->json();
+            // dd($countries);
+        }
+
+        // Fetch all banks
+        $banks = Bank::all();
 
         if ($bankAccount->user_id !== Auth::id()) {
             abort(403, 'Unauthorized access.');
@@ -184,7 +238,7 @@ class addBankAccountController extends Controller
 
         $allUserAccounts = BankAccount::where('user_id', Auth::id())->get();
 
-        return view('business.editPayout', compact('bankAccount', 'allUserAccounts'));
+        return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
     }
 
     public function setDefault(Request $request, $id)
@@ -209,4 +263,67 @@ class addBankAccountController extends Controller
             'default_account_id' => $account->id,
         ]);
     }
+
+
+    public function fetchBanks(Request $request)
+    {
+        $countryCurrency = $request->get('countryCurrency'); // Default to NG
+        $currency = $request->get('currency'); // Default to NGN
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+                'country' => $countryCurrency,
+                'currency' => $currency
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'fields' => $response->json()
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
+    }
+
+    public function validatePayoutAccountName(Request $request)
+    {
+        $request->validate([
+            'country' => 'required|string',
+            'currency' => 'required|string',
+            'bank_id' => 'required|string',
+            'account_number' => 'required|string',
+        ]);
+
+        $payload = $request->only([
+            'country', 'currency', 'bank_id', 'account_number'
+        ]);
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->post(
+            rtrim(env('OHENTPAY_BASE_URL'), '/') . '/recipients/validate', $payload
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($response->json(), $response->status());
+        }
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payout account validated successfully.',
+                'data' => $response->json()
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid payout account.',
+            'data' => $response->json()
+        ], $response->status());
+    }
+
 }
