@@ -11,20 +11,21 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\business\addBankAccountController;
-use App\Http\Controllers\Business\AddBeneficiariesController;
-use App\Http\Controllers\Business\AddCustomerController;
-use App\Http\Controllers\Business\BillPaymentController;
-use App\Http\Controllers\Business\ChargebackController;
-use App\Http\Controllers\Business\ComplianceController;
+use App\Http\Controllers\business\AddBeneficiariesController;
+use App\Http\Controllers\business\AddCustomerController;
+use App\Http\Controllers\business\BillPaymentController;
+use App\Http\Controllers\business\ChargebackController;
+use App\Http\Controllers\business\ComplianceController;
 use App\Http\Controllers\business\SubAccountController;
-use App\Http\Controllers\Business\SubscriptionController;
+use App\Http\Controllers\business\SubscriptionController;
 use App\Http\Controllers\business\TransactionHistoryController;
 use App\Http\Controllers\business\InvoicesController;
 use App\Http\Controllers\business\refundsController;
+use App\Http\Controllers\business\RemitaController;
 use App\Http\Controllers\business\CreateBankController;
-use App\Http\Controllers\Business\OrganizationController;
-use App\Http\Controllers\Business\SendMoneyController;
-use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\business\OrganizationController;
+use App\Http\Controllers\business\SendMoneyController;
+use App\Http\Controllers\business\VirtualAccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -85,6 +86,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
     Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
     Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
+    Route::get('/fetch-banks', [addBankAccountController::class, 'fetchBanks'])->name('fetch.banks');
+    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
 
 
     //subaccount
@@ -112,7 +115,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
     Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
     Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
-
+    
+    //remita
+    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
+    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    
 
 
     // beneficias
