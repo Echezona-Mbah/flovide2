@@ -99,18 +99,18 @@
                         @endif
 
                         @if (session('api_error'))
-<script>
-    Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
-        title: @json(session('api_error')),
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-    });
-</script>
-@endif
+                            <script>
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: @json(session('api_error')),
+                                    showConfirmButton: false,
+                                    timer: 4000,
+                                    timerProgressBar: true,
+                                });
+                            </script>
+                        @endif
 
 
 
@@ -265,8 +265,7 @@
                                 <div>
                                     <label class="block font-medium mb-1">Bank</label>
                                     <div class="relative">
-                                        <button @click="bankOpen = !bankOpen" type="button"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
+                                        <button @click="bankOpen = !bankOpen" type="button" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
                                             <span x-text="selectedBankName || 'Select your bank'"></span>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -6276,27 +6275,27 @@
     
             validateAccount() {
                 const country = this.selectedCountry?.alpha2;
-    const currency = this.selectedCurrency;
-    const bankId = this.selectedBankId;
-    const accountNumber = this.accountNumber;
+                const currency = this.selectedCurrency;
+                const bankId = this.selectedBankId;
+                const accountNumber = this.accountNumber;
 
-    console.log('Validation values:', { country, currency, bankId, accountNumber });
+                console.log('Validation values:', { country, currency, bankId, accountNumber });
 
-    this.isLoading = true;
+                this.isLoading = true;
 
-    if (!country || !currency || !bankId || !accountNumber || accountNumber.length < 6) {
-        console.warn('Validation failed. Required data missing.', {
-            missing: {
-                country: !country,
-                currency: !currency,
-                bankId: !bankId,
-                accountNumber: !accountNumber || accountNumber.length < 6
-            }
-        });
-        this.accountName = '';
-        this.isLoading = false;
-        return;
-    }
+                if (!country || !currency || !bankId || !accountNumber || accountNumber.length < 6) {
+                    console.warn('Validation failed. Required data missing.', {
+                        missing: {
+                            country: !country,
+                            currency: !currency,
+                            bankId: !bankId,
+                            accountNumber: !accountNumber || accountNumber.length < 6
+                        }
+                    });
+                    this.accountName = '';
+                    this.isLoading = false;
+                    return;
+                }
 
     
                 fetch('/validate-account', {
