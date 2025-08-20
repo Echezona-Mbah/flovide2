@@ -61,7 +61,7 @@
                 </i>
                 Bills payment
             </a>
-            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="#">
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('remita.index')}}">
                 <i class="fas fa-exchange-alt text-base">
                 </i>
                 Remita
