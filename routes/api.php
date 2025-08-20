@@ -7,6 +7,9 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\business\SubAccountController;
+use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\business\refundsController;
+use App\Http\Controllers\business\RemitaController;
 use App\Http\Controllers\business\TransactionHistoryController;
 use App\Http\Controllers\business\AddBeneficiariesController;
 use App\Http\Controllers\business\AddCustomerController;
@@ -66,6 +69,23 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('business/update-subaccount/{id}', [SubAccountController::class, 'update']);
     Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
     Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
+    //invoices section
+    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+    //refund
+    Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
+    Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
+    Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
+    //remita
+    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
+    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+
     // api for transaction history
     Route::get('business/showTransactions', [TransactionHistoryController::class, 'showAllTransactions']);
     Route::get('business/userTransactions', [TransactionHistoryController::class, 'transaction']);
