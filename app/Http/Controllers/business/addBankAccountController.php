@@ -173,12 +173,33 @@ class addBankAccountController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'bank_name' => 'required|string',
-            'bank_country' => 'required|string',
-            'account_number' => ['required', 'regex:/^\d{10}$/'],
-            'account_name' => 'required|string',
-        ]);
+        $type = $request->input('type');
+        if(!$type) {
+            return response()->json(['message' => 'Account type is required.'], 400);
+        }
+        // Validate the request
+        if ($type === 'local') {
+            $request->validate([
+                'bank_name' => 'required|string|max:255',
+                'bank_country' => 'required|string|max:10',
+                'account_number' => ['required', 'regex:/^\d{10}$/'],
+                'account_name' => 'required|string|max:255',
+            ]);
+        } elseif ($type === 'foreign') {
+            $request->validate([
+                'bank_country' => 'required|string|max:10',
+                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
+                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
+                'account_name' => 'required|string|max:255',
+                'city' => 'required|string|max:25',
+                'state' => 'required|string|max:25',
+                'address' => 'required|string|max:255',
+                'zipcode' => 'required|string|max:20',
+            ]);
+
+        }else{
+            return response()->json(['message' => 'Invalid account type.'], 400);
+        }
 
         $bankAccount = BankAccount::find($id);
 
@@ -198,10 +219,16 @@ class addBankAccountController extends Controller
 
         // Update the bank account
         $bankAccount->update([
-            'bank_name' => $request->bank_name,
-            'bank_country' => $request->bank_country,
-            'account_number' => Crypt::encryptString($request->account_number),
-            'account_name' => $request->account_name
+            'bank_name' => $request->bank_name ?? "",
+            'bank_country' => $request->bank_country ?? "",
+            'account_number' => Crypt::encryptString($request->iban) ?? "",
+            'account_name' => $request->account_name ?? "",
+            'bic' => isset($request->bic) ? Crypt::encryptString($request->bic) : null,
+            'iban' => isset($request->iban) ? Crypt::encryptString($request->iban) : null,
+            'city' => $request->city ?? null,
+            'state' => $request->state ?? null,
+            'recipient_address' => $request->address ?? null,
+            'zipcode' => $request->zipcode ?? null,
         ]);
 
         if ($request->expectsJson()) {
@@ -237,6 +264,17 @@ class addBankAccountController extends Controller
         }
 
         $allUserAccounts = BankAccount::where('user_id', Auth::id())->get();
+
+        //api response
+        if (request()->expectsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Bank account retrieved successfully.',
+                'data' => $bankAccount,
+                'countries' => $countries,
+                'banks' => $banks,
+            ], 200);
+        }
 
         return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
     }
