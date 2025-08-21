@@ -22,6 +22,7 @@ class Subaccount extends Model
         'state',
         'zipcode',
         'recipient_address',
+        'type',
         'default',
     ];
 
