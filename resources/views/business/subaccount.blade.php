@@ -44,26 +44,34 @@
 
                         <form method="POST" action="{{ route('business.store') }}" class="space-y-6">
                             @csrf
-
-                            <div>
-                                <label for="bank" class="block text-gray-600 text-sm mb-1 font-semibold">Bank</label>
-                                <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                    <option value="" selected disabled>Select your bank</option>
-                                    <option value="GTB">GTB</option>
-                                    <option value="Zenith">Zenith</option>
-                                    <option value="UBA">UBA</option>
-                                </select>
-                            </div>
-                
+                            
                             <div>
                                 <label for="country" class="block text-gray-600 text-sm mb-1 font-semibold">
                                     In what country is your bank located?
                                 </label>
                                 <select id="country" name="bank_country" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                                     <option value="" selected disabled>Select country</option>
-                                    <option value="Nigeria">Nigeria</option>
-                                    <option value="Ghana">Ghana</option>
-                                    <option value="Kenya">Kenya</option>
+                                    @foreach($countries as $country)
+                                        <option 
+                                            value="{{ $country['country_name'] }}"
+                                            data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
+                                            data-currency="{{ $country['default_currency'] }}" data-alpha2="{{ $country['alpha2'] }}"
+                                        >
+                                            {{ $country['country_name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="bank" class="block text-gray-600 text-sm mb-1 font-semibold">Bank</label>
+                                <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <option value="" selected disabled>Select your bank</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{ $bank->name }}" data-code="{{ $bank->country_code  }}">
+                                            {{ $bank->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                 

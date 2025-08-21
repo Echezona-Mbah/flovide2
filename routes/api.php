@@ -63,9 +63,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('business/delete-account/{id}', [addBankAccountController::class, 'destroy']);
     Route::delete('business/delete-accounts', [addBankAccountController::class, 'destroyAll']);
     Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
+    Route::get('business/bank-account/{id}', [addBankAccountController::class, 'edit']);
     // api routes for sub accounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
+    Route::get('business/show-subaccount/{id}', [SubAccountController::class, 'edit']);
     Route::put('business/update-subaccount/{id}', [SubAccountController::class, 'update']);
     Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
     Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
