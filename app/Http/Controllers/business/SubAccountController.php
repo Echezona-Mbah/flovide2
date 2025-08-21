@@ -5,7 +5,9 @@ namespace App\Http\Controllers\business;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\Subaccount;
+use App\Models\Bank;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
 
 class SubAccountController extends Controller
@@ -15,19 +17,43 @@ class SubAccountController extends Controller
         $this->middleware('auth:sanctum');
     }
 
-    public function subaccount()
+    public function subaccount(Request $request)
     {
      
         $user = Auth::user();
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+        $countries = [];
+
+        if ($response->successful()) {
+            $countries = $response->json();
+            // dd($countries);
+        }
+        // Fetch all banks
+        $banks = Bank::all();
+        
+        if ($request->expectsJson()) {
+            if ($subaccounts->isEmpty()) {
+                return response()->json(['message' => 'You have not added any subaccounts yet.'], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Bank accounts and countries retrieved successfully.',
+                'data' => $subaccounts,
+                'countries' => $countries
+            ], 200);
+        }
 
         if ($subaccounts->isEmpty()) {
             session()->flash('info', 'You have not added any subaccounts yet.');
         }
-        // dd(' $user');
+        // dd(' $banks');
 
         return view('business.subaccount', [
-            'subaccounts' => $subaccounts
+            'subaccounts' => $subaccounts,
+            'countries' => $countries,
+            'banks' => $banks
         ]);
 
         
@@ -49,8 +75,9 @@ class SubAccountController extends Controller
                     }
                 }
             ],
+            'type' => 'required|string|max:10',
             'bank_country' => 'required|string',
-            'bank_country' => 'required|string|size:2', // ISO 2-letter country code
+            // 'bank_country' => 'required|string|size:2', // ISO 2-letter country code
             'currency' => 'required|string|size:3', // ISO 4217
             'bic' => 'nullable|string|regex:/^[A-Za-z0-9]{8,11}$/',
             'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
@@ -75,6 +102,7 @@ class SubAccountController extends Controller
             'state' => $validated['state'] ?? null,
             'zipcode' => $validated['zipcode'] ?? null,
             'recipient_address' => $validated['recipient_address'] ?? null,
+            'type' => $validated['type'] ?? null,
             'default' => $isFirst,
         ]);
 
@@ -98,58 +126,92 @@ class SubAccountController extends Controller
             abort(403, 'Unauthorized access.');
         }
 
+        $bankAccount = Subaccount::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->whereNull('deleted_at')->firstOrFail();
+
+        // Fetch all countries
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+        $countries = [];
+
+        if ($response->successful()) {
+            $countries = $response->json();
+            // dd($countries);
+        }
+
+        // Fetch all banks
+        $banks = Bank::all();
+
+        //api response
+        if (request()->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $subaccount,
+                'countries' => $countries,
+                'banks' => $banks,
+            ], 200);
+        }
+
         $allUserSubAccounts = Subaccount::where('user_id', Auth::id())->get();
 
-        return view('business.editSubaccount', compact('subaccount', 'allUserSubAccounts'));
+        return view('business.editSubaccount', compact('subaccount', 'allUserSubAccounts', 'countries', 'banks'));
     }
 
 
-    public function show($id)
+    public function show()
     {
-        $subaccount = Subaccount::find($id);
+        $user = Auth::user();
+        $subaccounts = Subaccount::where('user_id', $user->id)->get();
 
-        // Check if subaccount exists and belongs to the authenticated user
-        if (!$subaccount || $subaccount->user_id !== Auth::user()->id) {
-            return response()->json(['message' => 'Subaccount not found or unauthorized.'], 403);
-        } else {
-
-            return response()->json([
-                'message' => 'Subaccount retrieved successfully.',
-                'data' => $subaccount
-            ]);
+        if ($subaccounts->isEmpty()) {
+            return response()->json(['message' => 'No subaccounts found.'], 404);
         }
+
+        return response()->json([
+            'message' => 'Subaccounts retrieved successfully.',
+            'data' => $subaccounts
+        ]);
     }
+
 
     public function update(Request $request, $id)
     {
         $subaccount = Subaccount::find($id);
 
         // Check if subaccount exists and belongs to the authenticated user
-        if (!$subaccount || $subaccount->user_id !== Auth::user()->id) {
+        if (!$subaccount || $subaccount->user_id !== Auth::id()) {
             return response()->json(['message' => 'Subaccount not found or unauthorized.'], 403);
-        } else {
-
-            // Validate and update the subaccount
-            $request->validate([
-                'bank_name' => 'required|string',
-                'bank_country' => 'required|string',
-                'account_number' => 'required|digits:10',
-                'account_name' => 'required|string'
-            ]);
-
-            // $subaccount->update($request->all());
-            $subaccount->update($request->only([
-                'bank_name',
-                'bank_country',
-                'account_number',
-                'account_name'
-            ]));
-
-            return response()->json([
-                'message' => 'Subaccount updated successfully.',
-                'data' => $subaccount
-            ]);
         }
+
+
+
+        $validated = $request->validate([
+            'bank_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\pL\s]+$/u',
+                function ($attribute, $value, $fail) {
+                    if (preg_match('/^\d+$/', $value)) {
+                        $fail('The bank name cannot be just numbers.');
+                    }
+                }
+            ],
+            'bank_country' => 'required|string',
+            'account_number' => ['required', 'regex:/^\d{10}$/'],
+            'account_name' => 'required|string'
+        ]);
+
+        $subaccount->bank_name = $validated['bank_name'];
+        $subaccount->bank_country = $validated['bank_country'];
+        $subaccount->account_number = Crypt::encryptString($validated['account_number']);
+        $subaccount->account_name = $validated['account_name'];
+        $subaccount->save();
+
+        return response()->json([
+            'message' => 'Subaccount updated successfully.',
+            'data' => $subaccount
+        ]);
     }
 
     public function destroy($id)
