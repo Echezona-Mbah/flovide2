@@ -64,6 +64,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('business/delete-accounts', [addBankAccountController::class, 'destroyAll']);
     Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
     Route::get('business/bank-account/{id}', [addBankAccountController::class, 'edit']);
+    Route::get('business/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks']);
     // api routes for sub accounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
@@ -98,7 +99,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/add-baneficia', [AddBeneficiariesController::class, 'store']);
     Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
     Route::delete('beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
-    Route::get('/fetchBanks', [AddBeneficiariesController::class, 'fetchBankss']);
+    Route::get('/fetchBanks', [AddBeneficiariesController::class, 'fetchBanks']);
     Route::post('/validate-account', [AddBeneficiariesController::class, 'validateRecipient']);
     Route::get('/fetchcountrylist', [AddBeneficiariesController::class, 'fetchcountrylist']);
     Route::get('beneficia/all', [AddBeneficiariesController::class, 'allBeneficia']);
