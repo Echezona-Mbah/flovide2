@@ -5918,23 +5918,31 @@
 
             console.log(`Fetching banks for ${countryCurrencyCode} / ${currencyCode}...`);
 
-            fetch(`/fetch-banks?countryCurrency=${countryCurrencyCode}&currency=${currencyCode}`)
+            fetch(`{{ route('fetch.localbanks') }}?countryCurrency=${countryCurrencyCode}&currency=${currencyCode}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
             .then(res => res.json())
             .then(data => {
                 console.log('Bank fetch response:', data);
                 if (data.status === 'success' && data.fields?.[0]?.options) {
                     let banks = data.fields[0].options;
-                    // Populate the <select> with the banks returned
+
                     banks.forEach(bank => {
                         let option = document.createElement('option');
-                        option.value = bank.name;
-                        option.textContent = bank.name;
-                        option.setAttribute('data-code', bank.country_code ?? '');
+                        option.value = bank.value; // use the numeric value or bank_code
+                        option.textContent = bank.label; // display name in dropdown
+                        option.setAttribute('data-code', bank.bank_code ?? '');
+                        option.setAttribute('data-nibss', bank.bank_nibss_code ?? '');
                         bankSelect.appendChild(option);
                     });
                     console.log('Banks updated:', banks);
                 } else {
-                    this.banks = [];
+                    // this.banks = [];
                     Swal.fire({
                         toast: true,
                         icon: 'error',
