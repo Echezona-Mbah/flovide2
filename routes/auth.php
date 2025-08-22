@@ -86,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
     Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
     Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
-    Route::get('/fetch-banks', [addBankAccountController::class, 'fetchBanks'])->name('fetch.banks');
+    Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
     Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
 
 

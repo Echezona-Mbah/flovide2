@@ -303,29 +303,39 @@ class addBankAccountController extends Controller
     }
 
 
-    public function fetchBanks(Request $request)
+    public function fetchlocalBanks(Request $request)
     {
-        $countryCurrency = $request->get('countryCurrency'); // Default to NG
-        $currency = $request->get('currency'); // Default to NGN
+        $countryCurrency = strtolower($request->get('countryCurrency')); // Default to NG
+        $currency = strtolower($request->get('currency')); // Default to NGN
 
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-                'country' => $countryCurrency,
-                'currency' => $currency
-            ]);
+        try {
+            $response = Http::withToken(env('OHENTPAY_API_KEY'))
+                ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+                    'country' => $countryCurrency,
+                    'currency' => $currency
+                ]);
 
-        if ($response->successful()) {
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Bank fields fetched successfully.',
+                    'fields' => $response->json()
+                ]);
+            }
+
             return response()->json([
-                'status' => 'success',
-                'fields' => $response->json()
-            ]);
-        }
+                'status' => 'error',
+                'message' => 'Failed to fetch bank fields',
+                'details' => $response->json()
+            ], $response->status());
 
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch bank fields',
-            'details' => $response->json()
-        ], $response->status());
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch bank fields',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function validatePayoutAccountName(Request $request)
