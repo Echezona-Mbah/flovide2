@@ -111,7 +111,7 @@
                             </section>
 
                             <!-- Right side -->
-                            <section class="w-full lg:w-[24vw] border-l bg-white p-6 lg:p-8 bg-gray-50">
+                            <section class="w-full lg:w-[24vw] border-l  p-6 lg:p-8 bg-gray-50">
                                 <div class="flex  justify-between items-center h-10 mb-6 bg-gray-200 w-full text-[12px] rounded-md p-1 w-[20vw] font-semibold">
                                     <div class="bg-white cursor-pointer px-2 py-2 rounded-md navBarSection1">Transaction Details</div>
                                     <div class="px-2 py-2 cursor-pointer rounded-md navBarSection2">Refund Tracker</div>
