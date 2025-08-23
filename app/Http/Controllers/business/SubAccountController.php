@@ -61,40 +61,46 @@ class SubAccountController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'account_number' => ['required', 'regex:/^\d{10}$/'],
-            'account_name' => 'required|string',
-            'bank_name' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[\pL\s]+$/u',
-                function ($attribute, $value, $fail) {
-                    if (preg_match('/^\d+$/', $value)) {
-                        $fail('The bank name cannot be just numbers.');
-                    }
-                }
-            ],
-            'type' => 'required|string|max:10',
-            'bank_country' => 'required|string',
-            // 'bank_country' => 'required|string|size:2', // ISO 2-letter country code
-            'currency' => 'required|string|size:3', // ISO 4217
-            'bic' => 'nullable|string|regex:/^[A-Za-z0-9]{8,11}$/',
-            'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
-            'city' => 'nullable|string|max:255',
-            'state' => 'nullable|string|max:255',
-            'zipcode' => 'nullable|string|max:20',
-            'recipient_address' => 'nullable|string|max:255',
-        ]);
+        $isDynamic = $request->input('formDynamicFields') === 'true';
+
+        if (!$isDynamic) {
+            $validated = $request->validate([
+                'bank_name' => 'required|string|max:255',
+                'type' => 'required|string|max:10',
+                'bank_country' => 'required|string',
+                'account_number' => ['required', 'regex:/^\d{10}$/'],
+                'account_name' => 'required|string|max:255',
+                'currency' => 'required|string|size:3', // ISO 4217
+                'bic' => 'nullable|string|regex:/^[A-Za-z0-9]{8,11}$/',
+                'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zipcode' => 'nullable|string|max:20',
+                'recipient_address' => 'nullable|string|max:255',
+            ]);
+        } else {
+            // Dynamic fields (AU_AUD, US_USD, etc.)
+            $validated = $request->validate([
+                'bank_country' => 'required|string|max:10',
+                'currency' => 'required|string|size:3', // ISO 4217 currency code
+                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
+                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zipcode' => 'required|string|max:20',
+                'address' => 'required|string|max:255',
+                'type' => 'required|string|max:10',
+            ]);
+        }
 
         $isFirst = Subaccount::where('user_id', Auth::id())->count() === 0;
 
         $subaccount = Subaccount::create([
             'user_id' => Auth::id(),
-            'account_number' => Crypt::encryptString($validated['account_number']),
-            'account_name' => $validated['account_name'],
-            'bank_name' => $validated['bank_name'],
-            'bank_country' => $validated['bank_country'],
+            'account_number' => isset($validated['account_number']) ? Crypt::encryptString($validated['account_number']) : "",
+            'account_name' => $validated['account_name'] ?? null,
+            'bank_name' => $validated['bank_name'] ?? "",
+            'bank_country' => $validated['bank_country'] ?? "",
             'currency' => $validated['currency'],
             'bic' => $validated['bic'] ? Crypt::encryptString($validated['bic']) : null,
             'iban' => $validated['iban'] ? Crypt::encryptString($validated['iban']) : null,
@@ -266,4 +272,76 @@ class SubAccountController extends Controller
             'default_account_id' => $account->id,
         ]);
     }
+
+    public function fetchlocalBanks(Request $request)
+    {
+        $countryCurrency = strtolower($request->get('countryCurrency')); // Default to NG
+        $currency = strtolower($request->get('currency')); // Default to NGN
+
+        try {
+            $response = Http::withToken(env('OHENTPAY_API_KEY'))
+                ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+                    'country' => $countryCurrency,
+                    'currency' => $currency
+                ]);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Bank fields fetched successfully.',
+                    'fields' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch bank fields',
+                'details' => $response->json()
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch bank fields',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function validatePayoutAccountName(Request $request)
+    {
+        $request->validate([
+            'country' => 'required|string',
+            'currency' => 'required|string',
+            'bank_id' => 'required|string',
+            'account_number' => 'required|string',
+        ]);
+
+        $payload = $request->only([
+            'country', 'currency', 'bank_id', 'account_number'
+        ]);
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->post(
+            rtrim(env('OHENTPAY_BASE_URL'), '/') . '/recipients/validate', $payload
+        );
+
+        $data = $response->json();
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payout account validated successfully.',
+                'account_name' => $data['account_name'] ?? null,
+                'data' => $data
+            ], 200);
+        }
+
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid payout account.',
+            'data' => $response->json()
+        ], $response->status());
+    }
+
 }
