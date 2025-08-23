@@ -72,18 +72,24 @@
                                             Bank account number
                                         </label>
                                         <span class="text-red-500 errornumber"></span>
-                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#C4C4C4] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
                                             id="account_number" name="account-number" placeholder="12345678" type="text" />
                                     </div>
 
                                     <!-- ACCOUNT NAME -->
-                                    <div class="flex flex-col gap-1">
-                                        <label class="font-normal text-[#6B6B6B]" for="account-name">
-                                            Bank account name
-                                        </label>
+                                    <div class="flex flex-col gap-1">                                        
+                                        <div class="flex items-center gap-2">
+                                            <label class="font-normal text-[#6B6B6B]" for="account-name">
+                                                Bank account name
+                                            </label>
+                                            <!-- Spinner (hidden by default) -->
+                                            <svg id="account_spinner" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                            </svg>
+                                        </div>
                                         <span class="text-red-500 errorname"></span>
-                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#C4C4C4] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
-                                            id="account_name" name="account-name" placeholder="John Doe" type="text" />
+                                        <input  type="text" value="" class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
                                     </div>
                                     <div class="flex flex-col gap-1">
                                         <div id="responseMessage"></div>
@@ -5928,7 +5934,6 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log('Bank fetch response:', data);
                 if (data.status === 'success' && data.fields?.[0]?.options) {
                     let banks = data.fields[0].options;
 
@@ -5938,11 +5943,11 @@
                         option.textContent = bank.label; // display name in dropdown
                         option.setAttribute('data-code', bank.bank_code ?? '');
                         option.setAttribute('data-nibss', bank.bank_nibss_code ?? '');
+                        option.setAttribute('data-id', bank.value ?? '');
+                        option.setAttribute('data-label', bank.label ?? '');
                         bankSelect.appendChild(option);
                     });
-                    console.log('Banks updated:', banks);
                 } else {
-                    // this.banks = [];
                     Swal.fire({
                         toast: true,
                         icon: 'error',
@@ -5959,15 +5964,29 @@
             });
         }
 
+
+        document.getElementById("account_number").addEventListener("input", function () {
+            let accountNumber = this.value;
+            if(accountNumber.length === 10) {
+                document.getElementById("account_spinner").classList.remove("hidden");
+                validateAccount();
+            }
+        });
+
         //validate payout account name
         function validateAccount() {
+            const countrySelect = document.getElementById('country');
             const country = countrySelect.options[countrySelect.selectedIndex].dataset.alpha2;
             const currency = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
-            const bankId = this.selectedBankId;
+            
+            const selectElement = document.querySelector("#bankBB");
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const bankId = selectedOption.getAttribute("data-id");
+
             const accountName = document.querySelector("#account_name");
             const accountNumber = document.querySelector("#account_number").value;
-
-            console.log('Validation values:', { country, currency, bankId, accountNumber });
+            //get the spinner
+            let account_spinner = document.getElementById("account_spinner");
 
             if (!country || !currency || !bankId || !accountNumber || accountNumber.length < 6) {
                 Swal.fire({
@@ -5986,13 +6005,12 @@
             formData.append('currency', currency);
             formData.append('bank_id', String(bankId));
             formData.append('account_number', accountNumber);
-            console.log('Form data for validation:', Object.fromEntries(formData.entries()));
 
             // Make the API call to validate the account name
             fetch('{{ route("validatePayoutAccountName") }}', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
@@ -6003,14 +6021,16 @@
                 console.log('Account validation response:', data);
                 if (data.status === 'success' && data.account_name) {
                     accountName.value = data.account_name;
-                    console.log('Account name set:', accountName.value );
+                    account_spinner.classList.add("hidden");
                 } else {
                     accountName.value = '';
                     console.warn('No account name returned.');
+                    account_spinner.classList.add("hidden");
                 }
             })
             .catch(err => {
                 accountName.value = '';
+                account_spinner.classList.add("hidden");
                 console.error('Error validating account:', err);
                 Swal.fire({
                     toast: true,
@@ -6050,10 +6070,12 @@
             if (allowedCurrenciesFrom.includes(currencyOnlyForm)) {
                 // Static fields validation
                 const country = document.querySelector("#country").value;
-                const bank = document.querySelector("#bankBB").value;
+                const selectElement = document.querySelector("#bankBB");
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                const bank = selectedOption.dataset.label;
                 const account_number = document.querySelector("#account_number").value;
                 const account_name = document.querySelector("#account_name").value;
-
+                console.log("Selected bank:", bank);
                 if (!country || !bank || !account_number || !account_name) {
                     Swal.fire({
                         toast: true,
@@ -6077,6 +6099,7 @@
 
                 //proceed with the form submission
                 validateForm(formData);
+                console.log("local data: ", Object.fromEntries(formData.entries()));
 
             }else{
 
