@@ -97,7 +97,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
     Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
     Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
-    Route::post('/bankSubAccounts/{id}/set-default', [SubAccountController::class, 'setDefault'])->name('setDefault');
+    Route::get('/subaccounts/fetch-banks', [SubAccountController::class, 'fetchlocalBanks'])->name('subaccounts.fetch.localbanks');
+    Route::post('/subaccounts/validate-payout-account-name', [SubAccountController::class, 'validatePayoutAccountName'])->name('subaccounts.validatePayoutAccountName');
 
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');

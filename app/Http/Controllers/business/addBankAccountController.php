@@ -58,20 +58,10 @@ class addBankAccountController extends Controller
             $validated = $request->validate([
                 'account_name' => 'required|string|max:255',
                 'account_number' => ['required', 'regex:/^\d{10}$/'],
-                'bank_country' => 'required|string|max:10',
-                'bank_name' => [
-                    'required',
-                    'string',
-                    'max:255',
-                    'regex:/^[\pL\s]+$/u',
-                    function ($attribute, $value, $fail) {
-                        if (preg_match('/^\d+$/', $value)) {
-                            $fail('The bank name cannot be just numbers.');
-                        }
-                    }
-                ],
+                'bank_country' => 'required|string|max:50',
+                'bank_name' => 'required|string|max:255',
                 'type' => 'required|string|max:10',
-                'currency' => 'nullable|string|size:3',
+                'currency' => 'required|string|size:3',
                 'bic' => 'nullable|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/',
                 'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
                 'city' => 'nullable|string|max:255',
@@ -82,7 +72,8 @@ class addBankAccountController extends Controller
         } else {
             // Dynamic fields (AU_AUD, US_USD, etc.)
             $validated = $request->validate([
-                'bank_country' => 'required|string|max:10',
+                'account_name' => 'required|string|max:255',
+                'bank_country' => 'required|string|max:50',
                 'currency' => 'required|string|size:3', // ISO 4217 currency code
                 'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
                 'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
@@ -355,17 +346,17 @@ class addBankAccountController extends Controller
             rtrim(env('OHENTPAY_BASE_URL'), '/') . '/recipients/validate', $payload
         );
 
-        if ($request->expectsJson()) {
-            return response()->json($response->json(), $response->status());
-        }
+        $data = $response->json();
 
         if ($response->successful()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'Payout account validated successfully.',
-                'data' => $response->json()
+                'account_name' => $data['account_name'] ?? null,
+                'data' => $data
             ], 200);
         }
+
 
         return response()->json([
             'status' => 'error',

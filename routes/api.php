@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
     Route::get('business/bank-account/{id}', [addBankAccountController::class, 'edit']);
     Route::get('business/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks']);
+    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName']);
     // api routes for sub accounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);

@@ -99,7 +99,7 @@
                             <div id="staticFields">
                                 <div>
                                     <label for="bank" class="block text-gray-600 text-sm mb-1 font-semibold">Bank</label>
-                                    <select id="bank" name="bank_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                    <select id="bankBB" name="bank_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                                         <option value="" selected disabled>Select your bank</option>
                                         @foreach($banks as $bank)
                                             <option value="{{ $bank->name }}" data-code="{{ $bank->country_code  }}">
@@ -117,10 +117,19 @@
                                 </div>
                     
                                 <div>
-                                    <label for="account-name" class="block text-gray-600 text-sm mb-1 font-semibold">
-                                        Bank account name
-                                    </label>
-                                    <input type="text" id="account-name" name="account_name" placeholder="John Doe" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <div class="flex items-center gap-2">
+                                        <label for="account-name" class="block text-gray-600 text-sm mb-1 font-semibold">
+                                            Bank account name
+                                        </label>
+                                        <!-- Spinner (hidden by default) -->
+                                        <svg id="account_spinner" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="account-name" disabled name="account_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <input type="hidden" name="type" value="local" />
+                                    <input type="hidden" name="currency" value="NGN" />
                                 </div>
                             </div>
                 
@@ -182,8 +191,19 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
+        //for searching of country name
+        document.addEventListener("DOMContentLoaded", () => { 
+            const countrySelect = document.querySelector("#country");
+            // Enable searchable select
+            if (!countrySelect.tomselect) {
+                new TomSelect("#country", {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" }
+                });
+            }
+        });
 
 
         const dynamicFields = {
@@ -5851,13 +5871,6 @@
         };
 
 
-        // document.querySelector("#country").addEventListener("change", function() {
-        //     let selectedOption = this.selectedOptions[0];
-        //     if (selectedOption) {
-        //         document.querySelector("#country").value = selectedOption.getAttribute("data-country");
-        //     }
-        // });
-
         document.addEventListener('DOMContentLoaded', function () {
             const allowedCurrencies = ['NGN', 'GHS', 'KES'];
 
@@ -5903,6 +5916,149 @@
             });
         });
 
+        //fetch bank
+        function Fetch_updateBankOptions() {
+            const countrySelect = document.getElementById('country');
+            // const selectedValue = countrySelect.value;  
+            const countryCurrencyCode = countrySelect.options[countrySelect.selectedIndex].dataset.alpha2;
+            const currencyCode = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
+
+            if(!currencyCode || !countryCurrencyCode) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    title: 'Please select a valid country'
+                });
+                return;
+            }
+            const bankSelect = document.getElementById('bankBB');
+            // Clear existing options first
+            bankSelect.innerHTML = `<option value="" disabled selected>Select your bank</option>`;
+
+            console.log(`Fetching banks for ${countryCurrencyCode} / ${currencyCode}...`);
+
+            fetch(`{{ route('subaccounts.fetch.localbanks') }}?countryCurrency=${countryCurrencyCode}&currency=${currencyCode}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.fields?.[0]?.options) {
+                    let banks = data.fields[0].options;
+
+                    banks.forEach(bank => {
+                        let option = document.createElement('option');
+                        option.value = bank.value; // use the numeric value or bank_code
+                        option.textContent = bank.label; // display name in dropdown
+                        option.setAttribute('data-code', bank.bank_code ?? '');
+                        option.setAttribute('data-nibss', bank.bank_nibss_code ?? '');
+                        option.setAttribute('data-id', bank.value ?? '');
+                        option.setAttribute('data-label', bank.label ?? '');
+                        bankSelect.appendChild(option);
+                    });
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        title: 'No valid banks returned.'
+                    });
+                    return;
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching banks:', err);
+            });
+        }
+
+
+        document.getElementById("account-number").addEventListener("input", function () {
+            let accountNumber = this.value;
+            if(accountNumber.length === 10) {
+                document.getElementById("account_spinner").classList.remove("hidden");
+                validateAccount();
+            }
+        });
+
+        //validate payout account name
+        function validateAccount() {
+            const countrySelect = document.getElementById('country');
+            const country = countrySelect.options[countrySelect.selectedIndex].dataset.alpha2;
+            const currency = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
+            
+            const selectElement = document.querySelector("#bankBB");
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const bankId = selectedOption.getAttribute("data-id");
+
+            const accountName = document.querySelector("#account-name");
+            const accountNumber = document.querySelector("#account-number").value;
+            //get the spinner
+            let account_spinner = document.getElementById("account_spinner");
+
+            if (!country || !currency || !bankId || !accountNumber || accountNumber.length < 6) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    title: 'Validation failed, Required data missing.'
+                });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('country', country);
+            formData.append('currency', currency);
+            formData.append('bank_id', String(bankId));
+            formData.append('account_number', accountNumber);
+
+            // Make the API call to validate the account name
+            fetch('{{ route("subaccounts.validatePayoutAccountName") }}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Account validation response:', data);
+                if (data.status === 'success' && data.account_name) {
+                    accountName.value = data.account_name;
+                    account_spinner.classList.add("hidden");
+                } else {
+                    accountName.value = '';
+                    console.warn('No account name returned.');
+                    account_spinner.classList.add("hidden");
+                }
+            })
+            .catch(err => {
+                accountName.value = '';
+                account_spinner.classList.add("hidden");
+                console.error('Error validating account:', err);
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    title: 'Error validating account'
+                });
+                return;
+            });
+        }
 
 
         document.querySelector('.delete-all-btn').addEventListener('click', function () {
