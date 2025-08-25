@@ -8,6 +8,7 @@ class VirtualCards extends Model
 {
         protected $fillable = [
         'user_id',
+        'personal_id',
         'card_provider',
         'card_id',
         'card_type',
@@ -26,7 +27,10 @@ class VirtualCards extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
+    public function personal()
+    {
+        return $this->belongsTo(Personal::class);
+    }
     public function country()
     {
         return $this->belongsTo(Countries::class,'country_id');
