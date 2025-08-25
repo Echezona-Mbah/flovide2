@@ -17,6 +17,10 @@ use App\Http\Controllers\Business\CreateBankController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\SubscriptionController;
 use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\Personal\AddBeneficiariesController as PersonalAddBeneficiariesController;
+use App\Http\Controllers\Personal\BillPaymentController as PersonalBillPaymentController;
+use App\Http\Controllers\Personal\CreateBankController as PersonalCreateBankController;
+use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,29 +34,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('auth/register', [RegisterController::class, 'register']);
-Route::post('auth/verify-email/{email}', [RegisterController::class, 'verifyEmail']);
-Route::post('auth/new-email-otp/{email}', [RegisterController::class, 'verifyEmailOtp']);
-Route::post('auth/login', [LoginController::class, 'login']);
+Route::post('auth/register', [RegisterController::class, 'registerUser']);
+Route::post('auth/verify-email', [RegisterController::class, 'verifyEmail']);
+Route::post('auth/new-email-otp', [RegisterController::class, 'verifyEmailOtp']);
+Route::post('auth/login', [LoginController::class, 'loginUser']);
 Route::get('/country', [RegisterController::class, 'getAllCountry']);
 Route::post('/auth/forgot-password', [ForgetPasswordController::class, 'forgotPassword']);
 Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
-Route::post('/auth/reset-password', [ForgetPasswordController::class, 'resetPassword']);
-
-// Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
-
-
-
-
-
-
-
-
-
+Route::post('/auth/reset-password', [ForgetPasswordController::class, 'resetPasswordapi']);
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
+    Route::get('/getLoggedInUser', [RegisterController::class, 'getLoggedInUser']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);
     // api routes for bank acccount details 
     Route::post('business/bank-account', [addBankAccountController::class, 'store']);
@@ -104,7 +98,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // api routes for DSTV details
     Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
     Route::post('/Dstvverify', [BillPaymentController::class, 'verify']);
-    Route::post('/Dstvpay', [BillPaymentController::class, 'store']);
+    Route::post('/Dstvpay', [BillPaymentController::class, 'handleDstv']);
     Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
 
     // Elecricity
@@ -114,7 +108,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/date_variations', [BillPaymentController::class, 'getDateVariations']);
     Route::post('/dataypay', [BillPaymentController::class, 'storeData']);
 
-        // Virtual Account
+    // Virtual Account
     Route::get('/virtualCard', [VirtualAccountController::class, 'index']);
     Route::post('/virtualCard', [VirtualAccountController::class, 'createVirtualAccount']);
     Route::get('/allvirtualcard', [VirtualAccountController::class, 'allvirtualcard']);
@@ -148,7 +142,75 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
+    //API FOR PERSONAL
 
+
+    Route::get('/personal', [RegisterController::class, 'getAllPersonal']);
+    Route::get('/getLoggedInPersonal', [RegisterController::class, 'getLoggedInPersonal']);
+    Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
+
+
+});
+
+Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
+    return $request->user(); 
+});
+// for personal
+Route::post('auth/registerpersonal', [RegisterController::class, 'registerPersonal']);
+Route::post('auth/verify-personalemail', [RegisterController::class, 'verifyPersonalEmail']);
+Route::post('auth/new-personalemail-otp', [RegisterController::class, 'verifyPersonalEmailOtp']);
+Route::post('auth/login-personal', [LoginController::class, 'loginPersonal']);
+Route::post('/auth/forgot-password-personal', [ForgetPasswordController::class, 'forgotPasswordPersonal']);
+Route::post('/auth/forget-verify-otp-personal', [ForgetPasswordController::class, 'verifyOTPPersonal']);
+Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
+
+Route::group(['middleware' => ['auth:personal-api']], function () {
+    Route::prefix('personal')->group(function () {
+
+    Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
+    Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
+    Route::put('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
+    Route::delete('personal-beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
+    Route::get('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
+    Route::post('/personal-validate-account', [PersonalAddBeneficiariesController::class, 'validateRecipient']);
+    Route::get('/personal-fetchcountrylist', [PersonalAddBeneficiariesController::class, 'fetchcountrylist']);
+    Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
+
+
+        // Virtual Account
+    Route::get('/personal-virtualCard', [PersonalVirtualAccountController::class, 'index']);
+    Route::post('personal-virtualCard', [PersonalVirtualAccountController::class, 'createVirtualAccount']);
+    Route::get('/personal-allvirtualcard', [PersonalVirtualAccountController::class, 'allvirtualcard']);
+    Route::get('/personal-virtualcard/{id}', [PersonalVirtualAccountController::class, 'showVirtualCard']);
+    Route::delete('/personal-virtualCard/{id}', [PersonalVirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
+
+
+        // api routes for DSTV details
+    Route::get('/personal-Dstvvariations', [PersonalBillPaymentController::class, 'getVariations']);
+    Route::post('/personal-Dstvverify', [PersonalBillPaymentController::class, 'verify']);
+    Route::post('/personal-Dstvpay', [PersonalBillPaymentController::class, 'handleDstv']);
+    Route::get('/personal-billhistory', [PersonalBillPaymentController::class, 'getUserBillPayments']);
+
+    // Elecricity
+    Route::get('/personal-electricityvariations', [PersonalBillPaymentController::class, 'getElectricityVariations']);
+    Route::post('/personal-electricity_verify', [PersonalBillPaymentController::class, 'verifyElectricity']);
+    Route::post('/personal-electricitypay', [PersonalBillPaymentController::class, 'handleElectricity']);
+    // DATA
+    Route::get('/personal-service_id', [PersonalBillPaymentController::class, 'getDataServiceId']);
+    Route::post('/personal-date_variations', [PersonalBillPaymentController::class, 'getDateVariations']);
+    Route::post('/personal-dataypay', [PersonalBillPaymentController::class, 'handleData']);
+
+        // api routes for Balance details
+    Route::get('/personal-balances', [PersonalCreateBankController::class, 'index']);
+    Route::get('/personal-singlebalances', [PersonalCreateBankController::class, 'create']);
+    Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
+    Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
+    Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
+
+
+
+        // ...other personal routes
+    });
 });
 
 
