@@ -159,7 +159,7 @@ class RegisteredUserController extends Controller
             'user_id'  => $user->id,
             'owner_id' => $user->id,
             'email'     => $user->email,
-            'role'  => $user->role,
+            'role'  => 'Owner',
         ]);
         Auth::login($user);
 

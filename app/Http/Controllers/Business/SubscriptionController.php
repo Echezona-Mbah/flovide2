@@ -13,9 +13,10 @@ class SubscriptionController extends Controller
 {
     public function index(Request $request)
     {
-        
-        $subscriptions = Subscription::where('user_id', $request->user()?->id ?? auth()->id())->get();
-        
+        $ownerId = session('owner_id');
+
+        // $subscriptions = Subscription::where('user_id', $request->user()?->id ?? auth()->id())->get();
+         $subscriptions = Subscription::where('user_id', $ownerId)->get();
 
         if ($request->expectsJson()) {
             return response()->json([

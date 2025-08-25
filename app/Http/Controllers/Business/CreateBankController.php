@@ -15,16 +15,7 @@ class CreateBankController extends Controller
 {
       use CurrencyHelper;
 
-    // public function create() {
-    //     $countries = Countries::all();
-    //     $user = auth()->user();
-    //     $balances = Balance::where('user_id', $user->id)->get();
-    //     foreach ($balances as $balance) {
-    //     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-    //     }
-    
-    //     return view('business.add_bank', compact('countries', 'balances'));
-    // }
+
     public function create(Request $request)
     {
         $countries = Countries::all();
@@ -95,31 +86,7 @@ class CreateBankController extends Controller
         return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
     }
 
-    // public function createBalance(Request $request)
-    // {
 
-    //     $request->validate([
-    //         'name' => 'required|string',
-    //         'currency' => 'required|string',
-    //     ]);
-    
-    //     $payload = $request->only(['name', 'currency']);
-    
-    //     $response = Http::withHeaders([
-    //         'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-    //         'Accept' => 'application/json',
-    //         'Content-Type' => 'application/json',
-    //     ])->post(env('OHENTPAY_BASE_URL') . '/balances', $payload);
-    
-    //     if ($response->successful()) {
-    //         return response()->json($response->json());
-    //     } else {
-
-    //         return redirect()->route('add_account.create')->with('success', 'Account Create successfully.');
-
-    //     }
-
-    // }
 
 
     public function getUserTotalBalance(Request $request)
@@ -195,72 +162,6 @@ class CreateBankController extends Controller
 
             return view('business.all_balances', compact('balances'));
         }
-
-    
-
-    // private function getCountryCodeFromCurrency($currency)
-    // {
-    //     $map = [
-    //         'NGN' => ['symbol' => '₦', 'country' => 'ng'],
-    //         'USD' => ['symbol' => '$', 'country' => 'us'],
-    //         'KES' => ['symbol' => 'KSh', 'country' => 'ke'],
-    //         'GHS' => ['symbol' => '₵', 'country' => 'gh'],
-    //         'ZAR' => ['symbol' => 'R', 'country' => 'za'],
-    //         'GBP' => ['symbol' => '£', 'country' => 'gb'],
-    //         'EUR' => ['symbol' => '€', 'country' => 'eu'],
-    //         'CAD' => ['symbol' => 'C$', 'country' => 'ca'],
-    //         'CZK' => ['symbol' => 'Kč', 'country' => 'cz'],
-    //         'DKK' => ['symbol' => 'kr', 'country' => 'dk'],
-    //         'AUD' => ['symbol' => 'A$', 'country' => 'au'],
-    //         'SEK' => ['symbol' => 'kr', 'country' => 'se'],
-    //         'RON' => ['symbol' => 'lei', 'country' => 'ro'],
-    //         'PLN' => ['symbol' => 'zł', 'country' => 'pl'],
-    //         'CHF' => ['symbol' => 'CHF', 'country' => 'ch'],
-    //         'HUF' => ['symbol' => 'Ft', 'country' => 'hu'],
-    //         'NOK' => ['symbol' => 'kr', 'country' => 'no'],
-    //     ];
-
-    //     return $map[strtoupper($currency)] ?? ['symbol' => '', 'country' => 'us'];
-    // }
-
-    // public function UpdateBalance(Request $request)
-    // {
-    //     $request->validate([
-    //         'balance_id' => 'required|string',
-    //         'name' => 'required|string|max:255',
-    //     ]);
-    
-    //     $balanceId = $request->input('balance_id');
-    //     $newName = $request->input('name');
-    
-    //     $url = rtrim(env('OHENTPAY_BASE_URL'), '/') . '/balances/' . $balanceId;
-    
-    //     $response = Http::withHeaders([
-    //         'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-    //         'Accept' => 'application/json',
-    //         'Content-Type' => 'application/json',
-    //     ])->patch($url, [
-    //         'name' => $newName,
-    //     ]);
-    
-    //     if ($request->expectsJson()) {
-    //         return response()->json([
-    //             'message' => $response->successful()
-    //                 ? 'Balance name updated successfully.'
-    //                 : ($response->json()['message'] ?? 'Failed to update balance name.'),
-    //             'data' => $response->json()?? null,
-    //             'method' => $request->method(),
-    //             'url' => $request->fullUrl()
-    //         ], $response->status());
-    //     }
-    
-    //     // Web response
-    //     if ($response->successful()) {
-    //         return redirect()->back()->with('success', 'Balance name updated successfully.');
-    //     } else {
-    //         return redirect()->back()->with('error', 'Failed to update balance name: ' . $response->body());
-    //     }
-    // }
     
     
     

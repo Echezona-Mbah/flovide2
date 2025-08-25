@@ -67,9 +67,7 @@
             190+ countries
           </h1>
           <p class="md:text-[0.875rem] text-xl text-center md:text-left font-normal mb-8 max-w-md">
-            Create business accounts in multiple currencies (GBP, USD, EUR,
-            &amp; CHF) and move your money around for less. 190+ countries,
-            40+ currencies.
+            Create business accounts and move your money around for less. 190+ countries, 40+ currencies.
           </p>
 
 <div

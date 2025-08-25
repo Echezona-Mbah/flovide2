@@ -336,6 +336,13 @@
                                             <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your company reg no">
                                             <div id="error-registration_number"></div>
                                         </div>
+
+                                        <!-- Business Number -->
+                                        <div>
+                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Business Number</label>
+                                            <input type="text" data-error-id="error-business_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your business no">
+                                            <div id="error-business_number"></div>
+                                        </div>
                                         <!-- Incorporation Date -->
                                         <div>
                                             <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Incorporation Date</label>

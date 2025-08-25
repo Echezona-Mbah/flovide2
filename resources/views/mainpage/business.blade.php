@@ -88,9 +88,8 @@
                 <p
                   class="text-gray-700 text-sm mb-8 leading-relaxed max-w-[320px]"
                 >
-                  Create business accounts to manage your money in different
-                  currencies, Make local and international payments to 190+
-                  countries.
+                  Create business account to manage your money,
+                  Make local and international payments to 190+ countries.
                 </p>
                 <button
                   class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
@@ -131,9 +130,8 @@
             Sync Your Finances
           </h1>
           <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-            Effortlessly manage your money across multiple accounts and
-            currencies, ensuring smooth and secure financial transactions
-            anytime, anywhere.
+            Effortlessly control your money across multiple scenarios in different currencies,
+             ensuring smooth and secure financial transactions anytime, anywhere. 
           </p>
         </section>
 
@@ -178,7 +176,7 @@
             >
               <h2 class="font-semibold text-lg mb-2">Currency Exchange</h2>
               <p class="text-gray-600 text-sm mb-4">
-                Convert money effortlessly and spend in your preferred currency.
+                Convert money effortlessly and send in your preferred currency
               </p>
               <button
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
@@ -212,7 +210,7 @@
             >
               <h2 class="font-semibold text-lg mb-2">Local Business Finance</h2>
               <p class="text-gray-200px text-sm mb-4">
-                Convert money effortlessly and spend in your preferred currency.
+                Convert money effortlessly and send in your preferred currency
               </p>
               <button
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
@@ -314,9 +312,7 @@
                   </div>
                   <h2 class="text-xl font-semibold mb-3">Basic Plan</h2>
                   <p class="text-sm mb-6 leading-relaxed">
-                    Enjoy unparalleled benefits, including exclusive lifestyle
-                    perks, premium travel experiences, and a meticulously
-                    crafted platinum-plated card.
+                    Enjoy unparalleled benefits, including exclusive lifestyle perks and premium travel experiences.
                   </p>
                   <p class="text-3xl font-semibold mb-6">Free</p>
                   <button
@@ -426,9 +422,7 @@
                   </div>
                   <h2 class="text-xl font-semibold mb-3">Enterprise Plan</h2>
                   <p class="text-sm mb-6 leading-relaxed">
-                    Get exclusive benefits like priority in-app support and
-                    everyday spending protection—all for less than the cost of a
-                    coffee.
+                    Get exclusive benefits like priority in-app support and everyday spending, all for less than the cost of a coffee.
                   </p>
                   <p class="text-3xl font-semibold mb-6">
                     £9.99<span class="text-base font-normal">/ per month</span>
@@ -540,8 +534,7 @@
                   <article
                     class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
                     <p class="mb-8 text-base leading-relaxed">
-                      I love having multi-currency accounts in one place. Managing my business payments in USD and EUR has never been smoother.
-                    </p>
+                      I love having the options to send money to multiple countries in multi-currency choices in one place. Managing my business payments in USD and EUR has never been smoother.                     </p>
                     <div class="flex items-center gap-4">
                       <img
                         alt="User"
@@ -607,7 +600,7 @@
                   <article
                     class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
                     <p class="mb-8 text-base leading-relaxed">
-                      The customer support team is always responsive and helpful. Flovide truly feels like a modern banking partner.
+                      The customer support team is always responsive and helpful. Flovide truly makes me feel like am on top of the world. 
                     </p>
                     <div class="flex items-center gap-4">
                       <img
@@ -620,7 +613,7 @@
                           Michael
                         </h3>
                         <p class="text-gray-700 text-sm leading-tight">
-                          Canada
+                          Uganda
                         </p>
                       </div>
                     </div>
@@ -661,11 +654,11 @@
       <section class="w-full flex flex-col items-center justify-center">
         <section class="mx-auto px-6 pt-12 pb-16 text-center space-y-4">
           <h1 class="text-4xl font-medium mb-3 text-gray-900">
-            Global access in 150+ countries
+            Global access in 190+ countries
           </h1>
           <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-            Moving, traveling, or sending money abroad? You're covered in 150+
-            countries—effortless payments, wherever you call home.
+            Moving, traveling, or sending money abroad? You're covered in 190+ countries—effortless payments,
+            wherever you call home or do business.
           </p>
 
           <button
@@ -778,9 +771,10 @@
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed"
                   >
                     <p class="list-disc mt-2">
-                      Create business accounts to manage your money in different
-                      currencies. Make local and international payments to 190+
-                      countries.
+                     Creating a Flovide account is very easy and simple. Just download Flovide mobile app,
+                     fill in your details and submit. If you are fully verified, you can immediately start making local and international
+                      payments to 190+ countries.
+                      However, businesses can create account online or in the app. 
                     </p>
                   </div>
                 </article>
@@ -793,7 +787,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      Which currencies can I hold in my account?
+                     What security measures does Flovide use to protect my account?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -830,10 +824,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Flovide supports multi-currency accounts. You can hold and
-                    manage USD, EUR, GBP, NGN, JPY, and many more. This enables
-                    seamless local and international transactions without
-                    constant conversions.
+                    "Flovide uses multi-factor authentication (MFA), encrypted communications,
+                    and continuous fraud monitoring to ensure your transactions and account access remain secure."
                   </div>
                 </article>
 
@@ -845,7 +837,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      How long does it take to send and receive money?
+                      Does Flovide hold my money?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -882,10 +874,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Local transfers are often instant. International transfers
-                    typically take 1–3 business days depending on the currency
-                    and destination country. Flovide uses fast payment networks
-                    to speed up processing.
+                    No. Flovide does not hold customer funds. All funds are immediately remitted to your desired locations. 
+
                   </div>
                 </article>
 
@@ -897,7 +887,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      Is my money safe with Flovide?
+                      How long does it take to send money with Flovide?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -934,10 +924,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Yes. Flovide secures your money with regulated banking
-                    partners, industry-standard encryption, and fraud monitoring
-                    systems. Your funds are held in segregated accounts for
-                    maximum safety.
+                    The time it takes Flovide to deliver your funds depends on the type of transfer that you make.
+                     About 98% of our transfers are completed within minutes. 
                   </div>
                 </article>
 
@@ -986,10 +974,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Flovide charges no fees for local transfers. For
-                    international transfers, small fees may apply depending on
-                    the destination. Currency conversions are done at
-                    competitive rates with minimal markup.
+                   Sending money through Flovide is completely free if you are an individual. 
+                   However, Business pay for transactions depending on their chosen plan.
                   </div>
                 </article>
 

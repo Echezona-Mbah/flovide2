@@ -55,7 +55,10 @@ class AddBeneficiariesController extends Controller
 
     public function create()
     {
-        $user = auth()->user();
+        // $user = auth()->user();
+
+        $ownerId = session('owner_id');
+
 
 
         $response = Http::withToken(env('OHENTPAY_API_KEY'))
@@ -68,7 +71,8 @@ class AddBeneficiariesController extends Controller
         }
 
         $banks = Bank::all();
-        $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(8);
+        // $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(8);
+        $beneficiaries = Beneficia::where('user_id', $ownerId)->paginate(8);
 
         return view('business.add_beneficia', compact('countries', 'banks', 'beneficiaries'));
     }
@@ -77,6 +81,9 @@ class AddBeneficiariesController extends Controller
 
     public function store(Request $request)
     {
+         $ownerId = session('owner_id');
+        //  dd($ownerId);
+       
         $country = $request->input('country');
         $currency = $request->input('currency');
 
@@ -128,6 +135,7 @@ class AddBeneficiariesController extends Controller
             $exists = Beneficia::where('account_name', $accountName)
             ->where('account_number', $accountNumber)
             ->where('user_id', auth()->id())
+            // ->where('user_id', $ownerId)
             ->exists();
 
             if ($exists) {
@@ -194,7 +202,8 @@ class AddBeneficiariesController extends Controller
             'bank'               => $responseData['bank_account']['bank_name'] ?? null,
             'currency'           => $responseData['bank_account']['currency'] ?? null,
             'created_at'         => now(),
-            'user_id'            => $request->user()?->id ?? auth()->id(),
+            // 'user_id'            => $request->user()?->id ?? auth()->id(),
+            'user_id'            => $ownerId,
             'default_reference'  => 'Invoice',
         ]);
 
