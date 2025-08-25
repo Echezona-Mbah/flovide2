@@ -142,15 +142,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
-    //API FOR PERSONAL
-
-
-    Route::get('/personal', [RegisterController::class, 'getAllPersonal']);
-    Route::get('/getLoggedInPersonal', [RegisterController::class, 'getLoggedInPersonal']);
-    Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
-
-
 });
+
+
+    // Route::get('/personal', [RegisterController::class, 'getAllPersonal']);
+    // Route::get('/getLoggedInPersonal', [RegisterController::class, 'getLoggedInPersonal']);
+    // Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
+
+    //API FOR PERSONAL
 
 Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
     return $request->user(); 
