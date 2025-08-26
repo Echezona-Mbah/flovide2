@@ -88,9 +88,8 @@
                 <p
                   class="text-gray-700 text-sm mb-8 leading-relaxed max-w-[320px]"
                 >
-                  Create business accounts to manage your money in different
-                  currencies, Make local and international payments to 190+
-                  countries.
+                  Create business account to manage your money,
+                  Make local and international payments to 190+ countries.
                 </p>
                 <button
                   class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
@@ -131,9 +130,8 @@
             Sync Your Finances
           </h1>
           <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-            Effortlessly manage your money across multiple accounts and
-            currencies, ensuring smooth and secure financial transactions
-            anytime, anywhere.
+            Effortlessly control your money across multiple scenarios in different currencies,
+             ensuring smooth and secure financial transactions anytime, anywhere. 
           </p>
         </section>
 
@@ -178,7 +176,7 @@
             >
               <h2 class="font-semibold text-lg mb-2">Currency Exchange</h2>
               <p class="text-gray-600 text-sm mb-4">
-                Convert money effortlessly and spend in your preferred currency.
+                Convert money effortlessly and send in your preferred currency.
               </p>
               <button
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"

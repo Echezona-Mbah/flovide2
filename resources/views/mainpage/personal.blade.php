@@ -299,6 +299,8 @@
             Effortlessly manage your money across multiple accounts and
             currencies, ensuring smooth and secure financial transactions
             anytime, anywhere.
+           Effortlessly control your money across multiple scenarios in different currencies,
+            ensuring smooth and secure financial transactions anytime, anywhere.
           </p>
         </section>
 
@@ -343,7 +345,7 @@
             >
               <h2 class="font-semibold text-lg mb-2">Currency Exchange</h2>
               <p class="text-gray-600 text-sm mb-4">
-                Convert money effortlessly and spend in your preferred currency.
+                Convert money effortlessly and send in your preferred currency.
               </p>
               <button
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
@@ -377,7 +379,7 @@
             >
               <h2 class="font-semibold text-lg mb-2">Local Business Finance</h2>
               <p class="text-gray-200px text-sm mb-4">
-                Convert money effortlessly and spend in your preferred currency.
+                Convert money effortlessly and send in your preferred currency.
               </p>
               <button
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
