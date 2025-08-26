@@ -243,8 +243,7 @@
                                             {{-- {{ Crypt::decryptString($account->account_number) }} --}}
                                             {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
                                         </span>
-                                        <span
-                                            class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
+                                        <span class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
                                             {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
                                         </span>
                                         @if($account->default)
