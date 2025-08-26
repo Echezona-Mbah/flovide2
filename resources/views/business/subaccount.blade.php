@@ -74,7 +74,7 @@
                             </script>
                         @endif
 
-                        <form method="POST" action="{{ route('business.store') }}" class="space-y-6">
+                        <form id="subAccountForm" method="POST" action="" class="space-y-6">
                             @csrf
                             
                             <div>
@@ -113,7 +113,7 @@
                                     <label for="account-number" class="block text-gray-600 text-sm mb-1 font-semibold">
                                         Bank account number
                                     </label>
-                                    <input type="text" id="account-number" name="account_number" placeholder="12345678" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    <input type="text" id="account-number" name="account_number" placeholder="12345678" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                 </div>
                     
                                 <div>
@@ -127,9 +127,7 @@
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                         </svg>
                                     </div>
-                                    <input type="text" id="account-name" disabled name="account_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                                    <input type="hidden" name="type" value="local" />
-                                    <input type="hidden" name="currency" value="NGN" />
+                                    <input type="text" id="account-name" disabled name="account_name" class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                 </div>
                             </div>
                 
@@ -159,7 +157,8 @@
                                 @foreach($subaccounts as $account)
                                     @php
                                         try {
-                                            $accountNumber = Crypt::decryptString($account->account_number);
+                                            // $accountNumber = Crypt::decryptString($account->account_number);
+                                            $accountNumber = ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban);
                                         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
                                             $accountNumber = 'Invalid or Unencrypted';
                                         }
@@ -167,7 +166,9 @@
                                     <li class="flex justify-between items-center bg-white rounded-xl px-5 py-3 text-gray-900 font-normal text-base">
                                         <div class="flex items-center gap-3">
                                             <span>{{ $accountNumber }}</span>
-                                            <span class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">{{ $account->bank_name }}</span>
+                                            <span class="bg-gray-300 text-gray-700 text-xs font-semibold rounded-full px-2 py-0.5 select-none">
+                                                {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
+                                            </span>
                                         </div>
                                         <div class="flex items-center gap-4 text-gray-400">
                                             <button aria-label="" class="hover:text-gray-600">
@@ -6059,6 +6060,165 @@
                 return;
             });
         }
+
+        //submit form
+        const form = document.getElementById('subAccountForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const allowedCurrenciesFrom = ['NGN', 'GHS', 'KES'];
+            const countrySelect = document.getElementById('country');
+            const selectedValue = countrySelect.value;  
+            const fullCurrency = countrySelect.options[countrySelect.selectedIndex].dataset.fullCurrency;
+            const currencyOnlyForm = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
+            
+            if(!currencyOnlyForm) {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    title: 'Please select a valid country'
+                });
+                return;
+            }
+
+            if (allowedCurrenciesFrom.includes(currencyOnlyForm)) {
+                // Static fields validation
+                const country = document.querySelector("#country").value;
+                const selectElement = document.querySelector("#bankBB");
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                const bank = selectedOption.dataset.label;
+                const account_number = document.querySelector("#account-number").value;
+                const account_name = document.querySelector("#account-name").value;
+                console.log("Selected bank:", bank);
+
+                if (!country || !bank || !account_number || !account_name) {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        title: 'All fields are required'
+                    });
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('account_name', account_name);
+                formData.append('account_number', account_number);
+                formData.append('bank_country', country);
+                formData.append('bank_name', bank);
+                formData.append('currency', currencyOnlyForm);
+                formData.append('type', "local");
+                formData.append('formDynamicFields', false);
+
+                //proceed with the form submission
+                // form.submit();
+                validateForm(formData);
+                console.log("local data: ", Object.fromEntries(formData.entries()));
+
+            }else{
+
+                const formData = new FormData(this);
+                formData.append('formDynamicFields', true);
+                formData.append('bank_country', selectedValue);
+                formData.append('currency', currencyOnlyForm);
+                formData.append('type', "foreign");
+                const values = {};
+
+                for (let [key, val] of formData.entries()) {
+                    values[key] = val.trim();
+                }
+                // Run dynamic inputs validation
+                if (!validateDynamicFormInputs(values, fullCurrency)) {
+                    return;
+                }
+                // If valid, proceed with the form submission
+                validateForm(formData);
+                console.log(values);
+            }
+
+            //validate dynamic form inputs
+            function validateDynamicFormInputs(values, countryCurrencyKey) {
+                let errors = [];
+
+                // get only the dynamic fields for the selected country/currency
+                const fields = dynamicFields[countryCurrencyKey] || [];
+
+                fields.forEach(field => {
+                    const key = field.name;
+                    if (!values[key]) {
+                        errors.push(`${field.label} is required`);
+                    }
+                });
+
+                if (errors.length > 0) {
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        title: errors[0], // show first error only
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    return false;
+                }
+                return true;
+            }
+
+
+
+            function validateForm(data) {
+                fetch('{{ route("subaccounts.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: data
+                })
+                .then(response => response.json()).then(data => {
+                    if (data.status == "success") {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Added!',
+                            text: data.message,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didClose: () => {
+                                location.reload();
+                            }
+                        });
+
+                    } else {
+                       Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            // didClose: () => {
+                            //     location.reload();
+                            // }
+                        });
+
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            }
+        });
 
 
         document.querySelector('.delete-all-btn').addEventListener('click', function () {

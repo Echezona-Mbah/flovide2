@@ -93,7 +93,7 @@ Route::middleware(['auth'])->group(function () {
     //subaccount
     Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
     Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
-    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('store');
+    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('subaccounts.store');
     Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
     Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
     Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
