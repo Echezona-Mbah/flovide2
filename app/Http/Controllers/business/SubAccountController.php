@@ -76,11 +76,12 @@ class SubAccountController extends Controller
                 'city' => 'nullable|string|max:255',
                 'state' => 'nullable|string|max:255',
                 'zipcode' => 'nullable|string|max:20',
-                'recipient_address' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
             ]);
         } else {
             // Dynamic fields (AU_AUD, US_USD, etc.)
             $validated = $request->validate([
+                'account_name' => 'required|string|max:255',
                 'bank_country' => 'required|string|max:10',
                 'currency' => 'required|string|size:3', // ISO 4217 currency code
                 'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
@@ -107,7 +108,7 @@ class SubAccountController extends Controller
             'city' => $validated['city'] ?? null,
             'state' => $validated['state'] ?? null,
             'zipcode' => $validated['zipcode'] ?? null,
-            'recipient_address' => $validated['recipient_address'] ?? null,
+            'recipient_address' => $validated['address'] ?? null,
             'type' => $validated['type'] ?? null,
             'default' => $isFirst,
         ]);
