@@ -40,6 +40,15 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'personal' => [
+            'driver' => 'session',
+            'provider' => 'personals',
+        ],
+
+        'personal-api' => [
+            'driver' => 'sanctum',
+            'provider' => 'personals',
+        ],
     ],
 
     /*
@@ -64,6 +73,13 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
+
+
+        'personals' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Personal::class,
+        ],
+
 
         // 'users' => [
         //     'driver' => 'database',

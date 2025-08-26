@@ -19,11 +19,17 @@ class Beneficia extends Model
         'default_reference',
         'sort_code',
         'user_id',
+        'personal_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+        public function personal()
+    {
+        return $this->belongsTo(Personal::class);
     }
 
     public function country()

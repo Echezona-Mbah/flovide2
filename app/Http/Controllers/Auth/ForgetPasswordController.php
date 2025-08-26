@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ForgetPasswordEmail;
+use App\Models\Personal;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ForgetPasswordController extends Controller
 {
@@ -18,58 +20,57 @@ class ForgetPasswordController extends Controller
     }
 
 
-    public function forgotPassword(Request $request)
+
+        public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
         ]);
 
         if ($validator->fails()) {
-            if ($request->expectsJson()) {
-                return response()->json([
+            return response()->json([
+                'data' => [
                     'message' => 'Validation failed',
                     'errors' => $validator->errors(),
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 422);
-            } else {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
+                ]
+            ], 422);
         }
-        $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'User not found',
-                    'errors' => 'User not found with the provided email address',
+        // Only User lookup
+        $account = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$account) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Account not found',
+                    'errors' => 'No User found with this email',
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 404);
-            } else {
-                return redirect()->back()->withErrors(['email' => 'User not found with the provided email address'])->withInput();
-            }
+                ]
+            ], 404);
         }
-        session(['reset_email' => $user->email]);
+
+        session(['reset_email' => $account->email]);
 
         $otp = $this->generateOTP();
 
-        $user->update([
+        $account->update([
             'forget_verification_otp' => $otp,
             'forgot_password_otp_expires_at' => now()->addMinutes(5),
         ]);
-        Mail::to($user->email)->send(new ForgetPasswordEmail($otp, $user));
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Password reset OTP sent. Please check your email for OTP',
-                'data' => ['otp' => $otp],
+        Mail::to($account->email)->send(new ForgetPasswordEmail($otp, $account));
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password reset OTP sent. Please check your email.',
+                'otp' => $otp,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
-            ], 201);
-        } else {
-            return redirect()->route('forget-verify-otp')->with('status', 'Password reset OTP sent. Please check your email.');
-        }
+            ]
+        ], 201);
     }
 
     
@@ -81,73 +82,129 @@ class ForgetPasswordController extends Controller
 
     public function verifyOTP(Request $request)
     {
-        $email = session('reset_email');
-        // dd($email);
         $validator = Validator::make($request->all(), [
             'otp' => 'required|digits:6',
         ]);
 
         if ($validator->fails()) {
-            if ($request->expectsJson()) {
-                return response()->json([
+            return response()->json([
+                'data' => [
                     'message' => 'Validation failed',
                     'errors' => $validator->errors(),
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 422);
-            } else {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
+                ]
+            ], 422);
         }
 
-        $user = User::where('forget_verification_otp', $request->otp)
+        // Only User lookup
+        $account = \App\Models\User::where('forget_verification_otp', $request->otp)
                     ->where('forgot_password_otp_expires_at', '>', now())
                     ->first();
 
-        if (!$user) {
-            if ($request->expectsJson()) {
-                return response()->json([
+        if (!$account) {
+            return response()->json([
+                'data' => [
                     'message' => 'Invalid or expired OTP',
                     'errors' => 'Invalid or expired OTP',
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 401);
-            } else {
-                return redirect()->back()->withErrors(['otp' => 'Invalid or expired OTP'])->withInput();
-            }
+                ]
+            ], 401);
         }
 
-        $user->update([
+        $account->update([
             'forget_verification_otp' => null,
             'forgot_password_otp_expires_at' => null,
+            'reset_token' => Str::random(60),
+            'reset_token_expires_at' => now()->addMinutes(10),
         ]);
 
-        if ($request->expectsJson()) {
-            return response()->json([
+        return response()->json([
+            'data' => [
                 'message' => 'OTP verified',
+                'reset_token' => $account->reset_token,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
-            ], 200);
-        } else {
-            return redirect()->route('resetPassword')->with('status', 'OTP verified. You can now reset your password.');
-        }
+            ]
+        ], 200);
     }
+
+
 
     public function createresetPassword()
     {
     
         return view('auth.reset-password');
     }
+
+
+    //  api
+    public function resetPasswordapi(Request $request)
+    {
+        $request->validate([
+            'reset_token' => 'required|string',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ],
+        ], [
+            'password.regex' => 'Password must contain uppercase, lowercase, number, and special character.',
+        ]);
+
+        // Only User lookup
+        $account = \App\Models\User::where('reset_token', $request->reset_token)
+                    ->where('reset_token_expires_at', '>', now())
+                    ->first();
+
+        if (!$account) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Invalid or expired reset token',
+                ]
+            ], 401);
+        }
+
+        $account->update([
+            'password' => bcrypt($request->password),
+            'reset_token' => null,
+            'reset_token_expires_at' => null,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password has been reset successfully',
+            ]
+        ], 200);
+    }
+
+
+
+
+    
+
+
+    // web
     public function resetPassword(Request $request)
     {
+
+        // dd('eesddd');
         $email = $request->expectsJson()
             ? $request->email
             : session('reset_email');
     
         if (!$email) {
             return $request->expectsJson()
-                ? response()->json(['message' => 'Email is missing'], 400)
-                : redirect()->back()->withErrors(['email' => 'Email session expired or missing. Please restart password reset.']);
+                ? response()->json([
+                     'data' => [
+                    'message' => 'Email is missing']
+                ], 400)
+                : redirect()->back()->withErrors([
+                     'data' => [
+                    'email' => 'Email session expired or missing. Please restart password reset.']]);
         }
     
         $rules = [
@@ -155,8 +212,7 @@ class ForgetPasswordController extends Controller
                 'required',
                 'string',
                 'min:8',
-                'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+                'confirmed'
             ],
         ];
     
@@ -169,11 +225,12 @@ class ForgetPasswordController extends Controller
         if ($validator->fails()) {
             if ($request->expectsJson()) {
                 return response()->json([
+                     'data' => [
                     'message' => 'Validation failed',
                     'errors' => $validator->errors(),
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 422);
+                ]], 422);
             } else {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
@@ -182,11 +239,12 @@ class ForgetPasswordController extends Controller
         if (!$user) {
             return $request->expectsJson()
                 ? response()->json([
+                 'data' => [
                     'message' => 'User not found',
                     'errors' => 'No account with this email',
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
-                ], 404)
+                ]], 404)
                 : redirect()->back()->withErrors(['email' => 'User not found'])->withInput();
         }
         $user->update([
@@ -201,19 +259,164 @@ class ForgetPasswordController extends Controller
     
         // API success response
         return response()->json([
+         'data' => [
             'message' => 'Password has been reset',
             'method' => $request->method(),
             'url' => $request->fullUrl()
-        ], 200);
+        ]], 200);
     }
-    
-
-
 
     private function generateOTP()
     {
         return rand(100000, 999999);
     }
+
+
+    // for personal
+
+    public function forgotPasswordPersonal(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 422);
+        }
+
+        $personal = Personal::where('email', $request->email)->first();
+
+        if (!$personal) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Personal not found',
+                    'errors' => 'Personal not found with the provided email address',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 404);
+        }
+
+        session(['reset_email' => $personal->email]);
+
+        $otp = $this->generateOTP();
+
+        $personal->update([
+            'forget_verification_otp' => $otp,
+            'forgot_password_otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        Mail::to($personal->email)->send(new ForgetPasswordEmail($otp, $personal));
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password reset OTP sent. Please check your email for OTP',
+                'data' => ['otp' => $otp],
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ], 201);
+    }
+
+    public function verifyOTPPersonal(Request $request)
+    {
+        $email = session('reset_email');
+
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 422);
+        }
+
+        $personal = Personal::where('forget_verification_otp', $request->otp)
+            ->where('forgot_password_otp_expires_at', '>', now())
+            ->first();
+
+        if (!$personal) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Invalid or expired OTP',
+                    'errors' => 'Invalid or expired OTP',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 401);
+        }
+
+        $personal->update([
+            'forget_verification_otp' => null,
+            'forgot_password_otp_expires_at' => null,
+            'reset_token' => Str::random(60),
+            'reset_token_expires_at' => now()->addMinutes(10),
+        ]);
+
+        return response()->json([
+            'data' => [
+                'message' => 'OTP verified',
+                'data' => ['reset_token' => $personal->reset_token],
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ], 200);
+    }
+
+    public function resetPasswordapiPersonal(Request $request)
+    {
+        $request->validate([
+            'reset_token' => 'required|string',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ],
+        ], [
+            'password.regex' => 'Password must contain uppercase, lowercase, number, and special character.',
+        ]);
+
+        $personal = Personal::where('reset_token', $request->reset_token)
+            ->where('reset_token_expires_at', '>', now())
+            ->first();
+
+        if (!$personal) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Invalid or expired reset token',
+                ]
+            ], 401);
+        }
+
+        $personal->update([
+            'password' => bcrypt($request->password),
+            'reset_token' => null,
+            'reset_token_expires_at' => null,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password has been reset successfully',
+            ]
+        ], 200);
+    }
+
+
 
 
 
