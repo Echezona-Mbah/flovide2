@@ -12,8 +12,9 @@ class ChargebackController extends Controller
 
  public function index(Request $request)
 {
-    $user = auth()->user();
-    $chargebacks = ChargeBacks::where('user_id', $user->id)->get();
+    // $user = auth()->user();
+    $ownerId = session('owner_id');
+    $chargebacks = ChargeBacks::where('user_id', $ownerId)->get();
 
     // API response
     if ($request->expectsJson()) {
