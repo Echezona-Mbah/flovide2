@@ -149,7 +149,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Route::get('/getLoggedInPersonal', [RegisterController::class, 'getLoggedInPersonal']);
     // Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
 
-    //API FOR PERSONAL
+    //API FOR PERSONAL dd
 
 Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
     return $request->user(); 
