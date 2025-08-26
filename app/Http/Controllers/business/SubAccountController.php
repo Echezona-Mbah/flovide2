@@ -48,7 +48,7 @@ class SubAccountController extends Controller
         if ($subaccounts->isEmpty()) {
             session()->flash('info', 'You have not added any subaccounts yet.');
         }
-        // dd(' $banks');
+        // dd(' $user');
 
         return view('business.subaccount', [
             'subaccounts' => $subaccounts,
