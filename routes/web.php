@@ -5,6 +5,7 @@ use App\Http\Controllers\business\addBankAccountController;
 use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\business\InvoicesController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\personalController;
 use Illuminate\Support\Facades\Route;
