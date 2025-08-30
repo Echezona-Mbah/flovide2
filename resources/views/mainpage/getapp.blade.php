@@ -20,9 +20,15 @@
                 Experience The<br />Future of Finance
               </h1>
               <p class="text-sm sm:text-base max-w-md mb-10">
+<<<<<<< HEAD
+                Unlock a powerful suite of financial solutions, including
+                digital payments, seamless transactions, wealth management, and
+                cutting-edge blockchain applications.
+=======
                 Unlock a powerful suite of financial solutions,
                 including digital payments, seamless transactions,
                 wealth management, and cutting-edge applications. 
+>>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
               </p>
               <div class="flex flex-wrap gap-4">
                 <button

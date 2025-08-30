@@ -6,17 +6,23 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\business\addBankAccountController;
+use App\Http\Controllers\Personal\addBankAccountController as PersonaladdBankAccountController;
 use App\Http\Controllers\business\SubAccountController;
+use App\Http\Controllers\Personal\SubAccountController as PersonalSubAccountController;
+use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\business\refundsController;
+use App\Http\Controllers\Personal\refundsController as PersonalrefundsController;
+use App\Http\Controllers\business\RemitaController;
 use App\Http\Controllers\business\TransactionHistoryController;
-use App\Http\Controllers\Business\AddBeneficiariesController;
-use App\Http\Controllers\Business\AddCustomerController;
-use App\Http\Controllers\Business\BillPaymentController;
-use App\Http\Controllers\Business\ChargebackController;
-use App\Http\Controllers\Business\ComplianceController;
-use App\Http\Controllers\Business\CreateBankController;
-use App\Http\Controllers\Business\SendMoneyController;
-use App\Http\Controllers\Business\SubscriptionController;
-use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\business\AddBeneficiariesController;
+use App\Http\Controllers\business\AddCustomerController;
+use App\Http\Controllers\business\BillPaymentController;
+use App\Http\Controllers\business\ChargebackController;
+use App\Http\Controllers\business\ComplianceController;
+use App\Http\Controllers\business\CreateBankController;
+use App\Http\Controllers\business\SendMoneyController;
+use App\Http\Controllers\business\SubscriptionController;
+use App\Http\Controllers\business\VirtualAccountController;
 use App\Http\Controllers\Personal\AddBeneficiariesController as PersonalAddBeneficiariesController;
 use App\Http\Controllers\Personal\AddMoneyController;
 use App\Http\Controllers\Personal\BillPaymentController as PersonalBillPaymentController;
@@ -46,24 +52,64 @@ Route::post('/auth/forgot-password', [ForgetPasswordController::class, 'forgotPa
 Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
 Route::post('/auth/reset-password', [ForgetPasswordController::class, 'resetPasswordapi']);
 
+// Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
+
+
+
+
+
+
+
+
+
+
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
     Route::get('/getLoggedInUser', [RegisterController::class, 'getLoggedInUser']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);
+    
     // api routes for bank acccount details 
     Route::post('business/bank-account', [addBankAccountController::class, 'store']);
     Route::get('business/show-bank-accounts', [addBankAccountController::class, 'payouts']);
     Route::delete('business/delete-account/{id}', [addBankAccountController::class, 'destroy']);
     Route::delete('business/delete-accounts', [addBankAccountController::class, 'destroyAll']);
     Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
+    Route::get('business/bank-account/{id}', [addBankAccountController::class, 'edit']);
+    Route::get('business/fetchBanks', [addBankAccountController::class, 'fetchlocalBanks']);
+    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName']);
+    
     // api routes for sub accounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
+    Route::get('business/show-subaccount/{id}', [SubAccountController::class, 'edit']);
     Route::put('business/update-subaccount/{id}', [SubAccountController::class, 'update']);
     Route::delete('business/delete-subaccount/{id}', [SubAccountController::class, 'destroy']);
     Route::delete('business/delete-subaccounts', [SubAccountController::class, 'destroyAll']);
-    // api for transaction history 
+    Route::get('business/fetchBanks', [SubAccountController::class, 'fetchlocalBanks']);
+    Route::post('business/validateSubaccountName', [SubAccountController::class, 'validatePayoutAccountName']);
+    
+    //invoices section
+    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+    
+    //refund
+    Route::get('/business/refunds', [refundsController::class, 'index'])->name('refunds.index');
+    Route::get('/business/refunds/{id}', [refundsController::class, 'fetchRefund']);
+    Route::post('/business/refunds', [refundsController::class, 'store'])->name('refund.store');
+    Route::post('/business/refunds/{id}/status', [refundsController::class, 'updateStatus']);
+    
+    //remita
+    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
+    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+
+    // api for transaction history
     Route::get('business/showTransactions', [TransactionHistoryController::class, 'showAllTransactions']);
     Route::get('business/userTransactions', [TransactionHistoryController::class, 'transaction']);
     Route::get('business/userTransactions/{id}', [TransactionHistoryController::class, 'UserTransaction']);
@@ -73,7 +119,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/add-baneficia', [AddBeneficiariesController::class, 'store']);
     Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
     Route::delete('beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
-    Route::get('/fetchBanks', [AddBeneficiariesController::class, 'fetchBankss']);
+    Route::get('/fetchBanks', [AddBeneficiariesController::class, 'fetchBanks']);
     Route::post('/validate-account', [AddBeneficiariesController::class, 'validateRecipient']);
     Route::get('/fetchcountrylist', [AddBeneficiariesController::class, 'fetchcountrylist']);
     Route::get('beneficia/all', [AddBeneficiariesController::class, 'allBeneficia']);
@@ -155,75 +201,60 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
 
     //API FOR PERSONAL dd
+    Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
+        return $request->user(); 
+    });
+    // for personal
+    Route::post('auth/registerpersonal', [RegisterController::class, 'registerPersonal']);
+    Route::post('auth/verify-personalemail', [RegisterController::class, 'verifyPersonalEmail']);
+    Route::post('auth/new-personalemail-otp', [RegisterController::class, 'verifyPersonalEmailOtp']);
+    Route::post('auth/login-personal', [LoginController::class, 'loginPersonal']);
+    Route::post('/auth/forgot-password-personal', [ForgetPasswordController::class, 'forgotPasswordPersonal']);
+    Route::post('/auth/forget-verify-otp-personal', [ForgetPasswordController::class, 'verifyOTPPersonal']);
+    Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
 
-Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
-    return $request->user(); 
-});
-// for personal
-Route::post('auth/registerpersonal', [RegisterController::class, 'registerPersonal']);
-Route::post('auth/verify-personalemail', [RegisterController::class, 'verifyPersonalEmail']);
-Route::post('auth/new-personalemail-otp', [RegisterController::class, 'verifyPersonalEmailOtp']);
-Route::post('auth/login-personal', [LoginController::class, 'loginPersonal']);
-Route::post('/auth/forgot-password-personal', [ForgetPasswordController::class, 'forgotPasswordPersonal']);
-Route::post('/auth/forget-verify-otp-personal', [ForgetPasswordController::class, 'verifyOTPPersonal']);
-Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
+    Route::group(['middleware' => ['auth:personal-api']], function () {
+        Route::prefix('personal')->group(function () {
 
-Route::group(['middleware' => ['auth:personal-api']], function () {
-    Route::prefix('personal')->group(function () {
-
-    Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
-    Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
-    Route::put('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
-    Route::delete('personal-beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
-    Route::get('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
-    Route::post('/personal-validate-account', [PersonalAddBeneficiariesController::class, 'validateRecipient']);
-    Route::get('/personal-fetchcountrylist', [PersonalAddBeneficiariesController::class, 'fetchcountrylist']);
-    Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
-
-
-    // Virtual Account
-    Route::get('/personal-virtualCard', [PersonalVirtualAccountController::class, 'index']);
-    Route::post('personal-virtualCard', [PersonalVirtualAccountController::class, 'createVirtualAccount']);
-    Route::get('/personal-allvirtualcard', [PersonalVirtualAccountController::class, 'allvirtualcard']);
-    Route::get('/personal-virtualcard/{id}', [PersonalVirtualAccountController::class, 'showVirtualCard']);
-    Route::delete('/personal-virtualCard/{id}', [PersonalVirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
+        Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
+        Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
+        Route::put('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
+        Route::delete('personal-beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
+        Route::get('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
+        Route::post('/personal-validate-account', [PersonalAddBeneficiariesController::class, 'validateRecipient']);
+        Route::get('/personal-fetchcountrylist', [PersonalAddBeneficiariesController::class, 'fetchcountrylist']);
+        Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
 
 
-    // api routes for DSTV details
+        // Virtual Account
+        Route::get('/personal-virtualCard', [PersonalVirtualAccountController::class, 'index']);
+        Route::post('personal-virtualCard', [PersonalVirtualAccountController::class, 'createVirtualAccount']);
+        Route::get('/personal-allvirtualcard', [PersonalVirtualAccountController::class, 'allvirtualcard']);
+        Route::get('/personal-virtualcard/{id}', [PersonalVirtualAccountController::class, 'showVirtualCard']);
+        Route::delete('/personal-virtualCard/{id}', [PersonalVirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
+
+
+        // api routes for DSTV details
     Route::get('/personal-Dstvvariations', [PersonalBillPaymentController::class, 'getVariations']);
     Route::post('/personal-Dstvverify', [PersonalBillPaymentController::class, 'verify']);
     Route::post('/personal-Dstvpay', [PersonalBillPaymentController::class, 'handleDstv']);
     Route::get('/personal-billhistory', [PersonalBillPaymentController::class, 'getUserBillPayments']);
 
-    // Elecricity
-    Route::get('/personal-electricityvariations', [PersonalBillPaymentController::class, 'getElectricityVariations']);
-    Route::post('/personal-electricity_verify', [PersonalBillPaymentController::class, 'verifyElectricity']);
-    Route::post('/personal-electricitypay', [PersonalBillPaymentController::class, 'handleElectricity']);
-    // DATA
-    Route::get('/personal-service_id', [PersonalBillPaymentController::class, 'getDataServiceId']);
-    Route::post('/personal-date_variations', [PersonalBillPaymentController::class, 'getDateVariations']);
-    Route::post('/personal-dataypay', [PersonalBillPaymentController::class, 'handleData']);
+        // Elecricity
+        Route::get('/personal-electricityvariations', [PersonalBillPaymentController::class, 'getElectricityVariations']);
+        Route::post('/personal-electricity_verify', [PersonalBillPaymentController::class, 'verifyElectricity']);
+        Route::post('/personal-electricitypay', [PersonalBillPaymentController::class, 'handleElectricity']);
+        // DATA
+        Route::get('/personal-service_id', [PersonalBillPaymentController::class, 'getDataServiceId']);
+        Route::post('/personal-date_variations', [PersonalBillPaymentController::class, 'getDateVariations']);
+        Route::post('/personal-dataypay', [PersonalBillPaymentController::class, 'handleData']);
 
-    // api routes for Balance details
+        // api routes for Balance details
     Route::get('/personal-balances', [PersonalCreateBankController::class, 'index']);
     Route::get('/personal-singlebalances', [PersonalCreateBankController::class, 'create']);
     Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
     Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
     Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
-
-    // api routes for Send Money detailsdeactivateAccount
-    Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
-    Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
-
-
-    // Update Profile
-    Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
-    Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
-    Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
-
-
-    Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
-
 
 
 

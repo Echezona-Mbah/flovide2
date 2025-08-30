@@ -11,18 +11,21 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\business\addBankAccountController;
-use App\Http\Controllers\Business\AddBeneficiariesController;
-use App\Http\Controllers\Business\AddCustomerController;
-use App\Http\Controllers\Business\BillPaymentController;
-use App\Http\Controllers\Business\ChargebackController;
-use App\Http\Controllers\Business\ComplianceController;
+use App\Http\Controllers\business\AddBeneficiariesController;
+use App\Http\Controllers\business\AddCustomerController;
+use App\Http\Controllers\business\BillPaymentController;
+use App\Http\Controllers\business\ChargebackController;
+use App\Http\Controllers\business\ComplianceController;
 use App\Http\Controllers\business\SubAccountController;
-use App\Http\Controllers\Business\SubscriptionController;
+use App\Http\Controllers\business\SubscriptionController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\business\refundsController;
+use App\Http\Controllers\business\RemitaController;
 use App\Http\Controllers\business\CreateBankController;
-use App\Http\Controllers\Business\OrganizationController;
-use App\Http\Controllers\Business\SendMoneyController;
-use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\business\OrganizationController;
+use App\Http\Controllers\business\SendMoneyController;
+use App\Http\Controllers\business\VirtualAccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -77,25 +80,50 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
-    Route::post('/payout', [addBankAccountController::class, 'store'])->name('store');
+    Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
     Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
     Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
     Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
     Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
     Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
-
+    Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
+    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
 
     //subaccount
     Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
     Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
-    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('store');
+    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('subaccounts.store');
     Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
     Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
     Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
-    Route::post('/bankSubAccounts/{id}/set-default', [SubAccountController::class, 'setDefault'])->name('setDefault');
+    Route::get('/subaccounts/fetch-banks', [SubAccountController::class, 'fetchlocalBanks'])->name('subaccounts.fetch.localbanks');
+    Route::post('/subaccounts/validate-payout-account-name', [SubAccountController::class, 'validatePayoutAccountName'])->name('subaccounts.validatePayoutAccountName');
 
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');
+    
+    //invoices section
+    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
+    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+
+    //refund
+    Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
+    Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
+    Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
+    
+    //remita
+    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
+    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
+    Route::post('/remita/update', [RemitaController::class, 'update'])->name('remita.update');
+    Route::post('/remita/{id}/destory', [RemitaController::class, 'destory'])->name('remita.destory');
+    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    
 
 
     // beneficias

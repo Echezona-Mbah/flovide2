@@ -69,17 +69,17 @@
               <div>
                 <h4 class="font-semibold mb-4">Our Services</h4>
                 <ul class="space-y-2 text-gray-600 text-sm">
-                  {{-- <li>
+                  <li>
                     <a href="#" class="hover:text-gray-900">Mobile banking</a>
-                  </li> --}}
+                  </li>
                   <li>
                     <a href="#" class="hover:text-gray-900"
                       >Advanced security</a
                     >
                   </li>
-                  {{-- <li>
+                  <li>
                     <a href="#" class="hover:text-gray-900">Digital wallet</a>
-                  </li> --}}
+                  </li>
                   <li>
                     <a href="#" class="hover:text-gray-900">Budgeting tools</a>
                   </li>
