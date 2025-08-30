@@ -25,27 +25,29 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    protected function mapWebRoutes()
-    {
-        Route::middleware('web') // Apply the 'web' middleware group
-            ->namespace($this->namespace)
-            ->group(base_path('routes/web.php')); // Path to the web.php routes file
-    }
+    // protected function mapWebRoutes()
+    // {
+    //     Route::middleware('web') // Apply the 'web' middleware group
+    //         ->namespace($this->namespace)
+    //         ->group(base_path('routes/web.php')); // Path to the web.php routes file
+    // }
+
+ protected function mapWebRoutes()
+{
+   Route::middleware(['web', \App\Http\Middleware\ResolveOwnerMiddleware::class])
+    ->namespace($this->namespace)
+    ->group(base_path('routes/web.php'));
+
+}
+
+
+
+    
 
     /**
      * Bootstrap any application services.
      */
-    // public function boot(): void
-    // {
-    //     $this->routes(function () {
-    //         Route::middleware('api')
-    //             ->prefix('api') 
-    //             ->group(base_path('routes/api.php'));
-    
-    //         Route::middleware('web')
-    //             ->group(base_path('routes/web.php'));
-    //     });
-    // }
+
 
     public function map()
     {
