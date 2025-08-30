@@ -57,21 +57,36 @@ public function registerUser(Request $request)
     ]);
 
     if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+        return response()->json([
+             'data' => [
+            'errors' => $validator->errors(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl()
+        ]], 422);
     }
 
     if (
         User::where('email', $request->email)->exists() ||
         Personal::where('email', $request->email)->exists()
     ) {
-        return response()->json(['errors' => ['email' => ['Email already taken']]], 422);
+        return response()->json([
+            'data' => [
+            'errors' => "Email already taken",
+            'method' => $request->method(),
+            'url' => $request->fullUrl()
+            ]], 422);
     }
 
     if ($request->person_phone && (
         User::where('person_phone', $request->person_phone)->exists() ||
         Personal::where('person_phone', $request->person_phone)->exists()
     )) {
-        return response()->json(['errors' => ['person_phone' => ['Phone already taken']]], 422);
+        return response()->json([
+            'data' => [
+            'errors' => "Phone already taken",
+            'method' => $request->method(),
+            'url' => $request->fullUrl()
+            ]], 422);
     }
 
     $otp = $this->generateOTP();
@@ -130,6 +145,8 @@ public function registerUser(Request $request)
             'message' => "Business registration successful. Please check your email for verification",
             'token' => $token,
             'email_verification_otp' => $otp,
+            'method' => $request->method(),
+            'url' => $request->fullUrl()
         ]
     ], 201);
 }
@@ -149,13 +166,13 @@ public function registerUser(Request $request)
         $account = \App\Models\User::where('email', $request->email)
             ->where('email_verification_otp_expires_at', '>', now())
             ->first();
-
         if (!$account) {
             return response()->json([
+                 'data' => [
                 'message' => 'Invalid or expired OTP',
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
-            ], 404);
+            ]], 404);
         }
 
         if ($account->email_verification_otp !== $request->otp) {
@@ -163,8 +180,11 @@ public function registerUser(Request $request)
 
             if ($account->email_verification_attempts >= 3) {
                 return response()->json([
-                    'errors' => 'Too many attempts. Please request a new OTP.'
-                ], 422);
+                    'data' => [
+                    'errors' => 'Too many attempts. Please request a new OTP.',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]], 422);
             }
 
             return response()->json([
@@ -242,7 +262,12 @@ public function registerUser(Request $request)
         $user = Auth::user();
 
         if (!$user) {
-            return Response::json(['message' => 'No logged-in user'], 404);
+            return Response::json([
+                'data' => [
+                'message' => 'No logged-in user',
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]], 404);
         }
 
         $method = $request->method();
@@ -262,23 +287,32 @@ public function registerUser(Request $request)
         if ($users->isEmpty()) {
             return Response::json([
              'data' => [
-                'message' => 'No users found'
+                'message' => 'No users found',
+                // 'method' => $request->method(),
+                // 'url' => $request->fullUrl()
             ]], 404);
         }
         return Response::json($users, 200);
     }
 
+
+
     public function getAllCountry()
-    {
-        $Countries = Countries::all();
-        if ($Countries->isEmpty()) {
-            return Response::json([
-             'data' => [
-                'message' => 'No Countries found'
-            ]], 404);
-        }
-        return Response::json($Countries, 200);
+{
+    $countries = Countries::all();
+
+    if ($countries->isEmpty()) {
+        return response()->json([
+            'data' => [
+            'message' => 'No Countries found'
+        ]], 404);
     }
+
+    return response()->json([
+        'data' => [
+        'countries' => $countries
+    ]], 200);
+}
 
 
     public function deleteUser(Request $request, $email)
@@ -336,81 +370,98 @@ public function registerUser(Request $request)
 
     //  for personal
 
-public function registerPersonal(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'email' => 'required|string|email|max:255',
-        'password' => [
-            'required','string','min:8','confirmed',
-            'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
-        ],
-        'password_confirmation' => 'required|string|min:8|same:password',
-        'country' => 'required|string|max:255',
-        'street_address' => 'required|string|max:255',
-        'city' => 'required|string|max:255',
-        'state' => 'required|string|max:255',
-        'firstname' => 'required|string|max:255',
-        'lastname' => 'required|string|max:255',
-        'person_phone' => 'required|string|max:20',
-    ]);
+    public function registerPersonal(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => [
+                'required','string','min:8','confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ],
+            'password_confirmation' => 'required|string|min:8|same:password',
+            'country' => 'required|string|max:255',
+            'street_address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'person_phone' => 'required|string|max:20',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => [
+                'errors' => $validator->errors(),
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]], 422);
+        }
 
-    if (
-        User::where('email', $request->email)->exists() ||
-        Personal::where('email', $request->email)->exists()
-    ) {
-        return response()->json(['errors' => ['email' => ['Email already taken']]], 422);
-    }
+        if (
+            User::where('email', $request->email)->exists() ||
+            Personal::where('email', $request->email)->exists()
+        ) {
+            return response()->json([
+                'data' => [
+                    'errors' => 'Email already taken',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]], 422);
+        }
 
-    if (
-        User::where('person_phone', $request->person_phone)->exists() ||
-        Personal::where('person_phone', $request->person_phone)->exists()
-    ) {
-        return response()->json(['errors' => ['person_phone' => ['Phone already taken']]], 422);
-    }
+        if (
+            User::where('person_phone', $request->person_phone)->exists() ||
+            Personal::where('person_phone', $request->person_phone)->exists()
+        ) {
+            return response()->json([
+                'data' => [
+                    'errors' => 'Phone already taken',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]], 422);
+        }
 
-    $otp = $this->generateOTP();
-    $existingcountry = Countries::where('name', $request->country)->first();
-    $currency_code = $existingcountry->currency_code;
+        $otp = $this->generateOTP();
+        $existingcountry = Countries::where('name', $request->country)->first();
+        $currency_code = $existingcountry->currency_code;
 
-    $user = Personal::create([
-        'country' => $request->country,
-        'firstname' => $request->firstname,
-        'lastname' => $request->lastname,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'person_phone' => $request->person_phone,
-        'street_address' => $request->street_address,
-        'city' => $request->city,
-        'state' => $request->state,
-        'currency' => $currency_code,
-        'email_verification_otp' => $otp,
-        'email_verification_otp_expires_at' => now()->addMinutes(10),
-    ]);
-
-    Balance::create([
-        'user_id' => null,
-        'personal_id' => $user->id,
-        'currency' => $user->currency ?? 'USD',
-        'name' => 'Main Balance',
-        'balance' => 0.00,
-    ]);
-
-    Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
-
-    $token = $user->createToken('personal-api-token')->plainTextToken;
-
-    return response()->json([
-        'data' => [
-            'message' => "Personal registration successful. Please check your email for verification",
-            'token' => $token,
+        $user = Personal::create([
+            'country' => $request->country,
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'person_phone' => $request->person_phone,
+            'street_address' => $request->street_address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'currency' => $currency_code,
             'email_verification_otp' => $otp,
-        ]
-    ], 201);
-}
+            'email_verification_otp_expires_at' => now()->addMinutes(10),
+        ]);
+
+        Balance::create([
+            'user_id' => null,
+            'personal_id' => $user->id,
+            'currency' => $user->currency ?? 'USD',
+            'name' => 'Main Balance',
+            'balance' => 0.00,
+        ]);
+
+        Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
+
+        $token = $user->createToken('personal-api-token')->plainTextToken;
+
+        return response()->json([
+            'data' => [
+                'message' => "Personal registration successful. Please check your email for verification",
+                'token' => $token,
+                'email_verification_otp' => $otp,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ], 201);
+    }
 
 
 
@@ -424,26 +475,29 @@ public function registerPersonal(Request $request)
             'email' => 'required','string','email','max:255',
 
         ]);
+
     
-        $user = Personal::where('email', $request->email)
-            ->where('email_verification_otp_expires_at', '>', now())
-            ->first();
-    
+       $user = \App\Models\Personal::where('email', $request->email)->first();
         if (!$user) {
-            $method = $request->method();
-            $url = $request->fullUrl();
             return response()->json([
-                'message' => 'Invalid or expired OTP',
-                'method' => $method,
-                'url' => $url
+                'data' => [
+                    'message' => 'User not found',
+                    'method'  => $request->method(),
+                    'url'     => $request->fullUrl(),
+                ]
             ], 404);
-        }
-    
+        }    
         if ($user->email_verification_otp !== $request->otp) {
             $user->increment('email_verification_attempts');
     
             if ($user->email_verification_attempts >= 3) {
-                return response()->json(['errors' => 'Too many attempts. Please request a new OTP.'], 422);
+
+                return response()->json([
+                    'data' => [
+                    'errors' => 'Too many attempts. Please request a new OTP.',
+                    'method' =>  $request->method(),
+                    'url' => $request->fullUrl()
+                ]], 422);
             }
     
             $method = $request->method();
@@ -458,9 +512,15 @@ public function registerPersonal(Request $request)
         }
     
         if ($user->email_verified_status !== 'no') {
-            return response()->json(['message' => 'Email already verified']);
+            return response()->json([
+            'data' => [
+                'message' => 'Email already verified',
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]]);
         }
-    
+            // dd($user);
+
         $user->update([
             'email_verified_at' => now(),
             'email_verified_status' => 'yes',
@@ -526,7 +586,12 @@ public function registerPersonal(Request $request)
         $personal = Auth::guard('personal')->user();
 
         if (!$personal) {
-            return Response::json(['message' => 'No logged-in personal'], 404);
+            return Response::json([
+            'data' => [
+                'message' => 'No logged-in personal',
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]], 404);
         }
 
         return response()->json([

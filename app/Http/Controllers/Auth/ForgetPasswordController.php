@@ -177,6 +177,7 @@ class ForgetPasswordController extends Controller
         return response()->json([
             'data' => [
                 'message' => 'Password has been reset successfully',
+                
             ]
         ], 200);
     }
@@ -369,7 +370,7 @@ class ForgetPasswordController extends Controller
         return response()->json([
             'data' => [
                 'message' => 'OTP verified',
-                'data' => ['reset_token' => $personal->reset_token],
+                'reset_token' => $personal->reset_token,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
             ]

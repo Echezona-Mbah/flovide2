@@ -127,13 +127,13 @@
             <div
               class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block"
             >
-              <img src="../asserts/Personal/headerImage2.png" alt="" />
+              <img src="../asserts/image 2 (1).png" alt="" />
             </div>
             <!-- Third card -->
             <div
               class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block"
             >
-              <img src="../asserts/Personal/headerImage3.png" alt="" />
+              <img src="../asserts/image 3.png" alt="" />
             </div>
           </div>
 

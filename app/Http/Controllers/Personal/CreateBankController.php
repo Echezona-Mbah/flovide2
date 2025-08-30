@@ -30,7 +30,7 @@ public function create(Request $request)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'No balance created for this personal account',
+                    'errors'     => 'No balance created for this personal account',
                     'balances'    => [],
                 ]
             ], 200);
@@ -115,7 +115,7 @@ public function updateBalance(Request $request)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'Balance not found.',
+                    'errors'     => 'Balance not found.',
                 ]
             ], 404)
             : redirect()->back()->with('error', 'Balance not found.');

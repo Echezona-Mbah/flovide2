@@ -18,8 +18,11 @@ use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\SubscriptionController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Personal\AddBeneficiariesController as PersonalAddBeneficiariesController;
+use App\Http\Controllers\Personal\AddMoneyController;
 use App\Http\Controllers\Personal\BillPaymentController as PersonalBillPaymentController;
 use App\Http\Controllers\Personal\CreateBankController as PersonalCreateBankController;
+use App\Http\Controllers\Personal\OrganizationController;
+use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -131,6 +134,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
+
+
     
     // Route::get('/balances', [BalanceController::class, 'index']);
     // Route::post('/balances', [BalanceController::class, 'store']);
@@ -176,7 +181,7 @@ Route::group(['middleware' => ['auth:personal-api']], function () {
     Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
 
 
-        // Virtual Account
+    // Virtual Account
     Route::get('/personal-virtualCard', [PersonalVirtualAccountController::class, 'index']);
     Route::post('personal-virtualCard', [PersonalVirtualAccountController::class, 'createVirtualAccount']);
     Route::get('/personal-allvirtualcard', [PersonalVirtualAccountController::class, 'allvirtualcard']);
@@ -184,7 +189,7 @@ Route::group(['middleware' => ['auth:personal-api']], function () {
     Route::delete('/personal-virtualCard/{id}', [PersonalVirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
 
 
-        // api routes for DSTV details
+    // api routes for DSTV details
     Route::get('/personal-Dstvvariations', [PersonalBillPaymentController::class, 'getVariations']);
     Route::post('/personal-Dstvverify', [PersonalBillPaymentController::class, 'verify']);
     Route::post('/personal-Dstvpay', [PersonalBillPaymentController::class, 'handleDstv']);
@@ -199,12 +204,26 @@ Route::group(['middleware' => ['auth:personal-api']], function () {
     Route::post('/personal-date_variations', [PersonalBillPaymentController::class, 'getDateVariations']);
     Route::post('/personal-dataypay', [PersonalBillPaymentController::class, 'handleData']);
 
-        // api routes for Balance details
+    // api routes for Balance details
     Route::get('/personal-balances', [PersonalCreateBankController::class, 'index']);
     Route::get('/personal-singlebalances', [PersonalCreateBankController::class, 'create']);
     Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
     Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
     Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
+
+    // api routes for Send Money detailsdeactivateAccount
+    Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
+    Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
+
+
+    // Update Profile
+    Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
+    Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
+    Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
+
+
+    Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
+
 
 
 
