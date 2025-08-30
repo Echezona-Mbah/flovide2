@@ -58,9 +58,6 @@ class User extends Authenticatable
         'tin',
         'tin_status',
         'utility_bill',
-<<<<<<< HEAD
-        'utility_bill_status'
-=======
         'utility_bill_status',
         'firstname',
         'lastname',
@@ -69,7 +66,6 @@ class User extends Authenticatable
         'reset_token_expires_at',
         'business_phone',
         'person_phone',
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
     ];
 
     /**
@@ -101,9 +97,6 @@ class User extends Authenticatable
     return $this->hasMany(Balance::class);
 }
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
 }

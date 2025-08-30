@@ -21,9 +21,11 @@
     <section class=" relative w-full ">
       <section class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
         <header class="flex items-center gap-4 mb-8">
-          <button aria-label="Back" class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
-            <i class="fas fa-chevron-left text-lg"></i>
-          </button>
+          <a href="{{ route('remita.index') }}">
+            <button aria-label="Back" class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
+              <i class="fas fa-chevron-left text-lg"></i>
+            </button>
+          </a>
           <h1 class="text-xl font-semibold text-gray-900 select-none">Page details</h1>
           <div class="ml-auto flex items-center gap-4">
             <div class="flex items-center gap-2">
@@ -43,17 +45,56 @@
             <p class="text-xs text-gray-500 select-none">
               Create, edit and track payment pages all in one place.
             </p>
+            <script>
+              @if ($errors->any())
+                Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'error',
+                  title: 'Please fix the following errors:',
+                  html: `
+                      <ul style="padding-left: 1.2em; margin: 0;">
+                          @foreach ($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                          @endforeach
+                      </ul>
+                  `,
+                  showConfirmButton: false,
+                  timer: 5000,
+                  timerProgressBar: true,
+                  customClass: {
+                      popup: 'text-sm'
+                  }
+                });
+              @endif
 
+              @if (session('success'))
+                Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'success',
+                  title: "{{ session('success') }}",
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true,
+                  didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                  }
+                });
+              @endif
+            </script>
+
+              
             <div class="flex flex-col gap-1">
-              <label class="text-xs text-gray-600 font-semibold select-none" for="cover-upload">Add a cover
-                image</label>
+              <label class="text-xs text-gray-600 font-semibold select-none" for="cover-upload">Add a cover image</label>
               <div class="flex flex-wrap gap-2 text-xs text-gray-500 select-none">
                 <span class="border border-gray-300 rounded-md px-2 py-[2px]">File type: .png and .jpg</span>
                 <span class="border border-gray-300 rounded-md px-2 py-[2px]">Max file size: 5MB</span>
                 <span class="border border-gray-300 rounded-md px-2 py-[2px]">Dimensions: 1600 px by 300 px</span>
               </div>
-              <label for="cover-upload"
-                class="mt-2 cursor-pointer border border-dashed border-gray-300 rounded-md h-16 flex items-center justify-center text-xs text-gray-600 select-none hover:border-gray-400">
+
+              <label for="cover-upload" class="mt-2 cursor-pointer border border-dashed border-gray-300 rounded-md h-28 flex items-center justify-center text-xs text-gray-600 select-none hover:border-gray-400">
                 Drag and drop here or
                 <button type="button" class="ml-2 bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-md">
                   <i class="fas fa-image mr-1"></i> Browse
@@ -61,17 +102,17 @@
                 <input type="file" id="cover-upload" class="hidden" />
               </label>
             </div>
+            <form class="flex flex-col gap-6" action="{{ route('remita.update') }}" method="PUT" enctype="multipart/form-data">
+              @method('PUT')
+              @csrf
 
-            <form class="flex flex-col gap-6">
               <div class="flex flex-col gap-1">
                 <label for="title" class="text-xs text-gray-600 select-none">Title</label>
-                <input id="title" type="text" placeholder="12345678"
-                  class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <input id="title" type="text" value="{{ $remita->title }}" class="text-xs text-dark-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
 
-              <div class="flex flex-col gap-1">
+              {{-- <div class="flex flex-col gap-1">
                 <label class="text-xs text-gray-600 select-none">Fixed Amount</label>
-
 
                 <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
 
@@ -99,22 +140,38 @@
                     class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 md:w-36 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
 
-              </div>
+              </div> --}}
 
               <div class="flex flex-col gap-1">
                 <label for="service-type" class="text-xs text-gray-600 select-none">Service Type</label>
-                <select id="service-type"
-                  class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <option selected disabled>Select a service type</option>
+                <select id="service-type" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option value="" disabled {{ empty($remita->service_type) ? 'selected' : '' }}>
+                    Select a service type
+                </option>
+                <option value="school_fees" {{ $remita->service_type === 'school_fees' ? 'selected' : '' }}>School Fees</option>
+                <option value="utilities" {{ $remita->service_type === 'utilities' ? 'selected' : '' }}>Utilities</option>
+                <option value="donation" {{ $remita->service_type === 'donation' ? 'selected' : '' }}>Donation</option>
+                <option value="subscription" {{ $remita->service_type === 'subscription' ? 'selected' : '' }}>Subscription</option>
+                <option value="product_payment" {{ $remita->service_type === 'product_payment' ? 'selected' : '' }}>Product Payment</option>
+                <option value="event_registration" {{ $remita->service_type === 'event_registration' ? 'selected' : '' }}>Event Registration</option>
                 </select>
               </div>
 
               <div class="flex flex-col gap-1">
                 <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
                 <div class="flex gap-3">
-                  <select id="subaccount"
-                    class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option selected disabled>Select a subaccount</option>
+                  <select id="subaccount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <option value="" disabled {{ empty($remita->subaccount_id) ? 'selected' : '' }}>
+                      Select a subaccount
+                    </option>
+                    @foreach ($subaccounts as $subaccount)
+                        <option value="{{ $subaccount->id }}" 
+                            {{ $remita->subaccount_id == $subaccount->id ? 'selected' : '' }}>
+                            {{ $subaccount->account_number 
+                              ? Crypt::decryptString($subaccount->account_number) 
+                              : Crypt::decryptString($subaccount->iban) }}
+                        </option>
+                    @endforeach
                   </select>
                   <input type="text" value="10"
                     class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -125,29 +182,78 @@
 
               <div class="flex flex-col gap-1">
                 <label for="currency" class="text-xs text-gray-600 select-none">Currency</label>
-                <select id="currency"
-                  class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex items-center gap-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <option selected>
-                    🇺🇸 US Dollar
-                  </option>
+                <select id="currency" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex items-center gap-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option selected>🌍 Select currency</option>
+                  <option value="USD">🇺🇸 USD – US Dollar</option>
+                  <option value="EUR">🇪🇺 EUR – Euro</option>
+                  <option value="GBP">🇬🇧 GBP – British Pound</option>
+                  <option value="JPY">🇯🇵 JPY – Japanese Yen</option>
+                  <option value="CNY">🇨🇳 CNY – Chinese Yuan</option>
+                  <option value="INR">🇮🇳 INR – Indian Rupee</option>
+                  <option value="AUD">🇦🇺 AUD – Australian Dollar</option>
+                  <option value="CAD">🇨🇦 CAD – Canadian Dollar</option>
+                  <option value="CHF">🇨🇭 CHF – Swiss Franc</option>
+                  <option value="NGN">🇳🇬 NGN – Nigerian Naira</option>
+                  <option value="ZAR">🇿🇦 ZAR – South African Rand</option>
+                  <option value="KES">🇰🇪 KES – Kenyan Shilling</option>
+                  <option value="GHS">🇬🇭 GHS – Ghanaian Cedi</option>
+                  <option value="EGP">🇪🇬 EGP – Egyptian Pound</option>
+                  <option value="BRL">🇧🇷 BRL – Brazilian Real</option>
+                  <option value="MXN">🇲🇽 MXN – Mexican Peso</option>
+                  <option value="ARS">🇦🇷 ARS – Argentine Peso</option>
+                  <option value="CLP">🇨🇱 CLP – Chilean Peso</option>
+                  <option value="COP">🇨🇴 COP – Colombian Peso</option>
+                  <option value="PEN">🇵🇪 PEN – Peruvian Sol</option>
+                  <option value="RUB">🇷🇺 RUB – Russian Ruble</option>
+                  <option value="TRY">🇹🇷 TRY – Turkish Lira</option>
+                  <option value="SAR">🇸🇦 SAR – Saudi Riyal</option>
+                  <option value="AED">🇦🇪 AED – UAE Dirham</option>
+                  <option value="QAR">🇶🇦 QAR – Qatari Riyal</option>
+                  <option value="KWD">🇰🇼 KWD – Kuwaiti Dinar</option>
+                  <option value="BHD">🇧🇭 BHD – Bahraini Dinar</option>
+                  <option value="OMR">🇴🇲 OMR – Omani Rial</option>
+                  <option value="PKR">🇵🇰 PKR – Pakistani Rupee</option>
+                  <option value="BDT">🇧🇩 BDT – Bangladeshi Taka</option>
+                  <option value="LKR">🇱🇰 LKR – Sri Lankan Rupee</option>
+                  <option value="THB">🇹🇭 THB – Thai Baht</option>
+                  <option value="MYR">🇲🇾 MYR – Malaysian Ringgit</option>
+                  <option value="IDR">🇮🇩 IDR – Indonesian Rupiah</option>
+                  <option value="SGD">🇸🇬 SGD – Singapore Dollar</option>
+                  <option value="HKD">🇭🇰 HKD – Hong Kong Dollar</option>
+                  <option value="KRW">🇰🇷 KRW – South Korean Won</option>
+                  <option value="VND">🇻🇳 VND – Vietnamese Dong</option>
+                  <option value="ILS">🇮🇱 ILS – Israeli Shekel</option>
+                  <option value="MAD">🇲🇦 MAD – Moroccan Dirham</option>
+                  <option value="TND">🇹🇳 TND – Tunisian Dinar</option>
+                  <option value="DZD">🇩🇿 DZD – Algerian Dinar</option>
+                  <option value="ETB">🇪🇹 ETB – Ethiopian Birr</option>
+                  <option value="UGX">🇺🇬 UGX – Ugandan Shilling</option>
+                  <option value="TZS">🇹🇿 TZS – Tanzanian Shilling</option>
+                  <option value="RWF">🇷🇼 RWF – Rwandan Franc</option>
+                  <option value="XAF">🌍 XAF – Central African CFA Franc</option>
+                  <option value="XOF">🌍 XOF – West African CFA Franc</option>
+                  <option value="SCR">🇸🇨 SCR – Seychellois Rupee</option>
+                  <option value="MUR">🇲🇺 MUR – Mauritian Rupee</option>
+                  <option value="BWP">🇧🇼 BWP – Botswana Pula</option>
+                  <option value="NAD">🇳🇦 NAD – Namibian Dollar</option>
+
                 </select>
               </div>
 
               <div class="flex flex-col gap-1">
                 <label for="visibility" class="text-xs text-gray-600 select-none">Visibility</label>
-                <select id="visibility"
-                  class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                  <option selected>Public</option>
+                <select id="visibility" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option value="" selected>Select visibility</option>
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
                 </select>
               </div>
 
               <div class="flex gap-4 mt-6">
-                <button type="submit"
-                  class="text-blue-700 bg-blue-100 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <button type="submit" class="text-blue-700 bg-blue-100 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
                   Update Page
                 </button>
-                <button type="button"
-                  class="text-red-600 bg-red-100 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <button type="button" class="text-red-600 bg-red-100 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
                   Delete Page
                 </button>
               </div>

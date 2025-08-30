@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\business;
+namespace App\Http\Controllers\Personal;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,9 +13,9 @@ class refundsController extends Controller
 
     public function index()
     {
-        $user = Auth::user();
+        $user = Auth::guard('personal-api')->user();
         // Fetch all refund requests for the authenticated user
-        $refunds = Refund::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $refunds = Refund::where('personal_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         if (request()->expectsJson()) {
             return response()->json([
@@ -54,10 +54,11 @@ class refundsController extends Controller
         // Generate a unique reference number
         $transactionRef = generateUniqueRefNumber();
 
+        $user = Auth::guard('personal-api')->user();
         try {
             // Create refund record
             $refund = Refund::create([
-                'user_id' => Auth::id(),
+                'personal_id' => $user->id,
                 'name' => $validated['fullname'],
                 'amount'   => $validated['amount'],
                 'type'   => $validated['method'],
@@ -99,11 +100,12 @@ class refundsController extends Controller
             'status' => 'required|in:approved,rejected'
         ]);
 
+        $user = Auth::guard('personal-api')->user();
         try{
             $refund = Refund::findOrFail($id);
 
             //authorize only if this refund belongs to the logged-in user
-            if ($refund->user_id !== Auth::id()) {
+            if ($refund->personal_id !== $user->id) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'You are not allowed to modify this request.',
@@ -134,8 +136,6 @@ class refundsController extends Controller
             return redirect()->back()->with('error', 'Failed to process request: ' . $e->getMessage());
         }
 
-        
-
     }
 
 
@@ -150,8 +150,8 @@ class refundsController extends Controller
     // get a user refund by id
     public function fetchRefund($id)
     {
-        $user = Auth::user();
-        $refund = Refund::where('user_id', $user->id)->find($id);
+        $user = Auth::guard("personal-api")->user();
+        $refund = Refund::where('personal_id', $user->id)->find($id);
         if (!$refund) {
             return response()->json([
                 'status' => 'error',

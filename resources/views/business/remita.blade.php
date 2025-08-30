@@ -40,6 +40,23 @@
                                 </button>
                             </a>
                         </div>
+
+                        <script>
+                            @if ($errors->any())
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: '{{ $errors->first() }}',
+                                    showConfirmButton: false,
+                                    timer: 5000,
+                                    timerProgressBar: true,
+                                    customClass: {
+                                        popup: 'text-sm'
+                                    }
+                                });
+                            @endif
+                        </script>
                         <!-- Cards Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-20">
                             
@@ -86,9 +103,11 @@
                                             <button class="{{ $remita->visibility == 'Private' ? 'hidden' : '' }}" aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                                 <i class="fas fa-link"></i>
                                             </button>
-                                            <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                                <i class="fas fa-chevron-right"></i>
-                                            </button>
+                                            <a href="{{ route('remita.edit', $remita->id) }}">
+                                                <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -139,6 +158,9 @@
             </section>
         </section>
     </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebarBtn');
