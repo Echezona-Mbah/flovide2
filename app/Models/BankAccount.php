@@ -16,6 +16,7 @@ class BankAccount extends Model
 
     protected $fillable = [
         'user_id',
+        'personal_id',
         'account_name',
         'account_number',
         'bank_country',
@@ -43,5 +44,9 @@ class BankAccount extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+        public function personal()
+    {
+        return $this->belongsTo(Personal::class);
     }
 }

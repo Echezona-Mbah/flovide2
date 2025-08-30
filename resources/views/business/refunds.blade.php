@@ -370,7 +370,7 @@
                         `;
                     }
 
-                    trackerCont.innerHTML = `<div class="w-full max-w-lg mx-auto bg-white p-6">${trackerHTML}</div>`;
+                    trackerCont.innerHTML = `<div class="w-full max-w-lg mx-auto p-6">${trackerHTML}</div>`;
                 });
             });
 
