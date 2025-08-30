@@ -89,7 +89,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
     Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
 
-
     //subaccount
     Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
     Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
@@ -120,6 +119,9 @@ Route::middleware(['auth'])->group(function () {
     //remita
     Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
     Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
+    Route::post('/remita/update', [RemitaController::class, 'update'])->name('remita.update');
+    Route::post('/remita/{id}/destory', [RemitaController::class, 'destory'])->name('remita.destory');
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
     
 

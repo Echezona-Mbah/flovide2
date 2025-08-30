@@ -58,9 +58,32 @@ class RemitaController extends Controller
         }
         return view('business.remitaCreate', ['subaccounts' => $subaccounts]);
     }
-    public function update()
+    public function edit(Request $request, $id)
     {
-        return view('business.remitaPayment');
+        $user = Auth::user();
+        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$remita) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Remita page not found.'], 404);
+            }
+            return redirect()->route('remita.index')->with('error', 'Remita page not found.');
+        }
+
+        $subaccounts = Subaccount::where('user_id', $user->id)->get();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Remita page retrieved successfully.',
+                'data' => [
+                    'remita' => $remita,
+                    'subaccounts' => $subaccounts
+                ],
+            ], 200);
+        }
+
+        return view('business.remitaPayment', ['remita' => $remita, 'subaccounts' => $subaccounts]);
     }
 
     //generate a unique 13-digit RRR code.
@@ -136,6 +159,62 @@ class RemitaController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Remita page created successfully.');
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:remitas,id',
+            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120|dimensions:width=1600,height=300', // 5MB
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric',
+            // 'rrr' => 'nullable|string|max:50',
+            'service_type' => 'required|string',
+            'subaccount_id' => 'required|string',
+            'percentage' => 'required|numeric|min:0|max:100', // Percentage must be between 0 and 100
+            'currency' => 'required|string',
+            'visibility' => 'required|string',
+        ]);
+
+        //get subaccount details
+        $subaccount = Subaccount::find($request->subaccount_id);
+        if (!$subaccount) {
+            return redirect()->back()->withErrors(['subaccount_id' => 'Invalid subaccount selected.']);
+        }
+
+        // Validate subaccount ownership
+        if ($subaccount->user_id !== Auth::id()) {
+            return redirect()->back()->withErrors(['subaccount_id' => 'You do not have permission to use this subaccount.']);
+        }
+
+        $accountNumber = Crypt::decryptString($subaccount->account_number);
+        $accountName = $subaccount->account_name;
+        $bankName = $subaccount->bank_name;
+        $path = null;
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('remita_cover_image', 'public');
+        }
+        $user = Auth::user();
+        $remita = Remita::where('id', $request->id)->where('user_id', $user->id)->first();
+        if (!$remita) {
+            return redirect()->route('remita.index')->with('error', 'Remita page not found or you do not have permission to edit it.');
+        }
+        $remita->cover_image = $path ?? $remita->cover_image;
+        $remita->title = $request->title;
+        $remita->amount = $request->amount;
+        // $remita->rrr = $request->rrr ?? $remita->
+        $remita->service_type = $request->service_type;
+        $remita->subaccount = $bankName;
+        $remita->subaccount_name = $accountName;
+        $remita->subaccount_number = $accountNumber;
+        $remita->percentage = $request->percentage ?? $remita->percentage; // Default to existing percentage if not provided
+        $remita->currency = $request->currency;
+        $remita->visibility = $request->visibility;
+        $remita->save();
+
+        return redirect()->route('remita.index')->with('success', 'Remita page updated successfully.');
+
     }
 
     public function destroy($id)

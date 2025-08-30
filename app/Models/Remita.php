@@ -18,6 +18,7 @@ class Remita extends Model
         'amount',
         'rrr',
         'service_type',
+        'subaccount_id',
         'subaccount',
         'subaccount_name',
         'subaccount_number',
@@ -25,4 +26,10 @@ class Remita extends Model
         'currency',
         'visibility',
     ];
+
+
+    public function subaccount()
+    {
+        return $this->belongsTo(Subaccount::class);
+    }
 }
