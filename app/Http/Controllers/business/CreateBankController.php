@@ -15,7 +15,6 @@ class CreateBankController extends Controller
 {
       use CurrencyHelper;
 
-
     public function create(Request $request)
     {
         $countries = Countries::all();
@@ -85,7 +84,6 @@ class CreateBankController extends Controller
 
         return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
     }
-
 
 
 

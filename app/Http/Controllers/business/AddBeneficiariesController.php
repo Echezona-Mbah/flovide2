@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Business;
+namespace App\Http\Controllers\business;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bank;
@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 class AddBeneficiariesController extends Controller
@@ -55,10 +56,7 @@ class AddBeneficiariesController extends Controller
 
     public function create()
     {
-        // $user = auth()->user();
-
-        $ownerId = session('owner_id');
-
+        $user = Auth::user();
 
 
         $response = Http::withToken(env('OHENTPAY_API_KEY'))
@@ -71,8 +69,7 @@ class AddBeneficiariesController extends Controller
         }
 
         $banks = Bank::all();
-        // $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(8);
-        $beneficiaries = Beneficia::where('user_id', $ownerId)->paginate(8);
+        $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(8);
 
         return view('business.add_beneficia', compact('countries', 'banks', 'beneficiaries'));
     }
@@ -81,9 +78,6 @@ class AddBeneficiariesController extends Controller
 
     public function store(Request $request)
     {
-         $ownerId = session('owner_id');
-        //  dd($ownerId);
-       
         $country = $request->input('country');
         $currency = $request->input('currency');
 
@@ -134,8 +128,7 @@ class AddBeneficiariesController extends Controller
             // 🔍 Check if this account already exists for the current user
             $exists = Beneficia::where('account_name', $accountName)
             ->where('account_number', $accountNumber)
-            ->where('user_id', auth()->id())
-            // ->where('user_id', $ownerId)
+            ->where('user_id', Auth::id())
             ->exists();
 
             if ($exists) {
@@ -202,8 +195,7 @@ class AddBeneficiariesController extends Controller
             'bank'               => $responseData['bank_account']['bank_name'] ?? null,
             'currency'           => $responseData['bank_account']['currency'] ?? null,
             'created_at'         => now(),
-            // 'user_id'            => $request->user()?->id ?? auth()->id(),
-            'user_id'            => $ownerId,
+            'user_id'            => $request->user()?->id ?? Auth::id(),
             'default_reference'  => 'Invoice',
         ]);
 
@@ -287,7 +279,7 @@ class AddBeneficiariesController extends Controller
     {
         $beneficia = Beneficia::findOrFail($id);
     
-        if ($beneficia->user_id != auth()->id()) {
+        if ($beneficia->user_id != Auth::id()) {
             $message = 'Unauthorized to delete this beneficia';
             return $request->expectsJson()
                 ? response()->json(['message' => $message], 403)
@@ -556,6 +548,7 @@ class AddBeneficiariesController extends Controller
             'details' => $response->json()
         ], $response->status());
     }
+
 
     
 }
