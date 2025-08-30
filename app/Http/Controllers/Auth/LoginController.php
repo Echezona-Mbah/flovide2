@@ -12,60 +12,14 @@ use Illuminate\Support\Facades\Hash;
 class LoginController extends Controller
 {
 
-<<<<<<< HEAD
-
-    public function login(Request $request)
-=======
     // Business
     public function loginUser(Request $request)
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
     {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-<<<<<<< HEAD
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            $user = Auth::user();
-
-            if ($user->email_verified_status !== 'yes') {
-                Auth::logout(); 
-                return response()->json([
-                    'message' => 'Email not verified. Please verify your email.',
-                    'status' => 'unverified',
-                    'verify_url' => url("/api/auth/verify-email/{$user->email}"),
-                ], 403);
-            }
-
-            $token = $user->createToken('API Token')->plainTextToken;
-
-            $filteredUser = [
-                'id' => $user->id,
-                'business_name' => $user->business_name,
-                'registration_number' => $user->registration_number,
-                'incorporation_date' => $user->incorporation_date,
-                'business_type' => $user->business_type,
-                'company_url' => $user->company_url,
-                'industry' => $user->industry,
-                'annual_turnover' => $user->annual_turnover,
-                'street_address' => $user->street_address,
-                'city' => $user->city,
-                'trading_address' => $user->trading_address,
-                'nature_of_business' => $user->nature_of_business,
-                'trading_street_address' => $user->trading_street_address,
-                'trading_city' => $user->trading_city,
-                'state' => $user->state,
-                'typeofuser' => $user->typeofuser,
-                'bvn' => $user->bvn,
-                'email' => $user->email,
-                'email_verified_status' => $user->email_verified_status,
-                'forgot_password_token' => $user->forgot_password_token,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ];
-
-=======
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
@@ -74,7 +28,6 @@ class LoginController extends Controller
 
         if ($account->email_verified_status !== 'yes') {
             Auth::logout();
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
             return response()->json([
                 'data' => [
                     'message' => 'Email not verified. Please verify your email.',
@@ -123,8 +76,6 @@ class LoginController extends Controller
         ], 200);
     }
 
-<<<<<<< HEAD
-=======
     public function loginPersonal(Request $request)
     {
         $request->validate([
@@ -186,6 +137,5 @@ class LoginController extends Controller
     }
 
 
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
     
 }

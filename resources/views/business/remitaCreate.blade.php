@@ -120,7 +120,7 @@
 
                             <!-- Image Preview -->
                             <div id="preview" class="hidden relative w-full h-full flex items-center justify-center">
-                                <img id="preview-img" class="max-h-36 object-contain rounded-md" />
+                                <img id="preview-img" class="max-h-24 object-contain rounded-md" />
                                 <!-- Remove Button -->
                                 <button type="button" id="remove-btn" class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-md shadow">
                                     Remove
@@ -178,7 +178,9 @@
                             <select id="subaccount" name="subaccount_id" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                 <option selected value="">Select a subaccount</option>
                                 @foreach ($subaccounts as $subaccount)
-                                    <option value="{{ $subaccount->id }}">{{ Crypt::decryptString($subaccount->account_number) . '_' . $subaccount->account_name . '_'. $subaccount->bank_name }}</option>                    
+                                    <option value="{{ $subaccount->id }}">
+                                        {{ ($subaccount->account_number) ? Crypt::decryptString($subaccount->account_number) : Crypt::decryptString($subaccount->iban) }}    
+                                    </option>                    
                                 @endforeach
                             </select>
                             <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -189,10 +191,60 @@
                     <div class="flex flex-col gap-1">
                         <label for="currency" class="text-xs text-gray-600 select-none">Currency</label>
                         <select id="currency" name="currency" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex items-center gap-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <option selected> Select currency </option>
-                            <option value="USD"> 🇺🇸 US Dollar </option>
-                            <option value="NGN"> NGN Naira </option>
-                            <option value="NGN"> EUR Euro </option>
+                            <option selected>🌍 Select currency</option>
+                            <option value="USD">🇺🇸 USD – US Dollar</option>
+                            <option value="EUR">🇪🇺 EUR – Euro</option>
+                            <option value="GBP">🇬🇧 GBP – British Pound</option>
+                            <option value="JPY">🇯🇵 JPY – Japanese Yen</option>
+                            <option value="CNY">🇨🇳 CNY – Chinese Yuan</option>
+                            <option value="INR">🇮🇳 INR – Indian Rupee</option>
+                            <option value="AUD">🇦🇺 AUD – Australian Dollar</option>
+                            <option value="CAD">🇨🇦 CAD – Canadian Dollar</option>
+                            <option value="CHF">🇨🇭 CHF – Swiss Franc</option>
+                            <option value="NGN">🇳🇬 NGN – Nigerian Naira</option>
+                            <option value="ZAR">🇿🇦 ZAR – South African Rand</option>
+                            <option value="KES">🇰🇪 KES – Kenyan Shilling</option>
+                            <option value="GHS">🇬🇭 GHS – Ghanaian Cedi</option>
+                            <option value="EGP">🇪🇬 EGP – Egyptian Pound</option>
+                            <option value="BRL">🇧🇷 BRL – Brazilian Real</option>
+                            <option value="MXN">🇲🇽 MXN – Mexican Peso</option>
+                            <option value="ARS">🇦🇷 ARS – Argentine Peso</option>
+                            <option value="CLP">🇨🇱 CLP – Chilean Peso</option>
+                            <option value="COP">🇨🇴 COP – Colombian Peso</option>
+                            <option value="PEN">🇵🇪 PEN – Peruvian Sol</option>
+                            <option value="RUB">🇷🇺 RUB – Russian Ruble</option>
+                            <option value="TRY">🇹🇷 TRY – Turkish Lira</option>
+                            <option value="SAR">🇸🇦 SAR – Saudi Riyal</option>
+                            <option value="AED">🇦🇪 AED – UAE Dirham</option>
+                            <option value="QAR">🇶🇦 QAR – Qatari Riyal</option>
+                            <option value="KWD">🇰🇼 KWD – Kuwaiti Dinar</option>
+                            <option value="BHD">🇧🇭 BHD – Bahraini Dinar</option>
+                            <option value="OMR">🇴🇲 OMR – Omani Rial</option>
+                            <option value="PKR">🇵🇰 PKR – Pakistani Rupee</option>
+                            <option value="BDT">🇧🇩 BDT – Bangladeshi Taka</option>
+                            <option value="LKR">🇱🇰 LKR – Sri Lankan Rupee</option>
+                            <option value="THB">🇹🇭 THB – Thai Baht</option>
+                            <option value="MYR">🇲🇾 MYR – Malaysian Ringgit</option>
+                            <option value="IDR">🇮🇩 IDR – Indonesian Rupiah</option>
+                            <option value="SGD">🇸🇬 SGD – Singapore Dollar</option>
+                            <option value="HKD">🇭🇰 HKD – Hong Kong Dollar</option>
+                            <option value="KRW">🇰🇷 KRW – South Korean Won</option>
+                            <option value="VND">🇻🇳 VND – Vietnamese Dong</option>
+                            <option value="ILS">🇮🇱 ILS – Israeli Shekel</option>
+                            <option value="MAD">🇲🇦 MAD – Moroccan Dirham</option>
+                            <option value="TND">🇹🇳 TND – Tunisian Dinar</option>
+                            <option value="DZD">🇩🇿 DZD – Algerian Dinar</option>
+                            <option value="ETB">🇪🇹 ETB – Ethiopian Birr</option>
+                            <option value="UGX">🇺🇬 UGX – Ugandan Shilling</option>
+                            <option value="TZS">🇹🇿 TZS – Tanzanian Shilling</option>
+                            <option value="RWF">🇷🇼 RWF – Rwandan Franc</option>
+                            <option value="XAF">🌍 XAF – Central African CFA Franc</option>
+                            <option value="XOF">🌍 XOF – West African CFA Franc</option>
+                            <option value="SCR">🇸🇨 SCR – Seychellois Rupee</option>
+                            <option value="MUR">🇲🇺 MUR – Mauritian Rupee</option>
+                            <option value="BWP">🇧🇼 BWP – Botswana Pula</option>
+                            <option value="NAD">🇳🇦 NAD – Namibian Dollar</option>
+
                         </select>
                     </div>
 
