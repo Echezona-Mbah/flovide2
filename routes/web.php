@@ -2,17 +2,32 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\business\addBankAccountController;
+use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\business\SubAccountController;
 use App\Http\Controllers\business\TransactionHistoryController;
+use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\MainPage\businessController;
+use App\Http\Controllers\MainPage\personalController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/business', [businessController::class, 'business'])->name('business');
+Route::get('/', [personalController::class, 'personal'])->name('personal');
+
+
+
+// Route::get('/dashboard', function () {
+    
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'create'])
+    ->middleware(['auth', 'verified', \App\Http\Middleware\ResolveOwnerMiddleware::class])
+    ->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

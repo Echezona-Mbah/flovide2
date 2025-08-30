@@ -1,3 +1,5 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="flex items-center gap-4 flex-wrap">
     <button aria-label="Notifications"
         class="relative bg-white w-10 h-10 rounded-full flex items-center justify-center">

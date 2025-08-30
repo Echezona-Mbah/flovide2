@@ -46,34 +46,99 @@
                             @method('PUT')
 
                             <div>
-                                <label for="bank" class="block text-gray-600 text-sm font-semibold mb-1">Bank</label>
-                                <select id="bank" name="bank_name" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                    <option value="{{ old('bank_name', $subaccount->bank_name) }}">{{ old('bank_name', $subaccount->bank_name) }}</option>
-                                    <option>GTBank</option>
-                                    <option>UBA</option>
-                                    <option>Zenith</option>
-                                </select>
-                            </div>
-                        
-                            <div>
                                 <label for="country" class="block text-gray-600 text-sm font-semibold mb-1">In what country is your bank located?</label>
                                 <select id="country" name="bank_country" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                     <option value="{{ old('bank_country', $subaccount->bank_country) }}">{{ old('bank_country', $subaccount->bank_country) }}</option>
-                                    <option>Nigeria</option>
-                                    <option>Ghana</option>
-                                    <option>USA</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country['country_name'] }}"
+                                        data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
+                                        data-currency="{{ $country['default_currency'] }}"
+                                        >
+                                            {{ $country['country_name'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
+
+                            @if ($subaccount->type === 'foreign')
+                                <div>
+                                    <label for="account-name" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        Bank account name
+                                    </label>
+                                    <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $subaccount->account_name) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="bic" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        BIC
+                                    </label>
+                                    <input type="text" id="bic" name="bic" value="{{ old('bic', Crypt::decryptString($subaccount->bic)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="iban" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        IBAN
+                                    </label>
+                                    <input type="text" id="iban" name="iban" value="{{ old('iban', Crypt::decryptString($subaccount->iban)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="city" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        City
+                                    </label>
+                                    <input type="text" id="city" name="city" value="{{ old('city', $subaccount->city) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="state" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        State
+                                    </label>
+                                    <input type="text" id="state" name="state" value="{{ old('state', $subaccount->state) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="recipient_address" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        Address
+                                    </label>
+                                    <input type="text" id="address" name="address" value="{{ old('recipient_address', $subaccount->recipient_address) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+
+                                <div>
+                                    <label for="zipcode" class="block text-gray-600 text-sm mb-1 font-medium">
+                                        Zipcode
+                                    </label>
+                                    <input type="text" id="zipcode" name="zipcode" value="{{ old('zipcode', $subaccount->zipcode) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                </div>
+                                <input type="text" name="type" value="foreign" class="hidden" />
                         
-                            <div>
-                                <label for="account-number" class="block text-gray-600 text-sm font-semibold mb-1">Bank account number</label>
-                                <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($subaccount->account_number)) }}" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                            </div>
+                            @else
+                                
+                                <div>
+                                    <label for="bank" class="block text-gray-600 text-sm font-semibold mb-1">Bank</label>
+                                    <select id="bank" name="bank_name" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                        <option value="{{ old('bank_name', $subaccount->bank_name) }}">{{ old('bank_name', $subaccount->bank_name) }}</option>
+                                        @foreach($banks as $bank)
+                                            <option value="{{ $bank->name }}" data-code="{{ $bank->country_code  }}">
+                                                {{ $bank->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                         
-                            <div>
-                                <label for="account-name" class="block text-gray-600 text-sm font-semibold mb-1">Bank account name</label>
-                                <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $subaccount->account_name) }}" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                            </div>
+                                <div>
+                                    <label for="account-number" class="block text-gray-600 text-sm font-semibold mb-1">Bank account number</label>
+                                    <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($subaccount->account_number)) }}" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                                </div>
+                            
+                                <div>
+                                    <label for="account-name" class="block text-gray-600 text-sm font-semibold mb-1">Bank account name</label>
+                                    <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $subaccount->account_name) }}" class="w-full rounded-lg border border-gray-300 text-gray-900 text-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                                </div>
+                                <input type="text" name="type" value="local" class="hidden" />
+                        
+                                
+                            @endif                        
+                            
                         
                             <div class="flex gap-4">
                                 <button type="submit" class="bg-blue-300 text-blue-800 font-semibold text-sm rounded-full px-6 py-2 hover:bg-blue-400 transition">
@@ -104,7 +169,9 @@
                                         <div class="flex justify-center items-center w-10 h-10 rounded-lg bg-green-100 text-green-700">
                                             <i class="fas fa-check"></i>
                                         </div>
-                                        <span class="font-semibold text-gray-900 text-base">{{ Crypt::decryptString($account->account_number) }}</span>
+                                        <span class="font-semibold text-gray-900 text-base">
+                                            {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
+                                        </span>
                                         <span class="bg-gray-200 text-gray-700 text-xs rounded-full px-2 py-0.5">{{ $account->bank_name }}</span>
                                         @if ($account->id !== $subaccount->id)
                                             <button type="button" class="ml-auto text-gray-600 hover:text-gray-900" aria-label="Edit account">
@@ -123,8 +190,10 @@
                                         <div data-id="{{ $account->id }}" class="set-default-btn flex justify-center items-center w-10 h-10 rounded-lg bg-gray-300 text-gray-600">
                                             <i class="fas fa-check"></i>
                                         </div>
-                                        <span class="font-semibold text-gray-900 text-base">{{ Crypt::decryptString($account->account_number) }}</span>
-                                        <span class="bg-gray-200 text-gray-700 text-xs rounded-full px-2 py-0.5">{{ $account->bank_name }}</span>
+                                        <span class="font-semibold text-gray-900 text-base">
+                                            {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
+                                        </span>
+                                        <span class="bg-gray-200 text-gray-700 text-xs rounded-full px-2 py-0.5">{{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}</span>
                                         @if ($account->id !== $subaccount->id)
                                             <button type="button" class="ml-auto text-gray-600 hover:text-gray-900" aria-label="Edit account">
                                                 <a href="{{ route('business.subaccountEdit', $account->id) }}">
