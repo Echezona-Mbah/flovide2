@@ -21,7 +21,10 @@ class LoginController extends Controller
         ]);
 
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json([
+                'data' => [
+                'message' => 'Invalid credentials'
+            ]], 401);
         }
 
         $account = Auth::user();
@@ -76,65 +79,75 @@ class LoginController extends Controller
         ], 200);
     }
 
-    public function loginPersonal(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+public function loginPersonal(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        // Manually authenticate since we're not using session guard here
-        $account = Personal::where('email', $request->email)->first();
+    $account = Personal::where('email', $request->email)->first();
 
-        if (!$account || !Hash::check($request->password, $account->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        if ($account->email_verified_status !== 'yes') {
-            return response()->json([
-                'data' => [
-                    'message' => 'Email not verified. Please verify your email.',
-                    'status' => 'unverified',
-                    'verify_url' => url("/api/auth/verify-email/{$account->email}"),
-                ]
-            ], 403);
-        }
-
-        // ✅ Create Sanctum token
-        $token = $account->createToken('PersonalToken')->plainTextToken;
-
-        $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
-        $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
-            ->latest()->take(4)->get();
-
-        $chartData = \App\Models\TransactionHistory::where('personal_id', $account->id)
-            ->where('created_at', '>=', now()->subMonths(3))
-            ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
-                DB::raw("SUM(amount) as total_amount")
-            )
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get();
-
+    if (!$account || !Hash::check($request->password, $account->password)) {
         return response()->json([
             'data' => [
-                'account_type' => 'personals',
-                'personal' => [
-                    'id' => $account->id,
-                    'firstname' => $account->firstname,
-                    'lastname' => $account->lastname,
-                    'email' => $account->email,
-                    'currency' => $account->currency,
-                    'email_verified_status' => $account->email_verified_status,
-                ],
-                'balances' => $balances,
-                'transactions' => $transactions,
-                'chart' => $chartData,
-                'token' => $token,
-            ]
-        ], 200);
+                'message' => 'Invalid credentials'
+            ]], 401);
     }
+
+    if ($account->email_verified_status !== 'yes') {
+        return response()->json([
+            'data' => [
+                'message' => 'Email not verified. Please verify your email.',
+                'status' => 'unverified',
+                'verify_url' => url("/api/auth/verify-email/{$account->email}"),
+            ]
+        ], 403);
+    }
+
+    $token = $account->createToken('PersonalToken')->plainTextToken;
+
+    // Fetch balances, transactions, chart data
+    $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
+    $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
+        ->latest()->take(4)->get();
+    $chartData = \App\Models\TransactionHistory::where('personal_id', $account->id)
+        ->where('created_at', '>=', now()->subMonths(3))
+        ->select(
+            DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+            DB::raw("SUM(amount) as total_amount")
+        )
+        ->groupBy('month')
+        ->orderBy('month', 'asc')
+        ->get();
+
+    // ✅ Fetch extra lists
+    $countries = \App\Models\Countries::all();  
+    $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
+    // $payoutAccounts = \App\Models\PayoutAccount::where('personal_id', $account->id)->get();
+
+    return response()->json([
+        'data' => [
+            'account_type' => 'personals',
+            'personal' => [
+                'id' => $account->id,
+                'firstname' => $account->firstname,
+                'lastname' => $account->lastname,
+                'email' => $account->email,
+                'currency' => $account->currency,
+                'email_verified_status' => $account->email_verified_status,
+            ],
+            'balances' => $balances,
+            'transactions' => $transactions,
+            'chart' => $chartData,
+            'countries' => $countries,        
+            'beneficiaries' => $beneficiaries,    
+            // 'payout_accounts' => $payoutAccounts,  
+            'token' => $token,
+        ]
+    ], 200);
+}
+
 
 
     

@@ -95,8 +95,7 @@ public function store(Request $request)
         return $request->expectsJson()
             ? response()->json([
                  'data' =>[
-                'message' => 'Validation failed', 
-                'errors' => $validator->errors()
+                 'errors' => $validator->errors()
             ]], 422)
             : redirect()->back()->withErrors($validator)->withInput();
     }       
@@ -120,7 +119,7 @@ public function store(Request $request)
         return $request->expectsJson()
             ? response()->json([
                  'data' =>[
-                'message' => $errorMessage
+                'errors' => $errorMessage
             ]], 409)
             : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
     }
@@ -304,7 +303,7 @@ public function store(Request $request)
         if ($response->successful()) {
             return back()->with('success', 'Recipient account created successfully.');
         } else {
-            return back()->with('error', 'Invalid bank or account number.');
+            return back()->with('errors', 'Invalid bank or account number.');
         }
     }
 
@@ -334,7 +333,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch country list',
+                'errors' => 'Failed to fetch country list',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
@@ -369,7 +368,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch currency list',
+                'errors' => 'Failed to fetch currency list',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
@@ -394,7 +393,7 @@ public function store(Request $request)
             return $request->expectsJson()
                 ? response()->json([
                     'data' => [
-                        'message' => 'Validation failed',
+                        'errors' => 'Validation failed',
                         'success' => false,
                         'errors' => $validator->errors(),
                         'method' => $request->method(),
@@ -424,7 +423,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch banks',
+                'errors' => 'Failed to fetch banks',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
