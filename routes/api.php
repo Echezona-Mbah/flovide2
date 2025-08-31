@@ -234,11 +234,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::delete('/personal-virtualCard/{id}', [PersonalVirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
 
 
+
         // api routes for DSTV details
-    Route::get('/personal-Dstvvariations', [PersonalBillPaymentController::class, 'getVariations']);
-    Route::post('/personal-Dstvverify', [PersonalBillPaymentController::class, 'verify']);
-    Route::post('/personal-Dstvpay', [PersonalBillPaymentController::class, 'handleDstv']);
-    Route::get('/personal-billhistory', [PersonalBillPaymentController::class, 'getUserBillPayments']);
+        Route::get('/personal-Dstvvariations', [PersonalBillPaymentController::class, 'getVariations']);
+        Route::post('/personal-Dstvverify', [PersonalBillPaymentController::class, 'verify']);
+        Route::post('/personal-Dstvpay', [PersonalBillPaymentController::class, 'handleDstv']);
+        Route::get('/personal-billhistory', [PersonalBillPaymentController::class, 'getUserBillPayments']);
+
 
         // Elecricity
         Route::get('/personal-electricityvariations', [PersonalBillPaymentController::class, 'getElectricityVariations']);
@@ -250,11 +252,52 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-dataypay', [PersonalBillPaymentController::class, 'handleData']);
 
         // api routes for Balance details
-    Route::get('/personal-balances', [PersonalCreateBankController::class, 'index']);
-    Route::get('/personal-singlebalances', [PersonalCreateBankController::class, 'create']);
-    Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
-    Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
-    Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
+        Route::get('/personal-balances', [PersonalCreateBankController::class, 'index']);
+        Route::get('/personal-singlebalances', [PersonalCreateBankController::class, 'create']);
+        Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
+        Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
+        Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
+
+        //payouts 
+        Route::post('/bank-account', [PersonaladdBankAccountController::class, 'store']);
+        Route::post('/validate-payout-account-name', [PersonaladdBankAccountController::class, 'validatePayoutAccountName']);
+        Route::get('/show-bank-accounts', [PersonaladdBankAccountController::class, 'payouts']);
+        Route::get('/bank-account/{id}', [PersonaladdBankAccountController::class, 'edit']);
+        Route::get('/fetchBanks', [PersonaladdBankAccountController::class, 'fetchlocalBanks']);
+        Route::delete('/delete-account/{id}', [PersonaladdBankAccountController::class, 'destroy']);
+        Route::delete('/delete-accounts', [PersonaladdBankAccountController::class, 'destroyAll']);
+        Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
+
+        //subaccount
+        Route::get('/subaccount', [PersonalSubAccountController::class, 'subaccount']);
+        Route::get('/show-subaccount/{id}', [PersonalSubAccountController::class, 'edit']);
+        Route::get('/show-subaccounts', [PersonalSubAccountController::class, 'show']);
+        Route::get('/fetchBanks', [PersonalSubAccountController::class, 'fetchlocalBanks']);
+        Route::delete('/deleteAllSubaccounts', [PersonalSubAccountController::class, 'destroyAll']);
+        Route::delete('/deleteSubaccount/{id}', [PersonalSubAccountController::class, 'destroy']);
+        Route::post('/subaccounts', [PersonalSubAccountController::class, 'store']);
+        Route::post('/validateSubaccountName', [PersonalSubAccountController::class, 'validatePayoutAccountName']);
+        Route::put('/updateSubaccount/{id}', [PersonalSubAccountController::class, 'update']);
+
+        //refund
+        Route::get('/refunds', [PersonalrefundsController::class, 'index']);
+        Route::get('/fetchRefund/{id}', [PersonalrefundsController::class, 'fetchRefund']);
+        Route::post('/refunds', [PersonalrefundsController::class, 'store']);
+        Route::post('/refunds/{id}/status', [PersonalrefundsController::class, 'updateStatus']);
+    
+    // api routes for Send Money detailsdeactivateAccount
+    Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
+    Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
+
+
+    // Update Profile
+    Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
+    Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
+    Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
+
+
+    Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
+
 
 
 
