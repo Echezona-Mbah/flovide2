@@ -12,6 +12,8 @@ use App\Http\Controllers\Personal\SubAccountController as PersonalSubAccountCont
 use App\Http\Controllers\business\InvoicesController;
 use App\Http\Controllers\business\refundsController;
 use App\Http\Controllers\Personal\refundsController as PersonalrefundsController;
+use App\Http\Controllers\Personal\paymentsController;
+use App\Http\Controllers\Personal\donationsController;
 use App\Http\Controllers\business\RemitaController;
 use App\Http\Controllers\business\TransactionHistoryController;
 use App\Http\Controllers\business\AddBeneficiariesController;
@@ -277,7 +279,22 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/fetchRefund/{id}', [PersonalrefundsController::class, 'fetchRefund']);
         Route::post('/refunds', [PersonalrefundsController::class, 'store']);
         Route::post('/refunds/{id}/status', [PersonalrefundsController::class, 'updateStatus']);
-    
+        
+        //payments
+        Route::get('/payments', [paymentsController::class, 'index']);
+        Route::get('/payments/show/{id}', [paymentsController::class, 'show']);
+        Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
+        Route::post('/payments/store', [paymentsController::class, 'store']);
+        Route::delete('/payments/{id}/destory', [paymentsController::class, 'destory']);
+        Route::put('/payments/update/{id}', [paymentsController::class, 'update']);
+        
+        //donations
+        Route::get('/donations', [donationsController::class, 'index']);
+        Route::get('/donations/show/{id}', [donationsController::class, 'show']);
+        Route::get('/donations/donationrecords', [donationsController::class, 'donationrecords']);
+        Route::post('/donations/store', [donationsController::class, 'store']);
+        Route::delete('/donations/{id}/destory', [donationsController::class, 'destory']);
+        Route::put('/donations/update/{id}', [donationsController::class, 'update']);
     });
 });
 
