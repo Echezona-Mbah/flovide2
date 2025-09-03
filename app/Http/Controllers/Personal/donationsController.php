@@ -18,18 +18,22 @@ class donationsController extends Controller
         
         if ($donations->total() < 1) {
             return response()->json([
-                'status'  => 'empty',
-                'message' => 'No donations found for this user',
-                'data'    => []
+                'data' => [
+                    'status'  => 'empty',
+                    'message' => 'No donations found for this user',
+                    'donations' => []
+                ]
             ]);
         }
 
         //return json
         return response()->json([
-            'status' => 'success',
-            'message' => 'donations retrieved successfully',
-            'data' => $donations
-        ]);
+            'data' => [
+                'status' => 'success',
+                'message' => 'donations retrieved successfully',
+                'donations' => $donations
+            ]
+        ], 201);
     }
 
     public function generateUniqueReference()
@@ -54,9 +58,11 @@ class donationsController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ]
             ], 422);
         }
         $path = null;
@@ -76,9 +82,11 @@ class donationsController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'donation created successfully',
-            'data' => $donation
+            'data' => [
+                'status' => 'success',
+                'message' => 'donation created successfully',
+                'donations' => $donation
+            ]
         ], 201);
     }
 
@@ -91,8 +99,10 @@ class donationsController extends Controller
 
         if (!$donation) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'donation not found or not authorized'
+                'data' => [
+                    'status'  => 'error',
+                    'message' => 'donation not found or not authorized',
+                ]
             ], 404);
         }
 
@@ -107,9 +117,11 @@ class donationsController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ]
             ], 422);
         }
 
@@ -123,9 +135,11 @@ class donationsController extends Controller
         ]));
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'donation updated successfully',
-            'data'    => $donation
+            'data' => [
+                'status' => 'success',
+                'message' => 'donation updated successfully',
+                'donation' => $donation
+            ]
         ]);
 
     }
@@ -138,15 +152,19 @@ class donationsController extends Controller
 
         if (!$donation) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'donation not found or not authorized'
+                'data' => [
+                    'status'  => 'error',
+                    'message' => 'donation not found or not authorized',
+                ]
             ], 404);
         }
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'donation retrieved successfully',
-            'data'    => $donation
+            'data' => [
+                'status'  => 'success',
+                'message' => 'donation retrieved successfully',
+                'donation'    => $donation
+            ]
         ]);
     }
 
@@ -158,16 +176,20 @@ class donationsController extends Controller
 
         if (!$donation) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'donation not found or not authorized'
+                'data' => [
+                    'status'  => 'error',
+                    'message' => 'donation not found or not authorized'
+                ]
             ], 404);
         }
 
         $donation->delete();
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'donation deleted successfully'
+            'data' => [
+                'status'  => 'success',
+                'message' => 'donation deleted successfully',
+            ]
         ]);
     }
 
@@ -177,9 +199,11 @@ class donationsController extends Controller
         $donations = donation::where("personal_id", $user->id)->with('records')->paginate(10);
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'donations with records retrieved successfully',
-            'data'    => $donations
+            'data' => [
+                'status'  => 'success',
+                'message' => 'donations with records retrieved successfully',
+                'donations'    => $donations
+            ]
         ]);
     }
 }

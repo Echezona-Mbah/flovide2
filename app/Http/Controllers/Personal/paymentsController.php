@@ -18,17 +18,21 @@ class paymentsController extends Controller
         
         if ($payments->total() < 1) {
             return response()->json([
-                'status'  => 'empty',
-                'message' => 'No payments found for this user',
-                'data'    => []
+                'data' => [
+                    'status' => 'empty',
+                    'message' => 'No payments found for this user',
+                    'payments' => []
+                ]
             ]);
         }
 
         //return json
         return response()->json([
-            'status' => 'success',
-            'message' => 'Payments retrieved successfully',
-            'data' => $payments
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payments retrieved successfully',
+                'payments' => $payments
+            ]
         ]);
     }
 
@@ -54,9 +58,11 @@ class paymentsController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ]
             ], 422);
         }
         $path = null;
@@ -77,9 +83,11 @@ class paymentsController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Payment created successfully',
-            'data' => $payment
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payment created successfully',
+                'payment' => $payment
+            ]
         ], 201);
     }
 
@@ -92,8 +100,10 @@ class paymentsController extends Controller
 
         if (!$payment) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Payment not found or not authorized'
+                'data' => [
+                    'status'  => 'error',
+                    'message' => 'Payment not found or not authorized',
+                ]
             ], 404);
         }
 
@@ -108,9 +118,11 @@ class paymentsController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ]
             ], 422);
         }
 
@@ -124,9 +136,11 @@ class paymentsController extends Controller
         ]));
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Payment updated successfully',
-            'data'    => $payment
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payment updated successfully',
+                'payment' => $payment
+            ]
         ]);
 
     }
@@ -139,15 +153,19 @@ class paymentsController extends Controller
 
         if (!$payment) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Payment not found or not authorized'
+                'data' => [
+                    'status'  => 'error',
+                    'message' => 'Payment not found or not authorized',
+                ]
             ], 404);
         }
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Payment retrieved successfully',
-            'data'    => $payment
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payment retrieved successfully',
+                'payment' => $payment
+            ]
         ]);
     }
 
@@ -159,16 +177,20 @@ class paymentsController extends Controller
 
         if (!$payment) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Payment not found or not authorized'
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Payment not found or not authorized'
+                ]
             ], 404);
         }
 
         $payment->delete();
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Payment deleted successfully'
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payment deleted successfully',
+            ]
         ]);
     }
 
@@ -178,9 +200,11 @@ class paymentsController extends Controller
         $payments = payment::where("personal_id", $user->id)->with('records')->paginate(10);
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Payments with records retrieved successfully',
-            'data'    => $payments
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payments with records retrieved successfully',
+                'payments' => $payments
+            ]
         ]);
     }
 }

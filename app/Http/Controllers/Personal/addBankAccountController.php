@@ -34,18 +34,24 @@ class addBankAccountController extends Controller
 
         if ($request->expectsJson()) {
             if ($bankAccounts->isEmpty()) {
-                return response()->json(['message' => 'No bank account found.'], 404);
+                return response()->json([
+                    'data' => [
+                        'message' => 'No bank account found.'
+                    ]
+                ], 404);
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank accounts and countries retrieved successfully.',
-                'data' => $bankAccounts,
-                'countries' => $countries,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank accounts and countries retrieved successfully.',
+                    'bankaccounts' => $bankAccounts,
+                    'countries' => $countries
+                ]
             ], 200);
         }
 
-        return view('business.payouts', ['bankAccounts' => $bankAccounts, 'countries' => $countries, 'banks' => $banks]);
+        // return view('business.payouts', ['bankAccounts' => $bankAccounts, 'countries' => $countries, 'banks' => $banks]);
     }
 
 
@@ -107,13 +113,15 @@ class addBankAccountController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account added successfully.',
             'data' => [
-                'id' => $bankAccount->id,
-                'account_name' => $bankAccount->account_name,
-                'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
-                'bank_name' => $bankAccount->bank_name,
+                'status' => 'success',
+                'message' => 'Bank account added successfully.',
+                'bankaccount' => [
+                    'id' => $bankAccount->id,
+                    'account_name' => $bankAccount->account_name,
+                    'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
+                    'bank_name' => $bankAccount->bank_name,
+                ]
             ]
         ], 201);
     }
@@ -125,7 +133,9 @@ class addBankAccountController extends Controller
 
         if (!$account) {
             return response()->json([
-                'message' => 'Bank account not found.'
+                'data' => [
+                    'message' => 'Bank account not found.'
+                ]
             ], 404);
         }
 
@@ -133,15 +143,19 @@ class addBankAccountController extends Controller
 
         if ($account->personal_id !== $user->id) {
             return response()->json([
-                'message' => 'Unauthorized.'
+                'data' => [
+                    'message' => 'Unauthorized.'
+                ]
             ], 403);
         }
 
         $account->delete();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account deleted successfully.'
+            'data' => [
+                'status' => 'success',
+                'message' => 'Bank account deleted successfully.'
+            ]
         ], 200);
     }
 
@@ -154,12 +168,18 @@ class addBankAccountController extends Controller
         $deletedCount = BankAccount::where('personal_id', $user->id)->delete();
 
         if ($deletedCount === 0) {
-            return response()->json(['message' => 'No accounts to delete.'], 404);
+            return response()->json([
+                'data' => [
+                    'message' => 'No accounts to delete.'
+                ]
+            ], 404);
         } else {
 
             return response()->json([
-                'message' => 'All your bank accounts have been deleted.',
-                'deleted_count' => $deletedCount
+                'data' => [
+                    'message' => 'All your bank accounts have been deleted.',
+                    'deleted_count' => $deletedCount
+                ]
             ], 200);
         }
     }
@@ -168,7 +188,11 @@ class addBankAccountController extends Controller
     {
         $type = $request->input('type');
         if(!$type) {
-            return response()->json(['message' => 'Account type is required.'], 400);
+            return response()->json([
+                'data' => [
+                    'message' => 'Account type is required.'
+                ]
+            ], 400);
         }
         // Validate the request
         if ($type === 'local') {
@@ -193,25 +217,37 @@ class addBankAccountController extends Controller
             ]);
 
         }else{
-            return response()->json(['message' => 'Invalid account type.'], 400);
+            return response()->json([
+                'data' => [
+                    'message' => 'Invalid account type.'
+                ]
+            ], 400);
         }
 
         $bankAccount = BankAccount::find($id);
 
         if (!$bankAccount) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Bank account not found.'], 404);
+                return response()->json([
+                    'data' => [
+                        'message' => 'Bank account not found.'
+                    ]
+                ], 404);
             }
-            return redirect()->back()->with('error', 'Bank account not found.');
+            // return redirect()->back()->with('error', 'Bank account not found.');
         }
 
         $user = Auth::guard('personal-api')->user();
 
         if ($bankAccount->personal_id !== $user->id) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized.'], 403);
+                return response()->json([
+                    'data' => [
+                        'message' => 'Unauthorized.'
+                    ]
+                ], 403);
             }
-            return redirect()->back()->with('error', 'Unauthorized access.');
+            // return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
         // Update the bank account
@@ -231,12 +267,14 @@ class addBankAccountController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Bank account updated successfully.',
-                'data' => $bankAccount
+                'data' => [
+                    'message' => 'Bank account updated successfully.',
+                    'data' => $bankAccount
+                ]
             ]);
         }
 
-        return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
+        // return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
     }
 
 
@@ -269,15 +307,17 @@ class addBankAccountController extends Controller
         //api response
         if (request()->expectsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank account retrieved successfully.',
-                'data' => $bankAccount,
-                'countries' => $countries,
-                'banks' => $banks,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank account retrieved successfully.',
+                    'data' => $bankAccount,
+                    'countries' => $countries,
+                    'banks' => $banks
+                ]
             ], 200);
         }
 
-        return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
+        // return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
     }
 
     public function setDefault(Request $request, $id)
@@ -288,7 +328,11 @@ class addBankAccountController extends Controller
             ->where('personal_id', $user->id)->whereNull('deleted_at')->firstOrFail();
 
         if ($account->personal_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json([
+                'data' => [
+                    'message' => 'Unauthorized'
+                ]
+            ], 403);
         }
 
         BankAccount::where('personal_id', $user->id)->update(['default' => false]);
@@ -296,9 +340,11 @@ class addBankAccountController extends Controller
         $account->save();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Payout account set.',
-            'default_account_id' => $account->id,
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payout account set.',
+                'default_account_id' => $account->id
+            ]
         ]);
     }
 
@@ -317,23 +363,29 @@ class addBankAccountController extends Controller
 
             if ($response->successful()) {
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Bank fields fetched successfully.',
-                    'fields' => $response->json()
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Bank fields fetched successfully.',
+                        'fields' => $response->json()
+                    ]
                 ]);
             }
 
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $response->json()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $response->json()
+                ]
             ], $response->status());
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $e->getMessage()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $e->getMessage()
+                ]
             ], 500);
         }
     }
@@ -359,18 +411,22 @@ class addBankAccountController extends Controller
 
         if ($response->successful()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Payout account validated successfully.',
-                'account_name' => $data['account_name'] ?? null,
-                'data' => $data
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payout account validated successfully.',
+                    'account_name' => $data['account_name'] ?? null,
+                    'payout' => $data
+                ]
             ], 200);
         }
 
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid payout account.',
-            'data' => $response->json()
+            'data' => [
+                'status' => 'error',
+                'message' => 'Invalid payout account.',
+                'data' => $response->json()
+            ]
         ], $response->status());
     }
 
