@@ -45,7 +45,7 @@ class donationsController extends Controller
 
         // Validate request
         $validator = Validator::make($request->all(), [
-            'cover_image' => 'nullable|string|max:255',
+            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
             'title' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0',
             'currency' => 'nullable|string|max:10',
@@ -59,11 +59,15 @@ class donationsController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
+        $path = null;
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('donation_cover_image', 'public');
+        }
         // Create donation
         $donation = donation::create([
             'personal_id' => $user->id,
-            'cover_image' => $request->cover_image,
+            'cover_image' => $path,
             'title' => $request->title,
             'donation_reference' => $this->generateUniqueReference(), // auto-generate unique reference
             'amount' => $request->amount,
