@@ -120,9 +120,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
     Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
     Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
-    Route::post('/remita/update', [RemitaController::class, 'update'])->name('remita.update');
-    Route::post('/remita/{id}/destory', [RemitaController::class, 'destory'])->name('remita.destory');
+    Route::put('/remita/{id}/update', [RemitaController::class, 'update'])->name('remita.update');
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
     
 
 
