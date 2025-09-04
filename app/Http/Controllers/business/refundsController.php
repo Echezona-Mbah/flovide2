@@ -94,7 +94,7 @@ class refundsController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        // Validate
+        // Validate 
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);
