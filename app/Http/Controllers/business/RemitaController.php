@@ -19,20 +19,22 @@ class RemitaController extends Controller
     {
         // Fetch all remita pages for the authenticated user
         $user = Auth::user();
-        $remitas = Remita::where('user_id', $user->id)->get();
+        $remitas = Remita::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         // Get all remita_ids from the collection
-        $remitaIds = $remitas->pluck('id'); 
+        $remitaIds = $remitas->pluck('id');
 
         //fetch remita_payment pages
         $paymentCount = RemitaPayment::whereIn('remita_id', $remitaIds)->count();
-        
+
         if (request()->expectsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Remita pages retrieved successfully.',
-                'data' => $remitas,
-                'remita_payments_count' => $paymentCount,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Remita pages retrieved successfully.',
+                    'remitas' => $remitas,
+                    'remita_payments_count' => $paymentCount,
+                ]
             ], 200);
         }
 
@@ -45,7 +47,7 @@ class RemitaController extends Controller
 
         $user = Auth::user();
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
-        
+
         //Decrypt account_number or iban before sending to view/JSON
         $subaccounts->transform(function ($subaccount) {
             try {
@@ -100,7 +102,7 @@ class RemitaController extends Controller
         }
 
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
-        
+
         //Decrypt account_number or iban before sending to view/JSON
         $subaccounts->transform(function ($subaccount) {
             try {
@@ -120,12 +122,12 @@ class RemitaController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Remita page retrieved successfully.',
                 'data' => [
+                    'status' => 'success',
+                    'message' => 'Remita page retrieved successfully.',
                     'remita' => $remita,
                     'subaccounts' => $subaccounts
-                ],
+                ]
             ], 200);
         }
 
@@ -166,7 +168,7 @@ class RemitaController extends Controller
         //get subaccount details
         $subaccount = Subaccount::find($request->subaccount_id);
         if (!$subaccount) {
-            if(request()->expectsJson()){
+            if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
@@ -179,7 +181,7 @@ class RemitaController extends Controller
 
         // Validate subaccount ownership
         if ($subaccount->user_id !== Auth::id()) {
-            if(request()->expectsJson()){
+            if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
@@ -220,6 +222,14 @@ class RemitaController extends Controller
             'visibility' => $request->visibility,
         ]);
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Remita page created successfully.'
+                ]
+            ], 200);
+        }
         return redirect()->back()->with('success', 'Remita page created successfully.');
     }
 
@@ -236,13 +246,13 @@ class RemitaController extends Controller
             'subaccount_id' => 'required|string',
             'percentage' => 'required|numeric|min:0|max:100',
             'currency' => 'required|string',
-            'visibility' => 'required|string',
+            'visibility' => 'required|string'
         ]);
 
         //get subaccount details
         $subaccount = Subaccount::find($request->subaccount_id);
         if (!$subaccount) {
-            if(request()->expectsJson()){
+            if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
@@ -255,7 +265,7 @@ class RemitaController extends Controller
 
         // Validate subaccount ownership
         if ($subaccount->user_id !== $user->id) {
-            if(request()->expectsJson()){
+            if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
@@ -272,9 +282,9 @@ class RemitaController extends Controller
 
 
         $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
-        
+
         if (!$remita) {
-            if(request()->expectsJson()){
+            if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
@@ -311,17 +321,16 @@ class RemitaController extends Controller
         $remita->visibility = $request->visibility;
         $remita->save();
 
-        if(request()->expectsJson()){
+        if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
-                    'message'=> 'Remite updated successfully'
+                    'message' => 'Remite updated successfully'
                 ]
             ], 200);
         }
 
         return redirect()->route('remita.edit', ['id' => $remita->id])->with('success', 'Remita page updated successfully.');
-
     }
 
     public function destroy(Request $request, $id)

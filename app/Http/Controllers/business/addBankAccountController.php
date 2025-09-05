@@ -56,6 +56,7 @@ class addBankAccountController extends Controller
         if (!$isDynamic) {
             // Static fields (NGN, GHS, KES accounts)
             $validated = $request->validate([
+                'account_type' => 'required|string|max:10',
                 'account_name' => 'required|string|max:255',
                 'account_number' => ['required', 'regex:/^\d{10}$/'],
                 'bank_country' => 'required|string|max:50',
@@ -72,6 +73,7 @@ class addBankAccountController extends Controller
         } else {
             // Dynamic fields (AU_AUD, US_USD, etc.)
             $validated = $request->validate([
+                'account_type' => 'required|string|max:10',
                 'account_name' => 'required|string|max:255',
                 'bank_country' => 'required|string|max:50',
                 'currency' => 'required|string|size:3', // ISO 4217 currency code
@@ -87,10 +89,28 @@ class addBankAccountController extends Controller
 
         $user = Auth::user();
 
+        // $encryptedAccount = Crypt::encryptString($validated['account_number']);
+        // // Check if this payout account already exists for the current user
+        // $exists = BankAccount::where('account_name', $validated['account_name'] )
+        // ->where('account_number', $encryptedAccount)->where('user_id', $user->id)->exists();
+
+        // if ($exists) {
+        //     if(request()->expectsJson()){
+        //         return response()->json([
+        //             'data' => [
+        //                 'status' => 'error',
+        //                 'message' => 'Payout account already exists.'
+        //             ]
+        //         ], 403);
+        //     }
+        //     return redirect()->back()->withErrors(['duplicate' => 'Payout account already exists.'])->withInput();
+        // }
+
         $isFirst = BankAccount::where('user_id', $user->id)->count() === 0;
 
         $bankAccount = BankAccount::create([
             'user_id' => $user->id,
+            'account_type' => $validated['account_type'],
             'account_name' => $validated['account_name'] ?? null,
             'account_number' => isset($validated['account_number']) ? Crypt::encryptString($validated['account_number']) : "",
             'bank_country' => $validated['bank_country'] ?? "",
@@ -107,13 +127,16 @@ class addBankAccountController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account added successfully.',
             'data' => [
-                'id' => $bankAccount->id,
-                'account_name' => $bankAccount->account_name,
-                'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
-                'bank_name' => $bankAccount->bank_name,
+                'status' => 'success',
+                'message' => 'Bank account added successfully.',
+                'bankaccount' => [
+                    'id' => $bankAccount->id,
+                    'account_type' => $bankAccount->account_type,
+                    'account_name' => $bankAccount->account_name,
+                    'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
+                    'bank_name' => $bankAccount->bank_name,
+                ]
             ]
         ], 201);
     }

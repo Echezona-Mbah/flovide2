@@ -104,9 +104,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/business/refunds/{id}/status', [refundsController::class, 'updateStatus']);
     
     //remita
-    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
-    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
-    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    Route::get('business/remita', [RemitaController::class, 'index']);
+    // Route::get('business/remita/create', [RemitaController::class, 'create']);
+    // Route::get('business/remita/{id}/edit', [RemitaController::class, 'edit']);
+    Route::put('business/remita/{id}/update', [RemitaController::class, 'update']);
+    Route::post('business/remita/store', [RemitaController::class, 'store']);
+    Route::delete('business/remita/{id}/destory', [RemitaController::class, 'destroy']);
+    
 
     // api for transaction history
     Route::get('business/showTransactions', [TransactionHistoryController::class, 'showAllTransactions']);
