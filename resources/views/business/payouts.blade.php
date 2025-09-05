@@ -32,7 +32,15 @@
                         </p>
                         <div class="flex flex-col gap-5 text-sm font-normal text-[#6B6B6B]">
                             <form id="bankAccountForm">
-                                @csrf                    
+                                @csrf          
+                                <div class="flex flex-col mb-3">
+                                    <label class="font-normal text-[#6B6B6B]" for="account type">Select Account Type</label>
+                                    <select class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_Type">
+                                        <option value="" selected> Select Account Type </option>
+                                        <option value="Personal"> Personal </option>
+                                        <option value="Business"> Business </option>
+                                    </select>
+                                </div>          
                                 <div class="flex flex-col gap-1">
                                     <label class="font-normal text-[#6B6B6B]" for="country">
                                         In what country is your bank located?
@@ -50,7 +58,13 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                </div>
+                                </div>         
+                                <div class="flex flex-col mb-4 mt-3">
+                                    <label class="font-normal text-[#6B6B6B]" for="currency">Select Currency</label>
+                                    <select class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="currency">
+                                        <option value=""> Select Currency </option>
+                                    </select>
+                                </div>   
 
                                 <div id="staticFields">
                                     <div class="flex flex-col gap-1">
@@ -67,17 +81,16 @@
                                     </div>
 
                                     <!-- ACCOUNT NUMBER -->
-                                    <div class="flex flex-col gap-1">
+                                    <div class="flex flex-col gap-1 mt-3">
                                         <label class="font-normal text-[#6B6B6B]" for="account-number">
                                             Bank account number
                                         </label>
                                         <span class="text-red-500 errornumber"></span>
-                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
-                                            id="account_number" name="account-number" placeholder="12345678" type="text" />
+                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_number" name="account-number" placeholder="12345678" type="text" />
                                     </div>
 
                                     <!-- ACCOUNT NAME -->
-                                    <div class="flex flex-col gap-1">                                        
+                                    <div class="flex flex-col gap-1 mt-3">                                        
                                         <div class="flex items-center gap-2">
                                             <label class="font-normal text-[#6B6B6B]" for="account-name">
                                                 Bank account name
@@ -89,7 +102,7 @@
                                             </svg>
                                         </div>
                                         <span class="text-red-500 errorname"></span>
-                                        <input  type="text" value="" class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
+                                        <input  type="text" value="" class="border border-[#C4C4C4] cursor-not-allowed rounded-md py-2 px-4 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
                                     </div>
                                     <div class="flex flex-col gap-1">
                                         <div id="responseMessage"></div>
@@ -5847,30 +5860,47 @@
         };
 
 
-        // document.querySelector("#country").addEventListener("change", function() {
-        //     let selectedOption = this.selectedOptions[0];
-        //     if (selectedOption) {
-        //         document.querySelector("#country").value = selectedOption.getAttribute("data-country");
-        //     }
-        // });
+
 
         document.addEventListener('DOMContentLoaded', function () {
             const allowedCurrencies = ['NGN', 'GHS', 'KES'];
 
             const countrySelect = document.getElementById('country');
+            const currencySelect = document.getElementById('currency'); // 👈 currency dropdown
             const staticFields = document.getElementById('staticFields');
             const dynamicFieldsContainer = document.getElementById('dynamicFields');
 
+            // make countries data available (from Blade)
+            const countries = @json($countries);
+
             countrySelect.addEventListener('change', function () {
-                // const selectedValue = this.value; // e.g. "NG_USD"
+                // get dataset values
                 const selectedValue = this.selectedOptions[0].dataset.fullcurrency; // e.g. "NG_USD"
                 const currencyOnly = this.selectedOptions[0].dataset.currency; // e.g. "USD"
+                const selectedCountry = this.value; // country_name
 
                 dynamicFieldsContainer.innerHTML = ''; // Clear old dynamic fields
 
+                // 🔹 populate currency dropdown
+                const country = countries.find(c => c.country_name === selectedCountry);
+                if (country) {
+                    currencySelect.innerHTML = ""; // clear old options
+
+                    country.currencies.forEach(currency => {
+                        let option = document.createElement("option");
+                        option.value = currency;
+                        option.textContent = currency;
+                        if (currency === country.default_currency) {
+                            option.selected = true; // set default currency
+                        }
+                        currencySelect.appendChild(option);
+                    });
+                }
+
+                // 🔹 handle static/dynamic fields
                 if (allowedCurrencies.includes(currencyOnly)) {
                     staticFields.style.display = 'block';
-                    //call the function to fetch banks
+                    // call the function to fetch banks
                     Fetch_updateBankOptions();
                 } else {
                     staticFields.style.display = 'none';
@@ -5898,6 +5928,7 @@
                 }
             });
         });
+
 
         //fetch bank
         function Fetch_updateBankOptions() {
@@ -5964,13 +5995,21 @@
         }
 
 
-        document.getElementById("account_number").addEventListener("input", function () {
-            let accountNumber = this.value;
-            if(accountNumber.length === 10) {
-                document.getElementById("account_spinner").classList.remove("hidden");
+        const accountInput = document.getElementById("account_number");
+        const spinner = document.getElementById("account_spinner");
+
+        function checkAccountNumber() {
+            let accountNumber = accountInput.value.trim();
+            if (accountNumber.length === 10) {
+                spinner.classList.remove("hidden");
                 validateAccount();
             }
-        });
+        }
+        // listen to multiple events
+        accountInput.addEventListener("input", checkAccountNumber);   // typing/paste
+        accountInput.addEventListener("change", checkAccountNumber);  // autofill/select suggestion
+        accountInput.addEventListener("blur", checkAccountNumber);    // when leaving the field
+
 
         //validate payout account name
         function validateAccount() {
@@ -6024,6 +6063,14 @@
                 } else {
                     accountName.value = '';
                     console.warn('No account name returned.');
+                    Swal.fire({
+                        toast: true,
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        title: 'Invalid account details'
+                    });
                     account_spinner.classList.add("hidden");
                 }
             })
@@ -6049,11 +6096,26 @@
             e.preventDefault();
 
             const allowedCurrenciesFrom = ['NGN', 'GHS', 'KES'];
+            const account_type = document.getElementById('account_Type');
             const countrySelect = document.getElementById('country');
+            const currencySelect = document.getElementById('currency');
             const selectedValue = countrySelect.value;  
             const fullCurrency = countrySelect.options[countrySelect.selectedIndex].dataset.fullCurrency;
-            const currencyOnlyForm = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
-            
+            // const currencyOnlyForm = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
+            let currencyOnlyForm = currencySelect.value;
+
+            if(account_type.value == "") {
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    title: 'Please select a valid account type'
+                });
+                return;
+            }
+
             if(!currencyOnlyForm) {
                 Swal.fire({
                     toast: true,
@@ -6061,7 +6123,7 @@
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 3000,
-                    title: 'Please select a valid country'
+                    title: 'Please select a valid currency'
                 });
                 return;
             }
@@ -6074,7 +6136,7 @@
                 const bank = selectedOption.dataset.label;
                 const account_number = document.querySelector("#account_number").value;
                 const account_name = document.querySelector("#account_name").value;
-                console.log("Selected bank:", bank);
+                // console.log("Selected bank:", bank);
                 if (!country || !bank || !account_number || !account_name) {
                     Swal.fire({
                         toast: true,
@@ -6088,6 +6150,7 @@
                 }
 
                 const formData = new FormData();
+                formData.append('account_type', account_type.value);
                 formData.append('account_name', account_name);
                 formData.append('account_number', account_number);
                 formData.append('bank_country', country);
@@ -6104,6 +6167,7 @@
 
                 const formData = new FormData(this);
                 formData.append('formDynamicFields', true);
+                formData.append('account_type', account_type.value);
                 formData.append('bank_country', selectedValue);
                 formData.append('currency', currencyOnlyForm);
                 formData.append('type', "foreign");
@@ -6161,14 +6225,15 @@
                     },
                     body: data
                 })
-                .then(response => response.json()).then(data => {
-                    if (data.status == "success") {
+                .then(response => response.json())
+                .then(res => {
+                    if (res.data.status == "success") {
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'success',
                             title: 'Added!',
-                            text: data.message,
+                            text: res.data.message,
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true,
@@ -6183,13 +6248,10 @@
                             position: 'top-end',
                             icon: 'error',
                             title: 'Error!',
-                            text: data.message,
+                            text: res.data.message,
                             showConfirmButton: false,
                             timer: 3000,
-                            timerProgressBar: true,
-                            // didClose: () => {
-                            //     location.reload();
-                            // }
+                            timerProgressBar: true
                         });
 
                     }

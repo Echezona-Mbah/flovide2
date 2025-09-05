@@ -115,11 +115,10 @@
 
 
                         <label for="country" class="font-normal">Select Account Type</label>
-                        <select id="account_type" name="account_type"
-                            class="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        <select id="account_type" name="account_type" class="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
                             <option selected disabled>Select Account Type</option>
-                                <option value="personal">Personal </option>
-                                <option value="business">Business</option>
+                            <option value="personal">Personal </option>
+                            <option value="business">Business</option>
                         </select>
                         
             
@@ -6280,7 +6279,6 @@
     
             validateAccount() {
                 const country = this.selectedCountry?.alpha2;
-<<<<<<< HEAD
                 const currency = this.selectedCurrency;
                 const bankId = this.selectedBankId;
                 const accountNumber = this.accountNumber;
@@ -6302,29 +6300,6 @@
                     this.isLoading = false;
                     return;
                 }
-=======
-    const currency = this.selectedCurrency;
-    const bankId = this.selectedBankId;
-    const accountNumber = this.accountNumber;
-
-    console.log('Validation values:', { country, currency, bankId, accountNumber });
-
-    this.isLoading = true;
-
-    if (!country || !currency || !bankId || !accountNumber || accountNumber.length < 6) {
-        console.warn('Validation failed. Required data missing.', {
-            missing: {
-                country: !country,
-                currency: !currency,
-                bankId: !bankId,
-                accountNumber: !accountNumber || accountNumber.length < 6
-            }
-        });
-        this.accountName = '';
-        this.isLoading = false;
-        return;
-    }
->>>>>>> 4214aa702807e3d23954c2ccb8c80301d29082d1
 
     
                 fetch('/validate-account', {

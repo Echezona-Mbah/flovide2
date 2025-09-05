@@ -14,7 +14,7 @@ class donationsController extends Controller
     //
     public function index(){
         $user = Auth::guard('personal-api')->user();
-        $donations = donation::where('personal_id', $user->id)->paginate(10);
+        $donations = donation::where('personal_id', $user->id)->orderBy('created_at', 'desc')->paginate(10);
         
         if ($donations->total() < 1) {
             return response()->json([
@@ -101,7 +101,7 @@ class donationsController extends Controller
             return response()->json([
                 'data' => [
                     'status'  => 'error',
-                    'message' => 'donation not found or not authorized',
+                    'message' => 'donation not found or not authorized'
                 ]
             ], 404);
         }
@@ -112,7 +112,7 @@ class donationsController extends Controller
             'title' => 'nullable|string|max:255',
             'amount' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:10',
-            'visibility' => 'nullable|in:public,private',
+            'visibility' => 'nullable|in:public,private'
         ]);
 
         if ($validator->fails()) {
@@ -146,15 +146,13 @@ class donationsController extends Controller
 
     public function show(Request $request, $id){
         $user = Auth::guard('personal-api')->user();
-        $donation = donation::where('id', $id)
-                      ->where('personal_id', $user->id)
-                      ->first();
+        $donation = donation::where('id', $id)->where('personal_id', $user->id)->first();
 
         if (!$donation) {
             return response()->json([
                 'data' => [
                     'status'  => 'error',
-                    'message' => 'donation not found or not authorized',
+                    'message' => 'donation not found or not authorized'
                 ]
             ], 404);
         }
@@ -170,9 +168,7 @@ class donationsController extends Controller
 
     public function destory(Request $request, $id){
         $user = Auth::guard('personal-api')->user();
-        $donation = donation::where('id', $id)
-                      ->where('personal_id', $user->id)
-                      ->first();
+        $donation = donation::where('id', $id)->where('personal_id', $user->id)->first();
 
         if (!$donation) {
             return response()->json([
@@ -188,7 +184,7 @@ class donationsController extends Controller
         return response()->json([
             'data' => [
                 'status'  => 'success',
-                'message' => 'donation deleted successfully',
+                'message' => 'donation deleted successfully'
             ]
         ]);
     }
