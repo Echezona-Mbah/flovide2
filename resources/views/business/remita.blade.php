@@ -64,7 +64,7 @@
                                 <!-- Card 1 -->
                                 <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
                                     <div class="flex justify-between items-center gap-4">
-                                        <div>
+                                        <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
                                             @php
                                                 if($remita->cover_image != null){
                                                     $coverImage = asset('storage/' . $remita->cover_image);
@@ -78,7 +78,7 @@
                                             <div class="flex justify-between items-start">
                                                 <div class="text-lg font-extrabold">{{ number_format($remita->amount, 2) . ' ' . $remita->currency }}</div>
                                             </div>
-                                            <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div>
+                                            {{-- <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div> --}}
                                         </div>
                                     </div>
                                     <div>
@@ -125,8 +125,7 @@
                                         <div class="flex justify-between items-start">
                                             <div class="text-lg font-extrabold">5 GBP</div>
                                         </div>
-                                        <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">
-                                            Monthly</div>
+                                        <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div>
                                     </div>
                                 </div>
                             
