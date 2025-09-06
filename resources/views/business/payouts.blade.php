@@ -37,8 +37,8 @@
                                     <label class="font-normal text-[#6B6B6B]" for="account type">Select Account Type</label>
                                     <select class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_Type">
                                         <option value="" selected> Select Account Type </option>
-                                        <option value="Personal"> Personal </option>
-                                        <option value="Business"> Business </option>
+                                        <option value="personal"> Personal </option>
+                                        <option value="business"> Business </option>
                                     </select>
                                 </div>          
                                 <div class="flex flex-col gap-1">
@@ -49,11 +49,8 @@
                                     <select class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="country" name="country">
                                         <option value="" disabled="" selected> Select country </option>
                                         @foreach($countries as $country)
-                                            <option 
-                                             value="{{ $country['country_name'] }}"
-                                             data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
-                                             data-currency="{{ $country['default_currency'] }}" data-alpha2="{{ $country['alpha2'] }}"
-                                            >
+                                            <option value="{{ $country['country_name'] }}" data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
+                                             data-currency="{{ $country['default_currency'] }}" data-alpha2="{{ $country['alpha2'] }}">
                                                 {{ $country['country_name'] }}
                                             </option>
                                         @endforeach
@@ -149,7 +146,7 @@
                                         </div>
                                 @endif
                                         <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                            {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
+                                            {{ ($account->account_number) ? $account->account_number : $account->iban }}
                                         </span>
                                         <span class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
                                             {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
@@ -5860,47 +5857,23 @@
         };
 
 
-
-
         document.addEventListener('DOMContentLoaded', function () {
             const allowedCurrencies = ['NGN', 'GHS', 'KES'];
 
             const countrySelect = document.getElementById('country');
-            const currencySelect = document.getElementById('currency'); // 👈 currency dropdown
+            const currencySelect = document.getElementById('currency');
             const staticFields = document.getElementById('staticFields');
             const dynamicFieldsContainer = document.getElementById('dynamicFields');
 
             // make countries data available (from Blade)
             const countries = @json($countries);
 
-            countrySelect.addEventListener('change', function () {
-                // get dataset values
-                const selectedValue = this.selectedOptions[0].dataset.fullcurrency; // e.g. "NG_USD"
-                const currencyOnly = this.selectedOptions[0].dataset.currency; // e.g. "USD"
-                const selectedCountry = this.value; // country_name
+            // function to render fields based on currency
+            function renderFields(currency, selectedValue) {
+                dynamicFieldsContainer.innerHTML = ''; // clear old fields
 
-                dynamicFieldsContainer.innerHTML = ''; // Clear old dynamic fields
-
-                // 🔹 populate currency dropdown
-                const country = countries.find(c => c.country_name === selectedCountry);
-                if (country) {
-                    currencySelect.innerHTML = ""; // clear old options
-
-                    country.currencies.forEach(currency => {
-                        let option = document.createElement("option");
-                        option.value = currency;
-                        option.textContent = currency;
-                        if (currency === country.default_currency) {
-                            option.selected = true; // set default currency
-                        }
-                        currencySelect.appendChild(option);
-                    });
-                }
-
-                // 🔹 handle static/dynamic fields
-                if (allowedCurrencies.includes(currencyOnly)) {
+                if (allowedCurrencies.includes(currency)) {
                     staticFields.style.display = 'block';
-                    // call the function to fetch banks
                     Fetch_updateBankOptions();
                 } else {
                     staticFields.style.display = 'none';
@@ -5926,6 +5899,43 @@
                         dynamicFieldsContainer.appendChild(wrapper);
                     });
                 }
+            }
+
+            // handle country change
+            countrySelect.addEventListener('change', function () {
+                const countryCode = this.selectedOptions[0].dataset.alpha2; // e.g. "NG"
+                const selectedValue = this.selectedOptions[0].dataset.fullcurrency; // e.g. "NG_USD"
+                const currencyOnly = this.selectedOptions[0].dataset.currency; // e.g. "NGN"
+                const selectedCountry = this.value; // country_name
+
+                // populate currency dropdown
+                const country = countries.find(c => c.country_name === selectedCountry);
+                if (country) {
+                    currencySelect.innerHTML = ""; // clear old options
+
+                    country.currencies.forEach(currency => {
+                        let option = document.createElement("option");
+                        option.value = currency;
+                        option.textContent = currency;
+                        if (currency === country.default_currency) {
+                            option.selected = true; // set default currency
+                        }
+                        currencySelect.appendChild(option);
+                    });
+                }
+
+                // render fields based on default currency
+                renderFields(currencyOnly, selectedValue);
+            });
+
+            // handle currency change
+            currencySelect.addEventListener("change", function (e) {
+                const selectedCurrency = e.target.value;
+
+                // Build full key like "NG_USD"
+                let selectedValue = countrySelect.selectedOptions[0].dataset.alpha2 + "_" + selectedCurrency;
+                // alert(selectedValue);
+                renderFields(selectedCurrency, selectedValue);
             });
         });
 
@@ -5952,7 +5962,7 @@
             // Clear existing options first
             bankSelect.innerHTML = `<option value="" disabled selected>Select your bank</option>`;
 
-            console.log(`Fetching banks for ${countryCurrencyCode} / ${currencyCode}...`);
+            // console.log(`Fetching banks for ${countryCurrencyCode} / ${currencyCode}...`);
 
             fetch(`{{ route('fetch.localbanks') }}?countryCurrency=${countryCurrencyCode}&currency=${currencyCode}`, {
                 method: 'GET',
@@ -6020,6 +6030,7 @@
             const selectElement = document.querySelector("#bankBB");
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const bankId = selectedOption.getAttribute("data-id");
+            // const bank_code = selectedOption.getAttribute("data-code");
 
             const accountName = document.querySelector("#account_name");
             const accountNumber = document.querySelector("#account_number").value;
@@ -6042,6 +6053,7 @@
             formData.append('country', country);
             formData.append('currency', currency);
             formData.append('bank_id', String(bankId));
+            // formData.append('bank_code', String(bank_code));
             formData.append('account_number', accountNumber);
 
             // Make the API call to validate the account name
@@ -6056,13 +6068,13 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log('Account validation response:', data);
+                // console.log('Account validation response:', data);
                 if (data.status === 'success' && data.account_name) {
                     accountName.value = data.account_name;
                     account_spinner.classList.add("hidden");
                 } else {
                     accountName.value = '';
-                    console.warn('No account name returned.');
+                    // console.warn('No account name returned.');
                     Swal.fire({
                         toast: true,
                         icon: 'error',
@@ -6077,7 +6089,7 @@
             .catch(err => {
                 accountName.value = '';
                 account_spinner.classList.add("hidden");
-                console.error('Error validating account:', err);
+                // console.error('Error validating account:', err);
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -6099,10 +6111,10 @@
             const account_type = document.getElementById('account_Type');
             const countrySelect = document.getElementById('country');
             const currencySelect = document.getElementById('currency');
-            const selectedValue = countrySelect.value;  
-            const fullCurrency = countrySelect.options[countrySelect.selectedIndex].dataset.fullCurrency;
-            // const currencyOnlyForm = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
-            let currencyOnlyForm = currencySelect.value;
+            const selectedValue = countrySelect.value;
+            let currencyOnlyForm = currencySelect.value; // e.g "NGN/USD/EUR/GBP"
+            const countryCode = countrySelect.selectedOptions[0].dataset.alpha2; // e.g. "NG"
+            let fullCountryCodeCurrency = countryCode + "_" + currencyOnlyForm;
 
             if(account_type.value == "") {
                 Swal.fire({
@@ -6136,6 +6148,9 @@
                 const bank = selectedOption.dataset.label;
                 const account_number = document.querySelector("#account_number").value;
                 const account_name = document.querySelector("#account_name").value;
+                const bankId = selectedOption.getAttribute("data-id");
+                // const bank_code = selectedOption.getAttribute("data-code");
+
                 // console.log("Selected bank:", bank);
                 if (!country || !bank || !account_number || !account_name) {
                     Swal.fire({
@@ -6155,8 +6170,9 @@
                 formData.append('account_number', account_number);
                 formData.append('bank_country', country);
                 formData.append('bank_name', bank);
+                formData.append('bank_code', bankId);
                 formData.append('currency', currencyOnlyForm);
-                formData.append('type', "local");
+                formData.append('country', countryCode); // e.g "NG"
                 formData.append('formDynamicFields', false);
 
                 //proceed with the form submission
@@ -6169,15 +6185,15 @@
                 formData.append('formDynamicFields', true);
                 formData.append('account_type', account_type.value);
                 formData.append('bank_country', selectedValue);
+                formData.append('country', countryCode); // e.g "NG"
                 formData.append('currency', currencyOnlyForm);
-                formData.append('type', "foreign");
                 const values = {};
 
                 for (let [key, val] of formData.entries()) {
                     values[key] = val.trim();
                 }
-                // Run dynamic inputs validation
-                if (!validateDynamicFormInputs(values, fullCurrency)) {
+                // Run dynamic inputs validation 
+                if (!validateDynamicFormInputs(values, fullCountryCodeCurrency)) {
                     return;
                 }
                 // If valid, proceed with the form submission
@@ -6243,6 +6259,29 @@
                         });
 
                     } else {
+                        if(res.data.message === "Validation failed") {
+                            let errors = res.data.errors; // the real validation errors object
+                            let errorMessages = [];
+
+                            // Collect all error messages
+                            for (let field in errors) {
+                                if (errors.hasOwnProperty(field)) {
+                                    errorMessages.push(errors[field][0]); // take first error per field
+                                }
+                            }
+
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: 'Validation Error!',
+                                text: errorMessages.join("\n"), // join all messages into one string
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                            return
+                        }
                        Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -6253,7 +6292,7 @@
                             timer: 3000,
                             timerProgressBar: true
                         });
-
+                        console.log(res.data);
                     }
                 })
                 .catch(error => {
@@ -6433,5 +6472,4 @@
     </script>
 
 </body>
-
 </html>
