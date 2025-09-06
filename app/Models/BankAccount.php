@@ -29,18 +29,18 @@ class BankAccount extends Model
         'state',
         'zipcode',
         'recipient_address',
-        'type',
+        'recipient_id',
     ];
     protected $attributes = [
         'currency' => 'USD',
     ];
 
 
-    protected $casts = [
-        'account_number' => 'encrypted',
-        'iban' => 'encrypted',
-        'bic' => 'encrypted',
-    ];
+    // protected $casts = [
+    //     'account_number' => 'encrypted',
+    //     'iban' => 'encrypted',
+    //     'bic' => 'encrypted',
+    // ];
 
     public function user()
     {
