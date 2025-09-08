@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\payments as payment;
 use Illuminate\Support\Str;
+use App\Exports\PaymentRecordsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelFormat;
 
 class paymentsController extends Controller
 {
@@ -23,7 +26,7 @@ class paymentsController extends Controller
                     'message' => 'No payments found for this user',
                     'payments' => []
                 ]
-            ]);
+            ], 200);
         }
 
         //return json
@@ -33,7 +36,7 @@ class paymentsController extends Controller
                 'message' => 'Payments retrieved successfully',
                 'payments' => $payments
             ]
-        ]);
+        ], 200);
     }
 
     public function generateUniqueReference()
@@ -141,7 +144,7 @@ class paymentsController extends Controller
                 'message' => 'Payment updated successfully',
                 'payment' => $payment
             ]
-        ]);
+        ], 200);
 
     }
 
@@ -166,14 +169,13 @@ class paymentsController extends Controller
                 'message' => 'Payment retrieved successfully',
                 'payment' => $payment
             ]
-        ]);
+        ], 200);
     }
 
     public function destory(Request $request, $id){
         $user = Auth::guard('personal-api')->user();
         $payment = payment::where('id', $id)
-                      ->where('personal_id', $user->id)
-                      ->first();
+                      ->where('personal_id', $user->id)->first();
 
         if (!$payment) {
             return response()->json([
@@ -191,7 +193,7 @@ class paymentsController extends Controller
                 'status' => 'success',
                 'message' => 'Payment deleted successfully',
             ]
-        ]);
+        ], 200);
     }
 
     public function paymentrecords(){
@@ -205,6 +207,19 @@ class paymentsController extends Controller
                 'message' => 'Payments with records retrieved successfully',
                 'payments' => $payments
             ]
-        ]);
+        ], 200);
+    }
+
+    public function exportUserPayments()
+    {
+        $user = Auth::guard('personal-api')->user();
+
+        $fileName = 'my_payments_records_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        return Excel::download(
+            new PaymentRecordsExport($user->id), 
+            $fileName, 
+            ExcelFormat::CSV
+        );
     }
 }

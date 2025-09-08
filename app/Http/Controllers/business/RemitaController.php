@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\RemitaRecordsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelFormat;
 
 class RemitaController extends Controller
 {
@@ -360,5 +363,28 @@ class RemitaController extends Controller
                 ]
             ], 200);
         }
+    }
+
+    public function exportUserRemita(Request $request, $id)
+    {
+        $fileName = 'my_remita_records_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $user = Auth::user();
+        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+        if(!$remita){
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Remita records not found'
+                    ]
+                ], 404);
+            }
+            return redirect()->back()->withErrors(['error' => 'Remita records not found']);
+        }
+        return Excel::download(
+            new RemitaRecordsExport($remita->id), 
+            $fileName, 
+            ExcelFormat::CSV
+        );
     }
 }
