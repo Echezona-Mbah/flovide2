@@ -78,15 +78,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/verify_bvn', [RegisteredUserController::class, 'verifyBVN'])->name('bvn.verify.submit');
 
 
-
+    //payout account
     Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
-    Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
-    Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
     Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
-    Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
-    Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
-    Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
     Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
+    Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
+    Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
+    Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
+    Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
+    Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
     Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
 
     //subaccount
@@ -119,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
     //remita
     Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
     Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    Route::get('/remita/{id}/export', [RemitaController::class, 'exportUserRemita'])->name('remite.export');
     Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
     Route::put('/remita/{id}/update', [RemitaController::class, 'update'])->name('remita.update');
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');

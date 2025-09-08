@@ -98,8 +98,7 @@
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                             </svg>
                                         </div>
-                                        <span class="text-red-500 errorname"></span>
-                                        <input  type="text" value="" class="border border-[#C4C4C4] cursor-not-allowed rounded-md py-2 px-4 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
+                                        <input type="text" value="" class="border border-[#C4C4C4] cursor-not-allowed rounded-md py-2 px-4 text-[#30941c] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
                                     </div>
                                     <div class="flex flex-col gap-1">
                                         <div id="responseMessage"></div>
@@ -110,7 +109,13 @@
                                 <!-- Dynamic fields for other countries -->
                                 <div id="dynamicFields" class="flex flex-col gap-3"></div>
 
-                                <button type="submit" id="bankAccountFormBTN" class="self-start bg-[#A9D3F7] text-[#1E4F8B] font-semibold text-sm rounded-full py-2.5 px-6 mt-2"> Add Account </button>
+                                <button type="submit" id="bankAccountFormBTN" class="self-start bg-[#A9D3F7] text-[#1E4F8B] font-semibold text-sm rounded-full py-2.5 px-6 mt-2"> 
+                                    <span class="btn-text">Add Account</span>
+                                    {{-- <svg id="submitSpinner" class="animate-spin hidden h-5 w-5 text-[#1E4F8B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>   --}}
+                                </button>
                             </form>
                         </div>
                     </section>
@@ -157,11 +162,11 @@
                                                 PAYOUT ACCOUNT
                                             </span>
                                         @endif
-                                        <button class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
+                                        {{-- <button class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
                                             <a href="{{ route('business.edit', $account->id) }}">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </a>
-                                        </button>
+                                        </button> --}}
                                         <button class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0 delete-icon" data-id="{{ $account->id }}">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -6173,7 +6178,7 @@
                 formData.append('bank_code', bankId);
                 formData.append('currency', currencyOnlyForm);
                 formData.append('country', countryCode); // e.g "NG"
-                formData.append('formDynamicFields', false);
+                // formData.append('formDynamicFields', false);
 
                 //proceed with the form submission
                 validateForm(formData);
