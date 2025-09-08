@@ -266,10 +266,19 @@
           <section class="flex-1 max-w-full lg:max-w-[520px] flex flex-col gap-4">
             <div class="flex justify-between items-center">
               <h2 class="font-semibold text-gray-900 select-none">Payments</h2>
-              <button type="button" class="flex items-center gap-2 rounded-lg border {{ $remita->visibility === "Private" ? "border-gray-300 bg-white px-4 py-2 text-gray-500 cursor-not-allowed" : "border-blue-300 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400" }} text-sm font-semibold ">
-                <i class="fas fa-file-export"></i>
-                Export CSV
-              </button>
+              @if ($remita->visibility === 'Private')
+                <button type="button" class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-500 cursor-not-allowed text-sm font-semibold ">
+                  <i class="fas fa-file-export"></i>
+                  Export CSV
+                </button>
+              @else
+                <a href="{{ route('remite.export', ['id' => $remita->id]) }}">
+                  <button type="button" class="flex items-center gap-2 rounded-lg border border-blue-300 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold ">
+                    <i class="fas fa-file-export"></i>
+                    Export CSV
+                  </button>
+                </a>
+              @endif
             </div>
 
             <div
