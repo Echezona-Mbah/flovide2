@@ -355,25 +355,32 @@ class addBankAccountController extends Controller
 
     public function setDefault(Request $request, $id)
     {
-        // $account = BankAccount::findOrFail($id);
+        $user = Auth::user();
         $account = BankAccount::where('id', $id)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $user->id)
             ->whereNull('deleted_at')
-            ->firstOrFail();
+            ->first();
 
-        if ($account->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$account) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Bank account not found or unauthorized'
+                ]
+            ], 404);
         }
 
-        BankAccount::where('user_id', Auth::id())->update(['default' => false]);
+        BankAccount::where('user_id', $user->id)->update(['default' => false]);
         $account->default = true;
         $account->save();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Payout account set.',
-            'default_account_id' => $account->id,
-        ]);
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payout account set successfully',
+                'default_account_id' => $account->id
+            ]
+        ], 200);
     }
 
 
