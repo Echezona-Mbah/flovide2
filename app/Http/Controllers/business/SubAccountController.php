@@ -9,6 +9,8 @@ use App\Models\Bank;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class SubAccountController extends Controller
 {
@@ -34,14 +36,21 @@ class SubAccountController extends Controller
         
         if ($request->expectsJson()) {
             if ($subaccounts->isEmpty()) {
-                return response()->json(['message' => 'You have not added any subaccounts yet.'], 404);
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'You have not added any subaccounts yet.'
+                    ]
+                ], 404);
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank accounts and countries retrieved successfully.',
-                'data' => $subaccounts,
-                'countries' => $countries
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank accounts and countries retrieved successfully.',
+                    'subaccounts' => $subaccounts,
+                    'countries' => $countries
+                ]
             ], 200);
         }
 
@@ -61,68 +70,156 @@ class SubAccountController extends Controller
 
     public function store(Request $request)
     {
-        $isDynamic = $request->input('formDynamicFields') === 'true';
+        $country = $request->input('country'); // e.g NG/GH/US
+        $currency = $request->input('currency'); // e.g NGN/USD/CAD/GHS/KES
 
-        if (!$isDynamic) {
-            $validated = $request->validate([
-                'bank_name' => 'required|string|max:255',
-                'type' => 'required|string|max:10',
-                'bank_country' => 'required|string',
-                'account_number' => ['required', 'regex:/^\d{10}$/'],
-                'account_name' => 'required|string|max:255',
-                'currency' => 'required|string|size:3', // ISO 4217
-                'bic' => 'nullable|string|regex:/^[A-Za-z0-9]{8,11}$/',
-                'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
-                'city' => 'nullable|string|max:255',
-                'state' => 'nullable|string|max:255',
-                'zipcode' => 'nullable|string|max:20',
-                'address' => 'nullable|string|max:255',
-            ]);
-        } else {
-            // Dynamic fields (AU_AUD, US_USD, etc.)
-            $validated = $request->validate([
-                'account_name' => 'required|string|max:255',
-                'bank_country' => 'required|string|max:10',
-                'currency' => 'required|string|size:3', // ISO 4217 currency code
-                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
-                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
-                'city' => 'required|string|max:255',
-                'state' => 'required|string|max:255',
-                'zipcode' => 'required|string|max:20',
-                'address' => 'required|string|max:255',
-                'type' => 'required|string|max:10',
-            ]);
+        // Start with rules that apply to all
+        $rules = [
+            'account_type' => 'required|string|max:255',
+            'bank_country' => 'required|string|max:255',
+            'country' => 'required|string',
+            'currency' => 'required|string',
+            'account_name' => 'required|string|max:255',
+        ];
+
+        $allowedCountries = ['NG', 'GH', 'KE'];
+        $LocalAllowedCurrencies = ['NGN', 'GHS', 'KES'];
+
+        if(in_array($currency, ['USD', 'EUR'])){
+            $rules['account_number'] = 'required|string';
+            $rules['address'] = 'required|string|max:255';
+            $rules['city'] = 'required|string|max:255';
+            $rules['state'] = 'required|string|max:255';
+            $rules['zipcode'] = 'required|string|max:20';
+        }else if($currency === "GBP"){
+            // $rules['iban'] = 'required|string|max:255';
+            $rules['sort_code'] = 'required|string|max:255';
+            $rules['account_number'] = 'required|string|max:255';
+            $rules['address'] = 'required|string|max:255';
+            $rules['city'] = 'required|string|max:255';
+            $rules['state'] = 'required|string|max:255';
+            $rules['zipcode'] = 'required|string|max:20';
+        }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
+            $rules['bank_code'] = 'required|string|max:20';
         }
 
-        $isFirst = Subaccount::where('user_id', Auth::id())->count() === 0;
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            if ($request->expectsJson()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'errors' => $validator->errors(),
+                        'message' => 'Validation failed'
+                    ]
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
-        $subaccount = Subaccount::create([
-            'user_id' => Auth::id(),
-            'account_number' => isset($validated['account_number']) ? Crypt::encryptString($validated['account_number']) : "",
-            'account_name' => $validated['account_name'] ?? null,
-            'bank_name' => $validated['bank_name'] ?? "",
-            'bank_country' => $validated['bank_country'] ?? "",
-            'currency' => $validated['currency'],
-            'bic' => $validated['bic'] ? Crypt::encryptString($validated['bic']) : null,
-            'iban' => $validated['iban'] ? Crypt::encryptString($validated['iban']) : null,
-            'city' => $validated['city'] ?? null,
-            'state' => $validated['state'] ?? null,
-            'zipcode' => $validated['zipcode'] ?? null,
-            'recipient_address' => $validated['address'] ?? null,
-            'type' => $validated['type'] ?? null,
-            'default' => $isFirst,
+        $user = Auth::user();
+        // Check if this Subaccount already exists for the current user
+        $exists = Subaccount::where('account_name', $request->input('account_name') )
+        ->where('account_number', $request->input('account_number'))->where('user_id', $user->id)->exists();
+
+        if ($exists) {
+            if(request()->expectsJson()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Subaccount already exists.'
+                    ]
+                ], 409);
+            }
+            return redirect()->back()->withErrors(['duplicate' => 'Subaccount already exists.'])->withInput();
+        }
+
+        $accountNumber = ($country === "NG") ? $request->input("account_number") : $request->input("iban");
+        //paload for 
+        $payload = [
+            'country' => $request->input('country'),
+            'currency' => $request->input('currency'),
+            'alias' => $request->input('account_name'),
+            'type' => $request->input('account_type'),
+            'account_name' => $request->input('account_name'),
+            'account_number' => $accountNumber
+        ];
+
+
+        if (in_array($currency, ['USD', 'EUR'])) {
+            $payload['bic'] = $request->input('bic');
+            $payload['address'] = $request->input('address');
+            $payload['city'] = $request->input('city');
+            $payload['state'] = $request->input('state');
+            $payload['zipcode'] = $request->input('zipcode');
+        }elseif($currency === 'GBP'){
+            $payload['sort_code'] = $request->input('sort_code');
+            $payload['address'] = $request->input('address');
+            $payload['city'] = $request->input('city');
+            $payload['state'] = $request->input('state');
+            $payload['zipcode'] = $request->input('zipcode');
+        }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
+            // $payload['sort_code'] = $request->input('bank_code');
+            $payload['bank_id'] = $request->input('bank_code');
+        }
+        //filter the payload
+        $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
+
+        //log payload data
+        Log::info('Payload sent to OhentPay:', ['payload' => $payload]);
+
+        //send payload to ohentpay api
+        $ohentPay_response = Http::withToken(env('OHENTPAY_API_KEY'))->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+        
+        if (!$ohentPay_response->successful()) {
+            $errorResponse = $ohentPay_response->json();
+            $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
+            //log error responses from api
+            Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
+
+            return redirect()->back()->with('api_error', $errorMessage)->withInput();
+        }
+
+        //ohentpay api response
+        $responseData = $ohentPay_response->json();
+
+        //check for default account
+        $isFirst = Subaccount::where('user_id', $user->id)->count() === 0;
+
+        $Subaccount = Subaccount::create([
+            'user_id' => $user->id,
+            'account_type' => $responseData['type'],
+            'account_name' => $responseData['bank_account']['account_name'] ?? null,
+            'account_number' => $responseData['bank_account']['account_number'] ?? "",
+            'bank_country' => $request->input('bank_country'),
+            'bank_name' => $responseData['bank_account']['bank_name'] ?? "",
+            'currency' => $responseData['bank_account']['currency'],
+            'bic' => $request->input('bic') ?? null,
+            'iban' => $request->input('iban') ?? null,
+            'city' => $request->input('city') ?? null,
+            'state' => $request->input('state') ?? null,
+            'zipcode' => $request->input('zipcode') ?? null,
+            'recipient_address' => $request->input('address') ?? null,
+            'recipient_id' => $responseData['id'],
+            'default' => $isFirst
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
+        return response()->json([
+            'data' => [
                 'status' => 'success',
-                'message' => 'Subaccount created successfully.',
-                'data' => $subaccount
-            ], 201);
-        }
+                'message' => 'Subaccount successfully added.',
+                'Subaccount' => [
+                    'id' => $Subaccount->id,
+                    'account_type' => $Subaccount->account_type,
+                    'account_name' => $Subaccount->account_name,
+                    'account_number' => $request->input('account_number') ? substr($request->input('account_number'), -4): null,
+                    'bank_name' => $Subaccount->bank_name,
+                ]
+            ]
+        ], 200);
 
         // Web request response
-        return redirect()->route('business.subaccount')->with('success', 'Subaccount created successfully.');
+        // return redirect()->route('business.subaccount')->with('success', 'Subaccount created successfully.');
     }
 
     public function edit($id)
