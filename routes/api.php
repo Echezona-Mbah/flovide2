@@ -5,30 +5,32 @@ use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\business\addBankAccountController;
+use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Personal\addBankAccountController as PersonaladdBankAccountController;
-use App\Http\Controllers\business\SubAccountController;
+use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Personal\SubAccountController as PersonalSubAccountController;
-use App\Http\Controllers\business\InvoicesController;
-use App\Http\Controllers\business\refundsController;
+use App\Http\Controllers\Business\InvoicesController;
+use App\Http\Controllers\Business\refundsController;
 use App\Http\Controllers\Personal\refundsController as PersonalrefundsController;
-use App\Http\Controllers\business\RemitaController;
-use App\Http\Controllers\business\TransactionHistoryController;
-use App\Http\Controllers\business\AddBeneficiariesController;
-use App\Http\Controllers\business\AddCustomerController;
-use App\Http\Controllers\business\BillPaymentController;
-use App\Http\Controllers\business\ChargebackController;
-use App\Http\Controllers\business\ComplianceController;
-use App\Http\Controllers\business\CreateBankController;
-use App\Http\Controllers\business\SendMoneyController;
-use App\Http\Controllers\business\SubscriptionController;
-use App\Http\Controllers\business\VirtualAccountController;
+use App\Http\Controllers\Business\RemitaController;
+use App\Http\Controllers\Business\TransactionHistoryController;
+use App\Http\Controllers\Business\AddBeneficiariesController;
+use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\Business\BillPaymentController;
+use App\Http\Controllers\Business\ChargebackController;
+use App\Http\Controllers\Business\ComplianceController;
+use App\Http\Controllers\Business\CreateBankController;
+use App\Http\Controllers\Business\SendMoneyController;
+use App\Http\Controllers\Business\SubscriptionController;
+use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Personal\AddBeneficiariesController as PersonalAddBeneficiariesController;
 use App\Http\Controllers\Personal\AddMoneyController;
 use App\Http\Controllers\Personal\BillPaymentController as PersonalBillPaymentController;
 use App\Http\Controllers\Personal\CreateBankController as PersonalCreateBankController;
+use App\Http\Controllers\Personal\NotificationController;
 use App\Http\Controllers\Personal\OrganizationController;
 use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyController;
+use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -51,6 +53,8 @@ Route::get('/country', [RegisterController::class, 'getAllCountry']);
 Route::post('/auth/forgot-password', [ForgetPasswordController::class, 'forgotPassword']);
 Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
 Route::post('/auth/reset-password', [ForgetPasswordController::class, 'resetPasswordapi']);
+Route::post('/auth/request-password-otp', [ForgetPasswordController::class, 'requestForgetPasswordOtp']);
+
 
 // Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
 
@@ -212,6 +216,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/auth/forgot-password-personal', [ForgetPasswordController::class, 'forgotPasswordPersonal']);
     Route::post('/auth/forget-verify-otp-personal', [ForgetPasswordController::class, 'verifyOTPPersonal']);
     Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
+    Route::post('/auth/request-forgetpassword-otp-personal', [ForgetPasswordController::class, 'requestForgetPasswordOtpPersonal']);
 
     Route::group(['middleware' => ['auth:personal-api']], function () {
         Route::prefix('personal')->group(function () {
@@ -219,8 +224,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
         Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
         Route::put('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
-        Route::delete('personal-beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
-        Route::get('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
+        Route::delete('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'destroy']);
+        Route::post('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
         Route::post('/personal-validate-account', [PersonalAddBeneficiariesController::class, 'validateRecipient']);
         Route::get('/personal-fetchcountrylist', [PersonalAddBeneficiariesController::class, 'fetchcountrylist']);
         Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
@@ -285,18 +290,30 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/refunds', [PersonalrefundsController::class, 'store']);
         Route::post('/refunds/{id}/status', [PersonalrefundsController::class, 'updateStatus']);
     
-    // api routes for Send Money detailsdeactivateAccount
-    Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
-    Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
+        // api routes for Send Money detailsdeactivateAccount
+        Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
+        Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
 
 
-    // Update Profile
-    Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
-    Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
-    Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
+        // Update Profile
+        Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
+        Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
+        Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
 
 
-    Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
+        Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
+
+
+
+        Route::get('/personal-transactions', [PersonalTransactionHistoryController::class, 'personalTransactions']);
+        Route::get('/personal-transactions/{status}', [PersonalTransactionHistoryController::class, 'filterPersonalTransactions']);
+
+        Route::get('/personal-notifications', [NotificationController::class, 'index']);
+        Route::get('/personal-notifications/unread', [NotificationController::class, 'unread']);
+        Route::put('/personal-notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+
+
 
 
 
