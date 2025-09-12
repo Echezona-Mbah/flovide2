@@ -98,7 +98,7 @@ public function verify(Request $request)
     if (!$response->successful()) {
         return response()->json([
             'data' => [
-                'status'      => 'error',
+                'errors'      => 'error',
                 'personal_id' => $personalId,
                 'message'     => 'Failed to verify smartcard',
                 'error'       => $response->json()
@@ -134,9 +134,8 @@ public function handleDstv(Request $request)
         if ($request->expectsJson()) {
             return response()->json([
                 'data' => [
-                    'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'Validation failed',
+                    // 'message'     => 'Validation failed',
                     'errors'      => $validator->errors()
                 ]
             ], 422);
@@ -150,9 +149,8 @@ public function handleDstv(Request $request)
         return $request->expectsJson()
             ? response()->json([
                 'data' => [
-                    'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => $msg
+                    'errors'     => $msg
                 ]
             ], 404)
             : redirect()->back()->with('error', $msg);
@@ -172,7 +170,7 @@ public function handleDstv(Request $request)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => $msg
+                    'errors'     => $msg
                 ]
             ], 400)
             : redirect()->back()->with('error', $msg);
@@ -271,7 +269,7 @@ public function destroy(Request $request, BillPayment $billPayment)
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
+                // 'message' => 'Validation failed',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -291,7 +289,7 @@ public function destroy(Request $request, BillPayment $billPayment)
         return response()->json([
             'message' => $response->successful()
                 ? 'Verification successful.'
-                : ($response->json()['message'] ?? 'Verification failed.'),
+                : ($response->json()['errors'] ?? 'Verification failed.'),
             'data' => $response->json(),
             'status' => $response->status(),
             'method' => $request->method(),
@@ -322,7 +320,7 @@ public function destroy(Request $request, BillPayment $billPayment)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'Validation failed',
+                    // 'message'     => 'Validation failed',
                     'errors'      => $validator->errors()
                 ]
             ], 422);
@@ -338,7 +336,7 @@ public function destroy(Request $request, BillPayment $billPayment)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => $msg
+                    'errors'     => $msg
                 ]
             ], 400);
         }
@@ -409,25 +407,28 @@ public function destroy(Request $request, BillPayment $billPayment)
     
             if (!$response->successful()) {
                 return response()->json([
-                    'message' => $responseBody['response_description'] ?? 'Failed to fetch variations',
+                      'data' => [
+                    'errors' => $responseBody['response_description'] ?? 'Failed to fetch variations',
                     'data' => [],
                     'status' => $response->status(),
-                ], $response->status());
+                ]], $response->status());
             }
     
             return response()->json([
+                  'data' => [
                 'message' => 'Service variations fetched successfully',
                 'data' => $responseBody,
                 'status' => 200,
-            ]);
+            ]]);
     
         } catch (\Exception $e) {
             Log::error('Variation Fetch Error:', ['error' => $e->getMessage()]);
             return response()->json([
-                'message' => 'Error connecting to VTPass API',
+                  'data' => [
+                'errors' => 'Error connecting to VTPass API',
                 'data' => [],
                 'status' => 500,
-            ], 500);
+            ]], 500);
         }
     }
 
@@ -451,7 +452,7 @@ public function destroy(Request $request, BillPayment $billPayment)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'Validation failed',
+                    // 'message'     => 'Validation failed',
                     'errors'      => $validator->errors()
                 ]
             ], 422);
@@ -467,7 +468,7 @@ public function destroy(Request $request, BillPayment $billPayment)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => $msg
+                    'errors'     => $msg
                 ]
             ], 400);
         }
@@ -480,7 +481,7 @@ public function destroy(Request $request, BillPayment $billPayment)
             'billersCode'   => $request->billers_code,
             'variation_code'=> $request->variation_code,
             'amount'        => $request->amount,
-            'phone'         => $request->billers_code, // billers_code = phone number for data
+            'phone'         => $request->billers_code, 
         ];
 
         $response = Http::withBasicAuth(
@@ -530,9 +531,10 @@ public function getUserBillPayments(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
+           'data' => [ 
             'status' => 'success',
             'data' => $billPayments
-        ], 200);
+        ]], 200);
     }
 
     return view('billpayments.index', compact('billPayments'));

@@ -38,6 +38,7 @@ class Personal extends Authenticatable
         'reset_token_expires_at',
         'business_phone',
         'person_phone',
+        'deletestatus',
     ];
 
 
