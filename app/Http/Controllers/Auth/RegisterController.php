@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
 use App\Mail\RegisterOtpMail;
 use App\Mail\WelcomeMail;
@@ -139,6 +140,8 @@ public function registerUser(Request $request)
     Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
 
     $token = $user->createToken('api-token')->plainTextToken;
+    event(new UserRegistered($user));
+
 
     return response()->json([
         'data' => [
@@ -451,6 +454,7 @@ public function registerUser(Request $request)
         Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
 
         $token = $user->createToken('personal-api-token')->plainTextToken;
+        event(new UserRegistered($user));
 
         return response()->json([
             'data' => [
