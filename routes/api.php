@@ -12,6 +12,9 @@ use App\Http\Controllers\Personal\SubAccountController as PersonalSubAccountCont
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\Business\refundsController;
 use App\Http\Controllers\Personal\refundsController as PersonalrefundsController;
+use App\Http\Controllers\Personal\paymentsController;
+use App\Http\Controllers\Personal\donationsController;
+
 use App\Http\Controllers\Business\RemitaController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
@@ -73,17 +76,18 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/getLoggedInUser', [RegisterController::class, 'getLoggedInUser']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);
     
-    // api routes for bank acccount details 
+    // api routes for payout acccount details 
     Route::post('business/bank-account', [addBankAccountController::class, 'store']);
-    Route::get('business/show-bank-accounts', [addBankAccountController::class, 'payouts']);
+    Route::post('business/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault']);
+    Route::post('business/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName']);
     Route::delete('business/delete-account/{id}', [addBankAccountController::class, 'destroy']);
     Route::delete('business/delete-accounts', [addBankAccountController::class, 'destroyAll']);
     Route::put('business/bankAccount/{id}', [addBankAccountController::class, 'update']);
     Route::get('business/bank-account/{id}', [addBankAccountController::class, 'edit']);
     Route::get('business/fetchBanks', [addBankAccountController::class, 'fetchlocalBanks']);
-    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName']);
+    Route::get('business/show-bank-accounts', [addBankAccountController::class, 'payouts']);
     
-    // api routes for sub accounts details
+    // api routes for subaccounts details
     Route::post('business/subaccounts', [SubAccountController::class, 'store']);
     Route::get('business/show-subaccounts', [SubAccountController::class, 'show']);
     Route::get('business/show-subaccount/{id}', [SubAccountController::class, 'edit']);
@@ -109,9 +113,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/business/refunds/{id}/status', [refundsController::class, 'updateStatus']);
     
     //remita
-    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
-    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
-    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    Route::get('business/remita', [RemitaController::class, 'index']);
+    Route::get('business/remita/{id}/export', [RemitaController::class, 'exportUserRemita']);
+    // Route::get('business/remita/create', [RemitaController::class, 'create']);
+    // Route::get('business/remita/{id}/edit', [RemitaController::class, 'edit']);
+    Route::put('business/remita/{id}/update', [RemitaController::class, 'update']);
+    Route::post('business/remita/store', [RemitaController::class, 'store']);
+    Route::delete('business/remita/{id}/destory', [RemitaController::class, 'destroy']);
+    
 
     // api for transaction history
     Route::get('business/showTransactions', [TransactionHistoryController::class, 'showAllTransactions']);
@@ -269,6 +278,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/show-bank-accounts', [PersonaladdBankAccountController::class, 'payouts']);
         Route::get('/bank-account/{id}', [PersonaladdBankAccountController::class, 'edit']);
         Route::get('/fetchBanks', [PersonaladdBankAccountController::class, 'fetchlocalBanks']);
+        Route::post('/payout/{id}/set-default', [PersonaladdBankAccountController::class, 'setDefault']);
         Route::delete('/delete-account/{id}', [PersonaladdBankAccountController::class, 'destroy']);
         Route::delete('/delete-accounts', [PersonaladdBankAccountController::class, 'destroyAll']);
         Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
@@ -289,6 +299,24 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/fetchRefund/{id}', [PersonalrefundsController::class, 'fetchRefund']);
         Route::post('/refunds', [PersonalrefundsController::class, 'store']);
         Route::post('/refunds/{id}/status', [PersonalrefundsController::class, 'updateStatus']);
+        
+        //payments
+        Route::get('/payments', [paymentsController::class, 'index']);
+        Route::get('/payments/show/{id}', [paymentsController::class, 'show']);
+        Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
+        Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
+        Route::post('/payments/store', [paymentsController::class, 'store']);
+        Route::delete('/payments/{id}/destory', [paymentsController::class, 'destory']);
+        Route::put('/payments/update/{id}', [paymentsController::class, 'update']);
+        
+        //donations
+        Route::get('/donations', [donationsController::class, 'index']);
+        Route::get('/donations/show/{id}', [donationsController::class, 'show']);
+        Route::get('/donations/donationrecords', [donationsController::class, 'donationrecords']);
+        Route::post('/donations/store', [donationsController::class, 'store']);
+        Route::delete('/donations/{id}/destory', [donationsController::class, 'destory']);
+        Route::put('/donations/update/{id}', [donationsController::class, 'update']);
+=======
     
         // api routes for Send Money detailsdeactivateAccount
         Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);

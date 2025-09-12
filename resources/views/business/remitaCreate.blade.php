@@ -34,9 +34,9 @@
                 <span class="w-3 h-3 rounded-full bg-gray-300 block"></span>
                 <span class="text-gray-700 text-sm select-none">Unsaved</span>
                 </div>
-                <button type="button" ="md:flex hidden items-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-500 text-sm font-semibold">
-                <i class="far fa-copy"></i>
-                Copy Link
+                <button type="button" class="md:flex hidden items-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-500 text-sm font-semibold">
+                    <i class="far fa-copy"></i>
+                    Copy Link
                 </button>
             </div>
         </header>
@@ -137,7 +137,7 @@
 
                     <div class="flex flex-col gap-1">
                         <label class="text-xs text-gray-600 select-none">Fixed Amount</label>
-                        <input type="number" name="amount" placeholder="30" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <input type="number" name="amount" placeholder="Enter Remita Amount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
 
                         {{-- <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
 
@@ -179,8 +179,8 @@
                                 <option selected value="">Select a subaccount</option>
                                 @foreach ($subaccounts as $subaccount)
                                     <option value="{{ $subaccount->id }}">
-                                        {{ ($subaccount->account_number) ? Crypt::decryptString($subaccount->account_number) : Crypt::decryptString($subaccount->iban) }}    
-                                    </option>                    
+                                    {{ $subaccount->decrypted_account ? $subaccount->decrypted_account . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                    </option>
                                 @endforeach
                             </select>
                             <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
