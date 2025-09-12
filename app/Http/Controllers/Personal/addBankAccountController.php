@@ -9,6 +9,8 @@ use App\Models\Bank;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class addBankAccountController extends Controller
 {
@@ -34,88 +36,174 @@ class addBankAccountController extends Controller
 
         if ($request->expectsJson()) {
             if ($bankAccounts->isEmpty()) {
-                return response()->json(['message' => 'No bank account found.'], 404);
+                return response()->json([
+                    'data' => [
+                        'message' => 'No bank account found.'
+                    ]
+                ], 404);
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank accounts and countries retrieved successfully.',
-                'data' => $bankAccounts,
-                'countries' => $countries,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank accounts and countries retrieved successfully.',
+                    'bankaccounts' => $bankAccounts,
+                    'countries' => $countries
+                ]
             ], 200);
         }
 
-        return view('business.payouts', ['bankAccounts' => $bankAccounts, 'countries' => $countries, 'banks' => $banks]);
+        // return view('business.payouts', ['bankAccounts' => $bankAccounts, 'countries' => $countries, 'banks' => $banks]);
     }
 
 
     public function store(Request $request)
     {
-        $isDynamic = $request->input('formDynamicFields') === 'true';
+        $country = $request->input('country'); // e.g NG/GH/US
+        $currency = $request->input('currency'); // e.g NGN/USD/CAD/GHS/KES
 
-        if (!$isDynamic) {
-            // Static fields (NGN, GHS, KES accounts)
-            $validated = $request->validate([
-                'account_name' => 'required|string|max:255',
-                'account_number' => ['required', 'regex:/^\d{10}$/'],
-                'bank_country' => 'required|string|max:50',
-                'bank_name' => 'required|string|max:255',
-                'type' => 'required|string|max:10',
-                'currency' => 'required|string|size:3',
-                'bic' => 'nullable|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/',
-                'iban' => 'nullable|string|max:34|regex:/^[A-Za-z0-9]+$/',
-                'city' => 'nullable|string|max:255',
-                'state' => 'nullable|string|max:255',
-                'zipcode' => 'nullable|string|max:20',
-                'address' => 'nullable|string|max:255',
-            ]);
-        } else {
-            // Dynamic fields (AU_AUD, US_USD, etc.)
-            $validated = $request->validate([
-                'account_name' => 'required|string|max:255',
-                'bank_country' => 'required|string|max:50',
-                'currency' => 'required|string|size:3', // ISO 4217 currency code
-                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
-                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
-                'city' => 'required|string|max:255',
-                'state' => 'required|string|max:255',
-                'zipcode' => 'required|string|max:20',
-                'address' => 'required|string|max:255',
-                'type' => 'required|string|max:10',
-            ]);
+        // Start with rules that apply to all
+        $rules = [
+            'account_type' => 'required|string|max:255',
+            'bank_country' => 'required|string|max:255',
+            'country' => 'required|string',
+            'currency' => 'required|string',
+            'account_name' => 'required|string|max:255',
+        ];
+        
+        $allowedCountries = ['NG', 'GH', 'KE'];
+        $LocalAllowedCurrencies = ['NGN', 'GHS', 'KES'];
+
+        if(in_array($currency, ['USD', 'EUR'])){
+            $rules['account_number'] = 'required|string';
+            $rules['address'] = 'required|string|max:255';
+            $rules['city'] = 'required|string|max:255';
+            $rules['state'] = 'required|string|max:255';
+            $rules['zipcode'] = 'required|string|max:20';
+        }else if($currency === "GBP"){
+            // $rules['iban'] = 'required|string|max:255';
+            $rules['sort_code'] = 'required|string|max:255';
+            $rules['account_number'] = 'required|string|max:255';
+            $rules['address'] = 'required|string|max:255';
+            $rules['city'] = 'required|string|max:255';
+            $rules['state'] = 'required|string|max:255';
+            $rules['zipcode'] = 'required|string|max:20';
+        }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
+            $rules['bank_id'] = 'required|string|max:20';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            if ($request->expectsJson()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'errors' => $validator->errors(),
+                        'message' => 'Validation failed'
+                    ]
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         $user = Auth::guard('personal-api')->user();
+        // Check if this payout account already exists for the current user
+        $exists = BankAccount::where('account_name', $request->input('account_name') )
+            ->where('account_number', $request->input('account_number'))
+            ->where('personal_id', $user->id)->exists();
 
+
+            if ($exists) {
+            if(request()->expectsJson()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Payout account already exists.'
+                    ]
+                ], 409);
+            }
+            return redirect()->back()->withErrors(['duplicate' => 'Payout account already exists.'])->withInput();
+        }
+
+        $accountNumber = ($country === "NG") ? $request->input("account_number") : $request->input("iban");
+        //paload for 
+        $payload = [
+            'country' => $request->input('country'),
+            'currency' => $request->input('currency'),
+            'alias' => $request->input('account_name'),
+            'type' => $request->input('account_type'),
+            'account_name' => $request->input('account_name'),
+            'account_number' => $accountNumber
+        ];
+
+        if (in_array($currency, ['USD', 'EUR'])) {
+            $payload['bic'] = $request->input('bic');
+            $payload['address'] = $request->input('address');
+            $payload['city'] = $request->input('city');
+            $payload['state'] = $request->input('state');
+            $payload['zipcode'] = $request->input('zipcode');
+        }elseif($currency === 'GBP'){
+            $payload['sort_code'] = $request->input('sort_code');
+            $payload['address'] = $request->input('address');
+            $payload['city'] = $request->input('city');
+            $payload['state'] = $request->input('state');
+            $payload['zipcode'] = $request->input('zipcode');
+        }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
+            // $payload['sort_code'] = $request->input('bank_code');
+            $payload['bank_id'] = $request->input('bank_id');
+        }
+        //filter the payload
+        $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
+
+        //log payload data
+        Log::info('Payload sent to OhentPay:', ['payload' => $payload]);
+
+        //send payload to ohentpay api
+        $ohentPay_response = Http::withToken(env('OHENTPAY_API_KEY'))->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+         if (!$ohentPay_response->successful()) {
+            $errorResponse = $ohentPay_response->json();
+            $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
+            //log error responses from api
+            Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
+
+            return redirect()->back()->with('api_error', $errorMessage)->withInput();
+        }
+
+        //ohentpay api response
+        $responseData = $ohentPay_response->json();
         $isFirst = BankAccount::where('personal_id', $user->id)->count() === 0;
 
         $bankAccount = BankAccount::create([
             'personal_id' => $user->id,
-            'account_name' => $validated['account_name'] ?? null,
-            'account_number' => isset($validated['account_number']) ? Crypt::encryptString($validated['account_number']) : "",
-            'bank_country' => $validated['bank_country'] ?? "",
-            'bank_name' => $validated['bank_name'] ?? "",
-            'currency' => $validated['currency'],
-            'bic' => isset($validated['bic']) ? Crypt::encryptString($validated['bic']) : null,
-            'iban' => isset($validated['iban']) ? Crypt::encryptString($validated['iban']) : null,
-            'city' => $validated['city'] ?? null,
-            'state' => $validated['state'] ?? null,
-            'zipcode' => $validated['zipcode'] ?? null,
-            'recipient_address' => $validated['address'] ?? null,
-            'type' => $validated['type'] ?? null,
+            'account_type' => $responseData['type'],
+            'account_name' => $responseData['bank_account']['account_name'] ?? null,
+            'account_number' => $responseData['bank_account']['account_number'] ?? "",
+            'bank_country' => $request->input('bank_country'),
+            'bank_name' => $responseData['bank_account']['bank_name'] ?? "",
+            'currency' => $responseData['bank_account']['currency'],
+            'bic' => $request->input('bic') ?? null,
+            'iban' => $request->input('iban') ?? null,
+            'city' => $request->input('city') ?? null,
+            'state' => $request->input('state') ?? null,
+            'zipcode' => $request->input('zipcode') ?? null,
+            'recipient_address' => $request->input('address') ?? null,
+            'recipient_id' => $responseData['id'],
             'default' => $isFirst
         ]);
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account added successfully.',
             'data' => [
-                'id' => $bankAccount->id,
-                'account_name' => $bankAccount->account_name,
-                'account_number' => isset($validated['account_number']) ? substr($validated['account_number'], -4): null,
-                'bank_name' => $bankAccount->bank_name,
+                'status' => 'success',
+                'message' => 'Bank account successfully added.',
+                'bankaccount' => [
+                    'id' => $bankAccount->id,
+                    'account_type' => $bankAccount->account_type,
+                    'account_name' => $bankAccount->account_name,
+                    'account_number' => $request->input('account_number') ? substr($request->input('account_number'), -4): null,
+                    'bank_name' => $bankAccount->bank_name,
+                ]
             ]
-        ], 201);
+        ], 200);
     }
 
 
@@ -125,7 +213,9 @@ class addBankAccountController extends Controller
 
         if (!$account) {
             return response()->json([
-                'message' => 'Bank account not found.'
+                'data' => [
+                    'message' => 'Bank account not found.'
+                ]
             ], 404);
         }
 
@@ -133,15 +223,19 @@ class addBankAccountController extends Controller
 
         if ($account->personal_id !== $user->id) {
             return response()->json([
-                'message' => 'Unauthorized.'
+                'data' => [
+                    'message' => 'Unauthorized.'
+                ]
             ], 403);
         }
 
         $account->delete();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account deleted successfully.'
+            'data' => [
+                'status' => 'success',
+                'message' => 'Bank account deleted successfully.'
+            ]
         ], 200);
     }
 
@@ -154,12 +248,18 @@ class addBankAccountController extends Controller
         $deletedCount = BankAccount::where('personal_id', $user->id)->delete();
 
         if ($deletedCount === 0) {
-            return response()->json(['message' => 'No accounts to delete.'], 404);
+            return response()->json([
+                'data' => [
+                    'message' => 'No accounts to delete.'
+                ]
+            ], 404);
         } else {
 
             return response()->json([
-                'message' => 'All your bank accounts have been deleted.',
-                'deleted_count' => $deletedCount
+                'data' => [
+                    'message' => 'All your bank accounts have been deleted.',
+                    'deleted_count' => $deletedCount
+                ]
             ], 200);
         }
     }
@@ -168,7 +268,11 @@ class addBankAccountController extends Controller
     {
         $type = $request->input('type');
         if(!$type) {
-            return response()->json(['message' => 'Account type is required.'], 400);
+            return response()->json([
+                'data' => [
+                    'message' => 'Account type is required.'
+                ]
+            ], 400);
         }
         // Validate the request
         if ($type === 'local') {
@@ -193,25 +297,37 @@ class addBankAccountController extends Controller
             ]);
 
         }else{
-            return response()->json(['message' => 'Invalid account type.'], 400);
+            return response()->json([
+                'data' => [
+                    'message' => 'Invalid account type.'
+                ]
+            ], 400);
         }
 
         $bankAccount = BankAccount::find($id);
 
         if (!$bankAccount) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Bank account not found.'], 404);
+                return response()->json([
+                    'data' => [
+                        'message' => 'Bank account not found.'
+                    ]
+                ], 404);
             }
-            return redirect()->back()->with('error', 'Bank account not found.');
+            // return redirect()->back()->with('error', 'Bank account not found.');
         }
 
         $user = Auth::guard('personal-api')->user();
 
         if ($bankAccount->personal_id !== $user->id) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized.'], 403);
+                return response()->json([
+                    'data' => [
+                        'message' => 'Unauthorized.'
+                    ]
+                ], 403);
             }
-            return redirect()->back()->with('error', 'Unauthorized access.');
+            // return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
         // Update the bank account
@@ -231,12 +347,14 @@ class addBankAccountController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Bank account updated successfully.',
-                'data' => $bankAccount
+                'data' => [
+                    'message' => 'Bank account updated successfully.',
+                    'data' => $bankAccount
+                ]
             ]);
         }
 
-        return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
+        // return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
     }
 
 
@@ -269,38 +387,53 @@ class addBankAccountController extends Controller
         //api response
         if (request()->expectsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank account retrieved successfully.',
-                'data' => $bankAccount,
-                'countries' => $countries,
-                'banks' => $banks,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank account retrieved successfully.',
+                    'data' => $bankAccount,
+                    'countries' => $countries,
+                    'banks' => $banks
+                ]
             ], 200);
         }
 
-        return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
+        // return view('business.editPayout', compact('bankAccount', 'allUserAccounts', 'countries', 'banks'));
     }
 
     public function setDefault(Request $request, $id)
     {
         $user = Auth::guard('personal-api')->user();
-        // $account = BankAccount::findOrFail($id);
-        $account = BankAccount::where('id', $id)
-            ->where('personal_id', $user->id)->whereNull('deleted_at')->firstOrFail();
 
-        if ($account->personal_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $account = BankAccount::where('id', $id)
+            ->where('personal_id', $user->id)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if (!$account) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Bank account not found or unauthorized'
+                ]
+            ], 404);
         }
 
+        // Remove default from all user's accounts
         BankAccount::where('personal_id', $user->id)->update(['default' => false]);
+
+        // Set selected as default
         $account->default = true;
         $account->save();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Payout account set.',
-            'default_account_id' => $account->id,
-        ]);
+            'data' => [
+                'status' => 'success',
+                'message' => 'Payout account set successfully',
+                'default_account_id' => $account->id
+            ]
+        ], 200);
     }
+
 
 
     public function fetchlocalBanks(Request $request)
@@ -317,23 +450,29 @@ class addBankAccountController extends Controller
 
             if ($response->successful()) {
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Bank fields fetched successfully.',
-                    'fields' => $response->json()
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Bank fields fetched successfully.',
+                        'fields' => $response->json()
+                    ]
                 ]);
             }
 
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $response->json()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $response->json()
+                ]
             ], $response->status());
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $e->getMessage()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $e->getMessage()
+                ]
             ], 500);
         }
     }
@@ -359,18 +498,22 @@ class addBankAccountController extends Controller
 
         if ($response->successful()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Payout account validated successfully.',
-                'account_name' => $data['account_name'] ?? null,
-                'data' => $data
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payout account validated successfully.',
+                    'account_name' => $data['account_name'] ?? null,
+                    'payout' => $data
+                ]
             ], 200);
         }
 
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid payout account.',
-            'data' => $response->json()
+            'data' => [
+                'status' => 'error',
+                'message' => 'Invalid payout account.',
+                'data' => $response->json()
+            ]
         ], $response->status());
     }
 

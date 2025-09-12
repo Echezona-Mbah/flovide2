@@ -105,10 +105,7 @@
                                     </select>
                                 </div>
 
-                                @if ($bankAccount->type === 'foreign')
-                                    {{-- <p class="text-red-600 text-sm mt-4">
-                                        Note: This is an international payout account. Ensure you have the correct details.
-                                    </p> --}}
+                                @if (!in_array($bankAccount->currency, ['NGN', 'GHS', 'KES']))
                                     <div>
                                         <label for="account-name" class="block text-gray-600 text-sm mb-1 font-medium">
                                             Bank account name
@@ -116,25 +113,25 @@
                                         <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $bankAccount->account_name) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                     </div>
 
-                                    {{-- <div>
+                                    <div>
                                         <label for="account-number" class="block text-gray-600 text-sm mb-1 font-medium">
                                             Bank account number
                                         </label>
-                                        <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($bankAccount->iban)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                                    </div> --}}
+                                        <input type="text" id="account-number" name="account_number" value="{{ old('account_number', $bankAccount->account_number) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    </div>
 
                                     <div>
                                         <label for="bic" class="block text-gray-600 text-sm mb-1 font-medium">
                                             BIC
                                         </label>
-                                        <input type="text" id="bic" name="bic" value="{{ old('bic', Crypt::decryptString($bankAccount->bic)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        <input type="text" id="bic" name="bic" value="{{ old('bic', $bankAccount->bic) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                     </div>
 
                                     <div>
                                         <label for="iban" class="block text-gray-600 text-sm mb-1 font-medium">
                                             IBAN
                                         </label>
-                                        <input type="text" id="iban" name="iban" value="{{ old('iban', Crypt::decryptString($bankAccount->iban)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        <input type="text" id="iban" name="iban" value="{{ old('iban', $bankAccount->iban) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                     </div>
 
                                     <div>
@@ -164,10 +161,8 @@
                                         </label>
                                         <input type="text" id="zipcode" name="zipcode" value="{{ old('zipcode', $bankAccount->zipcode) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                     </div>
-                                    <input type="text" name="type" value="foreign" class="hidden" />
                             
                                 @else
-                                    
 
                                     <div>
                                         <label for="bank" class="block text-gray-600 text-sm mb-1 font-medium">Bank</label>
@@ -185,17 +180,15 @@
                                         <label for="account-number" class="block text-gray-600 text-sm mb-1 font-medium">
                                             Bank account number
                                         </label>
-                                        <input type="text" id="account-number" name="account_number" value="{{ old('account_number', Crypt::decryptString($bankAccount->account_number ?: $bankAccount->iban)) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                        <input type="text" id="account-number" name="account_number" value="{{ old('account_number', $bankAccount->account_number ?: $bankAccount->iban) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
                                     </div>
                             
                                     <div>
                                         <label for="account-name" class="block text-gray-600 text-sm mb-1 font-medium">
                                             Bank account name
                                         </label>
-                                        <input type="text" id="account-name" name="account_name" value="{{ old('account_name', $bankAccount->account_name) }}" class="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                                    </div>
-                                    <input type="text" name="type" value="local" class="hidden" />
-                            
+                                        <input type="text" disabled id="account-name" name="account_name" value="{{ old('account_name', $bankAccount->account_name) }}" class="w-full border cursor-not-allowed border-gray-300 rounded-md px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                                    </div>                         
                                     
                                 @endif
 
@@ -241,7 +234,7 @@
                                     @endif
                                         <span class="font-normal text-base text-[#1E1E1E] select-none">
                                             {{-- {{ Crypt::decryptString($account->account_number) }} --}}
-                                            {{ ($account->account_number) ? Crypt::decryptString($account->account_number) : Crypt::decryptString($account->iban)}}
+                                            {{ ($account->account_number) ? $account->account_number : $account->iban}}
                                         </span>
                                         <span class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
                                             {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
