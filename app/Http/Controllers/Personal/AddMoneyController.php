@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Personal;
 use App\Http\Controllers\Controller;
 use App\Models\Balance;
 use App\Models\TransactionHistory;
+use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,56 +14,64 @@ class AddMoneyController extends Controller
 {
 public function topupWithCard(Request $request)
 {
-    $personalId = auth('personal-api')->id(); 
+    $personal = auth('personal-api')->user();
+    if (!$personal) {
+        return response()->json(['data' => ['errors' => 'Unauthenticated']], 401);
+    }
 
     $request->validate([
-        'balance' => 'required|integer',
-        'amount' => 'required|numeric|min:100',
-        'card_number' => 'required|string',
+        'balance'      => 'required|integer',
+        'amount'       => 'required|numeric|min:100',
+        'card_number'  => 'required|string',
         'expiry_month' => 'required|string',
-        'expiry_year' => 'required|string',
-        'cvv' => 'required|string',
+        'expiry_year'  => 'required|string',
+        'cvv'          => 'required|string', 
     ]);
 
-    // Fetch balance
-    $balance = Balance::where('personal_id', $personalId)
+    $balance = Balance::where('personal_id', $personal->id)
         ->where('id', $request->balance)
         ->first();
 
     if (!$balance) {
         return response()->json([
-            'data' => [
-                'errors' => 'Balance account not found'
-            ]
+            'data' => ['errors' => 'Balance account not found']
         ], 404);
     }
-    $maskedCard = substr($request->card_number, -4);
-    $reference = 'TOPUP-' . strtoupper(uniqid());
 
-    // Update balance
+    $digitsOnly = preg_replace('/\D/', '', $request->card_number);
+    $maskedCard = substr($digitsOnly, -4);
+    $reference  = 'TOPUP-' . strtoupper(uniqid());
+
     $balance->amount += $request->amount;
     $balance->save();
 
     TransactionHistory::create([
-        'personal_id'  => $personalId,
+        'personal_id'  => $personal->id,
         'type'         => 'topup',
         'amount'       => $request->amount,
         'status'       => 'successful',
         'method'       => 'card',
         'reference'    => $reference,
         'card_number'  => '**** **** **** ' . $maskedCard,
-        'expiry_month' => $request->expiry_month,
-        'expiry_year'  => $request->expiry_year,
-        'cvv'          => $request->cvv,
+        'expiry_month' => $request->expiry_month, 
+        'expiry_year'  => $request->expiry_year, 
+        // 'cvv'       => null, // ← do NOT store CVV
     ]);
 
+    $personal->notify(new GeneralNotification(
+        "Top-up Successful 🎉",
+        "You topped up {$request->amount} to your wallet using card ending {$maskedCard}. Ref: {$reference}"
+    ));
+
     return response()->json([
-             'data' => [
-        'message' => 'Top-up successful',
-        'balance' => $balance->amount,
-        'reference' => $reference,
-    ]], 200);
+        'data' => [
+            'message'   => 'Top-up successful',
+            'balance'   => $balance->amount,
+            'reference' => $reference,
+        ]
+    ], 200);
 }
+
 
 
 }
