@@ -6,6 +6,8 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
+use App\Models\GeneralNotification;
+use Illuminate\Notifications\DatabaseNotification;
 
 use Illuminate\Http\Response as HttpResponse;
 
@@ -107,12 +109,24 @@ class AppServiceProvider extends ServiceProvider
                 }
             });
         }
+
+
+            // Tell Laravel to use our GeneralNotification model
+    DatabaseNotification::resolveRelationUsing('morph', function () {
+        return GeneralNotification::class;
+    });
+
     }
 
     
+protected $listen = [
+    \App\Events\UserRegistered::class => [
+        \App\Listeners\SendUserRegisteredNotification::class,
+    ],
+    // You can add more events like TransactionCreated, BalanceCreated, etc.
+];
+    
+    
 
-    
-    
-    
     
 }

@@ -19,9 +19,11 @@ class refundsController extends Controller
 
         if (request()->expectsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Refund requests retrieved successfully.',
-                'data' => $refunds,
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Refund requests retrieved successfully.',
+                    'refunds' => $refunds,
+                ]
             ], 200);
         }
 
@@ -71,9 +73,11 @@ class refundsController extends Controller
             // If API request → return JSON
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'success',
-                    'message' => 'Refund request created successfully.',
-                    'data'    => $refund
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Refund request created successfully.',
+                        'refund' => $refund
+                    ]
                 ]);
             }
 
@@ -84,8 +88,10 @@ class refundsController extends Controller
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Failed to create refund: ' . $e->getMessage()
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Failed to create refund: ' . $e->getMessage()
+                    ]
                 ], 500);
             }
 
@@ -107,8 +113,10 @@ class refundsController extends Controller
             //authorize only if this refund belongs to the logged-in user
             if ($refund->personal_id !== $user->id) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'You are not allowed to modify this request.',
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'You are not allowed to modify this request.'
+                    ]
                 ], 403);
             }
 
@@ -118,8 +126,10 @@ class refundsController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Request updated successfully.',
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Request updated successfully.'
+                    ]
                 ], 200);
             }
 
@@ -128,8 +138,10 @@ class refundsController extends Controller
         catch (\Exception $e){
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Failed to process request: ' . $e->getMessage()
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Failed to process request: ' . $e->getMessage()
+                    ]
                 ], 500);
             }
 
@@ -154,14 +166,18 @@ class refundsController extends Controller
         $refund = Refund::where('personal_id', $user->id)->find($id);
         if (!$refund) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Refund request not found.',
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Refund request not found.'
+                ]
             ], 404);
         }
         return response()->json([
-            'status' => 'success',
-            'message' => 'Refund request retrieved successfully.',
-            'data' => $refund,
+            'data' => [
+                'status' => 'success',
+                'message' => 'Refund request retrieved successfully.',
+                'data' => $refund
+            ]
         ], 200);
     }
 

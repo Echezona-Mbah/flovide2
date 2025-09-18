@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\business;
+namespace App\Http\Controllers\Business;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,7 +94,7 @@ class refundsController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        // Validate
+        // Validate 
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);

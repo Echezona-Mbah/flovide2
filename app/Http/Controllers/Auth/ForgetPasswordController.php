@@ -21,7 +21,7 @@ class ForgetPasswordController extends Controller
 
 
 
-        public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
@@ -177,14 +177,10 @@ class ForgetPasswordController extends Controller
         return response()->json([
             'data' => [
                 'message' => 'Password has been reset successfully',
+                
             ]
         ], 200);
     }
-
-
-
-
-    
 
 
     // web
@@ -270,6 +266,62 @@ class ForgetPasswordController extends Controller
     {
         return rand(100000, 999999);
     }
+
+
+
+
+    public function requestForgetPasswordOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 422);
+        }
+
+        // Only User lookup
+        $account = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$account) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Account not found',
+                    'errors' => 'No User found with this email',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 404);
+        }
+
+        session(['reset_email' => $account->email]);
+
+        $otp = $this->generateOTP();
+
+        $account->update([
+            'forget_verification_otp' => $otp,
+            'forgot_password_otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        Mail::to($account->email)->send(new ForgetPasswordEmail($otp, $account));
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password reset OTP sent. Please check your email.',
+                'otp' => $otp,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ], 201);
+    }
+
 
 
     // for personal
@@ -369,7 +421,7 @@ class ForgetPasswordController extends Controller
         return response()->json([
             'data' => [
                 'message' => 'OTP verified',
-                'data' => ['reset_token' => $personal->reset_token],
+                'reset_token' => $personal->reset_token,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
             ]
@@ -415,6 +467,59 @@ class ForgetPasswordController extends Controller
             ]
         ], 200);
     }
+
+
+
+    public function requestForgetPasswordOtpPersonal(Request $request)
+{
+     $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 422);
+        }
+
+        $personal = Personal::where('email', $request->email)->first();
+
+        if (!$personal) {
+            return response()->json([
+                'data' => [
+                    'message' => 'Personal not found',
+                    'errors' => 'Personal not found with the provided email address',
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 404);
+        }
+
+        session(['reset_email' => $personal->email]);
+
+        $otp = $this->generateOTP();
+
+        $personal->update([
+            'forget_verification_otp' => $otp,
+            'forgot_password_otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        Mail::to($personal->email)->send(new ForgetPasswordEmail($otp, $personal));
+
+        return response()->json([
+            'data' => [
+                'message' => 'Password reset OTP sent. Please check your email for OTP',
+                'otp' =>  $otp,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ], 201);
+}
 
 
 
