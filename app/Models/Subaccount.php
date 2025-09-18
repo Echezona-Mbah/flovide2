@@ -12,6 +12,7 @@ class Subaccount extends Model
     protected $fillable = [
         'user_id',
         'personal_id',
+        'account_type',
         'account_number',
         'account_name',
         'bank_name',
@@ -23,15 +24,15 @@ class Subaccount extends Model
         'state',
         'zipcode',
         'recipient_address',
-        'type',
+        'recipient_id',
         'default',
     ];
 
-    protected $casts = [
-        'account_number' => 'encrypted',
-        'bic' => 'encrypted',
-        'iban' => 'encrypted',
-    ];
+    // protected $casts = [
+    //     'account_number' => 'encrypted',
+    //     'bic' => 'encrypted',
+    //     'iban' => 'encrypted',
+    // ];
 
 
     public function user()

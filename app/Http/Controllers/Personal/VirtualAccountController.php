@@ -57,18 +57,20 @@ public function createVirtualAccount(Request $request)
         'provider'     => 'Flovide',
     ]);
 
+        $allCards = VirtualCards::where('personal_id', $personal->id)
+        ->where('status', 'active')
+        ->get();
+
     if ($request->expectsJson()) {
         return response()->json([
             'data' => [
                 'status'      => 'success',
                 'personal_id' => $personal->id,
                 'message'     => 'Virtual card created successfully.',
-                'card'        => $card,
+                'cards'       => $allCards,
             ]
         ], 201);
     }
-
-    return redirect()->route('personal.allvirtualcard')->with('success', 'Virtual card created successfully.');
 }
 
 public function allvirtualcard(Request $request)
@@ -135,8 +137,10 @@ public function destroy($id)
     if (!$card) {
         if (request()->expectsJson()) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Virtual card not found.'
+               'data'=>[
+                 'status' => 'error',
+                 'errors' => 'Virtual card not found.'
+               ]
             ], 404);
         }
 
@@ -147,13 +151,14 @@ public function destroy($id)
 
     if (request()->expectsJson()) {
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Virtual card deleted successfully.'
+            'data'=>[
+                'status'  => 'success',
+                'message' => 'Virtual card deleted successfully.'
+            ]
         ], 200);
     }
-
-    return back()->with('success', 'Virtual card deleted successfully.');
 }
+
 
 
 }

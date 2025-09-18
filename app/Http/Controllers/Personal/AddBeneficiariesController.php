@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Beneficia;
 use App\Models\Countries;
+use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -95,8 +96,7 @@ public function store(Request $request)
         return $request->expectsJson()
             ? response()->json([
                  'data' =>[
-                'message' => 'Validation failed', 
-                'errors' => $validator->errors()
+                 'errors' => $validator->errors()
             ]], 422)
             : redirect()->back()->withErrors($validator)->withInput();
     }       
@@ -120,7 +120,7 @@ public function store(Request $request)
         return $request->expectsJson()
             ? response()->json([
                  'data' =>[
-                'message' => $errorMessage
+                'errors' => $errorMessage
             ]], 409)
             : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
     }
@@ -186,6 +186,14 @@ public function store(Request $request)
         'default_reference' => 'Invoice',
     ]);
 
+       $personal = \App\Models\Personal::find($personalId);
+    if ($personal) {
+        $personal->notify(new GeneralNotification(
+            "New Beneficiary Added 🎉",
+            "You successfully added {$beneficia->account_name} ({$beneficia->account_number}) as a beneficiary."
+        ));
+    }
+
     return $request->expectsJson()
         ? response()->json([
            'data'=>[
@@ -202,28 +210,31 @@ public function store(Request $request)
 
  
 
-  public function destroy(Request $request, $id)
+public function destroy(Request $request, $id)
 {
     $personalId = auth('personal-api')->id(); 
-
-    $beneficia = Beneficia::findOrFail($id);
+    $beneficia = Beneficia::find($id);
 
     if ($beneficia->personal_id != $personalId) {
         $message = 'Unauthorized to delete this beneficia';
         return $request->expectsJson()
-            ? response()->json(['message' => $message], 403)
+            ? response()->json([
+               'data'=>[
+                 'status'  => 'error',
+                'errors' => $message
+               ]
+            ], 403)
             : redirect()->back()->withErrors(['message' => $message]);
     }
 
-    // 👉 Call OhentPay API to delete recipient
     $ohentResponse = Http::withHeaders([
         'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-        'Accept' => 'application/json',
+        'Accept'        => 'application/json',
     ])->delete(env('OHENTPAY_BASE_URL') . '/recipients/' . $beneficia->recipient_id);
 
     logger()->info('OhentPay delete response', [
         'recipient_id' => $beneficia->recipient_id,
-        'response' => $ohentResponse->body()
+        'response'     => $ohentResponse->body()
     ]);
 
     if ($ohentResponse->successful() && $ohentResponse->json('result') === 'ok') {
@@ -232,9 +243,12 @@ public function store(Request $request)
         $successMessage = 'Beneficia deleted successfully from both system and OhentPay';
         return $request->expectsJson()
             ? response()->json([
-                'message' => $successMessage,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+              'data'=>[
+                'status'  => 'success',
+                'success' => $successMessage,
+                'method'  => $request->method(),
+                'url'     => $request->fullUrl()
+              ]
             ])
             : redirect()->route('personal.beneficia.index')->with('status', $successMessage);
     }
@@ -242,11 +256,15 @@ public function store(Request $request)
     $errorMessage = 'Failed to delete recipient from OhentPay';
     return $request->expectsJson()
         ? response()->json([
+            'data'=>[
+            'status'  => 'error',
             'message' => $errorMessage,
-            'error' => $ohentResponse->json(),
+            'error'   => $ohentResponse->json(),
+            ]
         ], 500)
         : redirect()->back()->withErrors(['message' => $errorMessage]);
 }
+
 
     
     
@@ -304,7 +322,7 @@ public function store(Request $request)
         if ($response->successful()) {
             return back()->with('success', 'Recipient account created successfully.');
         } else {
-            return back()->with('error', 'Invalid bank or account number.');
+            return back()->with('errors', 'Invalid bank or account number.');
         }
     }
 
@@ -334,7 +352,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch country list',
+                'errors' => 'Failed to fetch country list',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
@@ -369,7 +387,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch currency list',
+                'errors' => 'Failed to fetch currency list',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
@@ -394,7 +412,7 @@ public function store(Request $request)
             return $request->expectsJson()
                 ? response()->json([
                     'data' => [
-                        'message' => 'Validation failed',
+                        'errors' => 'Validation failed',
                         'success' => false,
                         'errors' => $validator->errors(),
                         'method' => $request->method(),
@@ -424,7 +442,7 @@ public function store(Request $request)
 
         return response()->json([
             'data' => [
-                'message' => 'Failed to fetch banks',
+                'errors' => 'Failed to fetch banks',
                 'success' => false,
                 'data' => $response->json(),
                 'method' => $request->method(),
