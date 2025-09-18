@@ -209,24 +209,17 @@ class addBankAccountController extends Controller
 
     public function destroy($id)
     {
-        $account = BankAccount::find($id);
+        $user = Auth::guard('personal-api')->user();
+        $account = BankAccount::where('id', $id)
+            ->where('personal_id', $user->id)
+            ->first();
 
         if (!$account) {
             return response()->json([
                 'data' => [
-                    'message' => 'Bank account not found.'
+                    'message' => 'Bank account not found or unauthorized.'
                 ]
             ], 404);
-        }
-
-        $user = Auth::guard('personal-api')->user();
-
-        if ($account->personal_id !== $user->id) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Unauthorized.'
-                ]
-            ], 403);
         }
 
         $account->delete();
