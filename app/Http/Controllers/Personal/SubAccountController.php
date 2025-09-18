@@ -34,27 +34,33 @@ class SubAccountController extends Controller
         
         if ($request->expectsJson()) {
             if ($subaccounts->isEmpty()) {
-                return response()->json(['message' => 'You have not added any subaccounts yet.'], 404);
+                return response()->json([
+                    'data' => [
+                        'message' => 'You have not added any subaccounts yet.'
+                    ]
+                ], 404);
             }
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Bank accounts and countries retrieved successfully.',
-                'data' => $subaccounts,
-                'countries' => $countries
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Bank accounts and countries retrieved successfully.',
+                    'subaccounts' => $subaccounts,
+                    'countries' => $countries
+                ]
             ], 200);
         }
 
-        if ($subaccounts->isEmpty()) {
-            session()->flash('info', 'You have not added any subaccounts yet.');
-        }
+        // if ($subaccounts->isEmpty()) {
+        //     session()->flash('info', 'You have not added any subaccounts yet.');
+        // }
         // dd(' $user');
 
-        return view('business.subaccount', [
-            'subaccounts' => $subaccounts,
-            'countries' => $countries,
-            'banks' => $banks
-        ]);
+        // return view('business.subaccount', [
+        //     'subaccounts' => $subaccounts,
+        //     'countries' => $countries,
+        //     'banks' => $banks
+        // ]);
 
         
     }
@@ -116,14 +122,16 @@ class SubAccountController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Subaccount created successfully.',
-                'data' => $subaccount
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Subaccount created successfully.',
+                    'subaccount' => $subaccount
+                ]
             ], 201);
         }
 
         // Web request response
-        return redirect()->route('business.subaccount')->with('success', 'Subaccount created successfully.');
+        // return redirect()->route('business.subaccount')->with('success', 'Subaccount created successfully.');
     }
 
     public function edit($id)
@@ -153,16 +161,18 @@ class SubAccountController extends Controller
         //api response
         if (request()->wantsJson()) {
             return response()->json([
-                'status' => 'success',
-                'data' => $subaccount,
-                'countries' => $countries,
-                'banks' => $banks,
+                'data' => [
+                    'status' => 'success',
+                    'data' => $subaccount,
+                    'countries' => $countries,
+                    'banks' => $banks
+                ]
             ], 200);
         }
 
         $allUserSubAccounts = Subaccount::where('personal_id', $user->id)->get();
 
-        return view('business.editSubaccount', compact('subaccount', 'allUserSubAccounts', 'countries', 'banks'));
+        // return view('business.editSubaccount', compact('subaccount', 'allUserSubAccounts', 'countries', 'banks'));
     }
 
 
@@ -172,12 +182,18 @@ class SubAccountController extends Controller
         $subaccounts = Subaccount::where('personal_id', $user->id)->get();
 
         if ($subaccounts->isEmpty()) {
-            return response()->json(['message' => 'No subaccounts found.'], 404);
+            return response()->json([
+                'data' => [
+                    'message' => 'No subaccounts found.'
+                ]
+            ], 404);
         }
 
         return response()->json([
-            'message' => 'Subaccounts retrieved successfully.',
-            'data' => $subaccounts
+            'data' => [
+                'message' => 'Subaccounts retrieved successfully.',
+                'data' => $subaccounts
+            ]
         ]);
     }
 
@@ -189,7 +205,11 @@ class SubAccountController extends Controller
         $user = Auth::guard('personal-api')->user();
         // Check if subaccount exists and belongs to the authenticated user
         if (!$subaccount || $subaccount->personal_id !== $user->id) {
-            return response()->json(['message' => 'Subaccount not found or unauthorized.'], 403);
+            return response()->json([
+                'data' => [
+                    'message' => 'Subaccount not found or unauthorized.'
+                ]
+            ], 403);
         }
 
 
@@ -218,8 +238,10 @@ class SubAccountController extends Controller
         $subaccount->save();
 
         return response()->json([
-            'message' => 'Subaccount updated successfully.',
-            'data' => $subaccount
+            'data' => [
+                'message' => 'Subaccount updated successfully.',
+                'data' => $subaccount
+            ]
         ]);
     }
 
@@ -236,8 +258,10 @@ class SubAccountController extends Controller
         $subaccount->delete();
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Subaccount deleted successfully.',
+            'data' => [
+                'status' => 'success',
+                'message' => 'Subaccount deleted successfully.'
+            ]
         ]);
     }
 
@@ -249,12 +273,19 @@ class SubAccountController extends Controller
         $deletedCount = Subaccount::where('personal_id', $user->id)->delete();
 
         if($deletedCount === 0){
-            return response()->json(["status" => "error", "message" => "No Subaccount to delete"], 404);
+            return response()->json([
+                'data' => [
+                    "status" => "error", 
+                    "message" => "No Subaccount to delete"
+                ]
+            ], 404);
         }else{
             return response()->json([
-                'status' => 'success',
-                'message' => 'All your bank accounts have been deleted.',
-                'deleted_count' => $deletedCount
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'All your bank accounts have been deleted.',
+                    'deleted_count' => $deletedCount
+                ]
             ], 200);
         }
     }
@@ -265,7 +296,11 @@ class SubAccountController extends Controller
 
         $user = Auth::guard('personal-api')->user();
         if ($account->personal_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json([
+                'data' => [
+                    'message' => 'Unauthorized'
+                ]
+            ], 403);
         }
 
         Subaccount::where('personal_id', $user->id)->update(['default' => false]);
@@ -273,8 +308,10 @@ class SubAccountController extends Controller
         $account->save();
 
         return response()->json([
-            'message' => 'Payout Sub Account Set.',
-            'default_account_id' => $account->id,
+            'data' => [
+                'message' => 'Payout Sub Account Set.',
+                'default_account_id' => $account->id
+            ]
         ]);
     }
 
@@ -292,23 +329,29 @@ class SubAccountController extends Controller
 
             if ($response->successful()) {
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Bank fields fetched successfully.',
-                    'fields' => $response->json()
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Bank fields fetched successfully.',
+                        'fields' => $response->json()
+                    ]
                 ]);
             }
 
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $response->json()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $response->json()
+                ]
             ], $response->status());
 
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch bank fields',
-                'details' => $e->getMessage()
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch bank fields',
+                    'details' => $e->getMessage()
+                ]
             ], 500);
         }
     }
@@ -334,18 +377,22 @@ class SubAccountController extends Controller
 
         if ($response->successful()) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Payout account validated successfully.',
-                'account_name' => $data['account_name'] ?? null,
-                'data' => $data
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payout account validated successfully.',
+                    'account_name' => $data['account_name'] ?? null,
+                    'payout' => $data
+                ]
             ], 200);
         }
 
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid payout account.',
-            'data' => $response->json()
+            'data' => [
+                'status' => 'error',
+                'message' => 'Invalid payout account.',
+                'data' => $response->json()
+            ]
         ], $response->status());
     }
 
