@@ -30,7 +30,7 @@ public function create(Request $request)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'No balance created for this personal account',
+                    'errors'     => 'No balance created for this personal account',
                     'balances'    => [],
                 ]
             ], 200);
@@ -58,6 +58,25 @@ public function createBalance(Request $request)
 
     $personalId = auth('personal-api')->id();
 
+    // 🔎 Check if user already has money in any balance
+    $hasMoney = Balance::where('personal_id', $personalId)
+        ->where('amount', '>', 0)
+        ->exists();
+
+    if (!$hasMoney) { // ❌ Block if no funds exist
+        $errorMessage = 'You must have funds in at least one balance before creating a new one';
+
+        return $request->expectsJson()
+            ? response()->json([
+                'data'=>[
+                    'status' => 'error',
+                    'errors' => $errorMessage
+                ]
+            ], 400)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
+
+    // ✅ Create new balance only if user already has some funds
     $balance = Balance::create([
         'personal_id' => $personalId,
         'name'        => $request->name,
@@ -67,17 +86,18 @@ public function createBalance(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'data' => [
-                'status'      => 'success',
-                'personal_id' => $personalId,
-                'message'     => 'Balance created successfully.',
-                'balance'     => $balance,
+            'data'=>[
+                'status'  => 'success',
+                'message' => 'Balance created successfully.',
+                'data'    => $balance,
             ]
         ], 201);
     }
 
     return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
 }
+
+
 
 public function getUserTotalBalance(Request $request)
 {
@@ -115,7 +135,7 @@ public function updateBalance(Request $request)
                 'data' => [
                     'status'      => 'error',
                     'personal_id' => $personalId,
-                    'message'     => 'Balance not found.',
+                    'errors'     => 'Balance not found.',
                 ]
             ], 404)
             : redirect()->back()->with('error', 'Balance not found.');

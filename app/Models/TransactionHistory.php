@@ -48,6 +48,11 @@ class TransactionHistory extends Model
         'exchange_rate',
         'single_rate',
         'created_at_external',
+        'card_number',
+        'expiry_month',
+        'expiry_year',
+        'cvv',
+
     ];
 
     protected $casts = [
