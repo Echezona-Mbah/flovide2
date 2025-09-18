@@ -94,9 +94,7 @@
               Your Money
             </h1>
             <p class="text-[14px] max-w-[520px] mx-auto mb-8">
-              Open GBP, USD, EUR, CHF, and NGN accounts effortlessly. Send and
-              receive money globally at the best rates—seamless transactions in
-              over 40 currencies across 190+ countries.
+             Send money to over 190+ countries around the world in different currencies like GBP, USD, EUR, CHF, CAD, NGN etc. 
             </p>
             <div
               class="flex flex-col md:flex-row justify-center gap-4 flex-wrap"
@@ -129,13 +127,13 @@
             <div
               class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block"
             >
-              <img src="../asserts/Personal/headerImage2.png" alt="" />
+              <img src="../asserts/image 2 (1).png" alt="" />
             </div>
             <!-- Third card -->
             <div
               class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block"
             >
-              <img src="../asserts/Personal/headerImage3.png" alt="" />
+              <img src="../asserts/image 3.png" alt="" />
             </div>
           </div>
 
@@ -267,7 +265,7 @@
               receive money at lower costs across 190+ countries in over 40
               currencies.
             </p>
-            <div
+            {{-- <div
               class="flex space-x-10 justify-between items-center md:space-x-20 text-gray-800"
             >
               <div>
@@ -282,7 +280,7 @@
                 <p class="text-2xl font-bold">15+</p>
                 <p class="text-sm mt-1">Years in business</p>
               </div>
-            </div>
+            </div> --}}
           </div>
         </div>
       </section>
@@ -296,9 +294,6 @@
             Sync Your Finances
           </h1>
           <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-            Effortlessly manage your money across multiple accounts and
-            currencies, ensuring smooth and secure financial transactions
-            anytime, anywhere.
            Effortlessly control your money across multiple scenarios in different currencies,
             ensuring smooth and secure financial transactions anytime, anywhere.
           </p>
@@ -452,15 +447,15 @@
           <div class="max-w-7xl mx-auto px-6 py-16 rounded-3xl">
             <div class="text-center max-w-3xl mx-auto">
               <p class="text-sm font-normal mb-2 text-[#82D3AB]">
-                Pricing Plans
+                {{-- Pricing Plans --}}
               </p>
               <h1 class="text-3xl md:text-5xl font-medium leading-tight mb-4">
-                Affordable Plans for Every <br />
-                Budget, Choose Yours
+                Sending money is free, making it affordable for you to send money<br />
+                 both locally and internationally
               </h1>
+              {{-- <h2>Sending money is free, making it affordable for you to send money both locally and internationally. </h2> --}}
               <p class="text-sm font-normal max-w-xl mx-auto">
-                Flovide offers a range of pricing plans to fit every budget and
-                level of need. Whether you’re a solo professional or a business.
+                Flovide offers a free sending to our personal clients while businesses can choose from a range of pricing plans to fit every budget and level of need.
               </p>
             </div>
 
@@ -468,9 +463,8 @@
               class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto"
             >
               <!-- Basic Plan -->
-              <div
-                class="rounded-3xl border shadow-2xl border-transparent bg-[#1C3C5E] flex flex-col justify-between"
-              >
+              {{-- <div
+                class="rounded-3xl border shadow-2xl border-transparent bg-[#1C3C5E] flex flex-col justify-between">
                 <div class="p-8">
                   <div class="mb-6">
                     <img
@@ -501,8 +495,7 @@
                   </button>
                 </div>
                 <div
-                  class="border-t border-dashed border-[#2f5a4a] p-8 space-y-3 text-sm text-[#7ea6b7]"
-                >
+                  class="border-t border-dashed border-[#2f5a4a] p-8 space-y-3 text-sm text-[#7ea6b7]">
                   <p class="flex items-center gap-3">
                     <i class="fas fa-check-circle opacity-40"></i> Selling point
                     1
@@ -520,12 +513,11 @@
                     4
                   </p>
                 </div>
-              </div>
+              </div> --}}
 
               <!-- Standard Plan -->
-              <div
-                class="rounded-3xl shadow-2xl bg-gradient-to-tl from-[#1C3C5E] via-[#1C3C5E] to-[#1f4a3a] flex flex-col justify-between"
-              >
+              {{-- <div
+                class="rounded-3xl shadow-2xl bg-gradient-to-tl from-[#1C3C5E] via-[#1C3C5E] to-[#1f4a3a] flex flex-col justify-between">
                 <div class="p-8">
                   <div class="mb-6">
                     <img
@@ -577,12 +569,11 @@
                     4
                   </p>
                 </div>
-              </div>
+              </div> --}}
 
               <!-- Enterprise Plan -->
-              <div
-                class="rounded-3xl border shadow-2xl border-transparent bg-[#1C3C5E] flex flex-col justify-between"
-              >
+              {{-- <div
+                class="rounded-3xl border shadow-2xl border-transparent bg-[#1C3C5E] flex flex-col justify-between">
                 <div class="p-8">
                   <div class="mb-6">
                     <img
@@ -634,7 +625,7 @@
                     4
                   </p>
                 </div>
-              </div>
+              </div> --}}
             </div>
           </div>
         </section>
@@ -704,7 +695,7 @@
                   <article
                     class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
                     <p class="mb-8 text-base leading-relaxed">
-                      I love having multi-currency accounts in one place. Managing my business payments in USD and EUR has never been smoother.
+                     I love having the options to send money to multiple countries in multi-currency choices in one place. Managing my business payments in USD and EUR has never been smoother. 
                     </p>
                     <div class="flex items-center gap-4">
                       <img
@@ -771,7 +762,7 @@
                   <article
                     class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
                     <p class="mb-8 text-base leading-relaxed">
-                      The customer support team is always responsive and helpful. Flovide truly feels like a modern banking partner.
+                      The customer support team is always responsive and helpful. Flovide truly makes me feel like am on top of the world. 
                     </p>
                     <div class="flex items-center gap-4">
                       <img
@@ -784,7 +775,7 @@
                           Michael
                         </h3>
                         <p class="text-gray-700 text-sm leading-tight">
-                          Canada
+                          Uganda
                         </p>
                       </div>
                     </div>
@@ -817,7 +808,7 @@
       <!-- testimonies end -->
 
       <!--  Virtual Card-->
-      <section class="w-full flex flex-col items-center justify-center">
+      {{-- <section class="w-full flex flex-col items-center justify-center">
         <section class="mx-auto px-6 pt-12 pb-16 text-center space-y-4">
           <p class="text-gray-400 text-sm font-semibold mb-2">Virtual Card</p>
           <h1 class="text-4xl font-medium mb-3 text-gray-900">
@@ -843,18 +834,18 @@
         <section class="max-w-7xl px-4 md:px-10">
           <img src="../asserts/Personal/virutalCard.svg" alt="" class="" />
         </section>
-      </section>
+      </section> --}}
       <!--  Virtual Card end -->
 
       <!-- Our globe countries -->
       <section class="w-full flex flex-col items-center justify-center">
         <section class="mx-auto px-6 pt-12 pb-16 text-center space-y-4">
           <h1 class="text-4xl font-medium mb-3 text-gray-900">
-            Global access in 150+ countries
+            Global access in 190+ countries
           </h1>
           <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-            Moving, traveling, or sending money abroad? You're covered in 150+
-            countries—effortless payments, wherever you call home.
+          Moving, traveling, or sending money abroad? You're covered in 190+ countries—effortless payments, 
+          wherever you call home or do business.
           </p>
 
           <button
@@ -890,7 +881,7 @@
           <h1
             class="text-center text-3xl sm:text-4xl font-medium text-gray-900 md:max-w-[35vw] mx-auto leading-tight"
           >
-            Robust business accounts designed for growth
+            Robust business account designed for growth
           </h1>
           <div
             class="mt-12 rounded-3xl md:border border-gray-400 p-4 md:p-10 flex flex-col gap-8 sm:gap-0 bg-white"
@@ -941,9 +932,8 @@
                 <p
                   class="text-gray-700 text-sm mb-8 leading-relaxed max-w-[320px]"
                 >
-                  Create business accounts to manage your money in different
-                  currencies, Make local and international payments to 190+
-                  countries.
+                  Create business account to manage your money,
+                   Make local and international payments to 190+ countries.
                 </p>
                 <button
                   class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
@@ -1056,9 +1046,10 @@
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed"
                   >
                     <p class="list-disc mt-2">
-                      Create business accounts to manage your money in different
-                      currencies. Make local and international payments to 190+
-                      countries.
+                      Creating a Flovide account is very easy and simple. 
+                      Just download Flovide mobile app, fill in your details and submit. 
+                      If you are fully verified, you can immediately start making local and international payments to 190+ countries.
+                       However, businesses can create account online or in the app. 
                     </p>
                   </div>
                 </article>
@@ -1071,7 +1062,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      Which currencies can I hold in my account?
+                      What security measures does Flovide use to protect my account?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -1108,10 +1099,9 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Flovide supports multi-currency accounts. You can hold and
-                    manage USD, EUR, GBP, NGN, JPY, and many more. This enables
-                    seamless local and international transactions without
-                    constant conversions.
+                    "Flovide uses multi-factor authentication (MFA), encrypted communications,
+                     and continuous fraud monitoring to ensure your transactions
+                      and account access remain secure."
                   </div>
                 </article>
 
@@ -1123,7 +1113,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      How long does it take to send and receive money?
+                      Does Flovide hold my money?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -1160,10 +1150,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Local transfers are often instant. International transfers
-                    typically take 1–3 business days depending on the currency
-                    and destination country. Flovide uses fast payment networks
-                    to speed up processing.
+                    No. Flovide does not hold customer funds.
+                    All funds are immediately remitted to your desired locations. 
                   </div>
                 </article>
 
@@ -1175,7 +1163,7 @@
                     class="flex justify-between items-center cursor-pointer"
                   >
                     <h3 class="font-semibold text-gray-900 text-base leading-6">
-                      Is my money safe with Flovide?
+                       How long does it take to send money with Flovide?
                     </h3>
                     <button
                       aria-label="Toggle"
@@ -1212,10 +1200,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Yes. Flovide secures your money with regulated banking
-                    partners, industry-standard encryption, and fraud monitoring
-                    systems. Your funds are held in segregated accounts for
-                    maximum safety.
+                    The time it takes Flovide to deliver your funds depends on the type of transfer that you make.
+                     About 98% of our transfers are completed within minutes. 
                   </div>
                 </article>
 
@@ -1264,10 +1250,8 @@
                   <div
                     class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden"
                   >
-                    Flovide charges no fees for local transfers. For
-                    international transfers, small fees may apply depending on
-                    the destination. Currency conversions are done at
-                    competitive rates with minimal markup.
+                    Sending money through Flovide is completely free if you are an individual.
+                     However, Business pay for transactions depending on their chosen plan. 
                   </div>
                 </article>
 
