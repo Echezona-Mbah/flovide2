@@ -1,14 +1,31 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\business\addBankAccountController;
+use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Business\DashboardController;
-use App\Http\Controllers\business\SubAccountController;
-use App\Http\Controllers\business\TransactionHistoryController;
-use App\Http\Controllers\business\InvoicesController;
+use App\Http\Controllers\Business\SubAccountController;
+use App\Http\Controllers\Business\TransactionHistoryController;
+use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\personalController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+
+Route::get('/artisan-clear', function () {
+    try {
+        Artisan::call('optimize:clear');
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Artisan optimize:clear command executed successfully.'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
 
 // Route::get('/', function () {
 //     return view('welcome');
