@@ -52,11 +52,11 @@ class paymentsController extends Controller
 
         // Validate request
         $validator = Validator::make($request->all(), [
-            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
-            'title' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
+            'title' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'currency' => 'nullable|string|max:10',
-            'visibility' => 'nullable|in:public,private',
+            'currency' => 'required|string|max:10',
+            'visibility' => 'required|in:public,private'
         ]);
 
         if ($validator->fails()) {
@@ -172,7 +172,7 @@ class paymentsController extends Controller
         ], 200);
     }
 
-    public function destory(Request $request, $id){
+    public function destroy(Request $request, $id){
         $user = Auth::guard('personal-api')->user();
         $payment = payment::where('id', $id)
                       ->where('personal_id', $user->id)->first();
@@ -191,7 +191,7 @@ class paymentsController extends Controller
         return response()->json([
             'data' => [
                 'status' => 'success',
-                'message' => 'Payment deleted successfully',
+                'message' => 'Payment deleted successfully'
             ]
         ], 200);
     }

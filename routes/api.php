@@ -293,7 +293,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
         Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
         Route::post('/payments/store', [paymentsController::class, 'store']);
-        Route::delete('/payments/{id}/destory', [paymentsController::class, 'destory']);
+        Route::delete('/payments/{id}/destroy', [paymentsController::class, 'destroy']);
         Route::put('/payments/update/{id}', [paymentsController::class, 'update']);
         
         //donations
