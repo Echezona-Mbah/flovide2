@@ -304,6 +304,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/payments', [paymentsController::class, 'index']);
         Route::get('/payments/show/{id}', [paymentsController::class, 'show']);
         Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
+        Route::get('/payments/subaccount', [paymentsController::class, 'subaccount']);
         Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
         Route::post('/payments/store', [paymentsController::class, 'store']);
         Route::delete('/payments/{id}/destroy', [paymentsController::class, 'destroy']);
