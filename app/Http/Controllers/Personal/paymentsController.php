@@ -73,16 +73,20 @@ class paymentsController extends Controller
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('payment_cover_image', 'public');
         }
-
+        
+        // auto-generate unique reference
+        $reference = $request->reference ?? $this->generateUniqueReference();
+        $pageLink = url('payment/paymentcheckout/' . $reference);
         // Create payment
         $payment = payment::create([
             'personal_id' => $user->id,
             'cover_image' => $path,
             'title' => $request->title,
-            'payment_reference' => $this->generateUniqueReference(), // auto-generate unique reference
+            'payment_reference' => $reference,
             'amount' => $request->amount,
             'currency' => $request->currency ?? 'NGN',
             'visibility' => $request->visibility ?? 'private',
+            'page_link' => $pageLink
         ]);
 
         return response()->json([

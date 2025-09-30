@@ -50,6 +50,13 @@
                 </i>
                 Invoices
             </a>
+
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('payment.index') }}">
+                {{-- <i class="fas fa-file-invoice text-base"></i> --}}
+                <i class="fas fa-file-invoice-dollar text-base"></i>
+                Payment page
+            </a>
+
             <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('subscriptions') }}">
                 <i class="fas fa-sync-alt text-base">
                 </i>
