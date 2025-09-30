@@ -316,7 +316,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/donations/store', [donationsController::class, 'store']);
         Route::delete('/donations/{id}/destory', [donationsController::class, 'destory']);
         Route::put('/donations/update/{id}', [donationsController::class, 'update']);
-=======
     
         // api routes for Send Money detailsdeactivateAccount
         Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);

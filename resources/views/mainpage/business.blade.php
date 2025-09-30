@@ -28,9 +28,7 @@
   @include('mainpage.header')
 
 
-    <main
-      class="md:relative md:top-[-20vh] right-0 left-0 mx-auto space-y-10 md:space-y-20 overflow-x-hidden"
-    >
+    <main class="md:relative md:top-[-20vh] right-0 left-0 mx-auto space-y-10 md:space-y-20 overflow-x-hidden">
       <!-- business part -->
       <section class="bg-white">
         <div class="md:max-w-5xl md:mx-auto px-4 md:px-6 py-12">
