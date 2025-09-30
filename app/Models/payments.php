@@ -17,18 +17,29 @@ class payments extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'user_id',
         'personal_id',
         'cover_image',
         'title',
-        'payment_reference',
         'amount',
+        'payment_reference',
+        'subaccount_id',
+        'subaccount',
+        'subaccount_name',
+        'subaccount_number',
+        'percentage',
         'currency',
         'visibility',
+        'page_link'
     ];
 
     /**
      * Relationship: A payment belongs to a personal.
      */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     public function personal()
     {
         return $this->belongsTo(Personal::class);
