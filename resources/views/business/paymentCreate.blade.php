@@ -15,7 +15,7 @@
   <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
     <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
       <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-        Remita
+        Payment
       </h1>            
       @include('business.header_notifical')
     </header>
@@ -23,7 +23,7 @@
       <section
         class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
         <header class="flex items-center gap-4 mb-8">
-            <a href="{{ route('remita.index') }}">
+            <a href="{{ route('payment.index') }}">
                 <button aria-label="Back" class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
                     <i class="fas fa-chevron-left text-lg"></i>
                 </button>
@@ -90,7 +90,7 @@
                 </script>
 
 
-                <form class="flex flex-col gap-6" action="{{ route('remita.store') }}" method="POST" enctype="multipart/form-data">
+                <form class="flex flex-col gap-6" action="{{ route('payment.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="flex flex-col gap-1">
@@ -132,12 +132,12 @@
 
                     <div class="flex flex-col gap-1">
                         <label for="title" class="text-xs text-gray-600 select-none">Title</label>
-                        <input id="title" type="text" name="title" placeholder="Enter Remita Title" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <input id="title" type="text" name="title" placeholder="Enter Payment Title" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                     </div>
 
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs text-gray-600 select-none">Fixed Amount</label>
-                        <input type="number" name="amount" placeholder="Enter Remita Amount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <label class="text-xs text-gray-600 select-none">Amount</label>
+                        <input type="number" name="amount" placeholder="Enter Payment Amount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
 
                         {{-- <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
 
@@ -157,35 +157,6 @@
                             <input type="text" placeholder="123456789" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 md:w-36 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                         </div> --}}
 
-                    </div>
-
-                    <div class="flex flex-col gap-1">
-                        <label for="service-type" class="text-xs text-gray-600 select-none">Service Type</label>
-                        <select id="service-type" name="service_type" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <option value="" selected >Select a service type</option>
-                            <option value="school_fees">School Fees</option>
-                            <option value="utilities">Utilities</option>
-                            <option value="donation">Donation</option>
-                            <option value="subscription">Subscription</option>
-                            <option value="product_payment">Product Payment</option>
-                            <option value="event_registration">Event Registration</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col gap-1">
-                        <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
-                        <div class="flex gap-3">
-                            <select id="subaccount" name="subaccount_id" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                <option selected value="">Select a subaccount</option>
-                                @foreach ($subaccounts as $subaccount)
-                                    <option value="{{ $subaccount->id }}">
-                                    {{ $subaccount->decrypted_account ? $subaccount->decrypted_account . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            <span class="text-xs text-gray-700 bg-gray-200 rounded-md px-2 py-2 flex items-center select-none">%</span>
-                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1">
@@ -246,6 +217,23 @@
                             <option value="NAD">🇳🇦 NAD – Namibian Dollar</option>
 
                         </select>
+                    </div>
+
+
+                    <div class="flex flex-col gap-1">
+                        <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
+                        <div class="flex gap-3">
+                            <select id="subaccount" name="subaccount_id" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option selected value="">Select a subaccount</option>
+                                @foreach ($subaccounts as $subaccount)
+                                    <option value="{{ $subaccount->id }}">
+                                    {{ $subaccount->account_number ? $subaccount->account_number . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <span class="text-xs text-gray-700 bg-gray-200 rounded-md px-2 py-2 flex items-center select-none">%</span>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1">
