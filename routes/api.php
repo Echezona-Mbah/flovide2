@@ -281,7 +281,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/payout/{id}/set-default', [PersonaladdBankAccountController::class, 'setDefault']);
         Route::delete('/delete-account/{id}', [PersonaladdBankAccountController::class, 'destroy']);
         Route::delete('/delete-accounts', [PersonaladdBankAccountController::class, 'destroyAll']);
-        Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
+        // Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
 
         //subaccount
         Route::get('/subaccount', [PersonalSubAccountController::class, 'subaccount']);
@@ -292,7 +292,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::delete('/deleteSubaccount/{id}', [PersonalSubAccountController::class, 'destroy']);
         Route::post('/subaccounts', [PersonalSubAccountController::class, 'store']);
         Route::post('/validateSubaccountName', [PersonalSubAccountController::class, 'validatePayoutAccountName']);
-        Route::put('/updateSubaccount/{id}', [PersonalSubAccountController::class, 'update']);
+        // Route::put('/updateSubaccount/{id}', [PersonalSubAccountController::class, 'update']);
 
         //refund
         Route::get('/refunds', [PersonalrefundsController::class, 'index']);
