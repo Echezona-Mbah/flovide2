@@ -52,7 +52,28 @@ class LoginController extends Controller
 
         $balances = \App\Models\Balance::where('user_id', $account->id)->get();
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
-            ->latest()->take(4)->get();
+    ->latest()
+    ->take(4)
+    ->get()
+    ->map(function ($t) {
+        return [
+            'type'      => $t->type,
+            'date'      => $t->created_at->format('Y-m-d H:i:s'),
+            'sender'    => $t->sender ?? 'N/A',
+            'recipient' => $t->recipient ?? 'N/A',
+            'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+            'currency'  => $t->currency,
+            'reference' => $t->reference,
+            'recipient_details' => [
+                'alias'          => $t->recipient_alias,
+                'account_name'   => $t->recipient_account_name,
+                'account_number' => $t->recipient_account_number,
+                'bank_name'      => $t->recipient_bank_name,
+                'bank_currency'  => $t->recipient_bank_currency,
+            ]
+        ];
+    });
+
 
         $chartData = \App\Models\TransactionHistory::where('user_id', $account->id)
             ->where('created_at', '>=', now()->subMonths(3))
@@ -134,8 +155,30 @@ class LoginController extends Controller
 
         // Fetch balances, transactions, chart data
         $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
-        $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
-            ->latest()->take(4)->get();
+       $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
+    ->latest()
+    ->take(4)
+    ->get()
+    ->map(function ($t) {
+        return [
+            'type'      => $t->type,
+            'date'      => $t->created_at->format('Y-m-d H:i:s'),
+            'sender'    => $t->sender ?? 'N/A',
+            'recipient' => $t->recipient ?? 'N/A',
+            'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+            'currency'  => $t->currency,
+            'reference' => $t->reference,
+            'recipient_details' => [
+                'alias'          => $t->recipient_alias,
+                'account_name'   => $t->recipient_account_name,
+                'account_number' => $t->recipient_account_number,
+                'bank_name'      => $t->recipient_bank_name,
+                'bank_currency'  => $t->recipient_bank_currency,
+            ]
+        ];
+    });
+
+
         $chartData = \App\Models\TransactionHistory::where('personal_id', $account->id)
             ->where('created_at', '>=', now()->subMonths(3))
             ->select(

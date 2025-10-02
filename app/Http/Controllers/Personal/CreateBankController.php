@@ -57,6 +57,7 @@ public function createBalance(Request $request)
     ]);
 
     $personalId = auth('personal-api')->id();
+    $currency   = strtoupper($request->currency);
 
     // 🔎 Check if user already has money in any balance
     $hasMoney = Balance::where('personal_id', $personalId)
@@ -68,7 +69,7 @@ public function createBalance(Request $request)
 
         return $request->expectsJson()
             ? response()->json([
-                'data'=>[
+                'data' => [
                     'status' => 'error',
                     'errors' => $errorMessage
                 ]
@@ -76,17 +77,35 @@ public function createBalance(Request $request)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
-    // ✅ Create new balance only if user already has some funds
+    // 🔎 Check if user already has this currency
+    $exists = Balance::where('personal_id', $personalId)
+        ->where('currency', $currency)
+        ->exists();
+
+    if ($exists) {
+        $errorMessage = "You already have a $currency balance. Duplicates are not allowed.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'errors' => $errorMessage
+                ]
+            ], 400)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
+
+    // ✅ Create new balance
     $balance = Balance::create([
         'personal_id' => $personalId,
         'name'        => $request->name,
-        'currency'    => $request->currency,
+        'currency'    => $currency,
         'amount'      => 0,
     ]);
 
     if ($request->expectsJson()) {
         return response()->json([
-            'data'=>[
+            'data' => [
                 'status'  => 'success',
                 'message' => 'Balance created successfully.',
                 'data'    => $balance,
@@ -96,6 +115,7 @@ public function createBalance(Request $request)
 
     return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
 }
+
 
 
 
