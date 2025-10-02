@@ -15,7 +15,7 @@
     <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Remita
+                Payment
             </h1>
             @include('business.header_notifical')
         </header>
@@ -33,10 +33,10 @@
                                     </i>
                                 </div>
                             </div>
-                            <a href="{{ route('remita.create') }}">
+                            <a href="{{ route('payment.create') }}">
                                 <button class="flex items-center gap-2 bg-[#0f5499] text-white text-sm font-semibold rounded-full px-5 py-2 whitespace-nowrap hover:bg-[#0c3f6a] transition">
                                     <i class="fas fa-paste"></i>
-                                Create Remita Page
+                                Create Payment Page
                                 </button>
                             </a>
                         </div>
@@ -60,14 +60,14 @@
                         <!-- Cards Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-20">
                             
-                            @foreach ($remitas as $remita )
+                            @foreach ($payments as $payment )
                                 <!-- Card 1 -->
                                 <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
                                     <div class="flex justify-between items-center gap-4">
                                         <div class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
                                             @php
-                                                if($remita->cover_image != null){
-                                                    $coverImage = asset('storage/' . $remita->cover_image);
+                                                if($payment->cover_image != null){
+                                                    $coverImage = asset('storage/' . $payment->cover_image);
                                                 }else{
                                                     $coverImage = asset('asserts/dashboard/img1.png');
                                                 }
@@ -76,23 +76,23 @@
                                         </div>
                                         <div>
                                             <div class="flex justify-between items-start">
-                                                <div class="text-lg font-extrabold">{{ number_format($remita->amount, 2) . ' ' . $remita->currency }}</div>
+                                                <div class="text-lg font-extrabold">{{ number_format($payment->amount, 2) . ' ' . $payment->currency }}</div>
                                             </div>
                                             {{-- <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div> --}}
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-md leading-tight">{{ ucfirst($remita->title) }}</h3>
+                                        <h3 class="font-semibold text-md leading-tight">{{ ucfirst($payment->title) }}</h3>
                                     </div>
                                     <div
                                         class="flex items-center justify-between gap-3 mt-4 text-sm font-semibold text-gray-700">
                                         <div class="flex gap-4 items-center">
                                             <div class="flex items-center gap-1">
                                                 <img src=" {{ asset("asserts/dashboard/person.png") }}" alt="">
-                                                {{ $payment_count[$remita->id] ?? 0  }}
+                                                {{ $payment_count[$payment->id] ?? 0  }}
                                             </div>
-                                            <div class="bg-[#F9F7E5] {{ $remita->visibility == "Private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                                @if ($remita->visibility == 'Private')
+                                            <div class="bg-[#F9F7E5] {{ $payment->visibility === "private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
+                                                @if ($payment->visibility === 'private')
                                                     <img src="/src/asserts/dashboard/note.png" alt="">
                                                 @else
                                                     <i class="fas fa-check text-[10px]"></i>
@@ -100,10 +100,12 @@
                                             </div>
                                         </div>
                                         <div class="flex gap-4">
-                                            <button aria-label="Link button" class="{{ $remita->visibility == 'Private' ? 'hidden' : '' }} bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                                <i class="fas fa-link"></i>
-                                            </button>
-                                            <a href="{{ route('remita.edit', $remita->id) }}">
+                                            <a href="{{ $payment->page_link }}" class="{{ $payment->visibility === 'private' ? 'hidden' : '' }}">
+                                                <button aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                                    <i class="fas fa-link"></i>
+                                                </button>
+                                            </a>
+                                            <a href="{{ route('payment.edit', $payment->id) }}">
                                                 <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                                     <i class="fas fa-chevron-right"></i>
                                                 </button>
