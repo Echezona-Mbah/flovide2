@@ -4,69 +4,80 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Remita;
-use App\Models\RemitaPayment;
+use App\Models\PaymentRecord;
 use App\Models\Subaccount;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
-use App\Exports\RemitaRecordsExport;
+use Illuminate\Support\Facades\Validator;
+use App\Models\payments as payment;
+use Illuminate\Support\Str;
+use App\Exports\PaymentRecordsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelFormat;
 
-class RemitaController extends Controller
+class PaymentController extends Controller
 {
-    //
     public function index()
     {
-        // Fetch all remita pages for the authenticated user
+        // Fetch all payment pages for the authenticated user
         $user = Auth::user();
-        $remitas = Remita::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $payment = payment::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
-        // Get all remita_ids from the collection
-        $remitaIds = $remitas->pluck('id');
+        // Get all payment_ids from the collection
+        $paymentIds = $payment->pluck('id');
 
-        //fetch remita_payment pages
-        $paymentCount = RemitaPayment::whereIn('remita_id', $remitaIds)->count();
+        //fetch payment pages
+        $paymentCount = PaymentRecord::whereIn('payment_id', $paymentIds)->count();
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
-                    'message' => 'Remita pages retrieved successfully.',
-                    'remitas' => $remitas,
-                    'remita_payments_count' => $paymentCount,
+                    'message' => 'Payment pages retrieved successfully.',
+                    'payments' => $payment,
+                    'payments_count' => $paymentCount,
                 ]
             ], 200);
         }
 
         //return the view
-        return view('business.remita', ['remitas' => $remitas, 'remita_payments_count' => $paymentCount]);
+        return view('business.payment', ['payments' => $payment, 'payments_count' => $paymentCount]);
     }
+
+    public function paymentcheckout(Request $request, $id)
+    {
+        $payment = payment::where("payment_reference", $id)->first();
+        if (!$payment) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'An error occured or payment not found.'
+                    ]
+                ], 404);
+            }
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Successfully retrieved payment.',
+                    'payment' => $payment
+                ]
+            ], 200);
+        }
+        //return view
+        return view("business.paymentCheckout", compact("payment"));
+    }
+
+    public function paymentpay(Request $request) {}
 
     public function create(Request $request)
     {
 
         $user = Auth::user();
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
-
-        //Decrypt account_number or iban before sending to view/JSON
-        $subaccounts->transform(function ($subaccount) {
-            try {
-                if (!empty($subaccount->account_number)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->account_number);
-                } elseif (!empty($subaccount->iban)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->iban);
-                } else {
-                    $subaccount->decrypted_account = null;
-                }
-            } catch (\Exception $e) {
-                // fallback if decryption fails
-                $subaccount->decrypted_account = null;
-            }
-            return $subaccount;
-        });
 
         if ($request->expectsJson()) {
             if ($subaccounts->isEmpty()) {
@@ -86,73 +97,49 @@ class RemitaController extends Controller
                 ]
             ], 200);
         }
-        return view('business.remitaCreate', ['subaccounts' => $subaccounts]);
+        return view('business.paymentCreate', ['subaccounts' => $subaccounts]);
     }
     public function edit(Request $request, $id)
     {
         $user = Auth::user();
-        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+        $Payment = payment::where('id', $id)->where('user_id', $user->id)->first();
 
-        if (!$remita) {
+        if (!$Payment) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'data' => [
-                        'message' => 'Remita page not found.'
+                        'status' => 'error',
+                        'message' => 'Payment page not found.'
                     ]
                 ], 404);
             }
-            return redirect()->route('remita.index')->with('error', 'Remita page not found.');
+            return redirect()->route('Payment.index')->with('error', 'Payment page not found.');
         }
 
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
-
-        //Decrypt account_number or iban before sending to view/JSON
-        $subaccounts->transform(function ($subaccount) {
-            try {
-                if (!empty($subaccount->account_number)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->account_number);
-                } elseif (!empty($subaccount->iban)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->iban);
-                } else {
-                    $subaccount->decrypted_account = null;
-                }
-            } catch (\Exception $e) {
-                // fallback if decryption fails
-                $subaccount->decrypted_account = null;
-            }
-            return $subaccount;
-        });
 
         if ($request->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
-                    'message' => 'Remita page retrieved successfully.',
-                    'remita' => $remita,
+                    'message' => 'Payment page retrieved successfully.',
+                    'Payment' => $Payment,
                     'subaccounts' => $subaccounts
                 ]
             ], 200);
         }
 
-        return view('business.remitaPayment', ['remita' => $remita, 'subaccounts' => $subaccounts]);
+        return view('business.editPayment', ['Payment' => $Payment, 'subaccounts' => $subaccounts]);
     }
 
-    //generate a unique 13-digit RRR code.
-    protected function generateRRR()
+    //generate a payment reference code.
+    public function generateUniqueReference()
     {
         do {
-            $rrr = sprintf(
-                "RRR-%04d-%04d-%04d-flovide",
-                mt_rand(0, 9999),
-                mt_rand(0, 9999),
-                mt_rand(0, 99999)
-            );
+            $reference = (string) Str::uuid();
+        } while (payment::where('payment_reference', $reference)->exists());
 
-            // Ensure uniqueness in the Remita table
-            $exists = Remita::where('rrr', $rrr)->exists();
-        } while ($exists);
-
-        return $rrr;
+        return $reference;
     }
 
     public function store(Request $request)
@@ -161,7 +148,6 @@ class RemitaController extends Controller
             'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120|dimensions:width=1600,height=300', // 5MB
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric',
-            'service_type' => 'required|string',
             'subaccount_id' => 'required|string',
             'percentage' => 'required|numeric|min:0|max:100', // Percentage must be between 0 and 100
             'currency' => 'required|string',
@@ -195,7 +181,7 @@ class RemitaController extends Controller
             return redirect()->back()->withErrors(['subaccount_id' => 'You do not have permission to use this subaccount.']);
         }
 
-        $accountNumber = Crypt::decryptString($subaccount->account_number);
+        $accountNumber = $subaccount->account_number;
         $accountName = $subaccount->account_name;
         $bankName = $subaccount->bank_name;
 
@@ -203,19 +189,19 @@ class RemitaController extends Controller
         $path = null;
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('remita_cover_image', 'public');
+            $path = $request->file('cover_image')->store('payment_cover_image', 'public');
         }
 
         $user = Auth::user();
-        $rrr = $request->rrr ?? $this->generateRRR();
+        $reference = $request->reference ?? $this->generateUniqueReference();
+        $pageLink = url('payment/paymentcheckout/' . $reference);
         // Save to DB
-        Remita::create([
+        payment::create([
             'user_id' => $user->id,
             'cover_image' => $path,
             'title' => $request->title,
             'amount' => $request->amount,
-            'rrr' => $rrr,
-            'service_type' => $request->service_type,
+            'payment_reference' => $reference,
             'subaccount_id' => $request->subaccount_id,
             'subaccount' => $bankName,
             'subaccount_name' => $accountName,
@@ -223,17 +209,18 @@ class RemitaController extends Controller
             'percentage' => $request->percentage ?? 10, // Default to 10% if not provided
             'currency' => $request->currency,
             'visibility' => $request->visibility,
+            'page_link' => $pageLink
         ]);
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
-                    'message' => 'Remita page created successfully.'
+                    'message' => 'Payment page created successfully.'
                 ]
             ], 200);
         }
-        return redirect()->back()->with('success', 'Remita page created successfully.');
+        return redirect()->back()->with('success', 'Payment page created successfully.');
     }
 
     public function update(Request $request, $id)
@@ -245,7 +232,6 @@ class RemitaController extends Controller
             'remove_cover' => 'nullable|in:0,1', // must be 0 or 1
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric',
-            'service_type' => 'required|string',
             'subaccount_id' => 'required|string',
             'percentage' => 'required|numeric|min:0|max:100',
             'currency' => 'required|string',
@@ -279,50 +265,49 @@ class RemitaController extends Controller
             return redirect()->back()->withErrors(['subaccount_id' => 'You do not have permission to use this subaccount.']);
         }
 
-        $accountNumber = Crypt::decryptString($subaccount->account_number);
+        $accountNumber = $subaccount->account_number;
         $accountName = $subaccount->account_name;
         $bankName = $subaccount->bank_name;
 
 
-        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+        $payment = payment::where('id', $id)->where('user_id', $user->id)->first();
 
-        if (!$remita) {
+        if (!$payment) {
             if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
-                        'message' => 'Remita not found'
+                        'message' => 'payment not found'
                     ]
                 ], 404);
             }
-            return redirect()->route('remita.index')->with('error', 'Remita page not found or you do not have permission to edit it.');
+            return redirect()->route('payment.index')->with('error', 'payment page not found or you do not have permission to edit it.');
         }
 
         $path = null;
         if ($request->remove_cover == 1) {
-            if ($remita->cover_image) {
-                Storage::disk('public')->delete($remita->cover_image);
+            if ($payment->cover_image) {
+                Storage::disk('public')->delete($payment->cover_image);
             }
-            $remita->cover_image = null;
+            $payment->cover_image = null;
         } elseif ($request->hasFile('cover_image')) {
-            if ($remita->cover_image) {
-                Storage::disk('public')->delete($remita->cover_image);
+            if ($payment->cover_image) {
+                Storage::disk('public')->delete($payment->cover_image);
             }
-            $path = $request->file('cover_image')->store('remita_cover_image', 'public');
-            $remita->cover_image = $path;
+            $path = $request->file('cover_image')->store('payment_cover_image', 'public');
+            $payment->cover_image = $path;
         }
 
-        $remita->title = $request->title;
-        $remita->amount = $request->amount;
-        $remita->service_type = $request->service_type;
-        $remita->subaccount_id = $subaccount->id;
-        $remita->subaccount = $bankName;
-        $remita->subaccount_name = $accountName;
-        $remita->subaccount_number = $accountNumber;
-        $remita->percentage = $request->percentage ?? $remita->percentage; // Default to existing percentage if not provided
-        $remita->currency = $request->currency;
-        $remita->visibility = $request->visibility;
-        $remita->save();
+        $payment->title = $request->title;
+        $payment->amount = $request->amount;
+        $payment->subaccount_id = $subaccount->id;
+        $payment->subaccount = $bankName;
+        $payment->subaccount_name = $accountName;
+        $payment->subaccount_number = $accountNumber;
+        $payment->percentage = $request->percentage ?? $payment->percentage; // Default to existing percentage if not provided
+        $payment->currency = $request->currency;
+        $payment->visibility = $request->visibility;
+        $payment->save();
 
         if (request()->expectsJson()) {
             return response()->json([
@@ -333,58 +318,35 @@ class RemitaController extends Controller
             ], 200);
         }
 
-        return redirect()->route('remita.edit', ['id' => $remita->id])->with('success', 'Remita page updated successfully.');
+        return redirect()->route('payment.edit', ['id' => $payment->id])->with('success', 'payment page updated successfully.');
     }
 
     public function destroy(Request $request, $id)
     {
         $user = Auth::user();
-        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+        $payment = payment::where('id', $id)->where('user_id', $user->id)->first();
 
-        if (!$remita) {
+        if (!$payment) {
             if (request()->expectsJson()) {
                 return response()->json([
                     'data' => [
                         'status' => 'error',
-                        'message' => 'Remita page not found or you do not have permission to delete it.'
+                        'message' => 'payment page not found or you do not have permission to delete it.'
                     ]
                 ], 404);
             }
-            // return redirect()->route('remita.index')->with('error', 'Remita page not found or you do not have permission to delete it.');
+            // return redirect()->route('payment.index')->with('error', 'payment page not found or you do not have permission to delete it.');
         }
 
-        $remita->delete();
+        $payment->delete();
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
-                    'message' => 'Remita page deleted successfully.'
+                    'message' => 'payment page deleted successfully.'
                 ]
             ], 200);
         }
-    }
-
-    public function exportUserRemita(Request $request, $id)
-    {
-        $fileName = 'my_remita_records_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        $user = Auth::user();
-        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
-        if(!$remita){
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'data' => [
-                        'status' => 'error',
-                        'message' => 'Remita records not found'
-                    ]
-                ], 404);
-            }
-            return redirect()->back()->withErrors(['error' => 'Remita records not found']);
-        }
-        return Excel::download(
-            new RemitaRecordsExport($remita->id), 
-            $fileName, 
-            ExcelFormat::CSV
-        );
     }
 }
