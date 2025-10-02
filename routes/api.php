@@ -98,13 +98,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('business/validateSubaccountName', [SubAccountController::class, 'validatePayoutAccountName']);
     
     //invoices section
-    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
-    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
-    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
-    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
-    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
-    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/business/invoices', [InvoicesController::class, 'index']);
+    Route::get('/business/invoices/{id}', [InvoicesController::class, 'show']);
+    // Route::get('/business/invoices/{id}/edit', [InvoicesController::class, 'edit']);
+    // Route::get('/business/invoices/create', [InvoicesController::class, 'create']);
+    Route::post('/business/invoices', [InvoicesController::class, 'store']);
+    Route::put('/business/invoices/{id}', [InvoicesController::class, 'update']);
+    Route::delete('/business/invoices/{id}', [InvoicesController::class, 'destroy']);
     
     //refund
     Route::get('/business/refunds', [refundsController::class, 'index'])->name('refunds.index');
