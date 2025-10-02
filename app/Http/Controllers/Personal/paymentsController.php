@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\payments as payment;
+use App\Models\Subaccount;
 use Illuminate\Support\Str;
 use App\Exports\PaymentRecordsExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -39,6 +40,39 @@ class paymentsController extends Controller
         ], 200);
     }
 
+    //fetch users added sub account
+    public function subaccount(){
+        try{
+            $user = Auth::guard('personal-api')->user();
+            $subaccounts = Subaccount::where('personal_id', $user->id)->get();
+
+            if ($subaccounts->isEmpty()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No subaccounts available for this user.',
+                        'subaccount' => []
+                    ]
+                ], 200);
+            }
+
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Subaccount fetched.',
+                    'subaccount' => $subaccounts
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Failed to fetch subaccounts.',
+                    // 'error' => $e->getMessage()
+                ]
+            ], 500);
+        }
+    }
     public function generateUniqueReference()
     {
         do {
@@ -55,7 +89,12 @@ class paymentsController extends Controller
             'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|max:10',
+            'subaccount_id' => 'nullable|string|max:50',
+            'subaccount' => 'nullable|string|max:100',
+            'subaccount_name' => 'nullable|string|max:150',
+            'subaccount_number' => 'nullable|digits_between:9,15',
+            'percentage' => 'nullable|numeric|min:0|max:100', // Percentage must be between 0 and 100
+            'currency' => 'required|string|size:3', // ISO currency codes are usually 3 chars (e.g., USD, NGN)
             'visibility' => 'required|in:public,private'
         ]);
 
@@ -73,16 +112,25 @@ class paymentsController extends Controller
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('payment_cover_image', 'public');
         }
-
+        
+        // auto-generate unique reference
+        $reference = $request->reference ?? $this->generateUniqueReference();
+        $pageLink = url('payment/paymentcheckout/' . $reference);
         // Create payment
         $payment = payment::create([
             'personal_id' => $user->id,
             'cover_image' => $path,
             'title' => $request->title,
-            'payment_reference' => $this->generateUniqueReference(), // auto-generate unique reference
+            'payment_reference' => $reference,
             'amount' => $request->amount,
+            'subaccount_id' => $request->subaccount_id,
+            'subaccount' => $request->subaccount,
+            'subaccount_name' => $request->subaccount_name,
+            'subaccount_number' => $request->subaccount_number,
+            'percentage' => $request->percentage,
             'currency' => $request->currency ?? 'NGN',
             'visibility' => $request->visibility ?? 'private',
+            'page_link' => $pageLink
         ]);
 
         return response()->json([
