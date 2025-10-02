@@ -281,7 +281,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/payout/{id}/set-default', [PersonaladdBankAccountController::class, 'setDefault']);
         Route::delete('/delete-account/{id}', [PersonaladdBankAccountController::class, 'destroy']);
         Route::delete('/delete-accounts', [PersonaladdBankAccountController::class, 'destroyAll']);
-        Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
+        // Route::put('/bankAccount/{id}', [PersonaladdBankAccountController::class, 'update']);
 
         //subaccount
         Route::get('/subaccount', [PersonalSubAccountController::class, 'subaccount']);
@@ -292,7 +292,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::delete('/deleteSubaccount/{id}', [PersonalSubAccountController::class, 'destroy']);
         Route::post('/subaccounts', [PersonalSubAccountController::class, 'store']);
         Route::post('/validateSubaccountName', [PersonalSubAccountController::class, 'validatePayoutAccountName']);
-        Route::put('/updateSubaccount/{id}', [PersonalSubAccountController::class, 'update']);
+        // Route::put('/updateSubaccount/{id}', [PersonalSubAccountController::class, 'update']);
 
         //refund
         Route::get('/refunds', [PersonalrefundsController::class, 'index']);
@@ -304,6 +304,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/payments', [paymentsController::class, 'index']);
         Route::get('/payments/show/{id}', [paymentsController::class, 'show']);
         Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
+        Route::get('/payments/subaccount', [paymentsController::class, 'subaccount']);
         Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
         Route::post('/payments/store', [paymentsController::class, 'store']);
         Route::delete('/payments/{id}/destroy', [paymentsController::class, 'destroy']);
@@ -316,7 +317,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/donations/store', [donationsController::class, 'store']);
         Route::delete('/donations/{id}/destory', [donationsController::class, 'destory']);
         Route::put('/donations/update/{id}', [donationsController::class, 'update']);
-=======
     
         // api routes for Send Money detailsdeactivateAccount
         Route::get('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
