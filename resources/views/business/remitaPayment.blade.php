@@ -14,7 +14,7 @@
   <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
     <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
       <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-        Subscriptions
+        Remita
       </h1>            
       @include('business.header_notifical')
     </header>
