@@ -55,31 +55,40 @@ class SendMoneyController extends Controller
 
 
 
-    public function getExchangeRate(Request $request)
-    {
-        $from = $request->get('from_currency');
-        $to = $request->get('to_currency');
-        $amount = $request->get('amount');
+public function getExchangeRate(Request $request)
+{
+    $from = $request->input('from_currency');
+    $to = $request->input('to_currency');
+    $amount = $request->input('amount', 1);
 
-        $result = $this->getExchangeRateFromMap($from, $to);
+    $result = $this->getExchangeRateFromMap($from, $to);
 
-        if (!$result) {
-            return response()->json([
-                'data' =>[
-                'errors' => 'Invalid currency'
-            ]], 400);
-        }
-
-        $rate = $result['rate'];
-        $fee = $result['transfer_fee'];
-        $converted = round($amount * $rate, 2);
-
+    if (!$result) {
         return response()->json([
-            'rate' => $rate,
-            'converted_amount' => $converted,
-            'transfer_fee' => $fee,
-        ]);
+            'data' => [
+                'errors' => 'Invalid currency'
+            ]
+        ], 400);
     }
+
+    $rate = $result['rate'];
+    $transfer_fee = $result['transfer_fee'];
+
+    $formatted = sprintf(
+        "%s %.2f = %s %s",
+        strtoupper($from),
+        (float) $amount,
+        strtoupper($to),
+        $rate
+    );
+
+    return response()->json([
+        'exchange_rate' => $formatted,
+        'transfer_fee' => $transfer_fee
+    ]);
+}
+
+
 
 
 
@@ -91,7 +100,6 @@ class SendMoneyController extends Controller
             'amount' => 'required|numeric|min:1',
             'recipient_id' => 'required|uuid',
             'balance_id' => 'required',
-            'reference' => 'nullable|string',
             'transfer_fee' => 'nullable',
             'total_amount' => 'required|numeric',
             'exchange_rate' => 'required|string',
