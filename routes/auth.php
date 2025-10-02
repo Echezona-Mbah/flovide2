@@ -22,6 +22,7 @@ use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\Business\refundsController;
 use App\Http\Controllers\Business\RemitaController;
+use App\Http\Controllers\Business\PaymentController;
 use App\Http\Controllers\Business\CreateBankController;
 use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
@@ -70,6 +71,13 @@ Route::middleware('guest')->group(function () {
 
 
 });
+
+//payment checkout
+Route::get('/payment/paymentcheckout/{id}', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
+Route::post('/payment/paymentpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
+
+
+
 
 // HtmlMinifier::class
 Route::middleware(['auth'])->group(function () {
@@ -124,6 +132,16 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/remita/{id}/update', [RemitaController::class, 'update'])->name('remita.update');
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
     Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
+    
+    //payment
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+    Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserRemita'])->name('payment.export');
+    Route::get('/payment/{id}/edit', [PaymentController::class, 'edit'])->name('payment.edit');
+    // Route::get('/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
+    Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
+    Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
+    Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
     
 
 
