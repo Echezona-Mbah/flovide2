@@ -549,11 +549,13 @@
 
                         if (response.ok) {
                             Swal.fire({
-                                title: 'Success!',
-                                text: statusMessage[invoiceStatus] || "Invoice updated successfully!",
+                                toast: true,
+                                position: 'top-end',
                                 icon: 'success',
-                                timer: 3000,
+                                title: statusMessage[invoiceStatus] || "Invoice updated successfully!",
                                 showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
                                 willClose: () => location.reload()
                             });
                         } else {
@@ -567,7 +569,15 @@
 
                 } catch (err) {
                     console.log(err);
-                    showMessage("Error connecting to server. Try again.", 'error');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: "Error connecting to server. Try again.",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 }
 
                 function showMessage(message, type = 'success') {
