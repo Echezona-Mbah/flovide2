@@ -32,6 +32,7 @@ use App\Http\Controllers\Personal\BillPaymentController as PersonalBillPaymentCo
 use App\Http\Controllers\Personal\CreateBankController as PersonalCreateBankController;
 use App\Http\Controllers\Personal\NotificationController;
 use App\Http\Controllers\Personal\OrganizationController;
+use App\Http\Controllers\Business\PaymentController;
 use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyController;
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
@@ -98,13 +99,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('business/validateSubaccountName', [SubAccountController::class, 'validatePayoutAccountName']);
     
     //invoices section
-    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
-    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
-    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
-    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
-    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
-    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/business/invoices', [InvoicesController::class, 'index']);
+    Route::get('/business/invoices/{id}', [InvoicesController::class, 'show']);
+    // Route::get('/business/invoices/{id}/edit', [InvoicesController::class, 'edit']);
+    // Route::get('/business/invoices/create', [InvoicesController::class, 'create']);
+    Route::post('/business/invoices', [InvoicesController::class, 'store']);
+    Route::put('/business/invoices/{id}', [InvoicesController::class, 'update']);
+    Route::delete('/business/invoices/{id}', [InvoicesController::class, 'destroy']);
     
     //refund
     Route::get('/business/refunds', [refundsController::class, 'index'])->name('refunds.index');
@@ -120,6 +121,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('business/remita/{id}/update', [RemitaController::class, 'update']);
     Route::post('business/remita/store', [RemitaController::class, 'store']);
     Route::delete('business/remita/{id}/destory', [RemitaController::class, 'destroy']);
+    
+    //payment
+    Route::get('business/payment', [PaymentController::class, 'index']);
+    Route::get('business/payment/create', [PaymentController::class, 'create']);
+    Route::get('business/payment/{id}/export', [PaymentController::class, 'exportUserRemita']);
+    Route::get('business/payment/{id}/edit', [PaymentController::class, 'edit']);
+    // Route::get('business/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout']);
+    Route::put('business/payment/{id}/update', [PaymentController::class, 'update']);
+    Route::post('business/payment/store', [PaymentController::class, 'store']);
+    Route::delete('business/payment/{id}/destory', [PaymentController::class, 'destroy']);
     
 
     // api for transaction history
@@ -304,6 +315,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/payments', [paymentsController::class, 'index']);
         Route::get('/payments/show/{id}', [paymentsController::class, 'show']);
         Route::get('/payments/paymentrecords', [paymentsController::class, 'paymentrecords']);
+        Route::get('/payments/paymentrecords/{id}', [paymentsController::class, 'records']);
         Route::get('/payments/subaccount', [paymentsController::class, 'subaccount']);
         Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
         Route::post('/payments/store', [paymentsController::class, 'store']);
