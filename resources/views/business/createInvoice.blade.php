@@ -365,6 +365,9 @@
                 //invoiceStatus data
                 msg = invoiceStatus == "pending" ? "Invoice created successfully!" : "Invoice saved as draft successfully!";
 
+                //display payload on the console
+                // console.log(payload);
+
                 // Proceed with API call
                 try {
                     const response = await fetch("{{ route('invoices.store') }}", {
@@ -382,14 +385,16 @@
                         const result = JSON.parse(text);
 
                         if (response.ok) {
-                            // Successful response
+                            // Successful response as a toast
                             Swal.fire({
-                                title: 'Success!',
-                                text: msg,
+                                toast: true,
+                                position: 'top-end',
                                 icon: 'success',
-                                timer: 3000,
+                                title: msg,
                                 showConfirmButton: false,
-                                willClose: () => {
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didClose: () => {
                                     location.reload();
                                 }
                             });
@@ -401,16 +406,32 @@
                                 const firstError = Object.values(result.errors).flat()[0];
                                 showMessage(firstError, 'error');
                             } else {
-                                showMessage("An unknown error occurred.", 'error');
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: "An unknown error occurred.",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
                             }
                         }
                     } catch (jsonError) {
-                        console.log("Server returned non-JSON response:", text);
+                        console.error("Server returned non-JSON response:", text);
                         showMessage("Unexpected server error. Check console.", 'error');
                     }
                 } catch (err) {
                     console.log(err);
-                    showMessage("Error connecting to server. Try again.", 'error');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: "Error connecting to server. Try again.",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 }
 
                 function showMessage(message, type = 'success') {
