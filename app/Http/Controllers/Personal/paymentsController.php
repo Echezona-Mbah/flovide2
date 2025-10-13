@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\payments as payment;
+use App\Models\PaymentRecord;
 use App\Models\Subaccount;
 use Illuminate\Support\Str;
 use App\Exports\PaymentRecordsExport;
@@ -254,6 +255,29 @@ class paymentsController extends Controller
                 'status' => 'success',
                 'message' => 'Payments with records retrieved successfully',
                 'payments' => $payments
+            ]
+        ], 200);
+    }
+
+    public function records(Request $request, $id){
+        $user = Auth::guard('personal-api')->user();
+        // Fetch payments records
+        $records = PaymentRecord::where("payment_id", $id)->where('personal_id', $user->id)->paginate(10);
+        
+        // If no records found, return error response
+        if ($records->isEmpty()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'No records found or unauthorized access'
+                ]
+            ], 404);
+        }
+        return response()->json([
+            'data' => [
+                'status' => 'success',
+                'message' => 'Records retrieved successfully',
+                'records' => $records
             ]
         ], 200);
     }
