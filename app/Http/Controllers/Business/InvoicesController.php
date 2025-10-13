@@ -16,14 +16,33 @@ class InvoicesController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        
+        $invoices = Invoices::with('items')->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
 
         if ($request->expectsJson()) {
-            $invoices = Invoices::with('user')->where('user_id', $user->id)->latest()->paginate(10);
-            return response()->json($invoices);
-        } else {
-            $invoices = Invoices::with('user')->where('user_id', $user->id)->latest()->paginate(10);
-            return view('business.invoicesList', compact('invoices'));
+            if ($invoices->isEmpty()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No invoices found for this user.',
+                        'invoices' => $invoices
+                    ]
+                ], 200);
+            }
+
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'All user invoices successfully listed.',
+                    'invoices' => $invoices
+                ]
+            ], 200);
         }
+        
+        return view('business.invoicesList', compact('invoices'));
+        
     }
 
     public function create()
@@ -89,13 +108,48 @@ class InvoicesController extends Controller
             ]);
         }
 
-        return response()->json(['status' => 'success', 'invoice_id' => $invoice->id]);
+        return response()->json([
+            'data' => [
+                'status' => 'success',
+                'message' => 'Invoice created successfully.',
+                'invoice_id' => $invoice->id
+            ]
+        ], 200);
     }
 
     public function show($id)
     {
-        $invoice = Invoices::with('client')->findOrFail($id);
-        return response()->json($invoice);
+        // $invoice = Invoices::with(['items'])->findOrFail($id);
+        $invoice = Invoices::with('items')->where('id', $id)->first();
+
+        if (!$invoice) {
+            // handle not found case
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Invoice not found.'
+                ]
+            ], 404);
+        }
+
+        // Check if the user owns the invoice
+        if ($invoice->user_id !== Auth::id()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ]
+            ], 403);
+        }
+
+        //success response
+        return response()->json([
+            'data' => [
+                'status' => 'success',
+                'message' => 'Invoice details retrieved successfully.',
+                'invoice' => $invoice
+            ]
+        ], 200);
     }
 
     public function update(Request $request, $id)
@@ -104,7 +158,12 @@ class InvoicesController extends Controller
         $invoice = Invoices::with('items')->findOrFail($id); 
         if ($invoice->user_id !== Auth::id()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Unauthorized'
+                    ]
+                ], 403);
             }
             abort(403, 'Unauthorized');
         }
@@ -203,10 +262,13 @@ class InvoicesController extends Controller
         }
 
         return response()->json([
-            'message' => 'Invoice updated successfully',
-            'data' => $invoice->fresh('items'),
-            'changes' => $changes
-        ]);
+            'data' => [
+                'status' => 'success',
+                'message' => 'Invoice updated successfully',
+                'invoice' => $invoice->fresh('items'),
+                'changes' => $changes
+            ]
+        ], 200);
     }
 
 
@@ -252,7 +314,12 @@ class InvoicesController extends Controller
 
         if ($invoice->user_id !== Auth::id()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Unauthorized'
+                    ]
+                ], 403);
             }
             abort(403, 'Unauthorized');
         }
@@ -260,7 +327,12 @@ class InvoicesController extends Controller
         $invoice->delete(); // Soft delete
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Invoice deleted successfully.']);
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Invoice deleted successfully.'
+                ]
+            ], 200);
         }
 
         return redirect()->back()->with('success', 'Invoice deleted successfully.');
