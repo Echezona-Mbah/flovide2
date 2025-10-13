@@ -19,10 +19,13 @@ use App\Http\Controllers\Business\RemitaController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\Business\AddMoneyController as BusinessAddMoneyController;
 use App\Http\Controllers\Business\BillPaymentController;
 use App\Http\Controllers\Business\ChargebackController;
 use App\Http\Controllers\Business\ComplianceController;
 use App\Http\Controllers\Business\CreateBankController;
+use App\Http\Controllers\Business\NotificationController as BusinessNotificationController;
+use App\Http\Controllers\Business\OrganizationController as BusinessOrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\SubscriptionController;
 use App\Http\Controllers\Business\VirtualAccountController;
@@ -132,13 +135,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/add-baneficia', [AddBeneficiariesController::class, 'store']);
     Route::put('/beneficias/{id}', [AddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
     Route::delete('beneficias/{id}', [AddBeneficiariesController::class, 'destroy'])->name('beneficias.destroy');
-    Route::get('/fetchBanks', [AddBeneficiariesController::class, 'fetchBanks']);
+    Route::post('/fetchBanks', [AddBeneficiariesController::class, 'fetchBanks']);
     Route::post('/validate-account', [AddBeneficiariesController::class, 'validateRecipient']);
     Route::get('/fetchcountrylist', [AddBeneficiariesController::class, 'fetchcountrylist']);
     Route::get('beneficia/all', [AddBeneficiariesController::class, 'allBeneficia']);
 
     // api routes for Send Money details
-    Route::get('/exchange-rate', [SendMoneyController::class, 'getExchangeRate']);
+    Route::post('/exchange-rate', [SendMoneyController::class, 'getExchangeRates']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('transactions.send');
     // api routes for Balance details
     Route::get('balances', [CreateBankController::class, 'index']);
@@ -158,17 +161,22 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('subscriptions/{id}', [SubscriptionController::class, 'update']);
     Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'destroy']);
     // api routes for DSTV details
-    Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
+    Route::get('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
     Route::post('/Dstvverify', [BillPaymentController::class, 'verify']);
     Route::post('/Dstvpay', [BillPaymentController::class, 'handleDstv']);
     Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
 
     // Elecricity
+    Route::get('/electricityvariations', [BillPaymentController::class, 'getElectricityVariations']);
     Route::post('/electricity_verify', [BillPaymentController::class, 'verifyElectricity']);
-    Route::post('/electricitypay', [BillPaymentController::class, 'storeELectricity']);
+    Route::post('/electricitypay', [BillPaymentController::class, 'handleElectricity']);
+    Route::get('/billhistory', [BillPaymentController::class, 'getUserBillPayments']);
 
+
+    Route::get('/service_id', [BillPaymentController::class, 'getDataServiceId']);
     Route::post('/date_variations', [BillPaymentController::class, 'getDateVariations']);
-    Route::post('/dataypay', [BillPaymentController::class, 'storeData']);
+    Route::post('/dataypay', [BillPaymentController::class, 'handleData']);
+
 
     // Virtual Account
     Route::get('/virtualCard', [VirtualAccountController::class, 'index']);
@@ -189,6 +197,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/chargeback/submitEvidence', [ChargeBackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
 
 
+    Route::post('/topup', [BusinessAddMoneyController::class, 'topupWithCard']);
+
+    Route::get('/notifications', [BusinessNotificationController::class, 'index']);
+    Route::get('/notifications/unread', [BusinessNotificationController::class, 'unread']);
+    Route::put('/notifications/{id}/read', [BusinessNotificationController::class, 'markAsRead']);
+
+
+    Route::post('/profile', [BusinessOrganizationController::class, 'updateProfile']);
+    Route::post('/email', [BusinessOrganizationController::class, 'updateEmail']);
+    Route::post('/deactivate-account', [BusinessOrganizationController::class, 'deactivateAccount']);
 
 
 
