@@ -77,6 +77,11 @@
                 </i>
                 Refunds
             </a>
+            <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('donation.index') }}">
+                <i class="fas fa-undo text-base">
+                </i>
+                Donations
+            </a>
             <a class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white" href="{{ route('chargeback') }}">
                 <i class="fas fa-ban text-base">
                 </i>
