@@ -16,6 +16,7 @@ class donations extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'user_id',
         'personal_id',
         'cover_image',
         'title',
@@ -23,15 +24,26 @@ class donations extends Model
         'amount',
         'currency',
         'visibility',
+        'page_link',
+        'percentage',
+        'subaccount_id',
+        'subaccount',
+        'subaccount_name',
+        'subaccount_number',
     ];
 
     /**
-     * Relationship: A donation belongs to a personal.
+     * Relationship: A donation belongs to a personal and user.
      */
     public function personal()
     {
         return $this->belongsTo(Personal::class);
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 
     public function records()
     {

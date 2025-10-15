@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('donations', function (Blueprint $table) {
+            //add page_link column
+            $table->string('page_link')->nullable()->after('visibility');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('donations', function (Blueprint $table) {
+            //
+            $table->dropColumn('page_link');
+        });
+    }
+};
