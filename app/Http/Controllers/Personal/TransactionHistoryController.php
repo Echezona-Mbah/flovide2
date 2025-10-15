@@ -8,23 +8,42 @@ use Illuminate\Http\Request;
 
 class TransactionHistoryController extends Controller
 {
-     public function personalTransactions(Request $request)
+   public function personalTransactions(Request $request)
     {
         $personalId = auth('personal-api')->id();
 
         $transactions = TransactionHistory::where('personal_id', $personalId)
             ->latest()
-            ->get();
+            ->take(4)
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'type'      => $t->type,
+                    'date'      => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'    => $t->sender ?? 'N/A',
+                    'recipient' => $t->recipient ?? 'N/A',
+                    'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+                    'currency'  => $t->currency,
+                    'status'    => $t->status,
+                    'reference' => $t->reference,
+                    'recipient_details' => [
+                        'alias'          => $t->recipient_alias,
+                        'account_name'   => $t->recipient_account_name,
+                        'account_number' => $t->recipient_account_number,
+                        'bank_name'      => $t->recipient_bank_name,
+                        'bank_currency'  => $t->recipient_bank_currency,
+                    ]
+                ];
+            });
 
         return $request->expectsJson()
             ? response()->json([
-                'data'=>[
                 'status' => 'success',
                 'data'   => $transactions
-                ]
             ])
             : view('transactions.personal', compact('transactions'));
     }
+
 
 
      public function filterPersonalTransactions(Request $request, $status)

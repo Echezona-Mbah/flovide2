@@ -19,6 +19,26 @@ class TransactionHistoryController extends Controller
         $this->middleware('auth:' . (request()->is('api/*') ? 'sanctum' : 'web'));
     }
 
+    // public function transaction()
+    // {
+    //     $transactions = TransactionHistory::where('user_id', Auth::id())
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     if (request()->wantsJson()) {
+    //         return response()->json([
+    //             'message' => 'Transactions retrieved successfully.',
+    //             'data' => $transactions
+    //         ]);
+    //     } else {
+
+    //         $latestTransaction = $transactions->first();
+    //         // return view('business.transactionHistory', ['transactions' => $transactions]);
+    //         return view('business.transactionHistory', compact('transactions', 'latestTransaction'));
+    //     }
+    // }
+
+
     public function transaction()
     {
         $transactions = TransactionHistory::where('user_id', Auth::id())
@@ -26,17 +46,37 @@ class TransactionHistoryController extends Controller
             ->get();
 
         if (request()->wantsJson()) {
+            $transactions = $transactions->map(function ($t) {
+                return [
+                    'type'      => $t->type,
+                    'date'      => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'    => $t->sender ?? 'N/A',
+                    'recipient' => $t->recipient ?? 'N/A',
+                    'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+                    'currency'  => $t->currency,
+                    'status'    => $t->status,
+                    'reference' => $t->reference,
+                    'recipient_details' => [
+                        'alias'          => $t->recipient_alias,
+                        'account_name'   => $t->recipient_account_name,
+                        'account_number' => $t->recipient_account_number,
+                        'bank_name'      => $t->recipient_bank_name,
+                        'bank_currency'  => $t->recipient_bank_currency,
+                    ]
+                ];
+            });
+
             return response()->json([
                 'message' => 'Transactions retrieved successfully.',
-                'data' => $transactions
+                'data'    => $transactions
             ]);
         } else {
-
             $latestTransaction = $transactions->first();
-            // return view('business.transactionHistory', ['transactions' => $transactions]);
             return view('business.transactionHistory', compact('transactions', 'latestTransaction'));
         }
     }
+
+
 
 
     public function showAllTransactions()
@@ -50,23 +90,61 @@ class TransactionHistoryController extends Controller
     }
 
 
+    // public function UserTransaction($id)
+    // {
+    //     $transaction = TransactionHistory::where('user_id', Auth::id())
+    //         ->where('id', $id)
+    //         ->first();
+
+    //     if (!$transaction) {
+    //         return response()->json([
+    //             'message' => 'Transaction not found.'
+    //         ], 404);
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'User Transaction retrieved successfully.',
+    //         'data' => $transaction
+    //     ]);
+    // }
+
     public function UserTransaction($id)
-    {
-        $transaction = TransactionHistory::where('user_id', Auth::id())
-            ->where('id', $id)
-            ->first();
+{
+    $transaction = TransactionHistory::where('user_id', Auth::id())
+        ->where('id', $id)
+        ->first();
 
-        if (!$transaction) {
-            return response()->json([
-                'message' => 'Transaction not found.'
-            ], 404);
-        }
-
+    if (!$transaction) {
         return response()->json([
-            'message' => 'User Transaction retrieved successfully.',
-            'data' => $transaction
-        ]);
+            'message' => 'Transaction not found.'
+        ], 404);
     }
+
+    // Format the transaction details like in your map
+    $data = [
+        'type'      => $transaction->type,
+        'date'      => $transaction->created_at->format('Y-m-d H:i:s'),
+        'sender'    => $transaction->sender ?? 'N/A',
+        'recipient' => $transaction->recipient ?? 'N/A',
+        'amount'    => $transaction->currency_symbol . number_format($transaction->amount, 2),
+        'currency'  => $transaction->currency,
+        'status'    => $transaction->status,
+        'reference' => $transaction->reference,
+        'recipient_details' => [
+            'alias'          => $transaction->recipient_alias,
+            'account_name'   => $transaction->recipient_account_name,
+            'account_number' => $transaction->recipient_account_number,
+            'bank_name'      => $transaction->recipient_bank_name,
+            'bank_currency'  => $transaction->recipient_bank_currency,
+        ]
+    ];
+
+    return response()->json([
+        'message' => 'User Transaction retrieved successfully.',
+        'data'    => $data
+    ]);
+}
+
 
 
     public function storeTransaction(Request $request)
