@@ -81,6 +81,9 @@ Route::post('/payment/paymentpay', [PaymentController::class, 'paymentpay'])->na
 Route::get('/donation/donationcheckout/{id}', [DonationController::class, 'donationcheckout'])->name('donation.checkout');
 Route::post('/donation/donationpay', [DonationController::class, 'donationpay'])->name('donation.pay');
 
+//remita checkout
+Route::get('/remita/remitacheckout/{id}', [RemitaController::class, 'remitacheckout'])->name('remita.checkout');
+Route::post('/remita/remitapay', [RemitaController::class, 'remitapay'])->name('remita.pay');
 
 
 
