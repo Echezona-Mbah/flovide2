@@ -50,11 +50,13 @@
                                         <i class="fas fa-cube text-xs"></i>
                                         Exchange
                                     </button>
-                                    <button
-                                        class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
+                                    <a href="{{ route('add_money') }}"
+                                    class="flex items-center gap-1 rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition
+                                            {{ request()->routeIs('add_money') ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-50' }}">
                                         <i class="far fa-file-alt text-xs"></i>
                                         Add Money
-                                    </button>
+                                    </a>
+
                                     {{-- <button
                                         class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
                                         <i class="fas fa-arrow-up-right-from-square"></i>
