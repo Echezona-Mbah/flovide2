@@ -179,7 +179,7 @@
                                 <option selected value="">Select a subaccount</option>
                                 @foreach ($subaccounts as $subaccount)
                                     <option value="{{ $subaccount->id }}">
-                                    {{ $subaccount->decrypted_account ? $subaccount->decrypted_account . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                    {{ $subaccount->account_number ? $subaccount->account_number . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -247,7 +247,7 @@
                             <option value="ZMW">🇿🇲 ZMW – Zambian Kwacha</option>
                             <option value="GEL">🇬🇪 GEL – Georgian Lari</option>
                             <option value="UAH">🇺🇦 UAH – Ukrainian Hryv</option>
-                            
+
                         </select>
                     </div>
 
