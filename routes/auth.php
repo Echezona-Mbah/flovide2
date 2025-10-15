@@ -24,6 +24,7 @@ use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\Business\refundsController;
 use App\Http\Controllers\Business\RemitaController;
 use App\Http\Controllers\Business\PaymentController;
+use App\Http\Controllers\Business\DonationController;
 use App\Http\Controllers\Business\CreateBankController;
 use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
@@ -76,6 +77,10 @@ Route::middleware('guest')->group(function () {
 //payment checkout
 Route::get('/payment/paymentcheckout/{id}', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
 Route::post('/payment/paymentpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
+
+//donation checkout
+Route::get('/donation/donationcheckout/{id}', [DonationController::class, 'donationcheckout'])->name('donation.checkout');
+Route::post('/donation/donationpay', [DonationController::class, 'donationpay'])->name('donation.pay');
 
 
 
@@ -134,6 +139,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
     Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
     
+    //donations
+    Route::get('/donation', [DonationController::class, 'donationIndex'])->name('donation.index');
+    Route::get('/donation/create', [DonationController::class, 'donationCreate'])->name('donation.create');
+    Route::get('/donation/{id}/export', [DonationController::class, 'exportUserDonation'])->name('donation.export');
+    Route::get('/donation/edit/{id}', [DonationController::class, 'donationEdit'])->name('donation.edit');
+    Route::put('/donation/update/{id}', [DonationController::class, 'donationUpdate'])->name('donation.update');
+    Route::post('/donation/store', [DonationController::class, 'donationStore'])->name('donation.store');
+    Route::delete('/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
+
+
     //payment
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
