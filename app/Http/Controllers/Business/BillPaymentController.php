@@ -39,15 +39,14 @@ class BillPaymentController extends Controller
 
     public function index(Request $request)
     {
-        $ownerId = session('owner_id');
-            $payments = BillPayment::where('user_id', $ownerId)
-            ->latest()
-            ->get();
+        // $ownerId = session('owner_id');
+         $user = auth()->user();
+        $payments = BillPayment::where('user_id',$user->id)->latest()->get();
         $serviceID = 'dstv'; 
         $variations = DstvPlans::all();
         $electricitydata = ElectricityCompany::all();
         $airTimedata = AirtimeNetwork::all();
-         $balances = Balance::where('user_id', $ownerId)->get();
+         $balances = Balance::where('user_id',$user->id)->get();
 
         foreach ($balances as $balance) {
             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
@@ -66,9 +65,10 @@ class BillPaymentController extends Controller
 
     public function indexElectricity(Request $request)
     {
-        $ownerId = session('owner_id');
+        // $ownerId = session('owner_id');
+        $user = auth()->user();
 
-        $payments = BillPayment::where('user_id', $ownerId)
+        $payments = BillPayment::where('user_id', $user->id)
             ->latest()
             ->get();
 
@@ -103,6 +103,23 @@ class BillPaymentController extends Controller
         }
     
         return response()->json($response->json());
+    }
+
+    public function getVariations(Request $request)
+    {
+        // $user = auth()->user();
+        $variations = DstvPlans::all();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'data' => $variations
+                ]
+            ], 200);
+        }
+
+        return view('dstv.plans', compact('variations'));
     }
     
     // Store payment and call VTpass pay API
@@ -222,6 +239,20 @@ class BillPaymentController extends Controller
     }
 
 
+
+    public function getElectricityVariations(Request $request)
+    {
+        $variations = ElectricityCompany::all();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'data' => $variations
+                ]
+            ], 200);
+        }
+    }
 
     public function verifyElectricity(Request $request)
     {
@@ -349,6 +380,22 @@ class BillPaymentController extends Controller
     }
 
 
+
+    public function getDataServiceId(Request $request)
+{
+    $variations = AirtimeNetwork::all();
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'data' => [
+                'status' => 'success',
+                'data' => $variations
+            ]
+        ], 200);
+    }
+
+    return view('dstv.plans', compact('variations'));
+}
     public function getDateVariations(Request $request)
     {
         $request->validate([
@@ -470,6 +517,26 @@ class BillPaymentController extends Controller
 
         return redirect()->route('bill_payment')->with('success', 'Data purchase ' . $status);
     }
+
+    public function getUserBillPayments(Request $request)
+    {
+    $user = auth()->user();
+
+        $billPayments = BillPayment::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+            'data' => [ 
+                'status' => 'success',
+                'data' => $billPayments
+            ]], 200);
+        }
+
+        return view('billpayments.index', compact('billPayments'));
+    }
+
 
 
     

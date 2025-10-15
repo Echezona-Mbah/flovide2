@@ -10,6 +10,8 @@ use App\Models\TransactionHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Traits\CurrencyHelper;
+use Illuminate\Support\Facades\Auth;
+
 
 class DashboardController extends Controller
 {
@@ -19,18 +21,20 @@ public function create()
     $countries = Countries::all();
 
     // Get the owner ID resolved by middleware
-    $ownerId = session('owner_id');
+    // $ownerId = session('owner_id');
+    $user = Auth::user();
+    
 
     // dd($ownerId);
 
     // Fetch recent transactions for the owner
-    $transactions = TransactionHistory::where('user_id', $ownerId)
+    $transactions = TransactionHistory::where('user_id', $user->id)
         ->latest('created_at')
         ->take(5)
         ->get();
 
     // Fetch balances for the owner
-    $balances = Balance::where('user_id', $ownerId)->get();
+    $balances = Balance::where('user_id', $user->id)->get();
 
     foreach ($balances as $balance) {
         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);

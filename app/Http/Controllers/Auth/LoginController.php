@@ -63,6 +63,8 @@ class LoginController extends Controller
             'recipient' => $t->recipient ?? 'N/A',
             'amount'    => $t->currency_symbol . number_format($t->amount, 2),
             'currency'  => $t->currency,
+            'status' => $t->status,
+            'type' => $t->type,
             'reference' => $t->reference,
             'recipient_details' => [
                 'alias'          => $t->recipient_alias,
@@ -102,7 +104,7 @@ class LoginController extends Controller
                     'email' => $account->email,
                     'currency' => $account->currency,
                     'profile_url' => $account->profile_picture 
-                    ? asset('storage/'.$account->profile_picture) 
+                    ? asset($account->profile_picture) 
                     : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
@@ -155,11 +157,7 @@ class LoginController extends Controller
 
         // Fetch balances, transactions, chart data
         $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
-       $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
-    ->latest()
-    ->take(4)
-    ->get()
-    ->map(function ($t) {
+       $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)->latest()->take(4)->get()->map(function ($t) {
         return [
             'type'      => $t->type,
             'date'      => $t->created_at->format('Y-m-d H:i:s'),
@@ -167,6 +165,8 @@ class LoginController extends Controller
             'recipient' => $t->recipient ?? 'N/A',
             'amount'    => $t->currency_symbol . number_format($t->amount, 2),
             'currency'  => $t->currency,
+            'status' => $t->status,
+            'type' => $t->type,
             'reference' => $t->reference,
             'recipient_details' => [
                 'alias'          => $t->recipient_alias,
@@ -205,7 +205,7 @@ class LoginController extends Controller
                     'email' => $account->email,
                     'currency' => $account->currency,
                      'profile_url' => $account->profile_picture 
-                    ? asset('storage/'.$account->profile_picture) 
+                    ? asset($account->profile_picture) 
                     : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
