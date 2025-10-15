@@ -15,7 +15,7 @@
   <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
     <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
       <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-        Remita
+        Donation
       </h1>            
       @include('business.header_notifical')
     </header>
@@ -23,12 +23,12 @@
       <section
         class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
         <header class="flex items-center gap-4 mb-8">
-            <a href="{{ route('remita.index') }}">
+            <a href="{{ route('donation.index') }}">
                 <button aria-label="Back" class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100">
                     <i class="fas fa-chevron-left text-lg"></i>
                 </button>
             </a>
-            <h1 class="text-xl font-semibold text-gray-900 select-none">Page details</h1>
+            <h1 class="text-xl font-semibold text-gray-900 select-none">Create Page</h1>
             <div class="ml-auto flex items-center gap-4">
                 <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-gray-300 block"></span>
@@ -45,7 +45,7 @@
             <!-- Left form section -->
             <section class="flex-1 max-w-full lg:max-w-[600px] flex flex-col gap-6">
                 <p class="text-xs text-gray-500 select-none">
-                Create, edit and track payment pages all in one place.
+                Create, edit and track donation pages all in one place.
                 </p>
 
                 <script>
@@ -90,7 +90,7 @@
                 </script>
 
 
-                <form class="flex flex-col gap-6" action="{{ route('remita.store') }}" method="POST" enctype="multipart/form-data">
+                <form class="flex flex-col gap-6" action="{{ route('donation.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="flex flex-col gap-1">
@@ -132,12 +132,12 @@
 
                     <div class="flex flex-col gap-1">
                         <label for="title" class="text-xs text-gray-600 select-none">Title</label>
-                        <input id="title" type="text" name="title" placeholder="Enter Remita Title" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <input id="title" type="text" name="title" placeholder="Enter Donation Title" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                     </div>
 
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs text-gray-600 select-none">Fixed Amount</label>
-                        <input type="number" name="amount" placeholder="Enter Remita Amount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        <label class="text-xs text-gray-600 select-none">Target Amount</label>
+                        <input type="number" name="amount" placeholder="Enter Donation Amount" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
 
                         {{-- <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
 
@@ -157,35 +157,6 @@
                             <input type="text" placeholder="123456789" class="text-xs text-gray-400 rounded-md border border-gray-300 px-3 py-2 md:w-36 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                         </div> --}}
 
-                    </div>
-
-                    <div class="flex flex-col gap-1">
-                        <label for="service-type" class="text-xs text-gray-600 select-none">Service Type</label>
-                        <select id="service-type" name="service_type" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                            <option value="" selected >Select a service type</option>
-                            <option value="school_fees">School Fees</option>
-                            <option value="utilities">Utilities</option>
-                            <option value="donation">Donation</option>
-                            <option value="subscription">Subscription</option>
-                            <option value="product_payment">Product Payment</option>
-                            <option value="event_registration">Event Registration</option>
-                        </select>
-                    </div>
-
-                    <div class="flex flex-col gap-1">
-                        <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
-                        <div class="flex gap-3">
-                            <select id="subaccount" name="subaccount_id" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                <option selected value="">Select a subaccount</option>
-                                @foreach ($subaccounts as $subaccount)
-                                    <option value="{{ $subaccount->id }}">
-                                    {{ $subaccount->decrypted_account ? $subaccount->decrypted_account . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                            <span class="text-xs text-gray-700 bg-gray-200 rounded-md px-2 py-2 flex items-center select-none">%</span>
-                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1">
@@ -247,8 +218,23 @@
                             <option value="ZMW">🇿🇲 ZMW – Zambian Kwacha</option>
                             <option value="GEL">🇬🇪 GEL – Georgian Lari</option>
                             <option value="UAH">🇺🇦 UAH – Ukrainian Hryv</option>
-                            
                         </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
+                        <div class="flex gap-3">
+                            <select id="subaccount" name="subaccount_id" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option selected value="">Select a subaccount</option>
+                                @foreach ($subaccounts as $subaccount)
+                                    <option value="{{ $subaccount->id }}">
+                                    {{ $subaccount->account_number ? $subaccount->account_number . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="number" name="percentage" value="10" class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <span class="text-xs text-gray-700 bg-gray-200 rounded-md px-2 py-2 flex items-center select-none">%</span>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1">
@@ -268,10 +254,10 @@
                 </form> 
             </section>
 
-          <!-- Right payments section -->
+          <!-- Right Donations section -->
           <section class="flex-1 max-w-full lg:max-w-[520px] flex flex-col gap-4">
             <div class="flex justify-between items-center">
-              <h2 class="font-semibold text-gray-900 select-none">Payments</h2>
+              <h2 class="font-semibold text-gray-900 select-none">Donations</h2>
               <button type="button" class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-500 text-sm font-semibold">
                 <i class="fas fa-file-export"></i>
                 Export CSV
@@ -281,7 +267,7 @@
             <div class="md:flex-1 md:overflow-y-auto w-full overflow-x-auto pr-2 bg-[#F3F3F3] p-4 rounded-2xl flex items-center justify-center" style="max-height: 600px;" tabindex="0">
                 <div class="flex items-center gap-4 rounded-xl px-6 py-3">
                     <img src="../../asserts/dashboard/person.png" alt="">
-                    <p>No payments yet</p>
+                    <p>No Donations yet</p>
                 </div>
             </div>
 
