@@ -61,6 +61,8 @@ class User extends Authenticatable
         'utility_bill_status',
         'firstname',
         'lastname',
+        'profile_picture',
+        'deletestatus',
         'subscription_status',
         'reset_token',
         'reset_token_expires_at',

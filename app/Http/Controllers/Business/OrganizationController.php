@@ -159,45 +159,177 @@ class OrganizationController extends Controller
 
 
 
+    public function updateProfile(Request $request)
+    {
+
+        $request->validate([
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'data' => [
+                    'errors' => 'User record not found'
+                ]
+            ], 404);
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            $folder = 'profile_pictures/business';
+            $filename = time() . '_' . uniqid() . '.' . $request->file('profile_picture')->getClientOriginalExtension();
+            $request->file('profile_picture')->move(public_path($folder), $filename);
+
+            // delete old picture if exists
+            if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
+                unlink(public_path($user->profile_picture));
+            }
+
+            $user->profile_picture = $folder . '/' . $filename;
+        }
+
+        $user->save();
+
+        return response()->json([
+            'data' => [
+                'message' => 'Profile updated successfully',
+                'profile_picture_url' => $user->profile_picture 
+                    ? asset($user->profile_picture) 
+                    : null,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ]);
+    }
 
 
+     public function storesetting(Request $request)
+    {
+        $formType = $request->input('form_type');
 
+        switch ($formType) {
+            case 'password':
+                return $this->updatePassword($request);
+            case 'deactivate':
+                return $this->deactivateAccount($request);
+            default:
+                return back()->with('error', 'Invalid bill payment type.');
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-         public function indexsetting(Request $request)
+          public function indexsetting(Request $request)
     {
     
         return view('business.organization_setting');
     }
+    // public function updateEmail(Request $request)
+    // {
+    //     $userId = auth()->id();
+
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //     ]);
+
+    //     $newEmail = $request->email;
+
+    //     // Check if email already exists in users table
+    //     $existsInUsers = User::where('email', $newEmail)
+    //         ->where('id', '!=', $userId)
+    //         ->exists();
+
+    //     if ($existsInUsers) {
+    //         return response()->json([
+    //             'data' => [
+    //                 'errors' => 'Email already taken',
+    //             ]
+    //         ], 422);
+    //     }
+
+    //     $user = User::find($userId);
+
+    //     if (!$user) {
+    //         return response()->json([
+    //             'data' => [
+    //                 'message' => 'User record not found'
+    //             ]
+    //         ], 404);
+    //     }
+
+    //     $user->email = $newEmail;
+    //     $user->save();
+
+    //     return response()->json([
+    //         'data' => [
+    //             'message' => 'Email updated successfully',
+    //             'email' => $user->email,
+    //             'method' => $request->method(),
+    //             'url' => $request->fullUrl()
+    //         ]
+    //     ]);
+    // }
+
+
+    public function deactivateAccount(Request $request)
+    {
+        $userId = auth()->id();
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'data' => [
+                    'message' => 'User record not found'
+                ]
+            ], 404);
+        }
+
+        // Update status
+        $user->deletestatus = 'deactivated';
+        $user->save();
+
+        // Revoke tokens if using Sanctum/Passport
+        $user->tokens()->delete();
+
+        return response()->json([
+            'data' => [
+                'message' => 'Account deactivated successfully',
+                'status' => $user->deletestatus,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+{
+    dd('ddd');
+    $request->validate([
+        'password' => 'required|string|min:8|confirmed',
+    ]);
+
+    $user = auth()->user();
+    $user->password = Hash::make($request->password);
+    $user->save();
+
+    return back()->with('success', 'Password updated successfully');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public function indexplan(Request $request)
     {

@@ -12,6 +12,8 @@ class OrganizationController extends Controller
 {
 public function updateProfile(Request $request)
 {
+    
+    
     $request->validate([
         'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
