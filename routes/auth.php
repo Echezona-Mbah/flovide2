@@ -229,8 +229,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/organization', [OrganizationController::class, 'store'])->name('team.store');
     Route::patch('/organization/{id}', [OrganizationController::class, 'updateRole'])->name('members.updateRole');
 
+
     Route::get('/organization_setting', [OrganizationController::class, 'indexsetting'])->name('organization_setting');
-    // Route::post('/deactivate-account', [OrganizationController::class, 'storesetting'])->name('user.deactivate');
+    Route::post('/organization_setting', [OrganizationController::class, 'storesetting'])->name('organization_setting.store');
+
     // Route::post('/update-password', [OrganizationController::class, 'storesetting'])->name('password.update');
     Route::get('/organization_plan', [OrganizationController::class, 'indexplan'])->name('organization_plan');
 
