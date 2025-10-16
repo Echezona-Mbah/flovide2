@@ -25,8 +25,13 @@ class Remita extends Model
         'percentage',
         'currency',
         'visibility',
+        'page_link'
     ];
 
+    public function payments()
+    {
+        return $this->hasMany(RemitaPayment::class, 'remita_id');
+    }
 
     public function subaccount()
     {

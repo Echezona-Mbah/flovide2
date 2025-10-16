@@ -91,7 +91,8 @@ class RemitaController extends Controller
     public function edit(Request $request, $id)
     {
         $user = Auth::user();
-        $remita = Remita::where('id', $id)->where('user_id', $user->id)->first();
+        // Fetch the specific remita page for the authenticated user and remita_payments
+        $remita = Remita::with('payments')->where('id', $id)->where('user_id', $user->id)->first();
 
         if (!$remita) {
             if ($request->expectsJson()) {
@@ -106,23 +107,6 @@ class RemitaController extends Controller
         }
 
         $subaccounts = Subaccount::where('user_id', $user->id)->get();
-
-        //Decrypt account_number or iban before sending to view/JSON
-        $subaccounts->transform(function ($subaccount) {
-            try {
-                if (!empty($subaccount->account_number)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->account_number);
-                } elseif (!empty($subaccount->iban)) {
-                    $subaccount->decrypted_account = Crypt::decryptString($subaccount->iban);
-                } else {
-                    $subaccount->decrypted_account = null;
-                }
-            } catch (\Exception $e) {
-                // fallback if decryption fails
-                $subaccount->decrypted_account = null;
-            }
-            return $subaccount;
-        });
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -196,7 +180,7 @@ class RemitaController extends Controller
             return redirect()->back()->withErrors(['subaccount_id' => 'You do not have permission to use this subaccount.']);
         }
 
-        $accountNumber = Crypt::decryptString($subaccount->account_number);
+        $accountNumber = $subaccount->account_number;
         $accountName = $subaccount->account_name;
         $bankName = $subaccount->bank_name;
 
@@ -224,6 +208,7 @@ class RemitaController extends Controller
             'percentage' => $request->percentage ?? 10, // Default to 10% if not provided
             'currency' => $request->currency,
             'visibility' => $request->visibility,
+            'page_link' => url('remita/remitacheckout/' . $rrr),
         ]);
 
         if (request()->expectsJson()) {
@@ -387,5 +372,35 @@ class RemitaController extends Controller
             $fileName, 
             ExcelFormat::CSV
         );
+    }
+
+    public function remitacheckout(Request $request, $id)
+    {
+        // Fetch the specific remita page using the RRR code
+        $remita = Remita::where('rrr', $id)->first();
+
+        if (!$remita) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Remita page not found.'
+                    ]
+                ], 404);
+            }
+            return redirect()->route('home')->with('error', 'Remita page not found.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Remita page retrieved successfully.',
+                    'remita' => $remita,
+                ]
+            ], 200);
+        }
+
+        return view('business.remitaCheckout', ['remita' => $remita]);
     }
 }
