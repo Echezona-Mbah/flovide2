@@ -147,8 +147,12 @@
                             <!-- Dynamic fields for other countries -->
                             <div id="dynamicFields" class="flex flex-col gap-3"></div>
 
-                            <button type="submit" class="bg-blue-200 text-blue-900 font-semibold rounded-full px-6 py-2 hover:bg-blue-300 transition">
-                                Add Account
+                            <button type="submit" id="bankAccountFormBTN" class="flex items-center justify-center gap-2 bg-blue-200 text-blue-900 font-semibold rounded-full px-6 py-2 hover:bg-blue-300 transition">
+                                <svg id="spinner" class="hidden animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                                <span class="btn-text">Add Account</span>
                             </button>
                         </form>
                     </section>
@@ -6124,6 +6128,21 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
+            //get submit button 
+            const submitButton = document.getElementById('bankAccountFormBTN');
+            const spinner = document.getElementById('spinner');
+            const btnText = submitButton.querySelector('.btn-text');
+            submitButton.disabled = true; //disable button to prevent multiple clicks
+            spinner.classList.remove('hidden');
+            btnText.innerHTML = 'Processing...';
+
+            //clear function
+            function clearButtonState() {
+                submitButton.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.innerHTML = 'Add Account';
+            }
+
             const allowedCurrenciesFrom = ['NGN', 'GHS', 'KES'];
             const account_type = document.getElementById('account_Type');
             const countrySelect = document.getElementById('country');
@@ -6142,6 +6161,7 @@
                     timer: 3000,
                     title: 'Please select a valid account type'
                 });
+                clearButtonState();
                 return;
             }
 
@@ -6154,6 +6174,7 @@
                     timer: 3000,
                     title: 'Please select a valid currency'
                 });
+                clearButtonState();
                 return;
             }
 
@@ -6177,6 +6198,7 @@
                         timer: 3000,
                         title: 'All fields are required'
                     });
+                    clearButtonState();
                     return;
                 }
 
@@ -6240,6 +6262,7 @@
                         showConfirmButton: false,
                         timer: 3000
                     });
+                    clearButtonState();
                     return false;
                 }
                 return true;
@@ -6296,9 +6319,10 @@
                                 timer: 3000,
                                 timerProgressBar: true
                             });
+                            clearButtonState();
                             return
                         }
-                       Swal.fire({
+                        Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'error',
@@ -6308,12 +6332,24 @@
                             timer: 3000,
                             timerProgressBar: true
                         });
+                        clearButtonState();
                         console.log(res.data);
 
                     }
                 })
                 .catch(error => {
                     console.log(error);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'An error occurred. Please try again.',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    clearButtonState();
                 });
             }
         });
