@@ -36,6 +36,7 @@ use App\Http\Controllers\Business\PaymentController;
 use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyController;
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
+use App\Http\Controllers\Business\DonationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -122,6 +123,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('business/remita/store', [RemitaController::class, 'store']);
     Route::delete('business/remita/{id}/destory', [RemitaController::class, 'destroy']);
     
+    //donations
+    Route::get('business/donation', [DonationController::class, 'donationIndex']);
+    // Route::get('business/donation/create', [DonationController::class, 'donationCreate']);
+    Route::get('business/donation/{id}/export', [DonationController::class, 'exportUserDonation']);
+    // Route::get('business/donation/edit/{id}', [DonationController::class, 'donationEdit']);
+    Route::put('business/donation/update/{id}', [DonationController::class, 'donationUpdate']);
+    Route::post('business/donation/store', [DonationController::class, 'donationStore']);
+    Route::delete('business/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
+
     //payment
     Route::get('business/payment', [PaymentController::class, 'index']);
     Route::get('business/payment/create', [PaymentController::class, 'create']);
