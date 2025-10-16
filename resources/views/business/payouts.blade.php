@@ -1,12 +1,14 @@
 @include('business.head')
+
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}
+    {{--
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}
 
     <!-- Mobile menu button -->
-  @include('business.header')
+    @include('business.header')
 
     <!-- Sidebar -->
-   @include('business.sidebar')
+    @include('business.sidebar')
     <!-- Overlay -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
     <!-- Main content -->
@@ -19,7 +21,8 @@
 
         </header>
         <section class=" relative ">
-            <section class="flex flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
+            <section
+                class="flex flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
                 <!-- Left form -->
                 <section class="flex flex-col lg:flex-row gap-8 bg-white rounded-tl-3xl md:p-6 p-2 ">
                     <section class="flex-1 bg-white rounded-xl md:p-6 p-2 max-w-full lg:max-w-lg ">
@@ -32,42 +35,53 @@
                         </p>
                         <div class="flex flex-col gap-5 text-sm font-normal text-[#6B6B6B]">
                             <form id="bankAccountForm">
-                                @csrf          
+                                @csrf
                                 <div class="flex flex-col mb-3">
-                                    <label class="font-normal text-[#6B6B6B]" for="account type">Select Account Type</label>
-                                    <select class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_Type">
+                                    <label class="font-normal text-[#6B6B6B]" for="account type">Select Account
+                                        Type</label>
+                                    <select
+                                        class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                        id="account_Type">
                                         <option value="" selected> Select Account Type </option>
                                         <option value="personal"> Personal </option>
                                         <option value="business"> Business </option>
                                     </select>
-                                </div>          
+                                </div>
                                 <div class="flex flex-col gap-1">
                                     <label class="font-normal text-[#6B6B6B]" for="country">
                                         In what country is your bank located?
                                     </label>
                                     <span class="text-red-500 errorcountry"></span>
-                                    <select class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="country" name="country">
+                                    <select
+                                        class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                        id="country" name="country">
                                         <option value="" disabled="" selected> Select country </option>
                                         @foreach($countries as $country)
-                                            <option value="{{ $country['country_name'] }}" data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}" 
-                                             data-currency="{{ $country['default_currency'] }}" data-alpha2="{{ $country['alpha2'] }}">
+                                            <option value="{{ $country['country_name'] }}"
+                                                data-fullCurrency="{{ $country['alpha2'] }}_{{ $country['default_currency'] }}"
+                                                data-currency="{{ $country['default_currency'] }}"
+                                                data-alpha2="{{ $country['alpha2'] }}">
                                                 {{ $country['country_name'] }}
                                             </option>
                                         @endforeach
                                     </select>
-                                </div>         
+                                </div>
                                 <div class="flex flex-col mb-4 mt-3">
                                     <label class="font-normal text-[#6B6B6B]" for="currency">Select Currency</label>
-                                    <select class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="currency">
+                                    <select
+                                        class="border border-[#C4C4C4] rounded-md py-2 px-4 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                        id="currency">
                                         <option value=""> Select Currency </option>
                                     </select>
-                                </div>   
+                                </div>
 
                                 <div id="staticFields">
                                     <div class="flex flex-col gap-1">
                                         <label class="font-normal text-[#6B6B6B]" for="bank"> Bank </label>
                                         <span class="text-red-500 errorbank"></span>
-                                        <select id="bankBB" class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" name="bank">
+                                        <select id="bankBB"
+                                            class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#6B6B6B] placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                            name="bank">
                                             <option value="" disabled="" selected> Select your bank </option>
                                             @foreach($banks as $bank)
                                                 <option value="{{ $bank->name }}" data-code="{{ $bank->country_code  }}">
@@ -83,22 +97,30 @@
                                             Bank account number
                                         </label>
                                         <span class="text-red-500 errornumber"></span>
-                                        <input class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_number" name="account-number" placeholder="12345678" type="text" />
+                                        <input
+                                            class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#161616] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                            id="account_number" name="account-number" placeholder="12345678"
+                                            type="text" />
                                     </div>
 
                                     <!-- ACCOUNT NAME -->
-                                    <div class="flex flex-col gap-1 mt-3">                                        
+                                    <div class="flex flex-col gap-1 mt-3">
                                         <div class="flex items-center gap-2">
                                             <label class="font-normal text-[#6B6B6B]" for="account-name">
                                                 Bank account name
                                             </label>
                                             <!-- Spinner (hidden by default) -->
-                                            <svg id="account_spinner" class="animate-spin h-4 w-4 text-blue-500 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                            <svg id="account_spinner" class="animate-spin h-4 w-4 text-blue-500 hidden"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                             </svg>
                                         </div>
-                                        <input type="text" value="" class="border border-[#C4C4C4] cursor-not-allowed rounded-md py-2 px-4 text-[#30941c] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]" id="account_name" name="account-name" disabled />
+                                        <input type="text" value=""
+                                            class="border border-[#C4C4C4] cursor-not-allowed rounded-md py-2 px-4 text-[#30941c] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
+                                            id="account_name" name="account-name" disabled />
                                     </div>
                                     <div class="flex flex-col gap-1">
                                         <div id="responseMessage"></div>
@@ -109,12 +131,12 @@
                                 <!-- Dynamic fields for other countries -->
                                 <div id="dynamicFields" class="flex flex-col gap-3"></div>
 
-                                <button type="submit" id="bankAccountFormBTN" class="self-start bg-[#A9D3F7] text-[#1E4F8B] font-semibold text-sm rounded-full py-2.5 px-6 mt-2"> 
-                                    <span class="btn-text">Add Account</span>
-                                    {{-- <svg id="submitSpinner" class="animate-spin hidden h-5 w-5 text-[#1E4F8B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <button type="submit" id="bankAccountFormBTN" class="flex items-center justify-center gap-2 self-start bg-[#A9D3F7] text-[#1E4F8B] font-semibold text-sm rounded-full py-2.5 px-6 mt-2">
+                                    <svg id="spinner" class="hidden animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                    </svg>   --}}
+                                    </svg>
+                                    <span class="btn-text">Add Account</span>
                                 </button>
                             </form>
                         </div>
@@ -127,65 +149,75 @@
                             <h3 class="font-semibold text-base text-[#1E1E1E]">
                                 Payout Accounts
                             </h3>
-                            <button aria-label="Delete All Payout Accounts" class="delete-all-btn flex items-center gap-1 text-[#D92D20] text-sm font-semibold rounded-md px-3 py-1 border border-[#D92D20] whitespace-nowrap">
+                            <button aria-label="Delete All Payout Accounts"
+                                class="delete-all-btn flex items-center gap-1 text-[#D92D20] text-sm font-semibold rounded-md px-3 py-1 border border-[#D92D20] whitespace-nowrap">
                                 <i class="fas fa-trash-alt"></i>
                                 Delete All
                             </button>
                         </div>
-                        <div aria-label="List of payout accounts" class="bg-[#F7F7F7] rounded-xl p-2 md:p-5 flex flex-col gap-3 max-w-full lg:max-w-lg overflow-x-scroll md:overflow-hidden">
+                        <div aria-label="List of payout accounts"
+                            class="bg-[#F7F7F7] rounded-xl p-2 md:p-5 flex flex-col gap-3 max-w-full lg:max-w-lg overflow-x-scroll md:overflow-hidden">
                             <p id="default-message" class="mt-4 text-green-600 font-medium hidden"></p>
                             @if($bankAccounts->isEmpty())
                                 <p>No bank accounts found.</p>
                             @else
                                 @foreach($bankAccounts as $account)
-                                @if($account->default)
-                                    <div aria-label="Payout account 2100048486 GTBank payout account selected" class="flex items-center gap-4 bg-white rounded-lg py-3 px-4 max-w-full">
-                                        <div aria-hidden="true" class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#E6F4F1] flex-shrink-0">
-                                            <i class="fas fa-check text-[#00875F] text-lg">
-                                            </i>
-                                        </div>
-                                @else
-                                    <div aria-label="" class="flex items-center gap-4 bg-[#E9E9E9] rounded-lg py-3 px-4 max-w-full">
-                                        <div aria-hidden="true" data-id="{{ $account->id }}" class="set-default-btn flex items-center justify-center w-9 h-9 rounded-lg bg-[#C4C4C4] flex-shrink-0">
-                                            <i class="fas fa-check text-[#6B6B6B] text-lg"></i>
-                                        </div>
-                                @endif
-                                        <span class="font-normal text-base text-[#1E1E1E] select-none">
-                                            {{ ($account->account_number) ? $account->account_number : $account->iban }}
-                                        </span>
-                                        <span class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
-                                            {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
-                                        </span>
-                                        @if($account->default)
-                                            <span class="text-xs font-semibold text-[#00875F] bg-[#E6F4F1] rounded-full py-1 px-2 flex items-center gap-1 whitespace-nowrap">
-                                                <i class="fas fa-university text-xs"></i>
-                                                PAYOUT ACCOUNT
-                                            </span>
+                                    @if($account->default)
+                                        <div aria-label="Payout account 2100048486 GTBank payout account selected"
+                                            class="flex items-center gap-4 bg-white rounded-lg py-3 px-4 max-w-full">
+                                            <div aria-hidden="true"
+                                                class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#E6F4F1] flex-shrink-0">
+                                                <i class="fas fa-check text-[#00875F] text-lg">
+                                                </i>
+                                            </div>
+                                    @else
+                                            <div aria-label=""
+                                                class="flex items-center gap-4 bg-[#E9E9E9] rounded-lg py-3 px-4 max-w-full">
+                                                <div aria-hidden="true" data-id="{{ $account->id }}"
+                                                    class="set-default-btn flex items-center justify-center w-9 h-9 rounded-lg bg-[#C4C4C4] flex-shrink-0">
+                                                    <i class="fas fa-check text-[#6B6B6B] text-lg"></i>
+                                                </div>
                                         @endif
-                                        {{-- <button class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
-                                            <a href="{{ route('business.edit', $account->id) }}">
-                                                <i class="fas fa-pencil-alt"></i>
-                                            </a>
-                                        </button> --}}
-                                        <button class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0 delete-icon" data-id="{{ $account->id }}">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
+                                            <span class="font-normal text-base text-[#1E1E1E] select-none">
+                                                {{ ($account->account_number) ? $account->account_number : $account->iban }}
+                                            </span>
+                                            <span
+                                                class="text-xs font-normal text-[#4B4B4B] bg-[#E9E9E9] rounded-full py-1 px-2 whitespace-nowrap">
+                                                {{ ($account->bank_name) ? $account->bank_name : 'INTERNATIONAL' }}
+                                            </span>
+                                            @if($account->default)
+                                                <span
+                                                    class="text-xs font-semibold text-[#00875F] bg-[#E6F4F1] rounded-full py-1 px-2 flex items-center gap-1 whitespace-nowrap">
+                                                    <i class="fas fa-university text-xs"></i>
+                                                    PAYOUT ACCOUNT
+                                                </span>
+                                            @endif
+                                            {{-- <button class="ml-auto text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0">
+                                                <a href="{{ route('business.edit', $account->id) }}">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                            </button> --}}
+                                            <button class="text-[#6B6B6B] hover:text-[#1E1E1E] flex-shrink-0 delete-icon"
+                                                data-id="{{ $account->id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
                                 @endforeach
                             @endif
-                            
-                        </div>
+
+                            </div>
                     </section>
                 </section>
             </section>
     </main>
 
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script> --}}
+    {{--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
         //for searching of country name
-        document.addEventListener("DOMContentLoaded", () => { 
+        document.addEventListener("DOMContentLoaded", () => {
             const countrySelect = document.querySelector("#country");
             // Enable searchable select
             if (!countrySelect.tomselect) {
@@ -2091,399 +2123,399 @@
             ],
             // Georgia (GE)
             'GE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
 
             // Germany (DE)
             'DE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'DE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'DE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Ghana (GH)
             'GH_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GH_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GH_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Gibraltar (GI)
             'GI_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
-            { name: 'account_number', label: 'Account number', type: 'number', length: 8 }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
+                { name: 'account_number', label: 'Account number', type: 'number', length: 8 }
             ],
             'GI_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GI_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Greece (GR)
             'GR_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'GR_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GR_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Greece (GR)
             'GR_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'GR_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GR_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Grenada (GD)
             'GD_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GD_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GD_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Guam (GU)
             'GU_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GU_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GU_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Guatemala (GT)
             'GT_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GT_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GT_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Guinea (GN)
             'GN_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GN_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'GN_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Honduras (HN)
             'HN_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HN_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HN_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //Hong Kong (HK)
             'HK_HKD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HK_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HK_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HK_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //Hungary (HU)
             'HU_HUF': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HU_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HU_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'HU_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             //  Iceland (IS)
             'IS_ISK': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IS_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IS_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IS_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             // India (IN)
             'IN_USD': [
@@ -2496,957 +2528,957 @@
                 { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IN_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IN_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //Indonesia (ID)
             'ID_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'ID_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'ID_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //🇮🇪 Ireland (IE)
             'IE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'IE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇮🇲 Isle of Man (IM)
             'IM_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'number' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'number' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IM_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'number' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'number' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IM_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
-            { name: 'account_number', label: 'Account number', type: 'number' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
+                { name: 'account_number', label: 'Account number', type: 'number' }
             ],
             // 🇮🇱 Israel (IL)
             'IL_ILS': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IL_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IL_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IL_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇮🇹 Italy (IT)
             'IT_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'IT_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'IT_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
 
             // 🇯🇲 Jamaica (JM)
             'JM_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JM_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JM_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇯🇵 Japan (JP)
             'JP_JPY': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JP_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JP_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JP_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇯🇪 Jersey (JE)
             'JE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
-            { name: 'account_number', label: 'Account number', type: 'number', length: 8 }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'sort_code', label: 'Sort code', type: 'number', length: 6 },
+                { name: 'account_number', label: 'Account number', type: 'number', length: 8 }
             ],
             'JE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇯🇴 Jordan (JO)
             'JO_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JO_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'JO_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇰🇿 Kazakhstan (KZ)
             'KZ_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KZ_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KZ_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇰🇪 Kenya (KE)
             'KE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇰🇮 Kiribati (KI)
             'KI_AUD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KI_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KI_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KI_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇽🇰 Kosovo (XK)
             'XK_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'XK_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'XK_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇰🇼 Kuwait (KW)
             'KW_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KW_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KW_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇰🇬 Kyrgyzstan (KG)
             'KG_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KG_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'KG_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇱🇻 Latvia (LV)
             'LV_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'LV_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LV_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇱🇸 Lesotho (LS)
             'LS_ZAR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LS_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LS_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LS_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇱🇮 Liechtenstein (LI)
             'LI_CHF': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LI_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LI_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LI_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             // 🇱🇹 Lithuania (LT)
             'LT_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'LT_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LT_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇱🇺 Luxembourg (LU)
             'LU_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'LU_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'LU_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇴 Macau (MO)
             'MO_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MO_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MO_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇬 Madagascar (MG)
             'MG_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MG_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MG_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇼 Malawi (MW)
             'MW_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MW_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MW_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇾 Malaysia (MY)
             'MY_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MY_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MY_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Maldives (MV):
             'MV_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MV_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MV_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇱 Mali (ML)
             'ML_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'ML_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'ML_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇹 Malta (MT)
             'MT_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'MT_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MT_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇭 Marshall Islands (MH)
             'MH_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MH_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MH_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇶 Martinique (MQ)
             'MQ_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'MQ_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MQ_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇷 Mauritania (MR)
             'MR_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MR_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MR_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇺 Mauritius (MU)
             'MU_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MU_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MU_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇾🇹 Mayotte (YT)
             'YT_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' }
             ],
             'YT_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'YT_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'iban', label: 'IBAN', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'iban', label: 'IBAN', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇲🇽 Mexico (MX)
             'MX_MXN': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MX_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MX_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'MX_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'clabe', label: 'CLABE', type: 'text', length: 18 },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // 🇫🇲 Micronesia (FM)
             'FM_USD': [
@@ -3640,7 +3672,7 @@
                 { name: 'state', label: 'State', type: 'text' },
                 { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
-                // Nepal (NP)
+            // Nepal (NP)
             'NP_USD': [
                 { name: 'account_name', label: 'Account name', type: 'text' },
                 { name: 'bic', label: 'BIC', type: 'text' },
@@ -3787,105 +3819,105 @@
             ],
             //  Niger (NE)
             'NE_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NE_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NE_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             // Niue (NU)
             'NU_NZD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NU_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NU_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NU_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //  NF (Norfolk Island)
             'NF_AUD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NF_USD': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NF_GBP': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             'NF_EUR': [
-            { name: 'account_name', label: 'Account name', type: 'text' },
-            { name: 'bic', label: 'BIC', type: 'text' },
-            { name: 'account_number', label: 'Account number', type: 'text' },
-            { name: 'address', label: 'Recipient address', type: 'text' },
-            { name: 'city', label: 'City', type: 'text' },
-            { name: 'state', label: 'State', type: 'text' },
-            { name: 'zipcode', label: 'Zipcode', type: 'text' }
+                { name: 'account_name', label: 'Account name', type: 'text' },
+                { name: 'bic', label: 'BIC', type: 'text' },
+                { name: 'account_number', label: 'Account number', type: 'text' },
+                { name: 'address', label: 'Recipient address', type: 'text' },
+                { name: 'city', label: 'City', type: 'text' },
+                { name: 'state', label: 'State', type: 'text' },
+                { name: 'zipcode', label: 'Zipcode', type: 'text' }
             ],
             //  North Mac
             "MK_EUR": [
@@ -4321,504 +4353,504 @@
             ],
             // --- QA (Qatar) ---
             "QA_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "QA_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "QA_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- CG (Congo) ---
             "CG_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "CG_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "CG_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- RO (Romania) ---
             "RO_RON": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RO_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RO_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RO_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             // --- RU (Russia) ---
             "RU_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RU_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RU_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- RW (Rwanda) ---
             "RW_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RW_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RW_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- BL (Saint Barthélemy) ---
             "BL_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "BL_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "BL_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SH (Saint Helena) ---
             "SH_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SH_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SH_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- KN (Saint Kitts and Nevis) ---
             "KN_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "KN_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "KN_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- MF (Saint Martin) ---
             "MF_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "MF_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "MF_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- PM (Saint Pierre and Miquelon) ---
             "PM_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             "PM_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "PM_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- VC (Saint Vincent and the Grenadines) ---
             "VC_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "VC_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "VC_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- WS (Samoa) ---
             "WS_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "WS_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "WS_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SM (San Marino) ---
             "SM_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             "SM_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SM_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- ST (São Tomé and Príncipe) ---
             "ST_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "ST_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "ST_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SA (Saudi Arabia) ---
             "SA_SAR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SA_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SA_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SN (Senegal) ---
             "SN_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SN_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SN_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- RS (Serbia) ---
             "RS_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RS_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "RS_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SC (Seychelles) ---
             "SC_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SC_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SC_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // --- SG (Singapore) ---
             "SG_SGD": [
@@ -4887,9 +4919,9 @@
             ],
             // --- SK (Slovakia) ---
             "SK_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             "SK_USD": [
                 { name: "account_name", label: "Account name", type: "text" },
@@ -4944,670 +4976,670 @@
                 { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SB_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SB_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // South Africa 
             "ZA_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "number" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "number" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "ZA_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "number" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "number" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "ZA_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "number" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "number" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // South Georgia and the South Sandwich Islands
             "GS_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "GS_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "GS_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // South Korea
             "KR_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "KR_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "KR_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Spain
             "ES_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             "ES_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "ES_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Sri Lanka – LK
             "LK_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "LK_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "LK_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Suriname 
             "SR_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SR_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SR_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Svalbard and Jan Mayen 
             "SJ_NOK": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SJ_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SJ_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SJ_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Sweden
             "SE_SEK": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SE_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SE_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "SE_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             // Switzerland
             "CH_CHF": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "CH_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "CH_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "CH_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" }
             ],
             // Taiwan 
             "TW_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TW_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TW_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Tanzania
             "TZ_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TZ_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TZ_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Thailand 
             "TH_THB": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TH_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TH_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Togo 
             "TG_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TG_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TG_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Tokelau 
             "TK_NZD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TK_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TK_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TK_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Tonga 
             "TO_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TO_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TO_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Turkey 
             "TR_TRY": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TR_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TR_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Turkmenistan 
             "TM_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TM_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TM_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             //  Turks and Caicos Islands
             "TC_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TC_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TC_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Tuvalu 
             "TV_AUD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TV_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TV_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "TV_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Uganda 
             "UG_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UG_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UG_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // United Arab Emirates
             "AE_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "AE_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "AE_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "purpose_code", label: "Select purpose of payment code", type: "select", options: [/* 111 options */] },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // United Kingdom
             "GB_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "sort_code", label: "Sort code", type: "number", length: 6 },
-            { name: "account_number", label: "Account number", type: "number", length: 8 }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "sort_code", label: "Sort code", type: "number", length: 6 },
+                { name: "account_number", label: "Account number", type: "number", length: 8 }
             ],
             "GB_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "GB_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "iban", label: "IBAN", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "iban", label: "IBAN", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             //United States (US) 
             'US_USD': [
@@ -5639,31 +5671,31 @@
             ],
             // U.S. Minor Outlying Islands
             "UM_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UM_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UM_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Virgin Islands
             "VI_USD": [
@@ -5676,50 +5708,50 @@
                 { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "VI_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "VI_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             // Uruguay 
             "UY_USD": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UY_GBP": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             "UY_EUR": [
-            { name: "account_name", label: "Account name", type: "text" },
-            { name: "bic", label: "BIC", type: "text" },
-            { name: "account_number", label: "Account number", type: "text" },
-            { name: "address", label: "Recipient address", type: "text" },
-            { name: "city", label: "City", type: "text" },
-            { name: "state", label: "State", type: "text" },
-            { name: "zipcode", label: "Zipcode", type: "text" }
+                { name: "account_name", label: "Account name", type: "text" },
+                { name: "bic", label: "BIC", type: "text" },
+                { name: "account_number", label: "Account number", type: "text" },
+                { name: "address", label: "Recipient address", type: "text" },
+                { name: "city", label: "City", type: "text" },
+                { name: "state", label: "State", type: "text" },
+                { name: "zipcode", label: "Zipcode", type: "text" }
             ],
             //Uzbekistan 
             "UZ_USD": [
@@ -5952,7 +5984,7 @@
             const countryCurrencyCode = countrySelect.options[countrySelect.selectedIndex].dataset.alpha2;
             const currencyCode = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
 
-            if(!currencyCode || !countryCurrencyCode) {
+            if (!currencyCode || !countryCurrencyCode) {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -5977,36 +6009,36 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success' && data.fields?.[0]?.options) {
-                    let banks = data.fields[0].options;
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.fields?.[0]?.options) {
+                        let banks = data.fields[0].options;
 
-                    banks.forEach(bank => {
-                        let option = document.createElement('option');
-                        option.value = bank.value; // use the numeric value or bank_code
-                        option.textContent = bank.label; // display name in dropdown
-                        option.setAttribute('data-code', bank.bank_code ?? '');
-                        option.setAttribute('data-nibss', bank.bank_nibss_code ?? '');
-                        option.setAttribute('data-id', bank.value ?? '');
-                        option.setAttribute('data-label', bank.label ?? '');
-                        bankSelect.appendChild(option);
-                    });
-                } else {
-                    Swal.fire({
-                        toast: true,
-                        icon: 'error',
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        title: 'No valid banks returned.'
-                    });
-                    return;
-                }
-            })
-            .catch(err => {
-                console.error('Error fetching banks:', err);
-            });
+                        banks.forEach(bank => {
+                            let option = document.createElement('option');
+                            option.value = bank.value; // use the numeric value or bank_code
+                            option.textContent = bank.label; // display name in dropdown
+                            option.setAttribute('data-code', bank.bank_code ?? '');
+                            option.setAttribute('data-nibss', bank.bank_nibss_code ?? '');
+                            option.setAttribute('data-id', bank.value ?? '');
+                            option.setAttribute('data-label', bank.label ?? '');
+                            bankSelect.appendChild(option);
+                        });
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            icon: 'error',
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            title: 'No valid banks returned.'
+                        });
+                        return;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching banks:', err);
+                });
         }
 
 
@@ -6031,7 +6063,7 @@
             const countrySelect = document.getElementById('country');
             const country = countrySelect.options[countrySelect.selectedIndex].dataset.alpha2;
             const currency = countrySelect.options[countrySelect.selectedIndex].dataset.currency;
-            
+
             const selectElement = document.querySelector("#bankBB");
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const bankId = selectedOption.getAttribute("data-id");
@@ -6071,46 +6103,61 @@
                 },
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                // console.log('Account validation response:', data);
-                if (data.status === 'success' && data.account_name) {
-                    accountName.value = data.account_name;
-                    account_spinner.classList.add("hidden");
-                } else {
+                .then(res => res.json())
+                .then(data => {
+                    // console.log('Account validation response:', data);
+                    if (data.status === 'success' && data.account_name) {
+                        accountName.value = data.account_name;
+                        account_spinner.classList.add("hidden");
+                    } else {
+                        accountName.value = '';
+                        // console.warn('No account name returned.');
+                        Swal.fire({
+                            toast: true,
+                            icon: 'error',
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            title: 'Invalid account details'
+                        });
+                        account_spinner.classList.add("hidden");
+                    }
+                })
+                .catch(err => {
                     accountName.value = '';
-                    // console.warn('No account name returned.');
+                    account_spinner.classList.add("hidden");
+                    // console.error('Error validating account:', err);
                     Swal.fire({
                         toast: true,
                         icon: 'error',
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 3000,
-                        title: 'Invalid account details'
+                        title: 'Error validating account'
                     });
-                    account_spinner.classList.add("hidden");
-                }
-            })
-            .catch(err => {
-                accountName.value = '';
-                account_spinner.classList.add("hidden");
-                // console.error('Error validating account:', err);
-                Swal.fire({
-                    toast: true,
-                    icon: 'error',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    title: 'Error validating account'
+                    return;
                 });
-                return;
-            });
         }
 
 
         //submit the form
-        document.querySelector('#bankAccountForm').addEventListener('submit', function(e) {
+        document.querySelector('#bankAccountForm').addEventListener('submit', function (e) {
             e.preventDefault();
+
+            //get submit button 
+            const submitButton = document.getElementById('bankAccountFormBTN');
+            const spinner = document.getElementById('spinner');
+            const btnText = submitButton.querySelector('.btn-text');
+            submitButton.disabled = true; //disable button to prevent multiple clicks
+            spinner.classList.remove('hidden');
+            btnText.innerHTML = 'Processing...';
+
+            //clear function
+            function clearButtonState() {
+                submitButton.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.innerHTML = 'Add Account';
+            }
 
             const allowedCurrenciesFrom = ['NGN', 'GHS', 'KES'];
             const account_type = document.getElementById('account_Type');
@@ -6121,7 +6168,7 @@
             const countryCode = countrySelect.selectedOptions[0].dataset.alpha2; // e.g. "NG"
             let fullCountryCodeCurrency = countryCode + "_" + currencyOnlyForm;
 
-            if(account_type.value == "") {
+            if (account_type.value == "") {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -6130,10 +6177,11 @@
                     timer: 3000,
                     title: 'Please select a valid account type'
                 });
+                clearButtonState();
                 return;
             }
 
-            if(!currencyOnlyForm) {
+            if (!currencyOnlyForm) {
                 Swal.fire({
                     toast: true,
                     icon: 'error',
@@ -6142,6 +6190,7 @@
                     timer: 3000,
                     title: 'Please select a valid currency'
                 });
+                clearButtonState();
                 return;
             }
 
@@ -6166,6 +6215,7 @@
                         timer: 3000,
                         title: 'All fields are required'
                     });
+                    clearButtonState();
                     return;
                 }
 
@@ -6184,7 +6234,7 @@
                 validateForm(formData);
                 console.log("local data: ", Object.fromEntries(formData.entries()));
 
-            }else{
+            } else {
 
                 const formData = new FormData(this);
                 formData.append('formDynamicFields', true);
@@ -6229,6 +6279,7 @@
                         showConfirmButton: false,
                         timer: 3000
                     });
+                    clearButtonState();
                     return false;
                 }
                 return true;
@@ -6246,63 +6297,75 @@
                     },
                     body: data
                 })
-                .then(response => response.json())
-                .then(res => {
-                    if (res.data.status == "success") {
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Added!',
-                            text: res.data.message,
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            didClose: () => {
-                                location.reload();
-                            }
-                        });
-
-                    } else {
-                        if(res.data.message === "Validation failed") {
-                            let errors = res.data.errors; // the real validation errors object
-                            let errorMessages = [];
-
-                            // Collect all error messages
-                            for (let field in errors) {
-                                if (errors.hasOwnProperty(field)) {
-                                    errorMessages.push(errors[field][0]); // take first error per field
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.data.status == "success") {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Added!',
+                                text: res.data.message,
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didClose: () => {
+                                    location.reload();
                                 }
-                            }
+                            });
 
+                        } else {
+                            if (res.data.message === "Validation failed") {
+                                let errors = res.data.errors; // the real validation errors object
+                                let errorMessages = [];
+
+                                // Collect all error messages
+                                for (let field in errors) {
+                                    if (errors.hasOwnProperty(field)) {
+                                        errorMessages.push(errors[field][0]); // take first error per field
+                                    }
+                                }
+
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: 'Validation Error!',
+                                    text: errorMessages.join("\n"), // join all messages into one string
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                                clearButtonState();
+                                return
+                            }
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
                                 icon: 'error',
-                                title: 'Validation Error!',
-                                text: errorMessages.join("\n"), // join all messages into one string
+                                title: 'Error!',
+                                text: res.data.message,
                                 showConfirmButton: false,
                                 timer: 3000,
                                 timerProgressBar: true
                             });
-                            return
+                            clearButtonState();
+                            console.log(res.data);
                         }
-                       Swal.fire({
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'error',
-                            title: 'Error!',
-                            text: res.data.message,
+                            title: 'Something went wrong. Please try again.',
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true
                         });
-                        console.log(res.data);
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                });
+                        clearButtonState();
+                    });
             }
         });
 
@@ -6312,7 +6375,7 @@
                 const id = this.dataset.id;
 
                 try {
-                    const response = await fetch(`/business/bank-accounts/${id}/set-default`, {
+                    const response = await fetch(`/bank-accounts/${id}/set-default`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -6320,15 +6383,16 @@
                         }
                     });
 
-                    const data = await response.json();
+                    const res = await response.json();
+                    // console.log(res);
 
-                    if (data.status === 'success') {
+                    if (res.data && res.data.status === 'success') {
                         // Success toast
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
                             icon: 'success',
-                            title: data.message || 'Bank account set as default successfully!',
+                            title: res.data.message || 'Bank account set as default successfully!',
                             showConfirmButton: false,
                             timer: 2000,
                             timerProgressBar: true,
@@ -6340,7 +6404,7 @@
                             toast: true,
                             position: 'top-end',
                             icon: 'error',
-                            title: data.message || 'Failed to set default bank account.',
+                            title: res.data.message || 'Failed to set default bank account.',
                             showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true
@@ -6365,9 +6429,9 @@
 
 
         document.querySelectorAll('.delete-icon').forEach((button) => {
-            button.addEventListener('click', function() {
-                const accountId = this.getAttribute('data-id');  
-                
+            button.addEventListener('click', function () {
+                const accountId = this.getAttribute('data-id');
+
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'You won\'t be able to revert this!',
@@ -6385,26 +6449,26 @@
                                 'Accept': 'application/json',
                             }
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status == 'success') {
-                                Swal.fire(
-                                    'Deleted!',
-                                    'Your bank account has been deleted.',
-                                    'success'
-                                ).then(() => {
-                                    location.reload(); 
-                                });
-                            } else {
-                                Swal.fire(
-                                    'Error!',
-                                    'There was an error deleting your bank account.',
-                                    'error'
-                                );
-                                console.log(data);
-                            }
-                        })
-                        .catch(error => console.log('Error:', error));
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status == 'success') {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your bank account has been deleted.',
+                                        'success'
+                                    ).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Error!',
+                                        'There was an error deleting your bank account.',
+                                        'error'
+                                    );
+                                    console.log(data);
+                                }
+                            })
+                            .catch(error => console.log('Error:', error));
                     }
                 });
             });
@@ -6429,16 +6493,16 @@
                             'Accept': 'application/json'
                         }
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        Swal.fire('Deleted!', 'All your bank accounts have been deleted.', 'success').then(() => {
-                            location.reload();
+                        .then(res => res.json())
+                        .then(data => {
+                            Swal.fire('Deleted!', 'All your bank accounts have been deleted.', 'success').then(() => {
+                                location.reload();
+                            });
+                        })
+                        .catch(err => {
+                            Swal.fire('Error!', 'Something went wrong.', 'error');
+                            console.log(err);
                         });
-                    })
-                    .catch(err => {
-                        Swal.fire('Error!', 'Something went wrong.', 'error');
-                        console.log(err);
-                    });
                 }
             });
         });
@@ -6477,4 +6541,5 @@
     </script>
 
 </body>
+
 </html>
