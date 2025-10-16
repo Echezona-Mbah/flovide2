@@ -19,6 +19,7 @@ class RemitaPayment extends Model
         'remita_id',
         'name',
         'email',
+        'number',
         'transaction_reference',
         'amount_paid',
         'currency',
