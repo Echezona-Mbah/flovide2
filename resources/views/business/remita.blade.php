@@ -19,7 +19,7 @@
             </h1>
             @include('business.header_notifical')
         </header>
-        <section class=" relative w-full">
+        <section class="relative w-full">
             <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
                 <div class="max-w-[1200px] mx-auto">
                   
@@ -100,9 +100,11 @@
                                             </div>
                                         </div>
                                         <div class="flex gap-4">
-                                            <button aria-label="Link button" class="{{ $remita->visibility == 'Private' ? 'hidden' : '' }} bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                                <i class="fas fa-link"></i>
-                                            </button>
+                                            <a href="{{ $remita->page_link }}" class="{{ $remita->visibility === 'private' ? 'hidden' : '' }}">
+                                                <button aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                                    <i class="fas fa-link"></i>
+                                                </button>
+                                            </a>
                                             <a href="{{ route('remita.edit', $remita->id) }}">
                                                 <button aria-label="Next button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                                     <i class="fas fa-chevron-right"></i>
@@ -114,7 +116,6 @@
                             
                             @endforeach
                             
-
                             
                             <div class="bg-white rounded-2xl p-4 flex flex-col justify-between shadow-sm gap-y-4 border border-[#D6D6D6]">
                                 <div class="flex justify-between items-center gap-4">
@@ -125,7 +126,6 @@
                                         <div class="flex justify-between items-start">
                                             <div class="text-lg font-extrabold">5 GBP</div>
                                         </div>
-                                        {{-- <div class="text-xs bg-gray-300 text-gray-700 rounded-full px-2 py-1 inline-block mt-1 select-none">Monthly</div> --}}
                                     </div>
                                 </div>
                             
