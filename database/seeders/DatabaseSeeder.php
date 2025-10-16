@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(PaymentRecordsSeeder::class);
+        $this->call(RemitaPaymentsTableSeeder::class);
 
     }
 }
