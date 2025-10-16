@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Personal;
+use App\Models\Subaccount;
 use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,6 +93,7 @@ class LoginController extends Controller
         $beneficiaries = \App\Models\Beneficia::where('user_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('user_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('user_id', $account->id)->where('status', 'active')->get();
+        $subaccounts = Subaccount::where('user_id', $account->id)->get();
 
 
         return response()->json([
@@ -115,6 +117,7 @@ class LoginController extends Controller
                 'beneficiaries' => $beneficiaries,    
                 'payout_accounts' => $payoutAccounts, 
                 'virtual_cards' => $virtualCards,
+                'subaccounts' => $subaccounts, 
                 'owner_id' => $teamMembership ? ($teamMembership->userOwner->id ?? null) : $account->id,
                 'role' => $teamMembership ? ($teamMembership->role ?? 'member') : 'Owner',
                 'token' => $token,
@@ -194,6 +197,8 @@ class LoginController extends Controller
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('personal_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('personal_id', $account->id)->where('status', 'active')->get();
+        $subaccounts = Subaccount::where('personal_id', $account->id)->get();
+
 
         return response()->json([
             'data' => [
@@ -216,6 +221,7 @@ class LoginController extends Controller
                 'beneficiaries' => $beneficiaries,    
                 'payout_accounts' => $payoutAccounts,  
                 'virtual_cards' => $virtualCards,
+                'subaccounts' => $subaccounts,
                 'token' => $token,
             ]
         ], 200);
