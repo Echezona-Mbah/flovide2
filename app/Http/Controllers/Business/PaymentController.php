@@ -349,4 +349,72 @@ class PaymentController extends Controller
             ], 200);
         }
     }
+
+    public function refresh()
+    {
+        $user = Auth::user();
+        $payments = payment::where('user_id', $user->id)->latest()->get();
+
+        if (request()->expectsJson()) {
+            if($payments->isEmpty()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No payment pages found.',
+                        'payments' => [],
+                    ]
+                ], 200);
+            }
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payment pages refreshed successfully.',
+                    'payments' => $payments,
+                ]
+            ], 200);
+        }
+
+        return redirect()->back()->with('payments', $payments);
+    }
+
+    public function refreshDetails(Request $request, $id)
+    {
+        $user = Auth::user();
+        $payment = payment::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$payment) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Payment page not found.'
+                    ]
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'Payment page not found.');
+        }
+
+        // Fetch only the records related to this payment
+        $records = $payment->records()->latest()->get();
+
+        if (request()->expectsJson()) {
+            if($records->isEmpty()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No payment records found for this payment page.',
+                        'records' => [],
+                    ]
+                ], 200);
+            }
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payment records refreshed successfully.',
+                    'records' => $records,
+                ]
+            ], 200);
+        }
+
+    }
 }
