@@ -341,6 +341,16 @@ class paymentsController extends Controller
         $payments = Payment::where('personal_id', $user->id)
             ->latest()
             ->get();
+        
+        if($payments->isEmpty()){
+            return response()->json([
+                'data' => [
+                    'status' => 'empty',
+                    'message' => 'No payments found for this user',
+                    'payments' => []
+                ]
+            ], 200);
+        }
 
         return response()->json([
             'data' => [
@@ -349,5 +359,45 @@ class paymentsController extends Controller
                 'payments' => $payments
             ]
         ], 200);
+    }
+
+    public function refreshDetails(Request $request, $id)
+    {
+        $user = Auth::guard('personal-api')->user();
+
+        $payment = Payment::where('id', $id)
+            ->where('personal_id', $user->id)
+            ->first();
+
+        if (!$payment) {
+            return response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Payment not found or not authorized',
+                ]
+            ], 404);
+        }
+
+        // Fetch only the records related to this payment
+        $records = $payment->records()->latest()->get();
+
+        if (request()->expectsJson()) {
+            if($records->isEmpty()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No payment records found for this payment page.',
+                        'records' => [],
+                    ]
+                ], 200);
+            }
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Payment records refreshed successfully.',
+                    'records' => $records,
+                ]
+            ], 200);
+        }
     }
 }
