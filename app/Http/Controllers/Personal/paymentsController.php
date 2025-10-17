@@ -18,10 +18,11 @@ use Maatwebsite\Excel\Excel as ExcelFormat;
 class paymentsController extends Controller
 {
     //
-    public function index(){
+    public function index()
+    {
         $user = Auth::guard('personal-api')->user();
         $payments = payment::where('personal_id', $user->id)->orderBy('created_at', 'desc')->paginate(10);
-        
+
         if ($payments->total() < 1) {
             return response()->json([
                 'data' => [
@@ -43,8 +44,9 @@ class paymentsController extends Controller
     }
 
     //fetch users added sub account
-    public function subaccount(){
-        try{
+    public function subaccount()
+    {
+        try {
             $user = Auth::guard('personal-api')->user();
             $subaccounts = Subaccount::where('personal_id', $user->id)->get();
 
@@ -83,7 +85,8 @@ class paymentsController extends Controller
 
         return $reference;
     }
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $user = Auth::guard('personal-api')->user();
 
         // Validate request
@@ -114,7 +117,7 @@ class paymentsController extends Controller
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('payment_cover_image', 'public');
         }
-        
+
         // auto-generate unique reference
         $reference = $request->reference ?? $this->generateUniqueReference();
         $pageLink = url('payment/paymentcheckout/' . $reference);
@@ -144,12 +147,13 @@ class paymentsController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $user = Auth::guard('personal-api')->user();
 
         $payment = payment::where('id', $id)
-                        ->where('personal_id', $user->id)
-                        ->first();
+            ->where('personal_id', $user->id)
+            ->first();
 
         if (!$payment) {
             return response()->json([
@@ -160,7 +164,7 @@ class paymentsController extends Controller
             ], 404);
         }
 
-         // Validate fields
+        // Validate fields
         $validator = Validator::make($request->all(), [
             'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
             'title' => 'required|string|max:255',
@@ -184,13 +188,13 @@ class paymentsController extends Controller
         //get subaccount details with subaccount_id
         $subaccountId = $request->input('subaccount_id');
         $subaccount = Subaccount::where('personal_id', $user->id)
-                        ->where('id', $subaccountId)->first();
-        
+            ->where('id', $subaccountId)->first();
+
         if (!$subaccount) {
             return response()->json([
                 'data' => [
                     'status' => 'error',
-                    'message' => 'Subaccount not found for the provided subaccount_id '. $subaccountId,
+                    'message' => 'Subaccount not found for the provided subaccount_id ' . $subaccountId,
                 ]
             ], 404);
         }
@@ -227,13 +231,13 @@ class paymentsController extends Controller
                 'payment' => $payment
             ]
         ], 200);
-
     }
 
-    public function show(Request $request, $id){
+    public function show(Request $request, $id)
+    {
         $user = Auth::guard('personal-api')->user();
         $payment = payment::where('id', $id)
-                      ->where('personal_id', $user->id)->first();
+            ->where('personal_id', $user->id)->first();
 
         if (!$payment) {
             return response()->json([
@@ -253,10 +257,11 @@ class paymentsController extends Controller
         ], 200);
     }
 
-    public function destroy(Request $request, $id){
+    public function destroy(Request $request, $id)
+    {
         $user = Auth::guard('personal-api')->user();
         $payment = payment::where('id', $id)
-                      ->where('personal_id', $user->id)->first();
+            ->where('personal_id', $user->id)->first();
 
         if (!$payment) {
             return response()->json([
@@ -277,7 +282,8 @@ class paymentsController extends Controller
         ], 200);
     }
 
-    public function paymentrecords(){
+    public function paymentrecords()
+    {
         $user = Auth::guard('personal-api')->user();
         // Fetch payments with related records
         $payments = payment::where("personal_id", $user->id)->with('records')->paginate(10);
@@ -291,11 +297,12 @@ class paymentsController extends Controller
         ], 200);
     }
 
-    public function records(Request $request, $id){
+    public function records(Request $request, $id)
+    {
         $user = Auth::guard('personal-api')->user();
         // Fetch payments records
         $records = PaymentRecord::where("payment_id", $id)->where('personal_id', $user->id)->paginate(10);
-        
+
         // If no records found, return error response
         if ($records->isEmpty()) {
             return response()->json([
@@ -321,9 +328,26 @@ class paymentsController extends Controller
         $fileName = 'my_payments_records_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
         return Excel::download(
-            new PaymentRecordsExport($user->id), 
-            $fileName, 
+            new PaymentRecordsExport($user->id),
+            $fileName,
             ExcelFormat::CSV
         );
+    }
+
+    public function refresh()
+    {
+        $user = Auth::guard('personal-api')->user();
+
+        $payments = Payment::where('personal_id', $user->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'status' => 'success',
+                'message' => 'Latest payment records fetched successfully',
+                'payments' => $payments
+            ]
+        ], 200);
     }
 }
