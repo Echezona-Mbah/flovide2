@@ -26,13 +26,13 @@ class PaymentRecordsSeeder extends Seeder
             DB::table('payment_records')->insert([
                 'user_id' => null,
                 'personal_id' => $personalIds[array_rand($personalIds)],
-                'payment_id' => rand(1, 5), // related payment IDs
+                'payment_id' => 1, // related payment IDs
                 'amount' => rand(1000, 10000),
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
                 'phone' => $faker->phoneNumber,
                 'currency' => "NGN",
-                'status' => $statuses[array_rand($statuses)],
+                'status' => "pending",
                 'reference' => 'TRX-' . strtoupper(Str::random(10)),
                 'created_at' => Carbon::now()->subDays(rand(0, 30)),
                 'updated_at' => Carbon::now(),
