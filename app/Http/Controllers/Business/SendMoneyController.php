@@ -81,6 +81,41 @@ class SendMoneyController extends Controller
         ]);
     }
 
+    
+    public function getExchangeRates(Request $request)
+    {
+        $from = $request->input('from_currency');
+        $to = $request->input('to_currency');
+        $amount = $request->input('amount', 1);
+
+        $result = $this->getExchangeRateFromMap($from, $to);
+
+        if (!$result) {
+            return response()->json([
+                'data' => [
+                    'errors' => 'Invalid currency'
+                ]
+            ], 400);
+        }
+
+        $rate = $result['rate'];
+        $transfer_fee = $result['transfer_fee'];
+
+        $formatted = sprintf(
+            "%s %.2f = %s %s",
+            strtoupper($from),
+            (float) $amount,
+            strtoupper($to),
+            $rate
+        );
+
+        return response()->json([
+            'exchange_rate' => $formatted,
+            'transfer_fee' => $transfer_fee
+        ]);
+    }
+
+
 
 
 

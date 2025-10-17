@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\Business\AddMoneyController;
 use App\Http\Controllers\Business\BillPaymentController;
 use App\Http\Controllers\Business\ChargebackController;
 use App\Http\Controllers\Business\ComplianceController;
@@ -231,11 +232,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/organization', [OrganizationController::class, 'store'])->name('team.store');
     Route::patch('/organization/{id}', [OrganizationController::class, 'updateRole'])->name('members.updateRole');
 
+
     Route::get('/organization_setting', [OrganizationController::class, 'indexsetting'])->name('organization_setting');
+    Route::post('/organization_setting', [OrganizationController::class, 'storesetting'])->name('organization_setting.store');
+
+    // Route::post('/update-password', [OrganizationController::class, 'storesetting'])->name('password.update');
     Route::get('/organization_plan', [OrganizationController::class, 'indexplan'])->name('organization_plan');
+
 
     Route::get('/compliance', [ComplianceController::class, 'index'])->name('compliance');
     Route::post('/compliance', [ComplianceController::class, 'store'])->name('compliance.store');
+
+    Route::get('/add_money', [AddMoneyController::class, 'index'])->name('add_money');
+
+
+
 
 
 

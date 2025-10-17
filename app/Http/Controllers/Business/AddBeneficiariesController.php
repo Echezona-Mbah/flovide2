@@ -7,6 +7,7 @@ use App\Models\Bank;
 use App\Models\Beneficia;
 use App\Models\Countries;
 use Illuminate\Http\Request;
+use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -76,137 +77,153 @@ class AddBeneficiariesController extends Controller
 
 
 
-    public function store(Request $request)
-    {
-        $country = $request->input('country');
-        $currency = $request->input('currency');
+public function store(Request $request)
+{
+    $userId = auth('api')->id() ?? auth()->id();
+    $country = $request->input('country');
+    $currency = $request->input('currency');
 
-        // Start with rules that apply to all
-        $rules = [
-            'account_type' => 'required|string|max:255',
-            'country' => 'required|string',
-            'currency' => 'required|string',
-            'account_name' => 'required|string|max:255',
-        ];
-        // dd($request->all());
+    // ✅ Base validation rules
+    $rules = [
+        'account_type'  => 'required|string|max:255',
+        'country'       => 'required|string',
+        'currency'      => 'required|string',
+        'account_name'  => 'required|string|max:255',
+    ];
 
-        // Conditional validation
-        if ($country === 'NG') {
-            $rules['bank_id'] = 'required|string|max:255';
-            $rules['account_number_input'] = 'required|string';
-        } elseif ($currency === 'GBP') {
-            $rules['sort_code'] = 'required|string|max:255';
-            $rules['account_number'] = 'required|string|max:255';
-            $rules['address'] = 'required|string|max:255';
-            $rules['city'] = 'required|string|max:255';
-            $rules['state'] = 'required|string|max:255';
-            $rules['zipcode'] = 'required|string|max:20';
-        } elseif (in_array($currency, ['USD', 'EUR'])) {
-            $rules['bic'] = 'required|string|max:255';
-            $rules['account_number'] = 'required|string';
-            $rules['address'] = 'required|string|max:255';
-            $rules['city'] = 'required|string|max:255';
-            $rules['state'] = 'required|string|max:255';
-            $rules['zipcode'] = 'required|string|max:20';
-        }
+    // ✅ Conditional validation
+    if ($country === 'NG') {
+        $rules['bank_id']              = 'required|string|max:255';
+        $rules['account_number_input'] = 'required|string';
+    } elseif ($currency === 'GBP') {
+        $rules['sort_code']       = 'required|string|max:255';
+        $rules['account_number']  = 'required|string|max:255';
+        $rules['address']         = 'required|string|max:255';
+        $rules['city']            = 'required|string|max:255';
+        $rules['state']           = 'required|string|max:255';
+        $rules['zipcode']         = 'required|string|max:20';
+    } elseif (in_array($currency, ['USD', 'EUR'])) {
+        $rules['bic']             = 'required|string|max:255';
+        $rules['account_number']  = 'required|string';
+        $rules['address']         = 'required|string|max:255';
+        $rules['city']            = 'required|string|max:255';
+        $rules['state']           = 'required|string|max:255';
+        $rules['zipcode']         = 'required|string|max:20';
+    }
 
-        $validator = Validator::make($request->all(), $rules);
+    $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return $request->expectsJson()
-                ? response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422)
-                : redirect()->back()->withErrors($validator)->withInput();
-        }
+    if ($validator->fails()) {
+        return $request->expectsJson()
+            ? response()->json(['errors' => $validator->errors()], 422)
+            : redirect()->back()->withErrors($validator)->withInput();
+    }
 
-        // Choose the correct account number field
-            $accountNumber = $country === 'NG' 
-            ? $request->input('account_number_input') 
-            : $request->input('account_number');
-            $accountName = $request->input('account_name');
+    // ✅ Choose correct account number field
+    $accountNumber = $country === 'NG'
+        ? $request->input('account_number_input')
+        : $request->input('account_number');
+    $accountName = $request->input('account_name');
 
-            
-            // 🔍 Check if this account already exists for the current user
-            $exists = Beneficia::where('account_name', $accountName)
-            ->where('account_number', $accountNumber)
-            ->where('user_id', Auth::id())
-            ->exists();
+    // ✅ Prevent duplicate beneficiary
+    $exists = Beneficia::where('account_name', $accountName)
+        ->where('account_number', $accountNumber)
+        ->where('user_id', $userId)
+        ->exists();
 
-            if ($exists) {
-            $errorMessage = 'This beneficiary already exists with the same account name and number.';
-
-            return $request->expectsJson()
-                ? response()->json(['message' => $errorMessage], 409)
-                : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
-            }
-
-        $payload = [
-            'country' => $country,
-            'currency' => $currency,
-            'alias' => $request->account_name,
-            'type' => $request->account_type,
-            'account_name' => $request->account_name,
-            'account_number' => $accountNumber,
-        ];
-        // dd($payload);
-        // Add country-specific fields
-        if ($country === 'NG') {
-            $payload['bank_id'] = $request->input('bank_id');
-        } elseif ($currency === 'GBP') {
-            $payload['sort_code'] = $request->input('sort_code');
-            $payload['address'] = $request->input('address');
-            $payload['city'] = $request->input('city');
-            $payload['state'] = $request->input('state');
-            $payload['zipcode'] = $request->input('zipcode');
-            // Do NOT include BIC for GBP
-        } elseif (in_array($currency, ['USD', 'EUR'])) {
-            $payload['bic'] = $request->input('bic');
-            $payload['address'] = $request->input('address');
-            $payload['city'] = $request->input('city');
-            $payload['state'] = $request->input('state');
-            $payload['zipcode'] = $request->input('zipcode');
-        }
-
-        // Optional: remove null/empty fields
-        $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
-
-        Log::info('Payload sent to OhentPay:', ['payload' => $payload]);
-        //dd($payload);
-        $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
-
-        if (!$ohentResponse->successful()) {
-            $errorResponse = $ohentResponse->json();
-            $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
-
-            Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
-
-            return redirect()->back()->with('api_error', $errorMessage)->withInput();
-        }
-
-        $responseData = $ohentResponse->json();
-
-        $beneficia = Beneficia::create([
-            'recipient_id'       => $responseData['id'],
-            'country'            => $responseData['country'],
-            'alias'              => $responseData['alias'],
-            'type'               => $responseData['type'],
-            'account_name'       => $responseData['bank_account']['account_name'] ?? null,
-            'account_number'     => $responseData['bank_account']['account_number'] ?? null,
-            'bank'               => $responseData['bank_account']['bank_name'] ?? null,
-            'currency'           => $responseData['bank_account']['currency'] ?? null,
-            'created_at'         => now(),
-            'user_id'            => $request->user()?->id ?? Auth::id(),
-            'default_reference'  => 'Invoice',
-        ]);
+    if ($exists) {
+        $errorMessage = 'This beneficiary already exists with the same account name and number.';
 
         return $request->expectsJson()
             ? response()->json([
-                'message' => 'Beneficia created successfully',
-                'success' => 'Beneficia created successfully',
-                 'data' => $beneficia
-                ], 201)
-            : redirect()->route('add_beneficias.create')->with('success', 'Beneficia created successfully.');
+                'errors' => [
+                    'message' => [$errorMessage]
+                ]
+            ], 409)
+            : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
     }
+
+
+    // ✅ Build payload
+    $payload = [
+        'country'        => $country,
+        'currency'       => $currency,
+        'alias'          => $accountName,
+        'type'           => $request->account_type,
+        'account_name'   => $accountName,
+        'account_number' => $accountNumber,
+    ];
+
+    if ($country === 'NG') {
+        $payload['bank_id'] = $request->input('bank_id');
+    } elseif ($currency === 'GBP') {
+        $payload['sort_code'] = $request->input('sort_code');
+        $payload['address']   = $request->input('address');
+        $payload['city']      = $request->input('city');
+        $payload['state']     = $request->input('state');
+        $payload['zipcode']   = $request->input('zipcode');
+    } elseif (in_array($currency, ['USD', 'EUR'])) {
+        $payload['bic']     = $request->input('bic');
+        $payload['address'] = $request->input('address');
+        $payload['city']    = $request->input('city');
+        $payload['state']   = $request->input('state');
+        $payload['zipcode'] = $request->input('zipcode');
+    }
+
+    // ✅ Remove empty/null fields
+    $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
+
+    Log::info('Payload sent to OhentPay:', $payload);
+
+    // ✅ Send request to OhentPay API
+    $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
+        ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+
+    if (!$ohentResponse->successful()) {
+        $errorResponse = $ohentResponse->json();
+        $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
+
+        Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
+
+        return $request->expectsJson()
+            ? response()->json(['errors' => $errorMessage], 500)
+            : redirect()->back()->with('api_error', $errorMessage)->withInput();
+    }
+
+    $responseData = $ohentResponse->json();
+
+    // ✅ Save beneficiary locally
+    $beneficia = Beneficia::create([
+        'recipient_id'      => $responseData['id'],
+        'country'           => $responseData['country'],
+        'alias'             => $responseData['alias'],
+        'type'              => $responseData['type'],
+        'account_name'      => $responseData['bank_account']['account_name'] ?? null,
+        'account_number'    => $responseData['bank_account']['account_number'] ?? null,
+        'bank'              => $responseData['bank_account']['bank_name'] ?? null,
+        'currency'          => $responseData['bank_account']['currency'] ?? null,
+        'user_id'           => $userId,
+        'default_reference' => 'Invoice',
+    ]);
+
+    // ✅ Notify user
+    $user = \App\Models\User::find($userId);
+    // dd($user);
+    if ($user) {
+        $user->notify(new GeneralNotification(
+            "New Beneficiary Added 🎉",
+            "You successfully added {$beneficia->account_name} ({$beneficia->account_number}) as a beneficiary."
+        ));
+    }
+
+    return $request->expectsJson()
+        ? response()->json([
+            'message' => 'Beneficiary created successfully',
+            'data'    => $beneficia
+        ], 200)
+        : redirect()->route('add_beneficias.create')->with('success', 'Beneficiary created successfully.');
+}
+
 
 
 
@@ -482,24 +499,69 @@ class AddBeneficiariesController extends Controller
     }
 
 
-    public function fetchBankss(Request $request)
-    {
+    // public function fetchBankss(Request $request)
+    // {
 
+    //     $country = $request->input('country');
+    //     $currency = $request->input('currency');
+    //     $rules = [
+    //             'country' => 'required|string',
+    //             'currency' => 'required|string',
+    //     ];
+    //     $validator = Validator::make($request->all(), $rules);
+
+    //     if ($validator->fails()) {
+    //             return $request->expectsJson()
+    //                 ? response()->json([
+    //                     'message' => 'Validation failed',
+    //                     'errors' => $validator->errors()
+    //                 ], 422)
+    //                 : redirect()->back()->withErrors($validator)->withInput();
+    //     }
+
+    //     $response = Http::withToken(env('OHENTPAY_API_KEY'))
+    //         ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+    //             'country' => $country,
+    //             'currency' => $currency
+    //         ]);
+
+    //     if ($response->successful()) {
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'banks' => $response->json()
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'error',
+    //         'message' => 'Failed to fetch banks',
+    //         'details' => $response->json()
+    //     ], $response->status());
+    // }
+
+        public function fetchBankss(Request $request)
+    {
         $country = $request->input('country');
         $currency = $request->input('currency');
+
         $rules = [
-                'country' => 'required|string',
-                'currency' => 'required|string',
+            'country' => 'required|string',
+            'currency' => 'required|string',
         ];
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-                return $request->expectsJson()
-                    ? response()->json([
-                        'message' => 'Validation failed',
-                        'errors' => $validator->errors()
-                    ], 422)
-                    : redirect()->back()->withErrors($validator)->withInput();
+            return $request->expectsJson()
+                ? response()->json([
+                    'data' => [
+                        'errors' => 'Validation failed',
+                        'success' => false,
+                        'errors' => $validator->errors(),
+                        'method' => $request->method(),
+                        'url' => $request->fullUrl()
+                    ]
+                ], 422)
+                : redirect()->back()->withErrors($validator)->withInput();
         }
 
         $response = Http::withToken(env('OHENTPAY_API_KEY'))
@@ -510,15 +572,24 @@ class AddBeneficiariesController extends Controller
 
         if ($response->successful()) {
             return response()->json([
-                'status' => 'success',
-                'banks' => $response->json()
-            ]);
+                'data' => [
+                    'message' => 'Banks retrieved successfully',
+                    'success' => true,
+                    'data' => $response->json(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl()
+                ]
+            ], 200);
         }
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch banks',
-            'details' => $response->json()
+            'data' => [
+                'errors' => 'Failed to fetch banks',
+                'success' => false,
+                'data' => $response->json(),
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
         ], $response->status());
     }
 
