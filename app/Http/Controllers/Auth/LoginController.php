@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Personal;
+use App\Models\Subaccount;
 use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,30 @@ class LoginController extends Controller
 
         $balances = \App\Models\Balance::where('user_id', $account->id)->get();
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
-            ->latest()->take(4)->get();
+    ->latest()
+    ->take(4)
+    ->get()
+    ->map(function ($t) {
+        return [
+            'type'      => $t->type,
+            'date'      => $t->created_at->format('Y-m-d H:i:s'),
+            'sender'    => $t->sender ?? 'N/A',
+            'recipient' => $t->recipient ?? 'N/A',
+            'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+            'currency'  => $t->currency,
+            'status' => $t->status,
+            'type' => $t->type,
+            'reference' => $t->reference,
+            'recipient_details' => [
+                'alias'          => $t->recipient_alias,
+                'account_name'   => $t->recipient_account_name,
+                'account_number' => $t->recipient_account_number,
+                'bank_name'      => $t->recipient_bank_name,
+                'bank_currency'  => $t->recipient_bank_currency,
+            ]
+        ];
+    });
+
 
         $chartData = \App\Models\TransactionHistory::where('user_id', $account->id)
             ->where('created_at', '>=', now()->subMonths(3))
@@ -69,6 +93,7 @@ class LoginController extends Controller
         $beneficiaries = \App\Models\Beneficia::where('user_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('user_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('user_id', $account->id)->where('status', 'active')->get();
+        $subaccounts = Subaccount::where('user_id', $account->id)->get();
 
 
         return response()->json([
@@ -81,7 +106,7 @@ class LoginController extends Controller
                     'email' => $account->email,
                     'currency' => $account->currency,
                     'profile_url' => $account->profile_picture 
-                    ? asset('storage/'.$account->profile_picture) 
+                    ? asset($account->profile_picture) 
                     : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
@@ -92,6 +117,7 @@ class LoginController extends Controller
                 'beneficiaries' => $beneficiaries,    
                 'payout_accounts' => $payoutAccounts, 
                 'virtual_cards' => $virtualCards,
+                'subaccounts' => $subaccounts, 
                 'owner_id' => $teamMembership ? ($teamMembership->userOwner->id ?? null) : $account->id,
                 'role' => $teamMembership ? ($teamMembership->role ?? 'member') : 'Owner',
                 'token' => $token,
@@ -134,8 +160,28 @@ class LoginController extends Controller
 
         // Fetch balances, transactions, chart data
         $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
-        $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
-            ->latest()->take(4)->get();
+       $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)->latest()->take(4)->get()->map(function ($t) {
+        return [
+            'type'      => $t->type,
+            'date'      => $t->created_at->format('Y-m-d H:i:s'),
+            'sender'    => $t->sender ?? 'N/A',
+            'recipient' => $t->recipient ?? 'N/A',
+            'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+            'currency'  => $t->currency,
+            'status' => $t->status,
+            'type' => $t->type,
+            'reference' => $t->reference,
+            'recipient_details' => [
+                'alias'          => $t->recipient_alias,
+                'account_name'   => $t->recipient_account_name,
+                'account_number' => $t->recipient_account_number,
+                'bank_name'      => $t->recipient_bank_name,
+                'bank_currency'  => $t->recipient_bank_currency,
+            ]
+        ];
+    });
+
+
         $chartData = \App\Models\TransactionHistory::where('personal_id', $account->id)
             ->where('created_at', '>=', now()->subMonths(3))
             ->select(
@@ -151,6 +197,8 @@ class LoginController extends Controller
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('personal_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('personal_id', $account->id)->where('status', 'active')->get();
+        $subaccounts = Subaccount::where('personal_id', $account->id)->get();
+
 
         return response()->json([
             'data' => [
@@ -162,7 +210,7 @@ class LoginController extends Controller
                     'email' => $account->email,
                     'currency' => $account->currency,
                      'profile_url' => $account->profile_picture 
-                    ? asset('storage/'.$account->profile_picture) 
+                    ? asset($account->profile_picture) 
                     : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
@@ -173,6 +221,7 @@ class LoginController extends Controller
                 'beneficiaries' => $beneficiaries,    
                 'payout_accounts' => $payoutAccounts,  
                 'virtual_cards' => $virtualCards,
+                'subaccounts' => $subaccounts,
                 'token' => $token,
             ]
         ], 200);
