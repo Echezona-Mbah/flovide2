@@ -21,7 +21,9 @@ class PaymentController extends Controller
     {
         // Fetch all payment pages for the authenticated user
         $user = Auth::user();
-        $payment = payment::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        $payment = payment::where('user_id', $user->id)
+                    ->latest()
+                    ->get();
 
         // Get all payment_ids from the collection
         $paymentIds = $payment->pluck('id');
