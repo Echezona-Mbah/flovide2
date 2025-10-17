@@ -21,7 +21,10 @@ class paymentsController extends Controller
     public function index()
     {
         $user = Auth::guard('personal-api')->user();
-        $payments = payment::where('personal_id', $user->id)->orderBy('created_at', 'desc')->paginate(10);
+        $payments = payment::where('personal_id', $user->id)
+                    ->withCount('records')
+                    ->latest()
+                    ->paginate(10);
 
         if ($payments->total() < 1) {
             return response()->json([
