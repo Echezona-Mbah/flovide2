@@ -1,21 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Personal;
+namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use App\Models\Balance;
-use App\Models\TransactionHistory;
 use App\Notifications\GeneralNotification;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Http\Request;
 
 class AddMoneyController extends Controller
 {
-public function topupWithCard(Request $request)
+
+      public function index(Request $request)
+    {
+        // $ownerId = session('owner_id');
+        $user = Auth::user();
+        $balances = Balance::where('user_id',$user->id)->get();
+    
+        return view('business.add_money', compact('balances'));
+    }
+
+
+
+    public function topupWithCard(Request $request)
 {
-    $personal = auth('personal-api')->user();
-    if (!$personal) {
+        $user = Auth::user();
+    if (!$user) {
         return response()->json(['data' => ['errors' => 'Unauthenticated']], 401);
     }
 
@@ -28,7 +39,7 @@ public function topupWithCard(Request $request)
         'cvv'          => 'required|string', 
     ]);
 
-    $balance = Balance::where('personal_id', $personal->id)
+    $balance = Balance::where('user_id', $user->id)
         ->where('id', $request->balance)
         ->first();
 
@@ -45,20 +56,7 @@ public function topupWithCard(Request $request)
     $balance->amount += $request->amount;
     $balance->save();
 
-    // TransactionHistory::create([
-    //     'personal_id'  => $personal->id,
-    //     'type'         => 'topup',
-    //     'amount'       => $request->amount,
-    //     'status'       => 'successful',
-    //     'method'       => 'card',
-    //     'reference'    => $reference,
-    //     'card_number'  => '**** **** **** ' . $maskedCard,
-    //     'expiry_month' => $request->expiry_month, 
-    //     'expiry_year'  => $request->expiry_year, 
-    //     // 'cvv'       => null, // ← do NOT store CVV
-    // ]);
-
-    $personal->notify(new GeneralNotification(
+    $user->notify(new GeneralNotification(
         "Top-up Successful 🎉",
         "You topped up {$request->amount} to your wallet using card ending {$maskedCard}. Ref: {$reference}"
     ));
@@ -71,7 +69,5 @@ public function topupWithCard(Request $request)
         ]
     ], 200);
 }
-
-
 
 }

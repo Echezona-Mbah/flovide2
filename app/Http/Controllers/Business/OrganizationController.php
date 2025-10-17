@@ -159,45 +159,180 @@ class OrganizationController extends Controller
 
 
 
+public function updateProfile(Request $request)
+{
+    $request->validate([
+        'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
+    ]);
+
+    $user = Auth::user();
+
+    if (!$user) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => [
+                    'errors' => 'User record not found'
+                ]
+            ], 404);
+        }
+        return redirect()->back()->withErrors('User record not found');
+    }
+
+    if ($request->hasFile('profile_picture')) {
+        $folder = 'profile_pictures/business';
+        $filename = time() . '_' . uniqid() . '.' . $request->file('profile_picture')->getClientOriginalExtension();
+        $request->file('profile_picture')->move(public_path($folder), $filename);
+
+        // delete old picture if exists
+        if ($user->profile_picture && file_exists(public_path($user->profile_picture))) {
+            unlink(public_path($user->profile_picture));
+        }
+
+        $user->profile_picture = $folder . '/' . $filename;
+    }
+
+    $user->save();
+
+    // ✅ If API (JSON request)
+    if ($request->expectsJson()) {
+        return response()->json([
+            'data' => [
+                'message' => 'Profile updated successfully',
+                'profile_picture_url' => $user->profile_picture 
+                    ? asset($user->profile_picture) 
+                    : null,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ]
+        ]);
+    }
+
+    // ✅ If Web (normal form submission)
+    return redirect()->back()->with('success', 'Profile updated successfully');
+}
 
 
 
+    public function storesetting(Request $request)
+    {
+        $formType = $request->input('form_type');
+
+        if ($formType === 'password') {
+            return $this->updatePassword($request);
+        }
+
+        if ($formType === 'deactivate') {
+            return $this->deactivateAccount($request);
+        }
+
+        if ($formType === 'updateProfile') {
+            return $this->updateProfile($request);
+        }
+
+        return redirect()->route('organization_setting')->withErrors('Invalid request.');
+    }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-         public function indexsetting(Request $request)
+          public function indexsetting(Request $request)
     {
     
         return view('business.organization_setting');
     }
+
+
+    public function deactivateAccount(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User record not found'
+                ], 404);
+            }
+            return redirect()->back()->withErrors('User record not found');
+        }
+        $user->deletestatus = 'deactivated';
+        $user->save();
+        try {
+            $user->tokens()->delete();
+        } catch (\Exception $e) {
+        }
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Account deactivated successfully',
+                'user_status' => $user->deletestatus,
+                'method' => $request->method(),
+                'url' => $request->fullUrl()
+            ], 200);
+        }
+        return redirect()
+            ->route('login')
+            ->with('success', 'Account deactivated successfully');
+    }
+
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                // Strong password rule
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/',
+            ],
+        ]);
+
+        $user = auth()->user();
+
+        // 2. Check if old password matches
+        if (!Hash::check($request->old_password, $user->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                'data'=>[
+                    'status' => false,
+                    'message' => 'Current password is incorrect',
+                ]
+                ], 422);
+            }
+            return back()->withErrors(['old_password' => 'Current password is incorrect']);
+        }
+        $user->password = Hash::make($request->password);
+        $user->save();
+        if ($request->expectsJson()) {
+            return response()->json([
+            'data'=>[
+                'status' => true,
+                'message' => 'Password updated successfully',
+            ]
+            ]);
+        }
+        return back()->with('success', 'Password updated successfully');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public function indexplan(Request $request)
     {

@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'business-name', errorId: 'businessNameError', message: 'Please enter a business name!' },
                 { id: 'registration-number', errorId: 'error-registration_number', message: 'Please enter a registration number!' },
                 { id: 'business-type', errorId: 'error-business_type', message: 'Please enter the business type!' },
+                { id: 'business_number', errorId: 'error-business_number', message: 'Please enter the business Number!' },
                 { id: 'company-url', errorId: 'error-company_url', message: 'Please enter the company URL!' },
                 { id: 'industry', errorId: 'error-industry', message: 'Please select an industry!' },
                 { id: 'annual-turnover', errorId: 'error-annual_turnover', message: 'Please enter the annual turnover!' }
@@ -248,48 +249,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
 
+        // if (step === 3) {
+        //     const fields = [
+        //         { id: 'first_name', errorId: 'error-first_name', message: 'Please enter your First Name!' },
+        //         { id: 'last_name', errorId: 'error-last_name', message: 'Please enter your Last Name!' },
+        //         { id: 'email', errorId: 'error-email', message: 'Please enter your email!' },
+        //         { id: 'state', errorId: 'error-state', message: 'Please enter your state!' },
+        //         { id: 'password', errorId: 'error-password', message: 'Please enter your password!' },
+        //         { id: 'confirm_password', errorId: 'error-confirm-password', message: 'Please confirm your password!' }
+        //     ];
+    
+        //     fields.forEach(field => {
+        //         const input = document.getElementById(field.id);
+        //         const errorContainer = document.getElementById(field.errorId);
+        //         input.setAttribute('data-error-id', field.errorId);
+    
+        //         const value = input.value.trim();
+    
+        //         // Reset previous error
+        //         errorContainer.innerText = "";
+        //         errorContainer.classList.remove("error-message");
+    
+        //         if (!value) {
+        //             errorContainer.innerText = field.message;
+        //             errorContainer.classList.add("error-message");
+        //             hasError = true;
+        //         } else if (field.id === 'password' && value.length < 8) {
+        //             errorContainer.innerText = "Password must be more than 8 characters!";
+        //             errorContainer.classList.add("error-message");
+        //             hasError = true;
+        //         } else {
+        //             formData[field.id] = value;
+        //         }
+        //     });
+    
+        //     const password = document.getElementById('password').value.trim();
+        //     const confirmPassword = document.getElementById('confirm_password').value.trim();
+    
+        //     if (password && confirmPassword && password !== confirmPassword) {
+        //         const confirmPasswordError = document.getElementById('error-confirm-password');
+        //         confirmPasswordError.innerText = "Passwords do not match!";
+        //         confirmPasswordError.classList.add("error-message");
+        //         hasError = true;
+        //     }
+        // }
         if (step === 3) {
-            const fields = [
-                { id: 'email', errorId: 'error-email', message: 'Please enter your email!' },
-                { id: 'state', errorId: 'error-state', message: 'Please enter your state!' },
-                { id: 'password', errorId: 'error-password', message: 'Please enter your password!' },
-                { id: 'confirm_password', errorId: 'error-confirm-password', message: 'Please confirm your password!' }
-            ];
-    
-            fields.forEach(field => {
-                const input = document.getElementById(field.id);
-                const errorContainer = document.getElementById(field.errorId);
-                input.setAttribute('data-error-id', field.errorId);
-    
-                const value = input.value.trim();
-    
-                // Reset previous error
-                errorContainer.innerText = "";
-                errorContainer.classList.remove("error-message");
-    
-                if (!value) {
-                    errorContainer.innerText = field.message;
-                    errorContainer.classList.add("error-message");
+                const fields = [
+                    { id: 'first_name', errorId: 'error-first_name', message: 'Please enter your First Name!' },
+                    { id: 'last_name', errorId: 'error-last_name', message: 'Please enter your Last Name!' },
+                    { id: 'person_number', errorId: 'error-person_number', message: 'Please enter your Person Number!' },
+                    { id: 'email', errorId: 'error-email', message: 'Please enter your email!' },
+                    { id: 'state', errorId: 'error-state', message: 'Please enter your state!' },
+                    { id: 'password', errorId: 'error-password', message: 'Please enter your password!' },
+                    { id: 'confirm_password', errorId: 'error-confirm-password', message: 'Please confirm your password!' }
+                ];
+
+                fields.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    const errorContainer = document.getElementById(field.errorId);
+                    input.setAttribute('data-error-id', field.errorId);
+
+                    const value = input.value.trim();
+
+                    // Reset previous error
+                    errorContainer.innerText = "";
+                    errorContainer.classList.remove("error-message");
+
+                    if (!value) {
+                        errorContainer.innerText = field.message;
+                        errorContainer.classList.add("error-message");
+                        hasError = true;
+                    } 
+                    else if (field.id === 'password') {
+                        if (value.length < 8) {
+                            errorContainer.innerText = "Password must be more than 8 characters!";
+                            errorContainer.classList.add("error-message");
+                            hasError = true;
+                        } else {
+                            const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+                            if (!strongPasswordPattern.test(value)) {
+                                errorContainer.innerText = "Password must contain uppercase, lowercase, number and special character!";
+                                errorContainer.classList.add("error-message");
+                                hasError = true;
+                            } else {
+                                formData[field.id] = value;
+                            }
+                        }
+                    } 
+                    else {
+                        formData[field.id] = value;
+                    }
+                });
+
+                const password = document.getElementById('password').value.trim();
+                const confirmPassword = document.getElementById('confirm_password').value.trim();
+
+                if (password && confirmPassword && password !== confirmPassword) {
+                    const confirmPasswordError = document.getElementById('error-confirm-password');
+                    confirmPasswordError.innerText = "Passwords do not match!";
+                    confirmPasswordError.classList.add("error-message");
                     hasError = true;
-                } else if (field.id === 'password' && value.length < 8) {
-                    errorContainer.innerText = "Password must be more than 8 characters!";
-                    errorContainer.classList.add("error-message");
-                    hasError = true;
-                } else {
-                    formData[field.id] = value;
                 }
-            });
-    
-            const password = document.getElementById('password').value.trim();
-            const confirmPassword = document.getElementById('confirm_password').value.trim();
-    
-            if (password && confirmPassword && password !== confirmPassword) {
-                const confirmPasswordError = document.getElementById('error-confirm-password');
-                confirmPasswordError.innerText = "Passwords do not match!";
-                confirmPasswordError.classList.add("error-message");
-                hasError = true;
-            }
         }
+
     
         
 
