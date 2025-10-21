@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payment_records', function (Blueprint $table) {
-            // Foreign key
-            $table->foreignId('user_id')
-            ->nullable()
-            ->after('payment_id')
-            ->constrained('users')
-            ->onDelete('cascade');
+        Schema::table('invoices', function (Blueprint $table) {
+            //
+            $table->string('invoice_receipt_link')->nullable()->after('status');
         });
     }
 
@@ -26,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('payment_records', function (Blueprint $table) {
+        Schema::table('invoices', function (Blueprint $table) {
             //
+            $table->dropColumn('invoice_receipt_link');
         });
     }
 };
