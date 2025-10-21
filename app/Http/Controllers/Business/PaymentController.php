@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\payments as payment;
 use Illuminate\Support\Str;
-use App\Exports\PaymentRecordsExport;
+use App\Exports\PaymentRecordsBusinessExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelFormat;
 
@@ -104,7 +104,7 @@ class PaymentController extends Controller
     public function edit(Request $request, $id)
     {
         $user = Auth::user();
-        $Payment = payment::where('id', $id)->where('user_id', $user->id)->first();
+        $Payment = payment::with("records")->where('id', $id)->where('user_id', $user->id)->first();
 
         if (!$Payment) {
             if ($request->expectsJson()) {
@@ -418,5 +418,27 @@ class PaymentController extends Controller
             ], 200);
         }
 
+    }
+
+    public function exportUserPayments($id)
+    {
+        $user = Auth::user();
+        $payment = payment::with("records")->where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$payment) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Payment page not found.'
+                    ]
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'Payment page not found.');
+        }
+
+        $fileName = 'payment_records_' . $payment->payment_reference . '.xlsx';
+
+        return Excel::download(new PaymentRecordsBusinessExport($payment->id), $fileName, ExcelFormat::XLSX);
     }
 }

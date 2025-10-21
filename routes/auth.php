@@ -86,6 +86,8 @@ Route::post('/donation/donationpay', [DonationController::class, 'donationpay'])
 Route::get('/remita/remitacheckout/{id}', [RemitaController::class, 'remitacheckout'])->name('remita.checkout');
 Route::post('/remita/remitapay', [RemitaController::class, 'remitapay'])->name('remita.pay');
 
+//invoice receipt link
+Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt'])->name('invoices.receipt');
 
 
 // HtmlMinifier::class
@@ -155,7 +157,7 @@ Route::middleware(['auth'])->group(function () {
     //payment
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
-    Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserRemita'])->name('payment.export');
+    Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserPayments'])->name('payment.export');
     Route::get('/payment/{id}/edit', [PaymentController::class, 'edit'])->name('payment.edit');
     // Route::get('/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
     Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
