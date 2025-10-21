@@ -17,11 +17,22 @@ return new class extends Migration
 
             // Foreign keys
             $table->foreignId('donation_id')->constrained('donations')->onDelete('cascade');
-            $table->foreignId('personal_id')->constrained('personals')->onDelete('cascade'); 
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('personal_id')
+                ->nullable()
+                ->constrained('personals')
+                ->nullOnDelete();
+
             //user details
             $table->string("name")->nullable();
             $table->string("email")->nullable();
             $table->string("phone")->nullable();
+            
             // Payment details
             $table->decimal('amount', 15, 2);
             $table->string('currency', 10)->default('NGN');

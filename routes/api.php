@@ -67,7 +67,8 @@ Route::post('/auth/request-password-otp', [ForgetPasswordController::class, 'req
 // Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
 
 
-
+//invoice receipt link
+Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt']);
 
 
 
@@ -130,7 +131,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('business/donation', [DonationController::class, 'donationIndex']);
     // Route::get('business/donation/create', [DonationController::class, 'donationCreate']);
     Route::get('business/donation/{id}/export', [DonationController::class, 'exportUserDonation']);
-    // Route::get('business/donation/edit/{id}', [DonationController::class, 'donationEdit']);
+    Route::get('business/donation/edit/{id}', [DonationController::class, 'donationEdit']);
+    Route::get('business/donation/refresh', [DonationController::class, 'donationRefresh']);
+    Route::get('business/donation/records/{id}', [DonationController::class, 'donationRecords']);
     Route::put('business/donation/update/{id}', [DonationController::class, 'donationUpdate']);
     Route::post('business/donation/store', [DonationController::class, 'donationStore']);
     Route::delete('business/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
@@ -138,7 +141,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //payment
     Route::get('business/payment', [PaymentController::class, 'index']);
     Route::get('business/payment/create', [PaymentController::class, 'create']);
-    Route::get('business/payment/{id}/export', [PaymentController::class, 'exportUserRemita']);
+    Route::get('business/payment/{id}/export', [PaymentController::class, 'exportUserPayments']);
     Route::get('business/payment/{id}/edit', [PaymentController::class, 'edit']);
     Route::get('business/payment/refresh', [PaymentController::class, 'refresh']);
     Route::get('business/payment/refresh/{id}', [PaymentController::class, 'refreshDetails']);
