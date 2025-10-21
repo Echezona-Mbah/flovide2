@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Subaccount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-// use App\Exports\RemitaRecordsExport;
+use App\Exports\DonationRecordsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelFormat;
 use Illuminate\Support\Facades\Validator;
@@ -166,7 +166,7 @@ class DonationController extends Controller
     public function donationEdit(Request $request, $id)
     {
         $user = Auth::user();
-        $donation = donation::where('id', $id)
+        $donation = donation::with("records")->where('id', $id)
             ->where('user_id', $user->id)
             ->first();
 
@@ -353,5 +353,99 @@ class DonationController extends Controller
             ], 200);
         }
         return view('business.donationCheckout', ['donation' => $donation]);
+    }
+
+    public function donationRecords(Request $request, $id)
+    {
+        $user = Auth::user();
+        $donation = donation::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$donation) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Donation not found or not authorized',
+                    ]
+                ], 404);
+            }
+            return redirect()->back()->withErrors(['error' => 'Donation not found or not authorized.']);
+        }
+
+        $records = DonationRecord::where('donation_id', $donation->id)->latest()->get();
+
+        if ($request->expectsJson()) {
+            if($records->isEmpty()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'Donation record is empty.',
+                        'records' => []
+                    ]
+                ], 200);
+            }
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Donation records retrieved successfully.',
+                    'records' => $records,
+                ]
+            ], 200);
+        }
+
+        return view('business.donationRecords', ['donation' => $donation, 'records' => $records]);
+    }
+
+    public function donationRefresh(Request $request)
+    {
+        $user = Auth::user();
+        $donations = donation::where('user_id', $user->id)->latest()->get();
+
+        if ($request->expectsJson()) {
+            if($donations->isEmpty()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'success',
+                        'message' => 'No donations found.',
+                        'donations' => []
+                    ]
+                ], 200);
+            }
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'message' => 'Donations refreshed successfully.',
+                    'donations' => $donations,
+                ]
+            ], 200);
+        }
+
+        return redirect()->back()->with('success', 'Donations refreshed successfully.');
+    }
+
+    public function exportUserDonation(Request $request, $id)
+    {
+        $user = Auth::user();
+        $donation = donation::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$donation) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Donation not found or not authorized',
+                    ]
+                ], 404);
+            }
+            return redirect()->back()->withErrors(['error' => 'Donation not found or not authorized.']);
+        }
+
+        $fileName = 'donation_records_' . $donation->donation_reference . '.xlsx';
+
+        return Excel::download(new DonationRecordsExport($donation->id), $fileName, ExcelFormat::XLSX);
     }
 }
