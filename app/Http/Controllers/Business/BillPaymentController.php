@@ -8,6 +8,7 @@ use App\Models\Balance;
 use App\Models\BillPayment;
 use App\Models\DstvPlans;
 use App\Models\ElectricityCompany;
+use App\Models\TeamMembers;
 use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -41,12 +42,14 @@ class BillPaymentController extends Controller
     {
         // $ownerId = session('owner_id');
          $user = auth()->user();
-        $payments = BillPayment::where('user_id',$user->id)->latest()->get();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+        $payments = BillPayment::where('user_id',$ownerId)->latest()->get();
         $serviceID = 'dstv'; 
         $variations = DstvPlans::all();
         $electricitydata = ElectricityCompany::all();
         $airTimedata = AirtimeNetwork::all();
-         $balances = Balance::where('user_id',$user->id)->get();
+         $balances = Balance::where('user_id',$ownerId)->get();
 
         foreach ($balances as $balance) {
             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
@@ -145,6 +148,18 @@ class BillPaymentController extends Controller
         }
 
         $user = auth()->user();
+
+        // ✅ Check user role
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $role = $team ? $team->role : 'Owner';
+
+        if (!in_array($role, ['Owner', 'Admin'])) {
+            $msg = 'Ask the owner to make you admin so you can buy.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 403)
+                : redirect()->back()->with('error', $msg);
+        }
+
         $variation = DstvPlans::where('code', $request->variation_code)->first();
 
         if (!$variation) {
@@ -157,7 +172,10 @@ class BillPaymentController extends Controller
         $amount = $variation->amount;
         $currency = $variation->currency ?? 'NGN';
 
-        $balance = Balance::where('user_id', $user->id)
+        // ✅ OWNER'S balance, not team member
+        $ownerId = $team ? $team->owner_id : $user->id;
+
+        $balance = Balance::where('user_id', $ownerId)
             ->where('id', $request->balance)
             ->first();
 
@@ -187,9 +205,9 @@ class BillPaymentController extends Controller
         $status = ($response['code'] ?? '') === '000' ? 'success' : 'failed';
         $transaction = $response['content']['transactions'] ?? [];
 
-        // Save transaction
+        // Save transaction under OWNER (!!!)
         $payment = BillPayment::create([
-            'user_id' => $user->id,
+            'user_id' => $ownerId,
             'request_id' => $request_id,
             'service_id' => $request->service_id,
             'variation_code' => $request->variation_code,
@@ -206,7 +224,6 @@ class BillPaymentController extends Controller
             $balance->save();
         }
 
-        // Return response
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Payment processed',
@@ -219,24 +236,34 @@ class BillPaymentController extends Controller
     }
 
 
+
     // Delete a payment record
-    public function destroy(Request $request, BillPayment $billPayment)
-    {
-        if ($billPayment->user_id !== ($request->user()?->id ?? auth()->id())) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            abort(403, 'Unauthorized');
-        }
+public function destroy(Request $request, BillPayment $billPayment)
+{
+    $user = auth()->user();
 
-        $billPayment->delete();
+    // Get the real owner of this user (from team_members)
+    $team = \App\Models\TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id; // If team member, get the business owner. If not, user is owner.
 
-        if ($request->expectsJson()) {
-            return response()->json(['message' => 'Payment deleted successfully'], 200);
-        }
-
-        return redirect()->route('billpayments.index')->with('success', 'Payment deleted successfully.');
+    // ✅ Only owner can delete
+    if ($billPayment->user_id !== $ownerId) {
+        $msg = 'Only the business owner can delete this payment';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg], 403)
+            : abort(403, $msg);
     }
+
+    $billPayment->delete();
+
+    if ($request->expectsJson()) {
+        return response()->json(['message' => 'Payment deleted successfully'], 200);
+    }
+
+    return redirect()->route('billpayments.index')
+        ->with('success', 'Payment deleted successfully.');
+}
+
 
 
 
@@ -295,89 +322,103 @@ class BillPaymentController extends Controller
     }
 
 
-    // Store payment and call VTpass pay API
-    public function handleElectricity(Request $request)
-    {
-        $rules = [
-            'service_id' => 'required|string',
-            'billers_code' => 'required|string',
-            'variation_code' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'phone' => 'required|string',
-            'balance' => 'required|string',
-        ];
+   public function handleElectricity(Request $request)
+{
+    $rules = [
+        'service_id' => 'required|string',
+        'billers_code' => 'required|string',
+        'variation_code' => 'required|string',
+        'amount' => 'required|numeric|min:0',
+        'phone' => 'required|string',
+        'balance' => 'required|string',
+    ];
 
-        $validator = Validator::make($request->all(), $rules);
+    $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $user = auth()->user();
-
-        $balance = Balance::where('user_id', $user->id)
-            ->where('id', $request->balance)
-            ->first();
-
-        if (!$balance || $balance->amount < $request->amount) {
-            $msg = 'Insufficient balance or balance not found';
-            return $request->expectsJson()
-                ? response()->json(['message' => $msg], 400)
-                : redirect()->back()->with('error', $msg);
-        }
-
-        $request_id = uniqid('vtpass_');
-
-        $payload = [
-            'request_id' => $request_id,
-            'serviceID' => $request->service_id,
-            'billersCode' => $request->billers_code,
-            'variation_code' => $request->variation_code,
-            'amount' => $request->amount,
-            'phone' => $request->phone,
-        ];
-
-        $response = Http::withBasicAuth(
-            env('VTPASS_USERNAME'),
-            env('VTPASS_PASSWORD')
-        )->post(env('VTPASS_API_URL') . '/pay', $payload)->json();
-
-        $status = ($response['code'] ?? '') === '000' ? 'success' : 'failed';
-        $transaction = $response['content']['transactions'] ?? [];
-
-        $payment = BillPayment::create([
-            'user_id' => $user->id,
-            'request_id' => $request_id,
-            'service_id' => $request->service_id,
-            'variation_code' => $request->variation_code,
-            'billers_code' => $request->billers_code,
-            'amount' => $transaction['amount'] ?? $request->amount,
-            'phone' => $transaction['phone'] ?? $request->phone,
-            'response' => $response,
-            'status' => $status,
-        ]);
-
-        if ($status === 'success') {
-            $balance->amount -= $request->amount;
-            $balance->save();
-        }
-
+    if ($validator->fails()) {
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Payment processed',
-                'status' => $status,
-                'data' => $payment
-            ], 200);
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
-
-        return redirect()->route('bill_payment')->with('success', 'Electricity bill payment ' . $status);
+        return redirect()->back()->withErrors($validator)->withInput();
     }
+
+    $user = auth()->user();
+
+    // ✅ Check role - only owner or admin can continue
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $role = $team ? $team->role : 'Owner'; // if no record, user is the owner
+
+    if (!in_array($role, ['Owner', 'Admin'])) {
+        $msg = 'Only the business owner or an admin can make payments.';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg], 403)
+            : redirect()->back()->with('error', $msg);
+    }
+
+    // ✅ Determine whose balance to use (always owner's balance)
+    $ownerId = $team ? $team->owner_id : $user->id;
+
+    $balance = Balance::where('user_id', $ownerId)
+        ->where('id', $request->balance)
+        ->first();
+
+    if (!$balance || $balance->amount < $request->amount) {
+        $msg = 'Insufficient balance or balance not found';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg], 400)
+            : redirect()->back()->with('error', $msg);
+    }
+
+    $request_id = uniqid('vtpass_');
+
+    $payload = [
+        'request_id' => $request_id,
+        'serviceID' => $request->service_id,
+        'billersCode' => $request->billers_code,
+        'variation_code' => $request->variation_code,
+        'amount' => $request->amount,
+        'phone' => $request->phone,
+    ];
+
+    $response = Http::withBasicAuth(
+        env('VTPASS_USERNAME'),
+        env('VTPASS_PASSWORD')
+    )->post(env('VTPASS_API_URL') . '/pay', $payload)->json();
+
+    $status = ($response['code'] ?? '') === '000' ? 'success' : 'failed';
+    $transaction = $response['content']['transactions'] ?? [];
+
+    $payment = BillPayment::create([
+        'user_id' => $ownerId, // ✅ Store as owner payment
+        'request_id' => $request_id,
+        'service_id' => $request->service_id,
+        'variation_code' => $request->variation_code,
+        'billers_code' => $request->billers_code,
+        'amount' => $transaction['amount'] ?? $request->amount,
+        'phone' => $transaction['phone'] ?? $request->phone,
+        'response' => $response,
+        'status' => $status,
+    ]);
+
+    if ($status === 'success') {
+        $balance->amount -= $request->amount;
+        $balance->save();
+    }
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'message' => 'Payment processed',
+            'status' => $status,
+            'data' => $payment
+        ], 200);
+    }
+
+    return redirect()->route('bill_payment')->with('success', 'Electricity bill payment ' . $status);
+}
+
 
 
 
@@ -437,6 +478,15 @@ class BillPaymentController extends Controller
     }
     public function handleData(Request $request)
     {
+        // ✅ Allow only owner or admin
+        $user = auth()->user();
+        if (!in_array($user->role, ['Owner', 'Admin'])) {
+            $msg = 'Unauthorized: Only owner or admin can perform this action.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 403)
+                : redirect()->back()->with('error', $msg);
+        }
+
         //  dd($request->all());
         $rules = [
             'service_id' => 'required|string',
@@ -457,8 +507,6 @@ class BillPaymentController extends Controller
             }
             return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        $user = auth()->user();
 
         $balance = Balance::where('user_id', $user->id)
             ->where('id', $request->balance)
@@ -518,11 +566,14 @@ class BillPaymentController extends Controller
         return redirect()->route('bill_payment')->with('success', 'Data purchase ' . $status);
     }
 
+
     public function getUserBillPayments(Request $request)
     {
-    $user = auth()->user();
+     $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
 
-        $billPayments = BillPayment::where('user_id', $user->id)
+        $billPayments = BillPayment::where('user_id', $ownerId)
             ->orderBy('created_at', 'desc')
             ->get();
 

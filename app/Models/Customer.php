@@ -15,6 +15,13 @@ class Customer extends Model
         'account_number',
         'account_name',
         'user_id',
+        'recipient_id',
+        'country',
+        'alias',
+        'type',
+        'currency',
+        'default_reference',
+        'sort_code',
     ];
 
     public function user()

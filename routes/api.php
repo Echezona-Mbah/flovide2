@@ -65,7 +65,8 @@ Route::post('/auth/request-password-otp', [ForgetPasswordController::class, 'req
 
 
 // Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
-
+// Route::get('/team/invite/{token}', [BusinessOrganizationController::class, 'showInviteForm'])->name('team.accept-invite');
+Route::post('/team/invite/{token}', [BusinessOrganizationController::class, 'completeInvite']);
 
 //invoice receipt link
 Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt']);
@@ -179,7 +180,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // api routes for Customers details
     Route::get('/customers', [AddCustomerController::class, 'index']);
     Route::post('/add-customers', [AddCustomerController::class, 'store']);
-    Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
+    Route::post('/fetchBanks-customers', [AddCustomerController::class, 'fetchBanks']);
+    Route::post('/validate-account-customers', [AddCustomerController::class, 'validateRecipient']);
+    Route::get('/fetchcountrylist-customers', [AddCustomerController::class, 'fetchcountrylist']);
+
+    // Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
     Route::delete('customers/{id}', [AddCustomerController::class, 'destroy'])->name('customers.destroy');
     // api routes for Subscriptions details
     Route::get('/subscriptions', [SubscriptionController::class, 'index']);
@@ -225,14 +230,18 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/topup', [BusinessAddMoneyController::class, 'topupWithCard']);
 
+    //notifications
     Route::get('/notifications', [BusinessNotificationController::class, 'index']);
     Route::get('/notifications/unread', [BusinessNotificationController::class, 'unread']);
     Route::put('/notifications/{id}/read', [BusinessNotificationController::class, 'markAsRead']);
 
-
+    // Organization
     Route::post('/profile', [BusinessOrganizationController::class, 'updateProfile']);
     Route::post('/email', [BusinessOrganizationController::class, 'updateEmail']);
     Route::post('/deactivate-account', [BusinessOrganizationController::class, 'deactivateAccount']);
+
+    Route::post('/team', [BusinessOrganizationController::class, 'store']);
+    Route::patch('/team/{id}', [BusinessOrganizationController::class, 'updateRole'])->name('members.updateRole');
 
 
 
