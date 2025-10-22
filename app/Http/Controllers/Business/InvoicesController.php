@@ -85,6 +85,8 @@ class InvoicesController extends Controller
         // Generate a unique tracking code
         $trackingCode = $this->generateTrackingCode();
 
+        $invoiceReceiptLink = url('/invoices/receipts/' . $trackingCode);
+
         $invoice = Invoices::create([
             'user_id' => Auth::id(),
             'invoice_number' => $validated['invoice_number'],
@@ -96,6 +98,7 @@ class InvoicesController extends Controller
             'note' => $validated['note'] ?? null,
             'amount' => $validated['amount'],
             'status' => $validated['status'],
+            'invoice_receipt_link' => $invoiceReceiptLink
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -336,5 +339,34 @@ class InvoicesController extends Controller
         }
 
         return redirect()->back()->with('success', 'Invoice deleted successfully.');
+    }
+
+    public function showReceipt(Request $request, $tracking_code)
+    {
+        $invoice = Invoices::with('items')->where('tracking_code', $tracking_code)->first();
+
+        if (!$invoice) {
+            if($request->expectsJson()){
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Invoice not found.'
+                    ]
+                ], 404);
+            }
+            return abort(404, 'Invoice not found.');
+        }
+
+        if($request->expectsJson()){
+            return response()->json([
+                'data' => [
+                    'status' => 'success',
+                    'invoice' => $invoice
+                ]
+            ], 200);
+        }
+
+        // Return the invoice receipt view
+        return view('business.invoiceReceipt', compact('invoice'));
     }
 }

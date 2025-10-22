@@ -22,7 +22,8 @@ class Invoices extends Model
         'currency', 
         'note',
         'amount',
-        'status'
+        'status',
+        'invoice_receipt_link'
     ];
 
     public function items()

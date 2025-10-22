@@ -67,7 +67,8 @@ Route::post('/auth/request-password-otp', [ForgetPasswordController::class, 'req
 // Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
 
 
-
+//invoice receipt link
+Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt']);
 
 
 
@@ -130,7 +131,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('business/donation', [DonationController::class, 'donationIndex']);
     // Route::get('business/donation/create', [DonationController::class, 'donationCreate']);
     Route::get('business/donation/{id}/export', [DonationController::class, 'exportUserDonation']);
-    // Route::get('business/donation/edit/{id}', [DonationController::class, 'donationEdit']);
+    Route::get('business/donation/edit/{id}', [DonationController::class, 'donationEdit']);
+    Route::get('business/donation/refresh', [DonationController::class, 'donationRefresh']);
+    Route::get('business/donation/records/{id}', [DonationController::class, 'donationRecords']);
     Route::put('business/donation/update/{id}', [DonationController::class, 'donationUpdate']);
     Route::post('business/donation/store', [DonationController::class, 'donationStore']);
     Route::delete('business/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
@@ -138,8 +141,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //payment
     Route::get('business/payment', [PaymentController::class, 'index']);
     Route::get('business/payment/create', [PaymentController::class, 'create']);
-    Route::get('business/payment/{id}/export', [PaymentController::class, 'exportUserRemita']);
+    Route::get('business/payment/{id}/export', [PaymentController::class, 'exportUserPayments']);
     Route::get('business/payment/{id}/edit', [PaymentController::class, 'edit']);
+    Route::get('business/payment/refresh', [PaymentController::class, 'refresh']);
+    Route::get('business/payment/refresh/{id}', [PaymentController::class, 'refreshDetails']);
     // Route::get('business/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout']);
     Route::put('business/payment/{id}/update', [PaymentController::class, 'update']);
     Route::post('business/payment/store', [PaymentController::class, 'store']);
@@ -346,6 +351,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/payments/paymentrecords/{id}', [paymentsController::class, 'records']);
         Route::get('/payments/subaccount', [paymentsController::class, 'subaccount']);
         Route::get('/payments/export', [paymentsController::class, 'exportUserPayments']);
+        Route::get('/payments/refresh', [paymentsController::class, 'refresh']);
+        Route::get('/payments/refresh/{id}', [paymentsController::class, 'refreshDetails']);
         Route::post('/payments/store', [paymentsController::class, 'store']);
         Route::delete('/payments/{id}/destroy', [paymentsController::class, 'destroy']);
         Route::put('/payments/update/{id}', [paymentsController::class, 'update']);
