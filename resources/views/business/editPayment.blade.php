@@ -34,11 +34,18 @@
                             <span class="w-3 h-3 rounded-full {{ $Payment->visibility === "private" ? "bg-yellow-500" : "bg-green-700" }} block"></span>
                             <span class="text-gray-700 text-sm select-none">{{ $Payment->visibility === "private" ? "Draft" : "Active" }}</span>
                         </div>
-                        <button type="button"
-                            class="md:flex hidden items-center gap-2 rounded-lg border {{ $Payment->visibility === "private" ? "border-gray-300 bg-gray-100 px-4 py-2 text-gray-500 cursor-not-allowed" : "border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-blue-200" }} text-sm font-semibold">
-                            <i class="far fa-copy"></i>
-                            Copy Link
-                        </button>
+                        @if($Payment->visibility === "private")
+                            <!-- Payment is private -->
+                            <button type="button" class="md:flex hidden items-center gap-2 rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-500 cursor-not-allowed text-sm font-semibold">
+                                <i class="far fa-copy"></i>
+                                Copy Link
+                            </button>
+                        @else
+                            <button type="button" value="{{ $Payment->page_link }}" onclick="copyLink(this.value)" class="md:flex hidden items-center gap-2 rounded-lg border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:bg-blue-200 text-sm font-semibold">
+                                <i class="far fa-copy"></i>
+                                Copy Link
+                            </button>
+                        @endif
                     </div>
                 </header>
 
@@ -333,16 +340,14 @@
                     <section class="flex-1 max-w-full lg:max-w-[520px] flex flex-col gap-4">
                         <div class="flex justify-between items-center">
                             <h2 class="font-semibold text-gray-900 select-none">Payments</h2>
-                            @if ($Payment->visibility === 'private')
-                                <button type="button"
-                                    class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-500 cursor-not-allowed text-sm font-semibold ">
+                            @if ($Payment->visibility === 'private' || $Payment->records->isEmpty())
+                                <button type="button" class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-500 cursor-not-allowed text-sm font-semibold ">
                                     <i class="fas fa-file-export"></i>
                                     Export CSV
                                 </button>
                             @else
                                 <a href="{{ route('payment.export', ['id' => $Payment->id]) }}">
-                                    <button type="button"
-                                        class="flex items-center gap-2 rounded-lg border border-blue-300 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold ">
+                                    <button type="button" class="flex items-center gap-2 rounded-lg border border-blue-300 bg-white px-4 py-2 text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold ">
                                         <i class="fas fa-file-export"></i>
                                         Export CSV
                                     </button>
@@ -350,44 +355,35 @@
                             @endif
                         </div>
 
-                        <div class="md:flex-1 md:overflow-y-auto  w-full overflow-x-auto space-y-3 pr-2 bg-[#F3F3F3] p-4 rounded-2xl"
-                            style="max-height: 600px;" tabindex="0">
+                        <div class="md:flex-1 md:overflow-y-auto  w-full overflow-x-auto space-y-3 pr-2 bg-[#F3F3F3] p-4 rounded-2xl" style="max-height: 600px;" tabindex="0">
                             <!-- Subscriber item template repeated 10 times -->
-                            <div
-                                class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
+                            @if ($Payment->records->isEmpty())
+                                <div class="flex items-center gap-4 rounded-xl px-6 py-3">
+                                    <img src="../../asserts/dashboard/person.png" alt="">
+                                    <p>No Payment yet</p>
+                                </div>
+                            @else
+                                @foreach ($Payment->records as $record)
+                                    <div class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
+                                        <span class="bg-[#F3F3F3] p-2 rounded-md">
+                                            @if ($record->status === 'failed')
+                                                <span class="w-3 h-3 rounded-full block" style="background-color: #c53030" aria-label="Inactive status"></span>
+                                            @elseif ($record->status === 'pending')   
+                                                <span class="w-3 h-3 rounded-full block" style="background-color: #d69e2e" aria-label="Pending status"></span>
+                                            @else                             
+                                                <span class="w-3 h-3 rounded-full block" style="background-color: #38a169" aria-label="Active status"></span>            
+                                            @endif
+                                        </span>
 
-                                <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                    <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                        aria-label="Active status"></span>
-                                </span>
-
-                                <span class="font-semibold text-gray-900  text-[10px] ">Marvin
-                                    McKinney</span>
-                                <span
-                                    class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                <span
-                                    class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                            </div>
-
-                            <div
-                                class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                    <span class="w-3 h-3 rounded-full block " style="background-color: #c53030"
-                                        aria-label="Inactive status"></span>
-                                </span>
-                                <span class="font-semibold text-gray-900  text-[10px] ">Annette
-                                    Black</span>
-                                <span
-                                    class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                <span
-                                    class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                            </div>
-
+                                        <span class="font-semibold text-gray-900  text-[10px] ">{{ $record->name }}</span>
+                                        <span class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">{{ $record->email }}</span>
+                                        <span class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">{{ $record->phone }}</span>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
                     </section>
                 </main>
-                </div>
-                </div>
             </section>
     </main>
 
@@ -507,6 +503,35 @@
                             });
                         });
                 }
+            });
+        }
+
+        function copyLink(data){
+            const link = data;
+
+            navigator.clipboard.writeText(link).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Link copied to clipboard!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            }).catch(err => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Failed to copy link!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
             });
         }
 

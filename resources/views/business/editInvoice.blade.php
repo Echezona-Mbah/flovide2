@@ -56,7 +56,7 @@
                                     <span class="w-3 h-3 rounded-full {{ $statusColor }}"></span>
                                     <span class="text-sm text-gray-600 select-text">{{ $status }}</span>
                                 </div>
-                                <button {{ $statusEnable }}  onclick="copyLink()" class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
+                                <button {{ $statusEnable }} value="{{ $invoice->invoice_receipt_link }}"  onclick="copyLink(this.value)" class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
                                     <i class="far fa-copy"></i>
                                     <span class="hidden md:flex">Copy Link</span>
                                 </button>
@@ -623,8 +623,8 @@
 
         });
 
-        function copyLink(){
-            const link = 'your-link-to-copy';
+        function copyLink(data){
+            const link = data;
 
             navigator.clipboard.writeText(link).then(() => {
                 Swal.fire({

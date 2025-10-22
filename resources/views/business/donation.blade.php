@@ -91,8 +91,8 @@
                                                 <img src=" {{ asset("asserts/dashboard/person.png") }}" alt="">
                                                 {{ $payment_count[$donation->id] ?? 0  }}
                                             </div>
-                                            <div class="bg-[#F9F7E5] {{ $donation->visibility == "Private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
-                                                @if ($donation->visibility == 'Private')
+                                            <div class="bg-[#F9F7E5] {{ ucfirst($donation->visibility) == "Private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
+                                                @if ( ucfirst($donation->visibility) == 'Private')
                                                     <img src="/src/asserts/dashboard/note.png" alt="">
                                                 @else
                                                     <i class="fas fa-check text-[10px]"></i>
@@ -100,7 +100,7 @@
                                             </div>
                                         </div>
                                         <div class="flex gap-4">
-                                            <a href="{{ $donation->page_link }}" class="{{ $donation->visibility === 'private' ? 'hidden' : '' }}">
+                                            <a href="{{ $donation->page_link }}" class="{{ ucfirst($donation->visibility) === 'Private' ? 'hidden' : '' }}">
                                                 <button aria-label="Link button" class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
                                                     <i class="fas fa-link"></i>
                                                 </button>
