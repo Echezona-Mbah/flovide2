@@ -86,9 +86,13 @@
                     <img src="{{ $member->avatar }}" alt="{{ $member->name }}" 
                          class="w-6 h-6 rounded-full object-cover">
                 @else
-                    <span class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center">
-                        {{ strtoupper(substr($member->user->business_name, 0, 1)) }}
-                    </span>
+               @php
+    $initial = strtoupper(substr($member->user->business_name ?? $member->user->name ?? '', 0, 1));
+@endphp
+
+<span class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center">
+    {{ $initial }}
+</span>
                 @endif
                 <span class="font-semibold text-gray-900">
                     {{ $member->user->business_name ?? 'Unknown' }}

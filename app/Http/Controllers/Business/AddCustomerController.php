@@ -6,24 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Countries;
 use App\Models\Customer;
+use App\Models\TeamMembers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Response;
+use App\Notifications\GeneralNotification;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class AddCustomerController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user();
-        $customers = Customer::where('user_id', $user->id)->paginate(5);
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+        $customers = Customer::where('user_id', $ownerId)->paginate(5);
       
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'customers records retrieved successfully',
+               'data'=>[
+                 'message' => 'customers records retrieved successfully',
                 'data' => $customers,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
+               ]
             ], 200);
         }
         return view('business.customer', compact('customers'));
@@ -53,62 +62,184 @@ class AddCustomerController extends Controller
     }
     public function create() {
         $user = auth()->user();
-        $countries = Countries::all();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+
+        $countries = [];
+
+        if ($response->successful()) {
+            $countries = $response->json(); // this gives the array of country objects
+        }
+
         $banks = Bank::all();
-        $customers = Customer::where('user_id', $user->id)->paginate(5);
+        $customers = Customer::where('user_id', $ownerId)->paginate(5);
         $customer = null; // Add this line
         return view('business.add_customer', compact('countries', 'banks', 'customers', 'customer'));
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'customer_name' => 'required|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'bank' => 'nullable|string',
-            'country_id' => 'required|exists:countries,id',
-            'account_number' => 'required|string',
-            'account_name' => 'required|string',
-        ]);
-    
+        $userId = auth('api')->id() ?? auth()->id();
+        $user = auth()->user();
+
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $role = $team ? $team->role : 'Owner'; 
+
+        if (!in_array($role, ['Owner', 'Admin'])) {
+            $msg = 'Only the business owner or an admin can add Customers.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 403)
+                : redirect()->back()->with('error', $msg);
+        }
+
+        $country = $request->input('country');
+        $currency = $request->input('currency');
+
+        // ✅ Base validation rules
+        $rules = [
+            'account_type'  => 'required|string|max:255',
+            'country'       => 'required|string',
+            'currency'      => 'required|string',
+            'account_name'  => 'required|string|max:255',
+        ];
+
+        // ✅ Conditional validation
+        if ($country === 'NG') {
+            $rules['bank_id']              = 'required|string|max:255';
+            $rules['account_number_input'] = 'required|string';
+        } elseif ($currency === 'GBP') {
+            $rules['sort_code']       = 'required|string|max:255';
+            $rules['account_number']  = 'required|string|max:255';
+            $rules['address']         = 'required|string|max:255';
+            $rules['city']            = 'required|string|max:255';
+            $rules['state']           = 'required|string|max:255';
+            $rules['zipcode']         = 'required|string|max:20';
+        } elseif (in_array($currency, ['USD', 'EUR'])) {
+            $rules['bic']             = 'required|string|max:255';
+            $rules['account_number']  = 'required|string';
+            $rules['address']         = 'required|string|max:255';
+            $rules['city']            = 'required|string|max:255';
+            $rules['state']           = 'required|string|max:255';
+            $rules['zipcode']         = 'required|string|max:20';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
         if ($validator->fails()) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ], 422);
-            } else {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
+            return $request->expectsJson()
+                ? response()->json(['errors' => $validator->errors()], 422)
+                : redirect()->back()->withErrors($validator)->withInput();
         }
-    
-        // Create the customer
+
+        // ✅ Choose correct account number field
+        $accountNumber = $country === 'NG'
+            ? $request->input('account_number_input')
+            : $request->input('account_number');
+        $accountName = $request->input('account_name');
+
+        // ✅ Prevent duplicate beneficiary
+        $exists = Customer::where('account_name', $accountName)
+            ->where('account_number', $accountNumber)
+            ->where('user_id', $userId)
+            ->exists();
+
+        if ($exists) {
+            $errorMessage = 'This customer already exists with the same account name and number.';
+
+            return $request->expectsJson()
+                ? response()->json([
+                    'errors' => [
+                        'message' => [$errorMessage]
+                    ]
+                ], 409)
+                : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
+        }
+
+        // ✅ Build payload
+        $payload = [
+            'country'        => $country,
+            'currency'       => $currency,
+            'alias'          => $accountName,
+            'type'           => $request->account_type,
+            'account_name'   => $accountName,
+            'account_number' => $accountNumber,
+        ];
+
+        if ($country === 'NG') {
+            $payload['bank_id'] = $request->input('bank_id');
+        } elseif ($currency === 'GBP') {
+            $payload['sort_code'] = $request->input('sort_code');
+            $payload['address']   = $request->input('address');
+            $payload['city']      = $request->input('city');
+            $payload['state']     = $request->input('state');
+            $payload['zipcode']   = $request->input('zipcode');
+        } elseif (in_array($currency, ['USD', 'EUR'])) {
+            $payload['bic']     = $request->input('bic');
+            $payload['address'] = $request->input('address');
+            $payload['city']    = $request->input('city');
+            $payload['state']   = $request->input('state');
+            $payload['zipcode'] = $request->input('zipcode');
+        }
+
+        // ✅ Remove empty/null fields
+        $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
+
+        Log::info('Payload sent to OhentPay:', $payload);
+
+        // ✅ Send request to OhentPay API
+        $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+
+        if (!$ohentResponse->successful()) {
+            $errorResponse = $ohentResponse->json();
+            $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
+
+            Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
+
+            return $request->expectsJson()
+                ? response()->json(['errors' => $errorMessage], 500)
+                : redirect()->back()->with('api_error', $errorMessage)->withInput();
+        }
+
+        $responseData = $ohentResponse->json();
+
+        // ✅ Save beneficiary locally
         $customer = Customer::create([
-            'customer_name' => $request->customer_name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'bank' => $request->bank,
-            'country_id' => $request->country_id,
-            'account_number' => $request->account_number,
-            'account_name' => $request->account_name,
-            'user_id' => $request->user()?->id ?? auth()->id(),
+            'recipient_id'      => $responseData['id'],
+            'country'           => $responseData['country'],
+            'alias'             => $responseData['alias'],
+            'type'              => $responseData['type'],
+            'account_name'      => $responseData['bank_account']['account_name'] ?? null,
+            'account_number'    => $responseData['bank_account']['account_number'] ?? null,
+            'bank'              => $responseData['bank_account']['bank_name'] ?? null,
+            'currency'          => $responseData['bank_account']['currency'] ?? null,
+            'user_id'           => $userId,
+            'default_reference' => 'Invoice',
         ]);
-    
-        // Return based on request type
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Customer created successfully',
-                'data' => $customer,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ], 201);
+
+        // ✅ Notify user
+        $user = \App\Models\User::find($userId);
+        if ($user) {
+            $user->notify(new GeneralNotification(
+                "New customer Added 🎉",
+                "You successfully added {$customer->account_name} ({$customer->account_number}) as a customer."
+            ));
         }
-    
-        return redirect()->route('customer')->with('success', 'Customer created successfully');
+
+        return $request->expectsJson()
+            ? response()->json([
+            'data'=>[
+                'message' => 'customer created successfully',
+                'data'    => $customer
+            ]
+            ], 200)
+            : redirect()->route('add_customer.create')->with('success', 'customer created successfully.');
     }
+
     
     public function json($id)
     {
@@ -118,29 +249,46 @@ class AddCustomerController extends Controller
     public function edit($id)
     {
         $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
         $customer = Customer::findOrFail($id);
         $countries = Countries::all();
         $banks = Bank::all();
-        $customeres = Customer::where('user_id', $user->id)
-        ->paginate(5);
+        $customeres = Customer::where('user_id', $ownerId)->paginate(5);
         return view('business.edit_customer', compact('customer', 'countries', 'banks','customeres'));
     }
 
     public function update(Request $request, $id)
     {
-         //dd($request->all());
+        $user = auth()->user();
+
+        // ✅ Team / Role Check
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $role = $team ? $team->role : 'Owner';
+
+        if (!in_array($role, ['Owner', 'Admin'])) {
+            $msg = 'Only the business owner or an admin can add beneficiaries.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 403)
+                : redirect()->back()->with('error', $msg);
+        }
+
+        // ✅ Check ownership of the customer record
         $customer = Customer::findOrFail($id);
 
         if ($customer->user_id != auth()->id()) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Unauthorized to edit this customer',
+                    'data'=>[
+                        'message' => 'Unauthorized to edit this customer',
+                    ]
                 ], 403);
             } else {
                 return redirect()->back()->withErrors(['message' => 'Unauthorized to edit this customer']);
             }
         }
 
+        // ✅ Validation
         $validator = Validator::make($request->all(), [
             'customer_name' => 'required|string',
             'email' => 'nullable|email',
@@ -154,27 +302,35 @@ class AddCustomerController extends Controller
         if ($validator->fails()) {
             if ($request->expectsJson()) {
                 return response()->json([
+                'data'=>[
                     'message' => 'Validation failed',
                     'errors' => $validator->errors(),
                     'method' => $request->method(),
                     'url' => $request->fullUrl()
+                ]
                 ], 422);
             } else {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
         }
 
+        // ✅ Update customer
         $customer->update($request->all());
+
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Customer updated successfully',
+                'data'=>[
+                    'message' => 'Customer updated successfully',
                 'data' => $customer,
                 'method' => $request->method(),
                 'url' => $request->fullUrl()
+                ]
             ]);
         }
+
         return redirect()->route('customer')->with('success', 'Customer updated successfully');
     }
+
 
     public function destroy(Request $request, $id)
     {
@@ -247,5 +403,83 @@ class AddCustomerController extends Controller
     
         return response()->stream($callback, 200, $headers);
     }
+
+
+     public function fetchBanks(Request $request)
+    {
+        $country = $request->get('country'); // Default to NG
+        $currency = $request->get('currency'); // Default to NGN
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+                'country' => $country,
+                'currency' => $currency
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'fields' => $response->json()
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
+    }
+
+       public function validateRecipient(Request $request)
+    {
+        $request->validate([
+            'country' => 'required|string',
+            'currency' => 'required|string',
+            'bank_id' => 'required|string',
+            'account_number' => 'required|string',
+        ]);
+
+        $payload = $request->only([
+            'country', 'currency', 'bank_id', 'account_number'
+        ]);
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))->post(
+            rtrim(env('OHENTPAY_BASE_URL'), '/') . '/recipients/validate', $payload
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($response->json(), $response->status());
+        }
+
+        if ($response->successful()) {
+            return back()->with('success', 'Recipient account created successfully.');
+        } else {
+            return back()->with('error', 'Invalid bank or account number.');
+        }
+    }
     
+        public function fetchcountrylist(Request $request)
+    {
+        $country_name = $request->get('country_name', 'NG'); 
+        $alpha2 = $request->get('alpha2', 'NGN'); 
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries', [
+                'country_name' => $country_name,
+                'alpha2' => $alpha2
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'fields' => $response->json()
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
+    }
 }
