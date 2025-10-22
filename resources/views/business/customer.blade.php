@@ -81,7 +81,7 @@
                                     <th class="pl-4 pb-2">Customer name</th>
                                     <th class="pb-2">Email</th>
                                     <th class="pb-2">Phone</th>
-                                    <th class="pr-4 pb-2 text-right">Date Added</th>
+                                    {{-- <th class="pr-4 pb-2 text-right">Date Added</th> --}}
                                 </tr>
                             </thead>
 
@@ -91,10 +91,10 @@
                                 <tr onclick="loadCustomerDetails({{ $customer->id }})"
                                     class="bg-blue-50 font-semibold rounded-lg cursor-pointer hover:bg-blue-100"
                                     data-id="{{ $customer->id }}">
-                                    <td class="pl-4 py-3">{{ $customer->customer_name }}</td>
-                                    <td class="py-3 max-w-[120px] truncate">{{ $customer->email }}</td>
-                                    <td class="py-3">{{ $customer->phone }}</td>
-                                    <td class="pr-4 py-3 text-right">{{ $customer->created_at->format('M j, Y') }}</td>
+                                    <td class="pl-4 py-3">{{ $customer->account_name }}</td>
+                                    <td class="py-3 max-w-[120px] truncate">{{ $customer->account_number }}</td>
+                                    <td class="py-3">{{ $customer->bank }}</td>
+                                    {{-- <td class="pr-4 py-3 text-right">{{ $customer->created_at->format('M j, Y') }}</td> --}}
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -114,14 +114,7 @@
                                 <p class="text-gray-400 text-xs mb-1">Date Added</p>
                                 <p id="customerDate" class="font-semibold text-base text-gray-900">—</p>
                             </div>
-                            <div>
-                                <p class="text-gray-400 text-xs mb-1">Email</p>
-                                <p id="customerEmail" class="font-semibold text-base text-gray-900">—</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-xs mb-1">Phone</p>
-                                <p id="customerPhone" class="font-semibold text-base text-gray-900">—</p>
-                            </div>
+                         
                             <div>
                                 <p class="text-gray-400 text-xs mb-1">Bank</p>
                                 <p id="customerBank" class="font-semibold text-base text-gray-900">—</p>
@@ -139,13 +132,15 @@
                                 <p id="accountNumber" class="font-semibold text-base text-gray-900">—</p>
                             </div>
                         </div>
-                
+{{--                 
                         <div class="mt-10 flex space-x-4">
-                            <button id="editButton"
+                            <button id="editButton" 
                             class="inline-flex items-center space-x-2 rounded-lg bg-blue-100 px-6 py-2 text-blue-700 hover:bg-blue-200">
                             <i class="fas fa-pen"></i>
                             <span>Edit</span>
-                        </button>
+                        </button> --}}
+                        <input type="hidden" id="editButton">
+                        <br>
                         
                         
                         <button type="button"
@@ -173,15 +168,15 @@
         .then(data => {
             const customer = data.data;
 
-            document.querySelector('#customerName').innerText = customer.name || '—';
-            document.querySelector('#customerEmail').innerText = customer.email || '—';
-            document.querySelector('#customerPhone').innerText = customer.phone || '—';
+            document.querySelector('#customerName').innerText = customer.account_name || '—';
+            // document.querySelector('#customerEmail').innerText = customer.email || '—';
+            // document.querySelector('#customerPhone').innerText = customer.phone || '—';
             document.querySelector('#customerDate').innerText = new Date(customer.created_at).toLocaleDateString('en-US', {
                 month: 'short', day: 'numeric', year: 'numeric'
             });
             document.querySelector('#customerBank').innerText = customer.bank || '—';
             document.querySelector('#accountName').innerText = customer.account_name || '—';
-            document.querySelector('#bankCountry').innerText = customer.bank_country || '—';
+            document.querySelector('#bankCountry').innerText = customer.country || '—';
             document.querySelector('#accountNumber').innerText = customer.account_number || '—';
             const editBtn = document.querySelector('#editButton');
             editBtn.onclick = function () {
