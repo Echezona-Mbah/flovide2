@@ -21,20 +21,24 @@ public function create()
     $countries = Countries::all();
 
     // Get the owner ID resolved by middleware
-    // $ownerId = session('owner_id');
-    $user = Auth::user();
+   $user = auth()->user();
+
+    // Check if user is a team member (admin under an owner)
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    // dd($team);
+
+    // If team member, use owner_id, else use own id
+    $ownerId = $team ? $team->owner_id : $user->id;
     
-
     // dd($ownerId);
-
-    // Fetch recent transactions for the owner
-    $transactions = TransactionHistory::where('user_id', $user->id)
+    // $transactions = TransactionHistory::where('user_id', $user->id)
+    $transactions = TransactionHistory::where('user_id', $ownerId)
         ->latest('created_at')
         ->take(5)
         ->get();
 
     // Fetch balances for the owner
-    $balances = Balance::where('user_id', $user->id)->get();
+    $balances = Balance::where('user_id', $ownerId)->get();
 
     foreach ($balances as $balance) {
         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);

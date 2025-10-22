@@ -57,13 +57,14 @@ class AppServiceProvider extends ServiceProvider
         $this->mapWebRoutes(); // If you need web routes
     }
 
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api') 
-            ->namespace($this->namespace)
-            ->group(base_path('routes/api.php')); 
-    }
+  protected function mapApiRoutes()
+{
+    Route::prefix('api')
+        ->middleware(['api', \App\Http\Middleware\ResolveOwnerMiddleware::class])
+        ->namespace($this->namespace)
+        ->group(base_path('routes/api.php'));
+}
+
 
     public function boot()
     {
