@@ -14,6 +14,7 @@ class DonationRecord extends Model
 
     protected $fillable = [
         'donation_id',
+        'user_id',
         'personal_id',
         'name',
         'email',
@@ -35,5 +36,10 @@ class DonationRecord extends Model
     public function personal()
     {
         return $this->belongsTo(Personal::class, 'personal_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
