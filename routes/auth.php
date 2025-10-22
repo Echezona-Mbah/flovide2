@@ -187,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
     Route::get('/customer/search', [AddCustomerController::class, 'search'])->name('customer.search');
     Route::get('/customer/export-csv', [AddCustomerController::class, 'exportCsv'])->name('customer.export.csv');
+    Route::get('/fetch-banks', [AddCustomerController::class, 'fetchBanks'])->name('fetch.banks');
     //subscriptions
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions');
     Route::get('/add_subscription', [SubscriptionController::class, 'create'])->name('add_subscription.create');

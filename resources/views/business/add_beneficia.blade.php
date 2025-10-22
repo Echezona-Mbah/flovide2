@@ -99,18 +99,18 @@
                         @endif
 
                         @if (session('api_error'))
-<script>
-    Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
-        title: @json(session('api_error')),
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-    });
-</script>
-@endif
+                        <script>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: @json(session('api_error')),
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true,
+                            });
+                        </script>
+                        @endif
 
 
 

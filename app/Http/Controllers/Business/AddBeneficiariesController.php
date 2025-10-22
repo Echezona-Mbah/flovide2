@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Beneficia;
 use App\Models\Countries;
+use App\Models\TeamMembers;
 use Illuminate\Http\Request;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Http;
@@ -18,7 +19,9 @@ class AddBeneficiariesController extends Controller
 {
     public function index(Request $request)
     {
-        $ownerId = session('owner_id');
+        $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
     
         $beneficias = Beneficia::where('user_id', $ownerId)
         ->paginate(8);
@@ -57,7 +60,9 @@ class AddBeneficiariesController extends Controller
 
     public function create()
     {
-        $user = Auth::user();
+           $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
 
 
         $response = Http::withToken(env('OHENTPAY_API_KEY'))
@@ -70,7 +75,7 @@ class AddBeneficiariesController extends Controller
         }
 
         $banks = Bank::all();
-        $beneficiaries = Beneficia::where('user_id', $user->id)->paginate(8);
+        $beneficiaries = Beneficia::where('user_id', $ownerId)->paginate(8);
 
         return view('business.add_beneficia', compact('countries', 'banks', 'beneficiaries'));
     }
@@ -80,6 +85,18 @@ class AddBeneficiariesController extends Controller
 public function store(Request $request)
 {
     $userId = auth('api')->id() ?? auth()->id();
+    $user = auth()->user();
+
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $role = $team ? $team->role : 'Owner'; 
+
+    if (!in_array($role, ['Owner', 'Admin'])) {
+        $msg = 'Only the business owner or an admin can add beneficiaries.';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg], 403)
+            : redirect()->back()->with('error', $msg);
+    }
+
     $country = $request->input('country');
     $currency = $request->input('currency');
 
@@ -142,7 +159,6 @@ public function store(Request $request)
             ], 409)
             : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
     }
-
 
     // ✅ Build payload
     $payload = [
@@ -208,7 +224,6 @@ public function store(Request $request)
 
     // ✅ Notify user
     $user = \App\Models\User::find($userId);
-    // dd($user);
     if ($user) {
         $user->notify(new GeneralNotification(
             "New Beneficiary Added 🎉",
@@ -223,6 +238,7 @@ public function store(Request $request)
         ], 200)
         : redirect()->route('add_beneficias.create')->with('success', 'Beneficiary created successfully.');
 }
+
 
 
 

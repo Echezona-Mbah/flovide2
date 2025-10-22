@@ -24,6 +24,8 @@ class OrganizationController extends Controller
             ->value('role'); // This returns only the role string
 
         $members = TeamMembers::where('owner_id', $ownerId)->get();
+                // dd($members);
+
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -36,7 +38,7 @@ class OrganizationController extends Controller
         return view('business.organization', compact('members', 'currentMemberRole'));
     }
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -62,16 +64,24 @@ class OrganizationController extends Controller
 
         $member->save();
 
+        // Add full invite link
+        $inviteLink = url('/team/invite/' . $member->invite_token);
+
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => true,
-                'message' => 'Member added successfully',
-                'data' => $member
+                'data' => [
+                    'status' => true,
+                    'message' => 'Member added successfully',
+                    'data' => array_merge($member->toArray(), [
+                        'invite_link' => $inviteLink
+                    ])
+                ]
             ]);
         }
 
         return back()->with('success', 'Member added successfully!');
     }
+
 
     public function showInviteForm($token)
     {
@@ -82,7 +92,7 @@ class OrganizationController extends Controller
     // Complete invite (register new user)
     public function completeInvite(Request $request, $token)
     {
-        $member = TeamMembers::with('userOwner') // eager load the team owner
+        $member = TeamMembers::with('userOwner')
             ->where('invite_token', $token)
             ->firstOrFail();
 
@@ -90,72 +100,96 @@ class OrganizationController extends Controller
             'name'     => 'required|string',
             'password' => 'required|min:6|confirmed',
         ]);
-
-        // If invited user already exists, reuse them
         $user = User::where('email', $member->email)->first();
 
         if (!$user) {
-            // Create user without making a new business dashboard
             $user = User::create([
-                'typeofuser'            => 'personnal', // invited users are personal
+                'typeofuser'            => 'business',
                 'email_verified_status' => 'yes',
                 'email'                 => $member->email,
                 'password'              => Hash::make($request->password),
                 'business_name'         => $request->name,
             ]);
         }
-
-        // Mark invite as accepted
-        $member->user_id     = $user->id;
-        $member->status      = 'active';
+        $member->user_id      = $user->id;
+        $member->status       = 'active';
         $member->invite_token = null;
         $member->save();
-
-        // Log in the invited user
         Auth::login($user);
 
-        // Redirect to the team owner’s dashboard
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status'  => true,
+                'message' => 'Invitation accepted successfully.',
+                'data'    => [
+                    'user'   => $user,
+                    'member' => $member,
+                    'team_owner' => $member->userOwner ? [
+                        'id' => $member->userOwner->id,
+                        'business_name' => $member->userOwner->business_name,
+                        'email' => $member->userOwner->email,
+                    ] : null
+                ]
+            ]);
+        }
+
+        // Web response (redirect)
         return redirect()->route('dashboard')
             ->with('success', 'Welcome to ' . $member->userOwner->business_name . ' dashboard!');
     }
 
 
-    public function updateRole(Request $request, $id)
-    {
-        $ownerId = session('owner_id');
 
-        $currentMemberRole = TeamMembers::where('owner_id', $ownerId)
-            ->where('user_id', auth()->id())
-            ->value('role');
+public function updateRole(Request $request, $id)
+{
+    $ownerId = session('owner_id');
+    $currentMemberRole = TeamMembers::where('owner_id', $ownerId)
+        ->where('user_id', auth()->id())
+        ->value('role');
 
-        if ($currentMemberRole !== 'Owner') {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Only the Owner can update roles.'
-                ], 403);
-            }
-            abort(403, 'Only the Owner can update roles.');
-        }
-
-        $request->validate([
-            'role' => 'required|in:Owner,Admin,Accountant,Author',
-        ]);
-
-        $member = TeamMembers::where('owner_id', $ownerId)->findOrFail($id);
-        $member->role = $request->role;
-        $member->save();
+    if ($currentMemberRole !== 'Owner') {
+        $message = 'Only the Owner can update roles.';
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => true,
-                'message' => 'Role updated successfully.',
-                'data' => $member
-            ]);
+                'status' => false,
+                'message' => $message
+            ], 403);
         }
 
-        return back()->with('success', 'Role updated successfully.');
+        return back()->with('error', $message);
     }
+    $request->validate([
+        'role' => 'required|in:Owner,Admin,Accountant,Author',
+    ]);
+    $member = TeamMembers::where('owner_id', $ownerId)->findOrFail($id);
+
+    $oldRole = $member->role;
+    $member->role = $request->role;
+    $member->save();
+
+    $successMessage = "Role updated successfully from $oldRole to {$member->role}.";
+
+    // If API request
+    if ($request->expectsJson()) {
+        return response()->json([
+            'status' => true,
+            'message' => $successMessage,
+            'data' => [
+                'id' => $member->id,
+                'email' => $member->email,
+                'old_role' => $oldRole,
+                'new_role' => $member->role,
+                'owner_id' => $member->owner_id,
+                'updated_at' => $member->updated_at,
+            ]
+        ]);
+    }
+
+    // If web request
+    return back()->with('success', $successMessage);
+}
+
 
 
 
