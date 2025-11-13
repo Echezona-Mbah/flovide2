@@ -66,6 +66,43 @@ class CreateBankController extends Controller
         ]);
 
         $userId = Auth::id() ?? $request->user_id;
+           $currency   = strtoupper($request->currency);
+
+    // 🔎 Check if user already has money in any balance
+    $hasMoney = Balance::where('user_id', $userId)
+        ->where('amount', '>', 0)
+        ->exists();
+
+    if (!$hasMoney) { // ❌ Block if no funds exist
+        $errorMessage = 'You must have funds in at least one balance before creating a new one';
+
+        return $request->expectsJson()
+            ? response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'errors' => $errorMessage
+                ]
+            ], 400)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
+
+    // 🔎 Check if user already has this currency
+    $exists = Balance::where('user_id', $userId)
+        ->where('currency', $currency)
+        ->exists();
+
+    if ($exists) {
+        $errorMessage = "You already have a $currency balance. Duplicates are not allowed.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'data' => [
+                    'status' => 'error',
+                    'errors' => $errorMessage
+                ]
+            ], 400)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
 
         $balance = Balance::create([
             'user_id' => $userId,

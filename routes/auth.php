@@ -89,6 +89,10 @@ Route::post('/remita/remitapay', [RemitaController::class, 'remitapay'])->name('
 //invoice receipt link
 Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt'])->name('invoices.receipt');
 
+//Subscription checkout
+Route::get('/subscription/subscriptioncheckout/{id}', [SubscriptionController::class, 'subscriptioncheckout'])->name('subscription.checkout');
+Route::post('/subscription/subscriptionpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
+
 
 // HtmlMinifier::class
 Route::middleware(['auth'])->group(function () {
@@ -194,6 +198,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/add_subscription', [SubscriptionController::class, 'store'])->name('add_subscription.store');
     Route::get('/subscriptions/{id}/edit', [SubscriptionController::class, 'edit'])->name('subscriptions.edit');
     Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
+    Route::get('/subscriptions/{id}/export', [SubscriptionController::class, 'exportSubscribers'])->name('subscriptions.export');
+
     /// Bill Payment
     Route::get('/bill_payment', [BillPaymentController::class, 'index'])->name('bill_payment');
     Route::post('/bill_payment', [BillPaymentController::class, 'store'])->name('billpayments.store');

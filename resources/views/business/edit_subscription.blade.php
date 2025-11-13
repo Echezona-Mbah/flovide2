@@ -141,18 +141,7 @@
                                         class="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
 
-                                {{-- <div>
-                                    <label for="currency"
-                                        class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Currency</label>
-                                    <select id="currency" name="currency"
-                                        class="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
-                                        <option value="GBP" selected>
-                                            🇬🇧 British Pound
-                                        </option>
-                                        <option value="USD">🇺🇸 US Dollar</option>
-                                        <option value="EUR">🇪🇺 Euro</option>
-                                    </select>
-                                </div> --}}
+                          
                                 <div>
                                     <label for="currency" class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Currency</label>
                                 
@@ -192,6 +181,30 @@
                                         <input type="hidden" id="currency" name="currency" value="{{ old('currency', $subscription->currency) }}">
                                     </div>
                                 </div>
+
+
+                                <div class="flex flex-col gap-1">
+                                    <label for="subaccount" class="text-xs text-gray-600 select-none">Subaccount</label>
+                                    <div class="flex gap-3">
+                                        <select id="subaccount" name="subaccount_id"
+                                            class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                            <option value="">Select a subaccount</option>
+                                            @foreach ($subaccounts as $subaccount)
+                                                <option value="{{ $subaccount->id }}"
+                                                    {{ $subscription->subaccount_id == $subaccount->id ? 'selected' : '' }}>
+                                                    {{ $subaccount->account_number ? $subaccount->account_number . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        <input type="number" name="percentage"
+                                            value="{{ old('percentage', $subscription->percentage ?? 10) }}"
+                                            class="text-xs text-gray-700 rounded-md border border-gray-300 px-3 py-2 w-16 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                        <span
+                                            class="text-xs text-gray-700 bg-gray-200 rounded-md px-2 py-2 flex items-center select-none">%</span>
+                                    </div>
+                                </div>
+
                                 
                                 
                                 
@@ -244,155 +257,33 @@
                                         Expired
                                     </button>
                                 </div>
-                                <button type="button"
-                                    class="flex items-center gap-2 rounded-lg border  text-center border-blue-300 bg-white px-4 py-1 text-blue-700 text-[10px] font-semibold hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                     <a href="{{ route('subscriptions.export', $subscription->id) }}"
+                                    class="flex items-center gap-2 rounded-lg border text-center border-blue-300 bg-white px-4 py-1 text-blue-700 text-[10px] font-semibold hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                     <i class="fas fa-file-export"></i> Export CSV
-                                </button>
+                                    </a>
                             </div>
 
-                            <div class="md:flex-1 md:overflow-y-auto  w-full overflow-x-auto space-y-3 pr-2"
-                                style="max-height: 600px;" tabindex="0">
-                                <!-- Subscriber item template repeated 10 times -->
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
+                          <div class="md:flex-1 md:overflow-y-auto w-full overflow-x-auto space-y-3 pr-2" style="max-height: 600px;" tabindex="0">
+    @foreach ($subscribers as $subscriber)
+        @php
+            $statusColor = ($subscriber->is_expired || $subscriber->status !== 'active') ? '#c53030' : '#2f855a';
+            $statusLabel = ($subscriber->is_expired || $subscriber->status !== 'active') ? 'expired' : 'active';
+        @endphp
 
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
+        <div class="subscriber-item flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm"
+             data-status="{{ $statusLabel }}">
+            <span class="bg-[#F3F3F3] p-2 rounded-md">
+                <span class="w-3 h-3 rounded-full block" style="background-color: {{ $statusColor }}"
+                      aria-label="{{ $subscriber->status }} status"></span>
+            </span>
 
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Marvin
-                                        McKinney</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
+            <span class="font-semibold text-gray-900 text-[10px]">{{ $subscriber->name }}</span>
+            <span class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">{{ $subscriber->email }}</span>
+            <span class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">{{ $subscriber->phone }}</span>
+        </div>
+    @endforeach
+</div>
 
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block " style="background-color: #c53030"
-                                            aria-label="Inactive status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Annette
-                                        Black</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Devon Lane</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Jacob Jones</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Kristin
-                                        Watson</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Jerome Bell</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block " style="background-color: #c53030"
-                                            aria-label="Inactive status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Wade Warren</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block" style="background-color: #2f855a"
-                                            aria-label="Active status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Ralph
-                                        Edwards</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block " style="background-color: #c53030"
-                                            aria-label="Inactive status"></span>
-                                    </span>
-
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Leslie
-                                        Alexander</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 bg-white justify-between rounded-xl px-6 py-3 shadow-sm">
-                                    <span class="bg-[#F3F3F3] p-2 rounded-md">
-                                        <span class="w-3 h-3 rounded-full block " style="background-color: #c53030"
-                                            aria-label="Inactive status"></span>
-                                    </span>
-                                    <span class="font-semibold text-gray-900  text-[10px] ">Brooklyn
-                                        Simmons</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-2 py-1">user-email@gmail.com</span>
-                                    <span
-                                        class="bg-gray-100 text-gray-600 text-[10px] font-semibold rounded-full px-3 py-1">+1000001111</span>
-                                </div>
-                            </div>
                         </section>
                     </main>
                 </div>
@@ -484,7 +375,31 @@
     }
 </script>
 
-    
+    <script>
+    const buttons = document.querySelectorAll('.flex.items-center.w-full.justify-center button');
+    const subscriberItems = document.querySelectorAll('.subscriber-item');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const filter = button.textContent.trim().toLowerCase();
+
+            // Update button styles
+            buttons.forEach(btn => btn.classList.replace('bg-white', 'bg-gray-100'));
+            buttons.forEach(btn => btn.classList.replace('text-gray-900', 'text-gray-500'));
+            button.classList.replace('bg-gray-100', 'bg-white');
+            button.classList.replace('text-gray-500', 'text-gray-900');
+
+            subscriberItems.forEach(item => {
+                if(filter === 'all' || item.dataset.status === filter){
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 
 </html>

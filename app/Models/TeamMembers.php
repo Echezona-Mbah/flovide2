@@ -14,6 +14,8 @@ class TeamMembers extends Model
         'permissions',
         'status',
         'invite_token',
+        'invite_token_expires_at',
+        'invite_token_used_at',
     ];
 
     public function user()
@@ -27,7 +29,10 @@ public function userOwner()
 }
 
 
-    
+    protected $casts = [
+    'invite_token_expires_at' => 'datetime',
+    'invite_token_used_at'    => 'datetime',
+];
     protected $table = 'team_members';
     protected $primaryKey ='id';
 }

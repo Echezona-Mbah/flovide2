@@ -38,49 +38,64 @@ class OrganizationController extends Controller
         return view('business.organization', compact('members', 'currentMemberRole'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'role' => 'required|in:Owner,Admin,Accountant,Author'
-        ]);
 
-        $owner = auth()->user();
-        $existingUser = User::where('email', $request->email)->first();
+public function store(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'role'  => 'required|in:Owner,Admin,Accountant,Author'
+    ]);
 
-        $member = new TeamMembers();
-        $member->owner_id = $owner->id;
-        $member->email = $request->email;
-        $member->role = $request->role;
+    $owner = auth()->user();
 
-        if ($existingUser) {
-            $member->user_id = $existingUser->id;
-            $member->status = 'active';
-        } else {
-            $member->invite_token = Str::random(40);
-            $member->status = 'pending';
-            Mail::to($request->email)->send(new TeamInviteMail($owner, $member->invite_token));
-        }
+    $existingMember = TeamMembers::where('owner_id', $owner->id)
+        ->where('email', $request->email)
+        ->first();
 
-        $member->save();
-
-        // Add full invite link
-        $inviteLink = url('/team/invite/' . $member->invite_token);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'data' => [
-                    'status' => true,
-                    'message' => 'Member added successfully',
-                    'data' => array_merge($member->toArray(), [
-                        'invite_link' => $inviteLink
-                    ])
-                ]
-            ]);
-        }
-
-        return back()->with('success', 'Member added successfully!');
+    if ($existingMember) {
+        return response()->json([
+            'data' => [
+                'status'  => false,
+                'error' => 'This email is already a member of your team.',
+            ]
+        ], 422);
     }
+
+    $existingUser = User::where('email', $request->email)->first();
+
+    $member = new TeamMembers();
+    $member->owner_id = $owner->id;
+    $member->email = $request->email;
+    $member->role = $request->role;
+    $member->invite_token = Str::random(40);
+    $member->invite_token_expires_at = now()->addHours(24); //  expires in 24 hours
+
+    if ($existingUser) {
+        $member->user_id = $existingUser->id;
+        $member->status = 'active';
+    } else {
+        $member->status = 'pending';
+    }
+
+    $member->save();
+
+    // ✅ Generate invite link
+    $inviteLink = url('/team/invite/' . $member->invite_token);
+
+    // ✅ Send mail
+    Mail::to($request->email)->send(new TeamInviteMail($owner, $inviteLink));
+
+    // ✅ Response
+    return response()->json([
+        'status'  => true,
+        'message' => 'Member added and invite email sent successfully.',
+        'data'    => array_merge($member->toArray(), [
+            'invite_link' => $inviteLink,
+        ]),
+    ]);
+}
+
+
 
 
     public function showInviteForm($token)
@@ -89,17 +104,39 @@ class OrganizationController extends Controller
         return view('mainpage.accept-invite', compact('member'));
     }
 
-    // Complete invite (register new user)
+        // Complete invite (register new user)
     public function completeInvite(Request $request, $token)
     {
-        $member = TeamMembers::with('userOwner')
-            ->where('invite_token', $token)
-            ->firstOrFail();
+    $member = TeamMembers::with('userOwner')
+        ->where('invite_token', $token)
+        ->first();
+
+    if (!$member) {
+        return response()->json([
+        'data'=>[
+            'status'  => false,
+            'error' => 'This invitation link is invalid or has already been used.',
+        ]
+        ], 404);
+    }
+
+
+        // ✅ Check if token expired
+        if ($member->invite_token_expires_at && $member->invite_token_expires_at->isPast()) {
+            return response()->json([
+                'data'=>[
+                    'status'  => false,
+                    'error' => 'This invitation link has expired. Please request a new one.',
+                ]
+            ], 410); // 410 Gone
+        }
 
         $request->validate([
             'name'     => 'required|string',
             'password' => 'required|min:6|confirmed',
         ]);
+
+        // ✅ Create or fetch user
         $user = User::where('email', $member->email)->first();
 
         if (!$user) {
@@ -111,32 +148,31 @@ class OrganizationController extends Controller
                 'business_name'         => $request->name,
             ]);
         }
-        $member->user_id      = $user->id;
-        $member->status       = 'active';
-        $member->invite_token = null;
+
+        // ✅ Activate member
+        $member->user_id = $user->id;
+        $member->status = 'active';
+        $member->invite_token_used_at = now(); // record usage
+        $member->invite_token = null;          // clear token
         $member->save();
+
         Auth::login($user);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'status'  => true,
-                'message' => 'Invitation accepted successfully.',
-                'data'    => [
-                    'user'   => $user,
-                    'member' => $member,
-                    'team_owner' => $member->userOwner ? [
-                        'id' => $member->userOwner->id,
-                        'business_name' => $member->userOwner->business_name,
-                        'email' => $member->userOwner->email,
-                    ] : null
-                ]
-            ]);
-        }
-
-        // Web response (redirect)
-        return redirect()->route('dashboard')
-            ->with('success', 'Welcome to ' . $member->userOwner->business_name . ' dashboard!');
+        return response()->json([
+            'status'  => true,
+            'message' => 'Invitation accepted successfully.',
+            'data'    => [
+                'user'   => $user,
+                'member' => $member,
+                'team_owner' => $member->userOwner ? [
+                    'id' => $member->userOwner->id,
+                    'business_name' => $member->userOwner->business_name,
+                    'email' => $member->userOwner->email,
+                ] : null,
+            ],
+        ]);
     }
+
 
 
 
