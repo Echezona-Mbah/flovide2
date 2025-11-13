@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call(PaymentRecordsSeeder::class);
         $this->call(RemitaPaymentsTableSeeder::class);
+        $this->call(PaymentRecordsBussinessSeeder::class);
+        $this->call(SubscriptionRecordSeeder::class);
+
+
 
     }
 }
