@@ -13,6 +13,7 @@ class Refund extends Model
         'name',
         'amount',
         'status',
+        'referenceNumber',
         'transaction_ref_number',
         'reason',
         'type',
