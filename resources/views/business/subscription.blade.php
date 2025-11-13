@@ -20,77 +20,67 @@
                 class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
                 <div class="max-w-[1200px] mx-auto">
                     <!-- Top Stats -->
-                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                        <div
-                            class="flex-1 rounded-2xl bg-gradient-to-r from-[#1f4d3a] to-[#2f6a44] p-6 text-white flex flex-col justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-[#3a6a56] p-2 rounded-lg flex items-center justify-center"
-                                    style="width: 36px; height: 36px">
-                                    <img src="/asserts/dashboard/sub-no.png" alt="">
-                                  
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm font-normal">
-                                Number of subscribers
-                            </p>
-                            <div class="flex items-center justify-between mt-1">
-                                <h2 class="text-2xl font-extrabold leading-none">
-                                    1,500
-                                </h2>
-                                <div
-                                    class="bg-white text-[#2f6a44] text-xs font-semibold rounded-full flex items-center gap-1 px-3 py-1">
-                                    <i class="fas fa-arrow-up">
-                                    </i>
-                                    36%
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-[#d0e1fd] p-2 rounded-lg flex items-center justify-center"
-                                    style="width: 36px; height: 36px">
-                                    <img src="/asserts/dashboard/sub-plans.png" alt="">
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-500 font-normal">
-                                Number of plans
-                            </p>
-                            <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">
-                                10
-                            </h2>
-                        </div>
-                        <div
-                            class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-[#fdd7dd] p-2 rounded-lg flex items-center justify-center"
-                                    style="width: 36px; height: 36px">
-                                    <img src="/asserts/dashboard/sub-un.png" alt="">
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-500 font-normal">
-                                Number of unsubscribers
-                            </p>
-                            <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">
-                                10
-                            </h2>
-                        </div>
-                        <div
-                            class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-[#f9f3c9] p-2 rounded-lg flex items-center justify-center"
-                                    style="width: 36px; height: 36px">
-                                    <img src="/asserts/dashboard/sub-total.png" alt="">
-                                </div>
-                            </div>
-                            <p class="mt-4 text-sm text-gray-500 font-normal">
-                                All-time subscriber total
-                            </p>
-                            <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">
-                                3,000
-                            </h2>
-                        </div>
-                    </div>
+<div class="flex flex-col sm:flex-row gap-4 mb-6">
+
+    <!-- Number of Subscribers -->
+    <div class="flex-1 rounded-2xl bg-gradient-to-r from-[#1f4d3a] to-[#2f6a44] p-6 text-white flex flex-col justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#3a6a56] p-2 rounded-lg flex items-center justify-center" style="width: 36px; height: 36px">
+                <img src="/asserts/dashboard/sub-no.png" alt="">
+            </div>
+        </div>
+        <p class="mt-4 text-sm font-normal">Number of subscribers</p>
+        <div class="flex items-center justify-between mt-1">
+            <h2 class="text-2xl font-extrabold leading-none">{{ $subscriberCount }}</h2>
+            <div class="bg-white text-[#2f6a44] text-xs font-semibold rounded-full flex items-center gap-1 px-3 py-1">
+                <i class="fas fa-arrow-up"></i> {{ $subscriberGrowth }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Number of Plans -->
+    <div class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#d0e1fd] p-2 rounded-lg flex items-center justify-center" style="width: 36px; height: 36px">
+                <img src="/asserts/dashboard/sub-plans.png" alt="">
+            </div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500 font-normal">Number of plans</p>
+        <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">{{ $planCount }}</h2>
+    </div>
+
+    <!-- Number of Unsubscribers -->
+    <div class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#fdd7dd] p-2 rounded-lg flex items-center justify-center" style="width: 36px; height: 36px">
+                <img src="/asserts/dashboard/sub-un.png" alt="">
+            </div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500 font-normal">Number of unsubscribers</p>
+        <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">{{ $unsubscriberCount }}</h2>
+    </div>
+
+    <!-- All-time subscriber total -->
+    <div class="flex-1 rounded-2xl bg-white p-6 flex flex-col justify-between border border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="bg-[#f9f3c9] p-2 rounded-lg flex items-center justify-center" style="width: 36px; height: 36px">
+                <img src="/asserts/dashboard/sub-total.png" alt="">
+            </div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500 font-normal">All-time subscriber total</p>
+        <h2 class="text-2xl font-extrabold leading-none text-gray-900 mt-1">{{ $totalSubscribers }}</h2>
+    </div>
+
+</div>
+
+<!-- Excel Export Button -->
+<div class="mt-4">
+    <a href="{{ route('subscriptions.export', ['id' => $subscriptions->first()?->id ?? 0]) }}" 
+       class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+        Export Subscribers Excel
+    </a>
+</div>
+
                     <!-- Main Content -->
                     <div class="bg-[#e9e9e9] rounded-2xl p-6">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -139,6 +129,8 @@
                                         </div>
                                     </div>
 
+                                    
+
                                     <div>
                                         <h3 class="font-semibold text-md leading-tight">
                                             {{ $subscription->title }}
@@ -149,7 +141,7 @@
                                         <div class="flex gap-4 items-center">
                                             <div class="flex items-center gap-1">
                                                 <img src="/assets/dashboard/person.png" alt="">
-                                                50 {{-- Replace this with actual number of users if available --}}
+                                                50 
                                             </div>
                                             <div class="bg-[#d1f0d9] text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
                                                 <i class="fas fa-check text-[10px]"></i>
@@ -164,10 +156,12 @@
                                             </a>
                                         
                                             <!-- Original Next button -->
-                                            <button aria-label="Next button"
-                                                class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
-                                                <i class="fas fa-chevron-right"></i>
-                                            </button>
+                                         <a href="{{ route('subscription.checkout', ['id' => $subscription->id]) }}" 
+                                            aria-label="Next button"
+                                            class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition">
+                                            <i class="fas fa-chevron-right"></i>
+                                            </a>
+
                                         </div>
                                         
                                     </div>

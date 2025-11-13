@@ -85,28 +85,73 @@ class BillPaymentController extends Controller
 
 
     // Verify smartcard or biller code via VTpass API
+    // public function verify(Request $request)
+    // {
+    //     $request->validate([
+    //         'billers_code' => 'required|string|min:6',
+    //     ]);
+    
+    //     $response = Http::withBasicAuth(env('VTPASS_USERNAME'), env('VTPASS_PASSWORD'))
+    //         ->post(env('VTPASS_API_URL') . '/merchant-verify', [
+    //             'billersCode' => $request->billers_code,
+    //             'serviceID' => 'dstv', // Hardcoded for DSTV
+    //             'type' => 'smartcard',
+    //         ]);
+    
+    //     if (!$response->successful()) {
+    //         return response()->json([
+    //             'message' => 'Failed to verify smartcard',
+    //             'error' => $response->json()
+    //         ], 400);
+    //     }
+    
+    //     return response()->json($response->json());
+    // }
+
     public function verify(Request $request)
-    {
-        $request->validate([
-            'billers_code' => 'required|string|min:6',
+{
+    $request->validate([
+        'billers_code' => 'required|string|min:6',
+    ]);
+
+    $response = Http::withBasicAuth(env('VTPASS_USERNAME'), env('VTPASS_PASSWORD'))
+        ->post(env('VTPASS_API_URL') . '/merchant-verify', [
+            'billersCode' => $request->billers_code,
+            'serviceID'   => 'dstv', // Hardcoded for DSTV
+            'type'        => 'smartcard',
         ]);
-    
-        $response = Http::withBasicAuth(env('VTPASS_USERNAME'), env('VTPASS_PASSWORD'))
-            ->post(env('VTPASS_API_URL') . '/merchant-verify', [
-                'billersCode' => $request->billers_code,
-                'serviceID' => 'dstv', // Hardcoded for DSTV
-                'type' => 'smartcard',
-            ]);
-    
-        if (!$response->successful()) {
-            return response()->json([
-                'message' => 'Failed to verify smartcard',
-                'error' => $response->json()
-            ], 400);
-        }
-    
-        return response()->json($response->json());
+
+    $data = $response->json();
+
+    // ✅ Check HTTP failure first
+    if (!$response->successful()) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Network or server error from VTpass.',
+            'error'   => $data,
+        ], 400);
     }
+
+    // ✅ Then check VTpass response code/content
+    if (
+        isset($data['content']['error']) ||
+        (isset($data['code']) && $data['code'] !== '0000' && $data['code'] !== '000')
+    ) {
+        return response()->json([
+            'status'  => false,
+            'message' => $data['content']['error'] ?? 'Verification failed.',
+            'data'    => $data,
+        ], 422);
+    }
+
+    // ✅ Success
+    return response()->json([
+        'status'  => true,
+        'message' => 'Smartcard verified successfully.',
+        'data'    => $data,
+    ], 200);
+}
+
 
     public function getVariations(Request $request)
     {
