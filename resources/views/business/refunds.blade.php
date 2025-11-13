@@ -181,9 +181,9 @@
 
 
     <!-- Modal Background -->
-    <div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="formModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <!-- Modal Content -->
-        <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
+        <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative max-h-[90vh] overflow-y-auto">
             
             <!-- Close Button -->
             <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
@@ -203,6 +203,10 @@
                     <select name="currency" id="currency" class="w-full border rounded px-3 py-2 focus:ring">
                         {{-- populated --}}
                     </select>
+                </div>
+                <div>
+                    <label class="block mb-1 font-medium">Transaction reference</label>
+                    <input type="text" name="referenceNumber" required class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300">
                 </div>
                 <div>
                     <label class="block mb-1 font-medium">Amount</label>
@@ -555,15 +559,17 @@
             const form = e.target;
             const name = form.name.value;
             const amount = form.amount.value;
+            const referenceNumber = form.referenceNumber.value;
             const method = form.method.value;
             const reason = form.message.value;
             const currency = form.currency.value;
             //validate input
-            if (!name || !amount || !method || !reason || !currency) {
+            if (!name || !referenceNumber || !amount || !method || !reason || !currency) {
                 showToast("All fields are required.", "error");
             }else{
                 const formData = new FormData();
                 formData.append('fullname', name);
+                formData.append('referenceNumber', referenceNumber);
                 formData.append('amount', amount);
                 formData.append('method', method);
                 formData.append('reason', reason);
