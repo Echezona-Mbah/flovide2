@@ -183,14 +183,18 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/fetchBanks-customers', [AddCustomerController::class, 'fetchBanks']);
     Route::post('/validate-account-customers', [AddCustomerController::class, 'validateRecipient']);
     Route::get('/fetchcountrylist-customers', [AddCustomerController::class, 'fetchcountrylist']);
-
     // Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
     Route::delete('customers/{id}', [AddCustomerController::class, 'destroy'])->name('customers.destroy');
+    
     // api routes for Subscriptions details
     Route::get('/subscriptions', [SubscriptionController::class, 'index']);
     Route::post('/add-subscriptions', [SubscriptionController::class, 'store']);
-    Route::put('subscriptions/{id}', [SubscriptionController::class, 'update']);
+    Route::post('subscriptions/{id}', [SubscriptionController::class, 'update']);
     Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'destroy']);
+    Route::post('/subscriptions_payment', [SubscriptionController::class, 'storeSubscriptionRecord']);
+    Route::get('/subscriptions/{id}/export', [SubscriptionController::class, 'exportSubscriberss'])->name('subscriptions.export');
+    Route::get('/subscriptions_record/{id}', [SubscriptionController::class, 'subscriptionDetails']);
+
     // api routes for DSTV details
     Route::get('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
     Route::post('/Dstvverify', [BillPaymentController::class, 'verify']);

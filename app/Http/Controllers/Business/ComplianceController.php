@@ -40,168 +40,206 @@ class ComplianceController extends Controller
     }
 
 
-    public function handleCac(Request $request)
-    {
-        $request->validate([
-            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
+public function handleCac(Request $request)
+{
+    $request->validate([
+        'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+    ]);
 
-        $user = auth()->user();
+    $user = auth()->user();
 
-        if ($user->cac_certificate && Storage::disk('public')->exists($user->cac_certificate)) {
-            Storage::disk('public')->delete($user->cac_certificate);
-        }
+    // ✅ Check if CAC is already uploaded and under review or approved
+    if ($user->cac_certificate && Storage::disk('public')->exists($user->cac_certificate)) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'CAC document already uploaded.',
+            'data'    => [
+                'cac_certificate' => $user->cac_certificate,
+                'cac_status'      => $user->cac_status,
+            ]
+        ], 409); // 409 Conflict
+    }
 
-        $path = $request->file('document')->store('cac_certificates', 'public');
+    // ✅ Store new document
+    $path = $request->file('document')->store('cac_certificates', 'public');
 
-        $user->cac_certificate = $path;
-        $user->cac_status = 'under review';
+    $user->cac_certificate = $path;
+    $user->cac_status = 'under review';
+    $user->save();
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'CAC document uploaded and under review.',
+        'data'    => [
+            'cac_certificate' => $path,
+            'cac_status'      => $user->cac_status,
+        ]
+    ], 201);
+}
+
+
+public function handleBvn(Request $request)
+{
+    $request->validate([
+        'bvn' => 'required|digits:11'
+    ]);
+
+    $user = auth()->user();
+
+    // ✅ Check if already verified
+    if ($user->bvn && $user->bvn_status === 'yes') {
+        return response()->json([
+            'status'  => false,
+            'message' => 'BVN already verified.',
+            'data'    => [
+                'bvn' => $user->bvn,
+            ]
+        ], 409);
+    }
+
+    $bvn = $request->input('bvn');
+
+    $response = Http::withToken(env('PAYSTACK_SECRET_KEY'))
+        ->get("https://api.paystack.co/bank/resolve_bvn/{$bvn}");
+
+    if ($response->successful()) {
+        $data = $response->json()['data'];
+
+        $user->bvn = $bvn;
+        $user->bvn_status = 'yes';
         $user->save();
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'CAC document uploaded and under review.',
-                'data' => [
-                    'cac_certificate' => $path,
-                    'cac_status' => $user->cac_status,
-                ]
-            ],201);
-        }
-
-        return back()->with('success', 'CAC certificate uploaded successfully and is now under review.');
+        return response()->json([
+            'status'  => true,
+            'message' => 'BVN verified successfully.',
+            'data'    => [
+                'bvn'  => $bvn,
+                'name' => $data['first_name'] . ' ' . $data['last_name'],
+                'dob'  => $data['dob']
+            ]
+        ], 200);
     }
 
-    public function handleBvn(Request $request)
-    {
-        $request->validate([
-            'bvn' => 'required|digits:11'
-        ]);
+    $errorMessage = $response->json()['message'] ?? 'BVN verification failed.';
 
-        $bvn = $request->input('bvn');
+    return response()->json([
+        'status'  => false,
+        'error'   => $errorMessage,
+    ], 422);
+}
 
-        $response = Http::withToken(env('PAYSTACK_SECRET_KEY'))
-            ->get("https://api.paystack.co/bank/resolve_bvn/{$bvn}");
 
-        if ($response->successful()) {
-            $data = $response->json()['data'];
+   public function handleValidid(Request $request)
+{
+    $request->validate([
+        'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+    ]);
 
-            $user = auth()->user();
-            $user->bvn = $bvn;
-            $user->bvn_status = 'yes';
-            $user->save();
+    $user = auth()->user();
 
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'BVN verified successfully',
-                    'data' => [
-                        'bvn' => $bvn,
-                        'name' => $data['first_name'] . ' ' . $data['last_name'],
-                        'dob' => $data['dob']
-                    ]
-                ]);
-            }
-
-            return back()->with('success', 'BVN verified successfully');
-        }
-        $errorMessage = $response->json()['message'] ?? 'BVN verification failed.';
-
-        if ($request->expectsJson()) {
-            return response()->json(['error' => $errorMessage], 422);
-        }
-
-        return back()->with('error', $errorMessage);
+    // ✅ Check if already uploaded
+    if ($user->valid_id && Storage::disk('public')->exists($user->valid_id)) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Valid ID already uploaded.',
+            'data'    => [
+                'valid_id'        => $user->valid_id,
+                'valid_id_status' => $user->valid_id_status,
+            ]
+        ], 409);
     }
 
-     public function handleValidid(Request $request)
-    {
-        $request->validate([
-            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
+    // ✅ Store new document
+    $path = $request->file('document')->store('valid_ids', 'public');
 
-        $user = auth()->user();
+    $user->valid_id = $path;
+    $user->valid_id_status = 'under review';
+    $user->save();
 
-        if ($user->valid_id && Storage::disk('public')->exists($user->valid_id)) {
-            Storage::disk('public')->delete($user->valid_id);
-        }
+    return response()->json([
+        'status'  => true,
+        'message' => 'Valid ID uploaded and under review.',
+        'data'    => [
+            'valid_id'        => $path,
+            'valid_id_status' => $user->valid_id_status,
+        ]
+    ], 201);
+}
 
-        $path = $request->file('document')->store('ValiadID', 'public');
+public function handleTin(Request $request)
+{
+    $request->validate([
+        'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+    ]);
 
-        $user->valid_id = $path;
-        $user->valid_id_status = 'under review';
-        $user->save();
+    $user = auth()->user();
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Valid ID of Directors/Owners uploaded and under review.',
-                'data' => [
-                    'valid_id' => $path,
-                    'valid_id_status' => $user->valid_id_status,
-                ]
-            ],201);
-        }
-
-        return back()->with('success', 'Valid ID of Directors/Owners uploaded successfully and is now under review.');
-    }
-     public function handleTin(Request $request)
-    {
-        $request->validate([
-            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
-
-        $user = auth()->user();
-
-        if ($user->tin && Storage::disk('public')->exists($user->tin)) {
-            Storage::disk('public')->delete($user->tin);
-        }
-
-        $path = $request->file('document')->store('Tax', 'public');
-
-        $user->tin = $path;
-        $user->tin_status = 'under review';
-        $user->save();
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Tax Identification Number (TIN) uploaded and under review.',
-                'data' => [
-                    'Tax' => $path,
-                    'tax_status' => $user->tin_status,
-                ]
-            ],201);
-        }
-
-        return back()->with('success', 'Tax Identification Number (TIN) uploaded successfully and is now under review.');
+    // ✅ Check if already uploaded
+    if ($user->tin && Storage::disk('public')->exists($user->tin)) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Tax Identification Number (TIN) document already uploaded.',
+            'data'    => [
+                'tin'         => $user->tin,
+                'tin_status'  => $user->tin_status,
+            ]
+        ], 409);
     }
 
-    public function handleUtilitybill(Request $request)
-    {
-        $request->validate([
-            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
+    // ✅ Store new TIN document
+    $path = $request->file('document')->store('tin_documents', 'public');
 
-        $user = auth()->user();
+    $user->tin = $path;
+    $user->tin_status = 'under review';
+    $user->save();
 
-        if ($user->utility_bill && Storage::disk('public')->exists($user->utility_bill)) {
-            Storage::disk('public')->delete($user->utility_bill);
-        }
+    return response()->json([
+        'status'  => true,
+        'message' => 'Tax Identification Number (TIN) uploaded and under review.',
+        'data'    => [
+            'tin'        => $path,
+            'tin_status' => $user->tin_status,
+        ]
+    ], 201);
+}
 
-        $path = $request->file('document')->store('Utilitybill', 'public');
 
-        $user->utility_bill = $path;
-        $user->utility_bill_status = 'under review';
-        $user->save();
+public function handleUtilitybill(Request $request)
+{
+    $request->validate([
+        'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+    ]);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Utility Bill / Proof of Address document uploaded and under review.',
-                'data' => [
-                    'utility_bill' => $path,
-                    'utility_bill_status' => $user->utility_bill_status,
-                ]
-            ],201);
-        }
+    $user = auth()->user();
 
-        return back()->with('success', 'Utility Bill / Proof of Address uploaded successfully and is now under review.');
+    // ✅ Check if already uploaded
+    if ($user->utility_bill && Storage::disk('public')->exists($user->utility_bill)) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Utility Bill / Proof of Address already uploaded.',
+            'data'    => [
+                'utility_bill'        => $user->utility_bill,
+                'utility_bill_status' => $user->utility_bill_status,
+            ]
+        ], 409);
     }
+
+    // ✅ Store new Utility Bill document
+    $path = $request->file('document')->store('utility_bills', 'public');
+
+    $user->utility_bill = $path;
+    $user->utility_bill_status = 'under review';
+    $user->save();
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'Utility Bill / Proof of Address uploaded and under review.',
+        'data'    => [
+            'utility_bill'        => $path,
+            'utility_bill_status' => $user->utility_bill_status,
+        ]
+    ], 201);
+}
+
 
 }
