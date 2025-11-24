@@ -33,6 +33,10 @@ Route::get('/artisan-clear', function () {
 
 Route::get('/business', [businessController::class, 'business'])->name('business');
 Route::get('/', [personalController::class, 'personal'])->name('personal');
+//careers route
+Route::get('/careers', function () {
+    return view('mainpage.careers');
+})->name('careers');
 
 
 

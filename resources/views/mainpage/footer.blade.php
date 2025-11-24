@@ -40,6 +40,9 @@
               <a href="#" class="hover:text-gray-900">Mobile app</a>
             </li>
             <li>
+              <a href="{{ route('careers') }}" class="hover:text-gray-900">Careers</a>
+            </li>
+            <li>
               <a href="#" class="hover:text-gray-900">Why choose us?</a>
             </li>
             <li>
