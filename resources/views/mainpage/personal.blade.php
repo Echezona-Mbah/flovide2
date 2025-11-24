@@ -68,14 +68,16 @@
               <a href="{{ route('register.saveStepData') }}" class=""> Get Started </a>
             </button>
 
-            <button aria-label="Select country"
+            {{-- <button aria-label="Select country"
               class="flex items-center space-x-2 border border-[#3380C4] rounded-full px-3 py-1 text-white focus:outline-none"
               type="button">
               <img alt="Flag of Nigeria" class="w-6 h-6 rounded-full object-cover" decoding="async" height="14"
                 src="../asserts/homepage/ng.svg" width="20" />
               <span> NG </span>
               <i class="fas fa-chevron-down text-xs"></i>
-            </button>
+            </button> --}}
+
+            <div id="google_translate_element"></div>
           </ul>
         </div>
       </section>
