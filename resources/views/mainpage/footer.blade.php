@@ -103,16 +103,18 @@
 
 
 
-<script type="text/javascript">
-  function googleTranslateElementInit() {
-    new google.translate.TranslateElement(
-      {
-        pageLanguage: 'en',
-        includedLanguages: 'en,es,fr,lg'
-      },
-      'google_translate_element'
-    );
+<script>
+  function toggleLang() {
+    const menu = document.getElementById('langMenu');
+    menu.classList.toggle('hidden');
   }
-</script>
 
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  // Optional: Close menu if clicked outside
+  window.addEventListener('click', function(e){
+    const menu = document.getElementById('langMenu');
+    const button = menu.previousElementSibling;
+    if(!button.contains(e.target) && !menu.contains(e.target)){
+      menu.classList.add('hidden');
+    }
+  });
+</script>
