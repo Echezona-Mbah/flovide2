@@ -31,21 +31,21 @@
     <section class="bg-white">
       <div class="md:max-w-5xl md:mx-auto px-4 md:px-6 py-12">
         <h1 class="text-center text-3xl sm:text-4xl font-medium text-gray-900 md:max-w-[35vw] mx-auto leading-tight">
-          Robust business accounts designed for growth
+          {{ __('Robust business accounts designed for growth') }}
         </h1>
         <div class="mt-12 rounded-3xl md:border border-gray-400 p-4 md:p-10 flex flex-col gap-8 sm:gap-0 bg-white">
           <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full justify-between">
             <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
-              Global Payments
+              {{ __('Global Payments') }}
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
-              Dedicated Support
+              {{ __('Dedicated Support') }}
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
-              Prestine Security
+              {{ __('Prestine Security') }}
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
-              Integrations
+              {{ __('Integrations') }}
             </button>
           </section>
 
@@ -55,16 +55,15 @@
                 <img src="{{asset('../asserts/mingcute_world-line.svg')}}" alt="" class="h-6 w-6" />
               </div>
               <h2 class="text-gray-900 font-bold text-xl mb-2">
-                Your business to the world
+                {{ __('Your business to the world') }}
               </h2>
               <p class="text-gray-700 text-sm mb-8 leading-relaxed max-w-[320px]">
-                Create business account to manage your money,
-                Make local and international payments to 190+ countries.
+                {{ __('Create business account to manage your money, Make local and international payments to 190+ countries.') }}
               </p>
               <button
                 class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
                 type="button">
-                Create A Business Account Now
+                {{ __('Create A Business Account Now') }}
                 <span>
                   <img src="{{asset('../asserts/homepage/arrow-up.svg')}}" alt="" width="20px" />
                 </span>
@@ -85,13 +84,12 @@
     <!-- blog section -->
     <section class="w-full">
       <section class="md:mx-auto px-4 md:px-6 md:pt-12 pt-4 pb-16 text-center">
-        <p class="text-[#777777] text-sm mb-2">Our Services</p>
+        <p class="text-[#777777] text-sm mb-2">{{ __('Our Services') }}</p>
         <h1 class="md:text-4xl text-3xl font-medium mb-3 text-gray-900">
-          Sync Your Finances
+          {{ __('Sync Your Finances') }}
         </h1>
         <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-          Effortlessly control your money across multiple scenarios in different currencies,
-          ensuring smooth and secure financial transactions anytime, anywhere.
+          {{ __('Effortlessly control your money across multiple scenarios in different currencies, ensuring smooth and secure financial transactions anytime, anywhere.') }}
         </p>
       </section>
 
@@ -99,14 +97,14 @@
         <!-- Card 1 -->
         <article class="bg-[#F2F2F2] rounded-3xl flex flex-col">
           <section class="flex flex-col justify-start items-start w-full px-10 pt-10">
-            <h2 class="font-semibold text-lg mb-2">Secure Transactions</h2>
+            <h2 class="font-semibold text-lg mb-2">{{ __('Secure Transactions') }}</h2>
             <p class="text-gray-600 text-sm mb-4">
-              Enjoy fast, safe, and reliable financial services.
+              {{ __('Enjoy fast, safe, and reliable financial services.') }}
             </p>
             <button
               class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
               type="button">
-              Get Started Now
+              {{ __('Get Started Now') }}
               <span>
                 <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
               </span>
@@ -120,14 +118,14 @@
         <!-- Card 2 -->
         <article class="bg-[#F2F2F2] rounded-3xl flex flex-col">
           <section class="flex flex-col justify-start items-start w-full px-10 pt-10">
-            <h2 class="font-semibold text-lg mb-2">Currency Exchange</h2>
+            <h2 class="font-semibold text-lg mb-2">{{ __('Currency Exchange') }}</h2>
             <p class="text-gray-600 text-sm mb-4">
-              Convert money effortlessly and send in your preferred currency
+              {{ __('Convert money effortlessly and send in your preferred currency.') }}
             </p>
             <button
               class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
               type="button">
-              Get Started Now
+              {{ __('Get Started Now') }}
               <span>
                 <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
               </span>
@@ -144,14 +142,14 @@
         <!-- Card 3 -->
         <article class="bg-[#F2F2F2] rounded-3xl flex flex-col relative">
           <section class="flex flex-col justify-start items-start w-full px-10 pt-10">
-            <h2 class="font-semibold text-lg mb-2">Local Business Finance</h2>
+            <h2 class="font-semibold text-lg mb-2">{{ __('Local Business Finance') }}</h2>
             <p class="text-gray-200px text-sm mb-4">
-              Convert money effortlessly and send in your preferred currency
+              {{ __('Convert money effortlessly and send in your preferred currency.') }}
             </p>
             <button
               class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
               type="button">
-              Get Started Now
+              {{ __('Get Started Now') }}
               <span>
                 <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
               </span>
@@ -168,15 +166,14 @@
         <!-- Card 4 -->
         <article class="bg-[#F2F2F2] rounded-3xl flex flex-col">
           <section class="flex flex-col justify-start items-start w-full px-10 pt-10">
-            <h2 class="font-semibold text-lg mb-2">Funds Remittance</h2>
+            <h2 class="font-semibold text-lg mb-2">{{ __('Funds Remittance') }}</h2>
             <p class="text-gray-200px text-sm mb-4">
-              Quickly transfer funds to family, friends, or business
-              worldwide.
+              {{ __('Quickly transfer funds to family, friends, or business worldwide.') }}
             </p>
             <button
               class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
               type="button">
-              Get Started Now
+              {{ __('Get Started Now') }}
               <span>
                 <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
               </span>
@@ -198,15 +195,13 @@
         <div class="max-w-7xl mx-auto px-6 py-16 rounded-3xl">
           <div class="text-center max-w-3xl mx-auto">
             <p class="text-sm font-normal mb-2 text-[#82D3AB]">
-              Pricing Plans
+              {{ __('Pricing Plans') }}
             </p>
             <h1 class="text-3xl md:text-5xl font-medium leading-tight mb-4">
-              Affordable Plans for Every <br />
-              Budget, Choose Yours
+              {{ __('Affordable Plans for Every Budget, Choose Yours') }}
             </h1>
             <p class="text-sm font-normal max-w-xl mx-auto">
-              Flovide offers a range of pricing plans to fit every budget and
-              level of need. Whether you’re a solo professional or a business.
+              {{ __('Flovide offers a range of pricing plans to fit every budget and level of need. Whether you’re a solo professional or a business.') }}
             </p>
           </div>
 
@@ -217,15 +212,15 @@
                 <div class="mb-6">
                   <img src="{{asset('../asserts/basic_good.svg')}}" alt="Basic Plan Icon" class="w-6 h-6" />
                 </div>
-                <h2 class="text-xl font-semibold mb-3">Basic Plan</h2>
+                <h2 class="text-xl font-semibold mb-3">{{ __('Basic Plan') }}</h2>
                 <p class="text-sm mb-6 leading-relaxed">
-                  Enjoy unparalleled benefits, including exclusive lifestyle perks and premium travel experiences.
+                  {{ __('Enjoy unparalleled benefits, including exclusive lifestyle perks and premium travel experiences.') }}
                 </p>
-                <p class="text-3xl font-semibold mb-6">Free</p>
+                <p class="text-3xl font-semibold mb-6">{{ __('Free') }}</p>
                 <button
                   class="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  Get Started Now
+                  {{ __('Get Started Now') }}
                   <span>
                     <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
                   </span>
@@ -258,19 +253,17 @@
                 <div class="mb-6">
                   <img src="{{asset('../asserts/solar_star-broken.svg')}}" alt="star icon" class="w-6 h-6" />
                 </div>
-                <h2 class="text-xl font-semibold mb-3">Standard Plan</h2>
+                <h2 class="text-xl font-semibold mb-3">{{ __('Standard Plan') }}</h2>
                 <p class="text-sm mb-6 leading-relaxed">
-                  Whether you're sending money abroad or managing your budget,
-                  our Standard account helps you maximize your money with
-                  ease.
+                  {{ __('Whether you\'re sending money abroad or managing your budget, our Standard account helps you maximize your money with ease.') }}
                 </p>
                 <p class="text-3xl font-semibold mb-6">
-                  £3.99<span class="text-base font-normal">/ per month</span>
+                  £3.99<span class="text-base font-normal">/ {{ __('per month') }}</span>
                 </p>
                 <button
                   class="inline-flex items-center gap-2 bg-[#7fc02a] text-white text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  Get Started Now
+                  {{ __('Get Started Now') }}
                   <span>
                     <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
                   </span>
@@ -302,18 +295,17 @@
                 <div class="mb-6">
                   <img src="{{asset('../asserts/enterprice_icon.svg')}}" alt="enterprice_icon Icon" class="w-6 h-6" />
                 </div>
-                <h2 class="text-xl font-semibold mb-3">Enterprise Plan</h2>
+                <h2 class="text-xl font-semibold mb-3">{{ __('Enterprise Plan') }}</h2>
                 <p class="text-sm mb-6 leading-relaxed">
-                  Get exclusive benefits like priority in-app support and everyday spending, all for less than the cost
-                  of a coffee.
+                  {{ __('Get exclusive benefits like priority in-app support and everyday spending, all for less than the cost of a coffee.') }}
                 </p>
                 <p class="text-3xl font-semibold mb-6">
-                  £9.99<span class="text-base font-normal">/ per month</span>
+                  £9.99<span class="text-base font-normal">/ {{ __('per month') }}</span>
                 </p>
                 <button
                   class="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  Get Started Now
+                  {{ __('Get Started Now') }}
                   <span>
                     <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
                   </span>
@@ -354,12 +346,12 @@
         <section class="px-4 md:max-w-[90rem] md:mx-auto md:px-6 py-12">
           <div class="flex flex-col md:flex-row gap-y-4 justify-center w-full md:justify-between items-center mb-10">
             <h2 class="text-2xl md:text-4xl font-medium leading-tight">
-              What Our Clients Say About Us
+              {{ __('What Our Clients Say About Us') }}
             </h2>
             <button
               class="flex items-center justify-center gap-2 rounded-full border border-gray-800 px-2 py-2 text-sm font-medium hover:bg-gray-100 transition w-[45vw] md:w-[15vw]"
               type="button">
-              Get Started Now
+              {{ __('Get Started Now') }}
               <span>
                 <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
               </span>
@@ -494,17 +486,16 @@
     <section class="w-full flex flex-col items-center justify-center">
       <section class="mx-auto px-6 pt-12 pb-16 text-center space-y-4">
         <h1 class="text-4xl font-medium mb-3 text-gray-900">
-          Global access in 190+ countries
+          {{ __('Global access in 190+ countries') }}
         </h1>
         <p class="text-[#777777] max-w-xl mx-auto text-sm md:text-base">
-          Moving, traveling, or sending money abroad? You're covered in 190+ countries—effortless payments,
-          wherever you call home or do business.
+          {{ __('Moving, traveling, or sending money abroad? You\'re covered in 190+ countries—effortless payments, wherever you call home or do business.') }}
         </p>
 
         <button
           class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
           type="button">
-          Get Started Now
+          {{ __('Get Started Now') }}
           <span>
             <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
           </span>
@@ -529,19 +520,19 @@
       <section class="bg-white text-gray-900">
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <h1 class="text-3xl font-semibold text-gray-900 text-center mb-10">
-            Frequently Asked Questions
+            {{ __('Frequently Asked Questions') }}
           </h1>
           <div class="flex flex-col lg:flex-row gap-10 lg:gap-20">
             <section class="lg:flex-1 max-w-md">
               <img alt="Customer support agent" class="rounded-3xl w-full object-cover" height="320"
                 src="{{asset('../asserts/customerCare.png')}}" width="400" />
               <h2 class="mt-6 text-xl font-semibold text-gray-900">
-                Need to speak with someone?
+                {{ __('Need to speak with someone?') }}
               </h2>
               <button
                 class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition"
                 type="button">
-                Contact Support
+                {{ __('Contact Support') }}
                 <span>
                   <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
                 </span>
@@ -554,7 +545,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    How do I create a Flovide account?
+                    {{ __('How do I create a Flovide account?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -569,11 +560,7 @@
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed">
                   <p class="list-disc mt-2">
-                    Creating a Flovide account is very easy and simple. Just download Flovide mobile app,
-                    fill in your details and submit. If you are fully verified, you can immediately start making local
-                    and international
-                    payments to 190+ countries.
-                    However, businesses can create account online or in the app.
+                    {{ __('Creating a Flovide account is very easy and simple. Just download Flovide mobile app, fill in your details and submit. If you are fully verified, you can immediately start making local and international payments to 190+ countries. However, businesses can create account online or in the app.') }}
                   </p>
                 </div>
               </article>
@@ -582,7 +569,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    What security measures does Flovide use to protect my account?
+                    {{ __('What security measures does Flovide use to protect my account?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -596,8 +583,7 @@
                   </button>
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden">
-                  "Flovide uses multi-factor authentication (MFA), encrypted communications,
-                  and continuous fraud monitoring to ensure your transactions and account access remain secure."
+                  {{ __('Flovide uses multi-factor authentication (MFA), encrypted communications, and continuous fraud monitoring to ensure your transactions and account access remain secure.') }}
                 </div>
               </article>
 
@@ -605,7 +591,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    Does Flovide hold my money?
+                    {{ __('Does Flovide hold my money?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -619,8 +605,7 @@
                   </button>
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden">
-                  No. Flovide does not hold customer funds. All funds are immediately remitted to your desired
-                  locations.
+                  {{ __('No. Flovide does not hold customer funds. All funds are immediately remitted to your desired locations.') }}
 
                 </div>
               </article>
@@ -629,7 +614,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    How long does it take to send money with Flovide?
+                    {{ __('How long does it take to send money with Flovide?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -643,8 +628,7 @@
                   </button>
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden">
-                  The time it takes Flovide to deliver your funds depends on the type of transfer that you make.
-                  About 98% of our transfers are completed within minutes.
+                  {{ __('The time it takes Flovide to deliver your funds depends on the type of transfer that you make. About 98% of our transfers are completed within minutes.') }}
                 </div>
               </article>
 
@@ -652,7 +636,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    Are there any transaction fees?
+                    {{ __('Are there any transaction fees?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -666,8 +650,7 @@
                   </button>
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden">
-                  Sending money through Flovide is completely free if you are an individual.
-                  However, Business pay for transactions depending on their chosen plan.
+                  {{ __('Sending money through Flovide is completely free if you are an individual. However, Business pay for transactions depending on their chosen plan.') }}
                 </div>
               </article>
 
@@ -675,7 +658,7 @@
               <article class="accordion bg-gray-100 rounded-2xl p-6 shadow-sm">
                 <header class="flex justify-between items-center cursor-pointer">
                   <h3 class="font-semibold text-gray-900 text-base leading-6">
-                    How can I contact customer support?
+                    {{ __('How can I contact customer support?') }}
                   </h3>
                   <button aria-label="Toggle" class="toggle-btn text-gray-900">
                     <svg class="h-6 w-6 plus-icon" fill="none" stroke="currentColor" stroke-width="2"
@@ -689,14 +672,14 @@
                   </button>
                 </header>
                 <div class="accordion-content mt-3 text-gray-900 text-sm leading-relaxed hidden">
-                  You can contact support via:
+                  {{ __('You can contact support via:') }}
                   <ul class="list-disc pl-5 mt-2">
-                    <li>Live chat in the Flovide app or website (24/7).</li>
+                    <li>{{ __('Live chat in the Flovide app or website (24/7).') }}</li>
                     <li>
-                      Email: support@flovide.com (response within 24 hours).
+                      {{ __('Email: support@flovide.com (response within 24 hours).') }}
                     </li>
                     <li>
-                      Phone support (check app for your region’s number).
+                      {{ __('Phone support (check app for your region’s number).') }}
                     </li>
                   </ul>
                 </div>
