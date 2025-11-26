@@ -1,40 +1,3 @@
-<style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  .VIpgJd-ZVi9od-ORHb-OEVmcd {
-    display: none;
-  }
-
-  /* Style the select dropdown */
-  .goog-te-combo {
-    width: 150px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #0F243D;
-    color: #fff;
-    font-size: 14px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  /* Remove underline from translated elements */
-  .goog-text-highlight {
-    background: none !important;
-    box-shadow: none !important;
-  }
-
-  /* Hide "Powered by Google Translate" */
-  .goog-te-gadget .goog-logo-link,
-  .goog-te-gadget span[style*="white-space:nowrap"] {
-    display: none !important;
-  }
-</style>
-
 <nav class="">
   <!-- Desktop Navigation -->
   <section class="hidden md:flex items-center justify-between px-6 py-4 max-w-[1200px] mx-auto">
@@ -81,15 +44,14 @@
     <!-- Right: Country selector, Sign In, Get Started -->
     <div class="flex items-center space-x-6 text-sm font-medium text-gray-800">
       <!-- Country selector -->
-      {{-- <button aria-label="Select country"
+      <button aria-label="Select country"
         class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525] hover:bg-[#E0E7FF] focus:outline-none"
         type="button">
         <img alt="Flag of Nigeria" class="w-5 h-5 rounded-full object-cover" decoding="async" height="14" src="{{asset("
           ../asserts/homepage/ng.svg")}}" width="20" />
         <span> NG </span>
         <i class="fas fa-chevron-down text-xs"></i>
-      </button> --}}
-      <div id="google_translate_element"></div>
+      </button>
       <!-- Sign In -->
       <a class="hover:text-gray-900" href="{{ route('login') }}"> Sign In </a>
       <!-- Divider -->
