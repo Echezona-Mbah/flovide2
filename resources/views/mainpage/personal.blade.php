@@ -43,38 +43,38 @@
           <ul class="bg-[#1C3C5E] w-full rounded-2xl shadow-md p-4 text-[20px] font-medium space-y-6 ">
             <a href="{{ route('personal') }}"
               class="block px-4 py-2 text-white hover:bg-[#3B82F6] border border-[#3380C4] p-4 bg-[#1E5186] rounded-xl">
-              Personal
+              {{ __('Personal') }}
             </a>
             <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-              Business
+              {{ __('Business') }}
             </a>
             <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-              Developer
+              {{ __('Developer') }}
             </a>
             <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-              Blog
+              {{ __('Blog') }}
             </a>
             <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-              Contact Us
+              {{ __('Contact Us') }}
             </a>
 
             <button
               class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-              <a href="{{ route('login') }}" class=""> Login </a>
+              <a href="{{ route('login') }}" class=""> {{ __('Login') }} </a>
             </button>
 
             <button class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-              <a href="{{ route('register.saveStepData') }}" class=""> Get Started </a>
+              <a href="{{ route('register.saveStepData') }}" class=""> {{ __('Get Started') }} </a>
             </button>
 
             <div class="relative">
-              <button onclick="toggleLang()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
+              <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
                 <span>{{ strtoupper(app()->getLocale()) }} </span>
                 <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
                 <i class="fas fa-chevron-down text-xs"></i>
               </button>
 
-              <ul id="langMenu" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
+              <ul id="langMenu_mobile" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
                 <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100">English</a></li>
                 <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100">Spanish</a></li>
                 <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100">French</a></li>

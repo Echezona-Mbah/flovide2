@@ -45,13 +45,13 @@
           </button>
 
           <div class="relative">
-            <button onclick="toggleLang()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
+            <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
               <span>{{ strtoupper(app()->getLocale()) }} </span>
               <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
               <i class="fas fa-chevron-down text-xs"></i>
             </button>
 
-            <ul id="langMenu" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
+            <ul id="langMenu_mobile" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
               <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100">English</a></li>
               <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100">Spanish</a></li>
               <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100">French</a></li>
