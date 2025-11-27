@@ -6,20 +6,19 @@
           <img src="{{asset('../asserts/footerLogo.svg')}}" alt="Flovide Logo" class="w-50 h-50" />
         </div>
         <p class="text-gray-600 text-sm leading-relaxed">
-          At Flovide, our mission is to empower individuals and businesses
-          with seamless, secure, and affordable financial solutions.
+          {{ __('At Flovide, our mission is to empower individuals and businesses with seamless, secure, and affordable financial solutions.') }}
         </p>
 
         <div class="mt-6">
           <h3 class="font-semibold text-lg mb-3">
-            Subscribe To Our Newsletter
+            {{ __('Subscribe To Our Newsletter') }}
           </h3>
           <form class="flex rounded-full border border-gray-300 overflow-hidden bg-white">
-            <input type="email" placeholder="Enter your email" class="flex-1 px-4 py-2 outline-none text-sm" />
+            <input type="email" placeholder="{{ __('Enter your email') }}" class="flex-1 px-4 py-2 outline-none text-sm" />
             <span class="p-1 rounded-full bg-white">
               <button type="submit"
                 class="flex items-center gap-2 bg-gray-900 rounded-full text-white px-5 py-2 text-sm font-medium hover:bg-gray-800 transition">
-                Subscribe
+                {{ __('Subscribe') }}
                 <span>
                   <img src="{{asset('../asserts/homepage/arrow-up.svg')}}" alt="" width="20px" />
                 </span>
@@ -31,51 +30,51 @@
 
       <section class="grid grid-cols-1 gap-y-10  md:grid-cols-3 md:w-[50vw]">
         <div>
-          <h4 class="font-semibold mb-4">Quick Links</h4>
+          <h4 class="font-semibold mb-4">{{ __('Quick Links') }}</h4>
           <ul class="space-y-2 text-gray-600 text-sm">
             <li>
-              <a href="#" class="hover:text-gray-900">Blog and news</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Blog and news') }}</a>
             </li>
             <li>
-              <a href="#" class="hover:text-gray-900">Mobile app</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Mobile app') }}</a>
             </li>
             <li>
-              <a href="{{ route('careers') }}" class="hover:text-gray-900">Careers</a>
+              <a href="{{ route('careers') }}" class="hover:text-gray-900">{{ __('Careers') }}</a>
             </li>
             <li>
-              <a href="#" class="hover:text-gray-900">Why choose us?</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Why choose us?') }}</a>
             </li>
             <li>
-              <a href="#" class="hover:text-gray-900">Pricing plan</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Pricing plan') }}</a>
             </li>
           </ul>
         </div>
 
         <div>
-          <h4 class="font-semibold mb-4">Our Services</h4>
+          <h4 class="font-semibold mb-4">{{ __('Our Services') }}</h4>
           <ul class="space-y-2 text-gray-600 text-sm">
             {{-- <li>
               <a href="#" class="hover:text-gray-900">Mobile banking</a>
             </li> --}}
             <li>
-              <a href="#" class="hover:text-gray-900">Advanced security</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Advanced security') }}</a>
             </li>
             {{-- <li>
               <a href="#" class="hover:text-gray-900">Digital wallet</a>
             </li> --}}
             <li>
-              <a href="#" class="hover:text-gray-900">Budgeting tools</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Budgeting tools') }}</a>
             </li>
             <li>
-              <a href="#" class="hover:text-gray-900">Making transactions</a>
+              <a href="#" class="hover:text-gray-900">{{ __('Making transactions') }}</a>
             </li>
           </ul>
         </div>
 
         <div>
-          <h4 class="font-semibold mb-4">Get In Touch</h4>
+          <h4 class="font-semibold mb-4">{{ __('Get In Touch') }}</h4>
           <ul class="space-y-2 text-gray-600 text-sm">
-            <li>United Kingdom</li>
+            <li>{{ __('United Kingdom') }}</li>
             <li>
               <a href="mailto:info@flovide.com" class="hover:text-gray-900">info@flovide.com</a>
             </li>
@@ -93,8 +92,8 @@
         class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
         <p>© Flovide 2025</p>
         <div class="flex space-x-4 mt-2 md:mt-0">
-          <a href="#" class="hover:text-gray-700">Terms and conditions</a>
-          <a href="#" class="hover:text-gray-700">Privacy policy</a>
+          <a href="#" class="hover:text-gray-700">{{ __('Terms and conditions') }}</a>
+          <a href="#" class="hover:text-gray-700">{{ __('Privacy policy') }}</a>
         </div>
       </div>
     </div>
@@ -109,12 +108,26 @@
     menu.classList.toggle('hidden');
   }
 
-  // Optional: Close menu if clicked outside
+
+  function toggleLang_mobile() {
+    const menu = document.getElementById('langMenu_mobile');
+    menu.classList.toggle('hidden');
+  }
+
+  //Close menu if clicked outside
   window.addEventListener('click', function(e){
     const menu = document.getElementById('langMenu');
+    const menu_mobile = document.getElementById('langMenu_mobile');
+
     const button = menu.previousElementSibling;
+    const button_mobile = menu_mobile.previousElementSibling;
+
     if(!button.contains(e.target) && !menu.contains(e.target)){
       menu.classList.add('hidden');
+    }
+
+    if(!button_mobile.contains(e.target) && !menu_mobile.contains(e.target)){
+      menu_mobile.classList.add('hidden');
     }
   });
 </script>
