@@ -25,8 +25,7 @@
     <header class="">
         <section class="bg-[#0F243D] md:h-[750px] md:mx-10 md:rounded-2xl text-white" id="mobileMenuButton">
             <!-- mobile menu -->
-            <section
-                class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
+            <section class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
                 <section class="flex justify-between items-center w-full">
                     <div>
                         <img src="../asserts/mobileLogo.svg" alt="" />
@@ -39,44 +38,49 @@
             <!-- Mobile Dropdown Menu -->
             <section class="md:hidden px-4 py-3 text-white w-full flex justify-center items-center">
                 <!-- Dropdown Content -->
-                <div id="mobileMenuContent"
-                    class="mt-2 absolute top-[15vh] left-0 right-0 w-full flex flex-col items-center justify-center z-50 hidden">
+                <div id="mobileMenuContent" class="mt-2 absolute top-[15vh] left-0 right-0 w-full flex flex-col items-center justify-center z-50 hidden">
                     <ul class="bg-[#1C3C5E] w-full rounded-2xl shadow-md p-4 text-[20px] font-medium space-y-6 ">
                         <a href="{{ route('personal') }}"
                             class="block px-4 py-2 text-white hover:bg-[#3B82F6] border border-[#3380C4] p-4 bg-[#1E5186] rounded-xl">
-                            Personal
+                            {{ __('Personal') }}
                         </a>
                         <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            Business
+                            {{ __('Business') }}
                         </a>
                         <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            Developer
+                            {{ __('Developer') }}
                         </a>
                         <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            Blog
+                            {{ __('Blog') }}
                         </a>
                         <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            Contact Us
+                            {{ __('Contact Us') }}
                         </a>
 
                         <button
                             class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-                            <a href="{{ route('login') }}" class=""> Login </a>
+                            <a href="{{ route('login') }}" class=""> {{ __('Login') }} </a>
                         </button>
 
                         <button
                             class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-                            <a href="{{ route('register.saveStepData') }}" class=""> Get Started </a>
+                            <a href="{{ route('register.saveStepData') }}" class=""> {{ __('Get Started') }} </a>
                         </button>
 
-                        <button aria-label="Select country"
-                            class="flex items-center space-x-2 border border-[#3380C4] rounded-full px-3 py-1 text-white focus:outline-none"
-                            type="button">
-                            <img alt="Flag of Nigeria" class="w-6 h-6 rounded-full object-cover" decoding="async"
-                                height="14" src="../asserts/homepage/ng.svg" width="20" />
-                            <span> NG </span>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
+                        <div class="relative">
+                            <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
+                                <span>{{ strtoupper(app()->getLocale()) }} </span>
+                                <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+
+                            <ul id="langMenu_mobile" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
+                                <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100">English</a></li>
+                                <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100">Spanish</a></li>
+                                <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100">French</a></li>
+                                <li><a href="{{ route('lang.switch', 'lg') }}" class="block px-4 py-2 hover:bg-gray-100">Luganda</a></li>
+                            </ul>
+                        </div>
                     </ul>
                 </div>
             </section>
@@ -384,6 +388,21 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+
+        <section>
+            <div class="max-w-7xl mx-auto px-6 md:px-8 py-10 text-center">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#0F243D] mb-4">
+                    Can't find what you're looking for?
+                </h2>
+                <p class="text-lg text-gray-600 mb-6">
+                    We're always on the lookout for exceptional talent. Send us your resume and a cover letter to:
+                </p>
+                <a href="mailto:career@flovide.com" class="inline-block bg-[#F6B34A] text-[#0F243D] font-semibold py-3 px-8 rounded-full hover:bg-[#F6B34A]/90 transition-colors text-lg shadow-md">
+                    career@flovide.com <i class="fas fa-envelope ml-2"></i>
+                </a>
             </div>
         </section>
 
