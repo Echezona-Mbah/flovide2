@@ -44,10 +44,22 @@
     <!-- Right: Language selector, Sign In, Get Started -->
     <div class="flex items-center space-x-6 text-sm font-medium text-gray-800">
       <!--  Language selector -->
+      @php
+        $flags = [
+          'en' => 'gb.svg',
+          'es' => 'es.svg',
+          'fr' => 'fr.svg',
+          'lg' => 'ug.svg',
+        ];
+
+        $currentLocale = app()->getLocale();
+        $currentFlag = $flags[$currentLocale] ?? 'gb.svg';
+      @endphp
+
       <div class="relative">
         <button onclick="toggleLang()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
           <span>{{ strtoupper(app()->getLocale()) }} </span>
-          <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
+          <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/' . $currentFlag) }}" alt="Flag" />
           <i class="fas fa-chevron-down text-xs"></i>
         </button>
 
