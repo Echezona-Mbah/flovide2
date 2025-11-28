@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\Business\SubAccountController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\MainPage\personalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 Route::get('/artisan-clear', function () {
     try {
@@ -33,6 +35,10 @@ Route::get('/artisan-clear', function () {
 
 Route::get('/business', [businessController::class, 'business'])->name('business');
 Route::get('/', [personalController::class, 'personal'])->name('personal');
+//careers route
+Route::get('/careers', function () {
+    return view('mainpage.careers');
+})->name('careers');
 
 
 
