@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>Sign In</title>
+    <title>{{ __('Reset Password') }}</title>
 </head>
 
 <body>
@@ -40,7 +40,7 @@
 
                     <section class="absolute md:top-[20vh] top-[16vh] w-full px-10">
                         <h1 class="w-full text-[#252525] font-semibold text-xl">
-                            Reset Password
+                            {{ __('Reset Password') }}
                         </h1>
 
 
@@ -88,7 +88,7 @@
 
                                   <!-- Password -->
                                   <div class="relative">
-                                    <label for="password" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Password</label>
+                                    <label for="password" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Password') }}</label>
                                     <input type="password" name="password" id="password"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                         placeholder="user1234" onkeyup="checkPasswordStrength()">
@@ -102,7 +102,7 @@
 
                                     <!-- Confirm Password -->
                                     <div class="relative mt-4">
-                                        <label for="password_confirmation" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Confirm Password</label>
+                                        <label for="password_confirmation" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Confirm Password') }}</label>
                                         <input type="password" name="password_confirmation" id="password_confirmation"
                                             class="password-toggle bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             placeholder="user1234">
@@ -118,11 +118,11 @@
 
                                     <!-- Password strength checklist -->
                                         <ul class="text-sm mt-2 space-y-1 text-gray-600 dark:text-gray-300" id="password-criteria">
-                                            <li id="lowercase" class="text-red-500">✖ At least one lowercase letter</li>
-                                            <li id="uppercase" class="text-red-500">✖ At least one uppercase letter</li>
-                                            <li id="number" class="text-red-500">✖ At least one number</li>
-                                            <li id="special" class="text-red-500">✖ At least one special character (@$!%*?&)</li>
-                                            <li id="length" class="text-red-500">✖ Minimum 8 characters</li>
+                                            <li id="lowercase" class="text-red-500">✖ {{ __('At least one lowercase letter') }}</li>
+                                            <li id="uppercase" class="text-red-500">✖ {{ __('At least one uppercase letter') }}</li>
+                                            <li id="number" class="text-red-500">✖ {{ __('At least one number') }}</li>
+                                            <li id="special" class="text-red-500">✖ {{ __('At least one special character (@$!%*?&)') }}</li>
+                                            <li id="length" class="text-red-500">✖ {{ __('Minimum 8 characters') }}</li>
                                         </ul>
 
 
@@ -131,7 +131,7 @@
                                         <button type="submit"
                                             class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
                                            >
-                                           Reset Password
+                                           {{ __('Reset Password') }}
                                         </button>
 
                                         {{-- <div class="flex items-center">
@@ -145,7 +145,7 @@
                                     <!-- sign up -->
 
                                     <section class="flex gap-4 flex-col">
-                                        <p>Don’t have an account?<a href="register" style="color: rgb(86, 86, 222)">Click here to register</a></p>
+                                        <p>{{ __('Don’t have an account?') }}<a href="register" style="color: rgb(86, 86, 222)">{{ __('Click here to register') }}</a></p>
                                  
                                     </section>
 
@@ -197,19 +197,19 @@
 
         // Update visual feedback
         document.getElementById("lowercase").className = hasLower ? "text-green-600" : "text-red-500";
-        document.getElementById("lowercase").innerHTML = hasLower ? "✔ Contains lowercase letter" : "✖ At least one lowercase letter";
+        document.getElementById("lowercase").innerHTML = hasLower ? "✔ {{ __('Contains lowercase letter') }}" : "✖ {{ __('At least one lowercase letter') }}";
 
         document.getElementById("uppercase").className = hasUpper ? "text-green-600" : "text-red-500";
-        document.getElementById("uppercase").innerHTML = hasUpper ? "✔ Contains uppercase letter" : "✖ At least one uppercase letter";
+        document.getElementById("uppercase").innerHTML = hasUpper ? "✔ {{ __('Contains uppercase letter') }}" : "✖ {{ __('At least one uppercase letter') }}";
 
         document.getElementById("number").className = hasNumber ? "text-green-600" : "text-red-500";
-        document.getElementById("number").innerHTML = hasNumber ? "✔ Contains number" : "✖ At least one number";
+        document.getElementById("number").innerHTML = hasNumber ? "✔ {{ __('Contains number') }}" : "✖ {{ __('At least one number') }}";
 
         document.getElementById("special").className = hasSpecial ? "text-green-600" : "text-red-500";
-        document.getElementById("special").innerHTML = hasSpecial ? "✔ Contains special character" : "✖ At least one special character (@$!%*?&)";
+        document.getElementById("special").innerHTML = hasSpecial ? "✔ {{ __('Contains special character') }}" : "✖ {{ __('At least one special character (@$!%*?&)') }}";
 
         document.getElementById("length").className = hasLength ? "text-green-600" : "text-red-500";
-        document.getElementById("length").innerHTML = hasLength ? "✔ Minimum 8 characters" : "✖ Minimum 8 characters";
+        document.getElementById("length").innerHTML = hasLength ? "✔ {{ __('Minimum 8 characters') }}" : "✖ {{ __('Minimum 8 characters') }}";
     }
 </script>
 
