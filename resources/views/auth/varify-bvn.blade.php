@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>BVN Verification</title>
+    <title>{{ __('BVN Verification') }}</title>
 </head>
 
 <body>
@@ -41,7 +41,7 @@
 
                     <section class="absolute md:top-[20vh] top-[16vh] w-full px-10">
                         <h1 class="w-full text-[#252525] font-semibold text-xl">
-                            BVN Verification
+                            {{ __('BVN Verification') }}
                         </h1>
 
 
@@ -81,7 +81,7 @@
                                     <!-- password -->
                                     <div>
                                         <label for="helper-text"
-                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Enter your BVN</label>
+                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Enter your BVN') }}</label>
                                         <input type="type" name="bvn" id="helper-text"
                                             aria-describedby="helper-text-explanation"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -95,7 +95,7 @@
                                         <button type="submit"
                                             class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
                                            >
-                                            Verify
+                                            {{ __('Verify') }}
                                         </button>
 
                                         {{-- <div class="flex items-center">
