@@ -20,39 +20,45 @@
         <ul class="bg-[#1C3C5E] w-full rounded-2xl shadow-md p-4 text-[20px] font-medium space-y-6 ">
           <a href="{{ route('personal') }}"
             class="block px-4 py-2 text-white hover:bg-[#3B82F6] border border-[#3380C4] p-4 bg-[#1E5186] rounded-xl">
-            Personal
+            {{ __('Personal') }}
           </a>
           <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-            Business
+            {{ __('Business') }}
           </a>
           <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-            Developer
+            {{ __('Developer') }}
           </a>
           <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-            Blog
+            {{ __('Blog') }}
           </a>
           <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-            Contact Us
+            {{ __('Contact Us') }}
           </a>
 
           <button
             class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-            <a href="#" class=""> Login </a>
+            <a href="#" class=""> {{ __('Login') }} </a>
           </button>
 
-          <button
-            class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-            <a href="#" class=""> Get Started </a>
+          <button class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
+            <a href="#" class=""> {{ __('Get Started') }} </a>
           </button>
 
-          <button aria-label="Select country"
-            class="flex items-center space-x-2 border border-[#3380C4] rounded-full px-3 py-1 text-white focus:outline-none"
-            type="button">
-            <img alt="Flag of Nigeria" class="w-6 h-6 rounded-full object-cover" decoding="async" height="14"
-              src="{{asset('../asserts/homepage/ng.svg')}}" width="20" />
-            <span> NG </span>
-            <i class="fas fa-chevron-down text-xs"></i>
-          </button>
+          <div class="relative">
+            <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
+              <span>{{ strtoupper(app()->getLocale()) }} </span>
+              <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
+              <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+
+            <ul id="langMenu_mobile" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
+              <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100">English</a></li>
+              <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100">Spanish</a></li>
+              <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100">French</a></li>
+              <li><a href="{{ route('lang.switch', 'lg') }}" class="block px-4 py-2 hover:bg-gray-100">Luganda</a></li>
+            </ul>
+          </div>
+          
         </ul>
       </div>
     </section>
@@ -61,12 +67,10 @@
       <div class="md:max-w-xl text-white">
         <h1
           class="font-semibold md:text-[3.5rem] text-4xl w-[87vw] md:full flex flex-wrap text-center md:text-left leading-[1.1] mb-6">
-          Do business <br class="hidden md:inline-block" />
-          like a local in <br class="hidden md:inline-block" />
-          190+ countries
+          {{ __('Do business like a local in 190+ countries') }}
         </h1>
         <p class="md:text-[0.875rem] text-xl text-center md:text-left font-normal mb-8 max-w-md">
-          Create business accounts and move your money around for less. 190+ countries, 40+ currencies.
+          {{ __('Create business accounts and move your money around for less. 190+ countries, 40+ currencies.') }}
         </p>
 
         <div
@@ -75,19 +79,18 @@
           <a href="{{ route('login') }}">
             <button
               class="bg-[#2D6BCF] text-white text-lg md:w-[15vw] font-medium rounded-full px-6 py-2.5 hover:bg-[#1f4e9e] transition">
-              Sign In
+              {{ __('Sign In') }}
             </button>
           </a>
 
           <a href="{{ route('register.saveStepData') }}">
             <button
               class="border md:w-[18vw] border-white border-opacity-40 text-white text-lg font-medium rounded-full px-6 md:px-4 py-2.5 hover:bg-white hover:bg-opacity-10 transition">
-              Open a Free Account
+              {{ __('Open a Free Account') }}
             </button>
           </a>
 
         </div>
-
       </div>
 
       <div class="flex flex-col gap-4 max-w-md w-full justify-center items-center">

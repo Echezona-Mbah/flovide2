@@ -9,6 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Jenssegers\Agent\Agent;
+use App\Models\LoginActivity;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -32,13 +34,49 @@ class AuthenticatedSessionController extends Controller
     //     return redirect()->intended(route('dashboard', absolute: false));
     // }
 
-        public function store(LoginRequest $request): RedirectResponse
-        {
-            $request->authenticate();
 
-            $user = auth()->user(); // Use the authenticated user
+    public function recordLoginActivity($request, $user)
+    {
+        $agent = new Agent();
 
-            if ($user->email_verified_status !== 'yes') {
+        // Get user details
+        $ip = $request->ip();
+        $device = $agent->device();
+        $browser = $agent->browser();
+        $os = $agent->platform();
+
+        //Get Location using IP-API
+        $location = null;
+        try {
+            $json = @file_get_contents("http://ip-api.com/json/{$ip}");
+            $details = json_decode($json, true);
+            if ($details && $details['status'] === 'success') {
+                $location = $details['city'] . ', ' . $details['country'];
+            }
+        } catch (\Exception $e) {
+            $location = null;
+        }
+
+        // Save record
+        LoginActivity::create([
+            'user_id' => $user->id,
+            'personal_id' => null,
+            'ip_address' => $ip,
+            'device' => $device ?: 'Unknown Device',
+            'browser' => $browser ?: 'Unknown Browser',
+            'os' => $os ?: 'Unknown OS',
+            'location' => $location,
+            'login_time' => now(),
+        ]);
+    }
+
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+
+        $user = auth()->user(); // Use the authenticated user
+
+        if ($user->email_verified_status !== 'yes') {
             $email = $user->email;
             Auth::logout();
 
@@ -53,9 +91,12 @@ class AuthenticatedSessionController extends Controller
         "Hello {$user->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
     ));
 
-    session()->flash('status', 'Login successful!');
-    return redirect()->intended(route('dashboard', absolute: false));
-}
+        //RECORD LOGIN ACTIVITY
+        $this->recordLoginActivity($request, $user);
+
+        session()->flash('status', 'Login successful!');
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
 
 
 
