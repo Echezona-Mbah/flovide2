@@ -205,7 +205,7 @@
               </div>
               @if(isset($chargeback))
 
-            <form class="space-y-6" method="POST" action="{{ route('chargeback.submitEvidence') }}" enctype="multipart/form-data">
+            <form class="space-y-6" method="POST" action="/chargeback/submitEvidence" enctype="multipart/form-data">
                 @csrf
 
                 <input type="hidden" name="id" value="{{ $chargeback->id }}">
