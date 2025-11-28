@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>Varify OTP </title>
+    <title>{{ __('Varify OTP') }}</title>
 </head>
 
 <body>
@@ -40,7 +40,7 @@
 
                     <section class="absolute md:top-[20vh] top-[16vh] w-full px-10">
                         <h1 class="w-full text-[#252525] font-semibold text-xl">
-                            forgot-password
+                            {{ __('forgot-password') }}
                         </h1>
 
 
@@ -80,7 +80,7 @@
                             
                                 <section class="flex flex-col gap-6">
                                     <div>
-                                        <label class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Enter OTP</label>
+                                        <label class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Enter OTP') }}</label>
                                         <div class="flex gap-3">
                                             @for ($i = 1; $i <= 6; $i++)
                                                 <input type="text" maxlength="1" class="otp-input w-10 h-10 text-center border rounded-lg text-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white" id="otp-{{ $i }}">
@@ -92,12 +92,12 @@
                                     <section class="mt-4 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-5 ">
                                         <button type="submit"
                                             class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]">
-                                            Continue
+                                            {{ __('Continue') }}
                                         </button>
                                     </section>
                             
                                     <section class="flex gap-4 flex-col">
-                                        <p>Don’t have an account? <a href="register" style="color: rgb(86, 86, 222)">Click here to register</a></p>
+                                        <p>{{ __('Don’t have an account?') }} <a href="register" style="color: rgb(86, 86, 222)">{{ __('Click here to register') }}</a></p>
                                     </section>
                                 </section>
                             </form>
@@ -140,7 +140,7 @@
                         toast: true,
                         position: 'top-end',
                         icon: 'error',
-                        title: 'Please fill in all OTP digits',
+                        title: '{{ __('Please fill in all OTP digits') }}',
                         showConfirmButton: false,
                         timer: 4000,
                         timerProgressBar: true,

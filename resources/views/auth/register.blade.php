@@ -73,7 +73,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <title>Sign Up</title>
+        <title>{{ __('Sign Up') }}</title>
     </head>
     
     <body>
@@ -137,7 +137,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -150,7 +150,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -163,7 +163,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
@@ -175,7 +175,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
     
@@ -186,20 +186,20 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Where is your business located?
+                                {{ __('Where is your business located?') }}
                             </h1>
     
                             <!-- select country -->
                             <section>
                                 <form class="max-w-sm mt-10" action="" method="POST" id="countryForm">
                                     @csrf
-                                    <label for="countries" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Country</label>
+                                    <label for="countries" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">{{ __('Country') }}</label>
                             
                                     <div class="custom-dropdown">
                                         <div class="dropdown-button" id="dropdownButton">
                                             <div class="flex gap-4 items-center">
                                                 <img src="" alt="" class="hidden" />
-                                                <span>Select a country</span>
+                                                <span>{{ __('Select a country') }}</span>
                                             </div>
                                             <i class="fa-solid fa-angle-down"></i>
                                         </div>
@@ -229,7 +229,7 @@
                                     <!-- Stepper Button -->
                                     <section class="mt-10">
                                         <button type="submit" class="w-[10em] rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C] btn-continue">
-                                            Continue
+                                            {{ __('Continue') }}
                                         </button>
                                     </section>
                                 </form>
@@ -267,7 +267,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -280,7 +280,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -293,7 +293,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
@@ -305,7 +305,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
     
@@ -316,7 +316,7 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Your Business Information
+                                {{ __('Your Business Information') }}
                             </h1>
     
                             <!-- select country -->
@@ -325,74 +325,74 @@
                                     <section class="flex flex-col gap-10">
                                         <!-- Business Name -->
                                         <div>
-                                            <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Business Name</label>
-                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter business name">
+                                            <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Name') }}</label>
+                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter business name') }}">
                                             <div id="businessNameError" ></div>
     
                                         </div>
                                         <!-- Registration Number -->
                                         <div>
-                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Registration Number</label>
-                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your company reg no">
+                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Registration Number') }}</label>
+                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
                                             <div id="error-registration_number"></div>
                                         </div>
 
                                         <!-- Business Number -->
                                         <div>
-                                            <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Business Number</label>
-                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your business no">
+                                            <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Number') }}</label>
+                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
                                             <div id="error-business_number"></div>
                                         </div>
                                         <!-- Incorporation Date -->
                                         <div>
-                                            <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Incorporation Date</label>
+                                            <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Incorporation Date') }}</label>
                                             <section class="flex flex-col md:flex-row md:justify-between md:items-center md:gap-2 gap-10">
-                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Day">
+                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Day') }}">
                                                 <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                    <option value="" disabled selected>Select a month</option>
-                                                    <option value="1">January</option>
-                                                    <option value="2">February</option>
-                                                    <option value="3">March</option>
-                                                    <option value="4">April</option>
-                                                    <option value="5">May</option>
-                                                    <option value="6">June</option>
-                                                    <option value="7">July</option>
-                                                    <option value="8">August</option>
-                                                    <option value="9">September</option>
-                                                    <option value="10">October</option>
-                                                    <option value="11">November</option>
-                                                    <option value="12">December</option>
+                                                    <option value="" disabled selected>{{ __('Select a month') }}</option>
+                                                    <option value="1">{{ __('January') }}</option>
+                                                    <option value="2">{{ __('February') }}</option>
+                                                    <option value="3">{{ __('March') }}</option>
+                                                    <option value="4">{{ __('April') }}</option>
+                                                    <option value="5">{{ __('May') }}</option>
+                                                    <option value="6">{{ __('June') }}</option>
+                                                    <option value="7">{{ __('July') }}</option>
+                                                    <option value="8">{{ __('August') }}</option>
+                                                    <option value="9">{{ __('September') }}</option>
+                                                    <option value="10">{{ __('October') }}</option>
+                                                    <option value="11">{{ __('November') }}</option>
+                                                    <option value="12">{{ __('December') }}</option>
                                                 </select>
-                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Year">
+                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Year') }}">
                                             </section>
                                             <div id="error-incorporation_date" class="text-red-500 mt-2"></div>
                                         </div>
                                         
                                         <!-- Business Type -->
                                         <div>
-                                            <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Business Type</label>
-                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter your business type">
+                                            <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Type') }}</label>
+                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter your business type') }}">
                                             <div id="error-business_type" ></div>
     
                                         </div>
     
                                         <!-- Company URL -->
                                         <div>
-                                            <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Company URL</label>
+                                            <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Company URL') }}</label>
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                     <p>https://</p>
                                                 </div>
-                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your URL">
+                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
                                             </div>
                                             <div id="error-company_url"></div>
     
                                         </div>
                                         <!-- Industry -->
                                         <div>
-                                            <label for="industry" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Industry</label>
+                                            <label for="industry" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Industry') }}</label>
                                             <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                <option selected>Select an option</option>
+                                                <option selected>{{ __('Select an option') }}</option>
                                                 @foreach ($industries as $industry)
                                                 <option value="{{ $industry->id }}">{{ $industry->name }}</option>
                                                 @endforeach
@@ -403,14 +403,14 @@
                                       <!-- Annual Turnover -->
                                       
                                       <div class="relative">
-                                        <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Annual Turnover</label>
+                                        <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Annual Turnover') }}</label>
                                         
                                         <!-- Wrapper div for the input and currency symbol -->
                                         <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full pl-8 p-2.5 flex items-center">
                                             <span id="currency-symbol" class="text-gray-900 mr-2"></span>
                                             <input type="text" id="annual-turnover" 
                                                 class="bg-transparent border-none text-gray-900 text-lg w-full focus:outline-none" 
-                                                placeholder="Enter your turnover">
+                                                placeholder="{{ __('Enter your turnover') }}">
                                         </div>
                                         
                                         <div id="error-annual_turnover" class="text-red-500 text-sm mt-1"></div>
@@ -471,7 +471,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -484,7 +484,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -497,7 +497,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
@@ -509,7 +509,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
     
@@ -520,7 +520,7 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Your Business Information
+                                {{ __('Your Business Information') }}
                             </h1>
     
                             <!-- select country -->
@@ -633,7 +633,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -646,7 +646,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -659,7 +659,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
@@ -671,7 +671,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#828282]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
     
@@ -682,7 +682,7 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Create Your Account
+                                {{ __('Create Your Account') }}
                             </h1>
     
                             <!-- select country -->
@@ -860,7 +860,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -873,7 +873,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -886,7 +886,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
@@ -898,7 +898,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
                         </section>
@@ -907,7 +907,7 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Please Enter The OTP Sent To Your Email
+                                {{ __('Please Enter The OTP Sent To Your Email') }}
                             </h1>
     
                             <!-- select country -->
@@ -1022,7 +1022,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                    <p>Country</p>
+                                    <p>{{ __('Country') }}</p>
                                 </div>
                             </section>
     
@@ -1035,7 +1035,7 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Business Info</p>
+                                    <p>{{ __('Business Info') }}</p>
                                 </div>
                             </section>
     
@@ -1048,19 +1048,19 @@
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Personal info</p>
+                                    <p>{{ __('Personal info') }}</p>
                                 </div>
                             </section>
     
                             <section class="flex w-full relative items-center text-blue-600 dark:text-blue-500">
-                                <div class="flex items-center justify-center h-10 text-[#589DD8] shrink-0">
+                                <div class="flex items-center justify-center h-10 text-[#D7D4D5] shrink-0">
                                     <span>
                                         <i class="fa-solid fa-circle-dot"></i>
                                     </span>
                                 </div>
                                 <div
                                     class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                    <p>Verification</p>
+                                    <p>{{ __('Verification') }}</p>
                                 </div>
                             </section>
     
@@ -1071,7 +1071,7 @@
                         <!-- stepper content -->
                         <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                             <h1 class="w-full font-semibold">
-                                Bank Verification
+                                {{ __('Bank Verification') }}
                             </h1>
     
     

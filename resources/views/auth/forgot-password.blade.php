@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>Forgot Password</title>
+    <title>{{ __('Forgot Password') }}</title>
 </head>
 
 <body>
@@ -40,7 +40,7 @@
 
                     <section class="absolute md:top-[20vh] top-[16vh] w-full px-10">
                         <h1 class="w-full text-[#252525] font-semibold text-xl">
-                            forgot-password
+                            {{ __('forgot-password') }}
                         </h1>
 
 
@@ -79,7 +79,7 @@
                                     <!-- bussiness email -->
                                     <div>
                                         <label for="helper-text"
-                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Email</label>
+                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Email') }}</label>
                                         <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             placeholder="johndoe@gmail.com">
@@ -95,7 +95,7 @@
                                         <button type="submit"
                                             class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
                                            >
-                                            Send Code
+                                            {{ __('Send Code') }}
                                         </button>
 
                                  
@@ -105,7 +105,7 @@
                                     <!-- sign up -->
 
                                     <section class="flex gap-4 flex-col">
-                                        <p>Don’t have an account?<a href="register" style="color: rgb(86, 86, 222)">Click here to register</a></p>
+                                        <p>{{ __('Don’t have an account?') }}<a href="register" style="color: rgb(86, 86, 222)">{{ __('Click here to register') }}</a></p>
                                         {{-- <div class="flex items-center">
                                             <p><span class="text-[#215F9C]">Create personal account</span></p>
                                             <img src="../asserts/icons/share.svg" alt="" class="w-5 h-5 text-[#215F9C]">
