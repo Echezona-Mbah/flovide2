@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Notifications\GeneralNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +47,11 @@ class AuthenticatedSessionController extends Controller
                 'user_email' => $email
             ]);
         }
-
+    // Send login notification
+    $user->notify(new GeneralNotification(
+        "Login Successful ✅",
+        "Hello {$user->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
+    ));
 
     session()->flash('status', 'Login successful!');
     return redirect()->intended(route('dashboard', absolute: false));

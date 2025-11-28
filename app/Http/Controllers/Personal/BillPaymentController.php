@@ -193,7 +193,8 @@ public function handleDstv(Request $request)
             : redirect()->back()->with('error', $msg);
     }
 
-    $request_id = uniqid('vtpass_');
+            date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
     $payload = [
         'request_id'    => $request_id,
@@ -372,7 +373,8 @@ public function verifyElectricity(Request $request)
             ], 400);
         }
 
-        $request_id = uniqid('vtpass_');
+               date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
         $payload = [
             'request_id'    => $request_id,
@@ -504,7 +506,8 @@ public function verifyElectricity(Request $request)
             ], 400);
         }
 
-        $request_id = uniqid('vtpass_');
+                date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
         $payload = [
             'request_id'    => $request_id,
