@@ -89,7 +89,7 @@
                                         <div class="flex gap-4 items-center">
                                             <div class="flex items-center gap-1">
                                                 <img src=" {{ asset("asserts/dashboard/person.png") }}" alt="">
-                                                {{ $payment_count[$payment->id] ?? 0  }}
+                                                {{ $payment->records_count ?? 0  }}
                                             </div>
                                             <div class="bg-[#F9F7E5] {{ $payment->visibility === "private" ? 'bg-[#F9F7E5]' : 'bg-[#d1f0d9]' }}  text-[#2f6a44] rounded-full w-7 h-7 flex items-center justify-center">
                                                 @if ($payment->visibility === 'private')

@@ -13,7 +13,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>    
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Varify Email</title>
+        <title>{{ __('Varify Email') }}</title>
     </head>
     
     <body>
@@ -56,7 +56,7 @@
                             </div>
                             <div
                                 class="block font-[500] text-base antialiased absolute top-10 left-[-1em] leading-relaxed text-[#215F9C]">
-                                <p>Country</p>
+                                <p>{{ __('Country') }}</p>
                             </div>
                         </section>
 
@@ -69,7 +69,7 @@
                             </div>
                             <div
                                 class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                <p>Business Info</p>
+                                <p>{{ __('Business Info') }}</p>
                             </div>
                         </section>
 
@@ -82,7 +82,7 @@
                             </div>
                             <div
                                 class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                <p>Personal info</p>
+                                <p>{{ __('Personal info') }}</p>
                             </div>
                         </section>
 
@@ -94,7 +94,7 @@
                             </div>
                             <div
                                 class="block font-[500] text-base antialiased absolute top-10 left-[-2em] leading-relaxed text-[#215F9C]">
-                                <p>Verification</p>
+                                <p>{{ __('Verification') }}</p>
                             </div>
                         </section>
                     </section>
@@ -103,7 +103,7 @@
                     <!-- stepper content -->
                     <section class="absolute md:top-[40vh] top-[30vh] w-full px-10">
                         <h1 class="w-full font-semibold">
-                            Please Enter The OTP Sent To Your Email
+                            {{ __('Please Enter The OTP Sent To Your Email') }}
                         </h1>
 
                         <!-- select country -->
@@ -191,13 +191,13 @@
 
                                     <section>
                                         <div class="flex  items-center w-full">
-                                            <p>Edit your email - <span class="text-[#215F9C]">{{ $userEmail }}</span>
+                                            <p>{{ __('Edit your email') }} - <span class="text-[#215F9C]">{{ $userEmail }}</span>
                                             </p>
                                             <img src="../asserts/icons/edit.svg" alt="" class="w-5 h-5 text-[#215F9C]">
                                         </div>
                                         <div class="flex items-center w-full">
                                             <button type="button" id="resendOtpBtn" class="flex items-center gap-1 text-[#215F9C] mt-2">
-                                                Didn’t get code? Resend OTP
+                                                {{ __('Didn’t get code? Resend OTP') }}
                                                 <img src="../asserts/icons/share.svg" alt="" class="w-5 h-5" />
                                             </button>
                                         </div>
@@ -209,13 +209,13 @@
                                 <!-- Back Button -->
                                     <button type="button"
                                     class="w-[10em] rounded-full p-2 h-12 border border-[#215F9C] text-[#215F9C] btn-back">
-                                    Back
+                                    {{ __('Back') }}
                                     </button>
 
                                     <!-- Continue Button -->
                                     <button type="submit"
                                     class="w-[10em] rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C] ">
-                                    Continue
+                                    {{ __('Continue') }}
                                     </button>
                                 
                                 </section>
@@ -264,7 +264,7 @@
                         toast: true,
                         position: 'top-end',
                         icon: 'success',
-                        title: response.message || 'OTP has been resent.',
+                        title: response.message || '{{ __('OTP has been resent.') }}',
                         showConfirmButton: false,
                         timer: 4000,
                         timerProgressBar: true,
@@ -275,7 +275,7 @@
                         toast: true,
                         position: 'top-end',
                         icon: 'error',
-                        title: 'Failed to resend OTP. Please try again.',
+                        title: '{{ __('Failed to resend OTP. Please try again.') }}',
                         showConfirmButton: false,
                         timer: 4000,
                         timerProgressBar: true,
