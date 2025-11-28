@@ -110,7 +110,6 @@ class CreateBankController extends Controller
             'currency' => $request->currency,
             'balance' => 0,
         ]);
-
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => true,
