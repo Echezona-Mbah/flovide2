@@ -26,9 +26,9 @@ class SubscriptionRecord extends Model
 
     ];
 
-    public function subscription()
+    public function subscriptionRecord()
     {
-        return $this->belongsTo(Subscription::class);
+        return $this->belongsTo(Subscription::class, "subscription_id");
     }
 
     public function user()

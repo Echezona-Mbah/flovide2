@@ -37,4 +37,6 @@ class Remita extends Model
     {
         return $this->belongsTo(Subaccount::class);
     }
+
+
 }

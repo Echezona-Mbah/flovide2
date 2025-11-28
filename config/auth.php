@@ -53,6 +53,11 @@ return [
             'driver' => 'sanctum',
             'provider' => 'personals',
         ],
+
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ]
     ],
 
     /*
@@ -83,6 +88,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Personal::class,
         ],
+
+            'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ]
 
 
         // 'users' => [
