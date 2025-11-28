@@ -168,6 +168,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
     Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
     
+    //top-up your wallet
+    Route::get('/top-up', function () {
+        return view('business.top_up_wallet');
+    })->name('top-up');
+
+    Route::get('/top-up-review', function () {
+        return view('business.top_up_review');
+    })->name('top-up-review');
 
 
     // beneficias

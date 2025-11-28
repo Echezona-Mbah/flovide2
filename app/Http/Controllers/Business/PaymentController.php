@@ -21,29 +21,22 @@ class PaymentController extends Controller
     {
         // Fetch all payment pages for the authenticated user
         $user = Auth::user();
-        $payment = payment::where('user_id', $user->id)
+        $payment = payment::withCount('records')->where('user_id', $user->id)
                     ->latest()
                     ->get();
-
-        // Get all payment_ids from the collection
-        $paymentIds = $payment->pluck('id');
-
-        //fetch payment pages
-        $paymentCount = PaymentRecord::whereIn('payment_id', $paymentIds)->count();
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
                     'message' => 'Payment pages retrieved successfully.',
-                    'payments' => $payment,
-                    'payments_count' => $paymentCount,
+                    'payments' => $payment
                 ]
             ], 200);
         }
 
         //return the view
-        return view('business.payment', ['payments' => $payment, 'payments_count' => $paymentCount]);
+        return view('business.payment', ['payments' => $payment]);
     }
 
     public function paymentcheckout(Request $request, $id)
