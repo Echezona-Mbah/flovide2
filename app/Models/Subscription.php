@@ -20,6 +20,11 @@ class Subscription extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+       public function subscription()
+    {
+        return $this->hasMany(SubscriptionRecord::class, 'subscription_id');
+    }
+
     protected $table ='subscriptions';
 
     protected $primaryKey ='id';
