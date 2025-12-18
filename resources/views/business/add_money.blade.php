@@ -15,7 +15,7 @@
     <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Add Money
+                {{ __('Add Money') }}
             </h1>
                  @include('business.header_notifical')
         </header>
@@ -32,7 +32,7 @@
 
                     <!-- Choose wallet -->
                     <div class="text-center mb-12 max-w-xs w-full">
-                        <p class="font-semibold text-sm mb-3">Choose which wallet balance to top-up</p>
+                        <p class="font-semibold text-sm mb-3">{{ __('Choose which wallet balance to top-up') }}</p>
                         <button
                             class="inline-flex items-center gap-1 bg-gray-200 rounded-md px-3 py-1 text-sm font-medium text-gray-800">
                             <img src="https://flagcdn.com/w20/gb.png" alt="UK flag" class="w-5 h-5 rounded-sm" />
@@ -58,8 +58,8 @@
                                 <i class="fas fa-stopwatch text-lg"></i>
                             </div>
                             <div class="flex justify-between w-full font-semibold text-sm">
-                                <span>Arrival time</span>
-                                <span class="font-normal">Today - in seconds</span>
+                                <span>{{ __('Arrival time') }}</span>
+                                <span class="font-normal">{{ __('Today - in seconds') }}</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 px-5 py-3">
@@ -68,7 +68,7 @@
                                 <i class="fas fa-file-invoice-dollar text-lg"></i>
                             </div>
                             <div class="flex justify-between w-full font-semibold text-sm">
-                                <span>Fees</span>
+                                <span>{{ __('Fees') }}</span>
                                 <span class="font-normal">£ 0.00</span>
                             </div>
                         </div>
@@ -78,13 +78,13 @@
                     <div id="infoBox"
                         class="max-w-md w-full border border-green-300 rounded-md bg-green-50 text-green-600 px-4 py-2 mb-6 flex items-center gap-2 text-sm select-none">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <span>Enter the amount you wish to add to continue</span>
+                        <span>{{ __('Enter the amount you wish to add to continue') }}</span>
                     </div>
 
                     <!-- Continue button -->
                     <button id="continueBtn" disabled
                         class="max-w-md w-full bg-gray-300 text-gray-600 font-semibold rounded-full py-3 cursor-not-allowed">
-                        Continue
+                        {{ __('Continue') }}
                     </button>
                 </section>
                 </div>
