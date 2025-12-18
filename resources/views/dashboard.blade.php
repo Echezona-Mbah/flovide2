@@ -15,7 +15,7 @@
     <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Dashboard
+                {{ __('Dashboard') }}
             </h1>
             @include('business.header_notifical')   
         </header>
@@ -28,7 +28,7 @@
                             <div
                                 class="flex flex-col md:flex-row md:items-center md:justify-between w-full md:gap-0 mb-10">
                                 <div>
-                                    <p class="text-gray-500 text-sm mb-1">Total Balance</p>
+                                    <p class="text-gray-500 text-sm mb-1">{{ __('Total Balance') }}</p>
                                     <h1 class="font-extrabold text-2xl md:text-xl">
                                         {{-- {{ $balance }}{{ number_format($balance) }} --}}
                                     </h1>
@@ -41,20 +41,20 @@
                                         <button
                                             class="flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-5 py-2 text-blue-700 text-sm md:text-sm font-medium hover:bg-blue-200 transition">
                                             <i class="fas fa-file-invoice text-xs"></i>
-                                            Send Money
+                                            {{ __('Send Money') }}
                                         </button>
                                     </a>
                                     
                                     <button
                                         class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
                                         <i class="fas fa-cube text-xs"></i>
-                                        Exchange
+                                        {{ __('Exchange') }}
                                     </button>
                                     <a href="{{ route('add_money') }}"
                                     class="flex items-center gap-1 rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition
                                             {{ request()->routeIs('add_money') ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-50' }}">
                                         <i class="far fa-file-alt text-xs"></i>
-                                        Add Money
+                                        {{ __('Add Money') }}
                                     </a>
 
                                     {{-- <button
@@ -70,11 +70,11 @@
                         
                         <section class="mb-10">
                             <div class="flex justify-between items-center mb-5">
-                                <h2 class="font-semibold text-lg">Your Balances</h2>
+                                <h2 class="font-semibold text-lg">{{ __('Your Balances') }}</h2>
                                     <a href="{{ route('add_account.create') }}"
                                         class="text-sm px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
                                     >
-                                        Add Balance
+                                        {{ __('Add Balance') }}
                                     </a>
                             </div>
 
@@ -153,10 +153,10 @@
                             <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
                                     <div class="flex items-center justify-between mb-5">
-                                        <h3 class="font-semibold text-lg">Transactions</h3>
+                                        <h3 class="font-semibold text-lg">{{ __('Transactions') }}</h3>
                                         <button
                                             class="flex items-center gap-1 text-gray-700 text-sm font-semibold hover:text-gray-900">
-                                            See All
+                                            {{ __('See All') }}
                                             <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                         </button>
                                     </div>
@@ -177,22 +177,22 @@
                                             <p class="font-semibold text-sm md:text-base">{{ number_format($tx->amount, 2) }} {{ $tx->currency }}</p>
                                         </div>
                                         @empty
-                                        <p class="text-gray-400">No transactions yet.</p>
+                                        <p class="text-gray-400">{{ __('No transactions yet.') }}</p>
                                         @endforelse
                                     </div>
                                     
                                 </div>
 
                                 <div>
-                                    <h3 class="font-semibold text-lg mb-5">Monthly Income</h3>
+                                    <h3 class="font-semibold text-lg mb-5">{{ __('Monthly Income') }}</h3>
                                     <div class="border border-gray-200 rounded-xl p-5 max-w-full overflow-x-auto">
                                         <div class="flex justify-between items-center mb-4">
                                             <select aria-label="Select quarter"
                                                 class="text-xs border border-gray-300 rounded-full py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <option>1st quarter</option>
-                                                <option>2nd quarter</option>
-                                                <option>3rd quarter</option>
-                                                <option>4th quarter</option>
+                                                <option>{{ __('1st quarter') }}</option>
+                                                <option>{{ __('2nd quarter') }}</option>
+                                                <option>{{ __('3rd quarter') }}</option>
+                                                <option>{{ __('4th quarter') }}</option>
                                             </select>
                                             <span class="font-semibold text-sm">GBP</span>
                                         </div>
@@ -219,15 +219,15 @@
                                             </text>
                                             <text x="0" y="195" fill="#6B7280" font-size="10"
                                                 font-family="Inter, sans-serif">
-                                                January
+                                                {{ __('January') }}
                                             </text>
                                             <text x="150" y="195" fill="#6B7280" font-size="10"
                                                 font-family="Inter, sans-serif">
-                                                February
+                                                {{ __('February') }}
                                             </text>
                                             <text x="350" y="195" fill="#6B7280" font-size="10"
                                                 font-family="Inter, sans-serif">
-                                                March
+                                                {{ __('March') }}
                                             </text>
                                             <text x="380" y="15" fill="#111827" font-size="12"
                                                 font-family="Inter, sans-serif" font-weight="700" text-anchor="end">
