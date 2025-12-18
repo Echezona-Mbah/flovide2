@@ -13,7 +13,7 @@
     <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Send to a beneficias
+                {{ __('Send to a beneficiary') }}
             </h1>
             @include('business.header_notifical')
 
@@ -23,8 +23,8 @@
                 <section class="flex flex-col w-full min-h-screen bg-gray-50 p-6 md:p-10">
                     <!-- Header -->
                     <div class="mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-800">My Beneficiaries</h2>
-                        <p class="text-sm text-gray-500">Send money to your saved beneficiaries.</p>
+                        <h2 class="text-2xl font-semibold text-gray-800">{{ __('My Beneficiaries') }}</h2>
+                        <p class="text-sm text-gray-500">{{ __('Send money to your saved beneficiaries.') }}</p>
                     </div>
                 
                     <!-- Search bar -->
@@ -32,11 +32,11 @@
                         <input 
                             id="search" 
                             type="search" 
-                            placeholder="Search by name, account number or email"
+                            placeholder="{{ __('Search by name, account number or email') }}"
                             class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" 
                         />
                         <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm hover:bg-blue-700 transition">
-                            Search
+                            {{ __('Search') }}
                         </button>
                     </form>
                 
@@ -64,19 +64,19 @@
                 
                                     <div>
                                         <h3 class="text-lg font-semibold text-gray-800 truncate w-40" id="beneficiaryName">{{ $beneficiary->account_name }}</h3>
-                                        <p class="text-xs text-gray-400">Saved Beneficiary</p>
+                                        <p class="text-xs text-gray-400">{{ __('Saved Beneficiary') }}</p>
                                     </div>
                                 </div>
                 
                                 <div class="mb-3 space-y-1 text-sm text-gray-700">
-                                    <p><strong id="beneficiaryAccount">Account:</strong> {{ $beneficiary->account_number }}</p>
-                                    <p><strong id="beneficiaryBank">Bank:</strong> {{ $beneficiary->bank }}</p>
+                                    <p><strong id="beneficiaryAccount">{{ __('Account:') }}</strong> {{ $beneficiary->account_number }}</p>
+                                    <p><strong id="beneficiaryBank">{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
                                 </div>
                             </div>
                        
                         @empty
                             <div class="col-span-full text-center text-gray-500">
-                                You haven't added any beneficiaries yet.
+                                {{ __("You haven't added any beneficiaries yet.") }}
                             </div>
                         @endforelse
                     </div>
@@ -87,7 +87,7 @@
                                 <!-- Close Button -->
                                 <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
 
-                                <h2 class="text-lg font-bold mb-4">Send Money</h2>
+                                <h2 class="text-lg font-bold mb-4">{{ __('Send Money') }}</h2>
 
                                 <!-- First Section: You Send -->
                                 <div class="flex flex-col gap-6 w-full max-w-md">
@@ -101,7 +101,7 @@
                                                 inputmode="decimal"
                                                 class="w-full px-3 py-2 text-sm focus:outline-none"
                                                 value="100.00" 
-                                                placeholder="You Send"
+                                                placeholder="{{ __('You Send') }}"
                                             />
 
 
@@ -141,16 +141,16 @@
                                     <!-- Exchange Info -->
                                     <div class="space-y-2 mb-6 text-sm text-gray-700">
                                         <div class="flex justify-between">
-                                            <span class="font-medium">Exchange rate:</span>
+                                            <span class="font-medium">{{ __('Exchange rate:') }}</span>
                                             <span id="exchangeRateText">NGN 1.00 = $0.0006</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="font-medium">Transfer fee:</span>
+                                            <span class="font-medium">{{ __('Transfer fee:') }}</span>
                                             <span id="transferFeeText">₦55.00</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="font-medium">Delivery:</span>
-                                            <span>Usually within 15 minutes(Can take up to 2 hours)</span>
+                                            <span class="font-medium">{{ __('Delivery:') }}</span>
+                                            <span>{{ __('Usually within 15 minutes(Can take up to 2 hours)') }}</span>
                                         </div>
                                     </div>
                                     <!-- Loader -->
@@ -159,11 +159,11 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                         </svg>
-                                        <span>Refreshing exchange rate...</span>
+                                        <span>{{ __('Refreshing exchange rate...') }}</span>
                                     </div>
 
                                     <!-- Recipient Gets -->
-                                    <h5 class="text-sm font-semibold text-gray-800 mb-2">Beneficia gets</h5>
+                                    <h5 class="text-sm font-semibold text-gray-800 mb-2">{{ __('Beneficiary gets') }}</h5>
                                     <div class="space-y-2 mb-6 text-sm text-gray-700">
                                         <div class="flex justify-between">
                                            <div class="font-medium flex items-center gap-1">
@@ -182,7 +182,7 @@
 
                                 <!-- Send Button -->
                                 <button id="sendBtn" class="w-full bg-green-600 text-white py-2 rounded-lg text-center hover:bg-green-700 transition">
-                                    Send
+                                    {{ __('Send') }}
                                 </button>
                                 
                             </div>
@@ -239,17 +239,17 @@
                                 <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative space-y-6">
                                     <button type="button" id="closeSummaryModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
                         
-                                    <h2 class="text-xl font-bold text-center text-gray-800">Confirm Transaction</h2>
+                                    <h2 class="text-xl font-bold text-center text-gray-800">{{ __('Confirm Transaction') }}</h2>
                         
                                     <!-- Section 1: Beneficiary Info -->
                                     <div class="bg-gray-100 rounded-lg p-4">
-                                        <h3 class="text-sm font-semibold text-gray-600 mb-2">Beneficiary Info</h3>
+                                        <h3 class="text-sm font-semibold text-gray-600 mb-2">{{ __('Beneficiary Info') }}</h3>
                                         <div class="flex justify-between text-sm text-gray-800">
-                                            <span>Name:</span>
+                                            <span>{{ __('Name:') }}</span>
                                             <span id="summaryName">...</span>
                                         </div>
                                         <div class="flex justify-between text-sm text-gray-800 mt-1">
-                                            <span>Account No:</span>
+                                            <span>{{ __('Account No:') }}</span>
                                             <span id="summaryAccount">...</span>
                                         </div>
                                     </div>
@@ -271,34 +271,34 @@
                                         <input type="hidden" name="recipient_amount" id="recipientAmountInput">
 
                                         <div class="flex justify-between">
-                                            <span>Bank:</span>
+                                            <span>{{ __('Bank:') }}</span>
                                             <span id="summaryBank">...</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Amount Sent:</span>
+                                            <span>{{ __('Amount Sent:') }}</span>
                                             <span id="summaryAmountSent">₦0.00</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Transfer Fee:</span>
+                                            <span>{{ __('Transfer Fee:') }}</span>
                                             <span id="summaryFee">₦0.00</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Total:</span>
+                                            <span>{{ __('Total:') }}</span>
                                             <span id="summaryTotal">₦0.00</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Exchange Rate:</span>
+                                            <span>{{ __('Exchange Rate:') }}</span>
                                             <span id="summaryRate">...</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>They'll Receive:</span>
+                                            <span>{{ __('They\'ll Receive:') }}</span>
                                             <span id="summaryReceive">...</span>
                                         </div>
                                     </div>
                         
                                     <!-- Final Process Button -->
                                     <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-center hover:bg-blue-700 transition">
-                                        Process Transaction
+                                        {{ __('Process Transaction') }}
                                     </button>
                                 </div>
                             </div>
