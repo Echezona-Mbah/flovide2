@@ -43,11 +43,21 @@
           <button class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
             <a href="#" class=""> {{ __('Get Started') }} </a>
           </button>
+          @php
+            $flags = [
+              'en' => 'gb.svg',
+              'es' => 'es.svg',
+              'fr' => 'fr.svg',
+              'lg' => 'ug.svg',
+            ];
 
+            $currentLocale = app()->getLocale();
+            $currentFlag = $flags[$currentLocale] ?? 'gb.svg';
+          @endphp
           <div class="relative">
             <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
               <span>{{ strtoupper(app()->getLocale()) }} </span>
-              <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/ng.svg')}}" alt="" />
+              <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/' . $currentFlag) }}" alt="Flag" />
               <i class="fas fa-chevron-down text-xs"></i>
             </button>
 
