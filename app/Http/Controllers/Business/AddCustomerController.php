@@ -99,47 +99,114 @@ class AddCustomerController extends Controller
         $country = $request->input('country');
         $currency = $request->input('currency');
 
-        // ✅ Base validation rules
-        $rules = [
-            'account_type'  => 'required|string|max:255',
-            'country'       => 'required|string',
-            'currency'      => 'required|string',
-            'account_name'  => 'required|string|max:255',
-        ];
+           /*
+    |--------------------------------------------------------------------------
+    | Base Validation Rules
+    |--------------------------------------------------------------------------
+    */
+    $rules = [
+        'account_type' => 'required|string|max:255',
+        'country'      => 'required|string',
+        'currency'     => 'required|string',
+        'account_name' => 'required|string|max:255',
+    ];
 
-        // ✅ Conditional validation
-        if ($country === 'NG') {
-            $rules['bank_id']              = 'required|string|max:255';
-            $rules['account_number_input'] = 'required|string';
-        } elseif ($currency === 'GBP') {
-            $rules['sort_code']       = 'required|string|max:255';
-            $rules['account_number']  = 'required|string|max:255';
-            $rules['address']         = 'required|string|max:255';
-            $rules['city']            = 'required|string|max:255';
-            $rules['state']           = 'required|string|max:255';
-            $rules['zipcode']         = 'required|string|max:20';
-        } elseif (in_array($currency, ['USD', 'EUR'])) {
-            $rules['bic']             = 'required|string|max:255';
-            $rules['account_number']  = 'required|string';
-            $rules['address']         = 'required|string|max:255';
-            $rules['city']            = 'required|string|max:255';
-            $rules['state']           = 'required|string|max:255';
-            $rules['zipcode']         = 'required|string|max:20';
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | Conditional Validation Rules
+    |--------------------------------------------------------------------------
+    */
 
-        $validator = Validator::make($request->all(), $rules);
+    // 🇦🇱 ALBANIA (AL)
+    if ($country === 'AL' && in_array($currency, ['EUR', 'USD', 'GBP'])) {
 
-        if ($validator->fails()) {
-            return $request->expectsJson()
-                ? response()->json(['errors' => $validator->errors()], 422)
-                : redirect()->back()->withErrors($validator)->withInput();
-        }
+        $rules['iban']    = 'required|string|max:34';
+        $rules['bic']     = 'required|string|max:255';
+        $rules['address'] = 'required|string|max:255';
+        $rules['city']    = 'required|string|max:255';
+        $rules['state']   = 'required|string|max:255';
+        $rules['zipcode'] = 'required|string|max:20';
 
-        // ✅ Choose correct account number field
-        $accountNumber = $country === 'NG'
-            ? $request->input('account_number_input')
-            : $request->input('account_number');
-        $accountName = $request->input('account_name');
+    }
+
+    // 🇦🇸 AMERICAN SAMOA (AS)
+    if ($country === 'AS' && in_array($currency, ['USD', 'EUR', 'GBP'])) {
+
+        $rules['account_number'] = 'required|string|max:255';
+        $rules['bic']            = 'required|string|max:255';
+        $rules['address']        = 'required|string|max:255';
+        $rules['city']           = 'required|string|max:255';
+        $rules['state']          = 'required|string|max:255';
+        $rules['zipcode']        = 'required|string|max:20';
+    }
+
+    // 🇳🇴 NORWAY (NO)
+    if ($country === 'NO' && in_array($currency, ['NOK', 'USD', 'GBP', 'EUR'])) {
+
+        $rules['iban']    = 'required|string|max:34';
+        $rules['bic']     = 'required|string|max:255';
+        $rules['address'] = 'required|string|max:255';
+        $rules['city']    = 'required|string|max:255';
+        $rules['state']   = 'required|string|max:255';
+        $rules['zipcode'] = 'required|string|max:20';
+
+    }
+
+    // 🇳🇬 NIGERIA
+    elseif ($country === 'NG' && $currency === 'NGN') {
+
+        $rules['bank_id']              = 'required|string|max:255';
+        $rules['account_number_input'] = 'required|digits:10';
+
+    }
+
+    // 🇬🇧 UNITED KINGDOM
+    elseif ($currency === 'GBP') {
+
+        $rules['sort_code']      = 'required|string|max:255';
+        $rules['account_number'] = 'required|string|max:255';
+        $rules['address']        = 'required|string|max:255';
+        $rules['city']           = 'required|string|max:255';
+        $rules['state']          = 'required|string|max:255';
+        $rules['zipcode']        = 'required|string|max:20';
+
+    }
+
+    // 🇺🇸 🇪🇺 USD / EUR
+    elseif (in_array($currency, ['USD', 'EUR'])) {
+
+        $rules['bic']            = 'required|string|max:255';
+        $rules['account_number'] = 'required|string|max:255';
+        $rules['address']        = 'required|string|max:255';
+        $rules['city']           = 'required|string|max:255';
+        $rules['state']          = 'required|string|max:255';
+        $rules['zipcode']        = 'required|string|max:20';
+
+    }
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return $request->expectsJson()
+            ? response()->json(['errors' => $validator->errors()], 422)
+            : redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Choose Correct Account Identifier
+    |--------------------------------------------------------------------------
+    */
+    if ($country === 'NG' && $currency === 'NGN') {
+        $accountNumber = $request->input('account_number_input');
+    } elseif (in_array($country, ['NO', 'AL'])) {
+        $accountNumber = $request->input('iban'); // Norway & Albania
+    } else {
+        // Covers AS, UK, USD, EUR, etc.
+        $accountNumber = $request->input('account_number');
+    }
+
+    $accountName = $request->input('account_name');
 
         // ✅ Prevent duplicate beneficiary
         $exists = Customer::where('account_name', $accountName)
@@ -169,43 +236,102 @@ class AddCustomerController extends Controller
             'account_number' => $accountNumber,
         ];
 
-        if ($country === 'NG') {
-            $payload['bank_id'] = $request->input('bank_id');
-        } elseif ($currency === 'GBP') {
-            $payload['sort_code'] = $request->input('sort_code');
-            $payload['address']   = $request->input('address');
-            $payload['city']      = $request->input('city');
-            $payload['state']     = $request->input('state');
-            $payload['zipcode']   = $request->input('zipcode');
-        } elseif (in_array($currency, ['USD', 'EUR'])) {
-            $payload['bic']     = $request->input('bic');
-            $payload['address'] = $request->input('address');
-            $payload['city']    = $request->input('city');
-            $payload['state']   = $request->input('state');
-            $payload['zipcode'] = $request->input('zipcode');
-        }
+        /*
+    |--------------------------------------------------------------------------
+    | Country Specific Payload
+    |--------------------------------------------------------------------------
+    */
 
-        // ✅ Remove empty/null fields
-        $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
+    // 🇳🇬 Nigeria
+    if ($country === 'NG') {
 
-        Log::info('Payload sent to OhentPay:', $payload);
+        $payload['account_number'] = $accountNumber;
+        $payload['bank_id']        = $request->input('bank_id');
 
-        // ✅ Send request to OhentPay API
-        $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+    }
+    // 🇦🇱 Albania payload
+    if ($country === 'AL') {
 
-        if (!$ohentResponse->successful()) {
-            $errorResponse = $ohentResponse->json();
-            $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
+        $payload['iban']    = $request->input('iban');
+        $payload['bic']     = $request->input('bic');
+        $payload['address'] = $request->input('address');
+        $payload['city']    = $request->input('city');
+        $payload['state']   = $request->input('state');
+        $payload['zipcode'] = $request->input('zipcode');
 
-            Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
+    }
 
-            return $request->expectsJson()
-                ? response()->json(['errors' => $errorMessage], 500)
-                : redirect()->back()->with('api_error', $errorMessage)->withInput();
-        }
+    elseif ($country === 'AS') {
 
-        $responseData = $ohentResponse->json();
+        $payload['account_number'] = $accountNumber;
+        $payload['bic']            = $request->input('bic');
+        $payload['address']        = $request->input('address');
+        $payload['city']           = $request->input('city');
+        $payload['state']          = $request->input('state');
+        $payload['zipcode']        = $request->input('zipcode');
+    }
+
+
+    
+    // 🇳🇴 Norway
+    elseif ($country === 'NO') {
+
+        $payload['iban']    = $request->input('iban');
+        $payload['bic']     = $request->input('bic');
+        $payload['address'] = $request->input('address');
+        $payload['city']    = $request->input('city');
+        $payload['state']   = $request->input('state');
+        $payload['zipcode'] = $request->input('zipcode');
+
+    }
+
+    // 🇬🇧 UK
+    elseif ($currency === 'GBP') {
+
+        $payload['account_number'] = $accountNumber;
+        $payload['sort_code']      = $request->input('sort_code');
+        $payload['address']        = $request->input('address');
+        $payload['city']           = $request->input('city');
+        $payload['state']          = $request->input('state');
+        $payload['zipcode']        = $request->input('zipcode');
+
+    }
+
+    // 🇺🇸 🇪🇺 USD / EUR
+    elseif (in_array($currency, ['USD', 'EUR'])) {
+
+        $payload['account_number'] = $accountNumber;
+        $payload['bic']            = $request->input('bic');
+        $payload['address']        = $request->input('address');
+        $payload['city']           = $request->input('city');
+        $payload['state']          = $request->input('state');
+        $payload['zipcode']        = $request->input('zipcode');
+
+    }
+
+    // Remove empty values
+    $payload = array_filter($payload, fn ($v) => $v !== null && $v !== '');
+
+    Log::info('Payload sent to OhentPay:', $payload);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Send to OhentPay
+    |--------------------------------------------------------------------------
+    */
+    $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
+        ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+
+    if (!$ohentResponse->successful()) {
+        $error = $ohentResponse->json();
+        Log::error('OhentPay recipient creation failed', $error);
+
+        return $request->expectsJson()
+            ? response()->json(['errors' => $error['message'] ?? 'Failed to create recipient'], 500)
+            : redirect()->back()->with('api_error', $error['message'] ?? 'Failed')->withInput();
+    }
+
+    $responseData = $ohentResponse->json();
 
         // ✅ Save beneficiary locally
         $customer = Customer::create([
@@ -405,7 +531,7 @@ class AddCustomerController extends Controller
     }
 
 
-     public function fetchBanks(Request $request)
+    public function fetchBanks(Request $request)
     {
         $country = $request->get('country'); // Default to NG
         $currency = $request->get('currency'); // Default to NGN
@@ -415,6 +541,9 @@ class AddCustomerController extends Controller
                 'country' => $country,
                 'currency' => $currency
             ]);
+
+        // dd($response->successful());
+
 
         if ($response->successful()) {
             return response()->json([

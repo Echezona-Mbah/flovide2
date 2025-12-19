@@ -6260,7 +6260,7 @@
                 });
             },
     
-            updateBankOptions() {
+              updateBankOptions() {
                 if (!this.selectedCountry || !this.selectedCurrency) {
                     console.warn('Missing country or currency. Bank fetch skipped.');
                     return;
@@ -6274,15 +6274,26 @@
                 fetch(`/fetch-banks?country=${countryCode}&currency=${currencyCode}`)
                     .then(res => res.json())
                     .then(data => {
-                        console.log('Bank fetch response:', data);
-                        if (data.status === 'success' && data.fields?.[0]?.options) {
-                            this.banks = data.fields[0].options;
-                            console.log('Banks updated:', this.banks);
-                        } else {
-                            this.banks = [];
-                            console.warn('No valid banks returned.');
-                        }
-                    })
+                            console.log('Bank fetch response:', data);
+
+                            if (data.status === 'success' && Array.isArray(data.fields)) {
+                                const bankField = data.fields.find(
+                                    field => field.name === 'bank_id' && Array.isArray(field.options)
+                                );
+
+                                if (bankField) {
+                                    this.banks = bankField.options;
+                                    console.log('Banks updated:', this.banks);
+                                } else {
+                                    this.banks = [];
+                                    console.warn('No bank field found.');
+                                }
+                            } else {
+                                this.banks = [];
+                                console.warn('Invalid bank response format.');
+                            }
+                        })
+
                     .catch(err => {
                         this.banks = [];
                         console.error('Error fetching banks:', err);

@@ -23,9 +23,9 @@ class AddMoneyController extends Controller
 
 
 
-    public function topupWithCard(Request $request)
+public function topupWithCard(Request $request)
 {
-        $user = Auth::user();
+    $user = Auth::user();
     if (!$user) {
         return response()->json(['data' => ['errors' => 'Unauthenticated']], 401);
     }
@@ -53,12 +53,30 @@ class AddMoneyController extends Controller
     $maskedCard = substr($digitsOnly, -4);
     $reference  = 'TOPUP-' . strtoupper(uniqid());
 
+    // Update balance
     $balance->amount += $request->amount;
     $balance->save();
 
+    // --- CREATE TRANSACTION HISTORY RECORD ---
+    \App\Models\TransactionHistory::create([
+        'user_id'       => $user->id,
+        'balance_id'    => $balance->id,
+        'type'          => 'credit', // top-ups are usually 'credit'
+        'amount'        => $request->amount,
+        'currency'      => $balance->currency,
+        'status'        => 'success',
+        'reference'     => $reference,
+        'transaction_type' => 'topup_card',
+        'card_number'   => '**** **** **** ' . $maskedCard,
+        'expiry_month'  => $request->expiry_month,
+        'expiry_year'   => $request->expiry_year,
+        'cvv'           => '***',
+        'method'        => 'card',
+    ]);
+
     $user->notify(new GeneralNotification(
         "Top-up Successful 🎉",
-        "You topped up {$request->amount} to your wallet using card ending {$maskedCard}. Ref: {$reference}"
+        "You topped up ₦{$request->amount} to your wallet using card ending {$maskedCard}. Ref: {$reference}"
     ));
 
     return response()->json([
@@ -69,5 +87,6 @@ class AddMoneyController extends Controller
         ]
     ], 200);
 }
+
 
 }
