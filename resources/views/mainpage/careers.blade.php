@@ -69,10 +69,10 @@
 
                         @php
                             $flags = [
-                            'en' => 'gb.svg',
-                            'es' => 'es.svg',
-                            'fr' => 'fr.svg',
-                            'lg' => 'ug.svg',
+                                'en' => 'gb.svg',
+                                'es' => 'es.svg',
+                                'fr' => 'fr.svg',
+                                'lg' => 'ug.svg',
                             ];
 
                             $currentLocale = app()->getLocale();

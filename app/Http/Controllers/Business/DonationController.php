@@ -22,27 +22,20 @@ class DonationController extends Controller
     {
         // Fetch all donations pages for the authenticated user
         $user = Auth::user();
-        $donations = donation::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-
-        // Get all donation_ids from the collection
-        $donationIds = $donations->pluck('id');
-
-        //fetch donations_payment pages
-        $paymentCount = DonationRecord::whereIn('donation_id', $donationIds)->count();
+        $donations = donation::withCount("records")->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
                     'message' => 'Donations pages retrieved successfully.',
-                    'donations' => $donations,
-                    'remita_payments_count' => $paymentCount,
+                    'donations' => $donations
                 ]
             ], 200);
         }
 
         //return the view
-        return view('business.donation', ['donations' => $donations, 'donation_payments_count' => $paymentCount]);
+        return view('business.donation', ['donations' => $donations]);
     }
 
 
