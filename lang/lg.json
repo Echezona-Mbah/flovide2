@@ -257,5 +257,19 @@
     "Arrival time": "Obudde bw’okutuuka",
     "Today - in seconds": "Leero – mu masekondi",
     "Fees": "Emisolo",
-    "Enter the amount you wish to add to continue": "Yingiza omuwendo gw’ensimbi gw’oyagala okwongerako okweyongera"
+    "Enter the amount you wish to add to continue": "Yingiza omuwendo gw’ensimbi gw’oyagala okwongerako okweyongera",
+    "Create A Balance": "Tondawo ensimbi",
+    "Create A New Balance": "Tondawo ensimbi empya",
+    "You can make withdrawals directly into any bank account of your choice.": "Osobola okuggya ensimbi butereevu okugenda ku akaawunti ya bbanka gy’oyagala",
+    "Currency": "Ssente",
+    "Name Your Account": "Tuuma erinnya lya akaawunti yo",
+    "Name": "Erinnya",
+    "Add Account": "Yongerako akaawunti",
+    "Bank Accounts": "Akaawunti za bbanka",
+    "Unnamed Account": "Akaawunti etatuumiddwa",
+    "Balance Details": "Ebikwata ku nsimbi",
+    "Edit Balance": "Kyusa ensimbi",
+    "New Name": "Erinnya epya",
+    "Cancel": "Sazaamu",
+    "Update": "Okutereeza"
 }
