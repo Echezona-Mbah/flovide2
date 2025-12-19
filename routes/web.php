@@ -9,6 +9,7 @@ use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\personalController;
+use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
@@ -37,7 +38,8 @@ Route::get('/business', [businessController::class, 'business'])->name('business
 Route::get('/', [personalController::class, 'personal'])->name('personal');
 //careers route
 Route::get('/careers', function () {
-    return view('mainpage.careers');
+    $jobs = Career::where('status', 1)->latest()->get(); 
+    return view('mainpage.careers', compact('jobs'));
 })->name('careers');
 
 

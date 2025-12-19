@@ -176,6 +176,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/createBalance', [CreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
     Route::post('/update_balance', [CreateBankController::class, 'UpdateBalance'])->name('update.balance');
     Route::get('/total-balance', [CreateBankController::class, 'getUserTotalBalance']);
+    Route::get('/dashboardapi', [CreateBankController::class, 'dashboardapi']);
+
 
     // api routes for Customers details
     Route::get('/customers', [AddCustomerController::class, 'index']);
@@ -328,6 +330,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-createBalance', [PersonalCreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
         Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance'])->name('update.balance');
         Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
+        Route::get('/personal-dashboardapi', [PersonalCreateBankController::class, 'dashboardapi']);
+
 
         //payouts 
         Route::post('/bank-account', [PersonaladdBankAccountController::class, 'store']);
