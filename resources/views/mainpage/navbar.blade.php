@@ -32,6 +32,14 @@
           {{ __('Blog') }}
         </a>
       </li>
+
+            <li>
+        <a class="{{ Route::currentRouteName() === 'Career' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
+          href="{{route('careers')}}">
+          {{ __('Career') }}
+        </a>
+      </li>
+
       <li>
         <a class="{{ Route::currentRouteName() === 'contact' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
           href="">

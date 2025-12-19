@@ -75,6 +75,13 @@
                                                             </a>
                                                         </li>
 
+                                                        <li class="nav-item">
+                                                            <a href="{{route('admin.career.index')}}" class="nav-link">
+                                                                <i class="nav-link-icon lnr-picture"></i>
+                                                                <span> Careers</span>
+                                                            </a>
+                                                        </li>
+
                                                     </ul>
                                                 </div>
                                                 <div class="col-sm-6 col-xl-4">

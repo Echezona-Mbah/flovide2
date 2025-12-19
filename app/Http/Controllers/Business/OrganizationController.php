@@ -86,13 +86,20 @@ public function store(Request $request)
     Mail::to($request->email)->send(new TeamInviteMail($owner, $inviteLink));
 
     // ✅ Response
-    return response()->json([
-        'status'  => true,
-        'message' => 'Member added and invite email sent successfully.',
-        'data'    => array_merge($member->toArray(), [
-            'invite_link' => $inviteLink,
-        ]),
-    ]);
+ // ✅ Success response
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Member added and invite email sent successfully.',
+            'data'    => array_merge($member->toArray(), [
+                'invite_link' => $inviteLink,
+            ]),
+        ], 201);
+    }
+
+    return redirect()
+        ->route('organization') // change to your team list page
+        ->with('success', 'Member added and invite email sent successfully.');
 }
 
 

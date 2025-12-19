@@ -31,6 +31,9 @@
           <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
             {{ __('Blog') }}
           </a>
+           <a href="{{ route('careers')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+              {{ __('Career') }}
+            </a>
           <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
             {{ __('Contact Us') }}
           </a>
