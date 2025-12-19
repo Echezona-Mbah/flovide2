@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AllSubaccountController;
 use App\Http\Controllers\Admin\AllSubscriptionController;
 use App\Http\Controllers\Admin\AllTeamMembersController;
 use App\Http\Controllers\Admin\BusinessAccountController;
+use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PersonalAccountController;
 use App\Http\Controllers\Admin\RegisterController;
@@ -356,6 +357,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
         Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
 
+
+        Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');
+        Route::post('/admin/career', [CareerController::class, 'store'])->name('admin.career.store');
+        Route::get('/admin/career-view', [CareerController::class, 'index'])->name('admin.career.index');
+        Route::delete('/admin/career-view/{id}',  [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
+        Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
+        Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
 
 
 

@@ -270,83 +270,46 @@
 
             <div class="space-y-6">
                 <!-- Role 1: Senior Backend Engineer -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                    <h3 class="text-2xl font-bold text-[#0F243D] mb-2 flex justify-between items-center">
-                        <span>Senior Backend Engineer (Payments Infrastructure)</span>
-                        <span class="text-sm text-gray-500 font-medium">Full-Time | Lagos/Hybrid</span>
-                    </h3>
-                    <p class="text-gray-600 mb-4">
-                        Lead the architecture and development of our high-volume, low-latency payment processing
-                        services. Ensure scalability, reliability, and compliance across all financial rails.
-                    </p>
-                    <div class="space-y-3 text-sm mb-6">
-                        <p class="font-semibold text-[#0F243D]">Key Requirements:</p>
-                        <ul class="list-disc pl-5 text-gray-600 space-y-1">
-                            <li>5+ years of experience with Go or Python in a distributed systems environment.</li>
-                            <li>Deep expertise in SQL/NoSQL databases, message queues (Kafka/RabbitMQ), and API design
-                                (REST/gRPC).</li>
-                            <li>Proven ability to manage cloud infrastructure (AWS/GCP) and CI/CD pipelines.</li>
-                            <li>Prior experience in fintech, particularly payment gateways, strongly preferred.</li>
-                        </ul>
-                    </div>
-                    <a href="#"
-                        class="inline-block bg-[#3B82F6] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#3B82F6]/90 transition-colors text-sm shadow-md">
-                        Apply Now <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
+                <div class="space-y-6">
+    @forelse ($jobs as $job)
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+            <h3 class="text-2xl font-bold text-[#0F243D] mb-2 flex justify-between items-center">
+                <span>{{ $job->title }}</span>
+                <span class="text-sm text-gray-500 font-medium">
+                    {{ $job->job_type }} | {{ $job->location }}
+                </span>
+            </h3>
 
-                <!-- Role 2: Product Manager -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                    <h3 class="text-2xl font-bold text-[#0F243D] mb-2 flex justify-between items-center">
-                        <span>Product Manager (SME Business Banking)</span>
-                        <span class="text-sm text-gray-500 font-medium">Full-Time | Remote</span>
-                    </h3>
-                    <p class="text-gray-600 mb-4">
-                        Define the strategy and roadmap for our Small and Medium Enterprise (SME) banking platform. You
-                        will translate market needs into product features that drive adoption and business value.
-                    </p>
-                    <div class="space-y-3 text-sm mb-6">
-                        <p class="font-semibold text-[#0F243D]">Key Requirements:</p>
-                        <ul class="list-disc pl-5 text-gray-600 space-y-1">
-                            <li>3+ years of product management experience, preferably in B2B or Business Banking.</li>
-                            <li>Strong analytical skills, comfortable with data visualization and hypothesis testing.
-                            </li>
-                            <li>Excellent communication skills to manage stakeholders from Engineering, Design, and
-                                Sales.</li>
-                            <li>Demonstrated success in launching and scaling digital financial products.</li>
-                        </ul>
-                    </div>
-                    <a href="#"
-                        class="inline-block bg-[#3B82F6] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#3B82F6]/90 transition-colors text-sm shadow-md">
-                        Apply Now <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
+            <p class="text-gray-600 mb-4">
+                {!! nl2br(e(Str::limit($job->description, 200))) !!}
+            </p>
 
-                <!-- Role 3: Senior Risk & Compliance Analyst -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                    <h3 class="text-2xl font-bold text-[#0F243D] mb-2 flex justify-between items-center">
-                        <span>Senior Risk & Compliance Analyst</span>
-                        <span class="text-sm text-gray-500 font-medium">Full-Time | Lagos</span>
-                    </h3>
-                    <p class="text-gray-600 mb-4">
-                        Oversee regulatory compliance (KYC, AML) and develop robust risk mitigation strategies for all
-                        new product launches. You are the guardian of our financial integrity.
-                    </p>
-                    <div class="space-y-3 text-sm mb-6">
-                        <p class="font-semibold text-[#0F243D]">Key Requirements:</p>
-                        <ul class="list-disc pl-5 text-gray-600 space-y-1">
-                            <li>4+ years in financial services, regulatory compliance, or risk management.</li>
-                            <li>In-depth knowledge of local and international financial regulations (e.g., CBN, SEC).
-                            </li>
-                            <li>Experience implementing automated monitoring and fraud detection systems.</li>
-                            <li>Relevant professional certification (e.g., ACAMS) is a significant advantage.</li>
-                        </ul>
-                    </div>
-                    <a href="#"
-                        class="inline-block bg-[#3B82F6] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#3B82F6]/90 transition-colors text-sm shadow-md">
-                        Apply Now <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
+<div class="space-y-3 text-sm mb-6">
+    <p class="font-semibold text-[#0F243D]">Key Requirements:</p>
+    <ul class="list-disc pl-5 text-gray-600 space-y-1">
+        @foreach(explode("\n", $job->requirements) as $req)
+            @if(trim($req) != '')
+                <li>{{ trim($req) }}</li>
+            @endif
+        @endforeach
+    </ul>
+</div>
+
+            {{-- <a href="#"
+                class="inline-block bg-[#3B82F6] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#3B82F6]/90 transition-colors text-sm shadow-md">
+                Apply Now <i class="fas fa-arrow-right ml-2"></i>
+            </a> --}}
+
+             <a href="mailto:career@flovide.com" class="inline-block bg-[#F6B34A] text-[#0F243D] font-semibold py-3 px-8 rounded-full hover:bg-[#F6B34A]/90 transition-colors text-lg shadow-md">
+                    career@flovide.com <i class="fas fa-envelope ml-2"></i>
+                </a>
+        </div>
+    @empty
+        <p class="text-gray-500 text-center">No career openings at the moment.</p>
+    @endforelse
+</div>
+
+
             </div>
         </section>
 
