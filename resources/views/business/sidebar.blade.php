@@ -17,7 +17,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('dashboard') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-tachometer-alt text-base"></i>
-            Dashboard
+            {{ __('Dashboard') }}
         </a>
 
         <!-- Payout accounts -->
@@ -25,7 +25,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('payouts') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-user-friends text-base"></i>
-            Payout accounts
+            {{ __('Payout accounts') }}
         </a>
 
         <!-- Subaccounts -->
@@ -33,7 +33,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('subaccount') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-layer-group text-base"></i>
-            Subaccounts
+            {{ __('Subaccounts') }}
         </a>
 
         <!-- Transaction History -->
@@ -41,7 +41,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('transactionHistory') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-history text-base"></i>
-            Transaction History
+            {{ __('Transaction History') }}
         </a>
 
         <!-- Beneficiaries -->
@@ -49,7 +49,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('beneficias') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-users text-base"></i>
-            Beneficiaries
+            {{ __('Beneficiaries') }}
         </a>
 
         <!-- Customers -->
@@ -57,7 +57,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('customer') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-wallet text-base"></i>
-            Customers
+            {{ __('Customers') }}
         </a>
 
         <!-- Invoices -->
@@ -65,7 +65,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('invoices.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice text-base"></i>
-            Invoices
+            {{ __('Invoices') }}
         </a>
 
         <!-- Payment page -->
@@ -73,7 +73,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('payment.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice-dollar text-base"></i>
-            Payment page
+            {{ __('Payment page') }}
         </a>
 
         <!-- Subscriptions -->
@@ -81,7 +81,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('subscriptions') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-sync-alt text-base"></i>
-            Subscriptions
+            {{ __('Subscriptions') }}
         </a>
 
         <!-- Bills payment -->
@@ -89,7 +89,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('bill_payment') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice-dollar text-base"></i>
-            Bills payment
+            {{ __('Bills payment') }}
         </a>
 
         <!-- Remita -->
@@ -97,7 +97,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('remita.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-exchange-alt text-base"></i>
-            Remita
+            {{ __('Remita') }}
         </a>
 
         <!-- Donation page -->
@@ -105,7 +105,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('donation.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice-dollar text-base"></i>
-            Donation
+            {{ __('Donation') }}
         </a>
 
         <!-- Refunds -->
@@ -113,7 +113,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('refunds.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-undo text-base"></i>
-            Refunds
+            {{ __('Refunds') }}
         </a>
 
         <!-- Chargebacks -->
@@ -121,7 +121,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('chargeback') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-ban text-base"></i>
-            Chargebacks
+            {{ __('Chargebacks') }}
         </a>
 
         <!-- Virtual Cards -->
@@ -129,7 +129,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('allvirtualcard') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-credit-card text-base"></i>
-            Virtual Cards
+            {{ __('Virtual Cards') }}
         </a>
 
         <!-- Compliance -->
@@ -137,7 +137,7 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('compliance') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-balance-scale text-base"></i>
-            Compliance
+            {{ __('Compliance') }}
         </a>
 
         <!-- Webhooks -->
@@ -145,7 +145,7 @@
            class="flex items-center gap-3 py-2 px-3 
             hover:bg-white rounded-md">
             <i class="fas fa-code-branch text-base"></i>
-            Webhooks
+            {{ __('Webhooks') }}
         </a>
 
         <!-- Your Organization -->
@@ -153,8 +153,54 @@
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('organization') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-building text-base"></i>
-            Your organization
+            {{ __('Your organization') }}
         </a>
 
     </nav>
+
+    <!-- Language Switcher -->
+    <div class="px-6 pb-8">
+        @php
+            $flags = [
+                'en' => 'gb.svg',
+                'es' => 'es.svg',
+                'fr' => 'fr.svg',
+                'lg' => 'ug.svg',
+            ];
+
+            $currentLocale = app()->getLocale();
+            $currentFlag = $flags[$currentLocale] ?? 'gb.svg';
+        @endphp
+        <div class="relative">
+            <button onclick="toggleLang_sidebar()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525] bg-white w-full justify-center">
+                <span>{{ strtoupper($currentLocale) }} </span>
+                <img class="w-6 h-6 rounded-full object-cover" src="{{ asset('../asserts/homepage/' . $currentFlag) }}" alt="Flag" />
+                <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+
+            <ul id="langMenu_sidebar" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 w-full bottom-full mb-2 z-50">
+                <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100 flex items-center gap-2"><img src="{{ asset('../asserts/homepage/gb.svg') }}" class="w-5 h-5 rounded-full"> English</a></li>
+                <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100 flex items-center gap-2"><img src="{{ asset('../asserts/homepage/es.svg') }}" class="w-5 h-5 rounded-full"> Spanish</a></li>
+                <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100 flex items-center gap-2"><img src="{{ asset('../asserts/homepage/fr.svg') }}" class="w-5 h-5 rounded-full"> French</a></li>
+                <li><a href="{{ route('lang.switch', 'lg') }}" class="block px-4 py-2 hover:bg-gray-100 flex items-center gap-2"><img src="{{ asset('../asserts/homepage/ug.svg') }}" class="w-5 h-5 rounded-full"> Luganda</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleLang_sidebar() {
+            const menu = document.getElementById('langMenu_sidebar');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close menu if clicked outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('langMenu_sidebar');
+            const button = menu.previousElementSibling;
+
+            if (menu && button && !button.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
 </aside>
