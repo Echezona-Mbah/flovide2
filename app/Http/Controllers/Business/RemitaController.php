@@ -22,27 +22,20 @@ class RemitaController extends Controller
     {
         // Fetch all remita pages for the authenticated user
         $user = Auth::user();
-        $remitas = Remita::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
-
-        // Get all remita_ids from the collection
-        $remitaIds = $remitas->pluck('id');
-
-        //fetch remita_payment pages
-        $paymentCount = RemitaPayment::whereIn('remita_id', $remitaIds)->count();
+        $remitas = Remita::withCount("payments")->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         if (request()->expectsJson()) {
             return response()->json([
                 'data' => [
                     'status' => 'success',
                     'message' => 'Remita pages retrieved successfully.',
-                    'remitas' => $remitas,
-                    'remita_payments_count' => $paymentCount,
+                    'remitas' => $remitas
                 ]
             ], 200);
         }
 
         //return the view
-        return view('business.remita', ['remitas' => $remitas, 'remita_payments_count' => $paymentCount]);
+        return view('business.remita', ['remitas' => $remitas]);
     }
 
     public function create(Request $request)
