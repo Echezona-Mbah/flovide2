@@ -92,7 +92,7 @@ class AuthenticatedSessionController extends Controller
     ));
 
         //RECORD LOGIN ACTIVITY
-        $this->recordLoginActivity($request, $user);
+        // $this->recordLoginActivity($request, $user);
 
         session()->flash('status', 'Login successful!');
         return redirect()->intended(route('dashboard', absolute: false));

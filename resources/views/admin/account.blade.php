@@ -39,7 +39,7 @@
 
             
 
-                                            <div class="row">
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="main-card mb-3 card">
                                     <div class="card-header">All Account
@@ -78,9 +78,6 @@
                                         {{ $allaccount->links('pagination::bootstrap-5') }}
                                     </div>
                                 </div>
-
-
-
                                 </div>
                             </div>
                         </div>
