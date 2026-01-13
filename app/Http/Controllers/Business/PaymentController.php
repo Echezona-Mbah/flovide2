@@ -140,7 +140,8 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120|dimensions:width=1600,height=300', // 5MB
+            // 'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120|dimensions:width=1600,height=300', // 5MB
+            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:5120', // 5MB
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric',
             'subaccount_id' => 'required|string',
