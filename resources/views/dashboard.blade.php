@@ -184,7 +184,7 @@
                                 </div>
 
                                 <div>
-                                    <h3 class="font-semibold text-lg mb-5">{{ __('Monthly Income') }}</h3>
+                                    <!-- <h3 class="font-semibold text-lg mb-5">{{ __('Monthly Income') }}</h3>
                                     <div class="border border-gray-200 rounded-xl p-5 max-w-full overflow-x-auto">
                                         <div class="flex justify-between items-center mb-4">
                                             <select aria-label="Select quarter"
@@ -254,7 +254,201 @@
                                                 50k
                                             </text>
                                         </svg>
+                                    </div> -->
+
+                                    <div class="bg-white border border-gray-200 rounded-xl p-5">
+                                        <!-- Header -->
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="font-semibold text-lg">Exchange Rate Calculator</h3>
+                                            <span class="text-sm text-gray-500">£1 = NGN 1,989</span>
+                                        </div>
+
+                                        <!-- From -->
+                                        <div class="bg-gray-50 rounded-xl p-4 mb-3">
+                                            <div class="flex justify-between items-center">
+                                                <input type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" />
+                                                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector" data-type="from">
+                                                    <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-4 rounded-sm flag" />
+                                                    <span class="font-medium code">GBP</span>
+                                                    <i class="fas fa-chevron-down text-xs"></i>
+
+                                                    <!-- Dropdown -->
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="USD" data-flag="https://flagcdn.com/w20/us.png">
+                                                            <img src="https://flagcdn.com/w20/us.png" class="w-5 h-4 rounded-sm"/> USD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="EUR" data-flag="https://flagcdn.com/w20/eu.png">
+                                                            <img src="https://flagcdn.com/w20/eu.png" class="w-5 h-4 rounded-sm"/> EUR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="NGN" data-flag="https://flagcdn.com/w20/ng.png">
+                                                            <img src="https://flagcdn.com/w20/ng.png" class="w-5 h-4 rounded-sm"/> NGN
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CAD" data-flag="https://flagcdn.com/w20/ca.png">
+                                                            <img src="https://flagcdn.com/w20/ca.png" class="w-5 h-4 rounded-sm"/> CAD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="AUD" data-flag="https://flagcdn.com/w20/au.png">
+                                                            <img src="https://flagcdn.com/w20/au.png" class="w-5 h-4 rounded-sm"/> AUD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="JPY" data-flag="https://flagcdn.com/w20/jp.png">
+                                                            <img src="https://flagcdn.com/w20/jp.png" class="w-5 h-4 rounded-sm"/> JPY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CNY" data-flag="https://flagcdn.com/w20/cn.png">
+                                                            <img src="https://flagcdn.com/w20/cn.png" class="w-5 h-4 rounded-sm"/> CNY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="INR" data-flag="https://flagcdn.com/w20/in.png">
+                                                            <img src="https://flagcdn.com/w20/in.png" class="w-5 h-4 rounded-sm"/> INR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="BRL" data-flag="https://flagcdn.com/w20/br.png">
+                                                            <img src="https://flagcdn.com/w20/br.png" class="w-5 h-4 rounded-sm"/> BRL
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="ZAR" data-flag="https://flagcdn.com/w20/za.png">
+                                                            <img src="https://flagcdn.com/w20/za.png" class="w-5 h-4 rounded-sm"/> ZAR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CHF" data-flag="https://flagcdn.com/w20/ch.png">
+                                                            <img src="https://flagcdn.com/w20/ch.png" class="w-5 h-4 rounded-sm"/> CHF
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="HKD" data-flag="https://flagcdn.com/w20/hk.png">
+                                                            <img src="https://flagcdn.com/w20/hk.png" class="w-5 h-4 rounded-sm"/> HKD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="SGD" data-flag="https://flagcdn.com/w20/sg.png">
+                                                            <img src="https://flagcdn.com/w20/sg.png" class="w-5 h-4 rounded-sm"/> SGD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="MXN" data-flag="https://flagcdn.com/w20/mx.png">
+                                                            <img src="https://flagcdn.com/w20/mx.png" class="w-5 h-4 rounded-sm"/> MXN
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="NZD" data-flag="https://flagcdn.com/w20/nz.png">
+                                                            <img src="https://flagcdn.com/w20/nz.png" class="w-5 h-4 rounded-sm"/> NZD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="KRW" data-flag="https://flagcdn.com/w20/kr.png">
+                                                            <img src="https://flagcdn.com/w20/kr.png" class="w-5 h-4 rounded-sm"/> KRW
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="TRY" data-flag="https://flagcdn.com/w20/tr.png">
+                                                            <img src="https://flagcdn.com/w20/tr.png" class="w-5 h-4 rounded-sm"/> TRY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="RUB" data-flag="https://flagcdn.com/w20/ru.png">
+                                                            <img src="https://flagcdn.com/w20/ru.png" class="w-5 h-4 rounded-sm"/> RUB
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="AED" data-flag="https://flagcdn.com/w20/ae.png">
+                                                            <img src="https://flagcdn.com/w20/ae.png" class="w-5 h-4 rounded-sm"/> AED
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="SAR" data-flag="https://flagcdn.com/w20/sa.png">
+                                                            <img src="https://flagcdn.com/w20/sa.png" class="w-5 h-4 rounded-sm"/> SAR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="EGP" data-flag="https://flagcdn.com/w20/eg.png">
+                                                            <img src="https://flagcdn.com/w20/eg.png" class="w-5 h-4 rounded-sm"/> EGP
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="GHS" data-flag="https://flagcdn.com/w20/gh.png">
+                                                            <img src="https://flagcdn.com/w20/gh.png" class="w-5 h-4 rounded-sm"/> GHS
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="KES" data-flag="https://flagcdn.com/w20/ke.png">
+                                                            <img src="https://flagcdn.com/w20/ke.png" class="w-5 h-4 rounded-sm"/> KES
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Swap button -->
+                                        <div class="flex justify-center my-2">
+                                            <button class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition swap-btn">
+                                                <i class="fas fa-exchange-alt text-sm"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- To -->
+                                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                                            <div class="flex justify-between items-center">
+                                                <input type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" readonly/>
+                                                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector" data-type="to">
+                                                    <img src="https://flagcdn.com/w20/ng.png" class="w-5 h-4 rounded-sm flag" />
+                                                    <span class="font-medium code">NGN</span>
+                                                    <i class="fas fa-chevron-down text-xs"></i>
+
+                                                    <!-- Dropdown -->
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="USD" data-flag="https://flagcdn.com/w20/us.png">
+                                                            <img src="https://flagcdn.com/w20/us.png" class="w-5 h-4 rounded-sm"/> USD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="EUR" data-flag="https://flagcdn.com/w20/eu.png">
+                                                            <img src="https://flagcdn.com/w20/eu.png" class="w-5 h-4 rounded-sm"/> EUR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="GBP" data-flag="https://flagcdn.com/w20/gb.png">
+                                                            <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-4 rounded-sm"/> GBP
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="AUD" data-flag="https://flagcdn.com/w20/au.png">
+                                                            <img src="https://flagcdn.com/w20/au.png" class="w-5 h-4 rounded-sm"/> AUD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="NGN" data-flag="https://flagcdn.com/w20/ng.png">
+                                                            <img src="https://flagcdn.com/w20/ng.png" class="w-5 h-4 rounded-sm"/> NGN
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CAD" data-flag="https://flagcdn.com/w20/ca.png">
+                                                            <img src="https://flagcdn.com/w20/ca.png" class="w-5 h-4 rounded-sm"/> CAD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="JPY" data-flag="https://flagcdn.com/w20/jp.png">
+                                                            <img src="https://flagcdn.com/w20/jp.png" class="w-5 h-4 rounded-sm"/> JPY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CNY" data-flag="https://flagcdn.com/w20/cn.png">
+                                                            <img src="https://flagcdn.com/w20/cn.png" class="w-5 h-4 rounded-sm"/> CNY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="INR" data-flag="https://flagcdn.com/w20/in.png">
+                                                            <img src="https://flagcdn.com/w20/in.png" class="w-5 h-4 rounded-sm"/> INR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="BRL" data-flag="https://flagcdn.com/w20/br.png">
+                                                            <img src="https://flagcdn.com/w20/br.png" class="w-5 h-4 rounded-sm"/> BRL
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="ZAR" data-flag="https://flagcdn.com/w20/za.png">
+                                                            <img src="https://flagcdn.com/w20/za.png" class="w-5 h-4 rounded-sm"/> ZAR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="CHF" data-flag="https://flagcdn.com/w20/ch.png">
+                                                            <img src="https://flagcdn.com/w20/ch.png" class="w-5 h-4 rounded-sm"/> CHF
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="HKD" data-flag="https://flagcdn.com/w20/hk.png">
+                                                            <img src="https://flagcdn.com/w20/hk.png" class="w-5 h-4 rounded-sm"/> HKD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="SGD" data-flag="https://flagcdn.com/w20/sg.png">
+                                                            <img src="https://flagcdn.com/w20/sg.png" class="w-5 h-4 rounded-sm"/> SGD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="MXN" data-flag="https://flagcdn.com/w20/mx.png">
+                                                            <img src="https://flagcdn.com/w20/mx.png" class="w-5 h-4 rounded-sm"/> MXN
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="NZD" data-flag="https://flagcdn.com/w20/nz.png">
+                                                            <img src="https://flagcdn.com/w20/nz.png" class="w-5 h-4 rounded-sm"/> NZD
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="KRW" data-flag="https://flagcdn.com/w20/kr.png">
+                                                            <img src="https://flagcdn.com/w20/kr.png" class="w-5 h-4 rounded-sm"/> KRW
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="TRY" data-flag="https://flagcdn.com/w20/tr.png">
+                                                            <img src="https://flagcdn.com/w20/tr.png" class="w-5 h-4 rounded-sm"/> TRY
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="RUB" data-flag="https://flagcdn.com/w20/ru.png">
+                                                            <img src="https://flagcdn.com/w20/ru.png" class="w-5 h-4 rounded-sm"/> RUB
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="AED" data-flag="https://flagcdn.com/w20/ae.png">
+                                                            <img src="https://flagcdn.com/w20/ae.png" class="w-5 h-4 rounded-sm"/> AED
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="SAR" data-flag="https://flagcdn.com/w20/sa.png">
+                                                            <img src="https://flagcdn.com/w20/sa.png" class="w-5 h-4 rounded-sm"/> SAR
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="EGP" data-flag="https://flagcdn.com/w20/eg.png">
+                                                            <img src="https://flagcdn.com/w20/eg.png" class="w-5 h-4 rounded-sm"/> EGP
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="GHS" data-flag="https://flagcdn.com/w20/gh.png">
+                                                            <img src="https://flagcdn.com/w20/gh.png" class="w-5 h-4 rounded-sm"/> GHS
+                                                        </div>
+                                                        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" data-code="KES" data-flag="https://flagcdn.com/w20/ke.png">
+                                                            <img src="https://flagcdn.com/w20/ke.png" class="w-5 h-4 rounded-sm"/> KES
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Chart placeholder -->
+                                        <div class="h-32 bg-gray-50 rounded-xl flex items-center justify-center text-sm text-gray-400">
+                                            Exchange rate trend chart
+                                        </div>
                                     </div>
+
                                 </div>
                             </section>
                         </div>
@@ -295,8 +489,9 @@
                 sidebar.classList.add('-translate-x-full');
             }
         });
-    </script>
-    <script>
+
+
+
         document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggleBalances');
             let expanded = false;
@@ -307,6 +502,56 @@
                 });
                 expanded = !expanded;
                 toggleBtn.textContent = expanded ? 'See Less' : 'See More';
+            });
+        });
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const swapBtn = document.querySelector('.swap-btn');
+            const selectors = document.querySelectorAll('.currency-selector');
+
+            // Toggle dropdown
+            selectors.forEach(sel => {
+                sel.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const dropdown = sel.querySelector('.currency-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+
+                // Select currency from dropdown
+                sel.querySelectorAll('.currency-item').forEach(item => {
+                    item.addEventListener('click', e => {
+                        const code = item.dataset.code;
+                        const flag = item.dataset.flag;
+
+                        sel.querySelector('.code').textContent = code;
+                        sel.querySelector('.flag').src = flag;
+
+                        sel.querySelector('.currency-dropdown').classList.add('hidden');
+                    });
+                });
+            });
+
+            // Swap currencies and flags
+            swapBtn.addEventListener('click', () => {
+                const from = document.querySelector('.currency-selector[data-type="from"]');
+                const to = document.querySelector('.currency-selector[data-type="to"]');
+
+                // Swap code
+                const tempCode = from.querySelector('.code').textContent;
+                from.querySelector('.code').textContent = to.querySelector('.code').textContent;
+                to.querySelector('.code').textContent = tempCode;
+
+                // Swap flag
+                const tempFlag = from.querySelector('.flag').src;
+                from.querySelector('.flag').src = to.querySelector('.flag').src;
+                to.querySelector('.flag').src = tempFlag;
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
             });
         });
     </script>
