@@ -44,10 +44,22 @@ public function create()
         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
 
+       // Prepare all currencies for dropdown
+    $currencyHelper = new class { use CurrencyHelper; };
+    $allCurrencies = [];
+    foreach ($currencyHelper->getAllCurrencies() as $code => $meta) {
+        $allCurrencies[] = [
+            'code' => $code,
+            'flag' => "https://flagcdn.com/w20/{$meta['country']}.png",
+            'symbol' => $meta['symbol']
+        ];
+    }
+
     return view('dashboard', compact(
         'countries',
         'transactions',
-        'balances'
+        'balances',
+         'allCurrencies'
     ));
 }
 
