@@ -60,7 +60,7 @@
             <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Contact Us') }}
             </a>
-
+{{-- 
             <button
               class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
               <a href="{{ route('login') }}" class=""> {{ __('Login') }} </a>
@@ -68,7 +68,7 @@
 
             <button class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
               <a href="{{ route('register.saveStepData') }}" class=""> {{ __('Get Started') }} </a>
-            </button>
+            </button> --}}
 
             @php
               $flags = [
@@ -106,7 +106,7 @@
             {{ __('Welcome To Flovide') }}
           </p>
           <h1 class="font-extrabold text-[40px] leading-[48px] mb-4">
-            {{ __('Take Total Control Of Your Money') }}
+            {{ __('Take Total Control Of') }}
             <br />
             {{ __('Your Money') }}
           </h1>
@@ -359,7 +359,7 @@
             {{-- <h2>Sending money is free, making it affordable for you to send money both locally and internationally.
             </h2> --}}
             <p class="text-sm font-normal max-w-xl mx-auto">
-              {{ __('Flovide offers a free sending to our personal clients while businesses can choose from a range of pricing plans to fit every budget and level of need.') }}
+              {{ __('Flovide offers fee-free transfers for personal users, with transparent exchange rates. Businesses can choose from a range of pricing plans to suit different budgets and transaction needs.') }}
             </p>
           </div>
 
@@ -734,7 +734,7 @@
               <button
                 class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
                 type="button">
-                {{ __('Create A Business Account Now') }}
+                {{ __('Create A Business Account/Login') }}
                 <span>
                   <img src="../asserts/homepage/arrow-up.svg" alt="" width="20px" />
                 </span>

@@ -873,35 +873,35 @@ public function store(Request $request)
 
 
 
-    public function fetchBanks(Request $request)
-    {
-        $country = $request->get('country'); // Default to NG
-        $currency = $request->get('currency'); // Default to NGN
+    // public function fetchBanks(Request $request)
+    // {
+    //     $country = $request->get('country'); 
+    //     $currency = $request->get('currency'); 
 
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-                'country' => $country,
-                'currency' => $currency
-            ]);
+    //     $response = Http::withToken(env('OHENTPAY_API_KEY'))
+    //         ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+    //             'country' => $country,
+    //             'currency' => $currency
+    //         ]);
 
-        // dd($response->successful());
+    //     dd($response->json());
 
 
-        if ($response->successful()) {
-            return response()->json([
-                'status' => 'success',
-                'fields' => $response->json()
-            ]);
-        }
+    //     if ($response->successful()) {
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'fields' => $response->json()
+    //         ]);
+    //     }
 
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch bank fields',
-            'details' => $response->json()
-        ], $response->status());
-    }
+    //     return response()->json([
+    //         'status' => 'error',
+    //         'message' => 'Failed to fetch bank fields',
+    //         'details' => $response->json()
+    //     ], $response->status());
+    // }
 
-// public function fetchBanks(Request $request)
+//     public function fetchBanks(Request $request)
 // {
 //     $country  = $request->get('country');
 //     $currency = $request->get('currency');
@@ -913,15 +913,14 @@ public function store(Request $request)
 //         ]);
 
 //     if ($response->successful()) {
-//         $fields = $response->json();
 
-//         // Get options from the select field
-//         $options = collect($fields)
-//             ->firstWhere('type', 'select')['options'] ?? [];
+//         // Extract only the "name" field
+//         $names = collect($response->json())->pluck('name');
 
 //         return response()->json([
-//             'status' => 'success',
-//             'banks'  => $options
+//             'status'  => 'success',
+//             'message' => 'Bank fields retrieved',
+//             'fields'  => $names
 //         ]);
 //     }
 
@@ -931,6 +930,62 @@ public function store(Request $request)
 //         'details' => $response->json()
 //     ], $response->status());
 // }
+
+
+public function fetchBanks(Request $request)
+{
+    $country  = $request->get('country');
+    $currency = $request->get('currency');
+
+    $response = Http::withToken(env('OHENTPAY_API_KEY'))
+        ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
+            'country'  => $country,
+            'currency' => $currency
+        ]);
+
+    if (!$response->successful()) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
+    }
+
+    $fields = collect($response->json());
+
+    // ✅ Check if bank select exists
+    $bankField = $fields->firstWhere('name', 'bank_id');
+
+    // ✅ If currency supports banks
+    if ($bankField && $bankField['type'] === 'select') {
+
+        $banks = collect($bankField['options'])->map(function ($bank) {
+            return [
+                'id'   => $bank['value'],
+                'name' => $bank['label'],
+                'code' => $bank['bank_code']
+            ];
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Banks retrieved',
+            'has_bank'=> true,
+            'fields'   => $fields->pluck('name'),
+            'banks' => $banks
+        ]);
+    }
+
+    // ❌ If currency does NOT require bank
+    return response()->json([
+        'status'   => 'success',
+        'message'  => 'No bank required for this currency',
+        'has_bank' => false,
+        'fields'   => $fields->pluck('name')
+    ]);
+}
+
+
 
     
 }

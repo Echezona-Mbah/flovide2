@@ -114,7 +114,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/business/invoices/{id}', [InvoicesController::class, 'destroy']);
     
     //refund
-    Route::get('/business/refunds', [refundsController::class, 'index'])->name('refunds.index');
+    Route::get('/business/refunds', [refundsController::class, 'index']);
     Route::get('/business/refunds/{id}', [refundsController::class, 'fetchRefund']);
     Route::post('/business/refunds', [refundsController::class, 'store'])->name('refund.store');
     Route::post('/business/refunds/{id}/status', [refundsController::class, 'updateStatus']);
@@ -293,7 +293,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
         Route::put('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'update'])->name('beneficias.update'); 
         Route::delete('/personal-beneficias/{id}', [PersonalAddBeneficiariesController::class, 'destroy']);
-        Route::post('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBankss']);
+        Route::post('/personal-fetchBanks', [PersonalAddBeneficiariesController::class, 'fetchBanks']);
         Route::post('/personal-validate-account', [PersonalAddBeneficiariesController::class, 'validateRecipient']);
         Route::get('/personal-fetchcountrylist', [PersonalAddBeneficiariesController::class, 'fetchcountrylist']);
         Route::get('personal-beneficia/all', [PersonalAddBeneficiariesController::class, 'allBeneficia']);
