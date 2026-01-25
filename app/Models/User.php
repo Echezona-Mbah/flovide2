@@ -100,5 +100,17 @@ class User extends Authenticatable
 }
 
 
+public function isFullyVerified(): bool
+{
+    return
+        $this->cac_status === 'confirmed' &&
+        $this->valid_id_status === 'confirmed' &&
+        $this->tin_status === 'confirmed' &&
+        $this->utility_bill_status === 'confirmed' &&
+        (
+            $this->countries_id !== 'Nigeria' ||
+            $this->bvn_status === 'yes'
+        );
+}
 
 }

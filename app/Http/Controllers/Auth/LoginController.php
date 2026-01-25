@@ -12,13 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
-use App\Models\Balance;
-use App\Models\TransactionHistory;
-use App\Models\TeamMembers;
-use App\Models\Countries;
-use App\Models\Beneficia;
-use App\Models\BankAccount;
-use App\Models\VirtualCards;
+
+use Illuminate\Support\Facades\Http;
 
 
 class LoginController extends Controller
@@ -449,7 +444,9 @@ class LoginController extends Controller
         });
 
         $teamMembership = \App\Models\TeamMembers::where('user_id', $account->id)->first();
-        $countries = \App\Models\Countries::all();
+        $countryResponse = $this->fetchcountrylist($request);
+        $countries = $countryResponse->getData();
+        // $countries = \App\Models\Countries::all();
         $beneficiaries = \App\Models\Beneficia::where('user_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('user_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('user_id', $account->id)->where('status', 'active')->get();
@@ -566,7 +563,8 @@ class LoginController extends Controller
         });
 
         // ✅ Fetch extra lists
-        $countries = \App\Models\Countries::all();
+          $countryResponse = $this->fetchcountrylist($request);
+        $countries = $countryResponse->getData();
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('personal_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('personal_id', $account->id)->where('status', 'active')->get();
@@ -598,5 +596,31 @@ class LoginController extends Controller
                 'token' => $token,
             ]
         ], 200);
+    }
+
+
+    public function fetchcountrylist(Request $request)
+    {
+        $country_name = $request->get('country_name', 'NG'); 
+        $alpha2 = $request->get('alpha2', 'NGN'); 
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries', [
+                'country_name' => $country_name,
+                'alpha2' => $alpha2
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'fields' => $response->json()
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
     }
 }

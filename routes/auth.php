@@ -111,7 +111,7 @@ Route::post('/subscription/subscriptionpay', [PaymentController::class, 'payment
 
 
 // HtmlMinifier::class
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','business.verified'])->group(function () {
 
     
 
