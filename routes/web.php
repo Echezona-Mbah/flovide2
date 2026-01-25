@@ -42,12 +42,29 @@ Route::get('/careers', function () {
     return view('mainpage.careers', compact('jobs'));
 })->name('careers');
 
+Route::get('/privacy-policy', function () {
+    return view('mainpage.privacy-policy');
+})->name('privacy-policy');
 
 
-// Route::get('/dashboard', function () {
-    
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/deletion', function () {
+    return view('mainpage.deletion');
+})->name('deletion');
+
+
+
+Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $request) {
+    $helper = new class {
+        use \App\Traits\CurrencyHelper;
+    };
+
+    return response()->json(
+        $helper->getExchangeRateFromMap($request->from, $request->to)
+    );
+});
+
+
+
 
 Route::get('/dashboard', [DashboardController::class, 'create'])
     ->middleware(['auth', 'verified', \App\Http\Middleware\ResolveOwnerMiddleware::class])
