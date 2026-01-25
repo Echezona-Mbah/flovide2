@@ -256,5 +256,19 @@
     "Arrival time": "Hora de llegada",
     "Today - in seconds": "Hoy - en segundos",
     "Fees": "Tarifas",
-    "Enter the amount you wish to add to continue": "Ingrese la cantidad que desea agregar para continuar"
+    "Enter the amount you wish to add to continue": "Ingrese la cantidad que desea agregar para continuar",
+    "Create A Balance": "Crear un saldo",
+    "Create A New Balance": "Crear un nuevo saldo",
+    "You can make withdrawals directly into any bank account of your choice.": "Puede realizar retiros directamente a cualquier cuenta bancaria de su elección.",
+    "Currency": "Moneda",
+    "Name Your Account": "Nombre de su cuenta",
+    "Name": "Nombre",
+    "Add Account": "Agregar cuenta",
+    "Bank Accounts": "Cuentas bancarias",
+    "Unnamed Account": "Cuenta sin nombre",
+    "Balance Details": "Detalles del saldo",
+    "Edit Balance": "Editar saldo",
+    "New Name": "Nuevo nombre",
+    "Cancel": "Cancelar",
+    "Update": "Actualizar"
 }
