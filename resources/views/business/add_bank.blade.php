@@ -13,7 +13,7 @@
     <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Create A Balance
+                {{ __('Create A Balance') }}
             </h1>
             @include('business.header_notifical')
 
@@ -24,11 +24,10 @@
                 <section class="flex flex-col lg:flex-row gap-8 bg-white rounded-tl-3xl md:p-6 p-2 ">
                     <section class="flex-1 bg-white rounded-xl md:p-6 p-2 max-w-full lg:max-w-lg ">
                         <h2 class="text-xl font-extrabold mb-1">
-                            Create A New Balance
+                            {{ __('Create A New Balance') }}
                         </h2>
                         <p class="text-[#6B6B6B] mb-6 text-sm font-normal">
-                            You can make withdrawals directly into any bank account of your
-                            choice.
+                            {{ __('You can make withdrawals directly into any bank account of your choice.') }}
                         </p>
                        
                         <form method="POST" action="{{ route('ohentpay.createBalance') }}" class="space-y-6" enctype="multipart/form-data">
@@ -65,7 +64,7 @@
                                 {{-- @csrf --}}
     
                                 <div>
-                                    <label for="currency" class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Currency</label>
+                                    <label for="currency" class="block mb-2 text-xs font-semibold text-gray-500 uppercase">{{ __('Currency') }}</label>
                                 
                                     <div class="relative">
                                         <!-- Button that shows selected currency -->
@@ -106,19 +105,19 @@
                                
                                 <div class="flex flex-col gap-1">
                                     <label class="font-normal text-[#6B6B6B]" for="account-number">
-                                        Name Your Account
+                                        {{ __('Name Your Account') }}
                                     </label>
                                     <span class="text-red-500 errornumber"></span>
                                     <input
                                         class="border border-[#C4C4C4] rounded-md py-2 px-3 text-[#C4C4C4] placeholder-[#C4C4C4] focus:outline-none focus:ring-2 focus:ring-[#A9D3F7]"
-                                        id="account-number" name="name" placeholder="Name" type="text" />
+                                        id="account-number" name="name" placeholder="{{ __('Name') }}" type="text" />
                                 </div>
                                 
                                 <div class="flex flex-col gap-1">
                                     <div id="responseMessage"></div>
                                 </div>
                                 <button id="bankAccountForm" class="self-start bg-[#A9D3F7] text-[#1E4F8B] font-semibold text-sm rounded-full py-2.5 px-6 mt-2"
-                                    type="submit"> Add Account </button>
+                                    type="submit"> {{ __('Add Account') }} </button>
                             </div>
 
                         </form>
@@ -130,7 +129,7 @@
                     <section class="flex-1 max-w-full lg:max-w-lg">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-semibold text-base text-[#1E1E1E]">
-                                Bank Accounts
+                                {{ __('Bank Accounts') }}
                             </h3>
                             {{-- <button aria-label="Delete All Payout Accounts" class="delete-all-btn flex items-center gap-1 text-[#D92D20] text-sm font-semibold rounded-md px-3 py-1 border border-[#D92D20] whitespace-nowrap">
                                 <i class="fas fa-trash-alt"></i>
@@ -164,7 +163,7 @@
                                                         alt="Flag of {{ strtoupper($account->currency_meta['country']) }}"
                                                         width="20" height="15" class="rounded-sm"
                                                     />
-                                                    <span style="font-weight: 400px">{{ $account['name'] ?? 'Unnamed Account' }}</span>
+                                                    <span style="font-weight: 400px">{{ $account['name'] ?? __('Unnamed Account') }}</span>
                                                 </div>
                                                 <span class="text-xs text-[#4B4B4B]">{{ $account['currency'] ?? '' }}</span>
                                             </div>
@@ -201,7 +200,7 @@
                                     &times;
                                 </button>
 
-                                <h2 class="text-xl font-semibold mb-4">Balance Details</h2>
+                                <h2 class="text-xl font-semibold mb-4">{{ __('Balance Details') }}</h2>
                                 <div id="balanceDetails" class="space-y-4">
                                     <!-- Dynamically loaded balance details will be injected here -->
                                 </div>
@@ -210,7 +209,7 @@
                         <!-- Modal -->
                         <div id="editModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
                             <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                                <h2 class="text-lg font-bold mb-4">Edit Balance</h2>
+                                <h2 class="text-lg font-bold mb-4">{{ __('Edit Balance') }}</h2>
                                 
                                 <form id="editBalanceForm" method="POST" action="{{ route('update.balance') }}">
                                     @csrf
@@ -245,13 +244,13 @@
                                     <input type="hidden" name="balance_id" id="editBalanceId">
                                     
                                     <div class="mb-4">
-                                        <label for="editBalanceName" class="block text-sm font-medium">New Name</label>
+                                        <label for="editBalanceName" class="block text-sm font-medium">{{ __('New Name') }}</label>
                                         <input type="text" name="name" id="editBalanceName" class="w-full border border-gray-300 rounded px-3 py-2 mt-1" required>
                                     </div>
                                     
                                     <div class="flex justify-end">
-                                        <button type="button" onclick="closeEditModal()" class="mr-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
-                                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Update</button>
+                                        <button type="button" onclick="closeEditModal()" class="mr-2 px-4 py-2 bg-gray-300 rounded">{{ __('Cancel') }}</button>
+                                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">{{ __('Update') }}</button>
                                     </div>
                                 </form>
                             </div>
