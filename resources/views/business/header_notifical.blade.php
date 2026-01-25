@@ -24,9 +24,31 @@
 
     <button aria-label="Select organization Nexus Global"
         class="bg-white rounded-full flex items-center gap-2 py-2 px-4 text-sm font-normal text-[#1E1E1E] whitespace-nowrap">
-        <i class="fas fa-bullseye text-[#1E1E1E]"></i>
-        Nexus Global
-        <i class="fas fa-chevron-right text-[#1E1E1E]"></i>
+        {{-- <i class="fas fa-bullseye text-[#1E1E1E]"></i>
+        {{ auth()->user()->business_name }}
+        <i class="fas fa-chevron-right text-[#1E1E1E]"></i> --}}
+
+        <div class="flex items-center space-x-2">
+    
+            <!-- Replace bullseye icon with an image -->
+            <div class="w-6 h-6">
+                @if(Auth::user()->profile_picture)
+                    <img src="{{ asset(Auth::user()->profile_picture) }}" 
+                        alt="Profile Picture" class="w-full h-full object-cover rounded-full">
+                @else
+                    <img src="{{ asset('asserts/dashboard/circle-dot.png') }}" 
+                        alt="Default Icon" class="w-full h-full object-cover rounded-full">
+                @endif
+            </div>
+
+            <!-- Business Name -->
+            <span class="text-[#1E1E1E] font-medium">
+                {{ auth()->user()->business_name }}
+            </span>
+
+            <i class="fas fa-chevron-right text-[#1E1E1E]"></i> 
+        </div>
+
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf

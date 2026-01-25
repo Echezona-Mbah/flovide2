@@ -78,14 +78,31 @@
           <li><a href="{{ route('lang.switch', 'lg') }}" class="block px-4 py-2 hover:bg-gray-100">Luganda</a></li>
         </ul>
       </div>
-      <!-- Sign In -->
+      {{-- <!-- Sign In -->
       <a class="hover:text-gray-900" href="{{ route('login') }}"> {{ __('Sign In') }} </a>
       <!-- Divider -->
       <span class="text-gray-300 select-none"> | </span>
       <!-- Get Started button -->
       <a class="bg-[#215F9C] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1E40AF] transition-colors" href="{{ route('register.saveStepData') }}">
         {{ __('Get Started') }}
-      </a>
+      </a> --}}
+
+      @if (request()->is('business*'))
+        <!-- Sign In -->
+        <a class="hover:text-gray-900" href="{{ route('login') }}">
+          {{ __('Sign In') }}
+        </a>
+
+        <!-- Divider -->
+        <span class="text-gray-300 select-none"> | </span>
+
+        <!-- Get Started button -->
+        <a class="bg-[#215F9C] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1E40AF] transition-colors"
+          href="{{ route('register.saveStepData') }}">
+          {{ __('Get Started') }}
+        </a>
+      @endif
+
     </div>
   </section>
 </nav>
