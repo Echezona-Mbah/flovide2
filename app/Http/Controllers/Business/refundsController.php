@@ -14,6 +14,7 @@ class refundsController extends Controller
     public function index()
     {
         $user = Auth::user();
+                // dd($user);
         // Fetch all refund requests for the authenticated user
         $refunds = Refund::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 

@@ -130,8 +130,10 @@
 
                 <div class="mt-16 flex flex-col md:flex-row md:justify-between items-center gap-6 md:gap-0 mx-auto">
                     <div class="flex items-center gap-10">
-                        <img alt="OhentPay company logo white on transparent background" class="h-30 w-30" height="40"
-                            src="../asserts/Personal/company1.png" />
+                        {{-- <img alt="OhentPay company logo white on transparent background" class="h-30 w-30" height="40"
+                            src="../asserts/Personal/company1.png" /> --}}
+                        <img class="h-30 w-12 dark:invert" src="../asserts/Personal/Capture.png">
+
                         <img alt="Sound wave style company logo white on transparent background" class="h-30 w-30"
                             height="40" src="../asserts/Personal/company2.png" />
                         <img alt="CentaDesk company logo white on transparent background" class="w-28" height="40"
@@ -328,7 +330,7 @@
                         rewarded, and speed matters. We balance ambitious targets with a human-first approach: expect
                         rapid iteration, high-impact projects, and a team that celebrates wins (and learns quickly from
                         mistakes). We foster an environment where your best work is ahead of you, surrounded by
-                        global-class talent focused on a shared mission to democratize finance.
+                        global-class talent focused on a shared mission to democratise finance.
                     </p>
 
                     <!-- Diversity Statement -->

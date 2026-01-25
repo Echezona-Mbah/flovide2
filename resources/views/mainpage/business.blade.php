@@ -190,7 +190,7 @@
     <!-- blog section end-->
 
     <!-- plans  -->
-    <section class="w-full flex justify-center items-center">
+    <section   id="plans" class="w-full flex justify-center items-center">
       <section class="bg-[#11402f] text-white max-w-7xl md:rounded-3xl">
         <div class="max-w-7xl mx-auto px-6 py-16 rounded-3xl">
           <div class="text-center max-w-3xl mx-auto">
