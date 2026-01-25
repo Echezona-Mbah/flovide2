@@ -298,13 +298,13 @@
                                         <!-- Header -->
                                         <div class="flex justify-between items-center mb-4">
                                             <h3 class="font-semibold text-lg">Exchange Rate Calculator</h3>
-                                            <span class="text-sm text-gray-500">£1 = NGN 1,989</span>
+                                            <span id="rateText" class="text-sm text-gray-500">Loading...</span>
                                         </div>
 
                                         <!-- From -->
                                         <div class="bg-gray-50 rounded-xl p-4 mb-3">
                                             <div class="flex justify-between items-center">
-                                                <input type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" />
+                                                <input id="fromAmount" type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" />
                                                 <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector" data-type="from">
                                                     <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-4 rounded-sm flag" />
                                                     <span class="font-medium code">GBP</span>
@@ -396,7 +396,7 @@
                                         <!-- To -->
                                         <div class="bg-gray-50 rounded-xl p-4 mb-6">
                                             <div class="flex justify-between items-center">
-                                                <input type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" readonly/>
+                                                <input id="toAmount" type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" readonly/>
                                                 <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector" data-type="to">
                                                     <img src="https://flagcdn.com/w20/ng.png" class="w-5 h-4 rounded-sm flag" />
                                                     <span class="font-medium code">NGN</span>
@@ -592,8 +592,77 @@
                 document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
             });
         });
+
+
+        
     </script>
-    
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const swapBtn = document.querySelector('.swap-btn');
+    const selectors = document.querySelectorAll('.currency-selector');
+    const fromAmount = document.getElementById('fromAmount');
+    const toAmount = document.getElementById('toAmount');
+    const rateText = document.getElementById('rateText');
+
+    async function calculate() {
+        let from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
+        let to   = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
+        let amt  = fromAmount.value;
+
+        if (!amt || amt <= 0) return;
+
+        let res = await fetch(`/dashboard/exchange-rate?from=${from}&to=${to}`);
+        let data = await res.json();
+
+        if (data && data.rate) {
+            toAmount.value = (amt * data.rate).toFixed(2);
+            rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
+        }
+    }
+
+    // Dropdown open / select
+    selectors.forEach(sel => {
+        sel.addEventListener('click', e => {
+            e.stopPropagation();
+            sel.querySelector('.currency-dropdown').classList.toggle('hidden');
+        });
+
+        sel.querySelectorAll('.currency-item').forEach(item => {
+            item.addEventListener('click', () => {
+                sel.querySelector('.code').textContent = item.dataset.code;
+                sel.querySelector('.flag').src = item.dataset.flag;
+                sel.querySelector('.currency-dropdown').classList.add('hidden');
+                calculate();
+            });
+        });
+    });
+
+    // Swap
+    swapBtn.addEventListener('click', () => {
+        const from = document.querySelector('.currency-selector[data-type="from"]');
+        const to = document.querySelector('.currency-selector[data-type="to"]');
+
+        [from.querySelector('.code').innerText, to.querySelector('.code').innerText] =
+        [to.querySelector('.code').innerText, from.querySelector('.code').innerText];
+
+        [from.querySelector('.flag').src, to.querySelector('.flag').src] =
+        [to.querySelector('.flag').src, from.querySelector('.flag').src];
+
+        calculate();
+    });
+
+    fromAmount.addEventListener('input', calculate);
+
+    // Close on outside click
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+    });
+});
+</script>
+
+
 </body>
 
 </html>
