@@ -173,6 +173,44 @@ trait CurrencyHelper
     ];
 }
 
+    public function getAllCurrencies()
+    {
+        return [
+            'NGN' => ['symbol' => '₦', 'country' => 'ng', 'rate' => 1550],
+            'USD' => ['symbol' => '$', 'country' => 'us', 'rate' => 1],
+            'KES' => ['symbol' => 'KSh', 'country' => 'ke', 'rate' => 130],
+            'GHS' => ['symbol' => '₵', 'country' => 'gh', 'rate' => 15],
+            'ZAR' => ['symbol' => 'R', 'country' => 'za', 'rate' => 18],
+            'GBP' => ['symbol' => '£', 'country' => 'gb', 'rate' => 0.77],
+            'EUR' => ['symbol' => '€', 'country' => 'eu', 'rate' => 0.9],
+            'CAD' => ['symbol' => 'C$', 'country' => 'ca', 'rate' => 1.35],
+            'CZK' => ['symbol' => 'Kč', 'country' => 'cz', 'rate' => 22],
+            'DKK' => ['symbol' => 'kr', 'country' => 'dk', 'rate' => 6.9],
+            'AUD' => ['symbol' => 'A$', 'country' => 'au', 'rate' => 1.5],
+            'SEK' => ['symbol' => 'kr', 'country' => 'se', 'rate' => 10.5],
+            'RON' => ['symbol' => 'lei', 'country' => 'ro', 'rate' => 4.6],
+            'PLN' => ['symbol' => 'zł', 'country' => 'pl', 'rate' => 4.0],
+            'CHF' => ['symbol' => 'CHF', 'country' => 'ch', 'rate' => 0.91],
+            'HUF' => ['symbol' => 'Ft', 'country' => 'hu', 'rate' => 355],
+            'NOK' => ['symbol' => 'kr', 'country' => 'no', 'rate' => 10.4],
+            'INR' => ['symbol' => '₹', 'country' => 'in', 'rate' => 83],
+            'JPY' => ['symbol' => '¥', 'country' => 'jp', 'rate' => 157],
+            'CNY' => ['symbol' => '¥', 'country' => 'cn', 'rate' => 7.2],
+            'BRL' => ['symbol' => 'R$', 'country' => 'br', 'rate' => 5.2],
+            'MXN' => ['symbol' => '$', 'country' => 'mx', 'rate' => 18],
+            'ARS' => ['symbol' => '$', 'country' => 'ar', 'rate' => 900],
+            'SGD' => ['symbol' => 'S$', 'country' => 'sg', 'rate' => 1.35],
+            'HKD' => ['symbol' => 'HK$', 'country' => 'hk', 'rate' => 7.8],
+            'NZD' => ['symbol' => 'NZ$', 'country' => 'nz', 'rate' => 1.6],
+            'AED' => ['symbol' => 'د.إ', 'country' => 'ae', 'rate' => 3.67],
+            'SAR' => ['symbol' => '﷼', 'country' => 'sa', 'rate' => 3.75],
+            'MYR' => ['symbol' => 'RM', 'country' => 'my', 'rate' => 4.7],
+            'THB' => ['symbol' => '฿', 'country' => 'th', 'rate' => 36],
+            'IDR' => ['symbol' => 'Rp', 'country' => 'id', 'rate' => 16250],
+            'PKR' => ['symbol' => '₨', 'country' => 'pk', 'rate' => 277],
+            'EGP' => ['symbol' => '£', 'country' => 'eg', 'rate' => 48],
+        ];
+    }
 
 
 }
