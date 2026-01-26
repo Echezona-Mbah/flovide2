@@ -1,29 +1,25 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="flex items-center gap-4 flex-wrap">
-    <button id="notifyBtn" aria-label="Notifications"
-        class="relative bg-white w-10 h-10 rounded-full flex items-center justify-center">
+    <button id="notifyBtn" aria-label="Notifications" class="relative bg-white w-10 h-10 rounded-full flex items-center justify-center">
         <i class="fas fa-bell text-[#4B4B4B] text-lg"></i>
         <span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#00B37E]"></span>
     </button>
-<div id="notificationBox"
-    class="hidden flex flex-col items-center px-0 pb-9 gap-8 isolate absolute w-[422px] h-[434px] right-[270px] top-[80px] bg-white shadow-[0_4px_60px_5px_rgba(0,0,0,0.1)] rounded-[24px] z-50 transition-all duration-300">
+    <div id="notificationBox" class="hidden flex flex-col items-center px-0 pb-9 gap-8 isolate absolute w-[422px] h-[434px] right-[270px] top-[80px] bg-white shadow-[0_4px_60px_5px_rgba(0,0,0,0.1)] rounded-[24px] z-50 transition-all duration-300">
 
-    <!-- Header -->
-    <div class="flex text-center justify-between border-b-2 w-full border-gray-100 px-6 pt-3 pb-3">
-        <h2 class="text-lg font-semibold">Notifications</h2>
-        <button id="closeNotificationBtn" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+        <!-- Header -->
+        <div class="flex text-center justify-between border-b-2 w-full border-gray-100 px-6 pt-3 pb-3">
+            <h2 class="text-lg font-semibold">Notifications</h2>
+            <button id="closeNotificationBtn" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+        </div>
+
+        <!-- Notification Content -->
+        <div id="notificationList" class="flex flex-col items-start px-4 gap-4 w-full h-[340px] overflow-y-auto">
+            <!-- Loop goes here -->
+        </div>
     </div>
 
-    <!-- Notification Content -->
-    <div id="notificationList"
-        class="flex flex-col items-start px-4 gap-4 w-full h-[340px] overflow-y-auto">
-        <!-- Loop goes here -->
-    </div>
-</div>
-
-    <button aria-label="Select organization Nexus Global"
-        class="bg-white rounded-full flex items-center gap-2 py-2 px-4 text-sm font-normal text-[#1E1E1E] whitespace-nowrap">
+    <button aria-label="Select organization Nexus Global" class="bg-white rounded-full flex items-center gap-2 py-2 px-4 text-sm font-normal text-[#1E1E1E] whitespace-nowrap">
         {{-- <i class="fas fa-bullseye text-[#1E1E1E]"></i>
         {{ auth()->user()->business_name }}
         <i class="fas fa-chevron-right text-[#1E1E1E]"></i> --}}
