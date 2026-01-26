@@ -63,45 +63,36 @@
                 <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
-                            <div
-                                class="flex flex-col md:flex-row md:items-center md:justify-between w-full md:gap-0 mb-10">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full mb-10 gap-6 md:gap-0">
+                                <!-- Balance Info -->
                                 <div>
                                     <p class="text-gray-500 text-sm mb-1">{{ __('Total Balance') }}</p>
                                     <h1 class="font-extrabold text-2xl md:text-xl">
                                         {{-- {{ $balance }}{{ number_format($balance) }} --}}
                                     </h1>
                                 </div>
-                                
-                                
-                                
-                                <div class="flex flex-col md:flex-row  mt-10 md:mt-0 gap-6 md:gap-2">
+
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap md:flex-row mt-4 md:mt-0 gap-4 md:gap-2">
                                     <a href="{{ route('send') }}">
-                                        <button
-                                            class="flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-5 py-2 text-blue-700 text-sm md:text-sm font-medium hover:bg-blue-200 transition">
+                                        <button class="flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm md:text-sm font-medium hover:bg-blue-200 transition">
                                             <i class="fas fa-file-invoice text-xs"></i>
                                             {{ __('Send Money') }}
                                         </button>
                                     </a>
-                                    
-                                    <button
-                                        class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
+
+                                    <button class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
                                         <i class="fas fa-cube text-xs"></i>
                                         {{ __('Exchange') }}
                                     </button>
-                                    <a href="{{ route('add_money') }}"
-                                    class="flex items-center gap-1 rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition
-                                            {{ request()->routeIs('add_money') ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-50' }}">
+
+                                    <a href="{{ route('add_money') }}" class="flex items-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium transition {{ request()->routeIs('add_money') ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-50' }}">
                                         <i class="far fa-file-alt text-xs"></i>
                                         {{ __('Add Money') }}
                                     </a>
-
-                                    {{-- <button
-                                        class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
-                                        <i class="fas fa-arrow-up-right-from-square"></i>
-                                        Send Money
-                                    </button> --}}
                                 </div>
                             </div>
+
                             {{-- @php
                             $showMore = count($balance) > 0;
                         @endphp --}}
@@ -222,78 +213,6 @@
                                 </div>
 
                                 <div>
-                                    <!-- <h3 class="font-semibold text-lg mb-5">{{ __('Monthly Income') }}</h3>
-                                    <div class="border border-gray-200 rounded-xl p-5 max-w-full overflow-x-auto">
-                                        <div class="flex justify-between items-center mb-4">
-                                            <select aria-label="Select quarter"
-                                                class="text-xs border border-gray-300 rounded-full py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <option>{{ __('1st quarter') }}</option>
-                                                <option>{{ __('2nd quarter') }}</option>
-                                                <option>{{ __('3rd quarter') }}</option>
-                                                <option>{{ __('4th quarter') }}</option>
-                                            </select>
-                                            <span class="font-semibold text-sm">GBP</span>
-                                        </div>
-                                        <svg viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                            class="w-full h-[200px]" aria-label="Monthly income line chart">
-                                            <defs>
-                                                <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="0%" stop-color="#34A853" stop-opacity="0.2" />
-                                                    <stop offset="100%" stop-color="#34A853" stop-opacity="0" />
-                                                </linearGradient>
-                                            </defs>
-                                            <path
-                                                d="M0 200 L50 200 L70 150 L90 170 L110 130 L130 140 L150 120 L170 130 L190 110 L210 120 L230 100 L250 110 L270 90 L290 100 L310 80 L330 50 L350 50 L400 50 L400 200 Z"
-                                                fill="url(#gradient)" stroke="#34A853" stroke-width="2" />
-                                            <circle cx="310" cy="80" r="7" fill="#fff" stroke="#34A853"
-                                                stroke-width="2" />
-                                            <line x1="310" y1="80" x2="250" y2="80" stroke="#000" stroke-width="1"
-                                                stroke-linecap="round" />
-                                            <rect x="190" y="70" width="60" height="25" rx="5" ry="5" fill="#000"
-                                                opacity="0.85" />
-                                            <text x="220" y="88" fill="#fff" font-size="12"
-                                                font-family="Inter, sans-serif" font-weight="600" text-anchor="middle">
-                                                24,400
-                                            </text>
-                                            <text x="0" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                {{ __('January') }}
-                                            </text>
-                                            <text x="150" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                {{ __('February') }}
-                                            </text>
-                                            <text x="350" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                {{ __('March') }}
-                                            </text>
-                                            <text x="380" y="15" fill="#111827" font-size="12"
-                                                font-family="Inter, sans-serif" font-weight="700" text-anchor="end">
-                                                GBP
-                                            </text>
-                                            <text x="10" y="180" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                0
-                                            </text>
-                                            <text x="10" y="140" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                1k
-                                            </text>
-                                            <text x="10" y="100" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                10k
-                                            </text>
-                                            <text x="10" y="60" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                20k
-                                            </text>
-                                            <text x="10" y="20" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                50k
-                                            </text>
-                                        </svg>
-                                    </div> -->
-
                                     <div class="bg-white border border-gray-200 rounded-xl p-5">
                                         <!-- Header -->
                                         <div class="flex justify-between items-center mb-4">
