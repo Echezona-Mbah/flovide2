@@ -19,8 +19,6 @@
 <body>
     <!-- navbar  -->
 
-
-
     @include('mainpage.navbar')
 
     <header class="">
