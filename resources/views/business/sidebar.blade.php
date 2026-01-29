@@ -59,7 +59,7 @@
             <i class="fas fa-wallet text-base"></i>
             {{ __('Customers') }}
         </a>
-
+{{-- 
         <!-- Invoices -->
         <a href="{{ route('invoices.index') }}"
            class="flex items-center gap-3 py-2 px-3 
@@ -106,7 +106,7 @@
             {{ request()->routeIs('donation.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice-dollar text-base"></i>
             {{ __('Donation') }}
-        </a>
+        </a> --}}
 
         <!-- Refunds -->
         <a href="{{ route('refunds.index') }}"
