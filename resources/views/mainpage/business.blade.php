@@ -502,10 +502,370 @@
         </button>
       </section>
 
-      <section class="max-w-7xl px-10">
-        <img src="{{asset('../asserts/country.svg')}}" alt="" class="hidden md:inline-block" />
-        <img src="{{asset('../asserts/world_countries_mobile.svg')}}" alt=" " class="md:hidden " />
-      </section>
+      <!-- <section class="max-w-7xl px-10"> -->
+        <!-- <img src="{{asset('../asserts/country.svg')}}" alt="" class="hidden md:inline-block" /> -->
+        <!-- <img src="{{asset('../asserts/world_countries_mobile.svg')}}" alt=" " class="md:hidden " /> -->
+        
+        <div class="max-w-7xl mx-auto px-4 py-10">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
+
+            <!-- Country Item -->
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/at.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/at.png" alt="Austria" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Austria
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="BEF" data-flag="https://flagcdn.com/w20/be.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/be.png" alt="Belgium" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Belgium
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="BGN" data-flag="https://flagcdn.com/w20/bg.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/bg.png" alt="Bulgaria" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Bulgaria
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="CAD" data-flag="https://flagcdn.com/w20/ca.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/ca.png" alt="Canada" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Canada
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+            
+            <a href="#exchange-calculator" data-currency="HRK" data-flag="https://flagcdn.com/w20/hr.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/hr.png" alt="Croatia" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Croatia
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/cy.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/cy.png" alt="Cyprus" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Cyprus
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="CZK" data-flag="https://flagcdn.com/w20/cz.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/cz.png" alt="Czech Republic" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Czech Republic
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="DKK" data-flag="https://flagcdn.com/w20/dk.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/dk.png" alt="Denmark" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Denmark
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EEK" data-flag="https://flagcdn.com/w20/ee.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/ee.png" alt="Estonia" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Estonia
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/ee.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/fi.png" alt="Finland" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Finland
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/fr.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/fr.png" alt="France" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                France
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/de.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/de.png" alt="Germany" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Germany
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/gi.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/gi.png" alt="Gibraltar" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Gibraltar
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/gr.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/gr.png" alt="Greece" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Greece
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/hu.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/hu.png" alt="Hungary" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Hungary
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/is.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/is.png" alt="Iceland" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Iceland
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/ie.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/ie.png" alt="Ireland" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Ireland
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/it.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/it.png" alt="Italy" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Italy
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/lv.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/lv.png" alt="Latvia" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Latvia
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/li.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/li.png" alt="Liechtenstein" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Liechtenstein
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/lt.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/lt.png" alt="Lithuania" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Lithuania
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/lu.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/lu.png" alt="Luxembourg" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Luxembourg
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/mt.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/mt.png" alt="Malta" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Malta
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/nl.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/nl.png" alt="Netherlands" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Netherlands
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/ng.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/ng.png" alt="Nigeria" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Nigeria
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/no.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/no.png" alt="Norway" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Norway
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/pl.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/pl.png" alt="Poland" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Poland
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/pt.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/pt.png" alt="Portugal" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Portugal
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/ro.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/ro.png" alt="Romania" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Romania
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/sk.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/sk.png" alt="Slovakia" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Slovakia
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/si.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/si.png" alt="Slovenia" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Slovenia
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="EUR" data-flag="https://flagcdn.com/w20/es.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/es.png" alt="Spain" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Spain
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="SEK" data-flag="https://flagcdn.com/w20/se.png" class=" country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/se.png" alt="Sweden" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                Sweden
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="GBP" data-flag="https://flagcdn.com/w20/gb.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/gb.png" alt="United Kingdom" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                United Kingdom
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+            <a href="#exchange-calculator" data-currency="USD" data-flag="https://flagcdn.com/w20/us.png" class="country-link flex flex-col items-center gap-2 group">
+              <img src="https://flagcdn.com/w80/us.png" alt="United States" class="w-14 h-14 rounded-full object-cover">
+              <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+                United States
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </span>
+            </a>
+
+
+          </div>
+        </div>
+
+      <!-- </section> -->
     </section>
 
     <!-- Our globe countries end-->
@@ -705,6 +1065,28 @@
   </main>
 
   @include('mainpage.script')
+
+
+  <script>
+    document.querySelectorAll('.country-link').forEach(link => {
+      link.addEventListener('click', () => {
+        const currency = link.dataset.currency;
+        const flag = link.dataset.flag;
+
+        // Target ONLY the "TO" currency selector
+        const toSelector = document.querySelector('.currency-selector[data-type="to"]');
+
+        if (!toSelector || !currency || !flag) return;
+
+        // Update flag and code
+        toSelector.querySelector('.flag').src = flag;
+        toSelector.querySelector('.code').textContent = currency;
+
+        // toSelector.dispatchEvent(new Event('change'));
+      });
+    });
+  </script>
+
 
 </body>
 
