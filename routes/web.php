@@ -42,6 +42,11 @@ Route::get('/careers', function () {
     return view('mainpage.careers', compact('jobs'));
 })->name('careers');
 
+//contact_us route
+Route::get('/contactUs', function () {
+    return view('mainpage.contactUs');
+})->name('contactUs');
+
 Route::get('/privacy-policy', function () {
     return view('mainpage.privacy-policy');
 })->name('privacy-policy');

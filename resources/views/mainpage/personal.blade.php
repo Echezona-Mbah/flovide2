@@ -57,7 +57,7 @@
             <a href="{{ route('careers')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Career') }}
             </a>
-            <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+            <a href="{{route('contactUs')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Contact Us') }}
             </a>
 {{-- 
@@ -690,10 +690,369 @@
         </button>
       </section>
 
-      <section class="max-w-7xl px-10">
+      <!-- <section class="max-w-7xl px-10">
         <img src="../asserts/country.svg" alt="" class="hidden md:inline-block" />
         <img src="../asserts/world_countries_mobile.svg" alt=" " class="md:hidden" />
-      </section>
+      </section> -->
+
+      <div class="max-w-7xl mx-auto px-4 py-10">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
+
+          <!-- Country Item -->
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/at.png" alt="Austria" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Austria
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/be.png" alt="Belgium" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Belgium
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/bg.png" alt="Bulgaria" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Bulgaria
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/ca.png" alt="Canada" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Canada
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+          
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/hr.png" alt="Croatia" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Croatia
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/cy.png" alt="Cyprus" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Cyprus
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/cz.png" alt="Czech Republic" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Czech Republic
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/dk.png" alt="Denmark" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Denmark
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/ee.png" alt="Estonia" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Estonia
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/fi.png" alt="Finland" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Finland
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/fr.png" alt="France" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              France
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/de.png" alt="Germany" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Germany
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/gi.png" alt="Gibraltar" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Gibraltar
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/gr.png" alt="Greece" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Greece
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/hu.png" alt="Hungary" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Hungary
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/is.png" alt="Iceland" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Iceland
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/ie.png" alt="Ireland" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Ireland
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/it.png" alt="Italy" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Italy
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/lv.png" alt="Latvia" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Latvia
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/li.png" alt="Liechtenstein" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Liechtenstein
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/lt.png" alt="Lithuania" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Lithuania
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/lu.png" alt="Luxembourg" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Luxembourg
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/mt.png" alt="Malta" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Malta
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/nl.png" alt="Netherlands" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Netherlands
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/ng.png" alt="Nigeria" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Nigeria
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/no.png" alt="Norway" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Norway
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/pl.png" alt="Poland" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Poland
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/pt.png" alt="Portugal" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Portugal
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/ro.png" alt="Romania" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Romania
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/sk.png" alt="Slovakia" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Slovakia
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/si.png" alt="Slovenia" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Slovenia
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/es.png" alt="Spain" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Spain
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/se.png" alt="Sweden" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              Sweden
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/gb.png" alt="United Kingdom" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              United Kingdom
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+            <img src="https://flagcdn.com/w80/us.png" alt="United States" class="w-14 h-14 rounded-full object-cover">
+            <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
+              United States
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </span>
+          </a>
+
+
+        </div>
+      </div>
     </section>
 
     <!-- Our globe countries end-->
