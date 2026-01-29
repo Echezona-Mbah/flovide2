@@ -120,14 +120,43 @@
     </div> --}}
 
   <!-- Social Icons -->
-  <div class="flex justify-center gap-4 mb-6">
-    <a href="https://www.facebook.com/profile.php?id=61578341616934" class="text-gray-600 hover:text-black"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://x.com/flovide65209" class="text-gray-600 hover:text-black"><i class="fab fa-twitter"></i></a>
-    <a href="https://www.instagram.com/flo.vide/" class="text-gray-600 hover:text-black"><i class="fab fa-instagram"></i></a>
-    <a href="https://www.linkedin.com/company/108073528/" class="text-gray-600 hover:text-black"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.youtube.com/channel/UCnoCw_kCWnHsMIDJ3SwMwOw" class="text-gray-600 hover:text-black"><i class="fab fa-youtube"></i></a>
-    {{-- <a href="#" class="text-gray-600 hover:text-black"><i class="fab fa-telegram"></i></a> --}}
-  </div>
+<div class="flex justify-center gap-4 mb-6">
+  <a href="https://www.facebook.com/profile.php?id=61578341616934"
+     target="_blank"
+     wire:navigate="false"
+     class="text-gray-600 hover:text-black">
+     <i class="fab fa-facebook-f"></i>
+  </a>
+
+  <a href="https://x.com/flovide65209"
+     target="_blank"
+     wire:navigate="false"
+     class="text-gray-600 hover:text-black">
+     <i class="fab fa-twitter"></i>
+  </a>
+
+  <a href="https://www.instagram.com/flo.vide/"
+     target="_blank"
+     wire:navigate="false"
+     class="text-gray-600 hover:text-black">
+     <i class="fab fa-instagram"></i>
+  </a>
+
+  <a href="https://www.linkedin.com/company/108073528/"
+     target="_blank"
+     wire:navigate="false"
+     class="text-gray-600 hover:text-black">
+     <i class="fab fa-linkedin-in"></i>
+  </a>
+
+  <a href="https://www.youtube.com/channel/UCnoCw_kCWnHsMIDJ3SwMwOw"
+     target="_blank"
+     wire:navigate="false"
+     class="text-gray-600 hover:text-black">
+     <i class="fab fa-youtube"></i>
+  </a>
+</div>
+
 
   <!-- Compliance Text -->
   <div class="max-w-4xl mx-auto text-xs text-gray-500 leading-relaxed space-y-3">
