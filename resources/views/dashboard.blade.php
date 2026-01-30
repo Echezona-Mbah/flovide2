@@ -174,7 +174,7 @@
                                     <div class="bg-white border border-gray-200 rounded-xl p-5">
                                         <!-- Header -->
                                         <div class="flex justify-between items-center mb-4">
-                                            <h3 class="font-semibold text-lg">Exchange Rate Calculator</h3>
+                                            <h3 class="font-semibold text-lg">Exchange Rate</h3>
                                             <span id="rateText" class="text-sm text-gray-500">Loading...</span>
                                         </div>
 
