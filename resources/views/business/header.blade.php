@@ -1,29 +1,57 @@
-    <!-- Mobile menu button -->
-    <header class="bg-[#E9E9E9] p-4 flex items-center justify-between md:hidden">
-        <button aria-label="Open sidebar" id="openSidebarBtn" class="text-[#1E1E1E] focus:outline-none">
-            <i class="fas fa-bars text-2xl"></i>
+<header class="bg-blue-100 p-4 flex items-center justify-between md:hidden">
+    <!-- Sidebar toggle -->
+    <button aria-label="Open sidebar" id="openSidebarBtn" class="text-[#1E1E1E] focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+    </button>
+
+    <!-- User profile + greeting as clickable link -->
+    <a href="{{ url('/organization_setting') }}" class="flex items-center gap-3">
+        <img src="{{ auth()->user()->profile_picture ?? '../../asserts/dashboard/default-user.png' }}"
+            alt="{{ auth()->user()->business_name }}"
+            class="w-10 h-10 rounded-full object-cover border-2 border-gray-300" />
+        <span class="text-sm font-medium text-[#1E1E1E]">
+            Hi, {{ auth()->user()->business_name }}
+        </span>
+    </a>
+
+
+    <!-- Notifications + Logout aligned horizontally -->
+    <div class="flex items-center gap-2">
+        <!-- Notifications -->
+        <button id="notifyBtn_Mobile" aria-label="Notifications"
+                class="relative w-10 h-10 flex items-center justify-center bg-white rounded-full">
+            <i class="fas fa-bell text-[#4B4B4B] text-lg"></i>
+            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#00B37E]"></span>
         </button>
-        <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain" height="40" src="../../asserts/dashboard/admin-logo.svg" width="120" />
-        <div>
-            <button id="notifyBtn_Mobile" aria-label="Notifications" class="relative bg-white w-10 h-10 rounded-full flex items-center justify-center">
-                <i class="fas fa-bell text-[#4B4B4B] text-lg"></i>
-                <span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#00B37E]"></span>
+
+        <!-- Logout -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" aria-label="Logout"
+                    class="w-10 h-10 flex items-center justify-center bg-red-500 rounded-full hover:bg-red-600 transition">
+                <i class="fas fa-sign-out-alt text-white text-lg"></i>
             </button>
+        </form>
 
-            <div id="notificationBox_mobile" class="hidden flex flex-col items-center px-4 py-6 gap-4 isolate absolute top-16 right-1/2 transform translate-x-1/2 w-[90%] max-w-sm bg-white shadow-[0_4px_60px_5px_rgba(0,0,0,0.1)] rounded-[24px] z-50 transition-all duration-300">
-                <!-- Header -->
-                <div class="flex text-center justify-between border-b-2 w-full border-gray-100 pb-2">
-                    <h2 class="text-lg font-semibold">Notifications</h2>
-                    <button id="closeNotificationBtn_mobile" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-                </div>
-
-                <!-- Notification Content -->
-                <div id="notificationList_mobile" class="flex flex-col items-start px-4 gap-4 w-full max-h-80 overflow-y-auto">
-                    <!-- Loop goes here -->
-                </div>
+        <!-- Notification dropdown -->
+        <div id="notificationBox_mobile"
+             class="hidden absolute top-16 right-0 flex flex-col items-center px-4 py-6 gap-4 w-[90%] max-w-sm bg-white shadow-[0_4px_60px_5px_rgba(0,0,0,0.1)] rounded-[24px] z-50 transition-all duration-300">
+            <div class="flex justify-between w-full border-b-2 border-gray-100 pb-2">
+                <h2 class="text-lg font-semibold">Notifications</h2>
+                <button id="closeNotificationBtn_mobile" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+            </div>
+            <div id="notificationList_mobile" class="flex flex-col items-start px-4 gap-4 w-full max-h-80 overflow-y-auto">
+                <!-- Loop goes here -->
             </div>
         </div>
-    </header>
+    </div>
+</header>
+
+
+
+
+
+
 
 
     <!-- Add Moment JS -->
