@@ -1,6 +1,6 @@
 <!-- Sidebar -->
 <aside aria-label="Sidebar" id="sidebar"
-    class="fixed inset-y-0 left-0 z-30 w-64 bg-[#E9E9E9] flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex-shrink-0">
+    class="fixed inset-y-0 left-0 z-30 w-64 bg-blue-100 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex-shrink-0">
     
     <div class="flex items-center justify-between py-8 px-6 flex-shrink-0">
         <img alt="Flovide logo black text with circular orbit design" class="w-[120px] h-[40px] object-contain"
@@ -44,22 +44,32 @@
             {{ __('Transaction History') }}
         </a>
 
-        <!-- Beneficiaries -->
-        <a href="{{ route('beneficias') }}"
-           class="flex items-center gap-3 py-2 px-3 
-            {{ request()->routeIs('beneficias') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
-            <i class="fas fa-users text-base"></i>
-            {{ __('Beneficiaries') }}
-        </a>
+       <!-- Accounts Dropdown -->
+        <div class="space-y-1">
+            <button id="accountsDropdownBtn"
+                    class="flex items-center justify-between w-full py-2 px-3 hover:bg-white rounded-md cursor-pointer focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-users text-base"></i>
+                    Accounts
+                </div>
+                <i id="accountsChevron" class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
+            </button>
 
-        <!-- Customers -->
-        <a href="{{ route('customer') }}"
-           class="flex items-center gap-3 py-2 px-3 
-            {{ request()->routeIs('customer') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
-            <i class="fas fa-wallet text-base"></i>
-            {{ __('Customers') }}
-        </a>
-{{-- 
+            <div id="accountsDropdownMenu" class="hidden flex-col pl-10 space-y-1">
+                <a href="{{ route('beneficias') }}"
+                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                    <i class="fas fa-user-friends text-base"></i>
+                    Beneficiaries
+                </a>
+
+                <a href="{{ route('customer') }}"
+                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                    <i class="fas fa-wallet text-base"></i>
+                    Customers
+                </a>
+            </div>
+        </div>
+        {{-- 
         <!-- Invoices -->
         <a href="{{ route('invoices.index') }}"
            class="flex items-center gap-3 py-2 px-3 
@@ -140,21 +150,48 @@
             {{ __('Compliance') }}
         </a>
 
-        <!-- Webhooks -->
-        <a href="#"
-           class="flex items-center gap-3 py-2 px-3 
-            hover:bg-white rounded-md">
-            <i class="fas fa-code-branch text-base"></i>
-            {{ __('Webhooks') }}
-        </a>
+        <!-- Settings Dropdown -->
+        <div class="space-y-1">
+            <!-- Settings Button -->
+            <button id="settingsDropdownBtn"
+                    class="flex items-center justify-between w-full py-2 px-3 hover:bg-white rounded-md cursor-pointer focus:outline-none">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-cog text-base"></i>
+                    Settings
+                </div>
+                <i id="settingsChevron" class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
+            </button>
 
-        <!-- Your Organization -->
-        <a href="{{ route('organization') }}"
-           class="flex items-center gap-3 py-2 px-3 
-            {{ request()->routeIs('organization') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
-            <i class="fas fa-building text-base"></i>
-            {{ __('Your organization') }}
-        </a>
+            <!-- Dropdown Items -->
+            <div id="settingsDropdownMenu" class="hidden flex-col pl-10 space-y-1">
+                <a href="#"
+                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                    <i class="fas fa-code-branch text-base"></i>
+                    Webhooks
+                </a>
+
+                <a href="{{ route('organization') }}"
+                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                    <i class="fas fa-building text-base"></i>
+                    Organization
+                </a>
+            </div>
+        </div>
+
+
+        <!-- Logout Form Styled as Sidebar Nav -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                class="flex items-center gap-3 py-2 px-3 mt-5 bg-red-500 text-white rounded-full w-full hover:bg-red-600 transition"
+                aria-label="Logout">
+                <i class="fas fa-sign-out-alt text-base"></i>
+                Logout
+            </button>
+        </form>
+
+
+
 
     </nav>
 
@@ -186,6 +223,23 @@
             </ul>
         </div>
     </div>
+
+
+    <script>
+    function setupDropdown(buttonId, menuId, chevronId) {
+        const btn = document.getElementById(buttonId);
+        const menu = document.getElementById(menuId);
+        const chevron = document.getElementById(chevronId);
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        });
+    }
+
+    setupDropdown('accountsDropdownBtn', 'accountsDropdownMenu', 'accountsChevron');
+    setupDropdown('settingsDropdownBtn', 'settingsDropdownMenu', 'settingsChevron');
+</script>
 
     <script>
         function toggleLang_sidebar() {
