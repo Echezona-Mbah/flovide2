@@ -48,7 +48,7 @@
                         <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
                             {{ __('Developer') }}
                         </a>
-                        <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+                        <a href="{{ route('blog') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
                             {{ __('Blog') }}
                         </a>
                         <a href="{{route('contactUs')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
