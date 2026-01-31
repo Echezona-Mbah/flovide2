@@ -12,7 +12,7 @@
     <!-- Overlay -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
     <!-- Main content -->
-    <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
+    <main class=" flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
                 {{ __('Dashboard') }}
@@ -20,41 +20,41 @@
             @include('business.header_notifical')   
         </header>
         <section class=" relative w-full">
-@if (!auth()->user()->isFullyVerified())
-  <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
-    
-    <!-- soft background accent -->
-    <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
+        @if (!auth()->user()->isFullyVerified())
+        <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
+            
+            <!-- soft background accent -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
 
-    <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      
-      <!-- Left content -->
-      <div class="flex items-start gap-3">
-        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
-          <i class="fas fa-shield-alt text-lg"></i>
+            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            
+            <!-- Left content -->
+            <div class="flex items-start gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
+                <i class="fas fa-shield-alt text-lg"></i>
+                </div>
+
+                <div>
+                <h4 class="text-sm font-semibold text-yellow-900">
+                    Account verification required
+                </h4>
+                <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
+                    For your safety and compliance, some features are temporarily unavailable.
+                    Please complete your verification to unlock full access.
+                </p>
+                </div>
+            </div>
+
+            <!-- Action button -->
+            <a href="{{ url('/compliance') }}"
+                class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
+                <i class="fas fa-arrow-right"></i>
+                Complete Verification
+            </a>
+
+            </div>
         </div>
-
-        <div>
-          <h4 class="text-sm font-semibold text-yellow-900">
-            Account verification required
-          </h4>
-          <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
-            For your safety and compliance, some features are temporarily unavailable.
-            Please complete your verification to unlock full access.
-          </p>
-        </div>
-      </div>
-
-      <!-- Action button -->
-      <a href="{{ url('/compliance') }}"
-         class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
-        <i class="fas fa-arrow-right"></i>
-        Complete Verification
-      </a>
-
-    </div>
-  </div>
-@endif
+        @endif
 
 
 
@@ -63,9 +63,10 @@
                 <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full mb-10 gap-6 md:gap-0">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full mb-10 gap-4">
+
                                 <!-- Balance Info -->
-                                <div>
+                                <div class="mb-4 md:mb-0">
                                     <p class="text-gray-500 text-sm mb-1">{{ __('Total Balance') }}</p>
                                     <h1 class="font-extrabold text-2xl md:text-xl">
                                         {{-- {{ $balance }}{{ number_format($balance) }} --}}
@@ -73,25 +74,32 @@
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="flex flex-wrap md:flex-row mt-4 md:mt-0 gap-4 md:gap-2">
-                                    <a href="{{ route('send') }}">
-                                        <button class="flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm md:text-sm font-medium hover:bg-blue-200 transition">
+                                <div class="flex flex-wrap justify-start gap-3 md:gap-2 w-full md:w-auto">
+                                    <a href="{{ route('send') }}" class="flex-1 md:flex-none">
+                                        <button class="w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm font-medium hover:bg-blue-200 transition">
                                             <i class="fas fa-file-invoice text-xs"></i>
                                             {{ __('Send Money') }}
                                         </button>
                                     </a>
 
-                                    <button class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
+                                    <button class="flex-1 md:flex-none w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-gray-900 text-sm font-medium hover:bg-gray-50 transition">
                                         <i class="fas fa-cube text-xs"></i>
                                         {{ __('Exchange') }}
                                     </button>
 
-                                    <a href="{{ route('add_money') }}" class="flex items-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium transition {{ request()->routeIs('add_money') ? 'bg-gray-100 text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-50' }}">
-                                        <i class="far fa-file-alt text-xs"></i>
-                                        {{ __('Add Money') }}
+                                    <a href="{{ route('add_money') }}" class="flex-1 md:flex-none w-full md:w-auto">
+                                        <button class="w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium transition
+                                            {{ request()->routeIs('add_money')
+                                                ? 'bg-gray-100 text-gray-900'
+                                                : 'bg-white text-gray-900 hover:bg-gray-50' }}">
+                                            <i class="far fa-file-alt text-xs"></i>
+                                            {{ __('Add Money') }}
+                                        </button>
                                     </a>
                                 </div>
                             </div>
+
+
 
                             {{-- @php
                             $showMore = count($balance) > 0;
@@ -107,116 +115,66 @@
                                     </a>
                             </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
+                            <div
+                                class="flex gap-4 overflow-x-auto pb-2
+                                    sm:grid sm:grid-cols-2
+                                    lg:grid-cols-5
+                                    sm:overflow-visible">
 
-                        {{-- Default balance from users table --}}
-                        {{-- <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
-                            <div class="flex items-center gap-2 mb-3">
-                                <img 
-                                    src="https://flagcdn.com/w20/{{ strtolower($flagCountry) }}.png" 
-                                    alt="Flag of {{ strtoupper($flagCountry) }}"
-                                    width="20" height="15" class="rounded-sm"
-                                />
-                                <span class="text-sm font-medium uppercase">{{ $defaultCurrency }}</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">Main Wallet</p>
-                                <p class="font-semibold text-lg">
-                                    {{ $currencySymbol }}{{ number_format($defaultBalance, 2) }}
-                                </p>
-                            </div>
-                        </div> --}}
+                                @foreach($balances as $balance)
+                                    <div
+                                        class="min-w-[260px] sm:min-w-0
+                                            border border-gray-200 rounded-xl p-5
+                                            bg-white shadow-sm
+                                            hover:shadow-md transition">
 
-                        {{-- Loop through balances table --}}
-                        @foreach($balances as $balance)
-                            <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
-                                <div class="flex items-center gap-2 mb-3">
-                                   <img 
-                                        src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png" 
-                                        alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
-                                        width="20" height="15" class="rounded-sm"
-                                    />
-
-                                    <span class="text-sm font-medium uppercase">{{ $balance->currency }}</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 mb-1">{{ $balance->name }}</p>
-                                    <p class="font-semibold text-lg">
-                                        {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endforeach
-
-                    </div>
-
-
-
-
-
-                        
-                            {{-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-                                @foreach(collect($balances)->take(5) as $balance)
-                                    <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
+                                        <!-- HEADER -->
                                         <div class="flex items-center gap-2 mb-3">
-                                            <img 
-                                                src="https://flagcdn.com/w20/{{ strtolower($balance['country']) }}.png" 
-                                                alt="Flag of {{ strtoupper($balance['country']) }}"
-                                                width="20" height="15" class="rounded-sm"
+                                            <img
+                                                src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
+                                                alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
+                                                width="20" height="15"
+                                                class="rounded-sm"
                                             />
-                                            <span class="text-sm">{{ $balance['currency'] }}</span>
+                                            <span class="text-sm font-semibold uppercase tracking-wide">
+                                                {{ $balance->currency }}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-gray-400 mb-1">Balance</p>
-                                            <p class="font-semibold text-lg">
-                                                {{ $balance['symbol'] }}{{ number_format($balance['balance'], 2) }}
-                                            </p>
-                                        </div>
+
+                                        <!-- BODY -->
+                                        <p class="text-xs text-gray-400 mb-1">
+                                            {{ $balance->name }}
+                                        </p>
+
+                                        <p class="text-xl font-bold text-gray-900">
+                                            {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
+                                        </p>
+
                                     </div>
                                 @endforeach
-                            </div> --}}
+
+                            </div>
+
+
+
+
+
+
+
+
+                    
                         </section>
                         
                         
 
                             <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <div class="flex items-center justify-between mb-5">
-                                        <h3 class="font-semibold text-lg">{{ __('Transactions') }}</h3>
-                                        <button
-                                            class="flex items-center gap-1 text-gray-700 text-sm font-semibold hover:text-gray-900">
-                                            {{ __('See All') }}
-                                            <i class="fas fa-arrow-up-right-from-square text-xs"></i>
-                                        </button>
-                                    </div>
-                                    <div class="space-y-3 bg-gray-50 rounded-xl p-4 md:p-6 max-w-full overflow-x-auto">
-                                        @forelse ($transactions as $tx)
-                                        <div class="flex items-center justify-between bg-white rounded-lg p-3 md:p-4">
-                                            <div class="flex items-center gap-3">
-                                                <div
-                                                    class="flex items-center justify-center w-10 h-10 rounded-lg 
-                                                    {{ $tx->transaction_type === 'payment' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
-                                                    <i class="fas {{ $tx->transaction_type === 'payment' ? 'fa-arrow-up-right' : 'fa-arrow-down-left' }}"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-medium">{{ $tx->sender ?? 'No name' }}</p>
-                                                    <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($tx->created_at)->format('M j, Y') }}</p>
-                                                </div>
-                                            </div>
-                                            <p class="font-semibold text-sm md:text-base">{{ number_format($tx->amount, 2) }} {{ $tx->currency }}</p>
-                                        </div>
-                                        @empty
-                                        <p class="text-gray-400">{{ __('No transactions yet.') }}</p>
-                                        @endforelse
-                                    </div>
-                                    
-                                </div>
 
+                                
                                 <div>
                                     <div class="bg-white border border-gray-200 rounded-xl p-5">
                                         <!-- Header -->
                                         <div class="flex justify-between items-center mb-4">
-                                            <h3 class="font-semibold text-lg">Exchange Rate Calculator</h3>
+                                            <h3 class="font-semibold text-lg">Exchange Rate</h3>
                                             <span id="rateText" class="text-sm text-gray-500">Loading...</span>
                                         </div>
 
@@ -282,6 +240,41 @@
                                     </div>
 
                                 </div>
+
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-5">
+                                        <h3 class="font-semibold text-lg">{{ __('Transactions') }}</h3>
+                                        <button
+                                            class="flex items-center gap-1 text-gray-700 text-sm font-semibold hover:text-gray-900">
+                                            {{ __('See All') }}
+                                            <i class="fas fa-arrow-up-right-from-square text-xs"></i>
+                                        </button>
+                                    </div>
+                                    <div class="space-y-3 bg-gray-50 rounded-xl p-4 md:p-6 max-w-full overflow-x-auto">
+                                        @forelse ($transactions as $tx)
+                                        <div class="flex items-center justify-between bg-white rounded-lg p-3 md:p-4">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                    {{ $tx->transaction_type === 'payment' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
+                                                    <i class="fas {{ $tx->transaction_type === 'payment' ? 'fa-arrow-up-right' : 'fa-arrow-down-left' }}"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium">{{ $tx->sender ?? 'No name' }}</p>
+                                                    <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($tx->created_at)->format('M j, Y') }}</p>
+                                                </div>
+                                            </div>
+                                            <p class="font-semibold text-sm md:text-base">{{ number_format($tx->amount, 2) }} {{ $tx->currency }}</p>
+                                        </div>
+                                        @empty
+                                        <p class="text-gray-400">{{ __('No transactions yet.') }}</p>
+                                        @endforelse
+                                    </div>
+                                    
+                                </div>
+
+
                             </section>
                         </div>
                     </section>
