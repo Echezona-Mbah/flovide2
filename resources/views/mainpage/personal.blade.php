@@ -51,7 +51,7 @@
             <a href="{{ url('/Coming') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Developer') }}
             </a>
-            <a href="{{ url('/Coming') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+            <a href="{{ route('blog') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Blog') }}
             </a>
             <a href="{{ route('careers')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
@@ -699,7 +699,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
 
           <!-- Country Item -->
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-Austria') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/at.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/at.png" alt="Austria" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Austria
@@ -709,7 +709,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-belgium') }}" data-currency="BEF" data-flag="https://flagcdn.com/w20/be.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/be.png" alt="Belgium" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Belgium
@@ -719,7 +719,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-bulgaria') }}" data-currency="BGN" data-flag="https://flagcdn.com/w20/bg.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/bg.png" alt="Bulgaria" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Bulgaria
@@ -729,7 +729,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-canada') }}" data-currency="CAD" data-flag="https://flagcdn.com/w20/ca.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/ca.png" alt="Canada" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Canada
@@ -739,7 +739,7 @@
             </span>
           </a>
           
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-croatia') }}" data-currency="HRK" data-flag="https://flagcdn.com/w20/hr.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/hr.png" alt="Croatia" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Croatia
@@ -749,7 +749,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-cyprus') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/cy.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/cy.png" alt="Cyprus" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Cyprus
@@ -759,7 +759,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-czech-republic') }}" data-currency="CZK" data-flag="https://flagcdn.com/w20/cz.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/cz.png" alt="Czech Republic" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Czech Republic
@@ -769,7 +769,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-denmark') }}" data-currency="DKK" data-flag="https://flagcdn.com/w20/dk.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/dk.png" alt="Denmark" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Denmark
@@ -779,7 +779,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-estonia') }}" data-currency="EEK" data-flag="https://flagcdn.com/w20/ee.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/ee.png" alt="Estonia" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Estonia
@@ -790,7 +790,7 @@
           </a>
 
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-finland') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/ee.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/fi.png" alt="Finland" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Finland
@@ -800,7 +800,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-france') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/fr.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/fr.png" alt="France" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               France
@@ -810,7 +810,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-germany') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/de.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/de.png" alt="Germany" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Germany
@@ -820,7 +820,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-gibraltar') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/gi.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/gi.png" alt="Gibraltar" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Gibraltar
@@ -830,7 +830,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-greece') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/gr.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/gr.png" alt="Greece" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Greece
@@ -840,7 +840,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-hungary') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/hu.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/hu.png" alt="Hungary" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Hungary
@@ -850,7 +850,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-iceland') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/is.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/is.png" alt="Iceland" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Iceland
@@ -860,7 +860,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-ireland') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/ie.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/ie.png" alt="Ireland" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Ireland
@@ -870,7 +870,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-italy') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/it.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/it.png" alt="Italy" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Italy
@@ -880,7 +880,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-latvia') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/lv.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/lv.png" alt="Latvia" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Latvia
@@ -890,7 +890,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-liechtenstein') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/li.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/li.png" alt="Liechtenstein" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Liechtenstein
@@ -900,7 +900,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-lithuania') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/lt.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/lt.png" alt="Lithuania" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Lithuania
@@ -910,7 +910,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-luxembourg') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/lu.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/lu.png" alt="Luxembourg" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Luxembourg
@@ -920,7 +920,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-malta') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/mt.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/mt.png" alt="Malta" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Malta
@@ -930,7 +930,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-netherlands') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/nl.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/nl.png" alt="Netherlands" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Netherlands
@@ -940,7 +940,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-nigeria') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/ng.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/ng.png" alt="Nigeria" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Nigeria
@@ -950,7 +950,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-norway') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/no.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/no.png" alt="Norway" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Norway
@@ -960,7 +960,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-poland') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/pl.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/pl.png" alt="Poland" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Poland
@@ -970,7 +970,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-portugal') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/pt.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/pt.png" alt="Portugal" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Portugal
@@ -980,7 +980,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-romania') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/ro.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/ro.png" alt="Romania" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Romania
@@ -990,7 +990,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-slovakia') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/sk.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/sk.png" alt="Slovakia" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Slovakia
@@ -1000,7 +1000,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-slovenia') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/si.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/si.png" alt="Slovenia" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Slovenia
@@ -1010,7 +1010,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-spain') }}" data-currency="EUR" data-flag="https://flagcdn.com/w20/es.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/es.png" alt="Spain" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Spain
@@ -1020,7 +1020,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-sweden') }}" data-currency="SEK" data-flag="https://flagcdn.com/w20/se.png" class=" country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/se.png" alt="Sweden" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               Sweden
@@ -1030,7 +1030,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-united-kingdom') }}" data-currency="GBP" data-flag="https://flagcdn.com/w20/gb.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/gb.png" alt="United Kingdom" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               United Kingdom
@@ -1040,7 +1040,7 @@
             </span>
           </a>
 
-          <a href="{{ route('business') }}" class="flex flex-col items-center gap-2 group">
+          <a href="{{ route('send-money', 'send-money-to-united-states') }}" data-currency="USD" data-flag="https://flagcdn.com/w20/us.png" class="country-link flex flex-col items-center gap-2 group">
             <img src="https://flagcdn.com/w80/us.png" alt="United States" class="w-14 h-14 rounded-full object-cover">
             <span class="flex items-center gap-1 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 group-hover:bg-gray-50">
               United States
@@ -1049,7 +1049,6 @@
               </svg>
             </span>
           </a>
-
 
         </div>
       </div>
