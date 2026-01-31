@@ -59,6 +59,10 @@ Route::get('/deletion', function () {
 })->name('deletion');
 
 
+Route::get('/Coming', function () {
+    return view('mainpage.comesoon');
+})->name('Coming');
+
 
 Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $request) {
     $helper = new class {
