@@ -9,6 +9,7 @@ use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\SendMoneyHomePageController;
+use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
 use App\Models\Career;
 use Illuminate\Support\Facades\Route;
@@ -54,9 +55,12 @@ Route::get('/privacy-policy', function () {
 
 Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
 
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+
 Route::get('/deletion', function () {
     return view('mainpage.deletion');
 })->name('deletion');
+
 
 
 Route::get('/Coming', function () {
