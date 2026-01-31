@@ -16,6 +16,7 @@
 
 
     <!-- Notifications + Logout aligned horizontally -->
+    <!-- Notifications + Logout aligned horizontally -->
     <div class="flex items-center gap-2">
         <!-- Notifications -->
         <button id="notifyBtn_Mobile" aria-label="Notifications"
@@ -24,27 +25,17 @@
             <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#00B37E]"></span>
         </button>
 
-        <!-- Logout -->
-        <form method="POST" action="{{ route('logout') }}">
+        <!-- Logout (perfectly aligned) -->
+        <form method="POST" action="{{ route('logout') }}"
+            class="flex items-center m-0 p-0">
             @csrf
             <button type="submit" aria-label="Logout"
                     class="w-10 h-10 flex items-center justify-center bg-red-500 rounded-full hover:bg-red-600 transition">
                 <i class="fas fa-sign-out-alt text-white text-lg"></i>
             </button>
         </form>
-
-        <!-- Notification dropdown -->
-        <div id="notificationBox_mobile"
-             class="hidden absolute top-16 right-0 flex flex-col items-center px-4 py-6 gap-4 w-[90%] max-w-sm bg-white shadow-[0_4px_60px_5px_rgba(0,0,0,0.1)] rounded-[24px] z-50 transition-all duration-300">
-            <div class="flex justify-between w-full border-b-2 border-gray-100 pb-2">
-                <h2 class="text-lg font-semibold">Notifications</h2>
-                <button id="closeNotificationBtn_mobile" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-            </div>
-            <div id="notificationList_mobile" class="flex flex-col items-start px-4 gap-4 w-full max-h-80 overflow-y-auto">
-                <!-- Loop goes here -->
-            </div>
-        </div>
     </div>
+
 </header>
 
 
