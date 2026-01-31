@@ -233,6 +233,16 @@
                                         </button>
                                     </section>
                                 </form>
+
+                                    <!-- Login Link -->  
+                                    <br><br>
+                                <div class="mt-12 ">
+                                    <span class="text-gray-600 mb-3 text-lg">{{ __('Have an account?') }}</span>
+                                    <a href="{{ route('login') }}" 
+                                    class="w-[12em] rounded-full px-6 py-4 bg-blue-600 text-white text-center font-semibold hover:bg-blue-700 transition-shadow shadow-md w-[10em] rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]">
+                                        {{ __('Click here to login') }}
+                                    </a>
+                                </div>
                             </section>
                             
                             
