@@ -30,49 +30,54 @@
 
       <section class="grid grid-cols-1 gap-y-10  md:grid-cols-3 md:w-[50vw]">
         <div>
-          <h4 class="font-semibold mb-4">{{ __('Quick Links') }}</h4>
-          <ul class="space-y-2 text-gray-600 text-sm">
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Blog and news') }}</a>
-            </li>
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Mobile app') }}</a>
-            </li>
-            <li>
-              <a href="{{ route('careers') }}" class="hover:text-gray-900">{{ __('Careers') }}</a>
-            </li>
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Why choose us?') }}</a>
-            </li>
-            <li>
-                <a href="{{ url('/business#plans') }}" class="hover:text-gray-900">
-                    {{ __('Pricing plan') }}
-                </a>
-            </li>
-
-          </ul>
+            <h4 class="font-semibold mb-4">{{ __('Quick Links') }}</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Blog and news') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Mobile app') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('careers') }}" class="hover:text-gray-900">{{ __('Careers') }}</a>
+                </li>
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Why choose us?') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/business#plans') }}" class="hover:text-gray-900">{{ __('Pricing plan') }}</a>
+                </li>
+            </ul>
         </div>
 
         <div>
-          <h4 class="font-semibold mb-4">{{ __('Our Services') }}</h4>
-          <ul class="space-y-2 text-gray-600 text-sm">
-            {{-- <li>
-              <a href="#" class="hover:text-gray-900">Mobile banking</a>
-            </li> --}}
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Advanced security') }}</a>
-            </li>
-            {{-- <li>
-              <a href="#" class="hover:text-gray-900">Digital wallet</a>
-            </li> --}}
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Budgeting tools') }}</a>
-            </li>
-            <li>
-              <a href="#" class="hover:text-gray-900">{{ __('Making transactions') }}</a>
-            </li>
-          </ul>
+            <h4 class="font-semibold mb-4">{{ __('Our Services') }}</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Advanced security') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Budgeting tools') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
+                        {{ __('Making transactions') }}
+                    </a>
+                </li>
+            </ul>
         </div>
+
+
 
         <div>
           <h4 class="font-semibold mb-4">{{ __('Get In Touch') }}</h4>
@@ -107,49 +112,78 @@
       </div>
     </div>
     <!-- Regulatory & Social Section -->
-<div class="border-t border-gray-300 mt-10 pt-8 text-center px-6">
+    <div class="border-t border-gray-300 mt-10 pt-8 text-center px-6">
 
-    <!-- Left: Logo -->
-    <div class="flex items-center">
-      <img src="{{asset('../asserts/footerLogo.svg')}}" alt="OhentPay Logo" class="h-10">
+        <!-- Left: Logo -->
+        <div class="flex items-center">
+          <img src="{{asset('../asserts/footerLogo.svg')}}" alt="OhentPay Logo" class="h-10">
+        </div>
+
+        <!-- Right: Copyright -->
+        {{-- <div class="text-sm text-gray-600">
+          © OhentPay 2026
+        </div> --}}
+
+        <!-- Social Icons -->
+      <div class="flex justify-center gap-4 mb-6">
+        <a href="https://www.facebook.com/profile.php?id=61578341616934"
+          target="_blank"
+          wire:navigate="false"
+          class="text-gray-600 hover:text-black">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+
+        <a href="https://x.com/flovide65209"
+          target="_blank"
+          wire:navigate="false"
+          class="text-gray-600 hover:text-black">
+          <i class="fab fa-twitter"></i>
+        </a>
+
+        <a href="https://www.instagram.com/flo.vide/"
+          target="_blank"
+          wire:navigate="false"
+          class="text-gray-600 hover:text-black">
+          <i class="fab fa-instagram"></i>
+        </a>
+
+        <a href="https://www.linkedin.com/company/108073528/"
+          target="_blank"
+          wire:navigate="false"
+          class="text-gray-600 hover:text-black">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+
+        <a href="https://www.youtube.com/channel/UCnoCw_kCWnHsMIDJ3SwMwOw"
+          target="_blank"
+          wire:navigate="false"
+          class="text-gray-600 hover:text-black">
+          <i class="fab fa-youtube"></i>
+        </a>
+      </div>
+
+
+      <!-- Compliance Text -->
+      <div class="max-w-4xl mx-auto text-xs text-gray-500 leading-relaxed space-y-3">
+        <p>
+          Flovide is duly registered as a Money Services Business (MSB) with the Financial Transactions and Reports Analysis Centre of Canada (FINTRAC), in accordance with applicable Canadian anti-money laundering and counter-terrorist financing regulations, under registration number C100000869.
+        </p>
+        <p>
+                In the United States, Flovide is registered as a Money Services Business with the Financial Crimes Enforcement Network (FinCEN), a bureau of the U.S. Department of the Treasury, under registration number 31000301191487.
+
+        </p>
+        <!-- 3 Logos Horizontal -->
+        <div class="flex justify-center items-center gap-6 mb-6">
+            {{-- <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 1"> --}}
+            {{-- <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 2">
+            <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 3"> --}}
+        </div>
+
+        <!-- Space under logos -->
+        <div class="h-6"></div>
+
+      </div>
     </div>
-
-    <!-- Right: Copyright -->
-    {{-- <div class="text-sm text-gray-600">
-      © OhentPay 2026
-    </div> --}}
-
-  <!-- Social Icons -->
-  <div class="flex justify-center gap-4 mb-6">
-    <a href="https://www.facebook.com/profile.php?id=61578341616934" class="text-gray-600 hover:text-black"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://x.com/flovide65209" class="text-gray-600 hover:text-black"><i class="fab fa-twitter"></i></a>
-    <a href="https://www.instagram.com/flo.vide/" class="text-gray-600 hover:text-black"><i class="fab fa-instagram"></i></a>
-    <a href="https://www.linkedin.com/company/108073528/" class="text-gray-600 hover:text-black"><i class="fab fa-linkedin-in"></i></a>
-    <a href="https://www.youtube.com/channel/UCnoCw_kCWnHsMIDJ3SwMwOw" class="text-gray-600 hover:text-black"><i class="fab fa-youtube"></i></a>
-    {{-- <a href="#" class="text-gray-600 hover:text-black"><i class="fab fa-telegram"></i></a> --}}
-  </div>
-
-  <!-- Compliance Text -->
-  <div class="max-w-4xl mx-auto text-xs text-gray-500 leading-relaxed space-y-3">
-    <p>
-      Flovide is duly registered as a Money Services Business (MSB) with the Financial Transactions and Reports Analysis Centre of Canada (FINTRAC), in accordance with applicable Canadian anti-money laundering and counter-terrorist financing regulations, under registration number C100000869.
-    </p>
-    <p>
-            In the United States, Flovide is registered as a Money Services Business with the Financial Crimes Enforcement Network (FinCEN), a bureau of the U.S. Department of the Treasury, under registration number 31000301191487.
-
-    </p>
-    <!-- 3 Logos Horizontal -->
-    <div class="flex justify-center items-center gap-6 mb-6">
-        {{-- <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 1"> --}}
-        {{-- <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 2">
-        <img src="{{asset('../asserts/footerLogo.svg')}}" class="h-10" alt="Logo 3"> --}}
-    </div>
-
-    <!-- Space under logos -->
-    <div class="h-6"></div>
-
-  </div>
-</div>
 
   </section>
 

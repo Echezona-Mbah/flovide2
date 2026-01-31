@@ -48,10 +48,10 @@
             <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Business') }}
             </a>
-            <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+            <a href="{{ url('/Coming') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Developer') }}
             </a>
-            <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+            <a href="{{ url('/Coming') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Blog') }}
             </a>
             <a href="{{ route('careers')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
@@ -60,7 +60,7 @@
             <a href="{{route('contactUs')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
               {{ __('Contact Us') }}
             </a>
-{{-- 
+            {{-- 
             <button
               class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
               <a href="{{ route('login') }}" class=""> {{ __('Login') }} </a>
