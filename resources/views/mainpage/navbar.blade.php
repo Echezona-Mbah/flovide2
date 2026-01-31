@@ -22,13 +22,13 @@
       </li>
       <li>
         <a class="{{ Route::currentRouteName() === 'developer' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
-          href="">
+          href="{{ url('/Coming') }}">
           {{ __('Developer') }}
         </a>
       </li>
       <li>
         <a class="{{ Route::currentRouteName() === 'blog' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
-          href="">
+          href="{{ url('/Coming') }}">
           {{ __('Blog') }}
         </a>
       </li>
