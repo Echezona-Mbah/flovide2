@@ -119,17 +119,18 @@
 
                                     <section class="flex gap-4 flex-col">
                                         <p>{{ __('Don’t have an account?') }}<a href="register" style="color: rgb(86, 86, 222)">{{ __('Click here to register') }}</a></p>
-                                        <div class="flex items-center">
+                                        <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank" class="flex items-center gap-2">
                                             <p><span class="text-[#215F9C]">{{ __('Create personal account') }}</span></p>
                                             <img src="../asserts/icons/share.svg" alt="" class="w-5 h-5 text-[#215F9C]">
-                                            <span
-                                                class="text-[#215F9C]  bg-[#D6E7F5] px-2 py-1 text-sm  rounded-full"><i
-                                                    class="fa fa-mobile px-1" aria-hidden="true"></i>{{ __('mobile') }}</span>
-                                        </div>
-                                        <div class="flex items-center">
+                                            <span class="text-[#215F9C] bg-[#D6E7F5] px-2 py-1 text-sm rounded-full">
+                                                <i class="fa fa-mobile px-1" aria-hidden="true"></i>{{ __('mobile') }}
+                                            </span>
+                                        </a>
+
+                                        {{-- <div class="flex items-center">
                                             <p><span class="text-[#215F9C]">{{ __('Create business account') }}</span></p>
                                             <img src="../asserts/icons/share.svg" alt="" class="w-5 h-5 text-[#215F9C]">
-                                        </div>
+                                        </div> --}}
                                     </section>
 
                                     <!-- sign up end-->
