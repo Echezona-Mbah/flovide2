@@ -21,81 +21,33 @@
 
     @include('mainpage.navbar')
 
-    <header class="">
-        <section class="bg-white md:hidden text-white" id="mobileMenuButton">
-            <!-- mobile menu -->
-            <section class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
-                <section class="flex justify-between items-center w-full">
+     <header class="">
+        <section class="bg-[#0F243D] text-white" id="mobileMenuButton">
+            <!-- Mobile Navbar -->
+            <section class="md:hidden px-4 py-3 border border-[#1E5186] rounded-2xl shadow-md">
+                <div class="flex justify-between items-center w-full">
                     <div>
-                        <img src="../asserts/mobileLogo2.png" alt="" style="width: 60px;" />
+                        <img src="../asserts/mobileLogo.svg" alt="Flovide Logo" class="h-8">
                     </div>
                     <div id="openSidebarBtn">
-                        <img src="../asserts/menu-icon2.png" alt="" style="width: 40px;" />
+                        <img src="../asserts/menu-icon.svg" alt="Menu Icon" class="h-6">
                     </div>
-                </section>
-            </section>
-            <!-- Mobile Dropdown Menu -->
-            <section class="md:hidden px-4 py-3 text-white w-full flex justify-center items-center">
-                <!-- Dropdown Content -->
-                <div id="mobileMenuContent" class="mt-2 absolute top-[15vh] left-0 right-0 w-full flex flex-col items-center justify-center z-50 hidden">
-                    <ul class="bg-[#1C3C5E] w-full rounded-2xl shadow-md p-4 text-[20px] font-medium space-y-6 ">
-                        <a href="{{ route('personal') }}" class="block px-4 py-2 text-white hover:bg-[#3B82F6] border border-[#3380C4] p-4 bg-[#1E5186] rounded-xl">
-                            {{ __('Personal') }}
-                        </a>
-                        <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            {{ __('Business') }}
-                        </a>
-                        <a href="#" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            {{ __('Developer') }}
-                        </a>
-                        <a href="{{ route('blog') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            {{ __('Blog') }}
-                        </a>
-                        <a href="{{route('contactUs')}}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
-                            {{ __('Contact Us') }}
-                        </a>
-
-                        <button
-                            class="text-center w-full px-4 py-2 text-white font-semibold hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-                            <a href="{{ route('login') }}" class=""> {{ __('Login') }} </a>
-                        </button>
-
-                        <button
-                            class="text-center w-full px-4 py-2 text-white font-semibold bg-[#1E5186] hover:bg-[#3B82F6] border border-[#3380C4] p-4 rounded-full">
-                            <a href="{{ route('register.saveStepData') }}" class=""> {{ __('Get Started') }} </a>
-                        </button>
-
-                        @php
-                            $flags = [
-                                'en' => 'gb.svg',
-                                'es' => 'es.svg',
-                                'fr' => 'fr.svg',
-                                'lg' => 'ug.svg',
-                            ];
-
-                            $currentLocale = app()->getLocale();
-                            $currentFlag = $flags[$currentLocale] ?? 'gb.svg';
-                        @endphp
-                        <div class="relative">
-                            <button onclick="toggleLang_mobile()" class="flex items-center space-x-2 border border-[#1D4ED8] rounded-full px-3 py-1 text-[#252525]">
-                                <span>{{ strtoupper(app()->getLocale()) }} </span>
-                                <img class="w-6 h-6 rounded-full object-cover" src="{{asset('../asserts/homepage/' . $currentFlag) }}" alt="Flag" />
-                                <i class="fas fa-chevron-down text-xs"></i>
-                            </button>
-
-                            <ul id="langMenu_mobile" class="absolute hidden bg-white shadow-md rounded-lg p-2 mt-2 right-0">
-                                <li><a href="{{ route('lang.switch', 'en') }}" class="block px-4 py-2 hover:bg-gray-100">English</a></li>
-                                <li><a href="{{ route('lang.switch', 'es') }}" class="block px-4 py-2 hover:bg-gray-100">Spanish</a></li>
-                                <li><a href="{{ route('lang.switch', 'fr') }}" class="block px-4 py-2 hover:bg-gray-100">French</a></li>
-                                <li><a href="{{ route('lang.switch', 'lg') }}" class="block px-4 py-2 hover:bg-gray-100">Luganda</a></li>
-                            </ul>
-                        </div>
-                    </ul>
                 </div>
             </section>
 
-
-            
+            <!-- Mobile Dropdown Menu -->
+            <section class="md:hidden px-4 py-3 w-full flex justify-center items-center">
+                <div id="mobileMenuContent" class="mt-2 absolute top-[15vh] left-0 right-0 w-full flex flex-col items-center justify-center z-50 hidden">
+                    <ul class="bg-[#1C3C5E] w-full rounded-2xl shadow-md p-4 text-[18px] font-medium space-y-4 text-white">
+                        <a href="{{ route('personal') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Personal</a>
+                        <a href="{{ route('business') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Business</a>
+                        <a href="{{ url('/Coming') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Developer</a>
+                        <a href="{{ route('blog') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Blog</a>
+                        <a href="{{ route('careers') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Career</a>
+                        <a href="{{ route('contactUs') }}" class="block px-4 py-2 rounded-lg hover:bg-[#3B82F6]">Contact Us</a>
+                    </ul>
+                </div>
+            </section>
         </section>
     </header>
     

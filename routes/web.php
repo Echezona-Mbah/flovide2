@@ -53,7 +53,6 @@ Route::get('/privacy-policy', function () {
     return view('mainpage.privacy-policy');
 })->name('privacy-policy');
 
-Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 
@@ -67,6 +66,9 @@ Route::get('/Coming', function () {
     return view('mainpage.comesoon');
 })->name('Coming');
 
+
+
+Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
 
 Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $request) {
     $helper = new class {

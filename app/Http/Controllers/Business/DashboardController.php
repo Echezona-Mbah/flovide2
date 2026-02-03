@@ -50,11 +50,12 @@ public function create()
     foreach ($currencyHelper->getAllCurrencies() as $code => $meta) {
         $allCurrencies[] = [
             'code' => $code,
-            'flag' => "https://flagcdn.com/w20/{$meta['country']}.png",
+            'flag' => "https://flagcdn.com/w20/{$meta['countrycode']}.png",
             'symbol' => $meta['symbol']
         ];
     }
 
+    // dd($allCurrencies);
     return view('dashboard', compact(
         'countries',
         'transactions',
