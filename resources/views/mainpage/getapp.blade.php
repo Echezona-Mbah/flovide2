@@ -28,11 +28,11 @@
                 >
                   <i class="fab fa-apple text-lg"></i> {{ __('Download for IOS') }}
                 </button>
-                <button
-                  class="flex items-center gap-2 bg-white text-gray-900 font-semibold rounded-full px-5 py-3 hover:bg-gray-100 transition"
-                >
-                  <i class="fab fa-google-play text-lg"></i> {{ __('Download for Android') }}
-                </button>
+                <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
+                  class="flex items-center gap-2 bg-white text-gray-900 font-semibold rounded-full px-5 py-3 hover:bg-gray-100 transition">
+                    <i class="fab fa-google-play text-lg"></i> {{ __('Download for Android') }}
+                </a>
+
               </div>
             </div>
             <div
