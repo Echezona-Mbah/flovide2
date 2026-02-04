@@ -45,6 +45,7 @@ use App\Http\Controllers\Business\NotificationController;
 use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\Business\WebhookController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -185,6 +186,9 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
     Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
     Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
+
+    //webhook
+    Route::get('/webhook', [WebhookController::class, 'index'])->name('webhook');
     
     //top-up your wallet
     Route::get('/top-up', function () {
