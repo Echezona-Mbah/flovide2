@@ -36,9 +36,7 @@
     <nav class="fixed top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <div class="flex items-center gap-8">
-                <a href="#" class="flex items-center gap-2">
-                    <!-- <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">N</div>
-                    <span class="text-xl font-bold tracking-tight text-slate-900">Flovide<span class="text-indigo-600">.</span></span> -->
+                <a href="{{ route('personal') }}" class="flex items-center gap-2">
                     <img src="{{asset('../asserts/homepage/Logo.png')}}" alt="Logo" />
                 </a>
                 <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
