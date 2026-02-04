@@ -153,8 +153,7 @@
         <!-- Settings Dropdown -->
         <div class="space-y-1">
             <!-- Settings Button -->
-            <button id="settingsDropdownBtn"
-                    class="flex items-center justify-between w-full py-2 px-3 hover:bg-white rounded-md cursor-pointer focus:outline-none">
+            <button id="settingsDropdownBtn" class="flex items-center justify-between w-full py-2 px-3 hover:bg-white rounded-md cursor-pointer focus:outline-none">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-cog text-base"></i>
                     Settings
@@ -164,16 +163,14 @@
 
             <!-- Dropdown Items -->
             <div id="settingsDropdownMenu" class="hidden flex-col pl-10 space-y-1">
-                <a href="#"
-                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                <a href="{{ route('webhook') }}" class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
                     <i class="fas fa-code-branch text-base"></i>
-                    Webhooks
+                    {{ __('Webhooks') }}
                 </a>
 
-                <a href="{{ route('organization') }}"
-                class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
+                <a href="{{ route('organization') }}"  class="flex items-center gap-3 py-2 px-3 hover:bg-white rounded-md">
                     <i class="fas fa-building text-base"></i>
-                    Organization
+                    {{ __('Organization') }}
                 </a>
             </div>
         </div>
@@ -182,9 +179,7 @@
         <!-- Logout Form Styled as Sidebar Nav -->
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit"
-                class="flex items-center gap-3 py-2 px-3 mt-5 bg-red-500 text-white rounded-full w-full hover:bg-red-600 transition"
-                aria-label="Logout">
+            <button type="submit"  class="flex items-center gap-3 py-2 px-3 mt-5 bg-red-500 text-white rounded-full w-full hover:bg-red-600 transition" aria-label="Logout">
                 <i class="fas fa-sign-out-alt text-base"></i>
                 Logout
             </button>
