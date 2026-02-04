@@ -11,6 +11,7 @@ use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\SendMoneyHomePageController;
 use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
+use App\Http\Controllers\MainPage\DeveloperController;
 use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -55,6 +56,7 @@ Route::get('/privacy-policy', function () {
 
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/developer', [DeveloperController::class, 'index'])->name('developer');
 
 Route::get('/deletion', function () {
     return view('mainpage.deletion');
