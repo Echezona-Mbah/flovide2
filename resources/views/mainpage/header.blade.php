@@ -25,7 +25,7 @@
           <a href="{{ route('business') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
             {{ __('Business') }}
           </a>
-          <a href="{{ url('/Coming') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
+          <a href="{{ route('developer') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
             {{ __('Developer') }}
           </a>
           <a href="{{ route('blog') }}" class="block px-4 py-2 text-white hover:bg-[#1E5186]">
