@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Models\Balance;
 use App\Models\Countries;
+use App\Models\ExchangeRate;
 use App\Models\TeamMembers;
 use App\Models\TransactionHistory;
 use Illuminate\Http\Request;
@@ -44,16 +45,23 @@ public function create()
         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
 
-       // Prepare all currencies for dropdown
-    $currencyHelper = new class { use CurrencyHelper; };
+  $exchangeRates = ExchangeRate::all();
+
     $allCurrencies = [];
-    foreach ($currencyHelper->getAllCurrencies() as $code => $meta) {
+
+    foreach ($exchangeRates as $rate) {
+
+        // convert country name to flag code (optional)
+        $countryCode = strtolower(substr($rate->currency_code, 0, 2));
+
         $allCurrencies[] = [
-            'code' => $code,
-            'flag' => "https://flagcdn.com/w20/{$meta['countrycode']}.png",
-            'symbol' => $meta['symbol']
+            'code' => $rate->currency_code,
+            'symbol' => $rate->currency_symbol ?? '',
+            'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
+            'rate' => $rate->rate
         ];
     }
+
 
     // dd($allCurrencies);
     return view('dashboard', compact(
