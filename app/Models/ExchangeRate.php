@@ -13,8 +13,9 @@ class ExchangeRate extends Model
 
 
 protected $fillable = [
-    'country_name',
+        'country_name',
         'currency_code',
+        'currency_symbol', 
         'rate',
         'transfer_fee'
     ];
