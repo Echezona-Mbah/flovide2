@@ -1,18 +1,34 @@
 <?php
 
+use App\Http\Controllers\Admin\AddAdminController;
+use App\Http\Controllers\Admin\AllAccountController;
+use App\Http\Controllers\Admin\AllBeneficiasController;
+use App\Http\Controllers\Admin\AllBillPaymentController;
+use App\Http\Controllers\Admin\AllChargebackController;
+use App\Http\Controllers\Admin\AllCustomersController;
+use App\Http\Controllers\Admin\AllDonationController;
+use App\Http\Controllers\Admin\AllInvoiceController;
+use App\Http\Controllers\Admin\AllPaymentController;
+use App\Http\Controllers\Admin\AllRefundController;
+use App\Http\Controllers\Admin\AllRemitaController;
+use App\Http\Controllers\Admin\AllSubaccountController;
+use App\Http\Controllers\Admin\AllSubscriptionController;
+use App\Http\Controllers\Admin\AllTeamMembersController;
+use App\Http\Controllers\Admin\BusinessAccountController;
+use App\Http\Controllers\Admin\CareerController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PersonalAccountController;
+use App\Http\Controllers\Admin\RegisterController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TransactionHistoryController as AdminTransactionHistoryController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\ForgetPasswordController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Business\AddBeneficiariesController;
 use App\Http\Controllers\Business\AddCustomerController;
+use App\Http\Controllers\Business\AddMoneyController;
 use App\Http\Controllers\Business\BillPaymentController;
 use App\Http\Controllers\Business\ChargebackController;
 use App\Http\Controllers\Business\ComplianceController;
@@ -22,10 +38,14 @@ use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\Business\refundsController;
 use App\Http\Controllers\Business\RemitaController;
+use App\Http\Controllers\Business\PaymentController;
+use App\Http\Controllers\Business\DonationController;
 use App\Http\Controllers\Business\CreateBankController;
+use App\Http\Controllers\Business\NotificationController;
 use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
+use App\Http\Controllers\Business\WebhookController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -71,8 +91,30 @@ Route::middleware('guest')->group(function () {
 
 });
 
+//payment checkout
+Route::get('/payment/paymentcheckout/{id}', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
+Route::post('/payment/paymentpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
+
+//donation checkout
+Route::get('/donation/donationcheckout/{id}', [DonationController::class, 'donationcheckout'])->name('donation.checkout');
+Route::post('/donation/donationpay', [DonationController::class, 'donationpay'])->name('donation.pay');
+
+//remita checkout
+Route::get('/remita/remitacheckout/{id}', [RemitaController::class, 'remitacheckout'])->name('remita.checkout');
+Route::post('/remita/remitapay', [RemitaController::class, 'remitapay'])->name('remita.pay');
+
+//invoice receipt link
+Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt'])->name('invoices.receipt');
+
+//Subscription checkout
+Route::get('/subscription/subscriptioncheckout/{id}', [SubscriptionController::class, 'subscriptioncheckout'])->name('subscription.checkout');
+Route::post('/subscription/subscriptionpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
+
+
 // HtmlMinifier::class
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','business.verified'])->group(function () {
+
+    
 
     Route::get('/verify_bvn', [RegisteredUserController::class, 'bvn'])->name('verify_bvn');
     Route::post('/verify_bvn', [RegisteredUserController::class, 'verifyBVN'])->name('bvn.verify.submit');
@@ -125,6 +167,37 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
     Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
     
+    //donations
+    Route::get('/donation', [DonationController::class, 'donationIndex'])->name('donation.index');
+    Route::get('/donation/create', [DonationController::class, 'donationCreate'])->name('donation.create');
+    Route::get('/donation/{id}/export', [DonationController::class, 'exportUserDonation'])->name('donation.export');
+    Route::get('/donation/edit/{id}', [DonationController::class, 'donationEdit'])->name('donation.edit');
+    Route::put('/donation/update/{id}', [DonationController::class, 'donationUpdate'])->name('donation.update');
+    Route::post('/donation/store', [DonationController::class, 'donationStore'])->name('donation.store');
+    Route::delete('/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
+
+
+    //payment
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+    Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
+    Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserPayments'])->name('payment.export');
+    Route::get('/payment/{id}/edit', [PaymentController::class, 'edit'])->name('payment.edit');
+    // Route::get('/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
+    Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
+    Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
+    Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
+
+    //webhook
+    Route::get('/webhook', [WebhookController::class, 'index'])->name('webhook');
+    
+    //top-up your wallet
+    Route::get('/top-up', function () {
+        return view('business.top_up_wallet');
+    })->name('top-up');
+
+    Route::get('/top-up-review', function () {
+        return view('business.top_up_review');
+    })->name('top-up-review');
 
 
     // beneficias
@@ -148,12 +221,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
     Route::get('/customer/search', [AddCustomerController::class, 'search'])->name('customer.search');
     Route::get('/customer/export-csv', [AddCustomerController::class, 'exportCsv'])->name('customer.export.csv');
+    Route::get('/fetch-banks', [AddCustomerController::class, 'fetchBanks'])->name('fetch.banks');
     //subscriptions
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions');
     Route::get('/add_subscription', [SubscriptionController::class, 'create'])->name('add_subscription.create');
     Route::post('/add_subscription', [SubscriptionController::class, 'store'])->name('add_subscription.store');
     Route::get('/subscriptions/{id}/edit', [SubscriptionController::class, 'edit'])->name('subscriptions.edit');
     Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
+    Route::get('/subscriptions/{id}/export', [SubscriptionController::class, 'exportSubscribers'])->name('subscriptions.export');
+
     /// Bill Payment
     Route::get('/bill_payment', [BillPaymentController::class, 'index'])->name('bill_payment');
     Route::post('/bill_payment', [BillPaymentController::class, 'store'])->name('billpayments.store');
@@ -187,7 +263,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Chargeback
     Route::get('/chargeback', [ChargebackController::class, 'index'])->name('chargeback');
-    Route::post('/chargeback/submitEvidence', [ChargeBackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
+    Route::post('/chargeback/submitEvidence', [ChargebackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
 
 
     //organization
@@ -195,33 +271,132 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/organization', [OrganizationController::class, 'store'])->name('team.store');
     Route::patch('/organization/{id}', [OrganizationController::class, 'updateRole'])->name('members.updateRole');
 
+
     Route::get('/organization_setting', [OrganizationController::class, 'indexsetting'])->name('organization_setting');
+    Route::post('/organization_setting', [OrganizationController::class, 'storesetting'])->name('organization_setting.store');
+
+    // Route::post('/update-password', [OrganizationController::class, 'storesetting'])->name('password.update');
     Route::get('/organization_plan', [OrganizationController::class, 'indexplan'])->name('organization_plan');
+
 
     Route::get('/compliance', [ComplianceController::class, 'index'])->name('compliance');
     Route::post('/compliance', [ComplianceController::class, 'store'])->name('compliance.store');
 
+    Route::get('/add_money', [AddMoneyController::class, 'index'])->name('add_money');
 
 
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    Route::get('/notifications', [NotificationController::class, 'index']);
 
 
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+
+
+
+
+    Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
+    Route::post('/admin/register', [RegisterController::class, 'store']);
+
+    Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
+    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit');
+
+    Route::middleware('admin.auth')->group(function () {
+        Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
+        Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
+
+        Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
+        Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
+        Route::post('/admin/business-account-status/{id}', [BusinessAccountController::class, 'updateStatus']);
+
+        Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
+        Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
+
+        Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
+        Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
+        Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
+        Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
+        Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
+        Route::get('/admin/allbillpayment', [AllBillPaymentController::class, 'index'])->name('admin.allbillpayment');
+
+        Route::get('/admin/donation', [AllDonationController::class, 'index'])->name('admin.donation');
+        Route::get('/admin/donation/{id}', [AllDonationController::class, 'show']);
+
+        Route::get('/admin/payment', [AllPaymentController::class, 'index'])->name('admin.payment');
+        Route::get('/admin/payment/{id}', [AllPaymentController::class, 'show']);
+
+        Route::get('/admin/remita', [AllRemitaController::class, 'index'])->name('admin.remita');
+        Route::get('/admin/remita/{id}', [AllRemitaController::class, 'show']);
+
+        Route::get('/admin/subscription', [AllSubscriptionController::class, 'index'])->name('admin.subscription');
+        Route::get('/admin/subscription/{id}', [AllSubscriptionController::class, 'show']);
+
+        Route::get('/admin/invoice', [AllInvoiceController::class, 'index'])->name('admin.invoice');
+        Route::get('/admin/invoice/{id}', [AllInvoiceController::class, 'show']);
+
+        Route::get('/admin/refund', [AllRefundController::class, 'index'])->name('admin.refund');
+
+        
+        Route::get('/admin/chargeback', [AllChargebackController::class, 'index'])->name('admin.chargeback');
+        Route::post('/admin/chargeback/{id}/update-status', [AllChargebackController::class, 'updateStatus'])->name('chargeback.updateStatus');
+        Route::post('/admin/chargeback/submitEvidence', [AllChargebackController::class, 'submitEvidence'])->name('admin.chargeback.submitEvidence');
+
+
+
+        Route::get('/admin/add_admin', [AddAdminController::class, 'index'])->name('admin.add_admin');
+        Route::post('/admin/add_admin', [AddAdminController::class, 'store'])->name('admin.add_admin.store');
+        Route::get('/admin/profile', [AddAdminController::class, 'indexprofile'])->name('admin.profile');
+        Route::post('/admin/profile', [AddAdminController::class, 'updateprofile'])->name('admin.profile.update');
+        Route::get('/admin/all_admin', [AddAdminController::class, 'indexadmin'])->name('admin.all_admin');
+        Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
+
+
+        Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
+        Route::get('/admin/exchangerate/{id}/edit', [SettingController::class, 'edit'])->name('admin.exchangerate.edit');
+        Route::put('/admin/exchangerate/{id}', [SettingController::class, 'update'])->name('admin.exchangerate.update');
+        Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
+        Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
+        Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
+
+
+        Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');
+        Route::post('/admin/career', [CareerController::class, 'store'])->name('admin.career.store');
+        Route::get('/admin/career-view', [CareerController::class, 'index'])->name('admin.career.index');
+        Route::delete('/admin/career-view/{id}',  [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
+        Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
+        Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+
+
+
+
+
+
+
+
+
+
+
+
+        Route::post('/admin/logout', [DashboardController::class, 'logout'])->name('admin.logout');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+

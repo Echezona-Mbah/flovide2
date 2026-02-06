@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\donations as donation;
 use Illuminate\Support\Str;
+use App\Models\Subaccount;
 
 class donationsController extends Controller
 {
@@ -54,6 +55,8 @@ class donationsController extends Controller
             'amount' => 'required|numeric|min:0',
             'currency' => 'nullable|string|max:10',
             'visibility' => 'nullable|in:public,private',
+            'percentage' => 'nullable|numeric|min:0|max:100',
+            'subaccount_id' => 'nullable|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -65,20 +68,48 @@ class donationsController extends Controller
                 ]
             ], 422);
         }
+
+        //get subaccount details with personal_id and subaccount_id
+        $subaccount = Subaccount::where('id', $request->input('subaccount_id'))
+            ->where('personal_id', $user->id)
+            ->first();
+        if (!$subaccount) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'status' => 'error',
+                        'message' => 'Invalid subaccount selected or unauthorised.'
+                    ]
+                ], 404);
+            }
+        }
+
         $path = null;
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('donation_cover_image', 'public');
         }
+
+        $donation_reference = $this->generateUniqueReference();
+        //get page_link
+        $pageLink = url('donation/donationcheckout/' . $donation_reference);
+
         // Create donation
         $donation = donation::create([
+            'user_id' => null,
             'personal_id' => $user->id,
             'cover_image' => $path,
             'title' => $request->title,
-            'donation_reference' => $this->generateUniqueReference(), // auto-generate unique reference
+            'donation_reference' => $donation_reference,
             'amount' => $request->amount,
             'currency' => $request->currency ?? 'NGN',
             'visibility' => $request->visibility ?? 'private',
+            'page_link' => $pageLink,
+            'percentage' => $request->percentage ?? null,
+            'subaccount_id' => $request->subaccount_id ?? null,
+            'subaccount' => $subaccount->bank_name ?? null,
+            'subaccount_name' => $subaccount->account_name ?? null,
+            'subaccount_number' => $subaccount->account_number ?? null,
         ]);
 
         return response()->json([
@@ -112,7 +143,9 @@ class donationsController extends Controller
             'title' => 'nullable|string|max:255',
             'amount' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:10',
-            'visibility' => 'nullable|in:public,private'
+            'visibility' => 'nullable|in:public,private',
+            'subaccount_id' => 'nullable|exists:subaccounts,id',
+            'percentage' => 'nullable|numeric|min:0|max:100',
         ]);
 
         if ($validator->fails()) {

@@ -89,7 +89,7 @@ class addBankAccountController extends Controller
             $rules['state'] = 'required|string|max:255';
             $rules['zipcode'] = 'required|string|max:20';
         }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
-            $rules['bank_id'] = 'required|string|max:20';
+            $rules['bank_code'] = 'required|string|max:20';
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -150,7 +150,7 @@ class addBankAccountController extends Controller
             $payload['zipcode'] = $request->input('zipcode');
         }else if(in_array($country, $allowedCountries) && in_array($currency, $LocalAllowedCurrencies)){
             // $payload['sort_code'] = $request->input('bank_code');
-            $payload['bank_id'] = $request->input('bank_id');
+            $payload['bank_id'] = $request->input('bank_code');
         }
         //filter the payload
         $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
@@ -209,24 +209,17 @@ class addBankAccountController extends Controller
 
     public function destroy($id)
     {
-        $account = BankAccount::find($id);
+        $user = Auth::guard('personal-api')->user();
+        $account = BankAccount::where('id', $id)
+            ->where('personal_id', $user->id)
+            ->first();
 
         if (!$account) {
             return response()->json([
                 'data' => [
-                    'message' => 'Bank account not found.'
+                    'message' => 'Bank account not found or unauthorized.'
                 ]
             ], 404);
-        }
-
-        $user = Auth::guard('personal-api')->user();
-
-        if ($account->personal_id !== $user->id) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Unauthorized.'
-                ]
-            ], 403);
         }
 
         $account->delete();
@@ -264,98 +257,98 @@ class addBankAccountController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
-    {
-        $type = $request->input('type');
-        if(!$type) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Account type is required.'
-                ]
-            ], 400);
-        }
-        // Validate the request
-        if ($type === 'local') {
-            $request->validate([
-                'bank_name' => 'required|string|max:255',
-                'bank_country' => 'required|string|max:10',
-                'account_number' => ['required', 'regex:/^\d{10}$/'],
-                'account_name' => 'required|string|max:255',
-                'currency' => 'required|string|size:3',
-            ]);
-        } elseif ($type === 'foreign') {
-            $request->validate([
-                'bank_country' => 'required|string|max:10',
-                'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
-                'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
-                'account_name' => 'required|string|max:255',
-                'city' => 'required|string|max:25',
-                'state' => 'required|string|max:25',
-                'address' => 'required|string|max:255',
-                'zipcode' => 'required|string|max:20',
-                'currency' => 'required|string|size:3',
-            ]);
+    // public function update(Request $request, $id)
+    // {
+    //     $type = $request->input('type');
+    //     if(!$type) {
+    //         return response()->json([
+    //             'data' => [
+    //                 'message' => 'Account type is required.'
+    //             ]
+    //         ], 400);
+    //     }
+    //     // Validate the request
+    //     if ($type === 'local') {
+    //         $request->validate([
+    //             'bank_name' => 'required|string|max:255',
+    //             'bank_country' => 'required|string|max:10',
+    //             'account_number' => ['required', 'regex:/^\d{10}$/'],
+    //             'account_name' => 'required|string|max:255',
+    //             'currency' => 'required|string|size:3',
+    //         ]);
+    //     } elseif ($type === 'foreign') {
+    //         $request->validate([
+    //             'bank_country' => 'required|string|max:10',
+    //             'bic' => 'required|string|size:8|regex:/^[A-Za-z0-9]{8,11}$/', // SWIFT/BIC
+    //             'iban' => 'required|string|max:34|regex:/^[A-Za-z0-9]+$/', // IBAN format
+    //             'account_name' => 'required|string|max:255',
+    //             'city' => 'required|string|max:25',
+    //             'state' => 'required|string|max:25',
+    //             'address' => 'required|string|max:255',
+    //             'zipcode' => 'required|string|max:20',
+    //             'currency' => 'required|string|size:3',
+    //         ]);
 
-        }else{
-            return response()->json([
-                'data' => [
-                    'message' => 'Invalid account type.'
-                ]
-            ], 400);
-        }
+    //     }else{
+    //         return response()->json([
+    //             'data' => [
+    //                 'message' => 'Invalid account type.'
+    //             ]
+    //         ], 400);
+    //     }
 
-        $bankAccount = BankAccount::find($id);
+    //     $bankAccount = BankAccount::find($id);
 
-        if (!$bankAccount) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'data' => [
-                        'message' => 'Bank account not found.'
-                    ]
-                ], 404);
-            }
-            // return redirect()->back()->with('error', 'Bank account not found.');
-        }
+    //     if (!$bankAccount) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'data' => [
+    //                     'message' => 'Bank account not found.'
+    //                 ]
+    //             ], 404);
+    //         }
+    //         // return redirect()->back()->with('error', 'Bank account not found.');
+    //     }
 
-        $user = Auth::guard('personal-api')->user();
+    //     $user = Auth::guard('personal-api')->user();
 
-        if ($bankAccount->personal_id !== $user->id) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'data' => [
-                        'message' => 'Unauthorized.'
-                    ]
-                ], 403);
-            }
-            // return redirect()->back()->with('error', 'Unauthorized access.');
-        }
+    //     if ($bankAccount->personal_id !== $user->id) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'data' => [
+    //                     'message' => 'Unauthorized.'
+    //                 ]
+    //             ], 403);
+    //         }
+    //         // return redirect()->back()->with('error', 'Unauthorized access.');
+    //     }
 
-        // Update the bank account
-        $bankAccount->update([
-            'bank_name' => $request->bank_name ?? "",
-            'bank_country' => $request->bank_country ?? "",
-            'account_number' => Crypt::encryptString($request->iban) ?? "",
-            'account_name' => $request->account_name ?? "",
-            'currency' => $request->currency ?? null,
-            'bic' => isset($request->bic) ? Crypt::encryptString($request->bic) : null,
-            'iban' => isset($request->iban) ? Crypt::encryptString($request->iban) : null,
-            'city' => $request->city ?? null,
-            'state' => $request->state ?? null,
-            'recipient_address' => $request->address ?? null,
-            'zipcode' => $request->zipcode ?? null,
-        ]);
+    //     // Update the bank account
+    //     $bankAccount->update([
+    //         'bank_name' => $request->bank_name ?? "",
+    //         'bank_country' => $request->bank_country ?? "",
+    //         'account_number' => Crypt::encryptString($request->iban) ?? "",
+    //         'account_name' => $request->account_name ?? "",
+    //         'currency' => $request->currency ?? null,
+    //         'bic' => isset($request->bic) ? Crypt::encryptString($request->bic) : null,
+    //         'iban' => isset($request->iban) ? Crypt::encryptString($request->iban) : null,
+    //         'city' => $request->city ?? null,
+    //         'state' => $request->state ?? null,
+    //         'recipient_address' => $request->address ?? null,
+    //         'zipcode' => $request->zipcode ?? null,
+    //     ]);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Bank account updated successfully.',
-                    'data' => $bankAccount
-                ]
-            ]);
-        }
+    //     if ($request->expectsJson()) {
+    //         return response()->json([
+    //             'data' => [
+    //                 'message' => 'Bank account updated successfully.',
+    //                 'data' => $bankAccount
+    //             ]
+    //         ]);
+    //     }
 
-        // return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
-    }
+    //     // return redirect()->route('business.edit', $id)->with('success', 'Bank account updated successfully.');
+    // }
 
 
     public function edit($id)

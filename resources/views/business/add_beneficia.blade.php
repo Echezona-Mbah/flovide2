@@ -99,18 +99,18 @@
                         @endif
 
                         @if (session('api_error'))
-<script>
-    Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
-        title: @json(session('api_error')),
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-    });
-</script>
-@endif
+                        <script>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'error',
+                                title: @json(session('api_error')),
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true,
+                            });
+                        </script>
+                        @endif
 
 
 
@@ -205,60 +205,7 @@
                             </div>
 
 
-                        
-                            <!-- NGN SECTION -->
-                            {{-- <div x-show="selectedCurrency === 'NGN'" x-cloak class="mt-4 space-y-4">
-                                <!-- BANK SELECTOR -->
-                                <div>
-                                    <label class="block font-medium mb-1">Bank</label>
-                                    <div class="relative">
-                                        <button @click="bankOpen = !bankOpen" type="button"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
-                                            <span x-text="selectedBankName || 'Select your bank'"></span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                        
-                                        <div x-show="bankOpen" @click.outside="bankOpen = false"
-                                            class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-60 overflow-y-auto">
-                                            <div class="p-2 border-b">
-                                                <input type="text" x-model="bankSearch" placeholder="Search bank..." class="w-full px-3 py-1 border rounded" />
-                                            </div>
-                                            <ul>
-                                                <template x-for="bank in filteredBanks()" :key="bank.value">
-                                                    <li @click="selectBank(bank)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                                        <span x-text="bank.label"></span>
-                                                    </li>
-                                                </template>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                        
-                                <!-- ACCOUNT NUMBER -->
-                                <input type="text" id="account-number" name="account_number_input"
-                                x-model="accountNumber"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                placeholder="Enter your account number"
-                                @input.debounce.500ms="validateAccount">
-                         
-
-                        
-                                <!-- ACCOUNT NAME -->
-                                <div x-show="accountName">
-                                    <p class="text-sm mt-2 text-green-600 font-semibold" x-text="accountName"></p>
-                                </div>
-                        
-                                <!-- LOADING SPINNER -->
-                                <div x-show="isLoading" class="mt-2 text-blue-500 text-sm flex items-center gap-2">
-                                    <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                    </svg>
-                                    Validating account number...
-                                </div>
-                            </div> --}}
+              
                             <div x-show="selectedCurrency === 'NGN' || selectedCurrency === 'GHS' || selectedCurrency === 'KES'" x-cloak class="mt-4 space-y-4">
                                 <!-- BANK SELECTOR -->
                                 <div>
@@ -462,7 +409,7 @@
                 'NG_USD': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -471,7 +418,7 @@
                 'NG_GBP': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -480,7 +427,7 @@
                 'NG_EUR': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -519,7 +466,7 @@
                 'AS_USD': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -528,7 +475,7 @@
                 'AS_GBP': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -537,7 +484,7 @@
                 'AS_EUR': [
                     { name: 'account_name', label: 'Account name', type: 'text' },
                     { name: 'bic', label: 'BIC', type: 'text' },
-                    { name: 'account_number', label: 'Account number', type: 'number', length: 10 },
+                    { name: 'account_number', label: 'Account number', type: 'number', length: 30 },
                     { name: 'address', label: 'Recipient address', type: 'text' },
                     { name: 'city', label: 'City', type: 'text' },
                     { name: 'state', label: 'State', type: 'text' },
@@ -6258,15 +6205,26 @@
                 fetch(`/fetch-banks?country=${countryCode}&currency=${currencyCode}`)
                     .then(res => res.json())
                     .then(data => {
-                        console.log('Bank fetch response:', data);
-                        if (data.status === 'success' && data.fields?.[0]?.options) {
-                            this.banks = data.fields[0].options;
-                            console.log('Banks updated:', this.banks);
-                        } else {
-                            this.banks = [];
-                            console.warn('No valid banks returned.');
-                        }
-                    })
+                            console.log('Bank fetch response:', data);
+
+                            if (data.status === 'success' && Array.isArray(data.fields)) {
+                                const bankField = data.fields.find(
+                                    field => field.name === 'bank_id' && Array.isArray(field.options)
+                                );
+
+                                if (bankField) {
+                                    this.banks = bankField.options;
+                                    console.log('Banks updated:', this.banks);
+                                } else {
+                                    this.banks = [];
+                                    console.warn('No bank field found.');
+                                }
+                            } else {
+                                this.banks = [];
+                                console.warn('Invalid bank response format.');
+                            }
+                        })
+
                     .catch(err => {
                         this.banks = [];
                         console.error('Error fetching banks:', err);

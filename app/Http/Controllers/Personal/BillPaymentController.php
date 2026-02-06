@@ -95,25 +95,42 @@ public function verify(Request $request)
             'type'        => 'smartcard',
         ]);
 
+    $body = $response->json();
+
+    // Case 1: HTTP not successful
     if (!$response->successful()) {
         return response()->json([
             'data' => [
-                'errors'      => 'error',
+                'status'      => 'error',
                 'personal_id' => $personalId,
                 'message'     => 'Failed to verify smartcard',
-                'error'       => $response->json()
+                'error'       => $body
             ]
-        ], 400);
+        ], 422); // ✅ keep as 422
     }
 
+    // Case 2: API success but invalid smartcard (error inside content)
+    if (isset($body['content']['error'])) {
+        return response()->json([
+            'data' => [
+                'status'      => 'error',
+                'personal_id' => $personalId,
+                'message'     => $body['content']['error'],
+            ]
+        ], 422); // ✅ changed from 400 to 422
+    }
+
+    // Case 3: Valid smartcard
     return response()->json([
         'data' => [
             'status'      => 'success',
             'personal_id' => $personalId,
-            'data'        => $response->json()
+            'data'        => $body
         ]
     ], 200);
 }
+
+
 
 
 // Store payment and call VTpass pay API
@@ -176,7 +193,8 @@ public function handleDstv(Request $request)
             : redirect()->back()->with('error', $msg);
     }
 
-    $request_id = uniqid('vtpass_');
+            date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
     $payload = [
         'request_id'    => $request_id,
@@ -257,45 +275,59 @@ public function destroy(Request $request, BillPayment $billPayment)
 
 
 
-    public function verifyElectricity(Request $request)
-    {
-        $rules = [
-            'billers_code' => 'required|string',
-            'service_id' => 'required|string',
-            'type' => 'required|string',
-        ];
+public function verifyElectricity(Request $request)
+{
+    $rules = [
+        'billers_code' => 'required|string',
+        'service_id'   => 'required|string',
+        'type'         => 'required|string',
+    ];
 
-        $validator = Validator::make($request->all(), $rules);
+    $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return response()->json([
-                // 'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $response = Http::withBasicAuth(
-            env('VTPASS_USERNAME'),
-            env('VTPASS_PASSWORD')
-        )->post(
-            env('VTPASS_API_URL') . '/merchant-verify',
-            [
-                'billersCode' => $request->billers_code,
-                'serviceID' => $request->service_id,
-                'type' => $request->type,
-            ]
-        );
-
+    if ($validator->fails()) {
         return response()->json([
-            'message' => $response->successful()
-                ? 'Verification successful.'
-                : ($response->json()['errors'] ?? 'Verification failed.'),
-            'data' => $response->json(),
-            'status' => $response->status(),
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-        ], $response->status());
+            'errors' => $validator->errors()
+        ], 422);
     }
+
+    $response = Http::withBasicAuth(
+        env('VTPASS_USERNAME'),
+        env('VTPASS_PASSWORD')
+    )->post(
+        env('VTPASS_API_URL') . '/merchant-verify',
+        [
+            'billersCode' => $request->billers_code,
+            'serviceID'   => $request->service_id,
+            'type'        => $request->type,
+        ]
+    );
+
+    $body = $response->json();
+
+    // Case 1: HTTP request itself failed
+    if (!$response->successful()) {
+        return response()->json([
+            'message' => 'Failed to verify meter number.',
+            'data'    => $body
+        ], 422);
+    }
+
+    // Case 2: VTpass returned 200 but meter is invalid
+    if (isset($body['content']['error'])) {
+        return response()->json([
+            'message' => $body['content']['error'],
+            'data'    => $body,
+        ], 422); // ✅ return 422 here
+    }
+
+    // Case 3: Valid meter
+    return response()->json([
+        'message' => 'Verification successful.',
+        'data'    => $body
+    ], 200);
+}
+
 
 
     // Store payment and call VTpass pay API
@@ -341,7 +373,8 @@ public function destroy(Request $request, BillPayment $billPayment)
             ], 400);
         }
 
-        $request_id = uniqid('vtpass_');
+               date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
         $payload = [
             'request_id'    => $request_id,
@@ -473,7 +506,8 @@ public function destroy(Request $request, BillPayment $billPayment)
             ], 400);
         }
 
-        $request_id = uniqid('vtpass_');
+                date_default_timezone_set('Africa/Lagos');
+        $request_id = date('YmdHi') . uniqid('_flovide_');
 
         $payload = [
             'request_id'    => $request_id,

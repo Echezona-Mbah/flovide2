@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
     
     public function saveStepData(Request $request)
     {
-        Log::info('Request data:', ['all_data' => $request->all()]);
+        // Log::info('Request data:', ['all_data' => $request->all()]);
 
         // Validate the input data
         $validated = $request->validate([
@@ -62,6 +62,10 @@ class RegisteredUserController extends Controller
             'street_address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'message' => 'nullable|string|max:255',
+            'business_number' => 'nullable|string|max:20',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'person_number' => 'nullable|string|max:20',
             'state' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'password' => 'nullable|string|max:255',
@@ -73,7 +77,7 @@ class RegisteredUserController extends Controller
         $existingcountryname = $existingcountry->name;
         $existingcountrycurrency_code = $existingcountry->currency_code;
 
-         Log::info('Request data:', ['all_data' => $existingcountrycurrency_code ]);
+        //  Log::info('Request data:', ['all_data' => $existingcountrycurrency_code ]);
         //   dd($existingcountry);
 
         // dd($existingcountry);
@@ -114,6 +118,10 @@ class RegisteredUserController extends Controller
         $user->nature_of_business = $validated['message'] ?? null;
         $user->email = $validated['email'] ?? null;
         $user->state = $validated['state'] ?? null;
+        $user->business_phone = $validated['business_number'] ?? null;
+        $user->firstname = $validated['first_name'] ?? null;
+        $user->lastname = $validated['last_name'] ?? null;
+        $user->person_phone = $validated['person_number'] ?? null;
         $user->currency = $existingcountrycurrency_code ?? null;
 
 
@@ -142,16 +150,14 @@ class RegisteredUserController extends Controller
             'email'     => $user->email,
             'role'  => 'Owner',
         ]);
-        Auth::login($user);
+        // Auth::login($user);
 
         Mail::to($user->email)->send(new WelcomeMail($user));
         Mail::to($user->email)->send(new RegisterOtpMail($email_verification_otp, $user));
 
-        return redirect()->route('verifyemail')->with([
-            'success' => true,
-            'message' => 'Step 3 completed. OTP sent to email!',
-            'email' => $user->email,
-        ]);
+        session(['user_email' => $user->email]);
+
+        return redirect()->route('verifyemail');
     }
 
 
@@ -185,6 +191,7 @@ class RegisteredUserController extends Controller
             ->where('email_verification_otp_expires_at', '>', now())
             ->first();
 
+
         if (!$user) {
             return back()->withErrors(['email' => 'Invalid or expired OTP']);
         }
@@ -215,9 +222,9 @@ class RegisteredUserController extends Controller
 
         // dd(($user->countries_id));
 
-    if ($user->countries_id === 'Nigeria') {
-        return redirect()->route('verify_bvn')->with('status', 'Email verified. Please verify your BVN.');
-    }
+        if ($user->countries_id === 'Nigeria') {
+            return redirect()->route('verify_bvn')->with('status', 'Email verified. Please verify your BVN.');
+        }
 
         return redirect()->route('dashboard')->with('status', 'Email verified successfully!');
     }

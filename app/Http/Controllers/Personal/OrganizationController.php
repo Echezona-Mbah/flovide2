@@ -10,55 +10,62 @@ use Illuminate\Support\Facades\Auth;
 
 class OrganizationController extends Controller
 {
-    public function updateProfile(Request $request)
-    {
-        $request->validate([
-            'firstname' => 'nullable|string|max:255',
-            'lastname' => 'nullable|string|max:255',
-            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+public function updateProfile(Request $request)
+{
+    
+    
+    $request->validate([
+        'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $personalId = auth('personal-api')->id(); 
-        $personal = Personal::where('id', $personalId)->first();
+    $personalId = auth('personal-api')->id(); 
+    $personal = Personal::where('id', $personalId)->first();
 
-        if (!$personal) {
-            return response()->json([
-                 'data' =>[
-                'errors' => 'Personal record not found'
-            ]], 404);
-        }
-
-        if ($request->filled('firstname')) {
-            $personal->firstname = $request->firstname;
-        }
-        if ($request->filled('lastname')) {
-            $personal->lastname = $request->lastname;
-        }
-
-        if ($request->hasFile('profile_picture')) {
-            $folder = "profile_pictures/personal";
-            $path = $request->file('profile_picture')->store($folder, 'public');
-            if ($personal->profile_picture && \Storage::disk('public')->exists($personal->profile_picture)) {
-                \Storage::disk('public')->delete($personal->profile_picture);
-            }
-
-            $personal->profile_picture = $path;
-        }
-
-        $personal->save();
-
+    if (!$personal) {
         return response()->json([
-            'data' =>[
+            'data' => [
+                'errors' => 'Personal record not found'
+            ]
+        ], 404);
+    }
+
+
+        //   if ($request->hasFile('profile_picture')) {
+        //     $folder = "profile_pictures/personal";
+        //     $path = $request->file('profile_picture')->store($folder, 'public');
+        //     if ($personal->profile_picture && \Storage::disk('public')->exists($personal->profile_picture)) {
+        //         \Storage::disk('public')->delete($personal->profile_picture);
+        //     }
+
+        //     $personal->profile_picture = $path;
+        // }
+
+        // $personal->save();
+
+    if ($request->hasFile('profile_picture')) {
+        $folder = 'profile_pictures/personal';
+        $filename = time() . '_' . uniqid() . '.' . $request->file('profile_picture')->getClientOriginalExtension();
+        $request->file('profile_picture')->move(public_path($folder), $filename);
+        if ($personal->profile_picture && file_exists(public_path($personal->profile_picture))) {
+            unlink(public_path($personal->profile_picture));
+        }
+        $personal->profile_picture = $folder . '/' . $filename;
+    }
+
+    $personal->save();
+
+    return response()->json([
+        'data' => [
             'message' => 'Profile updated successfully',
             'profile_picture_url' => $personal->profile_picture 
-                ? asset('storage/'.$personal->profile_picture) 
+                ? asset($personal->profile_picture) 
                 : null,
-            'firstname' => $personal->firstname,
-            'lastname' => $personal->lastname,
             'method' => $request->method(),
             'url' => $request->fullUrl()
-        ]]);
-    }
+        ]
+    ]);
+}
+
 
     public function updateEmail(Request $request)
     {

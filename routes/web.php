@@ -1,16 +1,22 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
 use App\Http\Controllers\MainPage\businessController;
+use App\Http\Controllers\MainPage\SendMoneyHomePageController;
+use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
+use App\Http\Controllers\MainPage\DeveloperController;
+use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
 Route::get('/artisan-clear', function () {
     try {
@@ -33,13 +39,51 @@ Route::get('/artisan-clear', function () {
 
 Route::get('/business', [businessController::class, 'business'])->name('business');
 Route::get('/', [personalController::class, 'personal'])->name('personal');
+//careers route
+Route::get('/careers', function () {
+    $jobs = Career::where('status', 1)->latest()->get(); 
+    return view('mainpage.careers', compact('jobs'));
+})->name('careers');
+
+//contact_us route
+Route::get('/contactUs', function () {
+    return view('mainpage.contactUs');
+})->name('contactUs');
+
+Route::get('/privacy-policy', function () {
+    return view('mainpage.privacy-policy');
+})->name('privacy-policy');
+
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/developer', [DeveloperController::class, 'index'])->name('developer');
+
+Route::get('/deletion', function () {
+    return view('mainpage.deletion');
+})->name('deletion');
 
 
 
-// Route::get('/dashboard', function () {
-    
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/Coming', function () {
+    return view('mainpage.comesoon');
+})->name('Coming');
+
+
+
+Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
+
+Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $request) {
+    $helper = new class {
+        use \App\Traits\CurrencyHelper;
+    };
+
+    return response()->json(
+        $helper->getExchangeRateFromMap($request->from, $request->to)
+    );
+});
+
+
+
 
 Route::get('/dashboard', [DashboardController::class, 'create'])
     ->middleware(['auth', 'verified', \App\Http\Middleware\ResolveOwnerMiddleware::class])

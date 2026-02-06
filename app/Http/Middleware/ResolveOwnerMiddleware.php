@@ -8,24 +8,30 @@ use App\Models\TeamMembers;
 class ResolveOwnerMiddleware
 {
     public function handle($request, Closure $next)
-{
-    $ownerId = null;
+    {
+        if (auth()->check()) {
 
-    if (auth()->check()) {
-        $authUser = auth()->user();
+            $authUser = auth()->user();
 
-        $teamMembership = TeamMembers::where('user_id', $authUser->id)->first();
+            // ✅ Check if this user is a team member (admin under an owner)
+            $teamMembership = TeamMembers::where('user_id', $authUser->id)->first();
 
-        $ownerId = $teamMembership
-            ? $teamMembership->userOwner->id
-            : $authUser->id;
+            // ✅ If team member → use owner_id
+            // ✅ Else → user is owner of their own business
+            $ownerId = $teamMembership
+                ? $teamMembership->owner_id
+                : $authUser->id;
 
-        session(['owner_id' => $ownerId]);
+            // ✅ Store in session (For Web)
+            session(['owner_id' => $ownerId]);
+
+            // ✅ Attach to request (For API & Web - more reliable!)
+            $request->merge(['owner_id' => $ownerId]);
+
+            // (OPTIONAL) Debug Log
+            // \Log::info("Resolved Owner ID: {$ownerId} for User ID: {$authUser->id}");
+        }
+
+        return $next($request);
     }
-
-    // \Log::info('Middleware running. Owner ID: ' . ($ownerId ?? 'none'));
-
-    return $next($request);
-}
-
 }

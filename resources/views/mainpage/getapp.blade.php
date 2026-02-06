@@ -12,30 +12,27 @@
           >
             <div class="flex-1 px-8 py-16 md:py-24 md:px-16 text-white">
               <p class="text-green-500 text-sm font-semibold mb-2">
-                Download Our App
+                {{ __('Download Our App') }}
               </p>
               <h1
                 class="text-4xl sm:text-5xl font-semibold leading-tight mb-6 max-w-lg"
               >
-                Experience The<br />Future of Finance
+                {{ __('Experience The Future of Finance') }}
               </h1>
               <p class="text-sm sm:text-base max-w-md mb-10">
-                Unlock a powerful suite of financial solutions,
-                including digital payments, seamless transactions,
-                wealth management, and cutting-edge applications. 
+                {{ __('Unlock a powerful suite of financial solutions, including digital payments, seamless transactions, wealth management, and cutting-edge applications.') }}
               </p>
               <div class="flex flex-wrap gap-4">
                 <button
                   class="flex items-center gap-2 bg-[#50A920] text-white font-semibold rounded-full px-5 py-3 transition"
                 >
-                  <i class="fab fa-apple text-lg"></i> Download for IOS
+                  <i class="fab fa-apple text-lg"></i> {{ __('Download for IOS') }}
                 </button>
-                <button
-                  class="flex items-center gap-2 bg-white text-gray-900 font-semibold rounded-full px-5 py-3 hover:bg-gray-100 transition"
-                >
-                  <i class="fab fa-google-play text-lg"></i> Download for
-                  Android
-                </button>
+                <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
+                  class="flex items-center gap-2 bg-white text-gray-900 font-semibold rounded-full px-5 py-3 hover:bg-gray-100 transition">
+                    <i class="fab fa-google-play text-lg"></i> {{ __('Download for Android') }}
+                </a>
+
               </div>
             </div>
             <div

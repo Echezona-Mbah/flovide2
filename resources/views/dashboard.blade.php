@@ -12,149 +12,242 @@
     <!-- Overlay -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
     <!-- Main content -->
-    <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
+    <main class=" flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
         <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
             <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Dashboard
+                {{ __('Dashboard') }}
             </h1>
             @include('business.header_notifical')   
         </header>
         <section class=" relative w-full">
+        @if (!auth()->user()->isFullyVerified())
+        <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
+            
+            <!-- soft background accent -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
+
+            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            
+            <!-- Left content -->
+            <div class="flex items-start gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
+                <i class="fas fa-shield-alt text-lg"></i>
+                </div>
+
+                <div>
+                <h4 class="text-sm font-semibold text-yellow-900">
+                    Account verification required
+                </h4>
+                <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
+                    For your safety and compliance, some features are temporarily unavailable.
+                    Please complete your verification to unlock full access.
+                </p>
+                </div>
+            </div>
+
+            <!-- Action button -->
+            <a href="{{ url('/compliance') }}"
+                class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
+                <i class="fas fa-arrow-right"></i>
+                Complete Verification
+            </a>
+
+            </div>
+        </div>
+        @endif
+
+
+
             <section
                 class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
                 <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
-                            <div
-                                class="flex flex-col md:flex-row md:items-center md:justify-between w-full md:gap-0 mb-10">
-                                <div>
-                                    <p class="text-gray-500 text-sm mb-1">Total Balance</p>
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full mb-10 gap-4">
+
+                                <!-- Balance Info -->
+                                <div class="mb-4 md:mb-0">
+                                    <p class="text-gray-500 text-sm mb-1">{{ __('Total Balance') }}</p>
                                     <h1 class="font-extrabold text-2xl md:text-xl">
                                         {{-- {{ $balance }}{{ number_format($balance) }} --}}
                                     </h1>
                                 </div>
-                                
-                                
-                                
-                                <div class="flex flex-col md:flex-row  mt-10 md:mt-0 gap-6 md:gap-2">
-                                    <a href="{{ route('send') }}">
-                                        <button
-                                            class="flex items-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-5 py-2 text-blue-700 text-sm md:text-sm font-medium hover:bg-blue-200 transition">
+
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap justify-start gap-3 md:gap-2 w-full md:w-auto">
+                                    <a href="{{ route('send') }}" class="flex-1 md:flex-none">
+                                        <button class="w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-blue-300 bg-blue-100 px-4 py-2 text-blue-700 text-sm font-medium hover:bg-blue-200 transition">
                                             <i class="fas fa-file-invoice text-xs"></i>
-                                            Send Money
+                                            {{ __('Send Money') }}
                                         </button>
                                     </a>
-                                    
-                                    <button
-                                        class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
+
+                                    <button class="flex-1 md:flex-none w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-gray-900 text-sm font-medium hover:bg-gray-50 transition">
                                         <i class="fas fa-cube text-xs"></i>
-                                        Exchange
+                                        {{ __('Exchange') }}
                                     </button>
-                                    <button
-                                        class="flex items-center gap-1 rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
-                                        <i class="far fa-file-alt text-xs"></i>
-                                        Add Money
-                                    </button>
-                                    {{-- <button
-                                        class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2 text-gray-900 text-sm md:text-sm font-medium hover:bg-gray-50 transition">
-                                        <i class="fas fa-arrow-up-right-from-square"></i>
-                                        Send Money
-                                    </button> --}}
+
+                                    <a href="{{ route('add_money') }}" class="flex-1 md:flex-none w-full md:w-auto">
+                                        <button class="w-full md:w-auto flex items-center justify-center gap-1 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium transition
+                                            {{ request()->routeIs('add_money')
+                                                ? 'bg-gray-100 text-gray-900'
+                                                : 'bg-white text-gray-900 hover:bg-gray-50' }}">
+                                            <i class="far fa-file-alt text-xs"></i>
+                                            {{ __('Add Money') }}
+                                        </button>
+                                    </a>
                                 </div>
                             </div>
+
+
+
                             {{-- @php
                             $showMore = count($balance) > 0;
                         @endphp --}}
                         
                         <section class="mb-10">
                             <div class="flex justify-between items-center mb-5">
-                                <h2 class="font-semibold text-lg">Your Balances</h2>
+                                <h2 class="font-semibold text-lg">{{ __('Your Balances') }}</h2>
                                     <a href="{{ route('add_account.create') }}"
                                         class="text-sm px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
                                     >
-                                        Add Balance
+                                        {{ __('Add Balance') }}
                                     </a>
                             </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
+                            <div
+                                class="flex gap-4 overflow-x-auto pb-2
+                                    sm:grid sm:grid-cols-2
+                                    lg:grid-cols-5
+                                    sm:overflow-visible">
 
-                        {{-- Default balance from users table --}}
-                        {{-- <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
-                            <div class="flex items-center gap-2 mb-3">
-                                <img 
-                                    src="https://flagcdn.com/w20/{{ strtolower($flagCountry) }}.png" 
-                                    alt="Flag of {{ strtoupper($flagCountry) }}"
-                                    width="20" height="15" class="rounded-sm"
-                                />
-                                <span class="text-sm font-medium uppercase">{{ $defaultCurrency }}</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">Main Wallet</p>
-                                <p class="font-semibold text-lg">
-                                    {{ $currencySymbol }}{{ number_format($defaultBalance, 2) }}
-                                </p>
-                            </div>
-                        </div> --}}
+                                @foreach($balances as $balance)
+                                    <div
+                                        class="min-w-[260px] sm:min-w-0
+                                            border border-gray-200 rounded-xl p-5
+                                            bg-white shadow-sm
+                                            hover:shadow-md transition">
 
-                        {{-- Loop through balances table --}}
-                        @foreach($balances as $balance)
-                            <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
-                                <div class="flex items-center gap-2 mb-3">
-                                   <img 
-                                        src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png" 
-                                        alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
-                                        width="20" height="15" class="rounded-sm"
-                                    />
-
-                                    <span class="text-sm font-medium uppercase">{{ $balance->currency }}</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-400 mb-1">{{ $balance->name }}</p>
-                                    <p class="font-semibold text-lg">
-                                        {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endforeach
-
-                    </div>
-
-
-
-
-
-                        
-                            {{-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-                                @foreach(collect($balances)->take(5) as $balance)
-                                    <div class="border border-gray-200 rounded-xl p-5 flex flex-col justify-between">
+                                        <!-- HEADER -->
                                         <div class="flex items-center gap-2 mb-3">
-                                            <img 
-                                                src="https://flagcdn.com/w20/{{ strtolower($balance['country']) }}.png" 
-                                                alt="Flag of {{ strtoupper($balance['country']) }}"
-                                                width="20" height="15" class="rounded-sm"
+                                            <img
+                                                src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
+                                                alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
+                                                width="20" height="15"
+                                                class="rounded-sm"
                                             />
-                                            <span class="text-sm">{{ $balance['currency'] }}</span>
+                                            <span class="text-sm font-semibold uppercase tracking-wide">
+                                                {{ $balance->currency }}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-gray-400 mb-1">Balance</p>
-                                            <p class="font-semibold text-lg">
-                                                {{ $balance['symbol'] }}{{ number_format($balance['balance'], 2) }}
-                                            </p>
-                                        </div>
+
+                                        <!-- BODY -->
+                                        <p class="text-xs text-gray-400 mb-1">
+                                            {{ $balance->name }}
+                                        </p>
+
+                                        <p class="text-xl font-bold text-gray-900">
+                                            {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
+                                        </p>
+
                                     </div>
                                 @endforeach
-                            </div> --}}
+
+                            </div>
+
+
+
+
+
+
+
+
+                    
                         </section>
                         
                         
 
                             <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                
+                                <div>
+                                    <div class="bg-white border border-gray-200 rounded-xl p-5">
+                                        <!-- Header -->
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="font-semibold text-lg">Exchange Rate</h3>
+                                            <span id="rateText" class="text-sm text-gray-500">Loading...</span>
+                                        </div>
+
+                                        <!-- From -->
+                                        <div class="bg-gray-50 rounded-xl p-4 mb-3">
+                                            <div class="flex justify-between items-center">
+                                                <input id="fromAmount" type="number" value="100" class="bg-transparent text-2xl font-bold outline-none w-1/2" />
+                                                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector" data-type="from">
+                                                    <img src="https://flagcdn.com/w20/gb.png" class="w-5 h-4 rounded-sm flag" />
+                                                    <span class="font-medium code">GBP</span>
+                                                    <i class="fas fa-chevron-down text-xs"></i>
+
+                                                    <!-- Dropdown -->
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
+                                                        @foreach($allCurrencies as $c)
+                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+                                                                data-code="{{ $c['code'] }}" 
+                                                                data-flag="{{ $c['flag'] }}">
+                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['code'] }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Swap button -->
+                                        <div class="flex justify-center my-2">
+                                            <button class="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition swap-btn">
+                                                <i class="fas fa-exchange-alt text-sm"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- To -->
+                                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                                            <div class="flex justify-between items-center">
+                                                <input id="toAmount" type="number" value="0" class="bg-transparent text-2xl font-bold outline-none w-1/2" readonly/>
+                                                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border cursor-pointer currency-selector " data-type="to">
+                                                    <img src="https://flagcdn.com/w20/ng.png" class="w-5 h-4 rounded-sm flag" />
+                                                    <span class="font-medium code">NGN</span>
+                                                    <i class="fas fa-chevron-down text-xs"></i>
+
+                                                    <!-- Dropdown -->
+                                                    <!-- Dropdown -->
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
+                                                        @foreach($allCurrencies as $c)
+                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+                                                                data-code="{{ $c['code'] }}" 
+                                                                data-flag="{{ $c['flag'] }}">
+                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['code'] }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Chart placeholder -->
+                                        <div class="h-32 bg-gray-50 rounded-xl flex items-center justify-center text-sm text-gray-400">
+                                            Exchange rate trend chart
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
                                 <div>
                                     <div class="flex items-center justify-between mb-5">
-                                        <h3 class="font-semibold text-lg">Transactions</h3>
+                                        <h3 class="font-semibold text-lg">{{ __('Transactions') }}</h3>
                                         <button
                                             class="flex items-center gap-1 text-gray-700 text-sm font-semibold hover:text-gray-900">
-                                            See All
+                                            {{ __('See All') }}
                                             <i class="fas fa-arrow-up-right-from-square text-xs"></i>
                                         </button>
                                     </div>
@@ -175,85 +268,13 @@
                                             <p class="font-semibold text-sm md:text-base">{{ number_format($tx->amount, 2) }} {{ $tx->currency }}</p>
                                         </div>
                                         @empty
-                                        <p class="text-gray-400">No transactions yet.</p>
+                                        <p class="text-gray-400">{{ __('No transactions yet.') }}</p>
                                         @endforelse
                                     </div>
                                     
                                 </div>
 
-                                <div>
-                                    <h3 class="font-semibold text-lg mb-5">Monthly Income</h3>
-                                    <div class="border border-gray-200 rounded-xl p-5 max-w-full overflow-x-auto">
-                                        <div class="flex justify-between items-center mb-4">
-                                            <select aria-label="Select quarter"
-                                                class="text-xs border border-gray-300 rounded-full py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <option>1st quarter</option>
-                                                <option>2nd quarter</option>
-                                                <option>3rd quarter</option>
-                                                <option>4th quarter</option>
-                                            </select>
-                                            <span class="font-semibold text-sm">GBP</span>
-                                        </div>
-                                        <svg viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                            class="w-full h-[200px]" aria-label="Monthly income line chart">
-                                            <defs>
-                                                <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="0%" stop-color="#34A853" stop-opacity="0.2" />
-                                                    <stop offset="100%" stop-color="#34A853" stop-opacity="0" />
-                                                </linearGradient>
-                                            </defs>
-                                            <path
-                                                d="M0 200 L50 200 L70 150 L90 170 L110 130 L130 140 L150 120 L170 130 L190 110 L210 120 L230 100 L250 110 L270 90 L290 100 L310 80 L330 50 L350 50 L400 50 L400 200 Z"
-                                                fill="url(#gradient)" stroke="#34A853" stroke-width="2" />
-                                            <circle cx="310" cy="80" r="7" fill="#fff" stroke="#34A853"
-                                                stroke-width="2" />
-                                            <line x1="310" y1="80" x2="250" y2="80" stroke="#000" stroke-width="1"
-                                                stroke-linecap="round" />
-                                            <rect x="190" y="70" width="60" height="25" rx="5" ry="5" fill="#000"
-                                                opacity="0.85" />
-                                            <text x="220" y="88" fill="#fff" font-size="12"
-                                                font-family="Inter, sans-serif" font-weight="600" text-anchor="middle">
-                                                24,400
-                                            </text>
-                                            <text x="0" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                January
-                                            </text>
-                                            <text x="150" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                February
-                                            </text>
-                                            <text x="350" y="195" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                March
-                                            </text>
-                                            <text x="380" y="15" fill="#111827" font-size="12"
-                                                font-family="Inter, sans-serif" font-weight="700" text-anchor="end">
-                                                GBP
-                                            </text>
-                                            <text x="10" y="180" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                0
-                                            </text>
-                                            <text x="10" y="140" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                1k
-                                            </text>
-                                            <text x="10" y="100" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                10k
-                                            </text>
-                                            <text x="10" y="60" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                20k
-                                            </text>
-                                            <text x="10" y="20" fill="#6B7280" font-size="10"
-                                                font-family="Inter, sans-serif">
-                                                50k
-                                            </text>
-                                        </svg>
-                                    </div>
-                                </div>
+
                             </section>
                         </div>
                     </section>
@@ -293,8 +314,9 @@
                 sidebar.classList.add('-translate-x-full');
             }
         });
-    </script>
-    <script>
+
+
+
         document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggleBalances');
             let expanded = false;
@@ -307,8 +329,140 @@
                 toggleBtn.textContent = expanded ? 'See Less' : 'See More';
             });
         });
+
+
+
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     const swapBtn = document.querySelector('.swap-btn');
+        //     const selectors = document.querySelectorAll('.currency-selector');
+
+        //     // Toggle dropdown
+        //     selectors.forEach(sel => {
+        //         sel.addEventListener('click', e => {
+        //             e.stopPropagation();
+        //             const dropdown = sel.querySelector('.currency-dropdown');
+        //             dropdown.classList.toggle('hidden');
+        //         });
+
+        //         // Select currency from dropdown
+        //         sel.querySelectorAll('.currency-item').forEach(item => {
+        //             item.addEventListener('click', e => {
+        //                 const code = item.dataset.code;
+        //                 const flag = item.dataset.flag;
+
+        //                 sel.querySelector('.code').textContent = code;
+        //                 sel.querySelector('.flag').src = flag;
+
+        //                 sel.querySelector('.currency-dropdown').classList.add('hidden');
+        //             });
+        //         });
+        //     });
+
+        //     // Swap currencies and flags
+        //     swapBtn.addEventListener('click', () => {
+        //         const from = document.querySelector('.currency-selector[data-type="from"]');
+        //         const to = document.querySelector('.currency-selector[data-type="to"]');
+
+        //         // Swap code
+        //         const tempCode = from.querySelector('.code').textContent;
+        //         from.querySelector('.code').textContent = to.querySelector('.code').textContent;
+        //         to.querySelector('.code').textContent = tempCode;
+
+        //         // Swap flag
+        //         const tempFlag = from.querySelector('.flag').src;
+        //         from.querySelector('.flag').src = to.querySelector('.flag').src;
+        //         to.querySelector('.flag').src = tempFlag;
+        //     });
+
+        //     // Close dropdown if clicked outside
+        //     document.addEventListener('click', () => {
+        //         document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+        //     });
+        // });
+
+
+        
     </script>
-    
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const swapBtn = document.querySelector('.swap-btn');
+    const selectors = document.querySelectorAll('.currency-selector');
+    const fromAmount = document.getElementById('fromAmount');
+    const toAmount = document.getElementById('toAmount');
+    const rateText = document.getElementById('rateText');
+
+    async function calculate() {
+        let from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
+        let to   = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
+        let amt  = parseFloat(fromAmount.value);
+
+        if (!amt || amt <= 0) {
+            toAmount.value = 0;
+            rateText.innerText = '';
+            return;
+        }
+
+        let res = await fetch(`/dashboard/exchange-rate?from=${from}&to=${to}`);
+        let data = await res.json();
+
+        if (data && data.rate) {
+            toAmount.value = (amt * data.rate).toFixed(2);
+            rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
+        }
+    }
+
+    // Dropdown open / select
+    selectors.forEach(sel => {
+        const dropdown = sel.querySelector('.currency-dropdown');
+
+        // Open dropdown when clicking the selector
+        sel.addEventListener('click', e => {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Handle selection
+        sel.querySelectorAll('.currency-item').forEach(item => {
+            item.addEventListener('click', e => {
+                e.stopPropagation(); // Prevent dropdown from reopening
+                sel.querySelector('.code').textContent = item.dataset.code;
+                sel.querySelector('.flag').src = item.dataset.flag;
+                dropdown.classList.add('hidden'); // Close dropdown
+                calculate();
+            });
+        });
+    });
+
+    // Swap button
+    swapBtn.addEventListener('click', () => {
+        const from = document.querySelector('.currency-selector[data-type="from"]');
+        const to = document.querySelector('.currency-selector[data-type="to"]');
+
+        [from.querySelector('.code').innerText, to.querySelector('.code').innerText] =
+        [to.querySelector('.code').innerText, from.querySelector('.code').innerText];
+
+        [from.querySelector('.flag').src, to.querySelector('.flag').src] =
+        [to.querySelector('.flag').src, from.querySelector('.flag').src];
+
+        calculate();
+    });
+
+    fromAmount.addEventListener('input', calculate);
+
+    // Close all dropdowns when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+    });
+
+    // Initial calculation with default 100
+    calculate();
+});
+
+</script>
+
+
 </body>
 
 </html>

@@ -94,12 +94,50 @@
                                     <div class="mb-6">
                                         <label for="currency"
                                             class="block mb-1 text-xs font-semibold text-gray-700">Currency</label>
-                                        <select id="currency"
-                                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
+                                        <select id="currency" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] focus:border-[#3B82F6]"
                                             aria-label="Currency">
-                                            <option value="GBP" selected>🇬🇧 British Pound</option>
-                                            <option value="USD">🇺🇸 US Dollar</option>
-                                            <option value="EUR">🇪🇺 Euro</option>
+                                            <option value="GBP" selected>🇬🇧 British Pound (GBP)</option>
+                                            <option value="USD">🇺🇸 US Dollar (USD)</option>
+                                            <option value="EUR">🇪🇺 Euro (EUR)</option>
+                                            <option value="AUD">🇦🇺 Australian Dollar (AUD)</option>
+                                            <option value="CAD">🇨🇦 Canadian Dollar (CAD)</option>
+                                            <option value="NZD">🇳🇿 New Zealand Dollar (NZD)</option>
+                                            <option value="JPY">🇯🇵 Japanese Yen (JPY)</option>
+                                            <option value="CNY">🇨🇳 Chinese Yuan (CNY)</option>
+                                            <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                            <option value="SEK">🇸🇪 Swedish Krona (SEK)</option>
+                                            <option value="NOK">🇳🇴 Norwegian Krone (NOK)</option>
+                                            <option value="DKK">🇩🇰 Danish Krone (DKK)</option>
+                                            <option value="SGD">🇸🇬 Singapore Dollar (SGD)</option>
+                                            <option value="HKD">🇭🇰 Hong Kong Dollar (HKD)</option>
+                                            <option value="INR">🇮🇳 Indian Rupee (INR)</option>
+
+                                            <!-- African currencies (15) -->
+                                            <option value="NGN">🇳🇬 Nigerian Naira (NGN)</option>
+                                            <option value="EGP">🇪🇬 Egyptian Pound (EGP)</option>
+                                            <option value="KES">🇰🇪 Kenyan Shilling (KES)</option>
+                                            <option value="GHS">🇬🇭 Ghanaian Cedi (GHS)</option>
+                                            <option value="MAD">🇲🇦 Moroccan Dirham (MAD)</option>
+                                            <option value="DZD">🇩🇿 Algerian Dinar (DZD)</option>
+                                            <option value="TND">🇹🇳 Tunisian Dinar (TND)</option>
+                                            <option value="UGX">🇺🇬 Ugandan Shilling (UGX)</option>
+                                            <option value="TZS">🇹🇿 Tanzanian Shilling (TZS)</option>
+                                            <option value="RWF">🇷🇼 Rwandan Franc (RWF)</option>
+                                            <option value="BWP">🇧🇼 Botswana Pula (BWP)</option>
+                                            <option value="ZMW">🇿🇲 Zambian Kwacha (ZMW)</option>
+                                            <option value="MUR">🇲🇺 Mauritian Rupee (MUR)</option>
+                                            <option value="XOF">🇸🇳 West African CFA Franc (XOF)</option>
+                                            <option value="XAF">🇨🇲 Central African CFA Franc (XAF)</option>
+
+                                            <option value="ZAR">🇿🇦 South African Rand (ZAR)</option>
+                                            <option value="BRL">🇧🇷 Brazilian Real (BRL)</option>
+                                            <option value="MXN">🇲🇽 Mexican Peso (MXN)</option>
+                                            <option value="RUB">🇷🇺 Russian Ruble (RUB)</option>
+                                            <option value="TRY">🇹🇷 Turkish Lira (TRY)</option>
+                                            <option value="KRW">🇰🇷 South Korean Won (KRW)</option>
+                                            <option value="AED">🇦🇪 UAE Dirham (AED)</option>
+                                            <option value="PLN">🇵🇱 Polish Złoty (PLN)</option>
+                                            <option value="ILS">🇮🇱 Israeli Shekel (ILS)</option>
                                         </select>
                                     </div>
 
@@ -365,6 +403,9 @@
                 //invoiceStatus data
                 msg = invoiceStatus == "pending" ? "Invoice created successfully!" : "Invoice saved as draft successfully!";
 
+                //display payload on the console
+                // console.log(payload);
+
                 // Proceed with API call
                 try {
                     const response = await fetch("{{ route('invoices.store') }}", {
@@ -382,14 +423,16 @@
                         const result = JSON.parse(text);
 
                         if (response.ok) {
-                            // Successful response
+                            // Successful response as a toast
                             Swal.fire({
-                                title: 'Success!',
-                                text: msg,
+                                toast: true,
+                                position: 'top-end',
                                 icon: 'success',
-                                timer: 3000,
+                                title: msg,
                                 showConfirmButton: false,
-                                willClose: () => {
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didClose: () => {
                                     location.reload();
                                 }
                             });
@@ -401,16 +444,32 @@
                                 const firstError = Object.values(result.errors).flat()[0];
                                 showMessage(firstError, 'error');
                             } else {
-                                showMessage("An unknown error occurred.", 'error');
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: "An unknown error occurred.",
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
                             }
                         }
                     } catch (jsonError) {
-                        console.log("Server returned non-JSON response:", text);
+                        console.error("Server returned non-JSON response:", text);
                         showMessage("Unexpected server error. Check console.", 'error');
                     }
                 } catch (err) {
                     console.log(err);
-                    showMessage("Error connecting to server. Try again.", 'error');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: "Error connecting to server. Try again.",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 }
 
                 function showMessage(message, type = 'success') {

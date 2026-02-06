@@ -45,17 +45,21 @@ public function topupWithCard(Request $request)
     $balance->amount += $request->amount;
     $balance->save();
 
-    TransactionHistory::create([
+        // --- CREATE TRANSACTION HISTORY RECORD ---
+    \App\Models\TransactionHistory::create([
         'personal_id'  => $personal->id,
-        'type'         => 'topup',
-        'amount'       => $request->amount,
-        'status'       => 'successful',
-        'method'       => 'card',
-        'reference'    => $reference,
-        'card_number'  => '**** **** **** ' . $maskedCard,
-        'expiry_month' => $request->expiry_month, 
-        'expiry_year'  => $request->expiry_year, 
-        // 'cvv'       => null, // ← do NOT store CVV
+        'balance_id'    => $balance->id,
+        'type'          => 'credit', // top-ups are usually 'credit'
+        'amount'        => $request->amount,
+        'currency'      => $balance->currency,
+        'status'        => 'success',
+        'reference'     => $reference,
+        'transaction_type' => 'topup_card',
+        'card_number'   => '**** **** **** ' . $maskedCard,
+        'expiry_month'  => $request->expiry_month,
+        'expiry_year'   => $request->expiry_year,
+        'cvv'           => '***',
+        'method'        => 'card',
     ]);
 
     $personal->notify(new GeneralNotification(

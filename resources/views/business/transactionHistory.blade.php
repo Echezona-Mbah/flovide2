@@ -273,13 +273,36 @@
         });
 
 
-        
+        function showToast(message, type = "success") {
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: type,
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: "#fff",
+                color: "#333",
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                },
+                didClose: () => {
+                    if (type === "success") {
+                        location.reload();
+                    }
+                }
+            });
+        }
 
         function copyReference() {
             const text = document.getElementById("referenceText").textContent;
             navigator.clipboard.writeText(text).then(function () {
-                alert("Transaction reference copied!");
+                // alert("Transaction reference copied!");
+                showToast("Transaction reference number copied!", "success");
             }).catch(function (err) {
+                showToast("Failed to copy transaction reference number.", "error");
                 console.log('Could not copy text: ', err);
             });
         }

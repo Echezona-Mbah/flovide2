@@ -15,7 +15,7 @@
   <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
     <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
       <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-        Subscriptions
+        Remita
       </h1>            
       @include('business.header_notifical')
     </header>
@@ -179,7 +179,7 @@
                                 <option selected value="">Select a subaccount</option>
                                 @foreach ($subaccounts as $subaccount)
                                     <option value="{{ $subaccount->id }}">
-                                    {{ $subaccount->decrypted_account ? $subaccount->decrypted_account . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
+                                    {{ $subaccount->account_number ? $subaccount->account_number . ' ' . $subaccount->bank_name . ' ' . $subaccount->account_name : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -244,6 +244,9 @@
                             <option value="MUR">🇲🇺 MUR – Mauritian Rupee</option>
                             <option value="BWP">🇧🇼 BWP – Botswana Pula</option>
                             <option value="NAD">🇳🇦 NAD – Namibian Dollar</option>
+                            <option value="ZMW">🇿🇲 ZMW – Zambian Kwacha</option>
+                            <option value="GEL">🇬🇪 GEL – Georgian Lari</option>
+                            <option value="UAH">🇺🇦 UAH – Ukrainian Hryv</option>
 
                         </select>
                     </div>

@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
         'personal' => [
             'driver' => 'session',
             'provider' => 'personals',
@@ -49,6 +53,11 @@ return [
             'driver' => 'sanctum',
             'provider' => 'personals',
         ],
+
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ]
     ],
 
     /*
@@ -79,6 +88,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Personal::class,
         ],
+
+            'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ]
 
 
         // 'users' => [

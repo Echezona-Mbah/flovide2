@@ -56,7 +56,7 @@
                                     <span class="w-3 h-3 rounded-full {{ $statusColor }}"></span>
                                     <span class="text-sm text-gray-600 select-text">{{ $status }}</span>
                                 </div>
-                                <button {{ $statusEnable }}  onclick="copyLink()" class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
+                                <button {{ $statusEnable }} value="{{ $invoice->invoice_receipt_link }}"  onclick="copyLink(this.value)" class="flex items-center space-x-2 rounded-full border {{ $statusBorderColor . ' ' . $statusTextColor . ' ' . $statusCusor }} px-4 py-2  select-none" aria-label="Copy Link">
                                     <i class="far fa-copy"></i>
                                     <span class="hidden md:flex">Copy Link</span>
                                 </button>
@@ -549,11 +549,13 @@
 
                         if (response.ok) {
                             Swal.fire({
-                                title: 'Success!',
-                                text: statusMessage[invoiceStatus] || "Invoice updated successfully!",
+                                toast: true,
+                                position: 'top-end',
                                 icon: 'success',
-                                timer: 3000,
+                                title: statusMessage[invoiceStatus] || "Invoice updated successfully!",
                                 showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
                                 willClose: () => location.reload()
                             });
                         } else {
@@ -567,7 +569,15 @@
 
                 } catch (err) {
                     console.log(err);
-                    showMessage("Error connecting to server. Try again.", 'error');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: "Error connecting to server. Try again.",
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 }
 
                 function showMessage(message, type = 'success') {
@@ -613,8 +623,8 @@
 
         });
 
-        function copyLink(){
-            const link = 'your-link-to-copy';
+        function copyLink(data){
+            const link = data;
 
             navigator.clipboard.writeText(link).then(() => {
                 Swal.fire({
