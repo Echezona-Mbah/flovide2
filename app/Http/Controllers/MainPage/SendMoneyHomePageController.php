@@ -51,6 +51,7 @@ public function index($slug = null)
         }
     }
 
+    // dd($currencies);
 
     return view('mainpage.send-money', compact('currencies', 'countryCurrency'));
 }

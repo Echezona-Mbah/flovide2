@@ -20,7 +20,7 @@
             {{ __('Dashboard') }}
         </a>
 
-        <!-- Payout accounts -->
+        {{-- <!-- Payout accounts -->
         <a href="{{ route('payouts') }}"
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('payouts') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
@@ -34,7 +34,7 @@
             {{ request()->routeIs('subaccount') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-layer-group text-base"></i>
             {{ __('Subaccounts') }}
-        </a>
+        </a> --}}
 
         <!-- Transaction History -->
         <a href="{{ route('transactionHistory') }}"
@@ -127,20 +127,20 @@
         </a>
 
         <!-- Chargebacks -->
-        <a href="{{ route('chargeback') }}"
+        {{-- <a href="{{ route('chargeback') }}"
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('chargeback') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-ban text-base"></i>
             {{ __('Chargebacks') }}
-        </a>
+        </a> --}}
 
         <!-- Virtual Cards -->
-        <a href="{{ route('allvirtualcard') }}"
+        {{-- <a href="{{ route('allvirtualcard') }}"
            class="flex items-center gap-3 py-2 px-3 
             {{ request()->routeIs('allvirtualcard') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-credit-card text-base"></i>
             {{ __('Virtual Cards') }}
-        </a>
+        </a> --}}
 
         <!-- Compliance -->
         <a href="{{ route('compliance') }}"
