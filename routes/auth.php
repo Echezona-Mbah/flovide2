@@ -110,6 +110,10 @@ Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'sh
 Route::get('/subscription/subscriptioncheckout/{id}', [SubscriptionController::class, 'subscriptioncheckout'])->name('subscription.checkout');
 Route::post('/subscription/subscriptionpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
 
+//referral page route
+Route::get('/referral', function () {
+    return view('business.referral');
+})->name('referral');
 
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {

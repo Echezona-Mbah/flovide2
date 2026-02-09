@@ -150,6 +150,13 @@
             {{ __('Compliance') }}
         </a>
 
+        <!-- Referral -->
+        <a href="{{ route('referral') }}" class="flex items-center gap-3 py-2 px-3 
+            {{ request()->routeIs('referral') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
+            <i class="fas fa-gift text-base"></i>
+            {{ __('Referral') }}
+        </a>
+
         <!-- Settings Dropdown -->
         <div class="space-y-1">
             <!-- Settings Button -->
