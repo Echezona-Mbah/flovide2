@@ -47,10 +47,10 @@ use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Business\referralLinkController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
-use Illuminate\Support\Facades\Mail;
 
 // Route::get('/test-auth', function () {
 //     return auth()->check() ? 'Logged in' : 'Guest';
@@ -61,22 +61,6 @@ Route::get('/force-logout', function () {
     session()->invalidate();
     session()->regenerateToken();
     return 'Logged out';
-});
-
-
-Route::get('/test-mail', function () {
-    $details = [
-        'title' => 'Test Email',
-        'body' => 'This is a test email from Flovide.'
-    ];
-
-    Mail::raw($details['body'], function ($message) use ($details) {
-        $message->to('emmanuelukwe1@gmail.com')
-                ->subject($details['title'])
-                ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
-    });
-
-    return 'Mail sent!';
 });
 
 
@@ -136,9 +120,7 @@ Route::get('/subscription/subscriptioncheckout/{id}', [SubscriptionController::c
 Route::post('/subscription/subscriptionpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
 
 //referral page route
-Route::get('/referral', function () {
-    return view('business.referral');
-})->name('referral');
+Route::get('/referral', [referralLinkController::class, 'index'])->name('referral');
 
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {

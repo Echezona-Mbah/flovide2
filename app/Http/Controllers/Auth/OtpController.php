@@ -96,6 +96,12 @@ class OtpController extends Controller
                 'login_otp_expires_at' => now()->addMinutes(5),
             ]);
 
+            // Send OTP notification
+            $user->notify(new GeneralNotification(
+                "Your Login OTP",
+                "Hello {$user->firstname}, your OTP is: {$otp}. It expires in 5 minutes."
+            ));
+
             // Send OTP via email
             Mail::to($user->email)->send(new LoginOtpMail($user, $otp));
 
