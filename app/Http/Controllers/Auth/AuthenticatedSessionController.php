@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
+use App\Mail\LoginOtpMail;
+use Illuminate\Support\Facades\Mail;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -85,17 +87,34 @@ class AuthenticatedSessionController extends Controller
                 'user_email' => $email
             ]);
         }
-    // Send login notification
-    $user->notify(new GeneralNotification(
-        "Login Successful ✅",
-        "Hello {$user->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
-    ));
 
         //RECORD LOGIN ACTIVITY
         // $this->recordLoginActivity($request, $user);
 
-        session()->flash('status', 'Login successful!');
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Generate OTP
+        $otp = rand(100000, 999999);
+
+        // Save OTP in database
+        $user->update([
+            'login_otp' => $otp,
+            'login_otp_expires_at' => now()->addMinutes(5)
+        ]);
+
+        // Send OTP notification
+        // $user->notify(new GeneralNotification(
+        //     "Your Login OTP",
+        //     "Hello {$user->firstname}, your OTP is: {$otp}. It expires in 5 minutes."
+        // ));
+
+        Mail::to($user->email)->send(new LoginOtpMail($user, $otp));
+
+        // Store user ID in session for OTP verification
+        session(['otp_user_id' => $user->id]);
+
+        Auth::logout();
+
+        // Redirect to OTP page instead of dashboard
+        return redirect()->route('otp.form');
     }
 
 

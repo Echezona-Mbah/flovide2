@@ -62,11 +62,21 @@
 
         <!-- Social Media Icons -->
         <div class="social-icons">
-            <a href="https://www.facebook.com/your-facebook-page"><img src="{{ asset('image/download1.png') }}" alt="Facebook"></a>
-            <a href="https://www.instagram.com/your-instagram-account"><img src="{{ asset('image/download 4.png') }}" alt="Instagram"></a>
-            <a href="https://www.linkedin.com/in/your-linkedin-profile"><img src="{{ asset('image/download3.png') }}" alt="LinkedIn"></a>
-            <a href="https://wa.me/your-whatsapp-number"><img src="{{ asset('image/download 2.png') }}" alt="WhatsApp"></a>
-            <a href="https://www.youtube.com/your-youtube-channel"><img src="{{ asset('image/download 5.png') }}" alt="YouTube Video Thumbnail"></a>
+            <a href="https://www.facebook.com/your-facebook-page">
+                <img src="{{ asset('asserts/SocialMedia/facebook.png') }}" alt="Facebook">
+            </a>
+            <a href="https://www.instagram.com/your-instagram-account">
+                <img src="{{ asset('asserts/SocialMedia/instagram.png') }}" alt="Instagram">
+            </a>
+            <a href="https://www.linkedin.com/in/your-linkedin-profile">
+                <img src="{{ asset('asserts/SocialMedia/linkedin.png') }}" alt="LinkedIn">
+            </a>
+            <a href="https://wa.me/your-whatsapp-number">
+                <img src="{{ asset('asserts/SocialMedia/whatsapp.png') }}" alt="WhatsApp">
+            </a>
+            <a href="https://www.youtube.com/your-youtube-channel">
+                <img src="{{ asset('asserts/SocialMedia/youtube.png') }}" alt="YouTube Video Thumbnail">
+            </a>
         </div>
     </div>
 </body>
