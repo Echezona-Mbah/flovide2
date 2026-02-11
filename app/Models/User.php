@@ -68,6 +68,8 @@ class User extends Authenticatable
         'reset_token_expires_at',
         'business_phone',
         'person_phone',
+        'login_otp',
+        'login_otp_expires_at'
     ];
 
     /**
@@ -91,6 +93,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'addresses' => 'array',
+            'login_otp_expires_at' => 'datetime',
         ];
     }
 
