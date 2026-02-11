@@ -46,36 +46,58 @@ use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
+use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Support\Facades\Mail;
+
+// Route::get('/test-auth', function () {
+//     return auth()->check() ? 'Logged in' : 'Guest';
+// });
+
+Route::get('/force-logout', function () {
+    Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
+    return 'Logged out';
+});
+
+
+Route::get('/test-mail', function () {
+    $details = [
+        'title' => 'Test Email',
+        'body' => 'This is a test email from Flovide.'
+    ];
+
+    Mail::raw($details['body'], function ($message) use ($details) {
+        $message->to('emmanuelukwe1@gmail.com')
+                ->subject($details['title'])
+                ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+    });
+
+    return 'Mail sent!';
+});
+
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register.saveStepData');
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
 
     Route::post('register', [RegisteredUserController::class, 'saveStepData']);
 
-
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgotpassword', [ForgetPasswordController::class, 'create'])
-        ->name('forgotpassword');
+    Route::get('forgotpassword', [ForgetPasswordController::class, 'create'])->name('forgotpassword');
 
     Route::post('forgotpassword', [ForgetPasswordController::class, 'forgotPassword']);
 
-    Route::get('forget-verify-otp', [ForgetPasswordController::class, 'createverifyOTP'])
-    ->name('forget-verify-otp');
+    Route::get('forget-verify-otp', [ForgetPasswordController::class, 'createverifyOTP'])->name('forget-verify-otp');
 
     Route::post('/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
-    
 
-    Route::get('resetPassword', [ForgetPasswordController::class, 'createresetPassword'])
-    ->name('resetPassword');
+    Route::get('resetPassword', [ForgetPasswordController::class, 'createresetPassword'])->name('resetPassword');
 
     Route::post('/resetPassword', [ForgetPasswordController::class, 'resetPassword']);
 
@@ -88,6 +110,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/team/invite/{token}', [OrganizationController::class, 'showInviteForm'])->name('team.accept-invite');
     Route::post('/team/invite/{token}', [OrganizationController::class, 'completeInvite'])->name('team.invite.complete');
 
+    Route::get('/otp', [OtpController::class, 'index'])->name('otp.form');
+    Route::post('/otp', [OtpController::class, 'verify'])->name('otp.verify');
+    Route::post('/otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
 
 });
 
