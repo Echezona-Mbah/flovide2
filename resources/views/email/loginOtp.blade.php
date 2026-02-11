@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Email</title>
+    <title>Flovide OTP</title>
     <style>
         body {
             background-color: #f4f4f4;
@@ -48,14 +48,15 @@
     <div class="container">
         <img src="{{ asset('Logo.png') }}" alt="Company Logo" style="max-width: 60%; margin-bottom: 20px;">
 
-        <h1>Verify Your Flovide Email Account🌟 </h1>
-        <h3>Dear {{ $user->business_name }}!,</h3>
-        <h3>Your (OTP): {{ $email_verification_otp }} </h3>
+        <h3>Hello {{ $user->business_name }},</h3>
+        <h3>Your (OTP): {{ $otp }} </h3>
+        <p>This OTP will expire in 5 minutes.</p>
         <p>Thank you for choosing Flovide.
         </p>
         <p>Best Regards,
         </p>
-        <p>The Flovide Team</p>
+        <p>The Flovide Team</p>
+        <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email.</p>
 
 
         <!-- Social Media Icons -->
@@ -76,6 +77,8 @@
                 <img src="{{ asset('asserts/SocialMedia/youtube.png') }}" alt="YouTube Video Thumbnail">
             </a>
         </div>
+
+
     </div>
 </body>
 </html>
