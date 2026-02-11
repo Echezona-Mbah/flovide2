@@ -61,7 +61,7 @@
                         <div class="flex flex-col sm:flex-row gap-3">
                             <!-- Input -->
                             <div class="flex items-center bg-gray-100 rounded-full px-4 py-3 w-full">
-                                <input type="text" value="https://www.flovide.com/i/DE412C54E2" readonly  class="bg-transparent w-full outline-none text-gray-700 text-sm"/>
+                                <input type="text" value="{{ $referralLink }}" readonly  class="bg-transparent w-full outline-none text-gray-700 text-sm"/>
                             </div>
 
                             <!-- Button -->

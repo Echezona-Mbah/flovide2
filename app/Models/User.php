@@ -42,6 +42,8 @@ class User extends Authenticatable
         'email_verification_otp_expires_at',
         'bvn', 
         'typeofuser',
+        'referral_code',
+        'referral_link',
         'email_verified_status',
         'email_verification_attempts',
         'forget_verification_otp',

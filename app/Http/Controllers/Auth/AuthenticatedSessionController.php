@@ -101,11 +101,12 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         // Send OTP notification
-        // $user->notify(new GeneralNotification(
-        //     "Your Login OTP",
-        //     "Hello {$user->firstname}, your OTP is: {$otp}. It expires in 5 minutes."
-        // ));
+        $user->notify(new GeneralNotification(
+            "Your Login OTP",
+            "Hello {$user->firstname}, your OTP is: {$otp}. It expires in 5 minutes."
+        ));
 
+        //Send OTP email
         Mail::to($user->email)->send(new LoginOtpMail($user, $otp));
 
         // Store user ID in session for OTP verification
