@@ -46,36 +46,42 @@ use App\Http\Controllers\Business\OrganizationController;
 use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
+use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Business\referralLinkController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
 
+// Route::get('/test-auth', function () {
+//     return auth()->check() ? 'Logged in' : 'Guest';
+// });
+
+Route::get('/force-logout', function () {
+    Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
+    return 'Logged out';
+});
+
+
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register.saveStepData');
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
 
     Route::post('register', [RegisteredUserController::class, 'saveStepData']);
 
-
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgotpassword', [ForgetPasswordController::class, 'create'])
-        ->name('forgotpassword');
+    Route::get('forgotpassword', [ForgetPasswordController::class, 'create'])->name('forgotpassword');
 
     Route::post('forgotpassword', [ForgetPasswordController::class, 'forgotPassword']);
 
-    Route::get('forget-verify-otp', [ForgetPasswordController::class, 'createverifyOTP'])
-    ->name('forget-verify-otp');
+    Route::get('forget-verify-otp', [ForgetPasswordController::class, 'createverifyOTP'])->name('forget-verify-otp');
 
     Route::post('/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
-    
 
-    Route::get('resetPassword', [ForgetPasswordController::class, 'createresetPassword'])
-    ->name('resetPassword');
+    Route::get('resetPassword', [ForgetPasswordController::class, 'createresetPassword'])->name('resetPassword');
 
     Route::post('/resetPassword', [ForgetPasswordController::class, 'resetPassword']);
 
@@ -88,6 +94,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/team/invite/{token}', [OrganizationController::class, 'showInviteForm'])->name('team.accept-invite');
     Route::post('/team/invite/{token}', [OrganizationController::class, 'completeInvite'])->name('team.invite.complete');
 
+    Route::get('/otp', [OtpController::class, 'index'])->name('otp.form');
+    Route::post('/otp', [OtpController::class, 'verify'])->name('otp.verify');
+    Route::post('/otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
 
 });
 
@@ -110,6 +119,8 @@ Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'sh
 Route::get('/subscription/subscriptioncheckout/{id}', [SubscriptionController::class, 'subscriptioncheckout'])->name('subscription.checkout');
 Route::post('/subscription/subscriptionpay', [PaymentController::class, 'paymentpay'])->name('payment.pay');
 
+//referral page route
+Route::get('/referral', [referralLinkController::class, 'index'])->name('referral');
 
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {

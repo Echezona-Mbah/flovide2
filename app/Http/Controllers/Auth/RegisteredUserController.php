@@ -41,7 +41,15 @@ class RegisteredUserController extends Controller
      */
 
 
-    
+    private function generateReferralCode($length = 10)
+    {
+        do {
+            $code = strtoupper(substr(bin2hex(random_bytes($length)), 0, $length));
+        } while (User::where('referral_code', $code)->exists());
+
+        return $code;
+    }
+
     public function saveStepData(Request $request)
     {
         // Log::info('Request data:', ['all_data' => $request->all()]);
@@ -134,7 +142,11 @@ class RegisteredUserController extends Controller
         $email_verification_otp = $this->generateOTP();
         $user->email_verification_otp = $email_verification_otp;
         $user->email_verification_otp_expires_at = now()->addMinutes(5);
-
+        
+        // REFERRAL CODE & LINK
+        $user->referral_code = $this->generateReferralCode();
+        $user->referral_link = url('/i/' . $user->referral_code);
+        
         $user->save();
 
         \App\Models\Balance::create([
