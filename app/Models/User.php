@@ -42,6 +42,8 @@ class User extends Authenticatable
         'email_verification_otp_expires_at',
         'bvn', 
         'typeofuser',
+        'referral_code',
+        'referral_link',
         'email_verified_status',
         'email_verification_attempts',
         'forget_verification_otp',
@@ -68,6 +70,8 @@ class User extends Authenticatable
         'reset_token_expires_at',
         'business_phone',
         'person_phone',
+        'login_otp',
+        'login_otp_expires_at'
     ];
 
     /**
@@ -91,6 +95,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'addresses' => 'array',
+            'login_otp_expires_at' => 'datetime',
         ];
     }
 
