@@ -7,6 +7,7 @@ use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
+use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\SendMoneyHomePageController;
 use App\Http\Controllers\MainPage\BlogController;
@@ -81,7 +82,6 @@ Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $reque
         $helper->getExchangeRateFromMap($request->from, $request->to)
     );
 });
-
 
 
 
