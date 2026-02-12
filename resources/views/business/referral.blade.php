@@ -61,17 +61,14 @@
                         <div class="flex flex-col sm:flex-row gap-3">
                             <!-- Input -->
                             <div class="flex items-center bg-gray-100 rounded-full px-4 py-3 w-full">
-                                <input type="text" value="{{ $referralLink }}" readonly  class="bg-transparent w-full outline-none text-gray-700 text-sm"/>
+                                <input type="text" id="referralInput" value="{{ $referralLink }}" readonly  class="bg-transparent w-full outline-none text-gray-700 text-sm"/>
                             </div>
 
                             <!-- Button -->
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
+                            <button id="copyReferralBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
                                 Share
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 12v.01M4 6v.01M4 18v.01M12 6l6 6-6 6" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M4 6v.01M4 18v.01M12 6l6 6-6 6" />
                                 </svg>
                             </button>
                         </div>
@@ -82,6 +79,9 @@
         </section>
     </main>
 
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const sidebar = document.getElementById('sidebar');
         const openBtn = document.getElementById('openSidebarBtn');
@@ -113,6 +113,30 @@
             } else {
                 sidebar.classList.add('-translate-x-full');
             }
+        });
+
+        const copyBtn = document.getElementById('copyReferralBtn');
+        const referralInput = document.getElementById('referralInput');
+
+        copyBtn.addEventListener('click', () => {
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(referralInput.value).then(() => {
+                // Show toast using SweetAlert2
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Referral link copied!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }).catch((err) => {
+                console.error('Failed to copy: ', err);
+            });
         });
     </script>
 </body>
