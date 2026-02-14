@@ -57,6 +57,8 @@ Route::post('auth/register', [RegisterController::class, 'registerUser']);
 Route::post('auth/verify-email', [RegisterController::class, 'verifyEmail']);
 Route::post('auth/new-email-otp', [RegisterController::class, 'verifyEmailOtp']);
 Route::post('auth/login', [LoginController::class, 'loginUser']);
+Route::post('auth/verify-user-login-otp', [LoginController::class, 'verifyUserLoginOtp']);
+Route::post('auth/resend-user-login-otp', [LoginController::class, 'resendUserLoginOtp']);
 Route::get('/country', [RegisterController::class, 'getAllCountry']);
 Route::post('/auth/forgot-password', [ForgetPasswordController::class, 'forgotPassword']);
 Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
