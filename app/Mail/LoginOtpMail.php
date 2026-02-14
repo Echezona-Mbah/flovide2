@@ -13,15 +13,15 @@ class LoginOtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public string $name;
     public $otp;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $otp)
+    public function __construct(string $name, $otp)
     {
-        $this->user = $user;
+        $this->name = $name;
         $this->otp = $otp;
     }
 

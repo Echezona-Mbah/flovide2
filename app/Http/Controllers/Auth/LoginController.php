@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
+use App\Mail\LoginOtpMail;
+use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Facades\Http;
 
@@ -513,6 +515,66 @@ class LoginController extends Controller
             ], 403);
         }
 
+        // Generate OTP
+        $otp = rand(100000, 999999);
+
+        $account->update([
+            'login_otp' => $otp,
+            'login_otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        // Send OTP notification
+        $account->notify(new GeneralNotification(
+            "Your Login OTP",
+            "Your OTP is: {$otp}. It expires in 5 minutes."
+        ));
+
+        //Send OTP email
+        Mail::to($account->email)->send(new LoginOtpMail($account->firstname, $otp));
+
+        return response()->json([
+            'data' => [
+                'message' => 'OTP sent to your email',
+                'status' => 'otp_required',
+                'email' => $account->email
+            ]
+        ], 200);
+    }
+
+    public function verifyLoginOtp(Request $request){
+        
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|digits:6'
+        ]);
+
+        $account = Personal::where('email', $request->email)->first();
+
+        if (!$account || !$account->login_otp) {
+            return response()->json([
+                'data' => ['message' => 'OTP not requested']
+            ], 400);
+        }
+
+        if (now()->gt($account->login_otp_expires_at)) {
+            return response()->json([
+                'data' => ['message' => 'OTP expired']
+            ], 400);
+        }
+
+        if ($account->login_otp != $request->otp) {
+            return response()->json([
+                'data' => ['message' => 'Invalid OTP']
+            ], 400);
+        }
+
+        // Clear OTP
+        $account->update([
+            'login_otp' => null,
+            'login_otp_expires_at' => null,
+        ]);
+
+        // Generate token after OTP success
         $token = $account->createToken('PersonalToken')->plainTextToken;
 
         $account->notify(new GeneralNotification(
@@ -543,9 +605,7 @@ class LoginController extends Controller
             ];
         });
 
-
-
-                   $months = collect(range(0, 2))->map(function ($i) {
+        $months = collect(range(0, 2))->map(function ($i) {
             return now()->subMonths($i)->format('Y-m');
         })->reverse()->values();
 
@@ -563,16 +623,17 @@ class LoginController extends Controller
         });
 
         // ✅ Fetch extra lists
-          $countryResponse = $this->fetchcountrylist($request);
+        $countryResponse = $this->fetchcountrylist($request);
         $countries = $countryResponse->getData();
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('personal_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('personal_id', $account->id)->where('status', 'active')->get();
         $subaccounts = Subaccount::where('personal_id', $account->id)->get();
 
-
         return response()->json([
             'data' => [
+                'message' => 'Login successful',
+                'token' => $token,
                 'account_type' => 'personals',
                 'personal' => [
                     'id' => $account->id,
@@ -593,10 +654,53 @@ class LoginController extends Controller
                 'payout_accounts' => $payoutAccounts,
                 'virtual_cards' => $virtualCards,
                 'subaccounts' => $subaccounts,
-                'token' => $token,
+            ]
+        ], 200);
+
+    }
+
+    public function resendLoginOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:personals,email'
+        ]);
+
+        $account = Personal::where('email', $request->email)->first();
+
+        //check if last OTP was sent less than 60 seconds ago
+        if ($account->login_otp_expires_at && now()->diffInSeconds($account->login_otp_expires_at->subMinutes(5)) < 60) {
+            return response()->json([
+                'data' => [
+                    'message' => 'You can request a new OTP after 60 seconds.'
+                ]
+            ], 429); // Too many requests
+        }
+
+        // Generate new OTP
+        $otp = rand(100000, 999999);
+
+        $account->update([
+            'login_otp' => $otp,
+            'login_otp_expires_at' => now()->addMinutes(5),
+        ]);
+
+        // Send OTP via email
+        Mail::to($account->email)->send(new LoginOtpMail($account->firstname, $otp));
+
+        // Send in-app notification
+        $account->notify(new GeneralNotification(
+            "Your Login OTP",
+            "Your new OTP is: {$otp}. It expires in 5 minutes."
+        ));
+
+        return response()->json([
+            'data' => [
+                'message' => 'OTP resent successfully',
+                'status' => 'otp_required'
             ]
         ], 200);
     }
+
 
 
     public function fetchcountrylist(Request $request)
