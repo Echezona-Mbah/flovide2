@@ -48,7 +48,7 @@
     <div class="container">
         <img src="{{ asset('Logo.png') }}" alt="Company Logo" style="max-width: 60%; margin-bottom: 20px;">
 
-        <h3>Hello {{ $user->business_name }},</h3>
+        <h3>Hello {{ $name }},</h3>
         <h3>Your (OTP): {{ $otp }} </h3>
         <p>This OTP will expire in 5 minutes.</p>
         <p>Thank you for choosing Flovide.
