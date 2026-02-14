@@ -14,7 +14,7 @@
     <section>
 
         <!-- logo -->
-               <section class="relative">
+            <section class="relative">
                 <div class="max-w-[300px] px-10 absolute top-10">
                     <a href="{{ route('personal') }}">
                         <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
@@ -71,8 +71,7 @@
                                 <section class="flex flex-col gap-6">
                                     <!-- bussiness email -->
                                     <div>
-                                        <label for="helper-text"
-                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Email') }}</label>
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Email') }}</label>
                                         <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             placeholder="johndoe@gmail.com">
@@ -82,11 +81,8 @@
 
                                     <!-- password -->
                                     <div>
-                                        <label for="helper-text"
-                                            class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Password') }}</label>
-                                        <input type="password" name="password" id="helper-text"
-                                            aria-describedby="helper-text-explanation"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Password') }}</label>
+                                        <input type="password" name="password" id="helper-text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             placeholder="user1234">
                                     </div>
                                     <!-- password end-->
