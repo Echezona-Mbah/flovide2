@@ -39,6 +39,8 @@ class Personal extends Authenticatable
         'business_phone',
         'person_phone',
         'deletestatus',
+        'login_otp',
+        'login_otp_expires_at'
     ];
 
 
@@ -51,6 +53,7 @@ class Personal extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'login_otp_expires_at' => 'datetime',
     ];
 
     public function balances()
