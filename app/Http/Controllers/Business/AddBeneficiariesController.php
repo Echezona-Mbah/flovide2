@@ -13,10 +13,14 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
+
 
 
 class AddBeneficiariesController extends Controller
 {
+        protected $beneficiaryService;
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -82,171 +86,12 @@ class AddBeneficiariesController extends Controller
 
 
 
-// public function store(Request $request)
-// {
-//     $userId = auth('api')->id() ?? auth()->id();
-//     $user = auth()->user();
-
-//     $team = TeamMembers::where('user_id', $user->id)->first();
-//     $role = $team ? $team->role : 'Owner'; 
-
-//     if (!in_array($role, ['Owner', 'Admin'])) {
-//         $msg = 'Only the business owner or an admin can add beneficiaries.';
-//         return $request->expectsJson()
-//             ? response()->json(['message' => $msg], 403)
-//             : redirect()->back()->with('error', $msg);
-//     }
-
-
-
-//     $country = $request->input('country');
-//     $currency = $request->input('currency');
-
-//     // ✅ Base validation rules
-//     $rules = [
-//         'account_type'  => 'required|string|max:255',
-//         'country'       => 'required|string',
-//         'currency'      => 'required|string',
-//         'account_name'  => 'required|string|max:255',
-//     ];
-
-//     // ✅ Conditional validation
-//     if ($country === 'NG' && $currency === 'NGN') {
-//         $rules['bank_id']              = 'required|string|max:255';
-//         $rules['account_number_input'] = 'required|string|max:255';
-//     } elseif ($currency === 'GBP') {
-//         $rules['sort_code']       = 'required|string|max:255';
-//         $rules['account_number']  = 'required|string|max:255';
-//         $rules['address']         = 'required|string|max:255';
-//         $rules['city']            = 'required|string|max:255';
-//         $rules['state']           = 'required|string|max:255';
-//         $rules['zipcode']         = 'required|string|max:20';
-//     } elseif (in_array($currency, ['USD', 'EUR'])) {
-//         $rules['bic']             = 'required|string|max:255';
-//         $rules['account_number']  = 'required|string|max:255';
-//         $rules['address']         = 'required|string|max:255';
-//         $rules['city']            = 'required|string|max:255';
-//         $rules['state']           = 'required|string|max:255';
-//         $rules['zipcode']         = 'required|string|max:20';
-//     }
-
-//     $validator = Validator::make($request->all(), $rules);
-
-//     if ($validator->fails()) {
-//         return $request->expectsJson()
-//             ? response()->json(['errors' => $validator->errors()], 422)
-//             : redirect()->back()->withErrors($validator)->withInput();
-//     }
-
-//     // ✅ Choose correct account number field
-//     $accountNumber = $country === 'NG' && $currency === 'NGN'
-//         ? $request->input('account_number_input')
-//         : $request->input('account_number');
-//     $accountName = $request->input('account_name');
-
-//     // ✅ Prevent duplicate beneficiary
-//     $exists = Beneficia::where('account_name', $accountName)
-//         ->where('account_number', $accountNumber)
-//         ->where('user_id', $userId)
-//         ->exists();
-
-//     if ($exists) {
-//         $errorMessage = 'This beneficiary already exists with the same account name and number.';
-
-//         return $request->expectsJson()
-//             ? response()->json([
-//                 'errors' => [
-//                     'message' => [$errorMessage]
-//                 ]
-//             ], 409)
-//             : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
-//     }
-
-//     // ✅ Build payload
-//     $payload = [
-//         'country'        => $country,
-//         'currency'       => $currency,
-//         'alias'          => $accountName,
-//         'type'           => $request->account_type,
-//         'account_name'   => $accountName,
-//         'account_number' => $accountNumber,
-//     ];
-
-
-//     if ($country === 'NG') {
-//         $payload['bank_id'] = $request->input('bank_id');
-//     } elseif ($currency === 'GBP') {
-//         $payload['sort_code'] = $request->input('sort_code');
-//         $payload['address']   = $request->input('address');
-//         $payload['city']      = $request->input('city');
-//         $payload['state']     = $request->input('state');
-//         $payload['zipcode']   = $request->input('zipcode');
-//     } elseif (in_array($currency, ['USD', 'EUR'])) {
-//         $payload['bic']     = $request->input('bic');
-//         $payload['address'] = $request->input('address');
-//         $payload['city']    = $request->input('city');
-//         $payload['state']   = $request->input('state');
-//         $payload['zipcode'] = $request->input('zipcode');
-//     }
-
-//     // ✅ Remove empty/null fields
-//     $payload = array_filter($payload, fn($value) => !is_null($value) && $value !== '');
-
-//     Log::info('Payload sent to OhentPay:', $payload);
-
-//     // ✅ Send request to OhentPay API
-//     $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
-//         ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
-
-//     if (!$ohentResponse->successful()) {
-//         $errorResponse = $ohentResponse->json();
-//         $errorMessage = $errorResponse['message'] ?? 'Failed to create recipient on OhentPay';
-
-//         Log::error('OhentPay recipient creation failed', ['response' => $errorResponse]);
-
-//         return $request->expectsJson()
-//             ? response()->json(['errors' => $errorMessage], 500)
-//             : redirect()->back()->with('api_error', $errorMessage)->withInput();
-//     }
-
-//     $responseData = $ohentResponse->json();
-
-//     // ✅ Save beneficiary locally
-//     $beneficia = Beneficia::create([
-//         'recipient_id'      => $responseData['id'],
-//         'country'           => $responseData['country'],
-//         'alias'             => $responseData['alias'],
-//         'type'              => $responseData['type'],
-//         'account_name'      => $responseData['bank_account']['account_name'] ?? null,
-//         'account_number'    => $responseData['bank_account']['account_number'] ?? null,
-//         'bank'              => $responseData['bank_account']['bank_name'] ?? null,
-//         'currency'          => $responseData['bank_account']['currency'] ?? null,
-//         'user_id'           => $userId,
-//         'default_reference' => 'Invoice',
-//     ]);
-
-//     // ✅ Notify user
-//     $user = \App\Models\User::find($userId);
-//     if ($user) {
-//         $user->notify(new GeneralNotification(
-//             "New Beneficiary Added 🎉",
-//             "You successfully added {$beneficia->account_name} ({$beneficia->account_number}) as a beneficiary."
-//         ));
-//     }
-
-//     return $request->expectsJson()
-//         ? response()->json([
-//             'message' => 'Beneficiary created successfully',
-//             'data'    => $beneficia
-//         ], 200)
-//         : redirect()->route('add_beneficias.create')->with('success', 'Beneficiary created successfully.');
-// }
-
-public function store(Request $request)
+  public function store(Request $request)
 {
     $userId = auth('api')->id() ?? auth()->id();
     $user   = auth()->user();
 
+    // Check role
     $team = TeamMembers::where('user_id', $user->id)->first();
     $role = $team ? $team->role : 'Owner';
 
@@ -257,280 +102,340 @@ public function store(Request $request)
             : redirect()->back()->with('error', $msg);
     }
 
-    $country  = $request->input('country');
-    $currency = $request->input('currency');
+    // Add country & currency to request if needed
+    $request->merge([
+        'country'  => $request->input('country'),
+        'currency' => $request->input('currency'),
+    ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Base Validation Rules
-    |--------------------------------------------------------------------------
-    */
-    $rules = [
-        'account_type' => 'required|string|max:255',
-        'country'      => 'required|string',
-        'currency'     => 'required|string',
-        'account_name' => 'required|string|max:255',
-    ];
+//    $response = $this->beneficiaryService->createBeneficiary($request, $userId);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Conditional Validation Rules
-    |--------------------------------------------------------------------------
-    */
+       $ibanqController = new IbanqBeneficiaryController(app(\App\Services\IbanqAuthService::class));
 
-    // 🇦🇱 ALBANIA (AL)
-    if ($country === 'AL' && in_array($currency, ['EUR', 'USD', 'GBP'])) {
-
-        $rules['iban']    = 'required|string|max:34';
-        $rules['bic']     = 'required|string|max:255';
-        $rules['address'] = 'required|string|max:255';
-        $rules['city']    = 'required|string|max:255';
-        $rules['state']   = 'required|string|max:255';
-        $rules['zipcode'] = 'required|string|max:20';
-
-    }
-
-    // 🇦🇸 AMERICAN SAMOA (AS)
-    if ($country === 'AS' && in_array($currency, ['USD', 'EUR', 'GBP'])) {
-
-        $rules['account_number'] = 'required|string|max:255';
-        $rules['bic']            = 'required|string|max:255';
-        $rules['address']        = 'required|string|max:255';
-        $rules['city']           = 'required|string|max:255';
-        $rules['state']          = 'required|string|max:255';
-        $rules['zipcode']        = 'required|string|max:20';
-    }
-
-    // 🇳🇴 NORWAY (NO)
-    if ($country === 'NO' && in_array($currency, ['NOK', 'USD', 'GBP', 'EUR'])) {
-
-        $rules['iban']    = 'required|string|max:34';
-        $rules['bic']     = 'required|string|max:255';
-        $rules['address'] = 'required|string|max:255';
-        $rules['city']    = 'required|string|max:255';
-        $rules['state']   = 'required|string|max:255';
-        $rules['zipcode'] = 'required|string|max:20';
-
-    }
-
-    // 🇳🇬 NIGERIA
-    elseif ($country === 'NG' && $currency === 'NGN') {
-
-        $rules['bank_id']              = 'required|string|max:255';
-        $rules['account_number_input'] = 'required|digits:10';
-
-    }
-
-    // 🇬🇧 UNITED KINGDOM
-    elseif ($currency === 'GBP') {
-
-        $rules['sort_code']      = 'required|string|max:255';
-        $rules['account_number'] = 'required|string|max:255';
-        $rules['address']        = 'required|string|max:255';
-        $rules['city']           = 'required|string|max:255';
-        $rules['state']          = 'required|string|max:255';
-        $rules['zipcode']        = 'required|string|max:20';
-
-    }
-
-    // 🇺🇸 🇪🇺 USD / EUR
-    elseif (in_array($currency, ['USD', 'EUR'])) {
-
-        $rules['bic']            = 'required|string|max:255';
-        $rules['account_number'] = 'required|string|max:255';
-        $rules['address']        = 'required|string|max:255';
-        $rules['city']           = 'required|string|max:255';
-        $rules['state']          = 'required|string|max:255';
-        $rules['zipcode']        = 'required|string|max:20';
-
-    }
-
-    $validator = Validator::make($request->all(), $rules);
-
-    if ($validator->fails()) {
-        return $request->expectsJson()
-            ? response()->json(['errors' => $validator->errors()], 422)
-            : redirect()->back()->withErrors($validator)->withInput();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Choose Correct Account Identifier
-    |--------------------------------------------------------------------------
-    */
-    if ($country === 'NG' && $currency === 'NGN') {
-        $accountNumber = $request->input('account_number_input');
-    } elseif (in_array($country, ['NO', 'AL'])) {
-        $accountNumber = $request->input('iban'); // Norway & Albania
-    } else {
-        // Covers AS, UK, USD, EUR, etc.
-        $accountNumber = $request->input('account_number');
-    }
-
-    $accountName = $request->input('account_name');
+    return $ibanqController->createBeneficiary($request);
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Prevent Duplicate Beneficiary
-    |--------------------------------------------------------------------------
-    */
-    $exists = Beneficia::where('account_name', $accountName)
-        ->where('account_number', $accountNumber)
-        ->where('user_id', $userId)
-        ->exists();
+    // // Call the createBeneficiary function
+    // $response = $this->createBeneficiary($request);
 
-    if ($exists) {
-        $errorMessage = 'This beneficiary already exists with the same account name and number.';
-        return $request->expectsJson()
-            ? response()->json(['errors' => ['message' => [$errorMessage]]], 409)
-            : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
-    }
+    // // Decode the JSON response if it's JSON
+    // $responseData = $response instanceof \Illuminate\Http\JsonResponse
+    //     ? $response->getData(true)['data'] ?? []
+    //     : [];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Base Payload
-    |--------------------------------------------------------------------------
-    */
-    $payload = [
-        'country'      => $country,
-        'currency'     => $currency,
-        'alias'        => $accountName,
-        'type'         => $request->account_type,
-        'account_name' => $accountName,
-    ];
+    // // Store in database if API call successful
+    // if (!empty($responseData) && $response->getData(true)['success']) {
+    //     $beneficia = Beneficia::create([
+    //         'recipient_id'     => $responseData['id'] ?? null,
+    //         'country'          => $responseData['country'] ?? $request->country,
+    //         'alias'            => $responseData['alias'] ?? $request->uniqueReference,
+    //         'type'             => $responseData['type'] ?? $request->type,
+    //         'account_name'     => $request->bankDetails['accountName'] ?? null,
+    //         'account_number'   => $request->bankDetails['accountNumber'] ?? null,
+    //         'bank'             => $responseData['bank_account']['bank_name'] ?? null,
+    //         'currency'         => $request->currency,
+    //         'user_id'          => $userId,
+    //         'default_reference'=> 'Invoice',
+    //     ]);
+    // }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Country Specific Payload
-    |--------------------------------------------------------------------------
-    */
+    // // Return same response from API or redirect
+    // return $request->expectsJson()
+    //     ? $response
+    //     : redirect()->back()->with('success', 'Beneficiary created successfully.');
+}
 
-    // 🇳🇬 Nigeria
-    if ($country === 'NG') {
 
-        $payload['account_number'] = $accountNumber;
-        $payload['bank_id']        = $request->input('bank_id');
 
-    }
-    // 🇦🇱 Albania payload
-    if ($country === 'AL') {
+// public function store(Request $request)
+// {
+//     $userId = auth('api')->id() ?? auth()->id();
+//     $user   = auth()->user();
 
-        $payload['iban']    = $request->input('iban');
-        $payload['bic']     = $request->input('bic');
-        $payload['address'] = $request->input('address');
-        $payload['city']    = $request->input('city');
-        $payload['state']   = $request->input('state');
-        $payload['zipcode'] = $request->input('zipcode');
+//     $team = TeamMembers::where('user_id', $user->id)->first();
+//     $role = $team ? $team->role : 'Owner';
 
-    }
+//     if (!in_array($role, ['Owner', 'Admin'])) {
+//         $msg = 'Only the business owner or an admin can add beneficiaries.';
+//         return $request->expectsJson()
+//             ? response()->json(['message' => $msg], 403)
+//             : redirect()->back()->with('error', $msg);
+//     }
 
-    elseif ($country === 'AS') {
+//     $country  = $request->input('country');
+//     $currency = $request->input('currency');
 
-        $payload['account_number'] = $accountNumber;
-        $payload['bic']            = $request->input('bic');
-        $payload['address']        = $request->input('address');
-        $payload['city']           = $request->input('city');
-        $payload['state']          = $request->input('state');
-        $payload['zipcode']        = $request->input('zipcode');
-    }
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Base Validation Rules
+//     |--------------------------------------------------------------------------
+//     */
+//     $rules = [
+//         'account_type' => 'required|string|max:255',
+//         'country'      => 'required|string',
+//         'currency'     => 'required|string',
+//         'account_name' => 'required|string|max:255',
+//     ];
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Conditional Validation Rules
+//     |--------------------------------------------------------------------------
+//     */
+
+//     // 🇦🇱 ALBANIA (AL)
+//     if ($country === 'AL' && in_array($currency, ['EUR', 'USD', 'GBP'])) {
+
+//         $rules['iban']    = 'required|string|max:34';
+//         $rules['bic']     = 'required|string|max:255';
+//         $rules['address'] = 'required|string|max:255';
+//         $rules['city']    = 'required|string|max:255';
+//         $rules['state']   = 'required|string|max:255';
+//         $rules['zipcode'] = 'required|string|max:20';
+
+//     }
+
+//     // 🇦🇸 AMERICAN SAMOA (AS)
+//     if ($country === 'AS' && in_array($currency, ['USD', 'EUR', 'GBP'])) {
+
+//         $rules['account_number'] = 'required|string|max:255';
+//         $rules['bic']            = 'required|string|max:255';
+//         $rules['address']        = 'required|string|max:255';
+//         $rules['city']           = 'required|string|max:255';
+//         $rules['state']          = 'required|string|max:255';
+//         $rules['zipcode']        = 'required|string|max:20';
+//     }
+
+//     // 🇳🇴 NORWAY (NO)
+//     if ($country === 'NO' && in_array($currency, ['NOK', 'USD', 'GBP', 'EUR'])) {
+
+//         $rules['iban']    = 'required|string|max:34';
+//         $rules['bic']     = 'required|string|max:255';
+//         $rules['address'] = 'required|string|max:255';
+//         $rules['city']    = 'required|string|max:255';
+//         $rules['state']   = 'required|string|max:255';
+//         $rules['zipcode'] = 'required|string|max:20';
+
+//     }
+
+//     // 🇳🇬 NIGERIA
+//     elseif ($country === 'NG' && $currency === 'NGN') {
+
+//         $rules['bank_id']              = 'required|string|max:255';
+//         $rules['account_number_input'] = 'required|digits:10';
+
+//     }
+
+//     // 🇬🇧 UNITED KINGDOM
+//     elseif ($currency === 'GBP') {
+
+//         $rules['sort_code']      = 'required|string|max:255';
+//         $rules['account_number'] = 'required|string|max:255';
+//         $rules['address']        = 'required|string|max:255';
+//         $rules['city']           = 'required|string|max:255';
+//         $rules['state']          = 'required|string|max:255';
+//         $rules['zipcode']        = 'required|string|max:20';
+
+//     }
+
+//     // 🇺🇸 🇪🇺 USD / EUR
+//     elseif (in_array($currency, ['USD', 'EUR'])) {
+
+//         $rules['bic']            = 'required|string|max:255';
+//         $rules['account_number'] = 'required|string|max:255';
+//         $rules['address']        = 'required|string|max:255';
+//         $rules['city']           = 'required|string|max:255';
+//         $rules['state']          = 'required|string|max:255';
+//         $rules['zipcode']        = 'required|string|max:20';
+
+//     }
+
+//     $validator = Validator::make($request->all(), $rules);
+
+//     if ($validator->fails()) {
+//         return $request->expectsJson()
+//             ? response()->json(['errors' => $validator->errors()], 422)
+//             : redirect()->back()->withErrors($validator)->withInput();
+//     }
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Choose Correct Account Identifier
+//     |--------------------------------------------------------------------------
+//     */
+//     if ($country === 'NG' && $currency === 'NGN') {
+//         $accountNumber = $request->input('account_number_input');
+//     } elseif (in_array($country, ['NO', 'AL'])) {
+//         $accountNumber = $request->input('iban'); // Norway & Albania
+//     } else {
+//         // Covers AS, UK, USD, EUR, etc.
+//         $accountNumber = $request->input('account_number');
+//     }
+
+//     $accountName = $request->input('account_name');
+
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Prevent Duplicate Beneficiary
+//     |--------------------------------------------------------------------------
+//     */
+//     $exists = Beneficia::where('account_name', $accountName)
+//         ->where('account_number', $accountNumber)
+//         ->where('user_id', $userId)
+//         ->exists();
+
+//     if ($exists) {
+//         $errorMessage = 'This beneficiary already exists with the same account name and number.';
+//         return $request->expectsJson()
+//             ? response()->json(['errors' => ['message' => [$errorMessage]]], 409)
+//             : redirect()->back()->withErrors(['duplicate' => $errorMessage])->withInput();
+//     }
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Base Payload
+//     |--------------------------------------------------------------------------
+//     */
+//     $payload = [
+//         'country'      => $country,
+//         'currency'     => $currency,
+//         'alias'        => $accountName,
+//         'type'         => $request->account_type,
+//         'account_name' => $accountName,
+//     ];
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Country Specific Payload
+//     |--------------------------------------------------------------------------
+//     */
+
+//     // 🇳🇬 Nigeria
+//     if ($country === 'NG') {
+
+//         $payload['account_number'] = $accountNumber;
+//         $payload['bank_id']        = $request->input('bank_id');
+
+//     }
+//     // 🇦🇱 Albania payload
+//     if ($country === 'AL') {
+
+//         $payload['iban']    = $request->input('iban');
+//         $payload['bic']     = $request->input('bic');
+//         $payload['address'] = $request->input('address');
+//         $payload['city']    = $request->input('city');
+//         $payload['state']   = $request->input('state');
+//         $payload['zipcode'] = $request->input('zipcode');
+
+//     }
+
+//     elseif ($country === 'AS') {
+
+//         $payload['account_number'] = $accountNumber;
+//         $payload['bic']            = $request->input('bic');
+//         $payload['address']        = $request->input('address');
+//         $payload['city']           = $request->input('city');
+//         $payload['state']          = $request->input('state');
+//         $payload['zipcode']        = $request->input('zipcode');
+//     }
 
 
     
-    // 🇳🇴 Norway
-    elseif ($country === 'NO') {
+//     // 🇳🇴 Norway
+//     elseif ($country === 'NO') {
 
-        $payload['iban']    = $request->input('iban');
-        $payload['bic']     = $request->input('bic');
-        $payload['address'] = $request->input('address');
-        $payload['city']    = $request->input('city');
-        $payload['state']   = $request->input('state');
-        $payload['zipcode'] = $request->input('zipcode');
+//         $payload['iban']    = $request->input('iban');
+//         $payload['bic']     = $request->input('bic');
+//         $payload['address'] = $request->input('address');
+//         $payload['city']    = $request->input('city');
+//         $payload['state']   = $request->input('state');
+//         $payload['zipcode'] = $request->input('zipcode');
 
-    }
+//     }
 
-    // 🇬🇧 UK
-    elseif ($currency === 'GBP') {
+//     // 🇬🇧 UK
+//     elseif ($currency === 'GBP') {
 
-        $payload['account_number'] = $accountNumber;
-        $payload['sort_code']      = $request->input('sort_code');
-        $payload['address']        = $request->input('address');
-        $payload['city']           = $request->input('city');
-        $payload['state']          = $request->input('state');
-        $payload['zipcode']        = $request->input('zipcode');
+//         $payload['account_number'] = $accountNumber;
+//         $payload['sort_code']      = $request->input('sort_code');
+//         $payload['address']        = $request->input('address');
+//         $payload['city']           = $request->input('city');
+//         $payload['state']          = $request->input('state');
+//         $payload['zipcode']        = $request->input('zipcode');
 
-    }
+//     }
 
-    // 🇺🇸 🇪🇺 USD / EUR
-    elseif (in_array($currency, ['USD', 'EUR'])) {
+//     // 🇺🇸 🇪🇺 USD / EUR
+//     elseif (in_array($currency, ['USD', 'EUR'])) {
 
-        $payload['account_number'] = $accountNumber;
-        $payload['bic']            = $request->input('bic');
-        $payload['address']        = $request->input('address');
-        $payload['city']           = $request->input('city');
-        $payload['state']          = $request->input('state');
-        $payload['zipcode']        = $request->input('zipcode');
+//         $payload['account_number'] = $accountNumber;
+//         $payload['bic']            = $request->input('bic');
+//         $payload['address']        = $request->input('address');
+//         $payload['city']           = $request->input('city');
+//         $payload['state']          = $request->input('state');
+//         $payload['zipcode']        = $request->input('zipcode');
 
-    }
+//     }
 
-    // Remove empty values
-    $payload = array_filter($payload, fn ($v) => $v !== null && $v !== '');
+//     // Remove empty values
+//     $payload = array_filter($payload, fn ($v) => $v !== null && $v !== '');
 
-    Log::info('Payload sent to OhentPay:', $payload);
+//     Log::info('Payload sent to OhentPay:', $payload);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Send to OhentPay
-    |--------------------------------------------------------------------------
-    */
-    $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
-        ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Send to OhentPay
+//     |--------------------------------------------------------------------------
+//     */
+//     $ohentResponse = Http::withToken(env('OHENTPAY_API_KEY'))
+//         ->post(env('OHENTPAY_BASE_URL') . '/recipients', $payload);
 
-    if (!$ohentResponse->successful()) {
-        $error = $ohentResponse->json();
-        Log::error('OhentPay recipient creation failed', $error);
+//     if (!$ohentResponse->successful()) {
+//         $error = $ohentResponse->json();
+//         Log::error('OhentPay recipient creation failed', $error);
 
-        return $request->expectsJson()
-            ? response()->json(['errors' => $error['message'] ?? 'Failed to create recipient'], 500)
-            : redirect()->back()->with('api_error', $error['message'] ?? 'Failed')->withInput();
-    }
+//         return $request->expectsJson()
+//             ? response()->json(['errors' => $error['message'] ?? 'Failed to create recipient'], 500)
+//             : redirect()->back()->with('api_error', $error['message'] ?? 'Failed')->withInput();
+//     }
 
-    $responseData = $ohentResponse->json();
+//     $responseData = $ohentResponse->json();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Save Beneficiary
-    |--------------------------------------------------------------------------
-    */
-    $beneficia = Beneficia::create([
-        'recipient_id'   => $responseData['id'],
-        'country'        => $responseData['country'],
-        'alias'          => $responseData['alias'],
-        'type'           => $responseData['type'],
-        'account_name'   => $responseData['bank_account']['account_name'] ?? $accountName,
-        'account_number' => $accountNumber,
-        'bank'           => $responseData['bank_account']['bank_name'] ?? null,
-        'currency'       => $currency,
-        'user_id'        => $userId,
-        'default_reference' => 'Invoice',
-    ]);
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Save Beneficiary
+//     |--------------------------------------------------------------------------
+//     */
+//     $beneficia = Beneficia::create([
+//         'recipient_id'   => $responseData['id'],
+//         'country'        => $responseData['country'],
+//         'alias'          => $responseData['alias'],
+//         'type'           => $responseData['type'],
+//         'account_name'   => $responseData['bank_account']['account_name'] ?? $accountName,
+//         'account_number' => $accountNumber,
+//         'bank'           => $responseData['bank_account']['bank_name'] ?? null,
+//         'currency'       => $currency,
+//         'user_id'        => $userId,
+//         'default_reference' => 'Invoice',
+//     ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Notify User
-    |--------------------------------------------------------------------------
-    */
-    if ($user) {
-        $user->notify(new GeneralNotification(
-            'New Beneficiary Added 🎉',
-            "You successfully added {$beneficia->account_name}."
-        ));
-    }
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Notify User
+//     |--------------------------------------------------------------------------
+//     */
+//     if ($user) {
+//         $user->notify(new GeneralNotification(
+//             'New Beneficiary Added 🎉',
+//             "You successfully added {$beneficia->account_name}."
+//         ));
+//     }
 
-    return $request->expectsJson()
-        ? response()->json(['message' => 'Beneficiary created successfully', 'data' => $beneficia], 200)
-        : redirect()->route('add_beneficias.create')->with('success', 'Beneficiary created successfully.');
-}
+//     return $request->expectsJson()
+//         ? response()->json(['message' => 'Beneficiary created successfully', 'data' => $beneficia], 200)
+//         : redirect()->route('add_beneficias.create')->with('success', 'Beneficiary created successfully.');
+// }
 
 
 

@@ -45,7 +45,7 @@
         </a>
 
        <!-- Accounts Dropdown -->
-        <div class="space-y-1">
+        {{-- <div class="space-y-1">
             <button id="accountsDropdownBtn"
                     class="flex items-center justify-between w-full py-2 px-3 hover:bg-white rounded-md cursor-pointer focus:outline-none">
                 <div class="flex items-center gap-3">
@@ -68,14 +68,21 @@
                     Customers
                 </a>
             </div>
-        </div>
+        </div> --}}
+
+         <a href="{{ route('beneficias') }}"
+           class="flex items-center gap-3 py-2 px-3 
+            {{ request()->routeIs('beneficias.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
+            <i class="fas fa-file-invoice text-base"></i>
+            {{ __('Beneficiaries') }}
+        </a>
         {{-- 
         <!-- Invoices -->
-        <a href="{{ route('invoices.index') }}"
+        <a href="{{ route('beneficias') }}"
            class="flex items-center gap-3 py-2 px-3 
-            {{ request()->routeIs('invoices.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
+            {{ request()->routeIs('beneficias.*') ? 'bg-white rounded-full font-semibold text-[#1E1E1E]' : 'hover:bg-white rounded-md' }}">
             <i class="fas fa-file-invoice text-base"></i>
-            {{ __('Invoices') }}
+            {{ __('Beneficiaries') }}
         </a>
 
         <!-- Payment page -->

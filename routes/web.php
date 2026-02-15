@@ -13,6 +13,8 @@ use App\Http\Controllers\MainPage\SendMoneyHomePageController;
 use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
 use App\Http\Controllers\MainPage\DeveloperController;
+use App\Http\Controllers\Pivot\PivotController as PivotPivotController;
+use App\Http\Controllers\PivotController;
 use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -82,6 +84,10 @@ Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $reque
         $helper->getExchangeRateFromMap($request->from, $request->to)
     );
 });
+
+// Route::get('/pivot-auth', [PivotController::class, 'auth']);
+// Route::get('/pivot-test', [PivotPivotController::class, 'sendPayment']);
+
 
 
 

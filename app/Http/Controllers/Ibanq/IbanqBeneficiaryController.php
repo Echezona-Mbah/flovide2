@@ -62,65 +62,97 @@ class IbanqBeneficiaryController extends Controller
      */
     public function createBeneficiary(Request $request)
     {
+        // Validate request
         $request->validate([
             'type' => 'required|in:individual,corporate',
             'uniqueReference' => 'required|string|max:16',
             'customerReference' => 'nullable|string|max:35',
             'email' => 'nullable|email|max:200',
             'phone' => 'nullable|string|max:30',
+
+            // individual fields
             'firstNames' => 'required_if:type,individual|string|max:140',
             'lastName' => 'required_if:type,individual|string|max:140',
-            'address' => 'required_if:type,individual|array',
+
+            // corporate field
+            'name' => 'required_if:type,corporate|string|max:200',
+
+            // required for both
+            'address' => 'required|array',
         ]);
 
         try {
+            // Call IBANQ API
             $client = $this->ibanq->authenticatedClient();
 
-            // Build JSON payload
             $payload = [
-                'type' => $request->input('type'),
-                'uniqueReference' => $request->input('uniqueReference'),
-                'customerReference' => $request->input('customerReference'),
-                'email' => $request->input('email'),
-                'phone' => $request->input('phone'),
+                'type' => $request->type,
+                'uniqueReference' => $request->uniqueReference,
+                'customerReference' => $request->customerReference,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
             ];
 
-            // If individual, include firstNames, lastName, address
-            if ($request->input('type') === 'individual') {
-                $payload['firstNames'] = $request->input('firstNames');
-                $payload['lastName'] = $request->input('lastName');
-                $payload['address'] = $request->input('address'); // address should be array with fields
+            if ($request->type === 'individual') {
+                $payload['firstNames'] = $request->firstNames;
+                $payload['lastName'] = $request->lastName;
             }
 
-            // POST request to /beneficiaries
-            $response = $client->post('/v2/beneficiaries', [
-                'json' => $payload
-            ]);
+            if ($request->type === 'corporate') {
+                $payload['name'] = $request->name;
+            }
 
-            // Check for 201 Created
-            if ($response->getStatusCode() === 201) {
-                $location = $response->getHeaderLine('Location'); // Link to new beneficiary
+            $response = $client->post('/v2/beneficiaries', $payload);
+            $responseData = $response->json();
+
+            // Store in database if successful
+            // if ($response->successful()) {
+            //     $userId = auth('api')->id() ?? auth()->id();
+            //     $beneficia = Beneficia::create([
+            //         'recipient_id'      => $responseData['id'] ?? null,
+            //         'country'           => $request->country,
+            //         'alias'             => $responseData['alias'] ?? $request->uniqueReference,
+            //         'type'              => $request->type,
+            //         'account_name'      => $request->bankDetails['accountName'] ?? null,
+            //         'account_number'    => $request->bankDetails['accountNumber'] ?? null,
+            //         'bank'              => $responseData['bank_account']['bank_name'] ?? null,
+            //         'currency'          => $request->currency,
+            //         'user_id'           => $userId,
+            //         'default_reference' => 'Invoice',
+            //     ]);
+            // }
+
+            // Return for API requests
+            if ($request->expectsJson()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Beneficiary created successfully',
-                    'location' => $location,
-                    'data' => $response->json()
-                ]);
+                    'success' => $response->successful(),
+                    'data' => $responseData,
+                ], $response->status());
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create beneficiary',
-                'data' => $response->json()
-            ], $response->getStatusCode());
+            // Return for web requests
+            return redirect()->back()
+                ->with('success', 'Beneficiary created successfully!');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
+            // API request error
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+
+            // Web request error
+            return redirect()->back()
+                ->with('error', 'Failed to create beneficiary: ' . $e->getMessage());
         }
     }
+
+
+
+
 
 
     /**
