@@ -65,6 +65,8 @@ Route::post('auth/register', [RegisterController::class, 'registerUser']);
 Route::post('auth/verify-email', [RegisterController::class, 'verifyEmail']);
 Route::post('auth/new-email-otp', [RegisterController::class, 'verifyEmailOtp']);
 Route::post('auth/login', [LoginController::class, 'loginUser']);
+Route::post('auth/verify-user-login-otp', [LoginController::class, 'verifyUserLoginOtp']);
+Route::post('auth/resend-user-login-otp', [LoginController::class, 'resendUserLoginOtp']);
 Route::get('/country', [RegisterController::class, 'getAllCountry']);
 Route::post('/auth/forgot-password', [ForgetPasswordController::class, 'forgotPassword']);
 Route::post('/auth/forget-verify-otp', [ForgetPasswordController::class, 'verifyOTP']);
@@ -334,6 +336,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('auth/verify-personalemail', [RegisterController::class, 'verifyPersonalEmail']);
     Route::post('auth/new-personalemail-otp', [RegisterController::class, 'verifyPersonalEmailOtp']);
     Route::post('auth/login-personal', [LoginController::class, 'loginPersonal']);
+    Route::post('auth/verify-login-otp', [LoginController::class, 'verifyLoginOtp']);
+    Route::post('auth/resend-login-otp', [LoginController::class, 'resendLoginOtp']);
     Route::post('/auth/forgot-password-personal', [ForgetPasswordController::class, 'forgotPasswordPersonal']);
     Route::post('/auth/forget-verify-otp-personal', [ForgetPasswordController::class, 'verifyOTPPersonal']);
     Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
