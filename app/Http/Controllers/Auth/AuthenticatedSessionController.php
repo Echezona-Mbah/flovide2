@@ -107,7 +107,7 @@ class AuthenticatedSessionController extends Controller
         ));
 
         //Send OTP email
-        Mail::to($user->email)->send(new LoginOtpMail($user, $otp));
+        Mail::to($user->email)->send(new LoginOtpMail($user->business_name, $otp));
 
         // Store user ID in session for OTP verification
         session(['otp_user_id' => $user->id]);
