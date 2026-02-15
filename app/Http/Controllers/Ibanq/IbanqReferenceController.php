@@ -46,10 +46,7 @@ class IbanqReferenceController extends Controller
      /**
      * Get required fields for a beneficiary based on type, country, and currency
      *
-     * @param Request $request
-     * @param string $type Individual or Corporate
-     * @param string $country 2-letter ISO country code
-     * @param string $currency 3-letter ISO currency code
+
      */
     public function getBeneficiaryRequirements(Request $request, $type, $country, $currency)
     {

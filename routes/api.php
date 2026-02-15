@@ -47,6 +47,7 @@ use App\Http\Controllers\Ibanq\IbanqPaymentController;
 use App\Http\Controllers\Ibanq\IbanqReferenceController;
 use App\Http\Controllers\Ibanq\IbanqWalletController;
 use App\Http\Controllers\IbanqTestController;
+use App\Http\Controllers\Pivot\PivotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,6 +124,14 @@ Route::get('/ibanq/reference/beneficiaries/{type}/{country}/{currency}', [IbanqR
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/pivot/payment', [PivotController::class, 'sendPayment']);
+    Route::post('/pivot/payment-status', [PivotController::class, 'queryPaymentStatus']);
+    Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation']);
+    Route::post('/pivot/card-payment', [PivotController::class, 'cardPayment']);
+
+
+
+
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
     Route::get('/getLoggedInUser', [RegisterController::class, 'getLoggedInUser']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);

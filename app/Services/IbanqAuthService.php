@@ -48,10 +48,16 @@ class IbanqAuthService
     {
         $token = $this->getAccessToken();
 
-        return Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-            'Accept'        => 'application/json',
-            'Content-Type'  => 'application/json',
-        ])->baseUrl($this->baseUrl);
+        // return Http::withHeaders([
+        //     'Authorization' => 'Bearer ' . $token,
+        //     'Accept'        => 'application/json',
+        //     'Content-Type'  => 'application/json',
+        // ])->baseUrl($this->baseUrl);
+
+        return Http::withToken($token)
+    ->acceptJson()
+    ->asJson()
+    ->baseUrl($this->baseUrl);
+
     }
 }

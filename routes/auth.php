@@ -48,6 +48,7 @@ use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Business\referralLinkController;
+use App\Http\Controllers\Pivot\PivotController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
@@ -121,6 +122,14 @@ Route::post('/subscription/subscriptionpay', [PaymentController::class, 'payment
 
 //referral page route
 Route::get('/referral', [referralLinkController::class, 'index'])->name('referral');
+
+
+
+
+
+Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation'])
+    ->name('pivot.account.validation');
+
 
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {

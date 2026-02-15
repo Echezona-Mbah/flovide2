@@ -18,53 +18,88 @@ class IbanqPaymentController extends Controller
     /**
      * Create a new payment
      */
-    public function createPayment(Request $request)
-    {
-        // Validate request data
-        $validated = $request->validate([
-            'beneficiaryAccountId' => 'required|uuid',
-            'batchId' => 'nullable|uuid',
-            'amount' => 'required|numeric|min:0.01',
-            'currency' => 'required|string|size:3',
-            'reference' => 'required|string|max:140',
-            'sendOn' => 'nullable|date|date_format:Y-m-d',
-            'arriveBy' => 'nullable|date|date_format:Y-m-d',
-            'paymentMethod' => 'nullable|string|max:50',
-            'purposeOfPayment' => 'nullable|array',
-            'purposeOfPayment.code' => 'nullable|string|max:10',
-            'purposeOfPayment.text' => 'nullable|string|max:140',
-        ]);
+public function createPayment(Request $request)
+{
+    $validated = $request->validate([
+        'beneficiaryAccountId' => 'required|uuid',
+        'amount' => 'required|numeric|min:0.01',
+        'currency' => 'required|string|size:3',
+        'reference' => 'required|string|max:140',
+        'sendOn' => 'nullable|date|date_format:Y-m-d',
+        'arriveBy' => 'nullable|date|date_format:Y-m-d',
+        'paymentMethod' => 'nullable|string|max:50',
+        'purposeOfPayment' => 'nullable|array',
+        'purposeOfPayment.purposeCode' => 'nullable|string|max:10',
+        'purposeOfPayment.invoiceNumber' => 'nullable|string|max:50',
+        'purposeOfPayment.invoiceDate' => 'nullable|date|date_format:Y-m-d',
+        'purposeOfPayment.charityNumber' => 'nullable|numeric',
+    ]);
 
-        // Ensure both sendOn and arriveBy are not set together
-        if (!empty($validated['sendOn']) && !empty($validated['arriveBy'])) {
-            return response()->json([
-                'success' => false,
-                'error' => 'You cannot specify both sendOn and arriveBy dates.'
-            ], 422);
-        }
-
-        try {
-            // Get authenticated HTTP client
-            $client = $this->ibanq->authenticatedClient();
-
-            // Send POST request to create payment
-            $response = $client->post('/v2/payments', [
-                'json' => $validated
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment created successfully',
-                'data' => $response->json()
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    // Ensure only one of sendOn or arriveBy is set
+    if (!empty($validated['sendOn']) && !empty($validated['arriveBy'])) {
+        return response()->json([
+            'success' => false,
+            'error' => 'You cannot specify both sendOn and arriveBy dates.'
+        ], 422);
     }
+
+    // Build payload
+    $payload = [
+        'beneficiaryAccountId' => $validated['beneficiaryAccountId'],
+        'amount' => $validated['amount'],
+        'currency' => $validated['currency'],
+        'reference' => $validated['reference'],
+    ];
+
+    // Only add if provided
+    if (!empty($validated['sendOn'])) {
+        $payload['sendOn'] = $validated['sendOn'];
+    }
+    if (!empty($validated['arriveBy'])) {
+        $payload['arriveBy'] = $validated['arriveBy'];
+    }
+    if (!empty($validated['paymentMethod'])) {
+        $payload['paymentMethod'] = $validated['paymentMethod'];
+    }
+
+    // Purpose of payment
+    if (!empty($validated['purposeOfPayment'])) {
+        $pp = $validated['purposeOfPayment'];
+        $payload['purposeOfPayment'] = array_filter([
+            'purposeCode' => $pp['purposeCode'] ?? null,
+            'invoiceNumber' => $pp['invoiceNumber'] ?? null,
+            'invoiceDate' => $pp['invoiceDate'] ?? null,
+            'charityNumber' => $pp['charityNumber'] ?? null,
+        ], fn($v) => $v !== null); // remove null fields
+    }
+
+    try {
+        $client = $this->ibanq->authenticatedClient();
+
+        // Post JSON payload
+        $response = $client->withHeaders([
+            'Accept' => 'application/json',
+        ])->post('/v2/payments', $payload);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment created successfully',
+            'data' => $response->json()
+        ], $response->status());
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
+
+
 
 
 
@@ -216,33 +251,35 @@ class IbanqPaymentController extends Controller
      * @param string $paymentId
      * @param Request $request
      */
-    public function approvePayment(Request $request, $paymentId)
-    {
-        $request->validate([
-            'twoFactorCode' => 'required|string|size:6', // The SCA 2FA code
+public function approvePayment(Request $request, $paymentId)
+{
+    $request->validate([
+        'twoFactorCode' => 'required|string|size:6', // SCA 2FA code
+    ]);
+
+    try {
+        // Get authenticated client
+        $client = $this->ibanq->authenticatedClient()
+            ->withHeaders([
+                'User-2-Factor-Code' => $request->twoFactorCode
+            ]);
+
+        // Send POST request to approve payment
+        $response = $client->post("/v2/payments/{$paymentId}/approve", []);
+
+        return response()->json([
+            'success' => $response->successful(),
+            'data' => $response->json(),
         ]);
 
-        try {
-            $client = $this->ibanq->authenticatedClient();
-
-            $response = $client->post("/payments/{$paymentId}/approve", [
-                'headers' => [
-                    'User-2-Factor-Code' => $request->twoFactorCode
-                ],
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'data' => $response->json()
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 
 
 
