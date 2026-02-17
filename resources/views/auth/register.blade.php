@@ -1,68 +1,5 @@
-<style>
-    #email-error{
-        background-color: #F56565;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 14px;
-        font-weight: bold;
-        border-radius: 10px;
-        widows: 20px;
-    }
-
-
-    /* Add this to your stylesheet */
-    .error-message {
-        background-color: #F56565;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 14px;
-        font-weight: bold;
-        border-radius: 10px;
-        widows: 20px;
-    }
-    #error-incorporation_date {
-    font-size: 12px;
-    margin-top: 5px;
-}
-.error-message {
-    display: block;
-}
-
-#loader.hidden {
-    display: none;
-}
-
-#loader {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-}
-
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-    
-    </style>
-    <!DOCTYPE html>
-    <html lang="en">
-    
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,32 +9,122 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>
+            #email-error{
+                background-color: #F56565;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 10px;
+                widows: 20px;
+            }
+            /* Add this to your stylesheet */
+            .error-message {
+                background-color: #F56565;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 10px;
+                widows: 20px;
+            }
+            #error-incorporation_date {
+                font-size: 12px;
+                margin-top: 5px;
+            }
+            .error-message {
+                display: block;
+            }
 
+            #loader.hidden {
+                display: none;
+            }
+
+            #loader {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 9999;
+            }
+
+            .spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 2s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .form-group {
+                width: 100%;
+            }
+            .password-wrapper {
+                position: relative;
+                width: 100%;
+            }
+
+            .form-input {
+                width: 100%;
+                height: 48px;
+                padding: 0 45px 0 15px; /* right padding for icon */
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                background: #f9fafb;
+                font-size: 14px;
+                outline: none;
+            }
+
+            .form-input:focus {
+                border-color: #000000ff;
+            }
+
+            .eye-btn {
+                position: absolute;
+                top: 50%;
+                right: 14px;
+                transform: translateY(-50%);
+                background: transparent;
+                border: none;
+                color: #6b7280;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .toast {
+                position: fixed;
+                top: 30px; /* change from bottom to top */
+                right: 30px;
+                background-color: #333;
+                color: #fff;
+                padding: 16px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                opacity: 0;
+                transition: opacity 0.5s ease, transform 0.5s ease;
+                transform: translateY(-20px); /* move upward initially */
+                z-index: 9999;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+    
+
+        </style>
         <title>{{ __('Sign Up') }}</title>
     </head>
     
     <body>
-        <style>
-    .toast {
-        position: fixed;
-        top: 30px; /* change from bottom to top */
-        right: 30px;
-        background-color: #333;
-        color: #fff;
-        padding: 16px 24px;
-        border-radius: 8px;
-        font-size: 16px;
-        opacity: 0;
-        transition: opacity 0.5s ease, transform 0.5s ease;
-        transform: translateY(-20px); /* move upward initially */
-        z-index: 9999;
-    }
-    .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-        </style>
         <div id="toast" class="toast hidden"></div>
 
           
@@ -811,17 +838,42 @@
     
                             
                                         <!-- Password -->
-                                        <div>
-                                            <label for="password" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Password</label>
+                                        <!-- <div>
+                                            <label for="password" class="block mb-2 text-sm font-bold text-[#828282]">Password</label>
                                             <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
                                             <div id="error-password" class="text-red-500 text-sm"></div>
+                                        </div> -->
+
+                                        <div class="form-group">
+                                            <label for="password" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Password') }}</label>
+
+                                            <div class="password-wrapper">
+                                                <input type="password" id="password" placeholder="••••••••" class="form-input" autocomplete="off">
+                                                <button type="button" id="togglePassword" class="eye-btn">
+                                                    <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
+                                                </button>
+                                            </div>
+                                            <div id="error-password" class="text-red-500 text-sm"></div> 
                                         </div>
                             
                                         <!-- Confirm Password -->
-                                        <div>
-                                            <label for="confirm_password" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Confirm Password</label>
+                                        <!-- <div>
+                                            <label for="confirm_password" class="block mb-2 text-sm font-bold text-[#828282]">Confirm Password</label>
                                             <input type="password" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
-                                            <div id="error-confirm-password" class="text-red-500 text-sm"></div>                                    </div>
+                                            <div id="error-confirm-password" class="text-red-500 text-sm"></div>                                    
+                                        </div> -->
+
+                                        <div class="form-group">
+                                            <label for="confirm_password" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Confirm Password') }}</label>
+
+                                            <div class="password-wrapper">
+                                                <input type="password" id="confirm_password" placeholder="••••••••" class="form-input" autocomplete="off">
+                                                <button type="button" id="toggleConfirmPassword" class="eye-btn">
+                                                    <i id="eyeIconConfirm" class="fa-solid fa-eye-slash"></i>
+                                                </button>
+                                            </div>
+                                            <div id="error-confirm-password" class="text-red-500 text-sm"></div> 
+                                        </div>
                             
                                         <!-- Terms and Conditions -->
                                         <div>
@@ -1147,6 +1199,26 @@
         
         <script src="{{ asset('../scripts/script.js') }}"></script>
         <script src="{{ asset('../scripts/stepper.js') }}"></script>
+
+        <script>
+            function setupPasswordToggle(inputId, buttonId, iconId) {
+                const input = document.getElementById(inputId);
+                const button = document.getElementById(buttonId);
+                const icon = document.getElementById(iconId);
+
+                button.addEventListener('click', function () {
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+
+                    icon.classList.toggle('fa-eye');
+                    icon.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            setupPasswordToggle('password', 'togglePassword', 'eyeIcon');
+            setupPasswordToggle('confirm_password', 'toggleConfirmPassword', 'eyeIconConfirm');
+        </script>
+
     </body>
     
-    </html>
+</html>
