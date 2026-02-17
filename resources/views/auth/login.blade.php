@@ -9,6 +9,43 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{{ __('Sign In') }}</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .form-group {
+            width: 100%;
+        }
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 45px 0 15px; /* right padding for icon */
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f9fafb;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #000000ff;
+        }
+
+        .eye-btn {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+    </style>
 </head>
 <body>
     <section>
@@ -71,27 +108,26 @@
                                 <section class="flex flex-col gap-6">
                                     <!-- bussiness email -->
                                     <div>
-                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Email') }}</label>
-                                        <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            placeholder="johndoe@gmail.com">
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Email') }}</label>
+                                        <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="johndoe@gmail.com">
                                     </div>
-
                                     <!-- bussiness email end-->
 
                                     <!-- password -->
-                                    <div>
-                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Password') }}</label>
-                                        <input type="password" name="password" id="helper-text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            placeholder="user1234">
+                                    <div class="form-group">
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Password') }}</label>
+
+                                        <div class="password-wrapper">
+                                            <input type="password" name="password" id="password" placeholder="••••••••" class="form-input">
+                                            <button type="button" id="togglePassword" class="eye-btn">
+                                                <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <!-- password end-->
 
-
-                                    <section
-                                        class="mt-4 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-5 ">
-                                        <button type="submit"
-                                            class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
+                                     
+                                    <section class="mt-4 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-5 ">
+                                        <button type="submit" class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
                                            >
                                             {{ __('Sign In') }}
                                         </button>
@@ -99,7 +135,6 @@
                                         <div class="flex items-center">
                                             <p><span class="text-[#215F9C]"><a href="forgotpassword">{{ __('Forgot password') }}</a></span></p>
                                             <img src="../asserts/icons/share.svg" alt="" class="w-5 h-5 text-[#215F9C]">
-
                                         </div>
                                     </section>
 
@@ -149,6 +184,22 @@
 
         </ol>
     </section>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const isPassword = password.type === 'password';
+
+            password.type = isPassword ? 'text' : 'password';
+
+            // Toggle icon
+            eyeIcon.classList.toggle('fa-eye');
+            eyeIcon.classList.toggle('fa-eye-slash');
+        });
+    </script>
 
 
 </body>
