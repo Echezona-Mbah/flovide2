@@ -40,6 +40,8 @@ class IbanqBeneficiaryAccountController extends Controller
             'defaultReference' => 'required|string|max:170',
         ]);
 
+       
+
         try {
             $client = $this->ibanq->authenticatedClient();
 
