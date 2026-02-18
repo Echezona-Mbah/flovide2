@@ -19,7 +19,7 @@
 
         </header>
         <section class=" relative w-full">
-            <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute w-full overflow-x-hidden right-[-2.3vw]">
+            <section class="bg-white text-gray-700 min-h-screen  md:rounded-3xl md:p-6 p-2 shadow-md md:absolute w-full overflow-x-hidden ">
                 <section class="flex flex-col md:flex-row gap-10  w-full mx-auto max-w-full min-h-screen">
                 <!-- Left side: Transactions list -->
                 <div class="flex-1 p-6 md:p-10 ">

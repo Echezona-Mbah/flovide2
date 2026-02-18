@@ -20,9 +20,8 @@
             @include('business.header_notifical')
 
         </header>
-        <section class=" relative ">
-            <section
-                class="flex flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
+        <section class="relative w-full">
+            <section class="flex flex-col w-full lg:flex-row gap-8 bg-white md:rounded-3xl md:p-6 p-2 shadow-md md:absolute overflow-x-hidden">
                 <!-- Left form -->
                 <section class="flex flex-col lg:flex-row gap-8 bg-white rounded-tl-3xl md:p-6 p-2 ">
                     <section class="flex-1 bg-white rounded-xl md:p-6 p-2 max-w-full lg:max-w-lg ">
