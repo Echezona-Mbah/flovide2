@@ -220,7 +220,7 @@
                             <section>
                                 <form class="max-w-sm mt-10" action="" method="POST" id="countryForm">
                                     @csrf
-                                    <label for="countries" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">{{ __('Country') }}</label>
+                                    <label for="countries" class="block mb-2 text-sm font-bold text-gray-900  ">{{ __('Country') }}</label>
                             
                                     <div class="custom-dropdown">
                                         <div class="dropdown-button" id="dropdownButton">
@@ -362,30 +362,30 @@
                                     <section class="flex flex-col gap-10">
                                         <!-- Business Name -->
                                         <div>
-                                            <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Name') }}</label>
-                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter business name') }}">
+                                            <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Name') }}</label>
+                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter business name') }}">
                                             <div id="businessNameError" ></div>
     
                                         </div>
                                         <!-- Registration Number -->
                                         <div>
-                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Registration Number') }}</label>
-                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
+                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Registration Number') }}</label>
+                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
                                             <div id="error-registration_number"></div>
                                         </div>
 
                                         <!-- Business Number -->
                                         <div>
-                                            <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Number') }}</label>
-                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
+                                            <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Number') }}</label>
+                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
                                             <div id="error-business_number"></div>
                                         </div>
                                         <!-- Incorporation Date -->
                                         <div>
-                                            <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Incorporation Date') }}</label>
+                                            <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Incorporation Date') }}</label>
                                             <section class="flex flex-col md:flex-row md:justify-between md:items-center md:gap-2 gap-10">
-                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Day') }}">
-                                                <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Day') }}">
+                                                <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                     <option value="" disabled selected>{{ __('Select a month') }}</option>
                                                     <option value="1">{{ __('January') }}</option>
                                                     <option value="2">{{ __('February') }}</option>
@@ -400,35 +400,35 @@
                                                     <option value="11">{{ __('November') }}</option>
                                                     <option value="12">{{ __('December') }}</option>
                                                 </select>
-                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Year') }}">
+                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Year') }}">
                                             </section>
                                             <div id="error-incorporation_date" class="text-red-500 mt-2"></div>
                                         </div>
                                         
                                         <!-- Business Type -->
                                         <div>
-                                            <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Type') }}</label>
-                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter your business type') }}">
+                                            <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Type') }}</label>
+                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter your business type') }}">
                                             <div id="error-business_type" ></div>
     
                                         </div>
     
                                         <!-- Company URL -->
                                         <div>
-                                            <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Company URL') }}</label>
+                                            <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Company URL') }}</label>
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                     <p>https://</p>
                                                 </div>
-                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
+                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
                                             </div>
                                             <div id="error-company_url"></div>
     
                                         </div>
                                         <!-- Industry -->
                                         <div>
-                                            <label for="industry" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Industry') }}</label>
-                                            <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            <label for="industry" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Industry') }}</label>
+                                            <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                 <option selected>{{ __('Select an option') }}</option>
                                                 @foreach ($industries as $industry)
                                                 <option value="{{ $industry->id }}">{{ $industry->name }}</option>
@@ -440,7 +440,7 @@
                                       <!-- Annual Turnover -->
                                       
                                       <div class="relative">
-                                        <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Annual Turnover') }}</label>
+                                        <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Annual Turnover') }}</label>
                                         
                                         <!-- Wrapper div for the input and currency symbol -->
                                         <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full pl-8 p-2.5 flex items-center">
@@ -567,9 +567,9 @@
                                         <!-- Street Address -->
                                         <div>
                                             <label for="street_address"
-                                                class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Street Address</label>
+                                                class="block mb-2 text-sm font-bold text-[#828282]  ">Street Address</label>
                                             <input type="text" id="street_address"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="Enter street address">
                                             <div id="error-street-address" class="text-red-500 text-sm"></div>
                                         </div>
@@ -577,9 +577,9 @@
                                         <!-- City -->
                                         <div>
                                             <label for="city"
-                                                class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">City</label>
+                                                class="block mb-2 text-sm font-bold text-[#828282]  ">City</label>
                                             <input type="text" id="city"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="Enter city">
                                             <div id="error-city" class="text-red-500 text-sm"></div>
                                         </div>
@@ -588,7 +588,7 @@
                                         <div>
                                             <section class="flex justify-between items-center w-full">
                                                 <label for="trading_address"
-                                                    class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Trading Address</label>
+                                                    class="block mb-2 text-sm font-bold text-[#828282]  ">Trading Address</label>
                             
                                                 <!-- Toggle Button -->
                                                 <section class="mb-2 capitalize">
@@ -606,7 +606,7 @@
                             
                                             <div id="trading-address-container" class="mt-4">
                                                 <input type="text" id="trading_address"
-                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                     placeholder="Enter trading address">
                                             </div>
                                             <div id="error-trading-address" class="text-red-500 text-sm"></div>
@@ -615,9 +615,9 @@
                                         <!-- Nature of Business -->
                                         <div>
                                             <label for="message"
-                                                class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Nature of Business</label>
+                                                class="block mb-2 text-sm font-bold text-[#828282]  ">Nature of Business</label>
                                             <textarea id="message" rows="6"
-                                                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="Enter the nature of your business, such as the services you offer, your target audience, etc."></textarea>
                                             <div id="error-nature-of-business" class="text-red-500 text-sm"></div>
                                         </div>
@@ -769,15 +769,15 @@
                                     <section class="flex flex-col gap-10">
                                         <!-- Street Address -->
                                         {{-- <div>
-                                            <label for="street_address" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Street Address</label>
-                                            <input type="text" id="street_address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter street address">
+                                            <label for="street_address" class="block mb-2 text-sm font-bold text-[#828282]  ">Street Address</label>
+                                            <input type="text" id="street_address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter street address">
                                             <div id="error-street-address" class="text-red-500 text-sm"></div>
                                         </div> --}}
                             
                                         <!-- City -->
                                         {{-- <div>
-                                            <label for="city" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">City</label>
-                                            <input type="text" id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter city">
+                                            <label for="city" class="block mb-2 text-sm font-bold text-[#828282]  ">City</label>
+                                            <input type="text" id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter city">
                                             <div id="error-city" class="text-red-500 text-sm"></div>
                                         </div> --}}
     
@@ -787,7 +787,7 @@
                                     
                                     {{-- <div id="ng-state-select" class="hidden">
                                         <div class="custom-select">
-                                            <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                                 <option value="" disabled selected>Select a state</option>
                                                 @foreach ($states as $state)
                                                 <option value="{{ $state->id }}">{{ $state->name }}</option>
@@ -799,38 +799,38 @@
 
                                     <!-- Generic State Input (visible for all non-NG countries) -->
                                     <div id="generic-state-input">
-                                        <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">First Name</label>
+                                        <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282]  ">First Name</label>
                                         <input type="text" id="first_name" placeholder="Enter Your First Name"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <div id="error-first_name" class="text-red-500 text-sm"></div>
                                     </div>
                                     
                                     <div id="generic-state-input">
-                                        <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Last Name</label>
+                                        <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282]  ">Last Name</label>
                                         <input type="text" id="last_name" placeholder="Enter Your Fast_Name"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <div id="error-last_name" class="text-red-500 text-sm"></div>
                                     </div>
 
                                     <div id="generic-state-input">
-                                        <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Phone Number</label>
+                                        <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282]  ">Phone Number</label>
                                         <input type="text" id="person_number" placeholder="Enter Your Phone Number"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <div id="error-person_number" class="text-red-500 text-sm"></div>
                                     </div>
 
                                     <div id="generic-state-input">
-                                        <label for="state" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">State</label>
+                                        <label for="state" class="block mb-2 text-sm font-bold text-[#828282]  ">State</label>
                                         <input type="text" id="state" placeholder="Enter Your State"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <div id="error-state" class="text-red-500 text-sm"></div>
                                     </div>
     
                             
                                         <!-- Email -->
                                         <div>
-                                            <label for="email" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Email</label>
-                                            <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="johndoe@gmail.com">
+                                            <label for="email" class="block mb-2 text-sm font-bold text-[#828282]  ">Email</label>
+                                            <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="johndoe@gmail.com">
                                             <div id="error-email" class="text-red-500 text-sm"></div>
                                             <small id="email-error" class="text-danger" style="display: none;"></small>
                                         </div>
@@ -840,7 +840,7 @@
                                         <!-- Password -->
                                         <!-- <div>
                                             <label for="password" class="block mb-2 text-sm font-bold text-[#828282]">Password</label>
-                                            <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
+                                            <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
                                             <div id="error-password" class="text-red-500 text-sm"></div>
                                         </div> -->
 
@@ -859,7 +859,7 @@
                                         <!-- Confirm Password -->
                                         <!-- <div>
                                             <label for="confirm_password" class="block mb-2 text-sm font-bold text-[#828282]">Confirm Password</label>
-                                            <input type="password" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
+                                            <input type="password" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" autocomplete="off">
                                             <div id="error-confirm-password" class="text-red-500 text-sm"></div>                                    
                                         </div> -->
 
@@ -981,7 +981,7 @@
                                                 <label for="code-1" class="sr-only">First code</label>
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-next="code-2" id="code-1"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                             <div>
@@ -989,7 +989,7 @@
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-prev="code-1" data-focus-input-next="code-3"
                                                     id="code-2"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                             <div>
@@ -997,7 +997,7 @@
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-prev="code-2" data-focus-input-next="code-4"
                                                     id="code-3"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                             <div>
@@ -1005,7 +1005,7 @@
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-prev="code-3" data-focus-input-next="code-5"
                                                     id="code-4"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                             <div>
@@ -1013,14 +1013,14 @@
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-prev="code-4" data-focus-input-next="code-6"
                                                     id="code-5"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                             <div>
                                                 <label for="code-6" class="sr-only">Sixth code</label>
                                                 <input type="text" maxlength="1" data-focus-input-init
                                                     data-focus-input-prev="code-5" id="code-6"
-                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                                    class="block w-10 h-10 md:w-18 md:h-16 py-3 text-sm font-extrabold text-center text-gray-900 bg-[#FAFAFA] border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                                     required />
                                             </div>
                                         </div>
@@ -1143,11 +1143,11 @@
                                         <!-- Bank verification -->
                                         <div>
                                             <label for="helper-text"
-                                                class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Please
+                                                class="block mb-2 text-sm font-bold text-[#828282]  ">Please
                                                 Enter Your
                                                 BVN</label>
                                             <input type="text" id="helper-text" aria-describedby="helper-text-explanation"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                                 placeholder="12345678901">
     
                                         </div>

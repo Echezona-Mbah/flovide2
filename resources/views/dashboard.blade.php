@@ -19,47 +19,47 @@
             </h1>
             @include('business.header_notifical')   
         </header>
-        <section class=" relative w-full">
-        @if (!auth()->user()->isFullyVerified())
-        <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
-            
-            <!-- soft background accent -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
 
-            <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            
-            <!-- Left content -->
-            <div class="flex items-start gap-3">
-                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
-                <i class="fas fa-shield-alt text-lg"></i>
+        <section class="relative w-full">
+            @if (!auth()->user()->isFullyVerified())
+            <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
+                
+                <!-- soft background accent -->
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
+
+                <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                
+                <!-- Left content -->
+                <div class="flex items-start gap-3">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
+                    <i class="fas fa-shield-alt text-lg"></i>
+                    </div>
+
+                    <div>
+                    <h4 class="text-sm font-semibold text-yellow-900">
+                        Account verification required
+                    </h4>
+                    <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
+                        For your safety and compliance, some features are temporarily unavailable.
+                        Please complete your verification to unlock full access.
+                    </p>
+                    </div>
                 </div>
 
-                <div>
-                <h4 class="text-sm font-semibold text-yellow-900">
-                    Account verification required
-                </h4>
-                <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
-                    For your safety and compliance, some features are temporarily unavailable.
-                    Please complete your verification to unlock full access.
-                </p>
+                <!-- Action button -->
+                <a href="{{ url('/compliance') }}"
+                    class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
+                    <i class="fas fa-arrow-right"></i>
+                    Complete Verification
+                </a>
+
                 </div>
             </div>
-
-            <!-- Action button -->
-            <a href="{{ url('/compliance') }}"
-                class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
-                <i class="fas fa-arrow-right"></i>
-                Complete Verification
-            </a>
-
-            </div>
-        </div>
-        @endif
+            @endif
 
 
 
-            <section
-                class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
+            <section class="bg-white w-full text-gray-700 min-h-screen md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute  overflow-x-hidden ">
                 <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
