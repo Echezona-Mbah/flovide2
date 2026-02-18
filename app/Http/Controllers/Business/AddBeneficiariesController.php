@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
-
-
+use App\Models\CountryRule;
 
 class AddBeneficiariesController extends Controller
 {
@@ -41,6 +40,27 @@ class AddBeneficiariesController extends Controller
     
         return view('business.beneficiaries', compact('beneficias'));
     }
+    public function create()
+    {
+        $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+
+        $countries = CountryRule::all();
+
+        // 🔥 Build JS-friendly array
+        $countryRules = [];
+
+        foreach ($countries as $c) {
+            $countryRules[$c->country_iso] = [
+                'currency' => $c->currency_iso,
+                'rules' => $c->rules,
+            ];
+        }
+
+        return view('business.add_beneficia', compact('countries', 'countryRules'));
+    }
+
 
     public function allBeneficia(Request $request)
     {
@@ -62,36 +82,23 @@ class AddBeneficiariesController extends Controller
 
 
 
-    public function create()
-    {
-           $user = auth()->user();
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $ownerId = $team ? $team->owner_id : $user->id;
+   
 
 
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries');
+public function store(Request $request)
+{
+    // Get logged-in business user (works for web + api)
+    $userId = auth('api')->id() ?? auth()->id();
+    $user   = auth('api')->user() ?? auth()->user();
 
-        $countries = [];
-
-        if ($response->successful()) {
-            $countries = $response->json(); // this gives the array of country objects
-        }
-
-        $banks = Bank::all();
-        $beneficiaries = Beneficia::where('user_id', $ownerId)->paginate(8);
-
-        return view('business.add_beneficia', compact('countries', 'banks', 'beneficiaries'));
+    if (!$user) {
+        $msg = 'You must be logged in to add a beneficiary.';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg], 401)
+            : redirect()->back()->with('error', $msg);
     }
 
-
-
-  public function store(Request $request)
-{
-    $userId = auth('api')->id() ?? auth()->id();
-    $user   = auth()->user();
-
-    // Check role
+    // Check team role
     $team = TeamMembers::where('user_id', $user->id)->first();
     $role = $team ? $team->role : 'Owner';
 
@@ -102,47 +109,13 @@ class AddBeneficiariesController extends Controller
             : redirect()->back()->with('error', $msg);
     }
 
-    // Add country & currency to request if needed
-    $request->merge([
-        'country'  => $request->input('country'),
-        'currency' => $request->input('currency'),
-    ]);
+    // Call IFX controller
+    $ibanq = new \App\Http\Controllers\Ibanq\IbanqBeneficiaryController(
+        app(\App\Services\IbanqAuthService::class)
+    );
 
-//    $response = $this->beneficiaryService->createBeneficiary($request, $userId);
+    return $ibanq->createBeneficiary($request, $user->id, null);
 
-       $ibanqController = new IbanqBeneficiaryController(app(\App\Services\IbanqAuthService::class));
-
-    return $ibanqController->createBeneficiary($request);
-
-
-    // // Call the createBeneficiary function
-    // $response = $this->createBeneficiary($request);
-
-    // // Decode the JSON response if it's JSON
-    // $responseData = $response instanceof \Illuminate\Http\JsonResponse
-    //     ? $response->getData(true)['data'] ?? []
-    //     : [];
-
-    // // Store in database if API call successful
-    // if (!empty($responseData) && $response->getData(true)['success']) {
-    //     $beneficia = Beneficia::create([
-    //         'recipient_id'     => $responseData['id'] ?? null,
-    //         'country'          => $responseData['country'] ?? $request->country,
-    //         'alias'            => $responseData['alias'] ?? $request->uniqueReference,
-    //         'type'             => $responseData['type'] ?? $request->type,
-    //         'account_name'     => $request->bankDetails['accountName'] ?? null,
-    //         'account_number'   => $request->bankDetails['accountNumber'] ?? null,
-    //         'bank'             => $responseData['bank_account']['bank_name'] ?? null,
-    //         'currency'         => $request->currency,
-    //         'user_id'          => $userId,
-    //         'default_reference'=> 'Invoice',
-    //     ]);
-    // }
-
-    // // Return same response from API or redirect
-    // return $request->expectsJson()
-    //     ? $response
-    //     : redirect()->back()->with('success', 'Beneficiary created successfully.');
 }
 
 
@@ -565,331 +538,6 @@ class AddBeneficiariesController extends Controller
     
         return response()->json($beneficiaries);
     }
-
-
-
-    
-
-    public function validateRecipient(Request $request)
-    {
-        $request->validate([
-            'country' => 'required|string',
-            'currency' => 'required|string',
-            'bank_id' => 'required|string',
-            'account_number' => 'required|string',
-        ]);
-
-        $payload = $request->only([
-            'country', 'currency', 'bank_id', 'account_number'
-        ]);
-
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))->post(
-            rtrim(env('OHENTPAY_BASE_URL'), '/') . '/recipients/validate', $payload
-        );
-
-        if ($request->expectsJson()) {
-            return response()->json($response->json(), $response->status());
-        }
-
-        if ($response->successful()) {
-            return back()->with('success', 'Recipient account created successfully.');
-        } else {
-            return back()->with('error', 'Invalid bank or account number.');
-        }
-    }
-
-    
-
-
-
-    // public function listRecipients(Request $request)
-    // {
-    //     $response = Http::withHeaders([
-    //         'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-    //         'Accept' => 'application/json',
-    //     ])->get(env('OHENTPAY_BASE_URL') . '/recipients');
-
-    //     if ($response->successful()) {
-    //         $recipients = $response->json();
-
-    //         // API response
-    //         if ($request->expectsJson()) {
-    //             return response()->json($recipients);
-    //         }
-
-    //         // Web view
-    //         return view('recipients.index', ['recipients' => $recipients]);
-    //     }
-
-    //     return response()->json([
-    //         'error' => 'Failed to fetch recipients',
-    //         'details' => $response->body(),
-    //     ], $response->status());
-    // }
-
-
-
-
-
-    public function fetchcountrylist(Request $request)
-    {
-        $country_name = $request->get('country_name', 'NG'); 
-        $alpha2 = $request->get('alpha2', 'NGN'); 
-
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries', [
-                'country_name' => $country_name,
-                'alpha2' => $alpha2
-            ]);
-
-        if ($response->successful()) {
-            return response()->json([
-                'status' => 'success',
-                'fields' => $response->json()
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch bank fields',
-            'details' => $response->json()
-        ], $response->status());
-    }
-
-    public function fetchcurrencylist(Request $request)
-    {
-        $currency_code = $request->get('currency_code', 'NG');
-        $currency_name = $request->get('currency_name', 'NGN'); 
-
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/currencies', [
-                'country_name' => $currency_code,
-                'currency_name' => $currency_name
-            ]);
-
-        if ($response->successful()) {
-            return response()->json([
-                'status' => 'success',
-                'fields' => $response->json()
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch bank fields',
-            'details' => $response->json()
-        ], $response->status());
-    }
-
-
-    // public function fetchBankss(Request $request)
-    // {
-
-    //     $country = $request->input('country');
-    //     $currency = $request->input('currency');
-    //     $rules = [
-    //             'country' => 'required|string',
-    //             'currency' => 'required|string',
-    //     ];
-    //     $validator = Validator::make($request->all(), $rules);
-
-    //     if ($validator->fails()) {
-    //             return $request->expectsJson()
-    //                 ? response()->json([
-    //                     'message' => 'Validation failed',
-    //                     'errors' => $validator->errors()
-    //                 ], 422)
-    //                 : redirect()->back()->withErrors($validator)->withInput();
-    //     }
-
-    //     $response = Http::withToken(env('OHENTPAY_API_KEY'))
-    //         ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-    //             'country' => $country,
-    //             'currency' => $currency
-    //         ]);
-
-    //     if ($response->successful()) {
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'banks' => $response->json()
-    //         ]);
-    //     }
-
-    //     return response()->json([
-    //         'status' => 'error',
-    //         'message' => 'Failed to fetch banks',
-    //         'details' => $response->json()
-    //     ], $response->status());
-    // }
-
-        public function fetchBankss(Request $request)
-    {
-        $country = $request->input('country');
-        $currency = $request->input('currency');
-
-        $rules = [
-            'country' => 'required|string',
-            'currency' => 'required|string',
-        ];
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $request->expectsJson()
-                ? response()->json([
-                    'data' => [
-                        'errors' => 'Validation failed',
-                        'success' => false,
-                        'errors' => $validator->errors(),
-                        'method' => $request->method(),
-                        'url' => $request->fullUrl()
-                    ]
-                ], 422)
-                : redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-                'country' => $country,
-                'currency' => $currency
-            ]);
-
-        if ($response->successful()) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Banks retrieved successfully',
-                    'success' => true,
-                    'data' => $response->json(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
-            ], 200);
-        }
-
-        return response()->json([
-            'data' => [
-                'errors' => 'Failed to fetch banks',
-                'success' => false,
-                'data' => $response->json(),
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]
-        ], $response->status());
-    }
-
-
-
-    // public function fetchBanks(Request $request)
-    // {
-    //     $country = $request->get('country'); 
-    //     $currency = $request->get('currency'); 
-
-    //     $response = Http::withToken(env('OHENTPAY_API_KEY'))
-    //         ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-    //             'country' => $country,
-    //             'currency' => $currency
-    //         ]);
-
-    //     dd($response->json());
-
-
-    //     if ($response->successful()) {
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'fields' => $response->json()
-    //         ]);
-    //     }
-
-    //     return response()->json([
-    //         'status' => 'error',
-    //         'message' => 'Failed to fetch bank fields',
-    //         'details' => $response->json()
-    //     ], $response->status());
-    // }
-
-//     public function fetchBanks(Request $request)
-// {
-//     $country  = $request->get('country');
-//     $currency = $request->get('currency');
-
-//     $response = Http::withToken(env('OHENTPAY_API_KEY'))
-//         ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-//             'country'  => $country,
-//             'currency' => $currency
-//         ]);
-
-//     if ($response->successful()) {
-
-//         // Extract only the "name" field
-//         $names = collect($response->json())->pluck('name');
-
-//         return response()->json([
-//             'status'  => 'success',
-//             'message' => 'Bank fields retrieved',
-//             'fields'  => $names
-//         ]);
-//     }
-
-//     return response()->json([
-//         'status'  => 'error',
-//         'message' => 'Failed to fetch bank fields',
-//         'details' => $response->json()
-//     ], $response->status());
-// }
-
-
-public function fetchBanks(Request $request)
-{
-    $country  = $request->get('country');
-    $currency = $request->get('currency');
-
-    $response = Http::withToken(env('OHENTPAY_API_KEY'))
-        ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/bankfields', [
-            'country'  => $country,
-            'currency' => $currency
-        ]);
-
-    if (!$response->successful()) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'Failed to fetch bank fields',
-            'details' => $response->json()
-        ], $response->status());
-    }
-
-    $fields = collect($response->json());
-
-    // ✅ Check if bank select exists
-    $bankField = $fields->firstWhere('name', 'bank_id');
-
-    // ✅ If currency supports banks
-    if ($bankField && $bankField['type'] === 'select') {
-
-        $banks = collect($bankField['options'])->map(function ($bank) {
-            return [
-                'id'   => $bank['value'],
-                'name' => $bank['label'],
-                'code' => $bank['bank_code']
-            ];
-        });
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Banks retrieved',
-            'has_bank'=> true,
-            'fields'   => $fields->pluck('name'),
-            'banks' => $banks
-        ]);
-    }
-
-    // ❌ If currency does NOT require bank
-    return response()->json([
-        'status'   => 'success',
-        'message'  => 'No bank required for this currency',
-        'has_bank' => false,
-        'fields'   => $fields->pluck('name')
-    ]);
-}
-
 
 
     

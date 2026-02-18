@@ -1,6 +1,41 @@
 @include('business.head')
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<style>
+/* Wrapper for safety */
+.select-wrapper {
+  width: 100%;
+}
+
+/* Force TomSelect to full width and big height */
+.select-wrapper .ts-control {
+  min-height: 40px !important;   /* always big */
+  height: 40px !important;       /* force exact height */
+  padding: 0 16px !important;    /* padding inside */
+  font-size: 16px !important;    /* readable font */
+  display: flex !important;
+  align-items: center !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  transition: all 0.2s ease;
+}
+
+/* Hover and focus */
+.select-wrapper .ts-control:hover {
+  border-color: #6366f1 !important;
+}
+
+.select-wrapper .ts-control.focus {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+}
+
+
+</style>
+
 
     <!-- Mobile menu button -->
   @include('business.header')
@@ -28,35 +63,86 @@
       <p class="text-gray-500 text-sm md:text-base">Securely add an international IBAN beneficiary</p>
     </div>
 
+    <!-- Form -->
     <form method="POST" action="{{ route('add_beneficias.store') }}" class="space-y-6 md:space-y-8">
       @csrf
 
-      <!-- Beneficiary Info Card -->
+      <!-- Alerts -->
+      @if ($errors->any())
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json($errors->first()),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('success'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: @json(session('success')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('api_error'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json(session('api_error')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      <!-- Beneficiary Information -->
       <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
         <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">👤 Beneficiary Information</h3>
 
         <!-- Country & Currency -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Country -->
           <div>
-            <label class="text-sm font-medium">Country</label>
-            <select name="country" class="w-full mt-1 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
-              <option value="">🌐 Select Country</option>
-              <option value="GB">🇬🇧 United Kingdom</option>
-              <option value="NG">🇳🇬 Nigeria</option>
-              <option value="UG">🇺🇬 Uganda</option>
-              <option value="CA">🇨🇦 Canada</option>
-            </select>
+            <label class="text-sm font-medium mb-1 block">Country</label>
+            <div class="select-wrapper">
+              <select id="countrySelect" name="country">
+                <option value=""></option>
+                @foreach($countries as $country)
+                  <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
+
+          <!-- Currency -->
           <div>
-            <label class="text-sm font-medium">Currency</label>
-            <select name="currency" class="w-full mt-1 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
-              <option value="">💰 Select Currency</option>
-              <option value="GBP">🇬🇧 £ - British Pound</option>
-              <option value="NGN">🇳🇬 ₦ - Nigerian Naira</option>
-              <option value="UGX">🇺🇬 USh - Ugandan Shilling</option>
-              <option value="CAD">🇨🇦 $ - Canadian Dollar</option>
-            </select>
+            <label class="text-sm font-medium mb-1 block">Currency</label>
+            <div class="select-wrapper">
+              <select id="currencySelect" name="bank[currency]">
+                <option value=""></option>
+                @foreach($countries->unique('currency_iso') as $country)
+                  <option value="{{ $country->currency_iso }}">{{ $country->currency_iso }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
+
         </div>
 
         <!-- Beneficiary Type -->
@@ -74,42 +160,69 @@
 
         <!-- Corporate Fields -->
         <div id="corporateFields" class="mt-2 hidden">
-          <input type="text" name="companyName" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
 
+        <!-- Reference -->
         <div class="mt-2">
           <input type="text" name="uniqueReference" placeholder="Unique Reference" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
       </div>
 
-      <!-- Address Card -->
+      <!-- Address -->
       <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
-        <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">📍 Address</h3>
+        <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">📍 Beneficiary Address</h3>
 
-        <input type="text" name="address[line1]" placeholder="Street address" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-        <input type="text" name="address[line2]" placeholder="Apartment, suite (optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        <input type="text" name="address[addressLine1]" placeholder="Street address" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        <input type="text" name="address[addressLine2]" placeholder="Apartment, suite (optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        <input type="text" name="address[buildingName]" placeholder="Building Name (Optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input type="text" name="address[city]" placeholder="City" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-          <select name="address[country]" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
-            <option value="GB">🇬🇧 United Kingdom</option>
-            <option value="NG">🇳🇬 Nigeria</option>
-            <option value="UG">🇺🇬 Uganda</option>
-            <option value="CA">🇨🇦 Canada</option>
-          </select>
-          <input type="text" name="address[postalCode]" placeholder="Postal code" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="address[state]" placeholder="State / Province (Optional)" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="address[postcode]" placeholder="Postal Code" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
+
+        <select name="address[country]" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
+          <option value="">Country</option>
+          @foreach($countries as $country)
+            <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+          @endforeach
+        </select>
       </div>
 
-      <!-- Bank Details Card -->
+      <!-- Bank Details -->
       <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
         <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">🏦 Bank Details</h3>
 
-        <input type="text" name="bankDetails[iban]" placeholder="IBAN" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400 text-sm md:text-base" />
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input type="text" name="bankDetails[accountNumber]" placeholder="Account number" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400 text-sm md:text-base" />
-          <input type="text" name="bankDetails[sortCode]" placeholder="Sort code" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-400 text-sm md:text-base" />
-        </div>
+        <input 
+            type="text" 
+            name="bank[accountHolder]" 
+            placeholder="Account Holder" 
+            class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
+        />
+
+        <input 
+        type="text" 
+        name="bank[nickname]" 
+        placeholder="Bank Nickname" 
+        class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
+        />
+
+        <!-- Bank Fields -->
+        <input type="text" id="iban" name="bank[iban]" placeholder="IBAN" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="accountNumber" name="bank[accountNumber]" placeholder="Account Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="sortCode" name="bank[sortCode]" placeholder="Sort Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="bankCode" name="bank[bankCode]" placeholder="Bank Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+
+        <!-- Account Type -->
+        <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
+          <option value="">Account Type</option>
+          <option value="checking">Checking</option>
+          <option value="savings">Savings</option>
+        </select>
       </div>
 
       <!-- Buttons -->
@@ -121,15 +234,87 @@
           Cancel
         </button>
       </div>
+
     </form>
   </div>
 </section>
+
 
 
 </section>
 
 
     </main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const options = {
+    allowEmptyOption: true,
+  };
+
+  new TomSelect("#countrySelect", options);
+  new TomSelect("#currencySelect", options);
+});
+
+
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const countryRules = @json($countryRules);
+
+  const fieldMap = {
+    iban: "iban",
+    accountNumber: "accountNumber",
+    sortCode: "sortCode",
+    bankCode: "bankCode",
+    swiftBic: "swiftBic",
+    routing: "routing",
+    accountType: "accountType"
+  };
+
+  const countrySelect = document.getElementById("countrySelect");
+  const currencySelect = document.getElementById("currencySelect");
+  const allFields = document.querySelectorAll(".bank-field");
+
+  if (!countrySelect) return; // safety
+
+  countrySelect.addEventListener("change", function () {
+
+    const selected = countryRules[this.value];
+
+    // Auto currency
+    if (selected && currencySelect) {
+      currencySelect.value = selected.currency;
+    }
+
+    // Hide all fields
+    allFields.forEach(f => {
+      f.classList.add("hidden");
+      f.removeAttribute("required");
+    });
+
+    if (!selected) return;
+
+    // Show required fields
+    selected.rules.forEach(field => {
+      const el = document.getElementById(fieldMap[field]);
+      if (el) {
+        el.classList.remove("hidden");
+        el.setAttribute("required", "required");
+      }
+    });
+
+  });
+
+});
+</script>
+
+
+
+
 
     <script>
 const typeSelect = document.getElementById('beneficiaryType');

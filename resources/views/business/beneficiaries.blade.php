@@ -17,285 +17,325 @@
             </h1>
             @include('business.header_notifical')
         </header>
-        <section class=" relative w-full">
-            <section
-                class="flex flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  w-full ">
-                
-                    <section class="flex flex-col md:flex-row  mx-auto max-w-full min-h-screen">
-                        <!-- Left side: Table and search -->
-                        <section class="flex-1 p-2 md:p-6">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-8 md:gap-0">
-                                <div class="flex-1 max-w-md">
-                                    <label for="search" class="sr-only">Search beneficiaries</label>
-                                    <div
-                                        class="flex items-center border border-gray-300 rounded-full px-4 py-2 w-full sm:w-[400px]">
-                                        <i class="fas fa-search text-gray-400 mr-3"></i>
-                                        <input type="search" id="search-input" placeholder="Search beneficiaries"
-                                        class="w-full text-sm text-gray-600 placeholder-gray-400 focus:outline-none" />
-                                    </div>
+<section class="relative w-full bg-gray-50 min-h-screen">
+
+    <section class="max-w-7xl mx-auto px-3 md:px-6 py-6">
+
+        <section class="bg-white rounded-2xl shadow-md">
+
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 md:p-6 border-b">
+
+                <!-- Search -->
+                <div class="flex items-center border border-gray-300 rounded-full px-4 py-2 w-full md:max-w-md">
+                    <i class="fas fa-search text-gray-400 mr-3"></i>
+                    <input type="search"
+                        placeholder="Search beneficiaries"
+                        class="w-full text-sm focus:outline-none" />
+                </div>
+
+                <!-- Button -->
+                <a href="{{ route('add_beneficias.create') }}"
+                    class="flex items-center justify-center gap-2 bg-blue-600 text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition w-full md:w-auto">
+                    <i class="fas fa-plus"></i>
+                    Add Beneficiary
+                </a>
+
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-sm">
+
+                    <thead class="bg-gray-100 text-gray-600">
+                        <tr>
+                            <th class="text-left px-4 py-3">Full Name</th>
+                            <th class="text-left px-4 py-3 hidden sm:table-cell">Bank</th>
+                            <th class="text-left px-4 py-3">Account</th>
+                            <th class="text-left px-4 py-3 hidden md:table-cell">Country</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse ($beneficias as $beneficia)
+
+                        <tr
+    onclick="showDetails(this)"
+    class="cursor-pointer border-b hover:bg-blue-50 transition"
+
+    data-id="{{ $beneficia->id }}"
+    data-name="{{ $beneficia->account_name }}"
+    data-bank="{{ $beneficia->bank }}"
+    data-account="{{ $beneficia->account_number }}"
+    data-country="{{ $beneficia->country }}"
+    data-city="{{ $beneficia->city }}"
+    data-state="{{ $beneficia->state }}"
+    data-address1="{{ $beneficia->address_line1 }}"
+    data-address2="{{ $beneficia->address_line2 }}"
+    data-swift="{{ $beneficia->swift_bic }}"
+    data-currency="{{ $beneficia->currency }}"
+>
+
+
+                            <td class="px-4 py-4 font-semibold">
+                                {{ $beneficia->account_name }}
+                                <div class="text-xs text-gray-500 sm:hidden">
+                                    {{ $beneficia->bank }}
                                 </div>
-                                <a href="{{ route('add_beneficias.create') }}"
-                            class="flex items-center justify-center gap-1 rounded-full bg-blue-200 text-blue-800 text-[12px] font-semibold px-4 py-2 min-w-[140px] hover:bg-blue-300 transition">
-                                <i class="fas fa-plus"></i> Add Beneficiary
-                            </a>
-                            </div>
-                            <!-- Beneficiaries Table -->
-                            <table class="w-full border-collapse text-sm text-gray-700 overflow-auto">
-                                @if ($errors->any())
-                                <script>
-                                    Swal.fire({
-                                        toast: true,
-                                        position: 'top-end',
-                                        icon: 'error',
-                                        title: @json($errors->first()),
-                                        showConfirmButton: false,
-                                        timer: 4000,
-                                        timerProgressBar: true,
-                                    });
-                                </script>
-                                @endif
-                                
-                                @if (session('success'))
-                                <script>
-                                    Swal.fire({
-                                        toast: true,
-                                        position: 'top-end',
-                                        icon: 'success',
-                                        title: @json(session('success')),
-                                        showConfirmButton: false,
-                                        timer: 4000,
-                                        timerProgressBar: true,
-                                    });
-                                </script>
-                                @endif
-                                <thead>
-                                    <tr class="border-b border-gray-200">
-                                        <th class="text-left font-normal pb-3 px-3">Full Name</th>
-                                        <th class="text-left font-normal pb-3 px-3">Bank</th>
-                                        <th class="text-left font-normal pb-3 px-3">Bank Account no.</th>
-                                        <th class="text-left font-normal pb-3 px-3">Bank country</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="beneficiaries-table" >
-                                    @forelse ($beneficias as $beneficia)
-                                    <tr 
-                                        id="beneficia-row-{{ $beneficia->id }}"
-                                        class="bg-blue-50 font-semibold border-b border-gray-200 cursor-pointer"
-                                        data-id="{{ $beneficia->id }}"
-                                        data-name="{{ $beneficia->account_name }}"
-                                        data-bank="{{ $beneficia->bank }}"
-                                        data-account="{{ $beneficia->account_number }}"
-                                        data-country="{{ $beneficia->country }}"
-                                        data-alias="{{ $beneficia->alias }}"
-                                        data-type="{{ $beneficia->type }}"
-                                        data-currency="{{ $beneficia->currency }}"
-                                        onclick="showDetails(this)">
+                            </td>
 
-                                        <td class="px-3 py-3">{{ $beneficia->account_name }}</td>
-                                        <td class="px-3 py-3">{{ $beneficia->bank }}</td>
-                                        <td class="px-3 py-3">{{ $beneficia->account_number }}</td>
-                                        <td class="px-3 py-3">{{ $beneficia->country }}</td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="4" class="px-3 py-3 text-center text-gray-500">No beneficiaries found.</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                            <div class="mt-4">
-                                {{ $beneficias->links() }}
-                            </div>
-                        </section>
-                    
-                        <!-- Right side: Beneficiary details -->
-                        <section id="beneficiary-details" class="w-full md:w-96 border-l border-gray-200 p-6 md:p-10">
-                            <h3 class="font-semibold text-gray-900 mb-6">Beneficiary Details</h3>
-                            <h2 id="detail-name" class="text-3xl font-normal mb-6">Select a beneficiary</h2>
-                            
-                        
-                            <input type="hidden" id="beneficia-id" />
+                            <td class="px-4 py-4 hidden sm:table-cell">
+                                {{ $beneficia->bank }}
+                            </td>
 
-                            <div class="mb-6">
-                                <p class="text-sm text-gray-500 mb-1">Bank</p>
-                                <p id="detail-bank-name" class="text-base font-normal text-gray-900">-</p>
-                            </div>
-                            
-                            <div class="mb-6">
-                                <p class="text-sm text-gray-500 mb-1">Alias</p>
-                                <p id="detail-alias" class="text-base font-normal text-gray-900">-</p>
-                            </div>
-                            
-                            <div class="mb-6">
-                                <p class="text-sm text-gray-500 mb-1">Account Type</p>
-                                <p id="detail-account-type" class="text-base font-normal text-gray-900">-</p>
-                            </div>
-                            
-                            {{-- <div class="mb-6">
-                                <p class="text-sm text-gray-400 mb-1">Country</p>
-                                <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
-                            </div> --}}
-                            <div class="mb-6">
-                                <p class="text-sm text-gray-400 mb-1">Country</p>
-                                <div class="flex items-center gap-2">
-                                    <img id="detail-country-flag" src="" alt="Country Flag" class="w-5 h-auto rounded shadow" />
-                                    <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
-                                </div>
-                            </div>
-                            
+                            <td class="px-4 py-4 font-mono">
+                                {{ $beneficia->account_number }}
+                            </td>
 
-                            <div class="mb-6">
-                                <p class="text-sm text-gray-400 mb-1">Currency</p>
-                                <p id="detail-currency" class="text-base font-semibold text-gray-900">-</p>
-                            </div>
-                            
-                        
-                            <div class="mb-10 flex items-center gap-2">
-                                <div>
-                                    <p class="text-sm text-gray-400 mb-1">Bank account number</p>
-                                    <p id="detail-account" class="text-base font-semibold text-gray-900 inline-block">-</p>
-                                </div>
-                                <button aria-label="Copy bank account number"
-                                    onclick="copyAccountNumber()"
-                                    class="text-green-600 hover:text-green-700 focus:outline-none">
-                                    <i class="far fa-copy"></i>
-                                </button>
-                            </div>
-                        
-                            <div class="flex gap-4">
-                                {{-- <a id="edit-link"
-                                href="#"
-                                class="inline-flex items-center gap-2 rounded-lg bg-blue-100 px-6 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                <i class="fas fa-pen"></i> Edit
-                                </a> --}}
+                            <td class="px-4 py-4 hidden md:table-cell">
+                                {{ $beneficia->country }}
+                            </td>
 
-                                <button type="button"
-                                    onclick="deleteBeneficia()"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-red-100 px-6 py-2 text-sm font-semibold text-red-600 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </button>
-                            </div>
-                        </section>
-                        
-                    </section>
-           
+                        </tr>
+
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-8 text-gray-500">
+                                No beneficiaries found
+                            </td>
+                        </tr>
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Pagination -->
+            <div class="p-4">
+                {{ $beneficias->links() }}
+            </div>
+
+        </section>
+
+    </section>
+
+</section>
+
+
+
+    <!-- ===================== MODAL ===================== -->
+
+<div id="beneficiaryModal"
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-50">
+
+    <!-- Slide Panel -->
+    <div id="modalPanel"
+        class="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-white shadow-2xl transform translate-x-full transition duration-300 flex flex-col">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between p-5 border-b bg-white">
+            <h2 class="font-bold text-lg">Beneficiary details</h2>
+
+            <button onclick="closeModal()"
+                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-8">
+
+            <!-- ================= Beneficiary Information ================= -->
+            <section>
+                <h3 class="section-title">Beneficiary Information</h3>
+
+                <div class="space-y-3">
+
+                    <div class="info-row">
+                        <span>Full Name</span>
+                        <p id="detail-name"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Country</span>
+                        <p id="detail-country"></p>
+                    </div>
+
+                </div>
             </section>
+
+            <!-- ================= Address ================= -->
+            <section>
+                <h3 class="section-title">Beneficiary Address</h3>
+
+                <div class="space-y-3">
+
+                    <div class="info-row">
+                        <span>Address Line 1</span>
+                        <p id="detail-address1"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Address Line 2</span>
+                        <p id="detail-address2"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>City / State</span>
+                        <p id="detail-city"></p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ================= Bank ================= -->
+            <section>
+                <h3 class="section-title">Bank Details</h3>
+
+                <div class="space-y-3">
+
+                    <div class="info-row">
+                        <span>Bank</span>
+                        <p id="detail-bank"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Account Number</span>
+                        <p id="detail-account"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Currency</span>
+                        <p id="detail-currency"></p>
+                    </div>
+
+                    <div class="info-row">
+                        <span>Swift / BIC</span>
+                        <p id="detail-swift"></p>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+
+
+        <!-- ✅ FIXED FOOTER ACTIONS -->
+        <div
+            class="border-t bg-white p-4 flex gap-3 sticky bottom-0">
+
+            <button id="updateBtn"
+                class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition">
+
+                Update
+
+            </button>
+
+            <button id="deleteBtn"
+                class="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition">
+
+                Delete
+
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<style>
+
+.section-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.info-row {
+    background: #f9fafb;
+    padding: 14px;
+    border-radius: 12px;
+}
+
+.info-row span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.info-row p {
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+</style>
+
+
+
+
+<script>
+
+let selectedBeneficiaryId = null;
+
+function showDetails(row) {
+
+    selectedBeneficiaryId = row.dataset.id;
+
+    document.getElementById("detail-name").textContent = row.dataset.name;
+    document.getElementById("detail-country").textContent = row.dataset.country;
+
+    document.getElementById("detail-address1").textContent = row.dataset.address1 || "-";
+    document.getElementById("detail-address2").textContent = row.dataset.address2 || "-";
+    document.getElementById("detail-city").textContent =
+        (row.dataset.city || "") + " " + (row.dataset.state || "");
+
+    document.getElementById("detail-bank").textContent = row.dataset.bank;
+    document.getElementById("detail-account").textContent = row.dataset.account;
+    document.getElementById("detail-currency").textContent = row.dataset.currency || "-";
+    document.getElementById("detail-swift").textContent = row.dataset.swift || "-";
+
+    const modal = document.getElementById("beneficiaryModal");
+    const panel = document.getElementById("modalPanel");
+
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+        panel.classList.remove("translate-x-full");
+    }, 10);
+}
+
+
+function closeModal() {
+
+    const modal = document.getElementById("beneficiaryModal");
+    const panel = document.getElementById("modalPanel");
+
+    panel.classList.add("translate-x-full");
+
+    setTimeout(() => {
+        modal.classList.add("hidden");
+        document.body.style.overflow = "auto";
+    }, 300);
+}
+
+</script>
+
+
+
     </main>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
 
-    <script>
-function showDetails(row) {
-    const id = row.dataset.id;
-    const countryCode = (row.dataset.country || '-').toUpperCase();
+   
 
-    // Automatically get country name from code using Intl API
-    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-    const countryName = regionNames.of(countryCode) || countryCode;
-
-    document.getElementById('beneficia-id').value = id;
-    document.getElementById('detail-name').textContent = row.dataset.name;
-    document.getElementById('detail-bank-name').textContent = row.dataset.bank;
-    document.getElementById('detail-account').textContent = row.dataset.account;
-    document.getElementById('detail-country').textContent = countryName;
-    document.getElementById('detail-alias').textContent = row.dataset.alias || '-';
-    document.getElementById('detail-account-type').textContent = row.dataset.type || '-';
-    document.getElementById('detail-currency').textContent = row.dataset.currency || '-';
-
-    // Set country flag
-    const flagImg = document.getElementById('detail-country-flag');
-    flagImg.src = `https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`;
-    flagImg.alt = `${countryName} Flag`;
-
-    // Edit URL
-    const editUrl = `{{ url('beneficias') }}/${id}/edit`;
-    document.getElementById('edit-link').href = editUrl;
-}
-
-
-
-    function copyAccountNumber() {
-        const number = document.getElementById('detail-account').textContent;
-        navigator.clipboard.writeText(number).then(() => {
-            alert("Account number copied!");
-        });
-    }
-
-    
-    function deleteBeneficia() {
-    const id = document.getElementById('beneficia-id').value;
-    if (!id) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'No beneficiary selected',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "This beneficiary will be deleted permanently.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/beneficia/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to delete');
-                return response.json();
-            })
-            .then(data => {
-                // Safely remove the row if it exists
-                document.getElementById(`beneficia-row-${id}`)?.remove();
-
-                // Reset detail panel
-                document.getElementById('beneficia-id').value = '';
-                document.getElementById('detail-name').textContent = 'Select a beneficiary';
-                document.getElementById('detail-bank').textContent = '-';
-                document.getElementById('detail-account').textContent = '-';
-                document.getElementById('detail-country').textContent = '-';
-
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Beneficiary deleted successfully',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-            })
-            .catch(error => {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'error',
-                    title: 'Error deleting beneficiary',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-                console.error(error);
-            });
-        }
-    });
-}
-
-
-    </script>
-
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('search-input');
         const tableBody = document.getElementById('beneficiaries-table');
@@ -328,7 +368,7 @@ function showDetails(row) {
                 });
         });
     });
-</script>
+</script> --}}
     
     <script>
         const sidebar = document.getElementById('sidebar');

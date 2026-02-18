@@ -122,9 +122,10 @@ class SendMoneyController extends Controller
 
       public function sendTransaction(Request $request)
     {
+        dd($request->all());
         $request->validate([
             'amount' => 'required|numeric|min:1',
-            'recipient_id' => 'required|uuid',
+            'account_id' => 'required|uuid',
             'balance_id' => 'required',
             'reference' => 'nullable|string',
             'transfer_fee' => 'nullable',

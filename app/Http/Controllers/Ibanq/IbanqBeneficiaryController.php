@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Ibanq;
 
 use App\Http\Controllers\Controller;
+use App\Models\Beneficia;
 use Illuminate\Http\Request;
 use App\Services\IbanqAuthService;
-
+use Pest\Support\Str;
 
 class IbanqBeneficiaryController extends Controller
 {
@@ -60,95 +61,562 @@ class IbanqBeneficiaryController extends Controller
       /**
      * Create a new beneficiary
      */
-    public function createBeneficiary(Request $request)
-    {
-        // Validate request
-        $request->validate([
-            'type' => 'required|in:individual,corporate',
-            'uniqueReference' => 'required|string|max:16',
-            'customerReference' => 'nullable|string|max:35',
-            'email' => 'nullable|email|max:200',
-            'phone' => 'nullable|string|max:30',
+    // public function createBeneficiary(Request $request)
+    // {
+    //     // Validate request
+    //     $request->validate([
+    //         'type' => 'required|in:individual,corporate',
+    //         'uniqueReference' => 'required|string|max:16',
+    //         'customerReference' => 'nullable|string|max:35',
+    //         'email' => 'nullable|email|max:200',
+    //         'phone' => 'nullable|string|max:30',
 
-            // individual fields
-            'firstNames' => 'required_if:type,individual|string|max:140',
-            'lastName' => 'required_if:type,individual|string|max:140',
+    //         // individual fields
+    //         'firstNames' => 'required_if:type,individual|string|max:140',
+    //         'lastName' => 'required_if:type,individual|string|max:140',
 
-            // corporate field
-            'name' => 'required_if:type,corporate|string|max:200',
+    //         // corporate field
+    //         'name' => 'required_if:type,corporate|string|max:200',
 
-            // required for both
-            'address' => 'required|array',
+    //         // required for both
+    //         'address' => 'required|array',
+    //     ]);
+
+    //     // dd($request->all());
+
+    //     try {
+    //         // Call IBANQ API
+    //         $client = $this->ibanq->authenticatedClient();
+
+    //         $payload = [
+    //             'type' => $request->type,
+    //             'uniqueReference' => $request->uniqueReference,
+    //             'customerReference' => $request->customerReference,
+    //             'email' => $request->email,
+    //             'phone' => $request->phone,
+    //             'address' => $request->address,
+    //         ];
+
+    //         if ($request->type === 'individual') {
+    //             $payload['firstNames'] = $request->firstNames;
+    //             $payload['lastName'] = $request->lastName;
+    //         }
+
+    //         if ($request->type === 'corporate') {
+    //             $payload['name'] = $request->name;
+    //         }
+
+    //         $response = $client->post('/v2/beneficiaries', $payload);
+    //         $responseData = $response->json();
+
+    //         // Store in database if successful
+    //         // if ($response->successful()) {
+    //         //     $userId = auth('api')->id() ?? auth()->id();
+    //         //     $beneficia = Beneficia::create([
+    //         //         'recipient_id'      => $responseData['id'] ?? null,
+    //         //         'country'           => $request->country,
+    //         //         'alias'             => $responseData['alias'] ?? $request->uniqueReference,
+    //         //         'type'              => $request->type,
+    //         //         'account_name'      => $request->bankDetails['accountName'] ?? null,
+    //         //         'account_number'    => $request->bankDetails['accountNumber'] ?? null,
+    //         //         'bank'              => $responseData['bank_account']['bank_name'] ?? null,
+    //         //         'currency'          => $request->currency,
+    //         //         'user_id'           => $userId,
+    //         //         'default_reference' => 'Invoice',
+    //         //     ]);
+    //         // }
+
+    //         // Return for API requests
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => $response->successful(),
+    //                 'data' => $responseData,
+    //             ], $response->status());
+    //         }
+
+    //         // Return for web requests
+    //         return redirect()->back()
+    //             ->with('success', 'Beneficiary created successfully!');
+
+    //     } catch (\Exception $e) {
+    //         // API request error
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'error' => $e->getMessage(),
+    //             ], 500);
+    //         }
+
+    //         // Web request error
+    //         return redirect()->back()
+    //             ->with('error', 'Failed to create beneficiary: ' . $e->getMessage());
+    //     }
+    // }
+
+// public function createBeneficiary(Request $request)
+// {
+//       //dd($request->all());
+//     // 1️⃣ Validate request
+//     $request->validate([
+//         'type' => 'required|in:individual,corporate',
+//         'uniqueReference' => 'required|string|max:50',
+//         'customerReference' => 'nullable|string|max:50',
+//         'email' => 'nullable|email|max:200',
+//         'phone' => 'nullable|string|max:30',
+
+//        // Individual
+//         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+//         'lastName' => 'nullable|required_if:type,individual|string|max:100',
+
+//         // Corporate
+//         'name' => 'nullable|required_if:type,corporate|string|max:200',
+
+//         // Address
+//         'address.addressLine1' => 'required|string|max:150',
+//         'address.addressLine2' => 'nullable|string|max:150',
+//         'address.buildingName' => 'nullable|string|max:100',
+//         'address.city' => 'required|string|max:100',
+//         'address.state' => 'nullable|string|max:50',
+//         'address.postcode' => 'nullable|string|max:20',
+//         'address.country' => 'required|string|size:2',
+
+//         // Bank basics
+//         'bank.currency' => 'required|string|size:3',
+//         'bank.accountHolder' => 'required|string|max:100',
+//         'bank.nickname' => 'required|string|max:100',
+//         'bank.accountNumber' => 'required|string|max:34',
+
+//         // 🔥 Smart global validation
+//         // Nigeria → bankCode required
+//         // 'bank.bankCode' => 'required_if:bank.currency,NGN|nullable|string|max:10',
+
+//         // Other countries → IBAN required
+//         'bank.iban' => 'required_unless:bank.currency,NGN|nullable|string|max:34',
+
+//         'bank.swiftBic' => 'nullable|string|max:50',
+//         'bank.defaultReference' => 'nullable|string|max:100',
+//     ]);
+
+//      //dd($request->all());
+
+//     try {
+//         $client = $this->ibanq->authenticatedClient();
+
+//         // 2️⃣ Address payload
+//         $addressInput = $request->input('address');
+
+//         $address = array_filter([
+//             'addressLine1' => $addressInput['addressLine1'] ?? null,
+//             'addressLine2' => $addressInput['addressLine2'] ?? null,
+//             'buildingName' => $addressInput['buildingName'] ?? null,
+//             'city' => $addressInput['city'] ?? null,
+//             'state' => $addressInput['state'] ?? null,
+//             'postcode' => $addressInput['postcode'] ?? null,
+//             'country' => $addressInput['country'] ?? null,
+//         ]);
+
+//         // 3️⃣ Beneficiary payload
+//         $payload = array_filter([
+//             'type' => $request->type,
+//             'uniqueReference' => $request->uniqueReference,
+//             'customerReference' => $request->customerReference,
+//             'email' => $request->email,
+//             'phone' => $request->phone,
+//             'address' => $address,
+//         ]);
+
+//         if ($request->type === 'individual') {
+//             $payload['firstNames'] = $request->firstNames;
+//             $payload['lastName'] = $request->lastName;
+//         } else {
+//             $payload['name'] = $request->name;
+//         }
+
+//         \Log::info('IBANQ Beneficiary Payload: ' . json_encode($payload));
+
+//         // 4️⃣ Create beneficiary
+//         $beneficiaryResponse = $client->post('/v2/beneficiaries', $payload);
+//         $beneficiaryData = $beneficiaryResponse->json();
+
+//         \Log::info('IBANQ Beneficiary Response: ' . json_encode($beneficiaryData));
+
+//         if (!isset($beneficiaryData['id'])) {
+//             return response()->json([
+//                 'success' => false,
+//                 'error' => $beneficiaryData['message']
+//                     ?? $beneficiaryData['messages']
+//                     ?? 'Beneficiary creation failed'
+//             ], 400);
+//         }
+
+//         $beneficiaryId = $beneficiaryData['id'];
+
+//         // 5️⃣ Account payload
+//         $bank = $request->input('bank');
+
+//         $accountPayload = array_filter([
+//             'currency' => $bank['currency'],
+//             'accountHolder' => $bank['accountHolder'],
+//             'nickname' => $bank['nickname'],
+//             'accountNumber' => $bank['accountNumber'],
+//             'bankCode' => $bank['bankCode'] ?? null,
+//             'iban' => $bank['iban'] ?? null,
+//             'swiftBic' => $bank['swiftBic'] ?? null,
+//             'defaultReference' => $bank['defaultReference'],
+//         ]);
+
+//         \Log::info('IBANQ Account Payload: ' . json_encode($accountPayload));
+
+//         // 6️⃣ Create account
+//         $accountResponse = $client->post(
+//             "/v2/beneficiaries/{$beneficiaryId}/accounts",
+//             $accountPayload
+//         );
+
+//         $accountData = $accountResponse->json();
+
+//         // Handle account errors
+//         if (isset($accountData['messages'])) {
+//             return response()->json([
+//                 'success' => false,
+//                 'beneficiary' => $beneficiaryData,
+//                 'account_error' => $accountData['messages']
+//             ], 400);
+//         }
+
+//         return response()->json([
+//             'success' => true,
+//             'beneficiary' => $beneficiaryData,
+//             'account' => $accountData
+//         ]);
+
+//     } catch (\Exception $e) {
+//         \Log::error('IBANQ Error: ' . $e->getMessage());
+
+//         return response()->json([
+//             'success' => false,
+//             'error' => $e->getMessage(),
+//         ], 500);
+//     }
+// }
+
+
+
+
+
+// public function createBeneficiary(Request $request)
+// {
+//     // 1️⃣ Validate Request
+//     $request->validate([
+//         'type' => 'required|in:individual,corporate',
+//         'uniqueReference' => 'nullable|string|max:50',
+//         'customerReference' => 'nullable|string|max:50',
+//         'email' => 'nullable|email|max:200',
+//         'phone' => 'nullable|string|max:30',
+
+//         // Individual fields
+//         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+//         'lastName' => 'nullable|required_if:type,individual|string|max:100',
+
+//         // Corporate fields
+//         'name' => 'nullable|required_if:type,corporate|string|max:200',
+
+//         // Address
+//         'address.addressLine1' => 'required|string|max:150',
+//         'address.addressLine2' => 'nullable|string|max:150',
+//         'address.buildingName' => 'nullable|string|max:100',
+//         'address.city' => 'required|string|max:100',
+//         'address.state' => 'nullable|string|max:50',
+//         'address.postcode' => 'nullable|string|max:20',
+//         'address.country' => 'required|string|size:2',
+
+//         // Bank
+//         'bank.currency' => 'required|string|size:3',
+//         'bank.accountHolder' => 'required|string|max:100',
+//         'bank.nickname' => 'required|string|max:100',
+//         'bank.accountNumber' => 'required|string|max:34',
+//         'bank.bankCode' => 'required_if:bank.currency,NGN|nullable|string|max:10',
+//         'bank.iban' => 'required_unless:bank.currency,NGN|nullable|string|max:34',
+//         'bank.swiftBic' => 'nullable|string|max:50',
+//         'bank.defaultReference' => 'nullable|string|max:100',
+//     ]);
+
+//     $bank = $request->input('bank', []);
+
+//     try {
+//         $client = $this->ibanq->authenticatedClient();
+
+//         // 2️⃣ Address payload
+//         $addressInput = $request->input('address', []);
+//         $address = array_filter([
+//             'addressLine1' => $addressInput['addressLine1'] ?? null,
+//             'addressLine2' => $addressInput['addressLine2'] ?? null,
+//             'buildingName' => $addressInput['buildingName'] ?? null,
+//             'city' => $addressInput['city'] ?? null,
+//             'state' => $addressInput['state'] ?? null,
+//             'postcode' => $addressInput['postcode'] ?? null,
+//             'country' => $addressInput['country'] ?? null,
+//         ]);
+
+//         $uniqueReference = strtoupper(Str::random(7)); // e.g., "A1B2C3D"
+//         $customerReference = strtoupper(Str::random(7)); // e.g., "X9Y8Z7K"
+
+//         // 3️⃣ Beneficiary payload
+//         $payload = array_filter([
+//             'type' => $request->type,
+//             'uniqueReference' => $uniqueReference,
+//             'customerReference' => $customerReference,
+//             'email' => $request->email,
+//             'phone' => $request->phone,
+//             'address' => $address,
+//         ]);
+
+//         if ($request->type === 'individual') {
+//             $payload['firstNames'] = $request->firstNames;
+//             $payload['lastName'] = $request->lastName;
+//         } else {
+//             $payload['name'] = $request->name;
+//         }
+
+//         // 4️⃣ Create beneficiary
+//         $beneficiaryResponse = $client->post('/v2/beneficiaries', $payload);
+//         $beneficiaryData = $beneficiaryResponse->json();
+
+//         if (!isset($beneficiaryData['id'])) {
+//             return $request->expectsJson()
+//                 ? response()->json(['success' => false, 'error' => $beneficiaryData['message'] ?? 'Beneficiary creation failed'], 400)
+//                 : back()->withErrors(['api_error' => $beneficiaryData['message'] ?? 'Beneficiary creation failed']);
+//         }
+
+//         $beneficiaryId = $beneficiaryData['id'];
+
+//         // 5️⃣ Account payload (safely handle missing keys)
+//         $accountPayload = array_filter([
+//             'currency' => $bank['currency'] ?? null,
+//             'accountHolder' => $bank['accountHolder'] ?? null,
+//             'nickname' => $bank['nickname'] ?? null,
+//             'accountNumber' => $bank['accountNumber'] ?? null,
+//             'bankCode' => $bank['bankCode'] ?? null,
+//             'iban' => $bank['iban'] ?? null,
+//             'swiftBic' => $bank['swiftBic'] ?? null,
+//             'defaultReference' => $bank['defaultReference'] ?? $bank['nickname'] ?? 'default_ref',
+//         ]);
+
+//         // 6️⃣ Create account
+//         $accountResponse = $client->post("/v2/beneficiaries/{$beneficiaryId}/accounts", $accountPayload);
+//         $accountData = $accountResponse->json();
+
+//         if (isset($accountData['messages'])) {
+//             return $request->expectsJson()
+//                 ? response()->json(['success' => false, 'beneficiary' => $beneficiaryData, 'account_error' => $accountData['messages']], 400)
+//                 : back()->withErrors(['account_error' => $accountData['messages']]);
+//         }
+
+//         // 7️⃣ Return success (API or Web)
+//         return $request->expectsJson()
+//             ? response()->json(['success' => true, 'beneficiary' => $beneficiaryData, 'account' => $accountData])
+//             : redirect()->back()->with('success', 'Beneficiary created successfully.');
+
+//     } catch (\Exception $e) {
+//         return $request->expectsJson()
+//             ? response()->json(['success' => false, 'error' => $e->getMessage()], 500)
+//             : back()->withErrors(['api_error' => $e->getMessage()]);
+//     }
+// }
+
+public function createBeneficiary(Request $request, $userId = null, $personalId = null)
+
+{
+
+
+
+    if ($request->typeofuser === 'business') {
+        $userId = auth('web')->id() ?? auth('api')->id();
+    }
+
+    if ($request->typeofuser === 'personal') {
+        $personalId = auth('personal')->id() ?? auth('personal-api')->id();
+    }
+
+    // dd($personalId);
+
+    // Validate request with custom messages
+    $validator = \Validator::make($request->all(), [
+        'type' => 'required|in:individual,corporate',
+        'email' => 'nullable|email|max:200',
+        'phone' => 'nullable|string|max:30',
+        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+        'lastName' => 'nullable|required_if:type,individual|string|max:100',
+        'name' => 'nullable|required_if:type,corporate|string|max:200',
+        'address.addressLine1' => 'required|string|max:150',
+        'address.addressLine2' => 'nullable|string|max:150',
+        'address.buildingName' => 'nullable|string|max:100',
+        'address.city' => 'required|string|max:100',
+        'address.state' => 'nullable|string|max:50',
+        'address.postcode' => 'nullable|string|max:20',
+        'address.country' => 'required|string|size:2',
+        'bank.currency' => 'required|string|size:3',
+        'bank.accountHolder' => 'required|string|max:100',
+        'bank.nickname' => 'required|string|max:100',
+        'bank.accountNumber' => 'nullable|string|max:34',
+        'bank.bankCode' => 'required_if:bank.currency,NGN|nullable|string|max:10',
+        'bank.iban' => 'required_unless:bank.currency,NGN|nullable|string|max:34',
+        'bank.swiftBic' => 'nullable|string|max:50',
+        'bank.defaultReference' => 'nullable|string|max:100',
+    ], [
+        'type.required' => 'Please select whether the beneficiary is an Individual or a Corporate entity.',
+        'type.in' => 'The beneficiary type must be either Individual or Corporate.',
+        'firstNames.required_if' => 'First Name is required for an Individual beneficiary.',
+        'lastName.required_if' => 'Last Name is required for an Individual beneficiary.',
+        'name.required_if' => 'Company Name is required for a Corporate beneficiary.',
+        'address.addressLine1.required' => 'Address Line 1 is required for the beneficiary.',
+        'address.city.required' => 'City is required for the beneficiary address.',
+        'address.country.required' => 'Country code is required for the beneficiary.',
+        'bank.currency.required' => 'Currency is required for the beneficiary bank account.',
+        'bank.accountHolder.required' => 'Account Holder name is required for the bank account.',
+        'bank.accountNumber.required' => 'Account Number is required for the bank account.',
+    ]);
+
+    // If validation fails
+    if ($validator->fails()) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        } else {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+    }
+
+    $bank = $request->input('bank', []);
+    $addressInput = $request->input('address', []);
+
+    // Generate unique references
+    $uniqueReference = strtoupper(\Str::random(7));
+    $customerReference = strtoupper(\Str::random(7));
+
+    try {
+        $client = $this->ibanq->authenticatedClient();
+
+        // Beneficiary payload
+        $payload = array_filter([
+            'type' => $request->type,
+            'uniqueReference' => $uniqueReference,
+            'customerReference' => $customerReference,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => array_filter([
+                'addressLine1' => $addressInput['addressLine1'] ?? null,
+                'addressLine2' => $addressInput['addressLine2'] ?? null,
+                'buildingName' => $addressInput['buildingName'] ?? null,
+                'city' => $addressInput['city'] ?? null,
+                'state' => $addressInput['state'] ?? null,
+                'postcode' => $addressInput['postcode'] ?? null,
+                'country' => $addressInput['country'] ?? null,
+            ]),
         ]);
 
-        try {
-            // Call IBANQ API
-            $client = $this->ibanq->authenticatedClient();
+        if ($request->type === 'individual') {
+            $payload['firstNames'] = $request->firstNames;
+            $payload['lastName'] = $request->lastName;
+        } else {
+            $payload['name'] = $request->name;
+        }
 
-            $payload = [
-                'type' => $request->type,
-                'uniqueReference' => $request->uniqueReference,
-                'customerReference' => $request->customerReference,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'address' => $request->address,
-            ];
+        // Create beneficiary on IFX
+        $beneficiaryResponse = $client->post('/v2/beneficiaries', $payload);
+        $beneficiaryData = $beneficiaryResponse->json();
 
-            if ($request->type === 'individual') {
-                $payload['firstNames'] = $request->firstNames;
-                $payload['lastName'] = $request->lastName;
-            }
-
-            if ($request->type === 'corporate') {
-                $payload['name'] = $request->name;
-            }
-
-            $response = $client->post('/v2/beneficiaries', $payload);
-            $responseData = $response->json();
-
-            // Store in database if successful
-            // if ($response->successful()) {
-            //     $userId = auth('api')->id() ?? auth()->id();
-            //     $beneficia = Beneficia::create([
-            //         'recipient_id'      => $responseData['id'] ?? null,
-            //         'country'           => $request->country,
-            //         'alias'             => $responseData['alias'] ?? $request->uniqueReference,
-            //         'type'              => $request->type,
-            //         'account_name'      => $request->bankDetails['accountName'] ?? null,
-            //         'account_number'    => $request->bankDetails['accountNumber'] ?? null,
-            //         'bank'              => $responseData['bank_account']['bank_name'] ?? null,
-            //         'currency'          => $request->currency,
-            //         'user_id'           => $userId,
-            //         'default_reference' => 'Invoice',
-            //     ]);
-            // }
-
-            // Return for API requests
+        if (!isset($beneficiaryData['id'])) {
+            $message = $beneficiaryData['message'] ?? 'Beneficiary creation failed';
             if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => $response->successful(),
-                    'data' => $responseData,
-                ], $response->status());
+                return response()->json(['success' => false, 'error' => $message], 400);
+            } else {
+                return redirect()->back()->with('error', $message);
             }
+        }
 
-            // Return for web requests
-            return redirect()->back()
-                ->with('success', 'Beneficiary created successfully!');
+        $beneficiaryId = $beneficiaryData['id'];
 
-        } catch (\Exception $e) {
-            // API request error
+        // Create account on IFX
+        $accountPayload = array_filter([
+            'currency' => $bank['currency'] ?? null,
+            'accountHolder' => $bank['accountHolder'] ?? null,
+            'nickname' => $bank['nickname'] ?? null,
+            'accountNumber' => $bank['accountNumber'] ?? null,
+            'bankCode' => $bank['bankCode'] ?? null,
+            'iban' => $bank['iban'] ?? null,
+            'swiftBic' => $bank['swiftBic'] ?? null,
+            'defaultReference' => $bank['defaultReference'] ?? $bank['nickname'] ?? 'default_ref',
+        ]);
+
+        $accountResponse = $client->post("/v2/beneficiaries/{$beneficiaryId}/accounts", $accountPayload);
+        $accountData = $accountResponse->json();
+
+        if (isset($accountData['messages'])) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'error' => $e->getMessage(),
-                ], 500);
+                    'beneficiary' => $beneficiaryData,
+                    'account_error' => $accountData['messages']
+                ], 400);
+            } else {
+                return redirect()->back()->with('error', implode(', ', $accountData['messages']));
             }
+        }
 
-            // Web request error
-            return redirect()->back()
-                ->with('error', 'Failed to create beneficiary: ' . $e->getMessage());
+        // Store locally
+        $beneficia = \App\Models\Beneficia::create([
+            'bank' => $bank['nickname'] ?? null,
+            'country_id' => $request->input('country_id') ?? null,
+            'account_number' => $bank['accountNumber'] ?? null,
+            'account_name' => $bank['accountHolder'] ?? null,
+            'beneficiary_name' => $request->input('name') ?? null,
+            'recipient_id' => $beneficiaryData['id'] ?? null,
+            'account_id' => $accountData['id'] ?? null,
+            'unique_reference' => $uniqueReference,
+            'customer_reference' => $customerReference,
+            'address_line1' => $addressInput['addressLine1'] ?? null,
+            'address_line2' => $addressInput['addressLine2'] ?? null,
+            'building_name' => $addressInput['buildingName'] ?? null,
+            'city' => $addressInput['city'] ?? null,
+            'state' => $addressInput['state'] ?? null,
+            'postcode' => $addressInput['postcode'] ?? null,
+            'country' => $addressInput['country'] ?? null,
+            'alias' => $bank['nickname'] ?? null,
+            'type' => $request->type,
+            'currency' => $bank['currency'] ?? null,
+            'default_reference' => $accountPayload['defaultReference'] ?? 'default_ref',
+            'sort_code' => $bank['bankCode'] ?? null,
+            'swift_bic' => $bank['swiftBic'] ?? null,
+            'user_id' => $userId,
+            'personal_id' => $personalId,
+        ]);
+
+        // Return success (API or Web)
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'beneficiary' => $beneficiaryData,
+                'account' => $accountData,
+                'local' => $beneficia
+            ], 201);
+        } else {
+            return redirect()->back()->with('success', 'Beneficiary created successfully.');
+        }
+
+    } catch (\Exception $e) {
+        if ($request->expectsJson()) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        } else {
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
+}
+
 
 
 

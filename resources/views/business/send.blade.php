@@ -45,7 +45,7 @@
                         @forelse($beneficiaries as $beneficiary)
                             <div 
                             class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            data-id="{{ $beneficiary->recipient_id }}"
+                            data-id="{{ $beneficiary->account_id }}"
                             data-account-name="{{ $beneficiary->account_name }}"
                             data-account-number="{{ $beneficiary->account_number }}"
                             data-bank="{{ $beneficiary->bank }}"
@@ -261,7 +261,7 @@
                                         <input type="hidden" name="amount" id="amountInput">
                                         <input type="hidden" name="reference" value="For invoice">
                          --}}
-                                        <input type="hidden" name="recipient_id" id="recipientIdInput">
+                                        <input type="hidden" name="account_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
                                         <input type="hidden" name="amount" id="amountInput">
                                         <input type="hidden" name="reference" value="For invoice">

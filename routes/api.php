@@ -47,6 +47,7 @@ use App\Http\Controllers\Ibanq\IbanqPaymentController;
 use App\Http\Controllers\Ibanq\IbanqReferenceController;
 use App\Http\Controllers\Ibanq\IbanqWalletController;
 use App\Http\Controllers\IbanqTestController;
+use App\Http\Controllers\IbanqWebhookController;
 use App\Http\Controllers\Pivot\PivotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -109,6 +110,7 @@ Route::post('/ibanq/payments/{paymentId}/reject', [IbanqPaymentController::class
 Route::get('/ibanq/reference/bank-fields/{country}/{currency}', [IbanqReferenceController::class, 'getBankAccountRequirements']);
 Route::get('/ibanq/reference/beneficiaries/{type}/{country}/{currency}', [IbanqReferenceController::class, 'getBeneficiaryRequirements']);
 
+Route::post('/ifx/webhook', [IbanqWebhookController::class, 'handle']);
 
 
 
