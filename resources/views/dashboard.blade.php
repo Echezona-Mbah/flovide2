@@ -59,7 +59,7 @@
 
 
 
-            <section class="bg-white w-full text-gray-700 min-h-screen md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute  overflow-x-hidden ">
+            <section class="bg-white w-full text-gray-700 min-h-screen md:rounded-3xl md:p-6 p-2 shadow-md md:absolute  overflow-x-hidden ">
                 <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
