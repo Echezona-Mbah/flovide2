@@ -22,8 +22,7 @@
 
         </header>
         <section class=" relative w-full ">
-            <section
-                class="bg-white text-gray-700 min-h-screen md:w-[80vw]   md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden ">
+            <section class="bg-white text-gray-700 min-h-screen w-full md:rounded-3xl md:p-6 p-2 shadow-md md:absolute overflow-x-hidden ">
 
 
                 <div
