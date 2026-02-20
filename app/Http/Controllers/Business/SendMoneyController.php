@@ -11,11 +11,121 @@ use App\Traits\SelectsBalanceId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Http\Controllers\Ibanq\IbanqPaymentController;
+
 
 class SendMoneyController extends Controller
 {
     use CurrencyHelper;
     use SelectsBalanceId;
+
+
+public function sendTransaction(Request $request)
+{
+    // Validate the request
+    $request->validate([
+        'amount' => 'required|numeric|min:1',
+        'account_id' => 'required|uuid',
+        'balance_id' => 'required',
+        'reference' => 'nullable|string',
+        'transfer_fee' => 'nullable',
+        'total_amount' => 'required|numeric',
+        'exchange_rate' => 'required|string',
+        'recipient_amount' => 'required|numeric',
+    ]);
+
+    // Extract currencies
+    $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
+    $sendingCurrency = explode(' ', $request->exchange_rate)[3] ?? 'NGN';
+    $balanceId = $this->getBalanceIdByCurrency($currency);
+
+    $isApi = $request->expectsJson();
+    $user = auth()->user();
+
+    // Check balance exists
+    $balance = Balance::where('id', $request->balance_id)->first();
+    if (!$balance) {
+        return $isApi
+            ? response()->json(['error' => 'Invalid balance selected'], 422)
+            : back()->withErrors(['balance' => 'Invalid balance selected']);
+    }
+
+    // Check sufficient funds
+    if ($balance->amount < $request->total_amount) {
+        return $isApi
+            ? response()->json(['error' => 'Insufficient funds'], 422)
+            : back()->withErrors(['amount' => 'Insufficient funds']);
+    }
+
+    $orderId = (string) Str::uuid();
+    $reference = 'ref-' . Str::uuid();
+
+    // Prepare IBANQ payload
+    $ibanqPayload = [
+        'beneficiaryAccountId' => $request->account_id,
+        'amount' => $request->recipient_amount,
+        'currency' => $sendingCurrency,
+        'reference' => $reference,
+    ];
+
+    // Instantiate IBANQ controller with dependency injection
+    $ibanqController = new IbanqPaymentController(app()->make(\App\Services\IbanqAuthService::class));
+
+    // Call the IBANQ payment function
+    $ibanqResponse = $ibanqController->createIbanqPayment($ibanqPayload);
+
+
+    // Handle IBANQ errors with detailed messages
+    if (!isset($ibanqResponse['success']) || !$ibanqResponse['success']) {
+        $errorMessage = $ibanqResponse['error'] ?? 'Unknown error from IBANQ';
+        return $isApi
+            ? response()->json(['error' => 'IBANQ Payment failed', 'details' => $errorMessage], 422)
+            : back()->with('error', 'IBANQ Payment failed: ' . $errorMessage);
+    }
+
+
+    $data = $ibanqResponse['data'] ?? [];
+
+    // Deduct funds AFTER successful IBANQ payment
+    $balance->amount -= $request->total_amount;
+    $balance->save();
+
+    // Log transaction
+    TransactionHistory::create([
+        'amount' => $request->total_amount,
+        'fees' => $request->transfer_fee ?? 0,
+        'currency' => $data['currency'] ?? $currency,
+        'to_currency' => $data['to_currency'] ?? null,
+        'balance_id' => $balanceId,
+        'virtual_account_id' => $data['virtual_account_id'] ?? null,
+        'order_id' => $data['order_id'] ?? $orderId,
+        'payment_reference' => $data['payment_reference'] ?? null,
+        'status' => $data['status'] ?? 'unknown',
+        'failure_reason' => $data['failure_reason'] ?? null,
+        'transaction_type' => $data['transaction_type'] ?? 'payment',
+        'payment_method' => $data['payment_method'] ?? null,
+        'sender_id' => $user->id,
+        'sender' => $user->business_name ?? null,
+        'recipient_id' => $data['recipient']['id'] ?? null,
+        'recipient_country' => $data['recipient']['country'] ?? null,
+        'recipient_account_name' => $data['recipient']['bank_account']['account_name'] ?? null,
+        'recipient_bank_name' => $data['recipient']['bank_account']['bank_name'] ?? null,
+        'recipient_account_number' => $data['recipient']['bank_account']['account_number'] ?? null,
+        'exchange_rate' => $data['exchange_rate']['rate'] ?? null,
+        'single_rate' => $data['exchange_rate']['single_rate'] ?? null,
+        'reference' => $data['reference'] ?? $reference,
+        'user_id' => $user->id,
+        'method' => $isApi ? 'api' : 'web',
+    ]);
+
+    // Return success
+    return $isApi
+        ? response()->json(['message' => 'Transaction successful', 'data' => $data])
+        : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully!');
+}
+
+
+
     
     public function index() 
     {
@@ -120,113 +230,114 @@ class SendMoneyController extends Controller
 
 
 
-      public function sendTransaction(Request $request)
-    {
-        dd($request->all());
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'account_id' => 'required|uuid',
-            'balance_id' => 'required',
-            'reference' => 'nullable|string',
-            'transfer_fee' => 'nullable',
-            'total_amount' => 'required|numeric',
-            'exchange_rate' => 'required|string',
-            'recipient_amount' => 'required|numeric',
-        ]);
+    //   public function sendTransaction(Request $request)
+    // {
+    //     //dd($request->all());
+    //     $request->validate([
+    //         'amount' => 'required|numeric|min:1',
+    //         'account_id' => 'required|uuid',
+    //         'balance_id' => 'required',
+    //         'reference' => 'nullable|string',
+    //         'transfer_fee' => 'nullable',
+    //         'total_amount' => 'required|numeric',
+    //         'exchange_rate' => 'required|string',
+    //         'recipient_amount' => 'required|numeric',
+    //     ]);
 
 
-        $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
-        $balanceId = $this->getBalanceIdByCurrency($currency);
-        // dd($currency);
-        $isApi = $request->expectsJson();
-        $user = auth()->user();
+    //     $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
+    //     $sendingcurrency = explode(' ', $request->exchange_rate)[3] ?? 'NGN';
+    //     $balanceId = $this->getBalanceIdByCurrency($currency);
 
-        if (!$balanceId) {
-            return $isApi
-                ? response()->json(['error' => 'Unsupported currency'], 422)
-                : back()->withErrors(['currency' => 'Unsupported currency']);
-        }
+    //     $isApi = $request->expectsJson();
+    //     $user = auth()->user();
 
-        $balance = Balance::where('id', $request->balance_id)->first();
-        if (!$balance) {
-            return $isApi
-                ? response()->json(['error' => 'Invalid balance selected'], 422)
-                : back()->withErrors(['balance' => 'Invalid balance selected']);
-        }
+    //     if (!$balanceId) {
+    //         return $isApi
+    //             ? response()->json(['error' => 'Unsupported currency'], 422)
+    //             : back()->withErrors(['currency' => 'Unsupported currency']);
+    //     }
 
-        if ($balance->amount < $request->total_amount) {
-            return $isApi
-                ? response()->json(['error' => 'Insufficient funds'], 422)
-                : back()->withErrors(['amount' => 'Insufficient funds']);
-        }
+    //     $balance = Balance::where('id', $request->balance_id)->first();
+    //     if (!$balance) {
+    //         return $isApi
+    //             ? response()->json(['error' => 'Invalid balance selected'], 422)
+    //             : back()->withErrors(['balance' => 'Invalid balance selected']);
+    //     }
 
-        $orderId = (string) Str::uuid();
-        $reference = 'ref-' . Str::uuid();
+    //     if ($balance->amount < $request->total_amount) {
+    //         return $isApi
+    //             ? response()->json(['error' => 'Insufficient funds'], 422)
+    //             : back()->withErrors(['amount' => 'Insufficient funds']);
+    //     }
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-                'Accept' => 'application/json',
-            ])->post(env('OHENTPAY_BASE_URL') . '/transactions', [
-                'transaction_type' => 'payment',
-                'amount' => $request->recipient_amount,
-                'balance_id' => $balanceId,
-                'recipient_id' => $request->recipient_id,
-                'order_id' => $orderId,
-                'reference' => $reference,
-            ]);
-        } catch (\Exception $e) {
-            return $isApi
-                ? response()->json(['message' => 'API error', 'error' => $e->getMessage()], 500)
-                : back()->with('error', 'API connection failed: ' . $e->getMessage());
-        }
+    //     $orderId = (string) Str::uuid();
+    //     $reference = 'ref-' . Str::uuid();
 
-        if ($response->successful()) {
-            $data = $response->json();
+    //     try {
+    //         $response = Http::withHeaders([
+    //             'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
+    //             'Accept' => 'application/json',
+    //         ])->post(env('OHENTPAY_BASE_URL') . '/transactions', [
+    //             'transaction_type' => 'payment',
+    //             'amount' => $request->recipient_amount,
+    //             'balance_id' => $balanceId,
+    //             'recipient_id' => $request->recipient_id,
+    //             'order_id' => $orderId,
+    //             'reference' => $reference,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return $isApi
+    //             ? response()->json(['message' => 'API error', 'error' => $e->getMessage()], 500)
+    //             : back()->with('error', 'API connection failed: ' . $e->getMessage());
+    //     }
 
-            // Deduct funds AFTER success
-            $balance->amount -= $request->total_amount;
-            $balance->save();
+    //     if ($response->successful()) {
+    //         $data = $response->json();
 
-            // Log transaction
-            TransactionHistory::create([
-                'amount' => $request->total_amount,
-                'fees' => $request->transfer_fee ?? 0,
-                'currency' => $data['currency'] ?? $currency,
-                'to_currency' => $data['to_currency'] ?? null,
-                'balance_id' => $balanceId,
-                'virtual_account_id' => $data['virtual_account_id'] ?? null,
-                'order_id' => $data['order_id'] ?? $orderId,
-                'payment_reference' => $data['payment_reference'] ?? null,
-                'status' => $data['status'] ?? 'unknown',
-                'failure_reason' => $data['failure_reason'] ?? null,
-                'transaction_type' => $data['transaction_type'] ?? 'payment',
-                'payment_method' => $data['payment_method'] ?? null,
-                'sender_id' => $user->id,
-                'sender' => $user->business_name ?? null,
-                'recipient_id' => $data['recipient']['id'] ?? null,
-                'recipient_country' => $data['recipient']['country'] ?? null,
-                'recipient_account_name' => $data['recipient']['bank_account']['account_name'] ?? null,
-                'recipient_bank_name' => $data['recipient']['bank_account']['bank_name'] ?? null,
-                'recipient_account_number' => $data['recipient']['bank_account']['account_number'] ?? null,
-                'exchange_rate' => $data['exchange_rate']['rate'] ?? null,
-                'single_rate' => $data['exchange_rate']['single_rate'] ?? null,
-                'reference' => $data['reference'] ?? $reference,
-                'user_id' => $user->id,
-                'method' => $isApi ? 'api' : 'web',
-            ]);
+    //         // Deduct funds AFTER success
+    //         $balance->amount -= $request->total_amount;
+    //         $balance->save();
 
-            return $isApi
-                ? response()->json(['message' => 'Transaction successful', 'data' => $data])
-                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully!');
-        }
+    //         // Log transaction
+    //         TransactionHistory::create([
+    //             'amount' => $request->total_amount,
+    //             'fees' => $request->transfer_fee ?? 0,
+    //             'currency' => $data['currency'] ?? $currency,
+    //             'to_currency' => $data['to_currency'] ?? null,
+    //             'balance_id' => $balanceId,
+    //             'virtual_account_id' => $data['virtual_account_id'] ?? null,
+    //             'order_id' => $data['order_id'] ?? $orderId,
+    //             'payment_reference' => $data['payment_reference'] ?? null,
+    //             'status' => $data['status'] ?? 'unknown',
+    //             'failure_reason' => $data['failure_reason'] ?? null,
+    //             'transaction_type' => $data['transaction_type'] ?? 'payment',
+    //             'payment_method' => $data['payment_method'] ?? null,
+    //             'sender_id' => $user->id,
+    //             'sender' => $user->business_name ?? null,
+    //             'recipient_id' => $data['recipient']['id'] ?? null,
+    //             'recipient_country' => $data['recipient']['country'] ?? null,
+    //             'recipient_account_name' => $data['recipient']['bank_account']['account_name'] ?? null,
+    //             'recipient_bank_name' => $data['recipient']['bank_account']['bank_name'] ?? null,
+    //             'recipient_account_number' => $data['recipient']['bank_account']['account_number'] ?? null,
+    //             'exchange_rate' => $data['exchange_rate']['rate'] ?? null,
+    //             'single_rate' => $data['exchange_rate']['single_rate'] ?? null,
+    //             'reference' => $data['reference'] ?? $reference,
+    //             'user_id' => $user->id,
+    //             'method' => $isApi ? 'api' : 'web',
+    //         ]);
 
-        // Handle failed transaction
-        $error = $response->json()['message'] ?? 'Unknown error';
-        return $isApi
-            ? response()->json(['error' => 'Transaction failed', 'details' => $error], 422)
-            : back()->with('error', 'Transaction failed: ' . $error);
-    }
+    //         return $isApi
+    //             ? response()->json(['message' => 'Transaction successful', 'data' => $data])
+    //             : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully!');
+    //     }
+
+    //     // Handle failed transaction
+    //     $error = $response->json()['message'] ?? 'Unknown error';
+    //     return $isApi
+    //         ? response()->json(['error' => 'Transaction failed', 'details' => $error], 422)
+    //         : back()->with('error', 'Transaction failed: ' . $error);
+    // }
 
 
     

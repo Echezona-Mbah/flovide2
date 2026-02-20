@@ -49,6 +49,7 @@ use App\Http\Controllers\Ibanq\IbanqWalletController;
 use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\IbanqWebhookController;
 use App\Http\Controllers\Pivot\PivotController;
+use App\Services\PivotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,7 +124,10 @@ Route::post('/ifx/webhook', [IbanqWebhookController::class, 'handle']);
 
 
 
-
+Route::get('/test-pivot-auth', function(PivotService $pivot) {
+    $response = $pivot->authenticate();
+    return response()->json($response);
+});
 
 
 

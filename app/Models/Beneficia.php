@@ -13,7 +13,7 @@ class Beneficia extends Model
         'account_name',          // account holder
         'currency',              // currency
         'sort_code',             // bank code
-        'swift_bic',             // SWIFT/BIC
+        'swift_bic',             // SWIFT/BICy
         'alias',                 // same as nickname
         'default_reference',     // default reference
 
