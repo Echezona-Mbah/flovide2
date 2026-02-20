@@ -109,6 +109,8 @@ public function store(Request $request)
             : redirect()->back()->with('error', $msg);
     }
 
+    // dd($request->all());
+
     // Call IFX controller
     $ibanq = new \App\Http\Controllers\Ibanq\IbanqBeneficiaryController(
         app(\App\Services\IbanqAuthService::class)
