@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class PivotService
 {
@@ -43,6 +44,20 @@ class PivotService
         ];
     }
 
+
+        public function getToken()
+{
+    return Cache::remember('pivot_token', 300, function () {
+
+        $auth = $this->authenticate();
+
+        if (!isset($auth['tokenResponse']['accessToken'])) {
+            throw new \Exception('Pivot auth failed');
+        }
+
+        return $auth['tokenResponse']['accessToken'];
+    });
+}
     // ===============================
     // POST TRANSACTION
     // ===============================
@@ -55,6 +70,18 @@ class PivotService
 
         return $response->json();
     }
+
+//     public function postTransaction($data)
+// {
+//     $token = $this->getToken();
+
+//     $url = $this->baseUrl . '/api/v1/post/payment';
+
+//     return Http::withToken($token)
+//         ->post($url, $data)
+//         ->json();
+// }
+
 
     public function queryPaymentStatus($token, $data)
     {
