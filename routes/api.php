@@ -40,6 +40,16 @@ use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyContro
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use App\Http\Controllers\Business\DonationController;
+use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
+use App\Http\Controllers\Ibanq\IbanqBeneficiaryApprovalController;
+use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
+use App\Http\Controllers\Ibanq\IbanqPaymentController;
+use App\Http\Controllers\Ibanq\IbanqReferenceController;
+use App\Http\Controllers\Ibanq\IbanqWalletController;
+use App\Http\Controllers\IbanqTestController;
+use App\Http\Controllers\IbanqWebhookController;
+use App\Http\Controllers\Pivot\PivotController;
+use App\Services\PivotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -73,14 +83,63 @@ Route::post('/team/invite/{token}', [BusinessOrganizationController::class, 'com
 //invoice receipt link
 Route::get('/invoices/receipts/{tracking_code}', [InvoicesController::class, 'showReceipt']);
 
+Route::get('/ibanq-test', [IbanqTestController::class, 'test']);
+Route::get('/ibanq/wallets', [IbanqWalletController::class, 'listWallets']);
+Route::get('/ibanq/wallets/{walletId}', [IbanqWalletController::class, 'walletDetails']);
+Route::get('/ibanq/wallets/{walletId}/transactions/{currency}', [IbanqWalletController::class, 'walletTransactions']);
+
+Route::get('/ibanq/beneficiaries', [IbanqBeneficiaryController::class, 'listBeneficiaries']);
+Route::post('/ibanq/beneficiaries', [IbanqBeneficiaryController::class, 'createBeneficiary']);
+Route::patch('/ibanq/beneficiaries/{beneficiaryId}', [IbanqBeneficiaryController::class, 'updateBeneficiary']);
+Route::get('/ibanq/beneficiaries/{beneficiaryId}', [IbanqBeneficiaryController::class, 'viewBeneficiary']);
+
+Route::get('/ibanq/beneficiaries/to-approve', [IbanqBeneficiaryApprovalController::class, 'listBeneficiariesToApprove']);
+Route::post('/ibanq/beneficiaries/{beneficiaryId}/reject', [IbanqBeneficiaryApprovalController::class, 'rejectBeneficiary']);
+Route::get('/ibanq/beneficiaries/{beneficiaryId}/approval-details', [IbanqBeneficiaryApprovalController::class, 'viewApprovalDetails']);
+
+Route::post('/ibanq/beneficiaries/{beneficiaryId}/accounts', [IbanqBeneficiaryAccountController::class, 'addAccount']);
+Route::get('/ibanq/beneficiaries/{beneficiaryId}/accounts', [IbanqBeneficiaryAccountController::class, 'listAccounts']);
+Route::delete('/ibanq/beneficiaries/{beneficiaryId}/accounts/{beneficiaryAccountId}', [IbanqBeneficiaryAccountController::class, 'deleteAccount']);
+
+Route::post('/ibanq/payments', [IbanqPaymentController::class, 'createPayment']);
+Route::get('/ibanq/payments', [IbanqPaymentController::class, 'listPayments']);
+Route::get('/ibanq/payments/{paymentId}', [IbanqPaymentController::class, 'viewPaymentDetails']);
+
+Route::post('/ibanq/payments/{paymentId}/approve', [IbanqPaymentController::class, 'approvePayment']);
+Route::post('/ibanq/payments/{paymentId}/reject', [IbanqPaymentController::class, 'rejectPayment']);
+
+Route::get('/ibanq/reference/bank-fields/{country}/{currency}', [IbanqReferenceController::class, 'getBankAccountRequirements']);
+Route::get('/ibanq/reference/beneficiaries/{type}/{country}/{currency}', [IbanqReferenceController::class, 'getBeneficiaryRequirements']);
+
+Route::post('/ifx/webhook', [IbanqWebhookController::class, 'handle']);
 
 
 
 
+
+
+
+
+
+
+
+
+Route::get('/test-pivot-auth', function(PivotService $pivot) {
+    $response = $pivot->authenticate();
+    return response()->json($response);
+});
 
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/pivot/payment', [PivotController::class, 'sendPayment']);
+    Route::post('/pivot/payment-status', [PivotController::class, 'queryPaymentStatus']);
+    Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation']);
+    Route::post('/pivot/card-payment', [PivotController::class, 'cardPayment']);
+
+
+
+
     Route::get('/users', [RegisterController::class, 'getAllUsers']);
     Route::get('/getLoggedInUser', [RegisterController::class, 'getLoggedInUser']);
     Route::delete('/deleteUser/{email}', [RegisterController::class, 'deleteUser']);

@@ -1,6 +1,41 @@
 @include('business.head')
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<style>
+/* Wrapper for safety */
+.select-wrapper {
+  width: 100%;
+}
+
+/* Force TomSelect to full width and big height */
+.select-wrapper .ts-control {
+  min-height: 40px !important;   /* always big */
+  height: 40px !important;       /* force exact height */
+  padding: 0 16px !important;    /* padding inside */
+  font-size: 16px !important;    /* readable font */
+  display: flex !important;
+  align-items: center !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  transition: all 0.2s ease;
+}
+
+/* Hover and focus */
+.select-wrapper .ts-control:hover {
+  border-color: #6366f1 !important;
+}
+
+.select-wrapper .ts-control.focus {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+}
+
+
+</style>
+
 
     <!-- Mobile menu button -->
   @include('business.header')
@@ -17,52 +52,299 @@
             </h1>
             @include('business.header_notifical')
         </header>
-        <section class=" relative w-full">
-           <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
-            <section class="flex flex-col md:flex-row gap-10 mx-auto max-w-full min-h-screen">
-                <!-- Left side: Table and search -->
-                <section class="flex-1 overflow-auto ">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4 md:gap-10">
-                        <div class="flex items-center border border-gray-300 rounded-full px-4 py-2 w-full sm:w-[400px] mb-4">
-                            <i class="fas fa-search text-gray-400 mr-3"></i>
-                            <input type="search" id="search-input" placeholder="Search beneficiaries"
-                                class="w-full text-sm text-gray-600 placeholder-gray-400 focus:outline-none" />
-                        </div>
-                        <a href="{{ route('add_beneficias.create') }}"
-                            class="flex items-center justify-center gap-1 rounded-full bg-blue-200 text-blue-800 text-[12px] font-semibold px-4 py-2 min-w-[140px] hover:bg-blue-300 transition">
-                                <i class="fas fa-plus"></i> Add Beneficiary
-                            </a>
+     <section class="w-full bg-gray-50 min-h-screen p-4 md:p-8">
 
-                    </div>
-                    <table class="w-full border-collapse text-sm ">
-                        <thead>
-                            <tr class="text-gray-600 font-semibold text-left border-b border-gray-300">
-                                <th class="py-3 pl-4 ">Full Name</th>
-                                <th class="py-3 px-4">Bank</th>
-                                <th class="py-3 px-4">Bank Account no.</th>
-                                <th class="py-3 pr-4 pl-6">Bank country</th>
-                            </tr>
-                        </thead>
-                        <tbody id="beneficiaries-table" class="divide-y divide-gray-200">
-                            @foreach ($beneficiaries as $beneficia)
-                            <tr onclick="window.location='{{ route('beneficias') }}'"
-                                class="bg-blue-50 font-semibold text-gray-900 cursor-pointer hover:bg-blue-100 transition">
-                                <td class="py-3 pl-4">{{ $beneficia->account_name }}</td>
-                                <td class="py-3 px-4">{{ $beneficia->bank }}</td>
-                                <td class="py-3 px-4">{{ $beneficia->account_number }}</td>
-                                <td class="py-3 pr-4 pl-6">{{ $beneficia->country }}</td>
-                            </tr>
-                            @endforeach
+ <section class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4">
+  <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
 
-                        </tbody>
-                    </table>
-                    <div class="mt-4">
-                        {{ $beneficiaries->links() }}
-                    </div>
-                </section>
-            
-                <!-- Right side: Form -->
-                <section class="w-full max-w-md border-l border-gray-200 pl-8">
+    <!-- Header -->
+    <div class="text-center space-y-1">
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900">Add New Beneficiary</h2>
+      <p class="text-gray-500 text-sm md:text-base">Securely add an international IBAN beneficiary</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="{{ route('add_beneficias.store') }}" class="space-y-6 md:space-y-8">
+      @csrf
+
+      <!-- Alerts -->
+      @if ($errors->any())
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json($errors->first()),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('success'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: @json(session('success')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('api_error'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json(session('api_error')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      <!-- Beneficiary Information -->
+      <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
+        <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">👤 Beneficiary Information</h3>
+
+        <!-- Country & Currency -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Country -->
+          <div>
+            <label class="text-sm font-medium mb-1 block">Country</label>
+            <div class="select-wrapper">
+              <select id="countrySelect" name="country">
+                <option value=""></option>
+                @foreach($countries as $country)
+                  <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <!-- Currency -->
+          <div>
+            <label class="text-sm font-medium mb-1 block">Currency</label>
+            <div class="select-wrapper">
+              <select id="currencySelect" name="bank[currency]">
+                <option value=""></option>
+                @foreach($countries->unique('currency_iso') as $country)
+                  <option value="{{ $country->currency_iso }}">{{ $country->currency_iso }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Beneficiary Type -->
+        <select id="beneficiaryType" name="type" class="w-full mt-2 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
+          <option value="">Select Type</option>
+          <option value="individual">Individual</option>
+          <option value="corporate">Corporate</option>
+        </select>
+
+        <!-- Individual Fields -->
+        <div id="individualFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 hidden">
+          <input type="text" name="firstNames" placeholder="First Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="lastName" placeholder="Last Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        </div>
+
+        <!-- Corporate Fields -->
+        <div id="corporateFields" class="mt-2 hidden">
+          <input type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        </div>
+
+        <!-- Reference -->
+        <div class="mt-2">
+          <input type="text" name="uniqueReference" placeholder="Unique Reference" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
+        <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">📍 Beneficiary Address</h3>
+
+        <input type="text" name="address[addressLine1]" placeholder="Street address" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        <input type="text" name="address[addressLine2]" placeholder="Apartment, suite (optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        <input type="text" name="address[buildingName]" placeholder="Building Name (Optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input type="text" name="address[city]" placeholder="City" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="address[state]" placeholder="State / Province (Optional)" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input type="text" name="address[postcode]" placeholder="Postal Code" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+        </div>
+
+        <select name="address[country]" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
+          <option value="">Country</option>
+          @foreach($countries as $country)
+            <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
+        <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">🏦 Bank Details</h3>
+
+        <input 
+            type="text" 
+            name="bank[accountHolder]" 
+            placeholder="Account Holder" 
+            class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
+        />
+
+        <input 
+        type="text" 
+        name="bank[nickname]" 
+        placeholder="Bank Nickname" 
+        class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
+        />
+
+        <!-- Bank Fields -->
+        <input type="text" id="iban" name="bank[iban]" placeholder="IBAN" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="accountNumber" name="bank[accountNumber]" placeholder="Account Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="sortCode" name="bank[sortCode]" placeholder="Sort Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="bankCode" name="bank[bankCode]" placeholder="Bank Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+
+        <!-- Account Type -->
+        <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
+          <option value="">Account Type</option>
+          <option value="checking">Checking</option>
+          <option value="savings">Savings</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mt-2">
+        <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:scale-[1.02] hover:shadow-xl transition">
+          Create Beneficiary
+        </button>
+        <button type="button" class="flex-1 border py-3 rounded-xl hover:bg-gray-100 transition">
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
+
+
+
+</section>
+
+
+    </main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const options = {
+    allowEmptyOption: true,
+  };
+
+  new TomSelect("#countrySelect", options);
+  new TomSelect("#currencySelect", options);
+});
+
+
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const countryRules = @json($countryRules);
+
+  const fieldMap = {
+    iban: "iban",
+    accountNumber: "accountNumber",
+    sortCode: "sortCode",
+    bankCode: "bankCode",
+    swiftBic: "swiftBic",
+    routing: "routing",
+    accountType: "accountType"
+  };
+
+  const countrySelect = document.getElementById("countrySelect");
+  const currencySelect = document.getElementById("currencySelect");
+  const allFields = document.querySelectorAll(".bank-field");
+
+  if (!countrySelect) return; // safety
+
+  countrySelect.addEventListener("change", function () {
+
+    const selected = countryRules[this.value];
+
+    // Auto currency
+    if (selected && currencySelect) {
+      currencySelect.value = selected.currency;
+    }
+
+    // Hide all fields
+    allFields.forEach(f => {
+      f.classList.add("hidden");
+      f.removeAttribute("required");
+    });
+
+    if (!selected) return;
+
+    // Show required fields
+    selected.rules.forEach(field => {
+      const el = document.getElementById(fieldMap[field]);
+      if (el) {
+        el.classList.remove("hidden");
+        el.setAttribute("required", "required");
+      }
+    });
+
+  });
+
+});
+</script>
+
+
+
+
+
+    <script>
+const typeSelect = document.getElementById('beneficiaryType');
+const individualFields = document.getElementById('individualFields');
+const corporateFields = document.getElementById('corporateFields');
+
+function toggleFields() {
+
+    individualFields.classList.add('hidden');
+    corporateFields.classList.add('hidden');
+
+    if (typeSelect.value === 'individual') {
+        individualFields.classList.remove('hidden');
+    }
+
+    if (typeSelect.value === 'corporate') {
+        corporateFields.classList.remove('hidden');
+    }
+}
+
+// Run on change
+typeSelect.addEventListener('change', toggleFields);
+
+// Run once on page load
+toggleFields();
+</script>
+
+
+    
+                {{-- <section class="w-full max-w-md border-l border-gray-200 pl-8">
                     <h2 class="font-semibold text-gray-900 text-base mb-2">Manually Add a Beneficiary</h2>
                     <p class="text-gray-500 text-sm mb-6 max-w-[320px]">
                         You can also quickly add someone as a beneficiary right after sending money to them.
@@ -120,148 +402,85 @@
                             <option value="personal">Personal </option>
                             <option value="business">Business</option>
                         </select>
+
+
+                        <!-- Select Country -->
+                        <div>
+                            <label class="font-medium mb-1">Select Country</label>
+                            <select name="country"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                required>
+
+                                <option value="" disabled selected>Choose country</option>
+
+                                <option value="UG">Uganda 🇺🇬</option>
+                                <option value="KE">Kenya 🇰🇪</option>
+                                <option value="NG">Nigeria 🇳🇬</option>
+                                <option value="CA">Canada 🇨🇦</option>
+                                <option value="GH">Ghana 🇬🇭</option>
+
+                            </select>
+                        </div>
+
+
+                        <!-- Service Code -->
+                        <div>
+                            <label class="font-medium mb-1">Service Code</label>
+                            <input type="text" name="serviceCode"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                placeholder="Enter service code (e.g. PS714349)"
+                                required>
+                        </div>
+
+
+
+                        <!-- MSISDN (Phone Number) -->
+                        <div>
+                            <label class="font-medium mb-1">Phone Number (MSISDN)</label>
+                            <input type="text" name="msisdn"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                placeholder="e.g. 256703039553"
+                                required>
+                        </div>
+
+                        <!-- Bank Sort Code -->
+                        <div>
+                            <label class="font-medium mb-1">Bank Sort Code</label>
+                            <input type="text" name="extraData[bankSortCode]"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                placeholder="Enter bank sort code"
+                                required>
+                        </div>
+
+                        <!-- Account Number -->
+                        <div>
+                            <label class="font-medium mb-1">Account Number</label>
+                            <input type="text" id="accountNumber" name="accountNumber"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                placeholder="Enter account number"
+                                required>
+                        </div>
+
+                        <!-- Account Name (Auto Filled) -->
+                        <div>
+                            <label class="font-medium mb-1">Account Name</label>
+                            <input type="text" id="accountName" name="account_name"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100"
+                                readonly>
+                        </div>
+
+                        <!-- Loading -->
+                        <div id="loading" class="hidden text-blue-500 text-sm">
+                            Validating account...
+                        </div>
+
+
+
+
                         
             
                         <!-- Hidden input for country -->
 
-                        <div x-data="countrySelector()" x-init="init()">
-                            <input type="hidden" name="country" :value="selectedCountry?.alpha2">
-                            <input type="hidden" name="currency" :value="selectedCurrency">
-                            <input type="hidden" name="account_name" :value="accountName">
-                            <input type="hidden" name="bank_id" :value="selectedBankId">
-                            <input type="hidden" name="account_number" :value="accountNumber">
-
-                            <!-- COUNTRY SELECTOR -->
-                            <label class="block font-medium mb-1">In what country is your bank located?</label>
-                            <button @click="open = !open" type="button"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <template x-if="selectedCountry">
-                                        <img :src="'https://flagcdn.com/24x18/' + selectedCountry.alpha2.toLowerCase() + '.png'" class="w-5 h-auto" alt="">
-                                    </template>
-                                    <span x-text="selectedCountry ? selectedCountry.country_name : 'Select country'"></span>
-                                </div>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                        
-                            <!-- Country Dropdown -->
-                            <div x-show="open" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto shadow-lg">
-                                <div @click.stop>
-                                    <div class="p-2">
-                                        <input type="text" x-model="search" placeholder="Search country..." class="w-full px-3 py-1 border rounded">
-                                    </div>
-                                    <ul>
-                                        <template x-for="country in filteredCountries()" :key="country.alpha2">
-                                            <li @click="selectCountry(country)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                                                <img :src="'https://flagcdn.com/24x18/' + country.alpha2.toLowerCase() + '.png'" class="w-5 h-auto" alt="">
-                                                <span x-text="country.country_name"></span>
-                                            </li>
-                                        </template>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <!-- CURRENCY SELECTOR -->
-                            <div class="mt-4" x-show="currencies.length > 0" x-cloak>
-                                <label class="block font-medium mb-1">Select Currency</label>
-                                <div class="relative">
-                                    <button @click="currencyOpen = !currencyOpen" type="button"
-                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
-                                        <span x-text="selectedCurrency ? getCurrencySymbol(selectedCurrency) + ' ' + selectedCurrency : 'Choose currency'"></span>
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    <div x-show="currencyOpen" @click.outside="currencyOpen = false"
-                                        class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-60 overflow-y-auto">
-                                        <ul>
-                                            <template x-for="currency in currencies" :key="currency">
-                                                <li @click="selectedCurrency = currency; currencyOpen = false; updateBankOptions();"
-                                                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                                    <span x-text="getCurrencySymbol(currency) + ' ' + currency"></span>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- NON-NGN (USD, EUR, GBP) DYNAMIC FIELDS -->
-                            <div x-show="selectedCurrency !== 'NGN' && computedFields().length > 0" x-cloak class="mt-4 space-y-4">
-                                <template x-for="field in computedFields()" :key="field.name">
-                                    <div>
-                                        <label class="block font-medium mb-1" x-text="field.label"></label>
-                                        <input 
-                                            :type="field.type" 
-                                            :name="field.name" 
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2" 
-                                            :maxlength="field.length || null"
-                                        />
-                                    </div>
-                                </template>
-                            </div>
-
-
-              
-                            <div x-show="selectedCurrency === 'NGN' || selectedCurrency === 'GHS' || selectedCurrency === 'KES'" x-cloak class="mt-4 space-y-4">
-                                <!-- BANK SELECTOR -->
-                                <div>
-                                    <label class="block font-medium mb-1">Bank</label>
-                                    <div class="relative">
-                                        <button @click="bankOpen = !bankOpen" type="button"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between">
-                                            <span x-text="selectedBankName || 'Select your bank'"></span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                            
-                                        <div x-show="bankOpen" @click.outside="bankOpen = false"
-                                            class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-60 overflow-y-auto">
-                                            <div class="p-2 border-b">
-                                                <input type="text" x-model="bankSearch" placeholder="Search bank..." class="w-full px-3 py-1 border rounded" />
-                                            </div>
-                                            <ul>
-                                                <template x-for="bank in filteredBanks()" :key="bank.value">
-                                                    <li @click="selectBank(bank)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                                        <span x-text="bank.label"></span>
-                                                    </li>
-                                                </template>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            
-                                <!-- ACCOUNT NUMBER -->
-                                <input type="text" id="account-number" name="account_number_input"
-                                    x-model="accountNumber"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                    placeholder="Enter your account number"
-                                    @input.debounce.500ms="validateAccount">
-                            
-                                <!-- ACCOUNT NAME -->
-                                <div x-show="accountName">
-                                    <p class="text-sm mt-2 text-green-600 font-semibold" x-text="accountName"></p>
-                                </div>
-                            
-                                <!-- LOADING SPINNER -->
-                                <div x-show="isLoading" class="mt-2 text-blue-500 text-sm flex items-center gap-2">
-                                    <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                                    </svg>
-                                    Validating account number...
-                                </div>
-                            </div>
-                            
-                            
-    
-
-
-                        </div>
                         
                         
         
@@ -277,46 +496,7 @@
                             </button>
                         </div>
                     </form>
-                </section>
-            </section>
-           </section>
-    </main>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('search-input');
-            const tableBody = document.getElementById('beneficiaries-table');
-    
-            input.addEventListener('keyup', function () {
-                const query = this.value;
-    
-                fetch(`/beneficiaries/search?query=${encodeURIComponent(query)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        let rows = '';
-    
-                        if (data.length === 0) {
-                            rows = '<tr><td colspan="4" class="text-center py-4 text-gray-500">No results found</td></tr>';
-                        } else {
-                            data.forEach(b => {
-                                rows += `
-                                    <tr onclick="window.location='/beneficias/${b.id}/edit'" 
-                                        class="bg-blue-50 font-semibold text-gray-900 cursor-pointer hover:bg-blue-100 transition">
-                                        <td class="py-3 pl-4">${b.account_name}</td>
-                                        <td class="py-3 px-4">${b.bank}</td>
-                                        <td class="py-3 px-4">${b.account_number}</td>
-                                        <td class="py-3 pr-4 pl-6">${b.country.name}</td>
-                                    </tr>
-                                `;
-                            });
-                        }
-    
-                        tableBody.innerHTML = rows;
-                    });
-            });
-        });
-    </script>
-    
-    
+                </section> --}}
     
     <script>
         document.getElementById('country').addEventListener('change', function () {
@@ -383,9 +563,61 @@
         });
     </script>
 
-
-
 <script>
+document.getElementById('accountNumber').addEventListener('blur', function () {
+
+    const country = document.querySelector('[name="country"]').value;
+
+    // Only validate for Uganda or Kenya
+    if (country !== 'UG' && country !== 'KE') return;
+
+    const data = {
+        serviceCode: document.querySelector('[name="serviceCode"]').value,
+        accountNumber: this.value,
+        msisdn: document.querySelector('[name="msisdn"]').value,
+        extraData: {
+            bankSortCode: document.querySelector('[name="extraData[bankSortCode]"]').value
+        }
+    };
+
+    document.getElementById('loading').classList.remove('hidden');
+
+    fetch("{{ route('pivot.account.validation') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+
+        document.getElementById('loading').classList.add('hidden');
+
+        if (res.accountName) {
+            document.getElementById('accountName').value = res.accountName;
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation failed',
+                text: res.statusDescription || 'Invalid account'
+            });
+        }
+
+    })
+    .catch(err => {
+        document.getElementById('loading').classList.add('hidden');
+        console.error(err);
+    });
+
+});
+</script>
+
+
+
+
+{{-- <script>
     function countrySelector() {
         return {
             countries: @json($countries),
@@ -6300,7 +6532,11 @@
     
 
 <!-- Alpine.js CDN -->
+<<<<<<< HEAD
 <script src="//unpkg.com/alpinejs" defer></script>
+=======
+<script src="//unpkg.com/alpinejs" defer></script> --}}
+>>>>>>> recovery
 
     
 </body>

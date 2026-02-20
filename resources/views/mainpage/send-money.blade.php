@@ -114,51 +114,131 @@
 
                 <!-- RIGHT CARD -->
                 <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-auto">
-                            
-                    <!-- You Send -->
-                    <div class="bg-gray-50 rounded-xl p-4 mb-4">
+
+                    <!-- YOU SEND -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-4 relative">
+
                         <p class="text-sm text-gray-500 mb-1">You send</p>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center text-3xl font-semibold gap-1">
-                                            <span>{{ '£' ?? '£' }}</span>
 
-                                <input id="sendAmount" type="number" value="100" class="w-28 border-0 focus:ring-0" min="1">
+                        <div class="flex items-center justify-between">
+
+                            <div class="flex items-center text-3xl font-semibold gap-1">
+                            <span id="senderSymbol">£</span>
+                            <input id="sendAmount" type="number" value="100" class="w-28 border-0 focus:ring-0">
                             </div>
-                            <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border">
-                                <!-- Dynamic sender flag -->
-                                <img src="https://flagcdn.com/w20/gb.png" alt="UK Flag" class="w-5 h-5 rounded-full">
-                                <span class="font-medium">GBP</span>
+
+                            <button onclick="toggleDropdown('sender')" class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border">
+
+                            <img id="senderFlag" src="https://flagcdn.com/w20/gb.png" class="w-5 h-5 rounded-full">
+                            <span id="senderCode">GBP</span>
+
+                            </button>
+
+                        </div>
+
+                        <!-- Sender Dropdown -->
+                        <div id="senderDropdown" class="dropdown hidden absolute right-0 mt-2 w-80 bg-white border rounded-xl shadow-lg z-50">
+
+                            <input type="text" placeholder="Search currency..."
+                            class="w-full p-3 border-b outline-none dropdown-search">
+
+                            <div class="max-h-60 overflow-y-auto">
+
+                            @foreach($currencies as $code => $currency)
+                                <div class="currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                                    data-target="sender"
+                                    data-code="{{ $code }}"
+                                    data-rate="{{ $currency['rate'] }}"
+                                    data-symbol="{{ $currency['symbol'] }}"
+                                    data-flag="{{ $currency['countrycode'] }}">
+
+                                    <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png"
+                                    class="w-5 h-5 rounded-full">
+
+                                    <span class="currency-text" data-country="{{ $currency['country_name'] }}">
+                                        {{ $currency['country_name'] }} ({{ $code }})
+                                    </span>
+                                </div>
+                                @endforeach
+
                             </div>
                         </div>
+
                     </div>
 
-                    <!-- Exchange Rate -->
+                    <!-- EXCHANGE -->
                     <div class="bg-gray-50 rounded-xl p-4 mb-4 flex justify-between text-sm">
-                        <span class="text-gray-500">Exchange rate</span>
-                        <span class="font-medium text-gray-800">
-                            1 GBP = {{ number_format($countryCurrency['rate'], 4) }} {{ $countryCurrency['symbol'] ?? 'EUR' }}
-                        </span>
+                    <span class="text-gray-500">Exchange rate</span>
+                    <span id="exchangeText" class="font-medium text-gray-800"></span>
                     </div>
 
-                    <!-- You Receive -->
-                    <div class="bg-gray-50 rounded-xl p-4">
+                    <!-- YOU RECEIVE -->
+                    <div class="bg-gray-50 rounded-xl p-4 relative">
+
                         <p class="text-sm text-gray-500 mb-1">You receive</p>
+
                         <div class="flex items-center justify-between">
+
                             <div class="flex items-center text-3xl font-semibold gap-1">
-                                <span>{{ $countryCurrency['symbol'] ?? '€' }}</span>
-                                <span id="receiveAmount">{{ number_format(100 * $countryCurrency['rate'], 2) }}</span>
+                                <span id="receiverSymbol">€</span>
+                                <span id="receiveAmount">0.00</span>
                             </div>
-                            <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border">
-                                <!-- Dynamic receiver flag using country code -->
-                                <img src="https://flagcdn.com/w20/{{ strtolower($countryCurrency['countrycode']) }}.png" alt="{{ $countryCurrency['country'] }} Flag" class="w-5 h-5 rounded-full">
-                                <span class="font-medium">{{ strtoupper($countryCurrency['countrycode'] ?? 'EUR') }}</span>
+
+                            <button onclick="toggleDropdown('receiver')" class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border">
+
+                                <img id="receiverFlag"
+                                src="https://flagcdn.com/w20/{{ strtolower($countryCurrency['countrycode']) }}.png"
+                                class="w-5 h-5 rounded-full">
+
+                                <span id="receiverCode">{{ array_key_first($currencies->toArray()) }}</span>
+
+                            </button>
+
+                        </div>
+
+                        <!-- Receiver Dropdown -->
+                        <div id="receiverDropdown" class="dropdown hidden absolute right-0 mt-2 w-80 bg-white border rounded-xl shadow-lg z-50">
+
+                            <input type="text" placeholder="Search currency..."
+                            class="w-full p-3 border-b outline-none dropdown-search">
+
+                            <div class="max-h-60 overflow-y-auto">
+
+                                @foreach($currencies as $code => $currency)
+                                    <div class="currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                                        data-target="receiver"
+                                        data-code="{{ $code }}"
+                                        data-rate="{{ $currency['rate'] }}"
+                                        data-symbol="{{ $currency['symbol'] }}"
+                                        data-flag="{{ $currency['countrycode'] }}">
+
+                                        <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png"
+                                        class="w-5 h-5 rounded-full">
+
+                                        <span class="currency-text" data-country="{{ $currency['country_name'] }}">
+                                            {{ $currency['country_name'] }} ({{ $code }})
+                                        </span>
+
+                                    </div>
+                                @endforeach
+
                             </div>
                         </div>
-                    </div>
 
+                    </div>
 
                 </div>
+
+
+
+
+
+
             </div>
+
+
+
+
 
 
             <br><br> 
@@ -453,17 +533,245 @@
 
         @include('mainpage.script')
         <!-- Dynamic Calculation -->
-<script>
-    const sendInput = document.getElementById('sendAmount');
-    const receiveOutput = document.getElementById('receiveAmount');
-    const rate = {{ $countryCurrency['rate'] }};
 
-    sendInput.addEventListener('input', () => {
-        const sendValue = parseFloat(sendInput.value) || 0;
-        const receiveValue = sendValue * rate;
-        receiveOutput.textContent = receiveValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+<script>
+console.log("🚀 Exchange script loaded");
+
+let selected = { sender: null, receiver: null };
+
+
+// =====================
+// Toggle dropdown
+// =====================
+function toggleDropdown(type) {
+    console.log("📂 Toggle dropdown:", type);
+
+    document.querySelectorAll('.dropdown')
+        .forEach(d => d.classList.add('hidden'));
+
+    document.getElementById(type + 'Dropdown')
+        .classList.toggle('hidden');
+}
+
+
+// =====================
+// Close dropdown outside click
+// =====================
+document.addEventListener('click', e => {
+    if (!e.target.closest('.relative')) {
+        console.log("🖱 Click outside — closing dropdowns");
+
+        document.querySelectorAll('.dropdown')
+            .forEach(d => d.classList.add('hidden'));
+    }
+});
+
+
+// =====================
+// Select currency
+// =====================
+document.querySelectorAll('.currency-item').forEach(item => {
+
+    item.addEventListener('click', () => {
+
+        const t = item.dataset.target;
+
+        console.log("✅ Currency clicked:", item.dataset);
+
+        selected[t] = {
+            code: item.dataset.code,
+            rate: parseFloat(item.dataset.rate),
+            symbol: item.dataset.symbol,
+            flag: item.dataset.flag
+        };
+
+        console.log(`📌 Selected ${t}:`, selected[t]);
+
+        document.getElementById(t + 'Flag').src =
+            `https://flagcdn.com/w20/${selected[t].flag}.png`;
+
+        document.getElementById(t + 'Symbol').textContent =
+            selected[t].symbol;
+
+        document.getElementById(t + 'Code').textContent =
+            selected[t].code;
+
+        updateAll();
+        toggleDropdown(t);
     });
+
+});
+
+
+// =====================
+// Search filter
+// =====================
+document.querySelectorAll('.dropdown-search').forEach(input => {
+
+    input.addEventListener('input', e => {
+
+        const search = e.target.value.toLowerCase();
+        console.log("🔍 Search:", search);
+
+        const list = e.target.nextElementSibling;
+
+        list.querySelectorAll('.currency-item').forEach(item => {
+            item.style.display =
+                item.textContent.toLowerCase().includes(search)
+                    ? 'flex' : 'none';
+        });
+
+    });
+
+});
+
+
+// =====================
+// Calculate conversion
+// =====================
+function calculate() {
+
+    console.log("🧮 Running calculation...");
+
+    if (!selected.sender || !selected.receiver) {
+        console.warn("⚠ Sender or receiver not selected", selected);
+        return;
+    }
+
+    const send =
+        parseFloat(document.getElementById('sendAmount').value) || 0;
+
+    const senderRate = parseFloat(selected.sender.rate);
+    const receiverRate = parseFloat(selected.receiver.rate);
+
+    console.log("💰 Send amount:", send);
+    console.log("📊 Sender rate:", senderRate);
+    console.log("📊 Receiver rate:", receiverRate);
+
+    if (!senderRate || !receiverRate) {
+        console.error("❌ Invalid rate detected!");
+        return;
+    }
+
+    const result = (send / senderRate) * receiverRate;
+
+    console.log("✅ Final result:", result);
+
+    document.getElementById('receiveAmount')
+        .textContent = result.toFixed(2);
+}
+
+
+// =====================
+// Exchange rate text
+// =====================
+function updateExchange() {
+
+    console.log("🔄 Updating exchange text");
+
+    if (!selected.sender || !selected.receiver) return;
+
+    const rate =
+        selected.receiver.rate / selected.sender.rate;
+
+    console.log("📈 Exchange rate:", rate);
+
+    document.getElementById('exchangeText').textContent =
+        `1 ${selected.sender.code} = ${rate.toFixed(4)} ${selected.receiver.code}`;
+}
+
+
+// =====================
+// Update all
+// =====================
+function updateAll() {
+    console.log("🔁 updateAll triggered");
+    calculate();
+    updateExchange();
+}
+
+
+// =====================
+// Input listener
+// =====================
+document.getElementById('sendAmount')
+.addEventListener('input', () => {
+    console.log("⌨ Input changed");
+    calculate();
+});
+
+
+// =====================
+// Country grid click
+// =====================
+document.querySelectorAll('.country-link').forEach(link => {
+
+    link.addEventListener('click', function(e) {
+
+        e.preventDefault();
+
+        const code = this.dataset.currency;
+        console.log("🌍 Country clicked:", code);
+
+        document.querySelectorAll('#receiverDropdown .currency-item')
+        .forEach(item => {
+
+            if (item.dataset.code === code) {
+                console.log("🎯 Matching currency found:", code);
+                item.click();
+            }
+
+        });
+
+    });
+
+});
+
+
+// =====================
+// Default setup
+// =====================
+console.log("⚙ Setting default currencies");
+
+// Default sender GBP
+const defaultSenderItem =
+    document.querySelector('#senderDropdown .currency-item[data-code="GBP"]');
+
+if (defaultSenderItem) {
+    console.log("🇬🇧 Default sender GBP found");
+    defaultSenderItem.click();
+} else {
+    console.warn("⚠ Default sender GBP NOT found");
+}
+
+
+// Default receiver
+const slugCurrencyCode =
+    "{{ $countryCurrency['currency_code'] ?? array_key_first($currencies->toArray()) }}";
+
+console.log("🎯 Slug receiver currency:", slugCurrencyCode);
+
+let receiverItem =
+    document.querySelector(
+        `#receiverDropdown .currency-item[data-code="${slugCurrencyCode}"]`
+    );
+
+if (!receiverItem) {
+    console.warn("⚠ Slug receiver not found — using first currency");
+
+    receiverItem =
+        document.querySelector('#receiverDropdown .currency-item');
+}
+
+if (receiverItem) {
+    console.log("✅ Default receiver selected:", receiverItem.dataset.code);
+    receiverItem.click();
+} else {
+    console.error("❌ No receiver currency found!");
+}
+
 </script>
+
 
     </body>
 </html>
