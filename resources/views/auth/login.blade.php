@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <title>{{ __('Sign In') }}</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<<<<<<< HEAD
     <style>
         .form-group {
             width: 100%;
@@ -46,6 +47,8 @@
         }
 
     </style>
+=======
+>>>>>>> recovery
 </head>
 <body>
     <section>
@@ -108,12 +111,20 @@
                                 <section class="flex flex-col gap-6">
                                     <!-- bussiness email -->
                                     <div>
+<<<<<<< HEAD
                                         <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Email') }}</label>
                                         <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="johndoe@gmail.com">
+=======
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Email') }}</label>
+                                        <input type="email" name="email" id="helper-text" aria-describedby="helper-text-explanation"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            placeholder="johndoe@gmail.com">
+>>>>>>> recovery
                                     </div>
                                     <!-- bussiness email end-->
 
                                     <!-- password -->
+<<<<<<< HEAD
                                     <div class="form-group">
                                         <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]">{{ __('Password') }}</label>
 
@@ -123,6 +134,12 @@
                                                 <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
                                             </button>
                                         </div>
+=======
+                                    <div>
+                                        <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Password') }}</label>
+                                        <input type="password" name="password" id="helper-text" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            placeholder="user1234">
+>>>>>>> recovery
                                     </div>
 
                                      

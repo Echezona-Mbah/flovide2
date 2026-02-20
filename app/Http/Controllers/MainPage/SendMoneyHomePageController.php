@@ -5,17 +5,36 @@ namespace App\Http\Controllers\MainPage;
 use App\Http\Controllers\Controller;
 use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
+use App\Models\ExchangeRate;
+use Illuminate\Support\Str;
+
 
 class SendMoneyHomePageController extends Controller
 {
         use CurrencyHelper;
 
+
 public function index($slug = null)
 {
-    $currencies = $this->getAllCurrencies();
+    $exchangeRates = ExchangeRate::all();
 
-    // If slug is given, find currency for that country
-    $countryCurrency = null;
+    $currencies = $exchangeRates->mapWithKeys(function ($rate) {
+
+        $countrySlug = Str::slug($rate->country_name);
+
+        return [
+            $rate->currency_code => [
+                'symbol' => $rate->currency_symbol,
+                'countrycode' => strtolower(substr($rate->currency_code, 0, 2)),
+                'country' => $countrySlug,
+                'rate' => $rate->rate,
+                'country_name' => $rate->country_name
+            ]
+        ];
+    });
+
+    // Default = first currency
+    $countryCurrency = $currencies->first(); // default
     if ($slug) {
         if (!str_starts_with($slug, 'send-money-to-')) {
             abort(404);
@@ -26,20 +45,17 @@ public function index($slug = null)
         foreach ($currencies as $code => $data) {
             if ($data['country'] === $countrySlug) {
                 $countryCurrency = $data;
+                $countryCurrency['currency_code'] = $code; // <-- add this
                 break;
             }
         }
-
-        if (!$countryCurrency) {
-            abort(404);
-        }
     }
-//  dd($countryCurrency);
-    return view('mainpage.send-money', [
-        'currencies' => $currencies,
-        'countryCurrency' => $countryCurrency ?? null
-    ]);
+
+    // dd($currencies);
+
+    return view('mainpage.send-money', compact('currencies', 'countryCurrency'));
 }
+
 
 
 }

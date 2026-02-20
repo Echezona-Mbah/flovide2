@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'ibanq' => [
+        'api_key' => env('IBANQ_API_KEY'),
+        'base_url' => env('IBANQ_BASE_URL'),
+    ],
+
+
 ];

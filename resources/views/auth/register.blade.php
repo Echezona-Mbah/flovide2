@@ -41,6 +41,7 @@
                 display: block;
             }
 
+<<<<<<< HEAD
             #loader.hidden {
                 display: none;
             }
@@ -121,6 +122,8 @@
     
 
         </style>
+=======
+>>>>>>> recovery
         <title>{{ __('Sign Up') }}</title>
     </head>
     
@@ -220,7 +223,11 @@
                             <section>
                                 <form class="max-w-sm mt-10" action="" method="POST" id="countryForm">
                                     @csrf
+<<<<<<< HEAD
                                     <label for="countries" class="block mb-2 text-sm font-bold text-gray-900  ">{{ __('Country') }}</label>
+=======
+                                    <label for="countries" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">{{ __('Country') }}</label>
+>>>>>>> recovery
                             
                                     <div class="custom-dropdown">
                                         <div class="dropdown-button" id="dropdownButton">
@@ -362,30 +369,52 @@
                                     <section class="flex flex-col gap-10">
                                         <!-- Business Name -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Name') }}</label>
                                             <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter business name') }}">
+=======
+                                            <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Name') }}</label>
+                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter business name') }}">
+>>>>>>> recovery
                                             <div id="businessNameError" ></div>
     
                                         </div>
                                         <!-- Registration Number -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Registration Number') }}</label>
                                             <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
+=======
+                                            <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Registration Number') }}</label>
+                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
+>>>>>>> recovery
                                             <div id="error-registration_number"></div>
                                         </div>
 
                                         <!-- Business Number -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Number') }}</label>
                                             <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
+=======
+                                            <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Number') }}</label>
+                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
+>>>>>>> recovery
                                             <div id="error-business_number"></div>
                                         </div>
                                         <!-- Incorporation Date -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Incorporation Date') }}</label>
                                             <section class="flex flex-col md:flex-row md:justify-between md:items-center md:gap-2 gap-10">
                                                 <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Day') }}">
                                                 <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+=======
+                                            <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Incorporation Date') }}</label>
+                                            <section class="flex flex-col md:flex-row md:justify-between md:items-center md:gap-2 gap-10">
+                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Day') }}">
+                                                <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+>>>>>>> recovery
                                                     <option value="" disabled selected>{{ __('Select a month') }}</option>
                                                     <option value="1">{{ __('January') }}</option>
                                                     <option value="2">{{ __('February') }}</option>
@@ -400,35 +429,57 @@
                                                     <option value="11">{{ __('November') }}</option>
                                                     <option value="12">{{ __('December') }}</option>
                                                 </select>
+<<<<<<< HEAD
                                                 <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Year') }}">
+=======
+                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Year') }}">
+>>>>>>> recovery
                                             </section>
                                             <div id="error-incorporation_date" class="text-red-500 mt-2"></div>
                                         </div>
                                         
                                         <!-- Business Type -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Type') }}</label>
                                             <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter your business type') }}">
+=======
+                                            <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Business Type') }}</label>
+                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="{{ __('Enter your business type') }}">
+>>>>>>> recovery
                                             <div id="error-business_type" ></div>
     
                                         </div>
     
                                         <!-- Company URL -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Company URL') }}</label>
+=======
+                                            <label for="company-url" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Company URL') }}</label>
+>>>>>>> recovery
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                     <p>https://</p>
                                                 </div>
+<<<<<<< HEAD
                                                 <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
+=======
+                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
+>>>>>>> recovery
                                             </div>
                                             <div id="error-company_url"></div>
     
                                         </div>
                                         <!-- Industry -->
                                         <div>
+<<<<<<< HEAD
                                             <label for="industry" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Industry') }}</label>
                                             <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+=======
+                                            <label for="industry" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Industry') }}</label>
+                                            <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+>>>>>>> recovery
                                                 <option selected>{{ __('Select an option') }}</option>
                                                 @foreach ($industries as $industry)
                                                 <option value="{{ $industry->id }}">{{ $industry->name }}</option>
@@ -440,7 +491,11 @@
                                       <!-- Annual Turnover -->
                                       
                                       <div class="relative">
+<<<<<<< HEAD
                                         <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Annual Turnover') }}</label>
+=======
+                                        <label for="annual-turnover" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">{{ __('Annual Turnover') }}</label>
+>>>>>>> recovery
                                         
                                         <!-- Wrapper div for the input and currency symbol -->
                                         <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full pl-8 p-2.5 flex items-center">
@@ -799,28 +854,50 @@
 
                                     <!-- Generic State Input (visible for all non-NG countries) -->
                                     <div id="generic-state-input">
+<<<<<<< HEAD
                                         <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282]  ">First Name</label>
                                         <input type="text" id="first_name" placeholder="Enter Your First Name"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+=======
+                                        <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">First Name</label>
+                                        <input type="text" id="first_name" placeholder="Enter Your First Name"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+>>>>>>> recovery
                                         <div id="error-first_name" class="text-red-500 text-sm"></div>
                                     </div>
                                     
                                     <div id="generic-state-input">
+<<<<<<< HEAD
                                         <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282]  ">Last Name</label>
                                         <input type="text" id="last_name" placeholder="Enter Your Fast_Name"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+=======
+                                        <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Last Name</label>
+                                        <input type="text" id="last_name" placeholder="Enter Your Fast_Name"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+>>>>>>> recovery
                                         <div id="error-last_name" class="text-red-500 text-sm"></div>
                                     </div>
 
                                     <div id="generic-state-input">
+<<<<<<< HEAD
                                         <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282]  ">Phone Number</label>
                                         <input type="text" id="person_number" placeholder="Enter Your Phone Number"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+=======
+                                        <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">Phone Number</label>
+                                        <input type="text" id="person_number" placeholder="Enter Your Phone Number"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+>>>>>>> recovery
                                         <div id="error-person_number" class="text-red-500 text-sm"></div>
                                     </div>
 
                                     <div id="generic-state-input">
+<<<<<<< HEAD
                                         <label for="state" class="block mb-2 text-sm font-bold text-[#828282]  ">State</label>
+=======
+                                        <label for="state" class="block mb-2 text-sm font-bold text-[#828282] dark:text-white">State</label>
+>>>>>>> recovery
                                         <input type="text" id="state" placeholder="Enter Your State"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <div id="error-state" class="text-red-500 text-sm"></div>
