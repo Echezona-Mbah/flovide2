@@ -11,6 +11,9 @@
   <style>
     body {
       color: #252525;
+      padding: 0;
+      margin: 0;
+      overflow-x: hidden !important;
     }
   </style>
 </head>
@@ -153,8 +156,8 @@
               src="../asserts/Personal/company2.png" />
             <img alt="CentaDesk company logo white on transparent background" class="w-28" height="40"
               src="../asserts/Personal/company3.png" />
-            <img alt="EW company logo white on transparent background" class="h-30 w-30" height="40"
-              src="../asserts/Personal/company4.png" />
+            <!-- <img alt="EW company logo white on transparent background" class="h-30 w-30" height="40"
+              src="../asserts/Personal/company4.png" /> -->
           </div>
           <div class="flex items-center gap-2">
             <div class="flex -space-x-3">
@@ -274,7 +277,7 @@
           </section>
           <section class="flex justify-start items-start w-full">
             <img alt="Blue digital lock surrounded by futuristic circular interface representing secure transactions"
-              class="rounded-2xl flex-grow px-10 w-[40vw]" src="../asserts/homepage/blog_img1.png" />
+              class="rounded-2xl flex-grow px-6" src="../asserts/homepage/blog_img1.png" />
           </section>
         </article>
         <!-- Card 2 -->
@@ -536,8 +539,7 @@
           <div id="testimonial-slider" class="relative w-full overflow-hidden">
             <div id="slider-track" class="flex transition-transform duration-500 ease-in-out gap-6">
               <template id="testimonial-card">
-                <article
-                  class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
+                <article class="min-w-full md:min-w-[33.3333%] bg-gray-100 rounded-tl-[1.5rem] rounded-tr-[1.5rem] rounded-br-[1.5rem] p-8 gap-y-20 flex flex-col justify-between">
                   <p class="mb-8 text-base leading-relaxed">
                     Flovide makes international transfers so easy and affordable. I can send money to my family abroad
                     without worrying about high fees
