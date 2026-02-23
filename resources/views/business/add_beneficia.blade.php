@@ -52,9 +52,9 @@
             </h1>
             @include('business.header_notifical')
         </header>
-     <section class="w-full bg-gray-50 min-h-screen p-4 md:p-8">
+     <section class="w-full rounded-3xl bg-white min-h-screen p-4 md:p-8">
 
- <section class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4">
+ <section class="min-h-screen bg-white py-4 px-2">
   <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
 
     <!-- Header -->
@@ -230,9 +230,9 @@
         <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:scale-[1.02] hover:shadow-xl transition">
           Create Beneficiary
         </button>
-        <button type="button" class="flex-1 border py-3 rounded-xl hover:bg-gray-100 transition">
-          Cancel
-        </button>
+        <a href="{{ route('beneficias') }}" type="button" class="flex-1 border py-3 rounded-xl text-center hover:bg-gray-100 transition">
+            Cancel
+        </a>
       </div>
 
     </form>
@@ -617,7 +617,7 @@ document.getElementById('accountNumber').addEventListener('blur', function () {
 
 
 
-{{-- <script>
+<script>
     function countrySelector() {
         return {
             countries: @json($countries),
@@ -6532,11 +6532,7 @@ document.getElementById('accountNumber').addEventListener('blur', function () {
     
 
 <!-- Alpine.js CDN -->
-<<<<<<< HEAD
 <script src="//unpkg.com/alpinejs" defer></script>
-=======
-<script src="//unpkg.com/alpinejs" defer></script> --}}
->>>>>>> recovery
 
     
 </body>
