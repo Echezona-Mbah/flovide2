@@ -18,7 +18,7 @@
             @include('business.header_notifical')
 
         </header>
-      <section class="relative w-full bg-gray-50 min-h-screen">
+      <section class="relative w-full rounded-2xl bg-gray-50 min-h-screen">
 
     <section class="max-w-7xl mx-auto px-3 md:px-6 py-6">
 
