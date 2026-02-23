@@ -19,8 +19,8 @@
 
         </header>
         <section class=" relative w-full">
-            <section class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute w-full overflow-x-hidden right-[-2.3vw]">
-                <section class="flex flex-col w-full min-h-screen bg-gray-50 p-6 md:p-10">
+            <section class="bg-white text-gray-700 min-h-screen md:rounded-3xl p-2 shadow-md md:absolute w-full overflow-x-hidden">
+                <section class="flex flex-col w-full min-h-screen bg-white p-6 md:p-10">
                     <!-- Header -->
                     <div class="mb-6">
                         <h2 class="text-2xl font-semibold text-gray-800">{{ __('My Beneficiaries') }}</h2>
