@@ -206,7 +206,7 @@
 
   <main class="right-0 left-0 mx-auto space-y-10 md:space-y-20 overflow-x-hidden">
     <!-- about us  -->
-    <section class="max-w-7xl mx-auto px-6 py-12 md:py-20">
+    <section class="max-w-7xl mx-auto w-full px-6 py-12 md:py-20">
       <div class="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-20">
         <img alt="Two people fist bumping over a wooden table with charts and laptop in background"
           class="w-full max-w-md md:max-w-lg rounded-3xl object-cover" height="400"
@@ -734,7 +734,7 @@
     <!-- Our globe countries end-->
 
     <!-- business part -->
-    <section class="bg-white">
+    <section class="bg-white w-full">
       <div class="md:max-w-5xl md:mx-auto px-4 md:px-6 py-12">
         <h1 class="text-center text-3xl sm:text-4xl font-medium text-gray-900 md:max-w-[35vw] mx-auto leading-tight">
           {{ __('Robust business account designed for growth') }}
@@ -766,20 +766,19 @@
               <p class="text-gray-700 text-sm mb-8 leading-relaxed max-w-[320px]">
                 {{ __('Create business account to manage your money, Make local and international payments to 190+ countries.') }}
               </p>
-              <button
-                class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
-                type="button">
-                {{ __('Create A Business Account/Login') }}
-                <span>
-                  <img src="../asserts/homepage/arrow-up.svg" alt="" width="20px" />
-                </span>
-              </button>
+              <a href="{{ route('register.saveStepData') }}">
+                <button class="bg-gray-900 text-white rounded-full px-6 py-2 text-sm font-semibold w-max flex items-center gap-2 hover:bg-gray-800 transition"
+                    type="button">
+                    {{ __('Create A Business Account/Login') }}
+                    <span>
+                      <img src="../asserts/homepage/arrow-up.svg" alt="" width="20px" />
+                  </span>
+                </button>
+              </a>
             </div>
             <div class="sm:w-1/2 flex justify-end">
-              <img
-                alt="Young woman sitting on bed holding a credit card in one hand and using a laptop on her lap, wearing a light blue knitted sweater"
-                class="rounded-2xl max-w-full h-auto object-cover" height="320"
-                src="../asserts/homepage/globalPayments.png" width="480" />
+              <img alt="Young woman sitting on bed holding a credit card in one hand and using a laptop on her lap, wearing a light blue knitted sweater"
+                class="rounded-2xl h-auto w-full" height="320" width="480" src="../asserts/homepage/globalPayments.png" />
             </div>
           </section>
         </div>
@@ -788,7 +787,7 @@
     <!-- business part end-->
 
     <!-- Accordion -->
-    <section>
+    <section class="w-full">
       <section class="bg-white text-gray-900">
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <h1 class="text-3xl font-semibold text-gray-900 text-center mb-10">
