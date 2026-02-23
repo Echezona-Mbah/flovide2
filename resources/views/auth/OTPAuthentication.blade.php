@@ -46,19 +46,19 @@
                     @csrf
 
                     <!-- Hidden combined OTP -->
-                    <input type="hidden" name="otp" id="otp">
-                    
+                    <input type="hidden" name="otp" id="otp">                    
+
                     <!-- OTP Inputs -->
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
 
-                        <span class="text-gray-500 text-xl px-2">—</span>
+                        <span class="text-gray-500 text-lg">—</span>
 
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" class="otp-box flex-1 max-w-[45px] aspect-square text-center text-lg rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
                     <!-- Links -->
