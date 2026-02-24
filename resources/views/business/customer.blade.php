@@ -18,8 +18,7 @@
             @include('business.header_notifical')
         </header>
         <section class=" relative w-full">
-            <section
-                class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
+            <section class="bg-white text-gray-700 min-h-screen w-full md:rounded-3xl p-2 shadow-md md:absolute overflow-x-hidden ">
                 <section class="flex flex-col md:flex-row gap-10 mx-auto max-w-full min-h-screen">
                     <!-- Left side: Table and search -->
                     <div class="flex-1 p-6 md:p-10 max-w-full md:max-w-4xl">

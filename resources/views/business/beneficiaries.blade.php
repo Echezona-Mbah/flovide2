@@ -17,7 +17,156 @@
             </h1>
             @include('business.header_notifical')
         </header>
-<section class="relative w-full bg-gray-50 min-h-screen">
+        <section class=" relative w-full">
+            <section class="flex flex-col lg:flex-row gap-8 bg-white md:rounded-3xl p-2 shadow-md md:absolute overflow-x-hidden  w-full ">
+                
+                    <section class="flex flex-col md:flex-row  mx-auto max-w-full min-h-screen">
+                        <!-- Left side: Table and search -->
+                        <section class="flex-1 p-2 md:p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-8 md:gap-0">
+                                <div class="flex-1 max-w-md">
+                                    <label for="search" class="sr-only">Search beneficiaries</label>
+                                    <div
+                                        class="flex items-center border border-gray-300 rounded-full px-4 py-2 w-full sm:w-[400px]">
+                                        <i class="fas fa-search text-gray-400 mr-3"></i>
+                                        <input type="search" id="search-input" placeholder="Search beneficiaries"
+                                        class="w-full text-sm text-gray-600 placeholder-gray-400 focus:outline-none" />
+                                    </div>
+                                </div>
+                                <a href="{{ route('add_beneficias.create') }}"
+                            class="flex items-center justify-center gap-1 rounded-full bg-blue-200 text-blue-800 text-[12px] font-semibold px-4 py-2 min-w-[140px] hover:bg-blue-300 transition">
+                                <i class="fas fa-plus"></i> Add Beneficiary
+                            </a>
+                            </div>
+                            <!-- Beneficiaries Table -->
+                            <table class="w-full border-collapse text-sm text-gray-700 overflow-auto">
+                                @if ($errors->any())
+                                <script>
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'error',
+                                        title: @json($errors->first()),
+                                        showConfirmButton: false,
+                                        timer: 4000,
+                                        timerProgressBar: true,
+                                    });
+                                </script>
+                                @endif
+                                
+                                @if (session('success'))
+                                <script>
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: @json(session('success')),
+                                        showConfirmButton: false,
+                                        timer: 4000,
+                                        timerProgressBar: true,
+                                    });
+                                </script>
+                                @endif
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left font-normal pb-3 px-3">Full Name</th>
+                                        <th class="text-left font-normal pb-3 px-3">Bank</th>
+                                        <th class="text-left font-normal pb-3 px-3">Bank Account no.</th>
+                                        <th class="text-left font-normal pb-3 px-3">Bank country</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="beneficiaries-table" >
+                                    @forelse ($beneficias as $beneficia)
+                                    <tr 
+                                        id="beneficia-row-{{ $beneficia->id }}"
+                                        class="bg-blue-50 font-semibold border-b border-gray-200 cursor-pointer"
+                                        data-id="{{ $beneficia->id }}"
+                                        data-name="{{ $beneficia->account_name }}"
+                                        data-bank="{{ $beneficia->bank }}"
+                                        data-account="{{ $beneficia->account_number }}"
+                                        data-country="{{ $beneficia->country }}"
+                                        data-alias="{{ $beneficia->alias }}"
+                                        data-type="{{ $beneficia->type }}"
+                                        data-currency="{{ $beneficia->currency }}"
+                                        onclick="showDetails(this)">
+
+                                        <td class="px-3 py-3">{{ $beneficia->account_name }}</td>
+                                        <td class="px-3 py-3">{{ $beneficia->bank }}</td>
+                                        <td class="px-3 py-3">{{ $beneficia->account_number }}</td>
+                                        <td class="px-3 py-3">{{ $beneficia->country }}</td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="4" class="px-3 py-3 text-center text-gray-500">No beneficiaries found.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                            <div class="mt-4">
+                                {{ $beneficias->links() }}
+                            </div>
+                        </section>
+                    
+                        <!-- Right side: Beneficiary details -->
+                        <section id="beneficiary-details" class="w-full md:w-96 border-l border-gray-200 p-6 md:p-10">
+                            <h3 class="font-semibold text-gray-900 mb-6">Beneficiary Details</h3>
+                            <h2 id="detail-name" class="text-3xl font-normal mb-6">Select a beneficiary</h2>
+                            
+                        
+                            <input type="hidden" id="beneficia-id" />
+
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500 mb-1">Bank</p>
+                                <p id="detail-bank-name" class="text-base font-normal text-gray-900">-</p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500 mb-1">Alias</p>
+                                <p id="detail-alias" class="text-base font-normal text-gray-900">-</p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500 mb-1">Account Type</p>
+                                <p id="detail-account-type" class="text-base font-normal text-gray-900">-</p>
+                            </div>
+                            
+                            {{-- <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Country</p>
+                                <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
+                            </div> --}}
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Country</p>
+                                <div class="flex items-center gap-2">
+                                    <img id="detail-country-flag" src="" alt="Country Flag" class="w-5 h-auto rounded shadow" />
+                                    <p id="detail-country" class="text-base font-semibold text-gray-900">-</p>
+                                </div>
+                            </div>
+                            
+
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-400 mb-1">Currency</p>
+                                <p id="detail-currency" class="text-base font-semibold text-gray-900">-</p>
+                            </div>
+                            
+                        
+                            <div class="mb-10 flex items-center gap-2">
+                                <div>
+                                    <p class="text-sm text-gray-400 mb-1">Bank account number</p>
+                                    <p id="detail-account" class="text-base font-semibold text-gray-900 inline-block">-</p>
+                                </div>
+                                <button aria-label="Copy bank account number"
+                                    onclick="copyAccountNumber()"
+                                    class="text-green-600 hover:text-green-700 focus:outline-none">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                        
+                            <div class="flex gap-4">
+                                {{-- <a id="edit-link"
+                                href="#"
+                                class="inline-flex items-center gap-2 rounded-lg bg-blue-100 px-6 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <i class="fas fa-pen"></i> Edit
+                                </a> --}}
 
     <section class="max-w-7xl mx-auto px-3 md:px-6 py-6">
 
