@@ -48,6 +48,7 @@ use App\Http\Controllers\Ibanq\IbanqReferenceController;
 use App\Http\Controllers\Ibanq\IbanqWalletController;
 use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\IbanqWebhookController;
+use App\Http\Controllers\Payaza\PayoutController;
 use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
 use Illuminate\Http\Request;
@@ -112,6 +113,9 @@ Route::get('/ibanq/reference/bank-fields/{country}/{currency}', [IbanqReferenceC
 Route::get('/ibanq/reference/beneficiaries/{type}/{country}/{currency}', [IbanqReferenceController::class, 'getBeneficiaryRequirements']);
 
 Route::post('/ifx/webhook', [IbanqWebhookController::class, 'handle']);
+
+
+Route::post('/payaza/payout', [PayoutController::class, 'sendPayout']);
 
 
 

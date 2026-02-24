@@ -127,14 +127,7 @@ Route::get('/referral', [referralLinkController::class, 'index'])->name('referra
 
 
 
-Route::post('/ibanq/beneficiaries', [IbanqBeneficiaryController::class, 'createBeneficiary']);
-Route::post('/ibanq/beneficiaries/{beneficiaryId}/accounts', [IbanqBeneficiaryAccountController::class, 'addAccount']);
-
-
-
-
-Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation'])
-    ->name('pivot.account.validation');
+Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation'])->name('pivot.account.validation');
 
 
 // HtmlMinifier::class
@@ -145,75 +138,15 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/verify_bvn', [RegisteredUserController::class, 'bvn'])->name('verify_bvn');
     Route::post('/verify_bvn', [RegisteredUserController::class, 'verifyBVN'])->name('bvn.verify.submit');
 
-
-    //payout account
-    Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
-    Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
-    Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
-    Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
-    Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
-    Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
-    Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
-    Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
-    Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
-
-    //subaccount
-    Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
-    Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
-    Route::post('subaccounts', [SubAccountController::class, 'store'])->name('subaccounts.store');
-    Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
-    Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
-    Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
-    Route::get('/subaccounts/fetch-banks', [SubAccountController::class, 'fetchlocalBanks'])->name('subaccounts.fetch.localbanks');
-    Route::post('/subaccounts/validate-payout-account-name', [SubAccountController::class, 'validatePayoutAccountName'])->name('subaccounts.validatePayoutAccountName');
-
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');
-    
-    //invoices section
-    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
-    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
-    Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
-    Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
-    Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
-    Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
 
     //refund
     Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');
     Route::post('/refunds', [refundsController::class, 'store'])->name('refund.store');
     Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
-    
-    //remita
-    Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
-    Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
-    Route::get('/remita/{id}/export', [RemitaController::class, 'exportUserRemita'])->name('remite.export');
-    Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
-    Route::put('/remita/{id}/update', [RemitaController::class, 'update'])->name('remita.update');
-    Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
-    Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
-    
-    //donations
-    Route::get('/donation', [DonationController::class, 'donationIndex'])->name('donation.index');
-    Route::get('/donation/create', [DonationController::class, 'donationCreate'])->name('donation.create');
-    Route::get('/donation/{id}/export', [DonationController::class, 'exportUserDonation'])->name('donation.export');
-    Route::get('/donation/edit/{id}', [DonationController::class, 'donationEdit'])->name('donation.edit');
-    Route::put('/donation/update/{id}', [DonationController::class, 'donationUpdate'])->name('donation.update');
-    Route::post('/donation/store', [DonationController::class, 'donationStore'])->name('donation.store');
-    Route::delete('/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
 
-
-    //payment
-    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
-    Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
-    Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserPayments'])->name('payment.export');
-    Route::get('/payment/{id}/edit', [PaymentController::class, 'edit'])->name('payment.edit');
-    // Route::get('/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
-    Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
-    Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
-    Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
-
-    //webhook
+      //webhook
     Route::get('/webhook', [WebhookController::class, 'index'])->name('webhook');
     
     //top-up your wallet
@@ -236,38 +169,9 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/beneficiaries/search', [AddBeneficiariesController::class, 'search'])->name('beneficiaries.search');
     Route::get('/fetch-banks', [AddBeneficiariesController::class, 'fetchBanks'])->name('fetch.banks');
     Route::post('/validate-account', [AddBeneficiariesController::class, 'validateRecipient']);
-    // customer
-    Route::get('/customer', [AddCustomerController::class, 'index'])->name('customer');
-    Route::get('/customers/{id}', [AddCustomerController::class, 'show']);
-    Route::get('/add_customer', [AddCustomerController::class, 'create'])->name('add_customer.create');
-    Route::post('/add_customer', [AddCustomerController::class, 'store'])->name('add_customer.store');
-    Route::get('/customer/{id}/json', [AddCustomerController::class, 'json']);
-    Route::get('/customer/{id}/edit', [AddCustomerController::class, 'edit'])->name('customer.edit'); 
-    Route::put('/customer/{id}', [AddCustomerController::class, 'update'])->name('customer.update');
-    Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
-    Route::get('/customer/search', [AddCustomerController::class, 'search'])->name('customer.search');
-    Route::get('/customer/export-csv', [AddCustomerController::class, 'exportCsv'])->name('customer.export.csv');
-    Route::get('/fetch-banks', [AddCustomerController::class, 'fetchBanks'])->name('fetch.banks');
-    //subscriptions
-    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions');
-    Route::get('/add_subscription', [SubscriptionController::class, 'create'])->name('add_subscription.create');
-    Route::post('/add_subscription', [SubscriptionController::class, 'store'])->name('add_subscription.store');
-    Route::get('/subscriptions/{id}/edit', [SubscriptionController::class, 'edit'])->name('subscriptions.edit');
-    Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
-    Route::get('/subscriptions/{id}/export', [SubscriptionController::class, 'exportSubscribers'])->name('subscriptions.export');
-
-    /// Bill Payment
-    Route::get('/bill_payment', [BillPaymentController::class, 'index'])->name('bill_payment');
-    Route::post('/bill_payment', [BillPaymentController::class, 'store'])->name('billpayments.store');
-    Route::post('/Dstvverify', [BillPaymentController::class, 'verify'])->name('Dstvverify');
-    Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
-    Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
-
-    Route::post('/verify-electricity', [BillPaymentController::class, 'verifyElectricity'])->name('verify.electricity');
-    Route::get('/get-data-variations', [BillPaymentController::class, 'getDateVariations'])->name('get.data.variations');
 
 
-   // create bank
+    // create bank
     Route::get('/add_account', [CreateBankController::class, 'create'])->name('add_account.create');
     Route::post('/ohentpay/createBalance', [CreateBankController::class, 'createBalance'])->name('ohentpay.createBalance');
     Route::get('/ohentpay/balances', [CreateBankController::class, 'getBalances']);
@@ -280,18 +184,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/exchange-rate', [SendMoneyController::class, 'getExchangeRate']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('send');
 
-    // Virtual Account
-    Route::get('/virtualCard', [VirtualAccountController::class, 'index'])->name('virtualCard');
-    Route::post('/virtualCard', [VirtualAccountController::class, 'createVirtualAccount'])->name('virtualCard.store');
-    Route::get('/allvirtualcard', [VirtualAccountController::class, 'allvirtualcard'])->name('allvirtualcard');
-    Route::delete('/virtualCard/{id}', [VirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
 
-
-    // Chargeback
-    Route::get('/chargeback', [ChargebackController::class, 'index'])->name('chargeback');
-    Route::post('/chargeback/submitEvidence', [ChargebackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
-
-
+    
     //organization
     Route::get('/organization', [OrganizationController::class, 'index'])->name('organization');
     Route::post('/organization', [OrganizationController::class, 'store'])->name('team.store');
@@ -315,8 +209,115 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+
+    //payout account
+    // Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
+    // Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
+    // Route::get('/bank-accounts/fetch-banks', [addBankAccountController::class, 'fetchlocalBanks'])->name('fetch.localbanks');
+    // Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
+    // Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
+    // Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
+    // Route::post('/payout', [addBankAccountController::class, 'store'])->name('payout.store');
+    // Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
+    // Route::post('/validate-payout-account-name', [addBankAccountController::class, 'validatePayoutAccountName'])->name('validatePayoutAccountName');
+
+    //subaccount
+    // Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
+    // Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
+    // Route::post('subaccounts', [SubAccountController::class, 'store'])->name('subaccounts.store');
+    // Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
+    // Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
+    // Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
+    // Route::get('/subaccounts/fetch-banks', [SubAccountController::class, 'fetchlocalBanks'])->name('subaccounts.fetch.localbanks');
+    // Route::post('/subaccounts/validate-payout-account-name', [SubAccountController::class, 'validatePayoutAccountName'])->name('subaccounts.validatePayoutAccountName');
+
+
+    
+    //invoices section
+    // Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    // Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    // Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    // Route::get('/invoices/{id}', [InvoicesController::class, 'show'])->name('invoices.show');
+    // Route::get('/invoices/{id}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    // Route::put('/invoices/{id}', [InvoicesController::class, 'update'])->name('invoices.update');
+    // Route::delete('/invoices/{id}', [InvoicesController::class, 'destroy'])->name('invoices.destroy');
+
+
+    
+    //remita
+    // Route::get('/remita', [RemitaController::class, 'index'])->name('remita.index');
+    // Route::get('/remita/create', [RemitaController::class, 'create'])->name('remita.create');
+    // Route::get('/remita/{id}/export', [RemitaController::class, 'exportUserRemita'])->name('remite.export');
+    // Route::get('/remita/{id}/edit', [RemitaController::class, 'edit'])->name('remita.edit');
+    // Route::put('/remita/{id}/update', [RemitaController::class, 'update'])->name('remita.update');
+    // Route::post('/remita/store', [RemitaController::class, 'store'])->name('remita.store');
+    // Route::delete('/remita/{id}/destory', [RemitaController::class, 'destroy']);
+    
+    //donations
+    // Route::get('/donation', [DonationController::class, 'donationIndex'])->name('donation.index');
+    // Route::get('/donation/create', [DonationController::class, 'donationCreate'])->name('donation.create');
+    // Route::get('/donation/{id}/export', [DonationController::class, 'exportUserDonation'])->name('donation.export');
+    // Route::get('/donation/edit/{id}', [DonationController::class, 'donationEdit'])->name('donation.edit');
+    // Route::put('/donation/update/{id}', [DonationController::class, 'donationUpdate'])->name('donation.update');
+    // Route::post('/donation/store', [DonationController::class, 'donationStore'])->name('donation.store');
+    // Route::delete('/donation/{id}/destory', [DonationController::class, 'donationDestroy']);
+
+
+    //payment
+    // Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+    // Route::get('/payment/create', [PaymentController::class, 'create'])->name('payment.create');
+    // Route::get('/payment/{id}/export', [PaymentController::class, 'exportUserPayments'])->name('payment.export');
+    // Route::get('/payment/{id}/edit', [PaymentController::class, 'edit'])->name('payment.edit');
+    // // Route::get('/payment/{id}/paymentcheckout', [PaymentController::class, 'paymentcheckout'])->name('payment.checkout');
+    // Route::put('/payment/{id}/update', [PaymentController::class, 'update'])->name('payment.update');
+    // Route::post('/payment/store', [PaymentController::class, 'store'])->name('payment.store');
+    // Route::delete('/payment/{id}/destory', [PaymentController::class, 'destroy']);
+
+  
+    // customer
+    // Route::get('/customer', [AddCustomerController::class, 'index'])->name('customer');
+    // Route::get('/customers/{id}', [AddCustomerController::class, 'show']);
+    // Route::get('/add_customer', [AddCustomerController::class, 'create'])->name('add_customer.create');
+    // Route::post('/add_customer', [AddCustomerController::class, 'store'])->name('add_customer.store');
+    // Route::get('/customer/{id}/json', [AddCustomerController::class, 'json']);
+    // Route::get('/customer/{id}/edit', [AddCustomerController::class, 'edit'])->name('customer.edit'); 
+    // Route::put('/customer/{id}', [AddCustomerController::class, 'update'])->name('customer.update');
+    // Route::delete('/customer/{id}', [AddCustomerController::class, 'destroy'])->name('customer.destroy');
+    // Route::get('/customer/search', [AddCustomerController::class, 'search'])->name('customer.search');
+    // Route::get('/customer/export-csv', [AddCustomerController::class, 'exportCsv'])->name('customer.export.csv');
+    // Route::get('/fetch-banks', [AddCustomerController::class, 'fetchBanks'])->name('fetch.banks');
+    //subscriptions
+    // Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions');
+    // Route::get('/add_subscription', [SubscriptionController::class, 'create'])->name('add_subscription.create');
+    // Route::post('/add_subscription', [SubscriptionController::class, 'store'])->name('add_subscription.store');
+    // Route::get('/subscriptions/{id}/edit', [SubscriptionController::class, 'edit'])->name('subscriptions.edit');
+    // Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
+    // Route::get('/subscriptions/{id}/export', [SubscriptionController::class, 'exportSubscribers'])->name('subscriptions.export');
+
+    /// Bill Payment
+    // Route::get('/bill_payment', [BillPaymentController::class, 'index'])->name('bill_payment');
+    // Route::post('/bill_payment', [BillPaymentController::class, 'store'])->name('billpayments.store');
+    // Route::post('/Dstvverify', [BillPaymentController::class, 'verify'])->name('Dstvverify');
+    // Route::post('/Dstvvariations', [BillPaymentController::class, 'getVariations']);
+    // Route::get('/Dstvhistory', [BillPaymentController::class, 'index']);
+
+    // Route::post('/verify-electricity', [BillPaymentController::class, 'verifyElectricity'])->name('verify.electricity');
+    // Route::get('/get-data-variations', [BillPaymentController::class, 'getDateVariations'])->name('get.data.variations');
+
+
+    // Virtual Account
+    // Route::get('/virtualCard', [VirtualAccountController::class, 'index'])->name('virtualCard');
+    // Route::post('/virtualCard', [VirtualAccountController::class, 'createVirtualAccount'])->name('virtualCard.store');
+    // Route::get('/allvirtualcard', [VirtualAccountController::class, 'allvirtualcard'])->name('allvirtualcard');
+    // Route::delete('/virtualCard/{id}', [VirtualAccountController::class, 'destroy'])->name('virtualCard.destroy');
+
+
+    // Chargeback
+    // Route::get('/chargeback', [ChargebackController::class, 'index'])->name('chargeback');
+    // Route::post('/chargeback/submitEvidence', [ChargebackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
+
 });
 
 

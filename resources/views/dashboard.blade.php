@@ -188,15 +188,17 @@
                                                     <i class="fas fa-chevron-down text-xs"></i>
 
                                                     <!-- Dropdown -->
-                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
-                                                        @foreach($allCurrencies as $c)
-                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
-                                                                data-code="{{ $c['code'] }}" 
-                                                                data-flag="{{ $c['flag'] }}">
-                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['code'] }}
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
+                                                    <!-- Inside each .currency-dropdown -->
+<div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
+    <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
+    @foreach($allCurrencies as $c)
+        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+             data-code="{{ $c['code'] }}" 
+             data-flag="{{ $c['flag'] }}">
+            <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
+        </div>
+    @endforeach
+</div>
 
                                                 </div>
                                             </div>
@@ -219,16 +221,17 @@
                                                     <i class="fas fa-chevron-down text-xs"></i>
 
                                                     <!-- Dropdown -->
-                                                    <!-- Dropdown -->
-                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto">
-                                                        @foreach($allCurrencies as $c)
-                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
-                                                                data-code="{{ $c['code'] }}" 
-                                                                data-flag="{{ $c['flag'] }}">
-                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['code'] }}
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
+                                                    <!-- Inside each .currency-dropdown -->
+<div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
+    <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
+    @foreach($allCurrencies as $c)
+        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+             data-code="{{ $c['code'] }}" 
+             data-flag="{{ $c['flag'] }}">
+            <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
+        </div>
+    @endforeach
+</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -394,9 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const rateText = document.getElementById('rateText');
 
     async function calculate() {
-        let from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
-        let to   = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
-        let amt  = parseFloat(fromAmount.value);
+        const from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
+        const to = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
+        const amt = parseFloat(fromAmount.value);
 
         if (!amt || amt <= 0) {
             toAmount.value = 0;
@@ -404,32 +407,47 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let res = await fetch(`/dashboard/exchange-rate?from=${from}&to=${to}`);
-        let data = await res.json();
+        try {
+            const res = await fetch(`/dashboard/exchange-rate?from=${from}&to=${to}`);
+            const data = await res.json();
 
-        if (data && data.rate) {
-            toAmount.value = (amt * data.rate).toFixed(2);
-            rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
+            if (data && data.rate) {
+                toAmount.value = (amt * data.rate).toFixed(2);
+                rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
+            }
+        } catch (err) {
+            console.error(err);
+            rateText.innerText = 'Error fetching rate';
         }
     }
 
-    // Dropdown open / select
     selectors.forEach(sel => {
         const dropdown = sel.querySelector('.currency-dropdown');
+        const searchInput = sel.querySelector('.currency-search');
 
-        // Open dropdown when clicking the selector
+        // Open dropdown
         sel.addEventListener('click', e => {
             e.stopPropagation();
             dropdown.classList.toggle('hidden');
+            searchInput?.focus();
+        });
+
+        // Handle search
+        searchInput?.addEventListener('input', () => {
+            const filter = searchInput.value.toLowerCase();
+            dropdown.querySelectorAll('.currency-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(filter) ? 'flex' : 'none';
+            });
         });
 
         // Handle selection
         sel.querySelectorAll('.currency-item').forEach(item => {
             item.addEventListener('click', e => {
-                e.stopPropagation(); // Prevent dropdown from reopening
+                e.stopPropagation();
                 sel.querySelector('.code').textContent = item.dataset.code;
                 sel.querySelector('.flag').src = item.dataset.flag;
-                dropdown.classList.add('hidden'); // Close dropdown
+                dropdown.classList.add('hidden');
                 calculate();
             });
         });
@@ -456,10 +474,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
     });
 
-    // Initial calculation with default 100
+    // Initial calculation
     calculate();
 });
-
 </script>
 
 

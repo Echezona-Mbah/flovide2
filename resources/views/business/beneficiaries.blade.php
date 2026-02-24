@@ -45,9 +45,7 @@
 
             <!-- Table -->
             <div class="overflow-x-auto">
-
                 <table class="w-full text-sm">
-
                     <thead class="bg-gray-100 text-gray-600">
                         <tr>
                             <th class="text-left px-4 py-3">Full Name</th>
@@ -56,29 +54,26 @@
                             <th class="text-left px-4 py-3 hidden md:table-cell">Country</th>
                         </tr>
                     </thead>
-
                     <tbody>
 
                         @forelse ($beneficias as $beneficia)
 
                         <tr
-    onclick="showDetails(this)"
-    class="cursor-pointer border-b hover:bg-blue-50 transition"
+                        onclick="showDetails(this)"
+                        class="cursor-pointer border-b hover:bg-blue-50 transition"
 
-    data-id="{{ $beneficia->id }}"
-    data-name="{{ $beneficia->account_name }}"
-    data-bank="{{ $beneficia->bank }}"
-    data-account="{{ $beneficia->account_number }}"
-    data-country="{{ $beneficia->country }}"
-    data-city="{{ $beneficia->city }}"
-    data-state="{{ $beneficia->state }}"
-    data-address1="{{ $beneficia->address_line1 }}"
-    data-address2="{{ $beneficia->address_line2 }}"
-    data-swift="{{ $beneficia->swift_bic }}"
-    data-currency="{{ $beneficia->currency }}"
->
-
-
+                        data-id="{{ $beneficia->id }}"
+                        data-name="{{ $beneficia->account_name }}"
+                        data-bank="{{ $beneficia->bank }}"
+                        data-account="{{ $beneficia->account_number }}"
+                        data-country="{{ $beneficia->country }}"
+                        data-city="{{ $beneficia->city }}"
+                        data-state="{{ $beneficia->state }}"
+                        data-address1="{{ $beneficia->address_line1 }}"
+                        data-address2="{{ $beneficia->address_line2 }}"
+                        data-swift="{{ $beneficia->swift_bic }}"
+                        data-currency="{{ $beneficia->currency }}"
+                        data-phone="{{ $beneficia->phone }}" >
                             <td class="px-4 py-4 font-semibold">
                                 {{ $beneficia->account_name }}
                                 <div class="text-xs text-gray-500 sm:hidden">
@@ -209,9 +204,15 @@
                     </div>
 
                     <div class="info-row">
+                        <span>Phone</span>
+                        <p id="detail-phone"></p>
+                    </div>
+
+                    <div class="info-row">
                         <span>Currency</span>
                         <p id="detail-currency"></p>
                     </div>
+
 
                     <div class="info-row">
                         <span>Swift / BIC</span>
@@ -228,18 +229,10 @@
         <div
             class="border-t bg-white p-4 flex gap-3 sticky bottom-0">
 
-            <button id="updateBtn"
-                class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition">
-
-                Update
-
-            </button>
 
             <button id="deleteBtn"
-                class="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition">
-
+                    class="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition">
                 Delete
-
             </button>
 
         </div>
@@ -278,53 +271,98 @@
 
 
 
-
 <script>
-
 let selectedBeneficiaryId = null;
 
-function showDetails(row) {
+function setField(id, value){
+    const el = document.getElementById(id);
+    if(!el) return;
 
+    const row = el.closest(".info-row");
+
+    if(value === undefined || value === null || value === "" || value === "null"){
+        row.style.display = "none";   // 🔥 hide row
+    }else{
+        row.style.display = "block";  // 🔥 show row
+        el.innerText = value;
+    }
+}
+
+function showDetails(row){
     selectedBeneficiaryId = row.dataset.id;
 
-    document.getElementById("detail-name").textContent = row.dataset.name;
-    document.getElementById("detail-country").textContent = row.dataset.country;
+    setField("detail-name", row.dataset.name);
+    setField("detail-country", row.dataset.country);
+    setField("detail-address1", row.dataset.address1);
+    setField("detail-address2", row.dataset.address2);
 
-    document.getElementById("detail-address1").textContent = row.dataset.address1 || "-";
-    document.getElementById("detail-address2").textContent = row.dataset.address2 || "-";
-    document.getElementById("detail-city").textContent =
-        (row.dataset.city || "") + " " + (row.dataset.state || "");
+    const cityState = `${row.dataset.city || ""} ${row.dataset.state || ""}`.trim();
+    setField("detail-city", cityState);
 
-    document.getElementById("detail-bank").textContent = row.dataset.bank;
-    document.getElementById("detail-account").textContent = row.dataset.account;
-    document.getElementById("detail-currency").textContent = row.dataset.currency || "-";
-    document.getElementById("detail-swift").textContent = row.dataset.swift || "-";
+    setField("detail-bank", row.dataset.bank);
+    setField("detail-account", row.dataset.account);
+    setField("detail-phone", row.dataset.phone);
+    setField("detail-currency", row.dataset.currency);
+    setField("detail-swift", row.dataset.swift);
 
     const modal = document.getElementById("beneficiaryModal");
     const panel = document.getElementById("modalPanel");
 
     modal.classList.remove("hidden");
     document.body.style.overflow = "hidden";
-
-    setTimeout(() => {
-        panel.classList.remove("translate-x-full");
-    }, 10);
+    setTimeout(() => panel.classList.remove("translate-x-full"), 10);
 }
 
-
-function closeModal() {
-
+// Close modal
+function closeModal(){
     const modal = document.getElementById("beneficiaryModal");
     const panel = document.getElementById("modalPanel");
 
     panel.classList.add("translate-x-full");
-
     setTimeout(() => {
         modal.classList.add("hidden");
         document.body.style.overflow = "auto";
     }, 300);
+
+    selectedBeneficiaryId = null;
 }
 
+// Delete beneficiary
+document.addEventListener("DOMContentLoaded", function() {
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    deleteBtn.addEventListener("click", async function(){
+
+        if(!selectedBeneficiaryId) return;
+
+        if(!confirm("Are you sure you want to delete this beneficiary?")) return;
+
+        try {
+            const res = await fetch(`/beneficia/${selectedBeneficiaryId}`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Accept": "application/json"
+                }
+            });
+
+            const data = await res.json();
+
+            if(res.ok){
+                alert(data.message || "Beneficiary deleted successfully");
+                closeModal();
+                location.reload(); // reload list for web
+            } else {
+                alert(data.message || "Delete failed");
+            }
+
+        } catch(e) {
+            console.error(e);
+            alert("Something went wrong");
+        }
+
+    });
+});
 </script>
 
 

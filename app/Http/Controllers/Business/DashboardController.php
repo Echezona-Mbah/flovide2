@@ -53,8 +53,10 @@ public function create()
 
         // convert country name to flag code (optional)
         $countryCode = strtolower(substr($rate->currency_code, 0, 2));
+        //dd($rate->country_name);
 
         $allCurrencies[] = [
+            'country_name'=>$rate->country_name,
             'code' => $rate->currency_code,
             'symbol' => $rate->currency_symbol ?? '',
             'flag' => "https://flagcdn.com/w20/{$countryCode}.png",

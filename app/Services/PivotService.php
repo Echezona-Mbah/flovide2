@@ -29,10 +29,12 @@ class PivotService
         // Debug: log URL
         logger('Pivot Auth URL: ' . $url);
 
+
         $response = Http::post($url, [
             'username' => $this->username,
             'password' => $this->password,
         ]);
+
 
         if ($response->successful()) {
             return $response->json();
@@ -43,6 +45,28 @@ class PivotService
             'message' => $response->body(),
         ];
     }
+
+//     public function authenticate()
+// {
+//     $url = $this->baseUrl . '/api/v1/auth/token';
+
+//     $response = Http::acceptJson()
+//         ->withBasicAuth($this->username, $this->password)
+//         ->post($url);
+
+//     logger($response->status());
+//     logger($response->headers());
+//     logger($response->body());
+
+//     if ($response->successful()) {
+//         return $response->json();
+//     }
+
+//     return [
+//         'error' => true,
+//         'message' => $response->body(),
+//     ];
+// }
 
 
         public function getToken()
