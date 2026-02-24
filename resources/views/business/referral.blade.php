@@ -20,7 +20,7 @@
             @include('business.header_notifical')
         </header>
         <section class="relative w-full">
-            <section class="bg-white text-gray-700 min-h-screen w-full md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
+            <section class="bg-white text-gray-700 min-h-screen w-full md:rounded-3xl md:p-6 p-2 shadow-md md:absolute overflow-x-hidden ">
                 <div class="max-w-[1200px] mx-auto">
                     <div class="bg-white max-w-4xl p-8 md:p-12">
                     
