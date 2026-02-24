@@ -117,18 +117,22 @@
         <!-- Country & Currency -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-          <!-- Country -->
-          <div>
+        
+        
+
+            <!-- Country -->
+            <div>
             <label class="text-sm font-medium mb-1 block">Country</label>
             <div class="select-wrapper">
-              <select id="countrySelect" name="country">
+                <select id="countrySelect" name="bank[country]">
                 <option value=""></option>
                 @foreach($countries as $country)
-                  <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+                    <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
                 @endforeach
-              </select>
+                </select>
             </div>
-          </div>
+            </div>
+
 
           <!-- Currency -->
           <div>
@@ -142,6 +146,8 @@
               </select>
             </div>
           </div>
+
+
 
         </div>
 
@@ -163,10 +169,6 @@
           <input type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
 
-        <!-- Reference -->
-        <div class="mt-2">
-          <input type="text" name="uniqueReference" placeholder="Unique Reference" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-        </div>
       </div>
 
       <!-- Address -->
@@ -174,40 +176,25 @@
         <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">📍 Beneficiary Address</h3>
 
         <input type="text" name="address[addressLine1]" placeholder="Street address" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-        <input type="text" name="address[addressLine2]" placeholder="Apartment, suite (optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-        <input type="text" name="address[buildingName]" placeholder="Building Name (Optional)" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input type="text" name="address[city]" placeholder="City" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
           <input type="text" name="address[state]" placeholder="State / Province (Optional)" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
           <input type="text" name="address[postcode]" placeholder="Postal Code" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
 
-        <select name="address[country]" class="border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
-          <option value="">Country</option>
-          @foreach($countries as $country)
-            <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
-          @endforeach
-        </select>
+
       </div>
 
       <!-- Bank Details -->
       <div class="bg-gray-50 rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
         <h3 class="font-semibold text-gray-800 flex items-center gap-2 text-base md:text-lg">🏦 Bank Details</h3>
 
-        <input 
-            type="text" 
-            name="bank[accountHolder]" 
-            placeholder="Account Holder" 
-            class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
-        />
+        <select id="transferMethod" name="transfer_method" class="w-full border rounded-xl px-3 py-2 hidden">
+        <option value="">Select Transfer Method</option>
+        <option value="mobile">Mobile Money</option>
+        <option value="bank">Bank Transfer</option>
+        </select>
 
-        <input 
-        type="text" 
-        name="bank[nickname]" 
-        placeholder="Bank Nickname" 
-        class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" 
-        />
 
         <!-- Bank Fields -->
         <input type="text" id="iban" name="bank[iban]" placeholder="IBAN" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
@@ -216,6 +203,13 @@
         <input type="text" id="bankCode" name="bank[bankCode]" placeholder="Bank Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
         <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
         <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+        <input id="mobileNumber" name="bank[mobileNumber]" placeholder="Mobile Number"class="w-full border rounded-xl px-3 py-2 hidden"/>
+        <select id="bankSelect" name="bank[sortCode]" class="w-full border rounded-xl px-3 py-2 hidden">
+            <option value="">Select Bank</option>
+            @foreach($banks as $bank)
+                <option value="{{ $bank->sort_code }}">{{ $bank->name }}</option>
+            @endforeach
+            </select>
 
         <!-- Account Type -->
         <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
@@ -223,6 +217,17 @@
           <option value="checking">Checking</option>
           <option value="savings">Savings</option>
         </select>
+
+          <input 
+            id="accountHolder"
+            type="text" 
+            name="bank[accountHolder]" 
+            placeholder="Account Holder"
+            class="w-full border rounded-xl px-3 py-2"
+            />
+            <div id="accountLoading" class="text-sm text-gray-500 hidden">
+            ⏳ Fetching account name…
+            </div>
       </div>
 
       <!-- Buttons -->
@@ -240,12 +245,201 @@
 </section>
 
 
-
 </section>
 
 
     </main>
 
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+    const currencySelect  = document.getElementById("currencySelect");
+    const transferMethod  = document.getElementById("transferMethod");
+    const accountInput    = document.getElementById("accountNumber");
+    const mobileInput     = document.getElementById("mobileNumber");
+    const bankSelect      = document.getElementById("bankSelect");
+    const holderInput     = document.getElementById("accountHolder");
+    const loadingText     = document.getElementById("accountLoading");
+
+    const SERVICES = @json($pivotServices); // ⭐ from .env
+
+    let timer;
+
+    async function validateUGX(){
+
+    const currency = currencySelect.value;
+    if(currency !== "UGX") return;
+
+    const method = transferMethod.value;
+    let payload = null;
+
+    console.log("Validation started", {currency, method});
+    console.log("Services from ENV", SERVICES);
+
+
+    // ================= MOBILE =================
+    if(method === "mobile"){
+
+    const mobile = mobileInput.value;
+    if(!mobile) return;
+
+    payload = {
+    serviceCode: SERVICES.ugx_mobile_service, // ⭐ dynamic
+    accountNumber: mobile,
+    msisdn: mobile
+    };
+
+    console.log("Mobile payload", payload);
+    }
+
+
+    // ================= BANK =================
+    if(method === "bank"){
+
+    const account = accountInput.value;
+    const sortCode = bankSelect.value;
+    const msisdn = mobileInput.value || account;
+
+    if(!account || !sortCode) return;
+
+    payload = {
+    serviceCode: SERVICES.ugx_bank_service, // ⭐ dynamic
+    accountNumber: account,
+    msisdn: msisdn,
+    extraData:{
+    bankSortCode: sortCode,
+    amount:"0"
+    }
+    };
+
+    console.log("Bank payload", payload);
+    }
+
+    if(!payload) return;
+
+    try{
+
+    loadingText.classList.remove("hidden");
+    holderInput.value = "";
+    holderInput.setAttribute("readonly", true);
+
+    const res = await fetch("{{ route('pivot.account.validation') }}",{
+    method:"POST",
+    headers:{
+    "Content-Type":"application/json",
+    "X-CSRF-TOKEN":"{{ csrf_token() }}"
+    },
+    body:JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    console.log("Pivot response", data);
+
+    loadingText.classList.add("hidden");
+
+    if(data.accountName){
+    holderInput.value = data.accountName;
+    holderInput.removeAttribute("readonly");
+    }else{
+    holderInput.value = "Account not found";
+    }
+
+    }catch(e){
+    loadingText.classList.add("hidden");
+    console.error("Validation error", e);
+    }
+
+    }
+
+
+    // 🔥 debounce listeners
+    accountInput?.addEventListener("input",()=>{
+    clearTimeout(timer);
+    timer=setTimeout(validateUGX,800);
+    });
+
+    mobileInput?.addEventListener("input",()=>{
+    clearTimeout(timer);
+    timer=setTimeout(validateUGX,800);
+    });
+
+    bankSelect?.addEventListener("change", validateUGX);
+    transferMethod?.addEventListener("change", validateUGX);
+
+    });
+</script>
+
+    {{-- for both country and currency log --}}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // --- COUNTRY SELECT ---
+  const countrySelect = document.querySelector("#countrySelect");
+  countrySelect.querySelectorAll("option").forEach(option => {
+    if(option.value) {
+      option.setAttribute("data-flag", `https://flagcdn.com/w20/${option.value.toLowerCase()}.png`);
+    }
+  });
+
+  // --- CURRENCY SELECT ---
+  const currencySelect = document.querySelector("#currencySelect");
+  currencySelect.querySelectorAll("option").forEach(option => {
+    if(option.value) {
+      // Find country ISO for this currency
+      const country = @json($countries->keyBy('currency_iso'));
+      const iso = country[option.value] ? country[option.value].country_iso.toLowerCase() : '';
+      if(iso) {
+        option.setAttribute("data-flag", `https://flagcdn.com/w20/${iso}.png`);
+      }
+    }
+  });
+
+  // Initialize TomSelect for COUNTRY
+  new TomSelect("#countrySelect", {
+    allowEmptyOption: true,
+    render: {
+      option: function(item, escape) {
+        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
+        return `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px;">
+                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
+                  <span>${escape(item.text)}</span>
+                </div>`;
+      },
+      item: function(item, escape) {
+        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
+        return `<div style="display:inline-flex; align-items:center; gap:6px;">
+                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
+                  <span>${escape(item.text)}</span>
+                </div>`;
+      }
+    }
+  });
+
+  // Initialize TomSelect for CURRENCY
+  new TomSelect("#currencySelect", {
+    allowEmptyOption: true,
+    render: {
+      option: function(item, escape) {
+        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
+        return `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px;">
+                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
+                  <span>${escape(item.text)}</span>
+                </div>`;
+      },
+      item: function(item, escape) {
+        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
+        return `<div style="display:inline-flex; align-items:center; gap:6px;">
+                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
+                  <span>${escape(item.text)}</span>
+                </div>`;
+      }
+    }
+  });
+});
+</script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const options = {
@@ -260,14 +454,17 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+
+{{-- when i select currency the bank detall will drop --}}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const countryRules = @json($countryRules);
+  const currencyRules = @json($currencyRules);
 
   const fieldMap = {
     iban: "iban",
     accountNumber: "accountNumber",
+    mobileNumber: "mobileNumber",
     sortCode: "sortCode",
     bankCode: "bankCode",
     swiftBic: "swiftBic",
@@ -275,22 +472,17 @@ document.addEventListener("DOMContentLoaded", function () {
     accountType: "accountType"
   };
 
-  const countrySelect = document.getElementById("countrySelect");
   const currencySelect = document.getElementById("currencySelect");
-  const allFields = document.querySelectorAll(".bank-field");
+  const countrySelect  = document.getElementById("countrySelect");
+  const allFields      = document.querySelectorAll(".bank-field");
 
-  if (!countrySelect) return; // safety
+  if (!currencySelect) return;
 
-  countrySelect.addEventListener("change", function () {
+  currencySelect.addEventListener("change", function () {
 
-    const selected = countryRules[this.value];
+    const selected = currencyRules[this.value];
 
-    // Auto currency
-    if (selected && currencySelect) {
-      currencySelect.value = selected.currency;
-    }
-
-    // Hide all fields
+    // hide all bank fields first
     allFields.forEach(f => {
       f.classList.add("hidden");
       f.removeAttribute("required");
@@ -298,7 +490,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!selected) return;
 
-    // Show required fields
+    // auto set country
+    if (countrySelect) {
+      countrySelect.value = selected.country;
+    }
+
+    // ⭐ IMPORTANT
+    // If UGX → do NOT show rules (payment method will handle)
+    if (this.value === "UGX") return;
+
+    // show required fields for other currencies
     selected.rules.forEach(field => {
       const el = document.getElementById(fieldMap[field]);
       if (el) {
@@ -311,7 +512,66 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
+ {{-- when you select ugx currency the paymentmethod --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
+    const currencySelect  = document.getElementById("currencySelect");
+    const transferMethod  = document.getElementById("transferMethod");
+    const mobileInput     = document.getElementById("mobileNumber");
+    const bankSelect      = document.getElementById("bankSelect");
+    const accountNumber   = document.getElementById("accountNumber");
+
+    function hideAll(){
+    transferMethod.classList.add("hidden");
+    mobileInput.classList.add("hidden");
+    bankSelect.classList.add("hidden");
+    accountNumber.classList.add("hidden");
+    }
+
+    hideAll();
+
+    // ⭐ Currency change
+    currencySelect.addEventListener("change", () => {
+
+    if(currencySelect.value === "UGX"){
+    transferMethod.classList.remove("hidden"); // only show payment method
+    mobileInput.classList.add("hidden");
+    bankSelect.classList.add("hidden");
+    accountNumber.classList.add("hidden");
+    }else{
+    hideAll();
+    }
+
+    });
+
+    // ⭐ Payment method change
+    transferMethod.addEventListener("change", () => {
+
+    const method = transferMethod.value;
+
+    if(method === "mobile"){
+    mobileInput.classList.remove("hidden");
+    bankSelect.classList.add("hidden");
+    accountNumber.classList.add("hidden");
+    }
+
+    else if(method === "bank"){
+    bankSelect.classList.remove("hidden");
+    accountNumber.classList.remove("hidden");
+    mobileInput.classList.add("hidden");
+    }
+
+    else{
+    mobileInput.classList.add("hidden");
+    bankSelect.classList.add("hidden");
+    accountNumber.classList.add("hidden");
+    }
+
+    });
+
+    });
+</script>
 
 
 

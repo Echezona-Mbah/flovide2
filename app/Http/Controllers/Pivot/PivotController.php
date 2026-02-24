@@ -28,12 +28,15 @@ class PivotController extends Controller
             'msisdn' => 'required|string',
             'accountNumber' => 'required|string',
             'amount' => 'required|numeric',
+            'chargeAmount' => 'nullable|numeric',
             'currencyCode' => 'required|string',
             'countryCode' => 'required|string',
-            'customerNames' => 'nullable|string',
+            'customerName' => 'nullable|string',
             'narration' => 'nullable|string',
             'extraData' => 'nullable|array',
         ]);
+
+        // dd($request->all());
 
         // 1️⃣ Authenticate
         $auth = $this->pivot->authenticate();
@@ -55,10 +58,11 @@ class PivotController extends Controller
             "accountNumber" => $request->accountNumber,
             "merchantTransactionId" => $merchantTransactionId,
             "amount" => $request->amount,
+            "chargeAmount" => $request->chargeAmount,
             "narration" => $request->narration ?? "Payment",
             "currencyCode" => $request->currencyCode,
             "countryCode" => $request->countryCode,
-            "customerNames" => $request->customerNames ?? "Customer",
+            "customerName" => $request->customerName ?? "Customer",
             "extraData" => isset($request->extraData) ? json_decode(json_encode($request->extraData), true) : null
         ];
 
@@ -71,12 +75,7 @@ class PivotController extends Controller
 
         logger('Pivot RESPONSE', $payment);
 
-            ApiLog::create([
-            'endpoint' => 'postTransaction',
-            'request' => json_encode($payload),
-            'response' => json_encode($payment),
-            'status' => $payment['status'] ?? 'UNKNOWN'
-        ]);
+
 
         return response()->json($payment);
     }
@@ -110,12 +109,7 @@ class PivotController extends Controller
 
         logger('Pivot RESPONSE', $response);
 
-            ApiLog::create([
-            'endpoint' => 'queryPaymentStatus',
-            'request' => json_encode($payload),
-            'response' => json_encode($response),
-            'status' => $response['status'] ?? 'UNKNOWN'
-        ]);
+
 
         return response()->json($response);
     }
@@ -135,22 +129,17 @@ public function accountValidation(Request $request)
         "serviceCode" => $request->serviceCode,
         "msisdn" => $request->msisdn,
         "accountNumber" => $request->accountNumber,
-        "extraData" => $request->extraData
+        "extraData" => isset($request->extraData) ? json_decode(json_encode($request->extraData), true) : null
+
     ];
 
-    // dd($response);
-            logger('Pivot REQUEST', $payload);
+    logger('Pivot REQUEST', $payload);
 
     $response = $this->pivot->accountValidation($token, $payload);
 
         logger('Pivot RESPONSE', $response);
 
-            ApiLog::create([
-            'endpoint' => 'accountValidation',
-            'request' => json_encode($payload),
-            'response' => json_encode($response),
-            'status' => $response['status'] ?? 'UNKNOWN'
-        ]);
+
 
     // Example Pivot response handling
     return response()->json([
@@ -220,12 +209,7 @@ public function accountValidation(Request $request)
         $response = $this->pivot->postCardPayment($token, $payload);
         logger('Pivot RESPONSE', $response);
 
-            ApiLog::create([
-            'endpoint' => 'postCardPayment',
-            'request' => json_encode($payload),
-            'response' => json_encode($response),
-            'status' => $response['status'] ?? 'UNKNOWN'
-        ]);
+
 
         return response()->json($response);
     }

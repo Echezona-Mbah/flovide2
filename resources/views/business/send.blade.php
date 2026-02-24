@@ -42,18 +42,25 @@
                 
                     <!-- Beneficiaries Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        @forelse($beneficiaries as $beneficiary)
-                            <div 
-                            class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            data-id="{{ $beneficiary->account_id }}"
-                            data-account-name="{{ $beneficiary->account_name }}"
-                            data-account-number="{{ $beneficiary->account_number }}"
-                            data-bank="{{ $beneficiary->bank }}"
-                            data-currency="{{ $beneficiary->currency }}"
-                            data-country="{{ $beneficiary->country }}"
-                            data-amount="100"
-                            data-gets="0.06"
-                            onclick="openModalFromElement(this)">
+                            @forelse($beneficiaries as $beneficiary)
+                            @php
+                                    $destination = strtolower($beneficiary->bank) === 'mobile'
+                                        ? $beneficiary->phone
+                                        : $beneficiary->account_number;
+                                @endphp
+                                <div 
+                                class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                data-id="{{ $beneficiary->recipient_id }}"
+                                data-account-name="{{ $beneficiary->account_name }}"
+                                data-account-number="{{ $beneficiary->account_number }}"
+                                data-bank="{{ $beneficiary->bank }}"
+                                data-currency="{{ $beneficiary->currency }}"
+                                data-country="{{ $beneficiary->country }}"
+                                data-phone="{{ $beneficiary->phone }}"
+                                data-sortcode="{{ $beneficiary->sort_code }}"
+                                data-amount="100"
+                                data-gets="0.06"
+                                onclick="openModalFromElement(this)">
                     
                            
                                                         
@@ -63,14 +70,21 @@
                                     </div>
                 
                                     <div>
-                                        <h3 class="text-lg font-semibold text-gray-800 truncate w-40" id="beneficiaryName">{{ $beneficiary->account_name }}</h3>
+                                        <h3 class="text-lg font-semibold text-gray-800 truncate w-40" >{{ $beneficiary->account_name }}</h3>
                                         <p class="text-xs text-gray-400">{{ __('Saved Beneficiary') }}</p>
                                     </div>
                                 </div>
                 
                                 <div class="mb-3 space-y-1 text-sm text-gray-700">
-                                    <p><strong id="beneficiaryAccount">{{ __('Account:') }}</strong> {{ $beneficiary->account_number }}</p>
-                                    <p><strong id="beneficiaryBank">{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
+                                    <p>
+                                        <strong>{{ __('Account:') }}</strong>
+                                        @if(strtolower($beneficiary->bank) === 'mobile')
+                                            {{ $beneficiary->phone }}
+                                        @else
+                                            {{ $beneficiary->account_number }}
+                                        @endif
+                                    </p>   
+                                    <p><strong >{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
                                 </div>
                             </div>
                        
@@ -138,6 +152,13 @@
                                         @endif
                                     </div>
 
+                                    <!-- Hidden Beneficiary Info (inside #transactionModal) -->
+                                    <div id="beneficiaryInfo" class="mb-3 hidden">
+                                        <p><strong>Name:</strong> <span id="beneficiaryName">...</span></p>
+                                        <p><strong>Account:</strong> <span id="beneficiaryAccount">...</span></p>
+                                        <p><strong>Bank:</strong> <span id="beneficiaryBank">...</span></p>
+                                    </div>
+
                                     <!-- Exchange Info -->
                                     <div class="space-y-2 mb-6 text-sm text-gray-700">
                                         <div class="flex justify-between">
@@ -153,6 +174,7 @@
                                             <span>{{ __('Usually within 15 minutes(Can take up to 2 hours)') }}</span>
                                         </div>
                                     </div>
+                                    
                                     <!-- Loader -->
                                     <div id="rateLoader" class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-2 hidden">
                                         <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -167,7 +189,7 @@
                                     <div class="space-y-2 mb-6 text-sm text-gray-700">
                                         <div class="flex justify-between">
                                            <div class="font-medium flex items-center gap-1">
-<span id="recipientSymbol"></span>
+                                                <span id="recipientSymbol"></span>
                                                 <span id="recipientAmount">0.00</span>
                                             </div>
 
@@ -248,9 +270,14 @@
                                             <span>{{ __('Name:') }}</span>
                                             <span id="summaryName">...</span>
                                         </div>
-                                        <div class="flex justify-between text-sm text-gray-800 mt-1">
-                                            <span>{{ __('Account No:') }}</span>
+                                        <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryAccountRow">
+                                            <span>Account No:</span>
                                             <span id="summaryAccount">...</span>
+                                        </div>
+
+                                        <div class="flex justify-between text-sm text-gray-800 mt-1 hidden" id="summaryPhoneRow">
+                                            <span>Phone:</span>
+                                            <span id="summaryPhone">...</span>
                                         </div>
                                     </div>
                         
@@ -259,9 +286,10 @@
                                         {{-- <input type="hidden" name="recipient_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" value="{{ $balanceList[0]['id'] ?? '' }}">
                                         <input type="hidden" name="amount" id="amountInput">
-                                        <input type="hidden" name="reference" value="For invoice">
-                         --}}
-                                        <input type="hidden" name="account_id" id="recipientIdInput">
+                                        <input type="hidden" name="reference" value="For invoice">--}}
+                                        <input type="hidden" name="sort_code" id="sort_codeInput">
+                                        <input type="hidden" name="bank" id="bankInput">
+                                        <input type="hidden" name="recipient_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
                                         <input type="hidden" name="amount" id="amountInput">
                                         <input type="hidden" name="reference" value="For invoice">
@@ -269,6 +297,9 @@
                                         <input type="hidden" name="total_amount" id="totalAmountInput">
                                         <input type="hidden" name="exchange_rate" id="exchangeRateInput">
                                         <input type="hidden" name="recipient_amount" id="recipientAmountInput">
+                                        <input type="hidden" name="account_number" id="accountNumberInput">
+                                        <input type="hidden" name="account_name" id="accountNameInput">
+                                        
 
                                         <div class="flex justify-between">
                                             <span>{{ __('Bank:') }}</span>
@@ -307,10 +338,8 @@
 
                 </section>
                 
-               
-                
-                
         </section>
+
     </main>
 
 
@@ -323,7 +352,7 @@
     
 
     
-    <script>
+    {{-- <script>
         document.addEventListener("DOMContentLoaded", function () {
             const currencySelect = document.getElementById("currency");
             const amountInput = document.getElementById("sendAmount");
@@ -452,36 +481,41 @@
 
         
             window.openModalFromElement = function (el) {
-                document.querySelectorAll('.selected-beneficiary').forEach(el => el.classList.remove('selected-beneficiary'));
+
+                document.querySelectorAll('.selected-beneficiary')
+                    .forEach(x => x.classList.remove('selected-beneficiary'));
+
                 el.classList.add('selected-beneficiary');
-        
-                const sendAmount = parseFloat(el.dataset.amount || 100);
-                const gets = parseFloat(el.dataset.gets || 0);
+
+                const name = el.dataset.accountName || "N/A";
+                const account = el.dataset.accountNumber || "";
+                const bank = el.dataset.bank || "";
+                const phone = el.dataset.phone || "";
                 const currency = el.dataset.currency || "USD";
-                const accountName = el.dataset.accountName || "N/A";
-                const accountNumber = el.dataset.accountNumber || "N/A";
-                const bank = el.dataset.bank || "N/A";
                 const recipientId = el.dataset.id || "";
-        
-                console.log("👤 Selected Beneficiary:");
-                console.log("Name:", accountName);
-                console.log("Account:", accountNumber);
-                console.log("Bank:", bank);
-                console.log("Currency:", currency);
-                console.log("Gets rate:", gets);
-                console.log("Recipient ID:", recipientId);
-        
-                document.getElementById("beneficiaryName").textContent = accountName;
-                document.getElementById("beneficiaryAccount").textContent = accountNumber;
+
+                const isMobile = bank.toLowerCase().includes("mobile");
+
+                // Display destination
+                const destination = isMobile ? phone : account;
+
+                document.getElementById("beneficiaryName").textContent = name;
+                document.getElementById("beneficiaryAccount").textContent = destination;
                 document.getElementById("beneficiaryBank").textContent = bank;
-        
+
+                // Save on element for summary step
+                el.dataset.destination = destination;
+
                 recipientCurrency = currency;
-                amountInput.value = sendAmount;
-               recipientGetsText.textContent = currency;
-                document.getElementById("recipientFlag").src = `https://flagcdn.com/24x18/${el.dataset.country?.toLowerCase() || "us"}.png`;
-                recipientAmountText.textContent = (sendAmount * gets).toFixed(2);
-        
+
+                amountInput.value = parseFloat(el.dataset.amount || 100);
+                recipientGetsText.textContent = currency;
+
+                document.getElementById("recipientFlag").src =
+                    `https://flagcdn.com/24x18/${el.dataset.country?.toLowerCase() || "us"}.png`;
+
                 updateRateDisplay();
+
                 document.getElementById("transactionModal")?.classList?.remove("hidden");
             };
         
@@ -538,6 +572,8 @@
                 document.getElementById('totalAmountInput').value = total.toFixed(2);
                 document.getElementById('exchangeRateInput').value = rate;
                 document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
+                document.getElementById('accountNumberInput').value = account;
+                document.getElementById('accountNameInput').value = name;
 
                 // Get balance ID from selected option
                 const selectedOption = document.getElementById('currency')?.selectedOptions[0];
@@ -557,8 +593,192 @@
             updateRateDisplay();
         });
     </script>
-        
-    
+         --}}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currencySelect = document.getElementById("currency");
+        const amountInput = document.getElementById("sendAmount");
+        const flagImg = document.getElementById("currencyFlag");
+        const symbolSpan = document.getElementById("currencySymbol");
+        const exchangeRateText = document.getElementById("exchangeRateText");
+        const transferFeeText = document.getElementById("transferFeeText");
+        const recipientAmountText = document.getElementById("recipientAmount");
+        const recipientGetsText = document.getElementById("recipientGets");
+        const sendCurrencySymbol = document.getElementById("sendCurrencySymbol");
+
+        function formatNumberInput(input) {
+            const cleaned = input.replace(/,/g, '');
+            const number = parseFloat(cleaned);
+            if (isNaN(number)) return '';
+            return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getRecipientCurrency() {
+            const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+            return selectedBeneficiary?.dataset.currency || "USD";
+        }
+
+        async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
+            const url = `${window.location.origin}/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`;
+            try {
+                const response = await fetch(url);
+                const contentType = response.headers.get("content-type") || "";
+                if (!response.ok || !contentType.includes("application/json")) throw new Error("Invalid response");
+                return await response.json();
+            } catch (err) {
+                console.error("Exchange rate fetch error:", err);
+                return null;
+            }
+        }
+
+        async function updateRateDisplay() {
+            const selectedOption = currencySelect?.selectedOptions[0];
+            if (!selectedOption) return;
+
+            const fromCurrency = selectedOption.value;
+            const symbol = selectedOption.dataset.symbol || "₦";
+            const country = selectedOption.dataset.country || "us";
+            const amount = parseFloat(amountInput.value || 0);
+            const recipientCurrency = getRecipientCurrency();
+
+            document.getElementById('rateLoader')?.classList.remove('hidden');
+
+            flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+            symbolSpan.textContent = symbol;
+            sendCurrencySymbol.textContent = symbol;
+
+            if (fromCurrency === recipientCurrency) {
+                exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} 1.00`;
+                recipientAmountText.textContent = amount.toFixed(2);
+                transferFeeText.textContent = `${symbol}55.00`;
+                document.getElementById('rateLoader')?.classList.add('hidden');
+                return;
+            }
+
+            const rateData = await fetchExchangeRate(fromCurrency, recipientCurrency, amount);
+
+            if (rateData && rateData.rate) {
+                const rate = parseFloat(rateData.rate);
+                const recipientAmount = parseFloat(rateData.converted_amount);
+                const fee = parseFloat(rateData.transfer_fee || 0);
+
+                exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} ${rate}`;
+                transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
+                recipientAmountText.textContent = recipientAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                const recipientSymbol = document.getElementById("recipientSymbol");
+                const currencySymbols = {
+                    USD: "$", NGN: "₦", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R",
+                    XOF: "CFA", XAF: "FCFA", BWP: "P", TZS: "TSh", UGX: "USh", MWK: "MK",
+                    CAD: "C$", AUD: "A$", INR: "₹", CNY: "¥", JPY: "¥", RUB: "₽", BRL: "R$",
+                    MXN: "Mex$", AED: "د.إ", SAR: "﷼", QAR: "ر.ق", EGP: "£", LKR: "Rs", PKR: "₨",
+                    THB: "฿", MYR: "RM", IDR: "Rp", PHP: "₱", KRW: "₩", CHF: "Fr", SEK: "kr",
+                    NOK: "kr", DKK: "kr", CZK: "Kč", PLN: "zł", HUF: "Ft", TRY: "₺", ARS: "$",
+                    CLP: "$", COP: "$", PEN: "S/"
+                };
+                recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
+            } else {
+                exchangeRateText.textContent = "Rate unavailable";
+                transferFeeText.textContent = `${symbol}0.00`;
+                recipientAmountText.textContent = "0.00";
+            }
+
+            document.getElementById('rateLoader')?.classList.add('hidden');
+        }
+
+    window.openModalFromElement = function(el) {
+        document.querySelectorAll('.selected-beneficiary').forEach(x => x.classList.remove('selected-beneficiary'));
+        el.classList.add('selected-beneficiary');
+
+        const name = el.dataset.accountName || "N/A";
+        const account = el.dataset.accountNumber || "";
+        const bank = el.dataset.bank || "";
+        const phone = el.dataset.phone || "";
+        const currency = el.dataset.currency || "USD";
+        const country = el.dataset.country || "us";
+
+        const isMobile = bank.toLowerCase().includes("mobile");
+        const destination = isMobile ? phone : account;
+
+        // Fill modal fields
+        const modal = document.getElementById("transactionModal");
+        modal.querySelector("#beneficiaryName").textContent = name;
+        modal.querySelector("#beneficiaryAccount").textContent = destination;
+        modal.querySelector("#beneficiaryBank").textContent = bank;
+        modal.querySelector("#recipientFlag").src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+        document.getElementById("recipientGets").textContent = currency;
+        document.getElementById("sendAmount").value = parseFloat(el.dataset.amount || 100);
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+
+        // Update exchange rate
+        if (currencySelect && amountInput) updateRateDisplay();
+    };
+
+    currencySelect?.addEventListener("change", updateRateDisplay);
+    amountInput?.addEventListener("input", updateRateDisplay);
+
+    document.getElementById("closeModalBtn")?.addEventListener("click", () => {
+        document.getElementById("transactionModal").classList.add("hidden");
+    });
+
+    window.addEventListener("click", (e) => {
+        if (e.target.id === "transactionModal") {
+            document.getElementById("transactionModal").classList.add("hidden");
+        }
+    });
+
+document.getElementById('sendBtn')?.addEventListener('click', () => {
+    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    const name = document.getElementById('beneficiaryName').textContent || "N/A";
+    const account = document.getElementById('beneficiaryAccount').textContent || "N/A";
+    const bank = document.getElementById('beneficiaryBank').textContent || "N/A";
+    const sortCode = selectedBeneficiary?.dataset.sortcode || ""; // ✅ get sort code
+    const amount = parseFloat(document.getElementById('sendAmount').value || 0);
+    const fee = parseFloat(document.getElementById('transferFeeText').textContent.replace(/[^\d.]/g, '') || 0);
+    const total = amount + fee;
+    const rate = document.getElementById('exchangeRateText').textContent || '';
+    const receive = document.getElementById('recipientAmount').textContent || '0.00';
+    const currency = document.getElementById('recipientGets').textContent || 'USD';
+    const recipientId = selectedBeneficiary?.dataset.id || '';
+    const symbol = document.getElementById('sendCurrencySymbol').textContent || '₦';
+    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || '';
+
+    // Update summary modal
+    document.getElementById('summaryName').textContent = name;
+    document.getElementById('summaryAccount').textContent = account;
+    document.getElementById('summaryBank').textContent = bank;
+    document.getElementById('summaryAmountSent').textContent = `${symbol}${amount.toFixed(2)}`;
+    document.getElementById('summaryFee').textContent = `${symbol}${fee.toFixed(2)}`;
+    document.getElementById('summaryTotal').textContent = `${symbol}${total.toFixed(2)}`;
+    document.getElementById('summaryRate').textContent = rate;
+    document.getElementById('summaryReceive').textContent = `${currency} ${receive}`;
+
+    // Hidden inputs
+    document.getElementById('recipientIdInput').value = recipientId;
+    document.getElementById('amountInput').value = amount.toFixed(2);
+    document.getElementById('transferFeeInput').value = fee.toFixed(2);
+    document.getElementById('totalAmountInput').value = total.toFixed(2);
+    document.getElementById('exchangeRateInput').value = rate;
+    document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
+    document.getElementById('accountNumberInput').value = account;
+    document.getElementById('accountNameInput').value = name;
+    document.getElementById('balanceIdInput').value = balanceId;
+    document.getElementById('bankInput').value = bank;
+    document.getElementById('sort_codeInput').value = sortCode; // ✅ now works
+
+    // Show summary modal
+    document.getElementById('summaryModal').classList.remove('hidden');
+});
+
+    document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
+        document.getElementById("summaryModal").classList.add("hidden");
+    });
+
+    updateRateDisplay();
+});
+</script>
     
 
     <script>
