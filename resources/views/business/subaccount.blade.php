@@ -19,7 +19,7 @@
 
         </header>
         <section class=" relative  w-full">
-            <section class="flex w-full flex-col lg:flex-row gap-8 bg-white md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden  ">
+            <section class="flex w-full flex-col lg:flex-row gap-8 bg-white md:rounded-3xl p-2 shadow-md md:absolute overflow-x-hidden  ">
                 <!-- Left form -->
                 <section class="max-w-7xl mx-auto flex w-full flex-col md:flex-row gap-14">
                     <!-- Left form section -->

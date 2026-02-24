@@ -145,7 +145,7 @@ class RegisteredUserController extends Controller
         
         // REFERRAL CODE & LINK
         $user->referral_code = $this->generateReferralCode();
-        $user->referral_link = url('/i/' . $user->referral_code);
+        $user->referral_link = url('/register/' . $user->referral_code);
         
         $user->save();
 
