@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Ibanq\IbanqPaymentController;
+use App\Services\PayazaService;
 use App\Services\PivotService;
 
 
@@ -22,126 +23,284 @@ class SendMoneyController extends Controller
     use SelectsBalanceId;
 
      protected $pivot;
+    protected $payaza;
 
-    public function __construct(PivotService $pivot)
+
+    public function __construct(PivotService $pivot, PayazaService $payaza)
     {
         $this->pivot = $pivot;
+        $this->payaza = $payaza;
     }
 
-     public function sendTransaction(Request $request)
-    {
-        // -------------------- Validate --------------------
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'recipient_id' => 'required|uuid',
-            'balance_id' => 'required',
-            'reference' => 'nullable|string',
-            'transfer_fee' => 'nullable',
-            'total_amount' => 'required|numeric',
-            'exchange_rate' => 'required|string',
-            'recipient_amount' => 'required|numeric',
-            'account_number' => 'required|string',
-            'account_name' => 'required|string',
-        ]);
+    
 
-        // -------------------- Extract currencies --------------------
-        $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
-        $sendingCurrency = explode(' ', $request->exchange_rate)[3] ?? 'NGN';
+    //  public function sendTransaction(Request $request)
+    // {
+    //     // -------------------- Validate --------------------
+    //     $request->validate([
+    //         'amount' => 'required|numeric|min:1',
+    //         'recipient_id' => 'required|uuid',
+    //         'balance_id' => 'required',
+    //         'reference' => 'nullable|string',
+    //         'transfer_fee' => 'nullable',
+    //         'total_amount' => 'required|numeric',
+    //         'exchange_rate' => 'required|string',
+    //         'recipient_amount' => 'required|numeric',
+    //         'account_number' => 'required|string',
+    //         'account_name' => 'required|string',
+    //     ]);
 
-        $balance = Balance::find($request->balance_id);
-        if (!$balance) {
-            return $request->expectsJson()
-                ? response()->json(['error' => 'Invalid balance selected'], 422)
-                : back()->withErrors(['balance' => 'Invalid balance selected']);
-        }
+    //     // -------------------- Extract currencies --------------------
+    //     $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
+    //     $sendingCurrency = explode(' ', $request->exchange_rate)[3] ?? 'NGN';
 
-        if ($balance->amount < $request->total_amount) {
-            return $request->expectsJson()
-                ? response()->json(['error' => 'Insufficient funds'], 422)
-                : back()->withErrors(['amount' => 'Insufficient funds']);
-        }
+    //     $balance = Balance::find($request->balance_id);
+    //     if (!$balance) {
+    //         return $request->expectsJson()
+    //             ? response()->json(['error' => 'Invalid balance selected'], 422)
+    //             : back()->withErrors(['balance' => 'Invalid balance selected']);
+    //     }
 
-        // -------------------- Choose provider --------------------
-        if (in_array($sendingCurrency, ['UGX', 'KES'])) {
-            // Use Pivot for UGX or KES
-            return $this->sendViaPivot($request, $sendingCurrency, $balance);
-        } else {
-            // Use IBANQ for other currencies
-            return $this->sendViaIbanq($request, $sendingCurrency, $balance);
-        }
+    //     if ($balance->amount < $request->total_amount) {
+    //         return $request->expectsJson()
+    //             ? response()->json(['error' => 'Insufficient funds'], 422)
+    //             : back()->withErrors(['amount' => 'Insufficient funds']);
+    //     }
+
+    //     // -------------------- Choose provider --------------------
+    //     if (in_array($sendingCurrency, ['UGX', 'KES'])) {
+    //         // Use Pivot for UGX or KES
+    //         return $this->sendViaPivot($request, $sendingCurrency, $balance);
+    //     } else {
+    //         // Use IBANQ for other currencies
+    //         return $this->sendViaIbanq($request, $sendingCurrency, $balance);
+    //     }
+    // }
+
+    public function sendTransaction(Request $request)
+{
+    // -------------------- Validate --------------------
+    $request->validate([
+        'amount' => 'required|numeric|min:1',
+        'recipient_id' => 'required|uuid',
+        'balance_id' => 'required',
+        'reference' => 'nullable|string',
+        'transfer_fee' => 'nullable',
+        'total_amount' => 'required|numeric',
+        'exchange_rate' => 'required|string',
+        'recipient_amount' => 'required|numeric',
+        'account_number' => 'required|string',
+        'account_name' => 'required|string',
+        'bank' => 'nullable|string', // 'bank' or 'mobile'
+        'bank_code' => 'nullable|string',
+    ]);
+
+    // -------------------- Extract currencies --------------------
+    $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
+    $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
+
+    $balance = Balance::find($request->balance_id);
+    if (!$balance) {
+        return $request->expectsJson()
+            ? response()->json(['error' => 'Invalid balance selected'], 422)
+            : back()->withErrors(['balance' => 'Invalid balance selected']);
     }
+
+    if ($balance->amount < $request->total_amount) {
+        return $request->expectsJson()
+            ? response()->json(['error' => 'Insufficient funds'], 422)
+            : back()->withErrors(['amount' => 'Insufficient funds']);
+    }
+
+    // -------------------- Choose provider --------------------
+    $pivotCurrencies = ['UGX', 'KES']; // Pivot supported currencies
+    $payazaCurrencies = ['NGN', 'GHS', 'TZS', 'XOF', 'XAF', 'ZAR', 'UGX', 'KES']; // Payaza supported currencies
+
+    if (in_array($sendingCurrency, $pivotCurrencies) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+        return $this->sendViaPivot($request, $sendingCurrency, $balance);
+    }
+
+    if (in_array($sendingCurrency, $payazaCurrencies) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+        return $this->sendViaPayaza($request, $sendingCurrency, $balance);
+    }
+
+    return $request->expectsJson()
+        ? response()->json(['error' => 'No payment provider available for this currency'], 422)
+        : back()->with('error', 'No payment provider available for this currency');
+}
 
     // -------------------- Pivot Payment --------------------
    protected function sendViaPivot(Request $request, $currency, $balance)
+    {
+        $isApi = $request->expectsJson();
+        $user = auth()->user();
+
+        // Authenticate Pivot
+        $auth = $this->pivot->authenticate();
+        if (isset($auth['error'])) {
+            return $isApi
+                ? response()->json(['error' => $auth['error']], 500)
+                : back()->withErrors(['error' => $auth['error']]);
+        }
+
+        $token = $auth['tokenResponse']['accessToken'];
+        $merchantTransactionId = 'TXN_' . substr(uniqid(), 0, 10);
+
+        // -------------------- Determine service code --------------------
+
+        $bankType = strtolower($request->bank ?? 'bank'); // 'mobile' or 'bank'
+
+        // Read service codes from .env
+        $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
+        $pivotUGXMobileService = env('PIVOT_UGX_MOBILE_SERVICE');
+        $pivotKESBankService   = env('PIVOT_KES_BANK_SERVICE', 'KES_BANK_CODE');
+        $pivotKESMobileService = env('PIVOT_KES_MOBILE_SERVICE', 'KES_MOBILE_CODE');
+
+        // Choose service code dynamically
+        if ($currency === 'UGX') {
+            $serviceCode = $bankType === 'mobile' ? $pivotUGXMobileService : $pivotUGXBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SORT', '000000') : $request->bank_code;
+        } elseif ($currency === 'KES') {
+            $serviceCode = $bankType === 'mobile' ? $pivotKESMobileService : $pivotKESBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_KES_MOBILE_SORT', '000000') : $request->bank_code;
+        } else {
+            $serviceCode = $bankType === 'mobile' ? 'DEFAULT_MOBILE' : 'DEFAULT_BANK';
+            $sortCode    = $bankType === 'mobile' ? '013847' : $request->bank_code;
+        }
+
+        // Build payload
+        $payload = [
+            "serviceCode" => $serviceCode,
+            "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',
+            "accountNumber" => $request->account_number,
+            "merchantTransactionId" => $merchantTransactionId,
+            "amount" => $request->recipient_amount,
+            "chargeAmount" => $request->transfer_fee ?? 0,
+            "narration" => $request->reference ?? "Payment",
+            "currencyCode" => $currency,
+            "countryCode" => $currency === 'UGX' ? 'UG' : 'KE',
+            "customerName" => $request->account_name,
+        ];
+
+        // Add extraData only for bank transfer
+        $payload['extraData'] = [
+            "bankSortCode" => $sortCode
+        ];
+
+        // Only include amount in extraData for bank transfers
+        if ($bankType !== 'mobile') {
+            $payload['extraData']['amount'] = $request->recipient_amount;
+        }
+        // dd($payload);
+
+        logger('Pivot REQUEST', $payload);
+        $payment = $this->pivot->postTransaction($token, $payload);
+        logger('Pivot RESPONSE', $payment);
+
+        if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
+            // Success
+            $balance->amount -= $request->total_amount;
+            $balance->save();
+
+            TransactionHistory::create([
+                'amount' => $request->total_amount,
+                'currency' => $currency,
+                'balance_id' => $balance->id,
+                'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
+                'sender_id' => auth()->id(),
+                'sender' => $user->business_name,
+                'recipient_account_number' => $request->account_number,
+                'recipient_account_name' => $request->account_name,
+                'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
+                'status' => 'success',
+                'method' => $isApi ? 'api' : 'web',
+                'reference' => 'ref-' . Str::uuid(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $isApi
+                ? response()->json(['message' => 'Pivot transaction successful', 'data' => $payment])
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Pivot!');
+        } else {
+            $errorMessage = $payment['statusDescription'] ?? 'Pivot payment failed';
+            return $isApi
+                ? response()->json(['error' => $errorMessage, 'details' => $payment], 422)
+                : back()->with('error', $errorMessage);
+        }
+    }
+
+
+protected function sendViaPayaza(Request $request, $currency, $balance)
 {
+
     $isApi = $request->expectsJson();
-    $user = auth()->user();
+    $transactionReference = "TXN_" . time();
 
-    // Authenticate Pivot
-    $auth = $this->pivot->authenticate();
-    if (isset($auth['error'])) {
+    // Payaza account reference
+    $accountReference = $this->payaza->getAccountReference($currency);
+    // dd($accountReference);
+
+    if (!$accountReference) {
         return $isApi
-            ? response()->json(['error' => $auth['error']], 500)
-            : back()->withErrors(['error' => $auth['error']]);
+            ? response()->json(['error' => 'Unable to retrieve account reference from Payaza'], 500)
+            : back()->with('error', 'Unable to retrieve account reference from Payaza');
     }
 
-    $token = $auth['tokenResponse']['accessToken'];
-    $merchantTransactionId = 'TXN_' . substr(uniqid(), 0, 10);
+    // Determine type: bank or mobile
+    $bankType = strtolower($request->bank ?? 'bank'); // 'bank' or 'mobile'
 
-    // -------------------- Determine service code --------------------
 
-    $bankType = strtolower($request->bank ?? 'bank'); // 'mobile' or 'bank'
 
-      // Read service codes from .env
-    $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
-    $pivotUGXMobileService = env('PIVOT_UGX_MOBILE_SERVICE');
-    $pivotKESBankService   = env('PIVOT_KES_BANK_SERVICE', 'KES_BANK_CODE');
-    $pivotKESMobileService = env('PIVOT_KES_MOBILE_SERVICE', 'KES_MOBILE_CODE');
+    // ------------------- Transaction type mapping -------------------
+    $transactionTypes = [
+        'NGN' => 'nuban',
+        'GHS' => $bankType === 'mobile' ? 'mobile_money' : 'ghipps',
+        'UGX' => 'mobile_money',
+        'TZS' => $bankType === 'mobile' ? 'mobile_money' : 'tiss',
+        'KES' => $bankType === 'mobile' ? 'mobile_money' : 'kepss',
+        'XOF' => $bankType === 'mobile' ? 'mobile_money' : 'wave',
+        'XAF' => 'mobile_money',
+        'ZAR' => 'RTC',
+    ];
 
-    // Choose service code dynamically
- // Choose service code dynamically
-    if ($currency === 'UGX') {
-        $serviceCode = $bankType === 'mobile' ? $pivotUGXMobileService : $pivotUGXBankService;
-        $sortCode    = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SORT', '000000') : $request->sort_code;
-    } elseif ($currency === 'KES') {
-        $serviceCode = $bankType === 'mobile' ? $pivotKESMobileService : $pivotKESBankService;
-        $sortCode    = $bankType === 'mobile' ? env('PIVOT_KES_MOBILE_SORT', '000000') : $request->sort_code;
-    } else {
-        $serviceCode = $bankType === 'mobile' ? 'DEFAULT_MOBILE' : 'DEFAULT_BANK';
-        $sortCode    = $bankType === 'mobile' ? '013847' : $request->sort_code;
-    }
+    $transactionType = $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban');
 
-    // Build payload
+    // ------------------- Build payload -------------------
     $payload = [
-        "serviceCode" => $serviceCode,
-        "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',
-        "accountNumber" => $request->account_number,
-        "merchantTransactionId" => $merchantTransactionId,
-        "amount" => $request->recipient_amount,
-        "chargeAmount" => $request->transfer_fee ?? 0,
-        "narration" => $request->reference ?? "Payment",
-        "currencyCode" => $currency,
-        "countryCode" => $currency === 'UGX' ? 'UG' : 'KE',
-        "customerName" => $request->account_name,
+        "transaction_type" => $transactionType,
+        "service_payload" => [
+            "payout_amount" => $request->recipient_amount,
+            "transaction_pin" => env('PAYAZA_MERCHANT_PIN'),
+            "account_reference" => $accountReference,
+            "currency" => $currency,
+            "country" => strtoupper(substr($currency, 0, 2)),
+            "payout_beneficiaries" => [
+                [
+                    "credit_amount" => $request->recipient_amount,
+                    "account_number" => $request->account_number,
+                    "account_name" => $request->account_name,
+                    "bank_code" => $request->bank_code ?? null,
+                    "narration" => $request->reference ?? "Payment",
+                    "transaction_reference" => $transactionReference,
+                    "sender" => [
+                        "sender_name" => auth()->user()->business_name ?? auth()->user()->name,
+                        "sender_id" => auth()->id(),
+                        "sender_phone_number" => auth()->user()->business_phone ?? null,
+                        "sender_address" => auth()->user()->street_address ?? null
+                    ]
+                ]
+            ]
+        ]
     ];
+//   dd($payload);
 
-    // Add extraData only for bank transfer
- $payload['extraData'] = [
-        "bankSortCode" => $sortCode
-    ];
+    logger('Payaza REQUEST', $payload);
 
-    // Only include amount in extraData for bank transfers
-    if ($bankType !== 'mobile') {
-        $payload['extraData']['amount'] = $request->recipient_amount;
-    }
-    // dd($payload);
+    $response = $this->payaza->initiatePayout($payload);
+    logger('Payaza RESPONSE', $response);
 
-    logger('Pivot REQUEST', $payload);
-    $payment = $this->pivot->postTransaction($token, $payload);
-    logger('Pivot RESPONSE', $payment);
-
-    if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
-        // Success
+    if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
+        // Deduct balance
         $balance->amount -= $request->total_amount;
         $balance->save();
 
@@ -149,12 +308,12 @@ class SendMoneyController extends Controller
             'amount' => $request->total_amount,
             'currency' => $currency,
             'balance_id' => $balance->id,
-            'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
+            'order_id' => $transactionReference,
             'sender_id' => auth()->id(),
-            'sender' => $user->business_name,
+            'sender' => auth()->user()->business_name ?? auth()->user()->name,
             'recipient_account_number' => $request->account_number,
             'recipient_account_name' => $request->account_name,
-            'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
+            'recipient_country' => strtoupper(substr($currency,0,2)),
             'status' => 'success',
             'method' => $isApi ? 'api' : 'web',
             'reference' => 'ref-' . Str::uuid(),
@@ -162,15 +321,16 @@ class SendMoneyController extends Controller
         ]);
 
         return $isApi
-            ? response()->json(['message' => 'Pivot transaction successful', 'data' => $payment])
-            : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Pivot!');
-    } else {
-        $errorMessage = $payment['statusDescription'] ?? 'Pivot payment failed';
-        return $isApi
-            ? response()->json(['error' => $errorMessage, 'details' => $payment], 422)
-            : back()->with('error', $errorMessage);
+            ? response()->json(['message' => 'Payaza transaction successful', 'data' => $response])
+            : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Payaza!');
     }
+
+    $errorMessage = $response['statusDescription'] ?? 'Payaza transaction failed';
+    return $isApi
+        ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
+        : back()->with('error', $errorMessage);
 }
+
 
     // -------------------- IBANQ Payment --------------------
     protected function sendViaIbanq(Request $request, $currency, $balance)
@@ -336,6 +496,8 @@ class SendMoneyController extends Controller
 //         ? response()->json(['message' => 'Transaction successful', 'data' => $data])
 //         : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully!');
 // }
+
+
 
 
 

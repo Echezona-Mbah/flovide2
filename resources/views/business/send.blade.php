@@ -57,7 +57,7 @@
                                 data-currency="{{ $beneficiary->currency }}"
                                 data-country="{{ $beneficiary->country }}"
                                 data-phone="{{ $beneficiary->phone }}"
-                                data-sortcode="{{ $beneficiary->sort_code }}"
+                                data-sortcode="{{ $beneficiary->bank_code }}"
                                 data-amount="100"
                                 data-gets="0.06"
                                 onclick="openModalFromElement(this)">
@@ -287,7 +287,7 @@
                                         <input type="hidden" name="balance_id" value="{{ $balanceList[0]['id'] ?? '' }}">
                                         <input type="hidden" name="amount" id="amountInput">
                                         <input type="hidden" name="reference" value="For invoice">--}}
-                                        <input type="hidden" name="sort_code" id="sort_codeInput">
+                                        <input type="hidden" name="bank_code" id="sort_codeInput">
                                         <input type="hidden" name="bank" id="bankInput">
                                         <input type="hidden" name="recipient_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">

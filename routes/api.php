@@ -48,6 +48,7 @@ use App\Http\Controllers\Ibanq\IbanqReferenceController;
 use App\Http\Controllers\Ibanq\IbanqWalletController;
 use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\IbanqWebhookController;
+use App\Http\Controllers\Orchard\OrchardController;
 use App\Http\Controllers\Payaza\PayoutController;
 use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
@@ -116,6 +117,14 @@ Route::post('/ifx/webhook', [IbanqWebhookController::class, 'handle']);
 
 
 Route::post('/payaza/payout', [PayoutController::class, 'sendPayout']);
+Route::get('/payaza/transaction-status', [PayoutController::class, 'transactionStatus']);
+Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry']);
+Route::get('/payaza/banks', [PayoutController::class, 'getBanks']);
+
+Route::post('/orchard/payout',[OrchardController::class, 'debit']);
+Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquiry']);
+
+
 
 
 

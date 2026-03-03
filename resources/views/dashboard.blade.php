@@ -58,9 +58,8 @@
 
 
 
-            <section
-                class="bg-white text-gray-700 min-h-screen  md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2.3vw] overflow-x-hidden ">
-                <div class="max-w-[100vw] mx-auto">
+            <section    class="bg-white text-gray-700 w-full md:rounded-tl-3xl md:p-6 p-3 shadow-md overflow-x-hidden">
+                    <div class="max-w-[100vw] mx-auto">
                     <section class="bg-white text-gray-900 p-6 md:p-4 w-full">
                         <div class="max-w-[100vw] mx-auto">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full mb-10 gap-4">
@@ -189,16 +188,16 @@
 
                                                     <!-- Dropdown -->
                                                     <!-- Inside each .currency-dropdown -->
-<div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
-    <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
-    @foreach($allCurrencies as $c)
-        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
-             data-code="{{ $c['code'] }}" 
-             data-flag="{{ $c['flag'] }}">
-            <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
-        </div>
-    @endforeach
-</div>
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
+                                                        <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
+                                                        @foreach($allCurrencies as $c)
+                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+                                                                data-code="{{ $c['code'] }}" 
+                                                                data-flag="{{ $c['flag'] }}">
+                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
 
                                                 </div>
                                             </div>
@@ -222,16 +221,16 @@
 
                                                     <!-- Dropdown -->
                                                     <!-- Inside each .currency-dropdown -->
-<div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
-    <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
-    @foreach($allCurrencies as $c)
-        <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
-             data-code="{{ $c['code'] }}" 
-             data-flag="{{ $c['flag'] }}">
-            <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
-        </div>
-    @endforeach
-</div>
+                                                    <div class="currency-dropdown hidden absolute bg-white border rounded shadow mt-1 z-50 max-h-48 overflow-y-auto p-2">
+                                                        <input type="text" class="currency-search w-full border rounded px-2 py-1 mb-2 text-sm" placeholder="Search..." />
+                                                        @foreach($allCurrencies as $c)
+                                                            <div class="currency-item flex items-center gap-2 px-3 py-1 cursor-pointer hover:bg-gray-100" 
+                                                                data-code="{{ $c['code'] }}" 
+                                                                data-flag="{{ $c['flag'] }}">
+                                                                <img src="{{ $c['flag'] }}" class="w-5 h-4 rounded-sm" /> {{ $c['country_name'] }} {{ $c['code'] }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
