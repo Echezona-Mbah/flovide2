@@ -50,6 +50,8 @@ use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Business\referralLinkController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
+use App\Http\Controllers\Orchard\OrchardController;
+use App\Http\Controllers\Payaza\PayoutController;
 use App\Http\Controllers\Pivot\PivotController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
@@ -128,6 +130,13 @@ Route::get('/referral', [referralLinkController::class, 'index'])->name('referra
 
 
 Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation'])->name('pivot.account.validation');
+
+Route::get('/banks/filter', [AddBeneficiariesController::class,'banks'])->name('banks.filter');
+Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry'])->name('payaza.account-enquiry');
+
+Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquiry']);
+
+
 
 
 // HtmlMinifier::class
