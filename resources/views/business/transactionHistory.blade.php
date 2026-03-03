@@ -93,7 +93,7 @@
                             </td>
 
                             <td class="px-4 py-4 hidden md:table-cell">
-                                {{ $transaction->recipient }}
+                                {{ $transaction->recipient_account_name }}
                             </td>
 
                             <td class="px-4 py-4 font-semibold">
@@ -102,7 +102,7 @@
 
                             <td class="px-4 py-4 text-center">
 
-                                @if($transaction->status == "successful")
+                                @if($transaction->status == "success")
                                     <span class="status success">Success</span>
                                 @elseif($transaction->status == "failed")
                                     <span class="status failed">Failed</span>

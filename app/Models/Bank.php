@@ -10,7 +10,9 @@ class Bank extends Model
     'name',
     'country_iso',
     'bank_code',
-    'sort_code'
+    'sort_code',
+    'provider',
+    'type',
 ];
     public function user()
     {
