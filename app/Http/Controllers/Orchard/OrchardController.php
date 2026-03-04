@@ -59,4 +59,30 @@ public function accountInquiry(Request $request, OrchardService $orchard)
     return response()->json($response);
 }
 
+
+
+public function appMobileAccountInquiry(Request $request, OrchardService $orchard)
+{
+    $request->validate([
+        'customer_number' => 'required|string|max:20',
+        'bank_code'       => 'required|string|max:3',
+    ]);
+
+    $payload = [
+        "customer_number" => $request->customer_number,
+        "exttrid"         => uniqid('APPM_'),
+        "service_id"      => env('ORCHARD_SERVICE_ID'),
+        "nw"              => "BNK",
+        "bank_code"       => $request->bank_code,
+        "trans_type"      => "AII",
+        "ts"              => now()->utc()->format('Y-m-d H:i:s')
+    ];
+
+    $response = $orchard->accountInquiry($payload);
+
+    return response()->json($response);
+}
+
+
+
 }

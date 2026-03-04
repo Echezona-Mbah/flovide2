@@ -133,46 +133,44 @@ class PayoutController extends Controller
         return response()->json($response);
     }
 
-//   public function accountEnquiry(Request $request)
+    public function accountEnquiry(Request $request)
+    {
+        $request->validate([
+            'currency' => 'required|string',
+            'account_number' => 'required|string',
+            'bank_code' => 'required|string', // required for both
+        ]);
+
+
+        $response = $this->payaza->accountEnquiry(
+            $request->currency,
+            $request->bank_code,   // always use bank_code
+            $request->account_number,
+        );
+        return response()->json($response);
+    }
+
+//     public function accountEnquiry(Request $request)
 // {
 //     $request->validate([
 //         'currency' => 'required|string',
 //         'type' => 'required|string|in:bank,mobile',
 //         'account_number' => 'required|string',
-//         'bank_code' => 'required|string', // required for both
+//         'bank_code' => 'sometimes|required_if:type,bank|string',
+//         'provider' => 'sometimes|required_if:type,mobile|string',
 //     ]);
 
+//     $type = $request->type;
 
 //     $response = $this->payaza->accountEnquiry(
 //         $request->currency,
-//         $request->bank_code,   // always use bank_code
+//         $type === 'bank' ? $request->bank_code : $request->provider,
 //         $request->account_number,
-//         $request->type
+//         $type
 //     );
+
 //     return response()->json($response);
 // }
-
-    public function accountEnquiry(Request $request)
-{
-    $request->validate([
-        'currency' => 'required|string',
-        'type' => 'required|string|in:bank,mobile',
-        'account_number' => 'required|string',
-        'bank_code' => 'sometimes|required_if:type,bank|string',
-        'provider' => 'sometimes|required_if:type,mobile|string',
-    ]);
-
-    $type = $request->type;
-
-    $response = $this->payaza->accountEnquiry(
-        $request->currency,
-        $type === 'bank' ? $request->bank_code : $request->provider,
-        $request->account_number,
-        $type
-    );
-
-    return response()->json($response);
-}
 
     public function getBanks(Request $request)
     {

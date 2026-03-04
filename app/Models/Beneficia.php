@@ -47,6 +47,7 @@ class Beneficia extends Model
         // Optional: extra info if needed
         'email',
         'phone',
+        'transfer_method',
     ];
 
     protected $table = 'beneficias';
