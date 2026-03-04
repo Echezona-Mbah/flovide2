@@ -97,13 +97,17 @@
                     <!-- CAC Certificate -->
                   <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                     <div class="flex items-center space-x-4">
-                      <div
-                        class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $cacStatus['color'] }}-400 text-{{ $cacStatus['color'] }}-500">
+                      <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $cacStatus['color'] }}-400 text-{{ $cacStatus['color'] }}-500">
                         <i class="{{ $cacStatus['icon'] }}"></i>
                       </div>
-                      <p class="font-semibold text-gray-900 text-sm leading-5">
-                        CAC certificate
-                      </p>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm leading-5">
+                            CAC certificate
+                            </p>
+                            <p class="text-gray-500 text-sm leading-5">
+                                Upload either Certificate of Registration, Certificate of Incorporate or a Certificate of Formation.
+                            </p>
+                        </div> 
                     </div>
                     <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
                       <div
@@ -148,13 +152,17 @@
                 @if ($user->countries_id == "Nigeria")
                 <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                     <div class="flex items-center space-x-4">
-                    <div
-                        class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $bvnStatus['color'] }}-400 text-{{ $bvnStatus['color'] }}-500">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $bvnStatus['color'] }}-400 text-{{ $bvnStatus['color'] }}-500">
                         <i class="{{ $bvnStatus['icon'] }}"></i>
                     </div>
-                    <p class="font-semibold text-gray-900 text-sm leading-5">
-                        Bank Verification Number (BVN)
-                    </p>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm leading-5">
+                                Bank Verification Number (BVN)
+                            </p>
+                            <p class="text-gray-500 text-sm leading-5">
+                                Provide your BVN for identity verification. Ensure it matches your account details.
+                            </p>
+                        </div>  
                     </div>
 
                     <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
@@ -190,9 +198,14 @@
                       class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $valididStatus['color'] }}-400 text-{{ $valididStatus['color'] }}-500">
                       <i class="{{ $valididStatus['icon'] }}"></i>
                     </div>
-                      <p class="font-semibold text-gray-900 text-sm leading-5">
-                        Valid ID of Directors/Owners
-                      </p>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm leading-5">
+                                Valid ID of Directors/Owners
+                            </p>
+                            <p class="text-gray-500 text-sm leading-5">
+                                Provide a valid government-issued ID for all directors or owners.
+                            </p>
+                        </div>
                     </div>
                     <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
                       <div
@@ -224,9 +237,14 @@
                       class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $tinStatus['color'] }}-400 text-{{ $tinStatus['color'] }}-500">
                       <i class="{{ $tinStatus['icon'] }}"></i>
                     </div>
-                      <p class="font-semibold text-gray-900 text-sm leading-5">
-                        Tax Identification Number (TIN)
-                      </p>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm leading-5">
+                                Tax Identification Number (TIN)
+                            </p>
+                            <p class="text-gray-500 text-sm leading-5">
+                                Provide your official Tax Identification Number for verification purposes.
+                            </p>
+                        </div>
                     </div>
                     <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
                      <div
@@ -253,46 +271,168 @@
                     </div>
                   </div>
 
-                  <!-- Item 5 -->
-                  <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
-                    <div class="flex items-center space-x-4">
-                           <div
-                      class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $utilitybillStatus['color'] }}-400 text-{{ $utilitybillStatus['color'] }}-500">
-                      <i class="{{ $utilitybillStatus['icon'] }}"></i>
-                    </div>
-                      <p class="font-semibold text-gray-900 text-sm leading-5">
-                        Utility Bill / Proof of Address
-                      </p>
-                    </div>
-                    <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                       <div
-                      class="text-{{ $utilitybillStatus['color'] }}-700 bg-{{ $utilitybillStatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
-                      {{ $utilitybillStatus['label'] }}
-                    </div>
-                      <!-- Utility Bill -->
+                    <!-- Item 5 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $utilitybillStatus['color'] }}-400 text-{{ $utilitybillStatus['color'] }}-500">
+                                <i class="{{ $utilitybillStatus['icon'] }}"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Utility Bill / Proof of Address
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    Upload a copy of your last bank statement or a utility bill dated within the last 3 months.
+                                </p>
+                            </div> 
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <div class="text-{{ $utilitybillStatus['color'] }}-700 bg-{{ $utilitybillStatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $utilitybillStatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
 
-                          @if ($user->utility_bill_status == "confirmed" && $user->utility_bill)
-                          <!-- Show Download Button -->
-                          <a href="{{ asset('storage/' . $user->utility_bill) }}" 
-                              class="bg-green-600 text-white px-4 py-2 rounded"
-                              download>
-                              Download
-                          </a>
-                      @else
-                          <!-- Show Upload Button -->
-                            <button id="openUtility"
-                          class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                          Upload
-                      </button>
-                     @endif
+                            @if ($user->utility_bill_status == "confirmed" && $user->utility_bill)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->utility_bill) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                  </div>
+
+                    <!-- Item 7 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Proof of Identity
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    You will need to have your physical passport, drivers license, or national ID.
+                                </p>
+                            </div>   
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <button id="openProofOfIdentity" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Item 9 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Ownership
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    Provide details of the ultimate beneficial owners with percentages (25% or above) 
+                                    <br> stated on shares registry or other legal document (any Commercial Registry
+                                    <br> document containing the beneficial ownership information or Annual Report)
+                                </p>
+                            </div>   
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <!-- Show Upload Button -->
+                            <button id="openOwnership" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Item 10 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Organisational Chart
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    If there is more than one layer of ownership, then we'll also need an 
+                                    <br> organisational chart signed by one of your Corporate Officers showing
+                                    <br> the last ultimate beneficial owners.
+                                </p>
+                            </div>   
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <!-- Show Upload Button -->
+                            <button id="openOrganisationalChart" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Item 8 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Register of Directors
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    If you have them provide official list of the Directors.
+                                </p>
+                            </div>   
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <!-- Show Upload Button -->
+                            <button id="openRegisterOfDirectors" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Item 6 -->
+                    <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm leading-5">
+                                    Formation Document
+                                </p>
+                                <p class="text-gray-500 text-sm leading-5">
+                                    Upload either Memorandum & Articles of Association or Articles of Incorporation
+                                </p>
+                            </div>                         
+                        </div>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
+                            <!-- Show Upload Button -->
+                            <button id="openFormationDocument" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+
+
+
+
                 </div>
 
 
                 <!-- modal upload -->
-                <section
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] drop-shadow-sm backdrop-blur-sm bg-opacity-50"
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] drop-shadow-sm backdrop-blur-sm bg-opacity-50"
                     id="modal" style="display: none;">
                     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                         <div class="flex justify-between w-full items-center border-b pb-4 mb-4">
@@ -372,8 +512,7 @@
                 <!-- modal end-->
 
                   <!--  modalBvn -->
-                <section
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] drop-shadow-sm backdrop-blur-sm bg-opacity-50"
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] drop-shadow-sm backdrop-blur-sm bg-opacity-50"
                     id="modalBvn" style="display: none;">
                     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
                         <div class="flex justify-between w-full items-center border-b pb-4 mb-4">
@@ -651,40 +790,173 @@
                 </section>
 
 
+
+
+
+
+                <!-- modal for Proof Of Identity -->
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] backdrop-blur-sm bg-opacity-50" id="modalProofOfIdentity" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <p class="text-xl font-semibold">Proof of Identity</p>
+                            <button class="close-modal border h-6 w-6 rounded-md flex items-center justify-center">
+                                <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
+                            </button>
+                        </div>
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="document_type" value="proof_of_identity">
+                            <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
+                            <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
+                        </form>
+                    </div>
+                </section>
+
+
+
+
+                <!-- modal for Ownership -->
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] backdrop-blur-sm bg-opacity-50" id="modalOwnership" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <p class="text-xl font-semibold">Ownership</p>
+                            <button class="close-modal border h-6 w-6 rounded-md flex items-center justify-center">
+                                <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
+                            </button>
+                        </div>
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="document_type" value="ownership">
+                            <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
+                            <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
+                        </form>
+                    </div>
+                </section>
+
+
+
+
+
+                <!-- modal for Organisational Chart -->
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] backdrop-blur-sm bg-opacity-50" id="modalOrganisationalChart" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <p class="text-xl font-semibold">Organisational Chart</p>
+                            <button class="close-modal border h-6 w-6 rounded-md flex items-center justify-center">
+                                <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
+                            </button>
+                        </div>
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="document_type" value="organisational_chart">
+                            <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
+                            <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
+                        </form>
+                    </div>
+                </section>
+
+
+
+
+
+                <!-- modal for Register of Directors -->
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] backdrop-blur-sm bg-opacity-50" id="modalRegisterOfDirectors" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <p class="text-xl font-semibold">Register of Directors</p>
+                            <button class="close-modal border h-6 w-6 rounded-md flex items-center justify-center">
+                                <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
+                            </button>
+                        </div>
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="document_type" value="register_of_directors">
+                            <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
+                            <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
+                        </form>
+                    </div>
+                </section>
+
+
+
+
+
+                <!-- modal for Formation document -->
+                <section class="fixed inset-0 z-50 flex items-center justify-center bg-[#FFFFFF66] backdrop-blur-sm bg-opacity-50" id="modalFormationDocument" style="display: none;">
+                    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <div class="flex justify-between items-center border-b pb-4 mb-4">
+                            <p class="text-xl font-semibold">Formation Document</p>
+                            <button class="close-modal border h-6 w-6 rounded-md flex items-center justify-center">
+                                <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
+                            </button>
+                        </div>
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="document_type" value="formation_document">
+                            <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
+                            <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
+                        </form>
+                    </div>
+                </section>
+
+
+
+
             </section>
 
         </section>
     </main>
 
-<script>
-    // Open specific modals
-    document.getElementById('openValidID')?.addEventListener('click', () => {
-        document.getElementById('modalValidID').style.display = 'flex';
-    });
-
-    document.getElementById('openTIN')?.addEventListener('click', () => {
-        document.getElementById('modalTIN').style.display = 'flex';
-    });
-
-    document.getElementById('openUtility')?.addEventListener('click', () => {
-        document.getElementById('modalUtility').style.display = 'flex';
-    });
-
-    document.getElementById('uploadBtn')?.addEventListener('click', () => {
-        document.getElementById('modal').style.display = 'flex';
-    });
-
-    document.getElementById('openBVN')?.addEventListener('click', () => {
-        document.getElementById('modalBvn').style.display = 'flex';
-    });
-
-    // Close modals
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', function () {
-            this.closest('section').style.display = 'none';
+    <script>
+        // Open specific modals
+        document.getElementById('openValidID')?.addEventListener('click', () => {
+            document.getElementById('modalValidID').style.display = 'flex';
         });
-    });
-</script>
+
+        document.getElementById('openTIN')?.addEventListener('click', () => {
+            document.getElementById('modalTIN').style.display = 'flex';
+        });
+
+        document.getElementById('openUtility')?.addEventListener('click', () => {
+            document.getElementById('modalUtility').style.display = 'flex';
+        });
+
+        document.getElementById('uploadBtn')?.addEventListener('click', () => {
+            document.getElementById('modal').style.display = 'flex';
+        });
+
+        document.getElementById('openBVN')?.addEventListener('click', () => {
+            document.getElementById('modalBvn').style.display = 'flex';
+        });
+
+
+
+
+        document.getElementById('openProofOfIdentity')?.addEventListener('click', () => {
+            document.getElementById('modalProofOfIdentity').style.display = 'flex';
+        });
+
+        document.getElementById('openOwnership')?.addEventListener('click', () => {
+            document.getElementById('modalOwnership').style.display = 'flex';
+        });
+
+        document.getElementById('openOrganisationalChart')?.addEventListener('click', () => {
+            document.getElementById('modalOrganisationalChart').style.display = 'flex';
+        });
+
+        document.getElementById('openRegisterOfDirectors')?.addEventListener('click', () => {
+            document.getElementById('modalRegisterOfDirectors').style.display = 'flex';
+        });
+
+        document.getElementById('openFormationDocument')?.addEventListener('click', () => {
+            document.getElementById('modalFormationDocument').style.display = 'flex';
+        });
+
+
+
+
+        // Close modals
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function () {
+                this.closest('section').style.display = 'none';
+            });
+        });
+    </script>
 
 
 
