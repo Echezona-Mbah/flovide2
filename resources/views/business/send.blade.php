@@ -58,6 +58,7 @@
                                 data-country="{{ $beneficiary->country }}"
                                 data-phone="{{ $beneficiary->phone }}"
                                 data-sortcode="{{ $beneficiary->bank_code }}"
+                                data-transfermethod="{{ $beneficiary->transfer_method }}"
                                 data-amount="100"
                                 data-gets="0.06"
                                 onclick="openModalFromElement(this)">
@@ -286,8 +287,9 @@
                                         {{-- <input type="hidden" name="recipient_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" value="{{ $balanceList[0]['id'] ?? '' }}">
                                         <input type="hidden" name="amount" id="amountInput">
-                                        <input type="hidden" name="reference" value="For invoice">--}}
+                                        <input type="hidden" name="reference" value="For invoice">--}}  
                                         <input type="hidden" name="bank_code" id="sort_codeInput">
+                                        <input type="hidden" name="transfer_method" id="transfermethodInput">
                                         <input type="hidden" name="bank" id="bankInput">
                                         <input type="hidden" name="recipient_id" id="recipientIdInput">
                                         <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
@@ -735,6 +737,7 @@ document.getElementById('sendBtn')?.addEventListener('click', () => {
     const account = document.getElementById('beneficiaryAccount').textContent || "N/A";
     const bank = document.getElementById('beneficiaryBank').textContent || "N/A";
     const sortCode = selectedBeneficiary?.dataset.sortcode || ""; // ✅ get sort code
+    const transfermethod = selectedBeneficiary?.dataset.transfermethod || ""; // ✅ get sort code
     const amount = parseFloat(document.getElementById('sendAmount').value || 0);
     const fee = parseFloat(document.getElementById('transferFeeText').textContent.replace(/[^\d.]/g, '') || 0);
     const total = amount + fee;
@@ -766,7 +769,8 @@ document.getElementById('sendBtn')?.addEventListener('click', () => {
     document.getElementById('accountNameInput').value = name;
     document.getElementById('balanceIdInput').value = balanceId;
     document.getElementById('bankInput').value = bank;
-    document.getElementById('sort_codeInput').value = sortCode; // ✅ now works
+    document.getElementById('sort_codeInput').value = sortCode; // ✅ now works 
+    document.getElementById('transfermethodInput').value = transfermethod;
 
     // Show summary modal
     document.getElementById('summaryModal').classList.remove('hidden');

@@ -134,7 +134,7 @@ Route::post('/pivot/account-validation', [PivotController::class, 'accountValida
 Route::get('/banks/filter', [AddBeneficiariesController::class,'banks'])->name('banks.filter');
 Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry'])->name('payaza.account-enquiry');
 
-Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquiry']);
+Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
 
 
