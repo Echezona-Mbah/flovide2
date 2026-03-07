@@ -60,19 +60,19 @@
 
         <!-- Social Media Icons -->
         <div class="social-icons">
-            <a href="https://www.facebook.com/your-facebook-page">
+            <a href="https://www.facebook.com/profile.php?id=61578341616934">
                 <img src="{{ asset('asserts/SocialMedia/facebook.png') }}" alt="Facebook">
             </a>
-            <a href="https://www.instagram.com/your-instagram-account">
+            <a href="https://www.instagram.com/flo.vide/">
                 <img src="{{ asset('asserts/SocialMedia/instagram.png') }}" alt="Instagram">
             </a>
-            <a href="https://www.linkedin.com/in/your-linkedin-profile">
+            <a href="https://www.linkedin.com/company/108073528/">
                 <img src="{{ asset('asserts/SocialMedia/linkedin.png') }}" alt="LinkedIn">
             </a>
             <a href="https://wa.me/your-whatsapp-number">
                 <img src="{{ asset('asserts/SocialMedia/whatsapp.png') }}" alt="WhatsApp">
             </a>
-            <a href="https://www.youtube.com/your-youtube-channel">
+            <a href="https://www.youtube.com/channel/UCnoCw_kCWnHsMIDJ3SwMwOw">
                 <img src="{{ asset('asserts/SocialMedia/youtube.png') }}" alt="YouTube Video Thumbnail">
             </a>
         </div>

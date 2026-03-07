@@ -109,6 +109,30 @@
             });
         });
 
+        // Handle paste OTP
+        inputs.forEach((input, index) => {
+            input.addEventListener("paste", function(e) {
+                e.preventDefault();
+
+                const pasteData = (e.clipboardData || window.clipboardData).getData("text");
+                const digits = pasteData.replace(/\D/g, "").split("");
+
+                digits.forEach((digit, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = digit;
+                    }
+                });
+
+                updateOTP();
+
+                // focus last filled input
+                const lastIndex = Math.min(digits.length - 1, inputs.length - 1);
+                if (lastIndex >= 0) {
+                    inputs[lastIndex].focus();
+                }
+            });
+        });
+
         function updateOTP() {
             let otp = "";
             inputs.forEach((input) => {
@@ -117,7 +141,7 @@
             hiddenInput.value = otp;
         }
 
-        // ===== RESEND OTP FUNCTIONALITY =====
+        //RESEND OTP FUNCTIONALITY
         const resendBtn = document.getElementById('resendOtp');
         const countdownSpan = document.getElementById('countdown');
         let countdown = 60;
