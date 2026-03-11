@@ -300,6 +300,267 @@
             </div>
         </section>
 
+
+        <!-- HOW IT WORKS -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <span class="inline-block bg-blue-100 text-blue-600 text-sm font-semibold px-4 py-1 rounded-full mb-4 tracking-wide uppercase">
+                    Simple &amp; Fast
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                    How to send money to <br>
+                    <span class="text-blue-600">{{ $countryCurrency['country'] }}</span> in 3 easy steps
+                </h2>
+                <p class="mt-4 text-gray-500 text-lg max-w-xl mx-auto">
+                    Get your money where it needs to go — quickly, safely, and at the best rates.
+                </p>
+            </div>
+
+            <!-- Steps Grid -->
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+
+                <!-- Connecting dashed line (desktop only) -->
+                <div class="hidden md:block absolute top-16 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-0.5 border-t-2 border-dashed border-blue-200 z-0"></div>
+
+                <!-- Step 1 -->
+                <div class="relative z-10 bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center text-center group">
+                    <div class="w-14 h-14 flex items-center justify-center rounded-full bg-blue-600 text-white text-2xl font-bold mb-6 group-hover:scale-110 transition-transform duration-300">
+                        1
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-50 mb-5">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Create Your Account</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        Sign up for free in minutes. Verify your identity once and you're ready to send money globally.
+                    </p>
+                    <a href="{{ route('register.saveStepData') }}"
+                       class="mt-6 inline-flex items-center gap-1 text-blue-600 text-sm font-semibold hover:underline">
+                        Get started
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative z-10 bg-blue-600 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center text-center group">
+                    <div class="w-14 h-14 flex items-center justify-center rounded-full bg-white text-blue-600 text-2xl font-bold mb-6 group-hover:scale-110 transition-transform duration-300">
+                        2
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 mb-5">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Enter Transfer Details</h3>
+                    <p class="text-blue-100 text-sm leading-relaxed">
+                        Choose an amount, select {{ $countryCurrency['country'] }} as your destination, and pick the best exchange rate — all in real time.
+                    </p>
+                    <span class="mt-6 inline-flex items-center gap-1 text-white text-sm font-semibold">
+                        Live rates
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative z-10 bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center text-center group">
+                    <div class="w-14 h-14 flex items-center justify-center rounded-full bg-blue-600 text-white text-2xl font-bold mb-6 group-hover:scale-110 transition-transform duration-300">
+                        3
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full bg-green-50 mb-5">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Money Arrives Fast</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">
+                        98% of transfers arrive within minutes. Your recipient in {{ $countryCurrency['country'] }} gets notified instantly.
+                    </p>
+                    <span class="mt-6 inline-flex items-center gap-1 text-green-600 text-sm font-semibold">
+                        ⚡ Usually within minutes
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- CTA below steps -->
+            <div class="mt-12 flex justify-center">
+                <a href="{{ route('login') }}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-semibold text-base transition-colors duration-200 shadow-md hover:shadow-lg">
+                    Send Money to {{ $countryCurrency['country'] }} Now →
+                </a>
+            </div>
+
+        </section>
+
+        <!-- TRUST / STATS BANNER -->
+        <section class="bg-gray-50 border-y border-gray-100 py-12">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">190+</p>
+                        <p class="text-sm text-gray-500">Countries Supported</p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">98%</p>
+                        <p class="text-sm text-gray-500">Delivered in Minutes</p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">5M+</p>
+                        <p class="text-sm text-gray-500">Happy Customers</p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 flex items-center justify-center bg-orange-100 rounded-full">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">256-bit</p>
+                        <p class="text-sm text-gray-500">SSL Encryption</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TESTIMONIALS -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+
+            <!-- Header -->
+            <div class="text-center mb-14">
+                <span class="inline-block bg-blue-100 text-blue-600 text-sm font-semibold px-4 py-1 rounded-full mb-4 tracking-wide uppercase">
+                    Trusted by Millions
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                    What our customers say
+                </h2>
+                <p class="mt-4 text-gray-500 text-lg max-w-xl mx-auto">
+                    Join millions of people who trust Flovide to send money to
+                    <span class="text-blue-600 font-medium">{{ $countryCurrency['country'] }}</span> and beyond.
+                </p>
+            </div>
+
+            <!-- Testimonial Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col gap-4 border border-gray-100">
+                    <!-- Stars -->
+                    <div class="flex items-center gap-1 text-yellow-400 text-lg">
+                        ★★★★★
+                    </div>
+                    <p class="text-gray-600 text-sm leading-relaxed flex-1">
+                        "Flovide made sending money abroad incredibly simple. The exchange rate was amazing and my family received the funds within minutes!"
+                    </p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold text-sm">
+                            AM
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Amara M.</p>
+                            <p class="text-gray-400 text-xs">Sent to {{ $countryCurrency['country'] }}</p>
+                        </div>
+                        <img src="https://flagcdn.com/w20/{{ strtolower($countryCurrency['countrycode']) }}.png"
+                             alt="{{ $countryCurrency['country'] }}" class="w-6 h-6 rounded-full object-cover ml-auto">
+                    </div>
+                </div>
+
+                <!-- Card 2 (highlighted) -->
+                <div class="bg-blue-600 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col gap-4 border border-blue-500">
+                    <!-- Stars -->
+                    <div class="flex items-center gap-1 text-yellow-300 text-lg">
+                        ★★★★★
+                    </div>
+                    <p class="text-blue-100 text-sm leading-relaxed flex-1">
+                        "No hidden fees, transparent rates, and lightning-fast transfers. Flovide is now the only service I use for international payments."
+                    </p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-white text-blue-600 font-bold text-sm">
+                            JK
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white text-sm">James K.</p>
+                            <p class="text-blue-200 text-xs">Sent to {{ $countryCurrency['country'] }}</p>
+                        </div>
+                        <img src="https://flagcdn.com/w20/{{ strtolower($countryCurrency['countrycode']) }}.png"
+                             alt="{{ $countryCurrency['country'] }}" class="w-6 h-6 rounded-full object-cover ml-auto">
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col gap-4 border border-gray-100">
+                    <!-- Stars -->
+                    <div class="flex items-center gap-1 text-yellow-400 text-lg">
+                        ★★★★★
+                    </div>
+                    <p class="text-gray-600 text-sm leading-relaxed flex-1">
+                        "I was skeptical at first, but Flovide delivered every time. The app is clean, fast, and I trust it completely for every transfer."
+                    </p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 text-green-600 font-bold text-sm">
+                            FO
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Fatima O.</p>
+                            <p class="text-gray-400 text-xs">Sent to {{ $countryCurrency['country'] }}</p>
+                        </div>
+                        <img src="https://flagcdn.com/w20/{{ strtolower($countryCurrency['countrycode']) }}.png"
+                             alt="{{ $countryCurrency['country'] }}" class="w-6 h-6 rounded-full object-cover ml-auto">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Overall rating bar -->
+            <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                <div class="flex flex-col items-center">
+                    <p class="text-5xl font-bold text-gray-900">4.9</p>
+                    <div class="flex text-yellow-400 text-xl mt-1">★★★★★</div>
+                    <p class="text-gray-500 text-sm mt-1">Average rating</p>
+                </div>
+                <div class="w-px h-16 bg-gray-200 hidden sm:block"></div>
+                <div class="flex flex-col items-center">
+                    <p class="text-5xl font-bold text-gray-900">50K+</p>
+                    <p class="text-gray-500 text-sm mt-2">Verified reviews</p>
+                </div>
+                <div class="w-px h-16 bg-gray-200 hidden sm:block"></div>
+                <div class="flex flex-col items-center">
+                    <p class="text-5xl font-bold text-gray-900">98%</p>
+                    <p class="text-gray-500 text-sm mt-2">Would recommend</p>
+                </div>
+            </div>
+
+        </section>
+
+
+
         <br><br> 
         <br><br>
 
