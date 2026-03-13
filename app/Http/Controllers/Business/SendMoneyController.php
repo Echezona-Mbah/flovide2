@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\Ibanq\IbanqPaymentController;
 use App\Services\PayazaService;
 use App\Services\PivotService;
+use App\Services\OrchardService;
+
 
 
 
@@ -22,14 +24,17 @@ class SendMoneyController extends Controller
     use CurrencyHelper;
     use SelectsBalanceId;
 
-     protected $pivot;
+    protected $pivot;
     protected $payaza;
+    protected $orchard;
 
 
-    public function __construct(PivotService $pivot, PayazaService $payaza)
+
+    public function __construct(PivotService $pivot, PayazaService $payaza,OrchardService $orchard)
     {
         $this->pivot = $pivot;
         $this->payaza = $payaza;
+        $this->orchard = $orchard;
     }
 
     
@@ -78,56 +83,129 @@ class SendMoneyController extends Controller
     // }
 
     public function sendTransaction(Request $request)
-{
-    // -------------------- Validate --------------------
-    $request->validate([
-        'amount' => 'required|numeric|min:1',
-        'recipient_id' => 'required|uuid',
-        'balance_id' => 'required',
-        'reference' => 'nullable|string',
-        'transfer_fee' => 'nullable',
-        'total_amount' => 'required|numeric',
-        'exchange_rate' => 'required|string',
-        'recipient_amount' => 'required|numeric',
-        'account_number' => 'required|string',
-        'account_name' => 'required|string',
-        'bank' => 'nullable|string', // 'bank' or 'mobile'
-        'bank_code' => 'nullable|string',
-    ]);
+    {
+        // -------------------- Validate --------------------
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'recipient_id' => 'required|uuid',
+            'balance_id' => 'required',
+            'reference' => 'nullable|string',
+            'transfer_fee' => 'nullable',
+            'total_amount' => 'required|numeric',
+            'exchange_rate' => 'required|string',
+            'recipient_amount' => 'required|numeric',
+            'account_number' => 'required|string',
+            'account_name' => 'required|string',
+            'bank' => 'nullable|string', // 'bank' or 'mobile'
+            'bank_code' => 'nullable|string',
+        ]);
 
-    // -------------------- Extract currencies --------------------
-    $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
-    $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
+        // dd($request->all());
+        // -------------------- Extract currencies --------------------
+        $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
+        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
 
-    $balance = Balance::find($request->balance_id);
-    if (!$balance) {
+        // -------------------- Determine service code --------------------
+
+        $bankType = strtolower($request->bank ?? 'bank'); // 'mobile' or 'bank'
+
+        // Read service codes from .env
+        $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
+        $pivotUGXMobileService = env('PIVOT_UGX_MOBILE_SERVICE');
+        $pivotKESBankService   = env('PIVOT_KES_BANK_SERVICE', 'KES_BANK_CODE');
+        $pivotKESMobileService = env('PIVOT_KES_MOBILE_SERVICE', 'KES_MOBILE_CODE');
+
+        // Choose service code dynamically
+        if ($currency === 'UGX') {
+            $serviceCode = $bankType === 'mobile' ? $pivotUGXMobileService : $pivotUGXBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SORT', '000000') : $request->bank_code;
+        } elseif ($currency === 'KES') {
+            $serviceCode = $bankType === 'mobile' ? $pivotKESMobileService : $pivotKESBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_KES_MOBILE_SORT', '000000') : $request->bank_code;
+        } else {
+            $serviceCode = $bankType === 'mobile' ? 'DEFAULT_MOBILE' : 'DEFAULT_BANK';
+            $sortCode    = $bankType === 'mobile' ? '013847' : $request->bank_code;
+        }
+
+        // Build payload
+        $payload = [
+            "serviceCode" => $serviceCode,
+            "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',
+            "accountNumber" => $request->account_number,
+            "merchantTransactionId" => $merchantTransactionId,
+            "amount" => $request->recipient_amount,
+            "chargeAmount" => $request->transfer_fee ?? 0,
+            "narration" => $request->reference ?? "Payment",
+            "currencyCode" => $currency,
+            "countryCode" => $currency === 'UGX' ? 'UG' : 'KE',
+            "customerName" => $request->account_name,
+        ];
+
+        // Add extraData only for bank transfer
+        $payload['extraData'] = [
+            "bankSortCode" => $sortCode
+        ];
+
+        // Only include amount in extraData for bank transfers
+        if ($bankType !== 'mobile') {
+            $payload['extraData']['amount'] = $request->recipient_amount;
+        }
+        // dd($payload);
+
+        logger('Pivot REQUEST', $payload);
+        $payment = $this->pivot->postTransaction($token, $payload);
+        logger('Pivot RESPONSE', $payment);
+
+        if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
+            // Success
+            $balance->amount -= $request->total_amount;
+            $balance->save();
+
+            TransactionHistory::create([
+                'amount' => $request->total_amount,
+                'currency' => $currency,
+                'balance_id' => $balance->id,
+                'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
+                'sender_id' => auth()->id(),
+                'sender' => $user->business_name,
+                'recipient_account_number' => $request->account_number,
+                'recipient_account_name' => $request->account_name,
+                'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
+                'status' => 'success',
+                'method' => $isApi ? 'api' : 'web',
+                'reference' => 'ref-' . Str::uuid(),
+                'user_id' => auth()->id(),
+            ]);
+
+        // -------------------- Choose provider --------------------
+        $pivotCurrencies = ['UGX']; // Pivot supported currencies
+        $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']; // Payaza supported currencies
+        $appMobileCurrencies = ['GHS'];
+
+       if (
+            in_array($sendingCurrency, $pivotCurrencies) &&
+            filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)
+        ) {
+            return $this->sendViaPivot($request, $sendingCurrency, $balance);
+        }
+
+        if (
+            in_array($sendingCurrency, $appMobileCurrencies) &&
+            filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)
+        ) {
+            return $this->sendViaAppMobile($request, $sendingCurrency, $balance); 
+        }
+
+        if (
+            in_array($sendingCurrency, $payazaCurrencies) &&
+            filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)
+        ) {
+            return $this->sendViaPayaza($request, $sendingCurrency, $balance);
+        }
         return $request->expectsJson()
-            ? response()->json(['error' => 'Invalid balance selected'], 422)
-            : back()->withErrors(['balance' => 'Invalid balance selected']);
+            ? response()->json(['error' => 'No payment provider available for this currency'], 422)
+            : back()->with('error', 'No payment provider available for this currency');
     }
-
-    if ($balance->amount < $request->total_amount) {
-        return $request->expectsJson()
-            ? response()->json(['error' => 'Insufficient funds'], 422)
-            : back()->withErrors(['amount' => 'Insufficient funds']);
-    }
-
-    // -------------------- Choose provider --------------------
-    $pivotCurrencies = ['UGX', 'KES']; // Pivot supported currencies
-    $payazaCurrencies = ['NGN', 'GHS', 'TZS', 'XOF', 'XAF', 'ZAR', 'UGX', 'KES']; // Payaza supported currencies
-
-    if (in_array($sendingCurrency, $pivotCurrencies) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-        return $this->sendViaPivot($request, $sendingCurrency, $balance);
-    }
-
-    if (in_array($sendingCurrency, $payazaCurrencies) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-        return $this->sendViaPayaza($request, $sendingCurrency, $balance);
-    }
-
-    return $request->expectsJson()
-        ? response()->json(['error' => 'No payment provider available for this currency'], 422)
-        : back()->with('error', 'No payment provider available for this currency');
-}
 
     // -------------------- Pivot Payment --------------------
    protected function sendViaPivot(Request $request, $currency, $balance)
@@ -148,7 +226,7 @@ class SendMoneyController extends Controller
 
         // -------------------- Determine service code --------------------
 
-        $bankType = strtolower($request->bank ?? 'bank'); // 'mobile' or 'bank'
+        $bankType = strtolower($request->transfer_method ?? 'bank'); // 'mobile' or 'bank'
 
         // Read service codes from .env
         $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
@@ -230,106 +308,181 @@ class SendMoneyController extends Controller
     }
 
 
-protected function sendViaPayaza(Request $request, $currency, $balance)
-{
+    protected function sendViaPayaza(Request $request, $currency, $balance)
+    {
 
-    $isApi = $request->expectsJson();
-    $transactionReference = "TXN_" . time();
+        $isApi = $request->expectsJson();
+        $transactionReference = "TXN_" . time();
 
-    // Payaza account reference
-    $accountReference = $this->payaza->getAccountReference($currency);
-    // dd($accountReference);
+        // Payaza account reference
+        $accountReference = $this->payaza->getAccountReference($currency);
+        // dd($accountReference);
 
-    if (!$accountReference) {
-        return $isApi
-            ? response()->json(['error' => 'Unable to retrieve account reference from Payaza'], 500)
-            : back()->with('error', 'Unable to retrieve account reference from Payaza');
-    }
+        if (!$accountReference) {
+            return $isApi
+                ? response()->json(['error' => 'Unable to retrieve account reference from Payaza'], 500)
+                : back()->with('error', 'Unable to retrieve account reference from Payaza');
+        }
 
-    // Determine type: bank or mobile
-    $bankType = strtolower($request->bank ?? 'bank'); // 'bank' or 'mobile'
+        // Determine type: bank or mobile
+        $bankType = strtolower($request->transfer_method ?? 'bank'); // 'bank' or 'mobile'
 
 
 
-    // ------------------- Transaction type mapping -------------------
-    $transactionTypes = [
-        'NGN' => 'nuban',
-        'GHS' => $bankType === 'mobile' ? 'mobile_money' : 'ghipps',
-        'UGX' => 'mobile_money',
-        'TZS' => $bankType === 'mobile' ? 'mobile_money' : 'tiss',
-        'KES' => $bankType === 'mobile' ? 'mobile_money' : 'kepss',
-        'XOF' => $bankType === 'mobile' ? 'mobile_money' : 'wave',
-        'XAF' => 'mobile_money',
-        'ZAR' => 'RTC',
-    ];
+        // ------------------- Transaction type mapping -------------------
+        $transactionTypes = [
+            'NGN' => 'nuban',
+            'GHS' => $bankType === 'mobile' ? 'mobile_money' : 'ghipps',
+            'UGX' => 'mobile_money',
+            'TZS' => $bankType === 'mobile' ? 'mobile_money' : 'tiss',
+            'KES' => $bankType === 'mobile' ? 'mobile_money' : 'kepss',
+            'XOF' => $bankType === 'mobile' ? 'mobile_money' : 'wave',
+            'XAF' => 'mobile_money',
+            'ZAR' => 'RTC',
+        ];
 
-    $transactionType = $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban');
+        $transactionType = $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban');
 
-    // ------------------- Build payload -------------------
-    $payload = [
-        "transaction_type" => $transactionType,
-        "service_payload" => [
-            "payout_amount" => $request->recipient_amount,
-            "transaction_pin" => env('PAYAZA_MERCHANT_PIN'),
-            "account_reference" => $accountReference,
-            "currency" => $currency,
-            "country" => strtoupper(substr($currency, 0, 2)),
-            "payout_beneficiaries" => [
-                [
-                    "credit_amount" => $request->recipient_amount,
-                    "account_number" => $request->account_number,
-                    "account_name" => $request->account_name,
-                    "bank_code" => $request->bank_code ?? null,
-                    "narration" => $request->reference ?? "Payment",
-                    "transaction_reference" => $transactionReference,
-                    "sender" => [
-                        "sender_name" => auth()->user()->business_name ?? auth()->user()->name,
-                        "sender_id" => auth()->id(),
-                        "sender_phone_number" => auth()->user()->business_phone ?? null,
-                        "sender_address" => auth()->user()->street_address ?? null
+        // ------------------- Build payload -------------------
+        $payload = [
+            "transaction_type" => $transactionType,
+            "service_payload" => [
+                "payout_amount" => $request->recipient_amount,
+                "transaction_pin" => env('PAYAZA_MERCHANT_PIN'),
+                "account_reference" => $accountReference,
+                "currency" => $currency,
+                "country" => strtoupper(substr($currency, 0, 2)),
+                "payout_beneficiaries" => [
+                    [
+                        "credit_amount" => $request->recipient_amount,
+                        "account_number" => $request->account_number,
+                        "account_name" => $request->account_name,
+                        "bank_code" => $request->bank_code ?? null,
+                        "narration" => $request->reference ?? "Payment",
+                        "transaction_reference" => $transactionReference,
+                        "sender" => [
+                            "sender_name" => auth()->user()->business_name ?? auth()->user()->name,
+                            "sender_id" => auth()->id(),
+                            "sender_phone_number" => auth()->user()->business_phone ?? null,
+                            "sender_address" => auth()->user()->street_address ?? null
+                        ]
                     ]
                 ]
             ]
-        ]
-    ];
-//   dd($payload);
+        ];
+            //   dd($payload);
 
-    logger('Payaza REQUEST', $payload);
+        logger('Payaza REQUEST', $payload);
 
-    $response = $this->payaza->initiatePayout($payload);
-    logger('Payaza RESPONSE', $response);
+        $response = $this->payaza->initiatePayout($payload);
+        logger('Payaza RESPONSE', $response);
 
-    if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
-        // Deduct balance
-        $balance->amount -= $request->total_amount;
-        $balance->save();
+        if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
+            // Deduct balance
+            $balance->amount -= $request->total_amount;
+            $balance->save();
 
-        TransactionHistory::create([
-            'amount' => $request->total_amount,
-            'currency' => $currency,
-            'balance_id' => $balance->id,
-            'order_id' => $transactionReference,
-            'sender_id' => auth()->id(),
-            'sender' => auth()->user()->business_name ?? auth()->user()->name,
-            'recipient_account_number' => $request->account_number,
-            'recipient_account_name' => $request->account_name,
-            'recipient_country' => strtoupper(substr($currency,0,2)),
-            'status' => 'success',
-            'method' => $isApi ? 'api' : 'web',
-            'reference' => 'ref-' . Str::uuid(),
-            'user_id' => auth()->id(),
-        ]);
+            TransactionHistory::create([
+                'amount' => $request->total_amount,
+                'currency' => $currency,
+                'balance_id' => $balance->id,
+                'order_id' => $transactionReference,
+                'sender_id' => auth()->id(),
+                'sender' => auth()->user()->business_name ?? auth()->user()->name,
+                'recipient_account_number' => $request->account_number,
+                'recipient_account_name' => $request->account_name,
+                'recipient_country' => strtoupper(substr($currency,0,2)),
+                'status' => 'success',
+                'method' => $isApi ? 'api' : 'web',
+                'reference' => 'ref-' . Str::uuid(),
+                'user_id' => auth()->id(),
+            ]);
 
+            return $isApi
+                ? response()->json(['message' => 'Payaza transaction successful', 'data' => $response])
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Payaza!');
+        }
+
+        $errorMessage = $response['statusDescription'] ?? 'Payaza transaction failed';
         return $isApi
-            ? response()->json(['message' => 'Payaza transaction successful', 'data' => $response])
-            : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Payaza!');
+            ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
+            : back()->with('error', $errorMessage);
     }
 
-    $errorMessage = $response['statusDescription'] ?? 'Payaza transaction failed';
-    return $isApi
-        ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
-        : back()->with('error', $errorMessage);
-}
+
+    protected function sendViaAppMobile(Request $request, $currency, $balance)
+    {
+
+        $isApi = $request->expectsJson();
+        $user  = auth()->user();
+
+        $exttrid = uniqid('APPM_');
+
+        $bankCode = $request->bank_code;
+
+        // Default to bank
+        $network = "BNK";
+
+        // If it's mobile money, the bank_code will usually be MTN, VOD, AIR etc
+        if (in_array($bankCode, ["MTN", "VOD", "AIR", "VIS", "MAS"])) {
+            $network = $bankCode;
+        }
+
+        $payload = [
+            "customer_number" => $request->account_number,
+            "amount"          => number_format($request->recipient_amount, 2, '.', ''),
+            "exttrid"         => $exttrid,
+            "reference"       => $request->reference ?? "Wallet Payment",
+            "nw"              => $network, // ✅ Dynamic now
+            "bank_code"       => $bankCode,
+            "trans_type"      => "MTC",
+            "callback_url"    => route('transactionHistory'),
+            "service_id"      => env('ORCHARD_SERVICE_ID'),
+            "ts"              => now()->utc()->format('Y-m-d H:i:s'),
+        ];
+
+        logger('AppMobile REQUEST', $payload);
+
+        // dd($payload);
+
+
+        $response = $this->orchard->sendPayment($payload);
+
+        logger('AppMobile RESPONSE', $response);
+
+        if (($response['status'] ?? null) === 'SUCCESS' || ($response['success'] ?? false)) {
+
+            // Deduct balance
+            $balance->amount -= $request->total_amount;
+            $balance->save();
+
+            TransactionHistory::create([
+                'amount' => $request->total_amount,
+                'currency' => $currency,
+                'balance_id' => $balance->id,
+                'order_id' => $exttrid,
+                'sender_id' => auth()->id(),
+                'sender' => $user->business_name ?? $user->name,
+                'recipient_account_number' => $request->account_number,
+                'recipient_account_name' => $request->account_name,
+                'recipient_country' => 'GH',
+                'status' => 'success',
+                'method' => $isApi ? 'api' : 'web',
+                'reference' => 'ref-' . Str::uuid(),
+                'user_id' => auth()->id(),
+            ]);
+
+            return $isApi
+                ? response()->json(['message' => 'AppMobile transaction successful', 'data' => $response])
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via AppMobile!');
+        }
+
+        $errorMessage = $response['message'] ?? 'AppMobile transaction failed';
+
+        return $isApi
+            ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
+            : back()->with('error', $errorMessage);
+    }
 
 
     // -------------------- IBANQ Payment --------------------

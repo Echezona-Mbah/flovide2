@@ -71,7 +71,20 @@ class User extends Authenticatable
         'business_phone',
         'person_phone',
         'login_otp',
-        'login_otp_expires_at'
+        'login_otp_expires_at',
+        'sumsub_applicant_id',
+        'proof_of_identity',
+        'proof_of_identity_status',
+        'ownership_document',
+        'ownership_status',
+        'organisational_chart',
+        'organisational_chart_status',
+        'register_of_directors',
+        'register_of_directors_status',
+        'formation_document',
+        'formation_document_status',
+        'identity_verification_status',
+        'selfie_verification_status',
     ];
 
     /**
@@ -112,10 +125,42 @@ public function isFullyVerified(): bool
         $this->valid_id_status === 'confirmed' &&
         $this->tin_status === 'confirmed' &&
         $this->utility_bill_status === 'confirmed' &&
+        $this->proof_of_identity_status === 'confirmed' &&
+        $this->ownership_status === 'confirmed' &&
+        $this->organisational_chart_status === 'confirmed' &&
+        $this->register_of_directors_status === 'confirmed' &&
+        $this->formation_document_status === 'confirmed' &&
+        $this->identity_verification_status === 'confirmed' &&
+        $this->selfie_verification_status === 'confirmed';
         (
             $this->countries_id !== 'Nigeria' ||
             $this->bvn_status === 'yes'
         );
+}
+
+
+public function complianceStatus($tokenResponse = null)
+{
+    $user = auth()->user();
+
+    return [
+        'cac' => $this->cac_status,
+        'valid_id' => $this->valid_id_status,
+        'tin' => $this->tin_status,
+        'utility_bill' => $this->utility_bill_status,
+        'proof_of_identity' => $this->proof_of_identity_status,
+        'ownership' => $this->ownership_status,
+        'organisational_chart' => $this->organisational_chart_status,
+        'register_of_directors' => $this->register_of_directors_status,
+        'formation_document' => $this->formation_document_status,
+        'identity_verification' => $this->identity_verification_status,
+        'selfie_verification' => $this->selfie_verification_status,
+        'bvn_required' => $this->countries_id === 'Nigeria' ? 'yes' : 'no',
+        'bvn_verified' => $this->bvn_status,
+        // 'fully_verified' => $this->isFullyVerified() ? 'yes' : 'no',
+        'token' => $tokenResponse['token'] ?? null,
+        'userId' => $this->id
+    ];
 }
 
 }

@@ -88,24 +88,112 @@ public function allBeneficia(Request $request)
 
 public function store(Request $request)
 {
-    // Get logged-in personal user (Sanctum API or web personal guard)
-    $personal = auth('personal-api')->user() ?? auth('personal')->user();
+    $isApi = $request->expectsJson();
 
+    // Get the authenticated personal user
+    $personal = auth('personal-api')->user();
     if (!$personal) {
-        $msg = 'You must be logged in to add a beneficiary.';
-
-        return $request->expectsJson()
-            ? response()->json(['message' => $msg], 401)
-            : redirect()->back()->with('error', $msg);
+        return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
     }
 
-    // Call Ibanq controller
-    $ibanq = new \App\Http\Controllers\Ibanq\IbanqBeneficiaryController(
-        app(\App\Services\IbanqAuthService::class)
-    );
+    $personalId = $personal->id;
 
-    return $ibanq->createBeneficiary($request, null, $personal->id);
+    /* ================= VALIDATION ================= */
+    $validator = \Validator::make($request->all(), [
+        'type' => 'required|in:individual,corporate',
+        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+        'lastName'   => 'nullable|required_if:type,individual|string|max:100',
+        'name'       => 'nullable|required_if:type,corporate|string|max:200',
+        'transfer_method' => 'required|in:bank,mobile',
+        'bank.country'        => 'required|string|min:2|max:3',
+        'bank.currency'       => 'required|string|size:3',
+        'bank.accountHolder'  => 'required|string|max:100',
+        'bank.accountNumber'  => 'nullable|string|max:34',
+        'bank.bankCode'       => 'nullable|string|max:20',
+        'bank.mobileNumber'   => 'nullable|string|max:30',
+    ]);
 
+    if ($validator->fails()) {
+        return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+    }
+
+    /* ================= EXTRACT DATA ================= */
+    $bank       = $request->input('bank', []);
+    $countryIso = strtoupper($bank['country']);
+    $currency   = strtoupper($bank['currency']);
+    $method     = $request->transfer_method;
+
+    /* ================= PROVIDER DETECTION ================= */
+    $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
+    $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+
+    $provider = null;
+
+    if ($currency === 'GHS') {
+        if ($appmobileEnabled) $provider = 'app_mobile';
+        elseif ($payazaEnabled) $provider = 'payaza';
+        else return response()->json(['success'=>false,'message'=>'No provider enabled for GHS'],403);
+    } elseif ($currency === 'UGX') {
+        if ($pivotEnabled) $provider = 'pivot';
+        elseif ($payazaEnabled) { $provider = 'payaza'; $method = 'mobile'; }
+        else return response()->json(['success'=>false,'message'=>'No provider enabled for UGX'],403);
+    } elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
+        if ($payazaEnabled) $provider = 'payaza';
+        else return response()->json(['success'=>false,'message'=>'Payaza disabled'],403);
+    } else {
+        if ($pivotEnabled) $provider = 'pivot';
+        else return response()->json(['success'=>false,'message'=>'Pivot disabled'],403);
+    }
+
+    /* ================= DETERMINE BANK / MOBILE ================= */
+    $bankName     = null;
+    $mobileNumber = null;
+    if ($method === 'bank') {
+        $bankRow = Bank::where(function ($q) use ($bank) {
+            $q->where('bank_code', $bank['bankCode'] ?? null)
+              ->orWhere('sort_code', $bank['bankCode'] ?? null);
+        })->first();
+        $bankName = $bankRow?->name;
+    }
+
+    if ($method === 'mobile') {
+        $mobileNumber = $bank['mobileNumber'] ?? null;
+        $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+        $bankName = $bankRow?->name ?? 'mobile';
+    }
+
+    /* ================= STORE ================= */
+    try {
+        $beneficia = Beneficia::create([
+            'country'   => $countryIso,
+            'currency'  => $currency,
+            'type'      => $request->type,
+            'first_names'       => $request->firstNames ?? null,
+            'last_name'         => $request->lastName ?? null,
+            'beneficiary_name'  => $request->name ?? null,
+            'account_number'    => $bank['accountNumber'] ?? null,
+            'account_name'      => $bank['accountHolder'] ?? null,
+            'phone'             => $mobileNumber,
+            'bank'              => $bankName,
+            'transfer_method'   => $method,
+            'bank_code'         => $bank['bankCode'] ?? null,
+            'provider'          => $provider,
+            'unique_reference'   => strtoupper(\Str::random(7)),
+            'customer_reference' => strtoupper(\Str::random(7)),
+            'recipient_id'       => \Str::uuid(),
+            'account_id'         => \Str::uuid(),
+
+            'personal_id' => $personalId, // <-- link to personal user
+        ]);
+
+        return response()->json(['success'=>true,'data'=>$beneficia],201);
+
+    } catch (\Exception $e) {
+        logger('Beneficiary Store Error: '.$e->getMessage());
+        return response()->json(['success'=>false,'message'=>'Failed to create beneficiary'],500);
+    }
 }
 
 

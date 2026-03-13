@@ -11,7 +11,7 @@ class TransactionHistoryController extends Controller
         public function index(Request $request)
     {
 
-        $lastTransactions = TransactionHistory::orderBy('created_at', 'desc')->paginate(4);
+        $lastTransactions = TransactionHistory::orderBy('created_at', 'desc')->paginate(10);
 
         return view('admin.transactionhistory', compact('lastTransactions'));
 

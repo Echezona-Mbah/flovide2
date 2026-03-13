@@ -145,14 +145,14 @@
         
                                         <!-- Password Field -->
                                               <div class="col-md-6">
-            <div class="form-floating">
-                <input name="password" type="password" class="form-control form-control-lg" >
-                <label>Password *</label>
-            </div>
-        </div>
+                                                    <div class="form-floating">
+                                                        <input name="password" type="password" class="form-control form-control-lg" >
+                                                        <label>Password *</label>
+                                                    </div>
+                                                </div>
         
                                     <!-- Enhanced Terms and Conditions -->
-                                    <div class="mt-4 p-4 rounded-3" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.1);">
+                                    {{-- <div class="mt-4 p-4 rounded-3" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.1);">
                                         <div class="form-check">
                                             <input name="check" id="exampleCheck" type="checkbox" class="form-check-input" style="transform: scale(1.3);" required>
                                             <label for="exampleCheck" class="form-check-label text-dark fw-medium">
@@ -162,12 +162,12 @@
                                                 <a href="javascript:void(0);" class="text-success text-decoration-none fw-semibold">Privacy Policy</a>
                                             </label>
                                         </div>
-                                    </div>
+                                    </div> --}}
         
                                     <!-- Premium Gradient Submit Button -->
                                     <button type="submit" class="btn btn-gradient-success btn-shadow btn-lg w-100 mt-4 mb-4 fw-semibold" 
                                             style="border-radius: 16px; height: 58px; font-size: 1.1rem;">
-                                        <i class="fa fa-user-plus me-2"></i>Create My Account
+                                        <i class="fa fa-user-plus me-2"></i>Login
                                     </button>
                                 </form>
         
@@ -196,14 +196,14 @@
                                 </div> --}}
         
                                 <!-- Sign in link with better styling -->
-                                <div class="text-center">
+                                {{-- <div class="text-center">
                                     <p class="text-muted mb-0 fs-6">
                                         Already have an account? 
                                         <a href="javascript:void(0);" class="text-success text-decoration-none fw-semibold">
                                             Sign in here
                                         </a>
                                     </p>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
         

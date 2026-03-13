@@ -134,7 +134,7 @@ Route::post('/pivot/account-validation', [PivotController::class, 'accountValida
 Route::get('/banks/filter', [AddBeneficiariesController::class,'banks'])->name('banks.filter');
 Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry'])->name('payaza.account-enquiry');
 
-Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquiry']);
+Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
 
 
@@ -210,7 +210,9 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
     Route::get('/compliance', [ComplianceController::class, 'index'])->name('compliance');
     Route::post('/compliance', [ComplianceController::class, 'store'])->name('compliance.store');
+    Route::get('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
 
+    
     Route::get('/add_money', [AddMoneyController::class, 'index'])->name('add_money');
 
 
@@ -333,8 +335,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-    Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
-    Route::post('/admin/register', [RegisterController::class, 'store']);
+    // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
+    // Route::post('/admin/register', [RegisterController::class, 'store']);
 
     Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
     Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit');
@@ -347,9 +349,17 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
         Route::post('/admin/business-account-status/{id}', [BusinessAccountController::class, 'updateStatus']);
+        Route::get('/admin/business-account/deactivate/{id}', [BusinessAccountController::class,'deactivate']);
+        Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
+        Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
+        Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
 
         Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
         Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
+        Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
+        Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
+        Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
+        Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
 
         Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
         Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
