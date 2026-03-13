@@ -20,13 +20,100 @@ class BusinessAccountController extends Controller
         use CurrencyHelper;
 
 
-    public function index(Request $request)
-    {
-        $allUser = User::where('typeofuser', 'business')
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(10); // you can adjust per page
-        return view('admin.businessaccount', compact('allUser'));
+public function index(Request $request)
+{
+    $search = $request->search;
+
+    $allUser = User::where('typeofuser', 'business')
+        ->when($search, function ($query) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('business_name', 'like', "%{$search}%")
+                  ->orWhere('firstname', 'like', "%{$search}%")
+                  ->orWhere('lastname', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('business_phone', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(10)
+        ->withQueryString(); // keeps search during pagination
+
+    return view('admin.businessaccount', compact('allUser','search'));
+}
+
+public function edit($id)
+{
+    $user = User::findOrFail($id);
+    return view('admin.businessaccountedit', compact('user'));
+}
+
+
+public function update(Request $request,$id)
+{
+    $user = User::findOrFail($id);
+
+    $request->validate([
+        'email' => 'required|email',
+        'firstname' => 'nullable|string|max:100',
+        'lastname' => 'nullable|string|max:100',
+        'business_name' => 'nullable|string|max:255',
+        'person_phone' => 'nullable|string|max:255',
+        'business_phone' => 'nullable|string|max:255',
+        'registration_number' => 'nullable|string|max:255',
+        'business_type' => 'nullable|string|max:255',
+        'industry' => 'nullable|string|max:255',
+        'company_url' => 'nullable|string|max:255',
+        'incorporation_date' => 'nullable|string|max:255',
+        'annual_turnover' => 'nullable|string|max:255',
+        'street_address' => 'nullable|string|max:255',
+        'trading_address' => 'nullable|string|max:255',
+        'city' => 'nullable|string|max:255',
+        'state' => 'nullable|string|max:255',
+        'countries_id' => 'nullable|string|max:255',
+        'currency' => 'nullable|string|max:255',
+        'referral_code' => 'nullable|string|max:255',
+        'referral_link' => 'nullable|string|max:255',
+
+    ]);
+
+    // dd( $request->all());
+
+
+    $data = $request->except('_token');
+
+    if($request->hasFile('profile_picture')){
+        $file = $request->file('profile_picture');
+        $filename = time().'_'.$file->getClientOriginalName();
+        $file->move(public_path('profile_pictures/business'),$filename);
+        $data['profile_picture'] = 'profile_pictures/business/'.$filename;
     }
+    $user->update($data);
+
+    return back()->with('success','User updated successfully');
+}
+
+public function deactivate($id)
+{
+    $user = User::findOrFail($id);
+
+    $user->deletestatus = $user->deletestatus == 'active' ? 'deactivated' : 'active';
+
+    $user->save();
+
+    return back()->with('success','User status updated');
+}
+
+
+public function destroy($id)
+{
+    $user = User::findOrFail($id);
+
+    $user->delete();
+
+    return back()->with('success','User deleted successfully');
+}
+
 
 public function find($id)
 {

@@ -7,22 +7,47 @@ use Illuminate\Http\Request;
 
 class EnsureBusinessVerified
 {
-    public function handle(Request $request, Closure $next)
-    {
-        $user = auth()->user();
+    // public function handle(Request $request, Closure $next)
+    // {
+    //     $user = auth()->user();
 
-        if ($user && ! $user->isFullyVerified()) {
+    //     if ($user && ! $user->isFullyVerified()) {
 
-            // allow verification + dashboard only
-            if ($request->routeIs('compliance', 'verification.*')) {
-                return $next($request);
-            }
+    //         // allow verification + dashboard only
+    //         if ($request->routeIs('compliance', 'verification.*')) {
+    //             return $next($request);
+    //         }
 
-            return redirect()
-                ->route('compliance')
-                ->with('error', 'Complete verification to continue');
+    //         return redirect()
+    //             ->route('compliance')
+    //             ->with('error', 'Complete verification to continue');
+    //     }
+
+    //     return $next($request);
+    // }
+
+public function handle(Request $request, Closure $next)
+{
+    $user = auth()->user();
+
+    if ($user && ! $user->isFullyVerified()) {
+
+        if ($request->routeIs(
+            'compliance*',
+            'verification.*',
+            'logout',
+            'sumsub.webhook',
+            'dashboard',
+            'profile*'
+        )) {
+            return $next($request);
         }
 
-        return $next($request);
+        return redirect()
+            ->route('compliance')
+            ->with('error','Complete verification to continue');
     }
+
+    return $next($request);
+}
 }

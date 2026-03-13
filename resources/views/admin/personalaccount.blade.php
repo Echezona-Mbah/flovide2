@@ -85,55 +85,156 @@
                                             <div class="row">
                             <div class="col-md-12">
                                 <div class="main-card mb-3 card">
-                                    <div class="table-responsive">
-    <table class="align-middle mb-0 table table-borderless table-striped table-hover">
-        <thead>
-            <tr>
-                <th class="text-center">Name</th>
-                <th class="text-center">Email</th>
-                <th class="text-center">City</th>
-                <th class="text-center">balance</th>
-                <th class="text-center">Currency</th>
-                {{-- <th class="text-center">Sales</th> --}}
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($allpersonal as $index => $user)
-            <tr>
-                <td>
-                    <div class="widget-content p-0">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left me-3">
-                                <img width="40" class="rounded-circle" src="{{ asset("$user->profile_picture ?? 'admin/assets/images/avatars/default.png'") }}" alt="">
-                            </div>
-                            <div class="widget-content-left flex2">
-                                <div class="widget-heading">{{ $user->business_name ?? $user->firstname.' '.$user->lastname }}</div>
-                                <div class="widget-subheading opacity-7">{{ $user->industry ?? 'N/A' }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td class="text-center">{{ $user->email ?? 'N/A' }}</td>
-                <td class="text-center">{{ $user->city ?? 'N/A' }}</td>
-                <td class="text-center">{{ $user->balance ?? 'N/A' }}</td>
-                <td class="text-center">{{ $user->currency ?? 'N/A' }}</td>
-                <td class="text-center">
-                    <a href="{{ url('/admin/personal-account/'.$user->id) }}"  
-                    class="btn btn-primary btn-sm">
-                    Details
-                    </a>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                                  <div class="table-responsive">
+                @if(session('success'))
+                <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#3085d6'
+                });
+                </script>
+                @endif
 
-    <!-- Pagination Links -->
-    <div class="mt-3">
-        {{ $allpersonal->links('pagination::bootstrap-5') }}
-    </div>
-</div>
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th style="min-width:220px;">User</th>
+                            <th>Email</th>
+                            <th class="d-none d-md-table-cell">City</th>
+                            <th class="d-none d-lg-table-cell">Balance</th>
+                            <th class="d-none d-lg-table-cell">Currency</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach ($allpersonal as $user)
+
+                            <tr>
+
+                                <!-- User -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+
+                                            <img 
+                                            src="{{ $user->profile_picture ? asset($user->profile_picture) : asset('asserts/dashboard/circle-dot.png') }}"
+                                            class="rounded-circle me-2"
+                                            width="38"
+                                            height="38"
+                                            >
+
+                                        <div>
+                                            <div class="fw-semibold">
+                                                {{ $user->business_name ?? $user->firstname.' '.$user->lastname }}
+                                            </div>
+
+                                            <small class="text-muted">
+                                                {{ $user->business_phone ?? 'N/A' }}
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+
+                                <!-- Email -->
+                                <td>
+                                    {{ $user->email ?? 'N/A' }}
+                                </td>
+
+
+                                <!-- City -->
+                                <td class="d-none d-md-table-cell">
+                                    {{ $user->city ?? 'N/A' }}
+                                </td>
+
+
+                                <!-- Balance -->
+                                <td class="d-none d-lg-table-cell">
+                                    {{ $user->balance ?? '0' }}
+                                </td>
+
+
+                                <!-- Currency -->
+                                <td class="d-none d-lg-table-cell">
+                                    {{ $user->currency ?? 'N/A' }}
+                                </td>
+
+
+                                <!-- Status -->
+                                <td>
+                                    @if($user->deletestatus == 'active')
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger">
+                                            Inactive
+                                        </span>
+                                    @endif
+                                </td>
+
+
+                                <!-- Actions -->
+                                <td class="text-end">
+
+                                    <div class="btn-group btn-group-sm">
+
+                                        <a 
+                                            href="{{ url('/admin/personal-account/'.$user->id) }}"
+                                            class="btn btn-info"
+                                            title="View"
+                                        >
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+
+                                        <a 
+                                            href="{{ url('/admin/personal-account/edit/'.$user->id) }}"
+                                            class="btn btn-warning"
+                                            title="Edit"
+                                        >
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+
+                                        <button 
+                                        class="btn btn-secondary toggleStatus"
+                                        data-id="{{ $user->id }}"
+                                        title="Activate/Deactivate"
+                                        >
+                                        @if($user->deletestatus == 'active')
+                                        <i class="fa fa-ban"></i>
+                                        @else
+                                        <i class="fa fa-check"></i>
+                                        @endif
+                                        </button>
+
+                                        <button 
+                                        type="button"
+                                        class="btn btn-danger deleteUser"
+                                        data-id="{{ $user->id }}"
+                                        title="Delete"
+                                        >
+                                        <i class="fa fa-trash"></i>
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
                                 </div>
                             </div>
@@ -161,3 +262,82 @@
 @include('admin.footer')
 
 
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ACTIVATE / DEACTIVATE
+    document.querySelectorAll('.toggleStatus').forEach(button => {
+
+        button.addEventListener('click', function () {
+
+            let id = this.dataset.id;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to change this user's status?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Continue',
+                cancelButtonText: 'No'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+                    window.location.href = "/admin/personal-account/deactivate/" + id;
+                }
+
+            });
+
+        });
+
+    });
+
+
+    // DELETE USER
+    document.querySelectorAll('.deleteUser').forEach(button => {
+
+        button.addEventListener('click', function () {
+
+            let id = this.dataset.id;
+
+            Swal.fire({
+                title: 'Delete User?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'No'
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    let form = document.createElement('form');
+                    form.method = "POST";
+                    form.action = "/admin/personal-account/delete/" + id;
+
+                    let csrf = document.createElement('input');
+                    csrf.type = "hidden";
+                    csrf.name = "_token";
+                    csrf.value = "{{ csrf_token() }}";
+
+                    let method = document.createElement('input');
+                    method.type = "hidden";
+                    method.name = "_method";
+                    method.value = "DELETE";
+
+                    form.appendChild(csrf);
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+
+            });
+
+        });
+
+    });
+
+});
+</script>

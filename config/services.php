@@ -40,5 +40,10 @@ return [
         'base_url' => env('IBANQ_BASE_URL'),
     ],
 
+    'sumsub' => [
+        'app_token' => env('SUMSUB_APP_TOKEN'),
+        'secret_key' => env('SUMSUB_SECRET_KEY'),
+    ],
+
 
 ];

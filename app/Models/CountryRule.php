@@ -10,10 +10,12 @@ class CountryRule extends Model
         'country_iso',
         'country_name',
         'currency_iso',
-        'rules'
+        'rules',
+         'is_active', 
     ];
 
     protected $casts = [
-        'rules' => 'array'
+        'rules' => 'array',
+         'is_active' => 'boolean',
     ];
 }

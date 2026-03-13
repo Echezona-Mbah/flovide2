@@ -208,6 +208,36 @@
                                         'status' => $user->utility_bill_status,
                                         'field' => 'utility_bill_status',
                                     ],
+                                     [
+                                        'label' => 'Proof Of Identity',
+                                        'file' => $user->proof_of_identity,
+                                        'status' => $user->proof_of_identity_status,
+                                        'field' => 'proof_of_identity_status',
+                                    ],
+                                     [
+                                        'label' => 'Ownership Document',
+                                        'file' => $user->ownership_document,
+                                        'status' => $user->ownership_status,
+                                        'field' => 'ownership_status',
+                                    ],
+                                     [
+                                        'label' => 'Organisational Chart',
+                                        'file' => $user->organisational_chart,
+                                        'status' => $user->organisational_chart_status,
+                                        'field' => 'organisational_chart_status',
+                                    ],
+                                     [
+                                        'label' => 'Register Of Directors',
+                                        'file' => $user->register_of_directors,
+                                        'status' => $user->register_of_directors_status,
+                                        'field' => 'register_of_directors_status',
+                                    ],
+                                     [
+                                        'label' => 'Formation Document',
+                                        'file' => $user->formation_document,
+                                        'status' => $user->formation_document_status,
+                                        'field' => 'formation_document_status',
+                                    ],
                                 ];
 
                                 @endphp
@@ -239,20 +269,29 @@
                                                 </td>
 
                                                 <!-- File Thumbnail -->
+<td class="text-center">
+    @if($doc['file'])
+        @php
+            $filePath = 'storage/' . $doc['file'];
+            $extension = pathinfo($doc['file'], PATHINFO_EXTENSION);
+        @endphp
 
-                                                <td class="text-center">
-                                                    @if($doc['file'])
-                                                        <a href="{{ asset('storage/' . $doc['file']) }}" download>
-                                                            <img
-                                                                width="60"
-                                                                style="cursor:pointer;"
-                                                                src="{{ asset('storage/' . $doc['file']) }}"
-                                                            >
-                                                        </a>
-                                                    @else
-                                                        <span class="badge bg-danger">No File</span>
-                                                    @endif
-                                                </td>
+        <a href="{{ asset($filePath) }}" target="_blank" download>
+            @if(in_array(strtolower($extension), ['jpg','jpeg','png','webp']))
+                <img 
+                    src="{{ asset($filePath) }}" 
+                    width="60" 
+                    style="cursor:pointer" 
+                    onerror="this.src='{{ asset('assets/dashboard/file.png') }}'"
+                >
+            @else
+                <i class="fa fa-file-pdf fa-2x text-danger"></i>
+            @endif
+        </a>
+    @else
+        <span class="badge bg-danger">No File</span>
+    @endif
+</td>
 
 
                                                 <!-- STATUS -->

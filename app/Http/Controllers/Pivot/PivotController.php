@@ -144,7 +144,7 @@ public function accountValidation(Request $request)
     // Example Pivot response handling
     return response()->json([
         'accountName' => $response['customerNames'] ?? null,
-        'raw' => $response
+        'data' => $response
     ]);
 }
 
