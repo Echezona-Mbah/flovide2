@@ -234,20 +234,23 @@
     </div>
 
 
-    <script>
-    function setupDropdown(buttonId, menuId, chevronId) {
-        const btn = document.getElementById(buttonId);
-        const menu = document.getElementById(menuId);
-        const chevron = document.getElementById(chevronId);
+<script>
+function setupDropdown(buttonId, menuId, chevronId) {
+    const btn = document.getElementById(buttonId);
+    const menu = document.getElementById(menuId);
+    const chevron = document.getElementById(chevronId);
 
+    // ✅ Only run if elements exist
+    if (btn && menu && chevron) {
         btn.addEventListener('click', () => {
             menu.classList.toggle('hidden');
             chevron.classList.toggle('rotate-180');
         });
     }
+}
 
-    setupDropdown('accountsDropdownBtn', 'accountsDropdownMenu', 'accountsChevron');
-    setupDropdown('settingsDropdownBtn', 'settingsDropdownMenu', 'settingsChevron');
+setupDropdown('accountsDropdownBtn', 'accountsDropdownMenu', 'accountsChevron');
+setupDropdown('settingsDropdownBtn', 'settingsDropdownMenu', 'settingsChevron');
 </script>
 
     <script>

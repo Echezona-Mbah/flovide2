@@ -90,7 +90,7 @@
                                 </ul>
                             </li>
                          
-                           <li class="app-sidebar__heading">Revenue Management</li>
+                           {{-- <li class="app-sidebar__heading">Revenue Management</li>
 
                             <li>
                                 <a href="{{route('admin.remita')}}" >
@@ -120,7 +120,7 @@
                                 <a href="{{route('admin.payment')}}" >
                                     <i class="metismenu-icon pe-7s-graph1"></i>Payment
                                 </a>
-                            </li>
+                            </li> --}}
 
 
                             <li class="app-sidebar__heading">Transactions & Billing</li>
@@ -129,11 +129,11 @@
                                     <i class="metismenu-icon pe-7s-graph"></i>Transaction History
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a href="{{route('admin.allbillpayment')}}" >
                                     <i class="metismenu-icon pe-7s-way"></i>Bill Payment
                                 </a>
-                            </li>
+                            </li> --}}
 
 
                             <li class="app-sidebar__heading">Charts</li>

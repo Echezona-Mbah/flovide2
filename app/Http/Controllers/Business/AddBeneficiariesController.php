@@ -45,7 +45,7 @@ class AddBeneficiariesController extends Controller
 
     public function create()
     {
-        $countries = CountryRule::all();
+        $countries = CountryRule::where('is_active', true)->get();
 
         $countryRules  = [];
         $currencyRules = [];
@@ -108,32 +108,54 @@ class AddBeneficiariesController extends Controller
     //     return response()->json($banks);
     // }
 
-public function banks(Request $request)
+    public function banks(Request $request)
+    {
+        $currency     = strtoupper($request->currency ?? '');
+        $countryInput = strtoupper($request->country ?? '');
+        $provider     = strtolower($request->provider ?? ''); // 👈 GET PROVIDER
+
+        $banks = Bank::query()
+
+            // Filter by country
+            ->when($countryInput, function($q) use ($countryInput) {
+                $q->where(function($query) use ($countryInput) {
+                    $query->where('country_iso', $countryInput)
+                        ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput,0,2)])
+                        ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput,0,3)]);
+                });
+            })
+
+            // 🔒 FILTER BY PROVIDER IF SENT
+            ->when($provider, function($q) use ($provider) {
+                $q->where('provider', $provider);
+            })
+
+            ->orderBy('name')
+            ->get(['id','name','bank_code','type','country_iso','provider']);
+
+        return response()->json($banks);
+    }
+
+    public function getBanks(Request $request)
 {
-    $currency     = strtoupper($request->currency ?? '');
-    $countryInput = strtoupper($request->country ?? '');
-    $provider     = strtolower($request->provider ?? ''); // 👈 GET PROVIDER
+    $country  = strtoupper($request->input('country'));   // e.g., NG
+    $provider = $request->input('provider');              // e.g., payaza or pivot
 
-    $banks = Bank::query()
+    if (!$country || !$provider) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Country and provider are required'
+        ], 422);
+    }
 
-        // Filter by country
-        ->when($countryInput, function($q) use ($countryInput) {
-            $q->where(function($query) use ($countryInput) {
-                $query->where('country_iso', $countryInput)
-                      ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput,0,2)])
-                      ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput,0,3)]);
-            });
-        })
+    $banks = \App\Models\Bank::where('country_iso', $country)
+                ->where('provider', $provider)
+                ->get(['name', 'bank_code', 'sort_code', 'type']);
 
-        // 🔒 FILTER BY PROVIDER IF SENT
-        ->when($provider, function($q) use ($provider) {
-            $q->where('provider', $provider);
-        })
-
-        ->orderBy('name')
-        ->get(['id','name','bank_code','type','country_iso','provider']);
-
-    return response()->json($banks);
+    return response()->json([
+        'success' => true,
+        'data' => $banks
+    ]);
 }
 
 
@@ -304,209 +326,209 @@ public function banks(Request $request)
 
 
     public function store(Request $request)
-{
-    $isApi = $request->expectsJson();
+    {
+        $isApi = $request->expectsJson();
 
-    $userId = auth('api')->id() ?? auth()->id();
-    $user   = auth()->user();
+        $userId = auth('api')->id() ?? auth()->id();
+        $user   = auth()->user();
 
-    /* ================= ROLE CHECK ================= */
-    $team = TeamMembers::where('user_id', $user->id)->first();
-    $role = $team ? $team->role : 'Owner';
+        /* ================= ROLE CHECK ================= */
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $role = $team ? $team->role : 'Owner';
 
-    if (!in_array($role, ['Owner', 'Admin'])) {
-        $msg = 'Only the business owner or an admin can add beneficiaries.';
-        return $isApi
-            ? response()->json(['success'=>false,'message'=>$msg],403)
-            : back()->with('error',$msg);
-    }
-
-
-    /* ================= VALIDATION ================= */
-    $validator = \Validator::make($request->all(), [
-
-        'type' => 'required|in:individual,corporate',
-
-        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
-        'lastName'   => 'nullable|required_if:type,individual|string|max:100',
-        'name'       => 'nullable|required_if:type,corporate|string|max:200',
-
-        'transfer_method' => 'required|in:bank,mobile',
-
-        'bank.country'        => 'required|string|min:2|max:3',
-        'bank.currency'       => 'required|string|size:3',
-        'bank.accountHolder'  => 'required|string|max:100',
-
-        'bank.accountNumber'  => 'nullable|string|max:34',
-        'bank.bankCode'       => 'nullable|string|max:20',
-        'bank.mobileNumber'   => 'nullable|string|max:30',
-    ]);
-
-    if ($validator->fails()) {
-        return $isApi
-            ? response()->json(['success'=>false,'errors'=>$validator->errors()],422)
-            : back()->withErrors($validator)->withInput();
-    }
-
-    /* ================= EXTRACT DATA ================= */
-    $bank       = $request->input('bank', []);
-    $countryIso = strtoupper($bank['country']);
-    $currency   = strtoupper($bank['currency']);
-    $method     = $request->transfer_method;
-
-   /* ================= PROVIDER DETECTION ================= */
-
-    $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
-
-    $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
-
-    $provider = null;
-
-    /*
-    |--------------------------------------------------------------------------
-    | GHS LOGIC (PRIORITY: APP MOBILE → PAYAZA)
-    |--------------------------------------------------------------------------
-    */
-    if ($currency === 'GHS') {
-
-        if ($appmobileEnabled) {
-
-            $provider = 'app_mobile';
-
-        } elseif ($payazaEnabled) {
-
-            $provider = 'payaza';
-
-        } else {
-
+        if (!in_array($role, ['Owner', 'Admin'])) {
+            $msg = 'Only the business owner or an admin can add beneficiaries.';
             return $isApi
-                ? response()->json(['success'=>false,'message'=>'No provider enabled for GHS'],403)
-                : back()->with('error','No provider enabled for GHS');
+                ? response()->json(['success'=>false,'message'=>$msg],403)
+                : back()->with('error',$msg);
         }
-    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UGX LOGIC
-    |--------------------------------------------------------------------------
-    */
-    elseif ($currency === 'UGX') {
 
-        if ($pivotEnabled) {
+        /* ================= VALIDATION ================= */
+        $validator = \Validator::make($request->all(), [
 
-            $provider = 'pivot';
+            'type' => 'required|in:individual,corporate',
 
-        } elseif ($payazaEnabled) {
+            'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+            'lastName'   => 'nullable|required_if:type,individual|string|max:100',
+            'name'       => 'nullable|required_if:type,corporate|string|max:200',
 
-            $provider = 'payaza';
-            $method   = 'mobile';
+            'transfer_method' => 'required|in:bank,mobile',
 
-        } else {
+            'bank.country'        => 'required|string|min:2|max:3',
+            'bank.currency'       => 'required|string|size:3',
+            'bank.accountHolder'  => 'required|string|max:100',
 
-            return $isApi
-                ? response()->json(['success'=>false,'message'=>'No provider enabled for UGX'],403)
-                : back()->with('error','No provider enabled for UGX');
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PAYAZA OTHER CURRENCIES
-    |--------------------------------------------------------------------------
-    */
-    elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
-
-        if ($payazaEnabled) {
-
-            $provider = 'payaza';
-
-        } else {
-
-            return $isApi
-                ? response()->json(['success'=>false,'message'=>'Payaza disabled'],403)
-                : back()->with('error','Payaza disabled');
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DEFAULT → PIVOT
-    |--------------------------------------------------------------------------
-    */
-    else {
-
-        if ($pivotEnabled) {
-
-            $provider = 'pivot';
-
-        } else {
-
-            return $isApi
-                ? response()->json(['success'=>false,'message'=>'Pivot disabled'],403)
-                : back()->with('error','Pivot disabled');
-        }
-    }
-
-            // dd($request->all());
-
-    /* ================= DETERMINE BANK / MOBILE ================= */
-    $bankName     = null;
-    $mobileNumber = null;
-    if ($method === 'bank') {
-        $bankRow = Bank::where(function ($q) use ($bank) {
-            $q->where('bank_code', $bank['bankCode'] ?? null)
-              ->orWhere('sort_code', $bank['bankCode'] ?? null);
-        })->first();
-        $bankName = $bankRow?->name;
-    }
-
-    if ($method === 'mobile') {
-        $mobileNumber = $bank['mobileNumber'] ?? null;
-        $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-        $bankName = $bankRow?->name ?? 'mobile';
-    }
-
-    /* ================= STORE ================= */
-
-    try {
-
-        $beneficia = Beneficia::create([
-            'country'   => $countryIso,
-            'currency'  => $currency,
-            'type'      => $request->type,
-            'first_names'       => $request->firstNames ?? null,
-            'last_name'         => $request->lastName ?? null,
-            'beneficiary_name'  => $request->name ?? null,
-            'account_number' => $bank['accountNumber'] ?? null,
-            'account_name'   => $bank['accountHolder'] ?? null,
-            'phone' => $mobileNumber,
-            'bank'  => $bankName,
-            'transfer_method' => $method,
-            'bank_code'       => $bank['bankCode'] ?? null,
-            'provider'        => $provider,
-            'unique_reference'   => strtoupper(\Str::random(7)),
-            'customer_reference' => strtoupper(\Str::random(7)),
-            'recipient_id' => \Str::uuid(),
-            'account_id'   => \Str::uuid(),
-
-            'user_id' => $userId,
+            'bank.accountNumber'  => 'nullable|string|max:34',
+            'bank.bankCode'       => 'nullable|string|max:20',
+            'bank.mobileNumber'   => 'nullable|string|max:30',
         ]);
 
-        return $isApi
-            ? response()->json(['success'=>true,'data'=>$beneficia],201)
-            : back()->with('success','Beneficiary created successfully');
+        if ($validator->fails()) {
+            return $isApi
+                ? response()->json(['success'=>false,'errors'=>$validator->errors()],422)
+                : back()->withErrors($validator)->withInput();
+        }
 
-    } catch (\Exception $e) {
+        /* ================= EXTRACT DATA ================= */
+        $bank       = $request->input('bank', []);
+        $countryIso = strtoupper($bank['country']);
+        $currency   = strtoupper($bank['currency']);
+        $method     = $request->transfer_method;
 
-        logger('Beneficiary Store Error: '.$e->getMessage());
+    /* ================= PROVIDER DETECTION ================= */
 
-        return $isApi
-            ? response()->json(['success'=>false,'message'=>'Failed to create beneficiary'],500)
-            : back()->with('error','Failed to create beneficiary');
+        $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
+
+        $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+        $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+        $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+
+        $provider = null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | GHS LOGIC (PRIORITY: APP MOBILE → PAYAZA)
+        |--------------------------------------------------------------------------
+        */
+        if ($currency === 'GHS') {
+
+            if ($appmobileEnabled) {
+
+                $provider = 'app_mobile';
+
+            } elseif ($payazaEnabled) {
+
+                $provider = 'payaza';
+
+            } else {
+
+                return $isApi
+                    ? response()->json(['success'=>false,'message'=>'No provider enabled for GHS'],403)
+                    : back()->with('error','No provider enabled for GHS');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | UGX LOGIC
+        |--------------------------------------------------------------------------
+        */
+        elseif ($currency === 'UGX') {
+
+            if ($pivotEnabled) {
+
+                $provider = 'pivot';
+
+            } elseif ($payazaEnabled) {
+
+                $provider = 'payaza';
+                $method   = 'mobile';
+
+            } else {
+
+                return $isApi
+                    ? response()->json(['success'=>false,'message'=>'No provider enabled for UGX'],403)
+                    : back()->with('error','No provider enabled for UGX');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAYAZA OTHER CURRENCIES
+        |--------------------------------------------------------------------------
+        */
+        elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
+
+            if ($payazaEnabled) {
+
+                $provider = 'payaza';
+
+            } else {
+
+                return $isApi
+                    ? response()->json(['success'=>false,'message'=>'flovide Payaza disabled'],403)
+                    : back()->with('error','flovide Payaza disabled');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEFAULT → PIVOT
+        |--------------------------------------------------------------------------
+        */
+        else {
+
+            if ($pivotEnabled) {
+
+                $provider = 'pivot';
+
+            } else {
+
+                return $isApi
+                    ? response()->json(['success'=>false,'message'=>'Pivot disabled'],403)
+                    : back()->with('error','Pivot disabled');
+            }
+        }
+
+                // dd($request->all());
+
+        /* ================= DETERMINE BANK / MOBILE ================= */
+        $bankName     = null;
+        $mobileNumber = null;
+        if ($method === 'bank') {
+            $bankRow = Bank::where(function ($q) use ($bank) {
+                $q->where('bank_code', $bank['bankCode'] ?? null)
+                ->orWhere('sort_code', $bank['bankCode'] ?? null);
+            })->first();
+            $bankName = $bankRow?->name;
+        }
+
+        if ($method === 'mobile') {
+            $mobileNumber = $bank['mobileNumber'] ?? null;
+            $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+            $bankName = $bankRow?->name ?? 'mobile';
+        }
+
+        /* ================= STORE ================= */
+
+        try {
+
+            $beneficia = Beneficia::create([
+                'country'   => $countryIso,
+                'currency'  => $currency,
+                'type'      => $request->type,
+                'first_names'       => $request->firstNames ?? null,
+                'last_name'         => $request->lastName ?? null,
+                'beneficiary_name'  => $request->name ?? null,
+                'account_number' => $bank['accountNumber'] ?? null,
+                'account_name'   => $bank['accountHolder'] ?? null,
+                'phone' => $mobileNumber,
+                'bank'  => $bankName,
+                'transfer_method' => $method,
+                'bank_code'       => $bank['bankCode'] ?? null,
+                'provider'        => $provider,
+                'unique_reference'   => strtoupper(\Str::random(7)),
+                'customer_reference' => strtoupper(\Str::random(7)),
+                'recipient_id' => \Str::uuid(),
+                'account_id'   => \Str::uuid(),
+
+                'user_id' => $userId,
+            ]);
+
+            return $isApi
+                ? response()->json(['success'=>true,'data'=>$beneficia],201)
+                : back()->with('success','Beneficiary created successfully');
+
+        } catch (\Exception $e) {
+
+            logger('Beneficiary Store Error: '.$e->getMessage());
+
+            return $isApi
+                ? response()->json(['success'=>false,'message'=>'Failed to create beneficiary'],500)
+                : back()->with('error','Failed to create beneficiary');
+        }
     }
-}
 
 
 

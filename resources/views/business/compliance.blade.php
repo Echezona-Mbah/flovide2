@@ -1,6 +1,7 @@
 @include('business.head')
 <body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.sumsub.com/sumsub-websdk/1.0.0/sumsub-websdk.min.js"></script>
 
     <!-- Mobile menu button -->
   @include('business.header')
@@ -33,7 +34,6 @@
 </div> --}}
 
 
-
         <section class=" relative w-full ">
             @if (!auth()->user()->isFullyVerified())
             <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
@@ -60,6 +60,7 @@
                     </div>
                 </div>
 
+
                 <!-- Action button -->
                 <a href="{{ url('/compliance') }}"
                     class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
@@ -70,6 +71,11 @@
                 </div>
             </div>
             @endif
+
+            {{-- <a href="{{ route('sumsub.kyc') }}"
+            class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+            Start Verification
+            </a> --}}
 
             <section class="bg-white text-gray-700 min-h-screen  w-full md:rounded-3xl md:p-6 p-2 shadow-md md:absolute  overflow-x-hidden ">
 
@@ -91,8 +97,55 @@
                       $valididStatus = $statusMap[$user->valid_id_status ?? 'no'];
                       $tinStatus = $statusMap[$user->tin_status ?? 'no'];
                       $utilitybillStatus = $statusMap[$user->utility_bill_status ?? 'no'];
+                      $proofofidentitystatus = $statusMap[$user->proof_of_identity_status ?? 'no'];
+                      $ownershipstatus = $statusMap[$user->ownership_status ?? 'no'];
+                      $organisationalchartstatus = $statusMap[$user->organisational_chart_status ?? 'no'];
+                      $registerofdirectorsstatus = $statusMap[$user->register_of_directors_status ?? 'no'];
+                      $formationdocumentstatus = $statusMap[$user->formation_document_status ?? 'no'];
 
                   @endphp
+
+                  <div class="flex items-center justify-between border border-gray-200 rounded-lg p-4 mb-4">
+    
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900">
+                            Identity Document
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mt-1">
+                            ID card • Passport • Residence permit • Driver's license
+                        </p>
+                    </div>
+
+                    <div>
+
+                        @if($user->identity_verification_status == 'confirmed')
+
+                        <span class="text-green-600 text-xs font-medium">
+                        Verified
+                        </span>
+
+                        @elseif($user->identity_verification_status == 'rejected')
+
+                        <span class="text-red-600 text-xs font-medium">
+                        Rejected
+                        </span>
+
+                        @else
+
+                        <a href="{{ route('sumsub.kyc') }}"
+                        class="text-gray-900 text-sm border border-gray-300 rounded-lg px-5 py-2">
+                        Start Verification
+                        </a>
+
+                        @endif
+                        {{-- <a href="{{ route('sumsub.kyc') }}"
+                        class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                            Start Verification
+                        </a> --}}
+                    </div>
+
+                </div>
 
                     <!-- CAC Certificate -->
                   <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
@@ -309,8 +362,8 @@
                     <!-- Item 7 -->
                     <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
-                                <i class="fas fa-file"></i>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $proofofidentitystatus['color'] }}-400 text-{{ $proofofidentitystatus['color'] }}-500">
+                                <i class="{{ $proofofidentitystatus['icon'] }}"></i>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm leading-5">
@@ -322,17 +375,30 @@
                             </div>   
                         </div>
                         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                            <button id="openProofOfIdentity" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                                Upload
-                            </button>
+                            <div class="text-{{ $proofofidentitystatus['color'] }}-700 bg-{{ $proofofidentitystatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $proofofidentitystatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
+
+                            @if ($user->proof_of_identity_status == "confirmed" && $user->proof_of_identity)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->proof_of_identity) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Item 9 -->
                     <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
-                                <i class="fas fa-file"></i>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $ownershipstatus['color'] }}-400 text-{{ $ownershipstatus['color'] }}-500">
+                                <i class="{{ $ownershipstatus['icon'] }}"></i>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm leading-5">
@@ -346,18 +412,30 @@
                             </div>   
                         </div>
                         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                            <!-- Show Upload Button -->
-                            <button id="openOwnership" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                                Upload
-                            </button>
+                            <div class="text-{{ $ownershipstatus['color'] }}-700 bg-{{ $ownershipstatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $ownershipstatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
+
+                            @if ($user->ownership_status == "confirmed" && $user->ownership_document)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->ownership_document) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Item 10 -->
                     <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
-                                <i class="fas fa-file"></i>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $organisationalchartstatus['color'] }}-400 text-{{ $organisationalchartstatus['color'] }}-500">
+                                <i class="{{ $organisationalchartstatus['icon'] }}"></i>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm leading-5">
@@ -371,18 +449,30 @@
                             </div>   
                         </div>
                         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                            <!-- Show Upload Button -->
-                            <button id="openOrganisationalChart" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                                Upload
-                            </button>
+                            <div class="text-{{ $organisationalchartstatus['color'] }}-700 bg-{{ $organisationalchartstatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $organisationalchartstatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
+
+                            @if ($user->organisational_chart_status == "confirmed" && $user->organisational_chart)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->organisational_chart) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Item 8 -->
                     <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
-                                <i class="fas fa-file"></i>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $registerofdirectorsstatus['color'] }}-400 text-{{ $registerofdirectorsstatus['color'] }}-500">
+                                <i class="{{ $registerofdirectorsstatus['icon'] }}"></i>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm leading-5">
@@ -394,18 +484,30 @@
                             </div>   
                         </div>
                         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                            <!-- Show Upload Button -->
-                            <button id="openRegisterOfDirectors" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                                Upload
-                            </button>
+                            <div class="text-{{ $registerofdirectorsstatus['color'] }}-700 bg-{{ $registerofdirectorsstatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $registerofdirectorsstatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
+
+                            @if ($user->register_of_directors_status == "confirmed" && $user->register_of_directors)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->register_of_directors) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Item 6 -->
                     <div class="flex items-center justify-between border border-gray-300 rounded-xl p-4">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-gray-400 text-gray-500">
-                                <i class="fas fa-file"></i>
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full border border-{{ $formationdocumentstatus['color'] }}-400 text-{{ $formationdocumentstatus['color'] }}-500">
+                                <i class="{{ $formationdocumentstatus['icon'] }}"></i>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 text-sm leading-5">
@@ -417,10 +519,22 @@
                             </div>                         
                         </div>
                         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-x-20">
-                            <!-- Show Upload Button -->
-                            <button id="openFormationDocument" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
-                                Upload
-                            </button>
+                            <div class="text-{{ $formationdocumentstatus['color'] }}-700 bg-{{ $formationdocumentstatus['color'] }}-200 rounded-full px-3 py-0.5 text-xs font-semibold select-none">
+                                {{ $formationdocumentstatus['label'] }}
+                            </div>
+                            <!-- Utility Bill -->
+
+                            @if ($user->formation_document_status == "confirmed" && $user->formation_document)
+                                <!-- Show Download Button -->
+                                <a href="{{ asset('storage/' . $user->formation_document) }}" class="bg-green-600 text-white px-4 py-2 rounded" download>
+                                    Download
+                                </a>
+                            @else
+                                <!-- Show Upload Button -->
+                                <button id="openUtility" class="text-gray-900 text-sm font-normal border border-gray-300 rounded-lg px-5 py-2 hover:bg-gray-50">
+                                    Upload
+                                </button>
+                            @endif
                         </div>
                     </div>
 
@@ -803,7 +917,51 @@
                                 <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
                             </button>
                         </div>
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                             <form action="{{ route('compliance.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                          @csrf
+                          
+                               @if ($errors->any())
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json($errors->first()),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        @if (session('error'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json(session('error')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        
+                                        @if (session('success'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'success',
+                                                title: @json(session('success')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
                             <input type="hidden" name="document_type" value="proof_of_identity">
                             <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
                             <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
@@ -823,7 +981,51 @@
                                 <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
                             </button>
                         </div>
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                              <form action="{{ route('compliance.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                          @csrf
+                          
+                               @if ($errors->any())
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json($errors->first()),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        @if (session('error'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json(session('error')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        
+                                        @if (session('success'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'success',
+                                                title: @json(session('success')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
                             <input type="hidden" name="document_type" value="ownership">
                             <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
                             <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
@@ -844,7 +1046,51 @@
                                 <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
                             </button>
                         </div>
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                              <form action="{{ route('compliance.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                          @csrf
+                          
+                               @if ($errors->any())
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json($errors->first()),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        @if (session('error'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json(session('error')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        
+                                        @if (session('success'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'success',
+                                                title: @json(session('success')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
                             <input type="hidden" name="document_type" value="organisational_chart">
                             <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
                             <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
@@ -865,7 +1111,51 @@
                                 <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
                             </button>
                         </div>
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                             <form action="{{ route('compliance.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                          @csrf
+                          
+                               @if ($errors->any())
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json($errors->first()),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        @if (session('error'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json(session('error')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        
+                                        @if (session('success'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'success',
+                                                title: @json(session('success')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
                             <input type="hidden" name="document_type" value="register_of_directors">
                             <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
                             <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
@@ -886,7 +1176,51 @@
                                 <i class="fas fa-times text-md cursor-pointer text-[#828282]"></i>
                             </button>
                         </div>
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                             <form action="{{ route('compliance.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                          @csrf
+                          
+                               @if ($errors->any())
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json($errors->first()),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        @if (session('error'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'error',
+                                                title: @json(session('error')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
+
+                                        
+                                        @if (session('success'))
+                                        <script>
+                                            Swal.fire({
+                                                toast: true,
+                                                position: 'top-end',
+                                                icon: 'success',
+                                                title: @json(session('success')),
+                                                showConfirmButton: false,
+                                                timer: 4000,
+                                                timerProgressBar: true,
+                                            });
+                                        </script>
+                                        @endif
                             <input type="hidden" name="document_type" value="formation_document">
                             <input type="file" name="document" required class="border border-gray-300 w-full p-2 rounded-2xl text-black focus:outline-none focus:ring-1 focus:ring-blue-300">
                             <button type="submit" class="w-full bg-[#215F9C] text-white font-medium py-2 px-4 rounded-2xl">Submit</button>
@@ -901,6 +1235,37 @@
 
         </section>
     </main>
+
+
+<script>
+fetch('/sumsub-token')
+.then(res => res.json())
+.then(data => {
+
+    if(!data.token){
+        console.error("Sumsub token error", data);
+        return;
+    }
+
+    SumsubWebSdk.init({
+        accessToken: data.token,
+        containerId: "sumsub-kyc-widget",
+
+        onMessage: message => {
+            console.log("Message:", message);
+        },
+
+        onError: error => {
+            console.error("Error:", error);
+        },
+
+        onComplete: result => {
+            console.log("Verification completed:", result);
+        }
+    });
+
+});
+</script>
 
     <script>
         // Open specific modals

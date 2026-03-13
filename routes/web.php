@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Business\addBankAccountController;
+use App\Http\Controllers\Business\ComplianceController;
 use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Business\TransactionHistoryController;
@@ -88,7 +89,10 @@ Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $reque
 // Route::get('/pivot-auth', [PivotController::class, 'auth']);
 // Route::get('/pivot-test', [PivotPivotController::class, 'sendPayment']);
 
-
+Route::get('/kyc-verification', function () {
+    return view('business.sumsub');
+})->name('sumsub.kyc');
+    Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
 
 
 Route::get('/dashboard', [DashboardController::class, 'create'])

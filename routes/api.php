@@ -50,6 +50,7 @@ use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\IbanqWebhookController;
 use App\Http\Controllers\Orchard\OrchardController;
 use App\Http\Controllers\Payaza\PayoutController;
+use App\Http\Controllers\Personal\ComplianceController as PersonalComplianceController;
 use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
 use Illuminate\Http\Request;
@@ -131,8 +132,13 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 
 
 
+// Route::post('/sumsub/webhook-test', function (Request $request) {
+//     \Log::info('Webhook test hit!', $request->all());
+//     return response('OK', 200);
+// });
 
-
+    Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
+        Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
 
 
 
@@ -144,11 +150,15 @@ Route::get('/test-pivot-auth', function(PivotService $pivot) {
 
 
 
+
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/pivot/payment', [PivotController::class, 'sendPayment']);
     Route::post('/pivot/payment-status', [PivotController::class, 'queryPaymentStatus']);
     Route::post('/pivot/account-validation', [PivotController::class, 'accountValidation']);
     Route::post('/pivot/card-payment', [PivotController::class, 'cardPayment']);
+
+    Route::post('/kyc/create-applicant',[ComplianceController::class,'createSumsubApplicant']);
 
 
 
@@ -240,6 +250,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/validate-account', [AddBeneficiariesController::class, 'validateRecipient']);
     Route::get('/fetchcountrylist', [AddBeneficiariesController::class, 'fetchcountrylist']);
     Route::get('beneficia/all', [AddBeneficiariesController::class, 'allBeneficia']);
+    Route::get('/banks/filter', [AddBeneficiariesController::class,'banks']);
+    Route::get('/banks', [AddBeneficiariesController::class, 'getBanks'])->name('api.banks');
+
 
     // api routes for Send Money details
     Route::post('/exchange-rate', [SendMoneyController::class, 'getExchangeRates']);
@@ -302,6 +315,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/tax', [ComplianceController::class, 'handleTin']);
     Route::post('/utilitybill', [ComplianceController::class, 'handleUtilitybill']);
     Route::post('/bvn', [ComplianceController::class, 'handleBvn']);
+    Route::post('/proof_of_identity', [ComplianceController::class, 'handleProofOfIdentity']);
+    Route::post('/ownership', [ComplianceController::class, 'handleOwnership']);
+    Route::post('/organisational_chart', [ComplianceController::class, 'handleOrganisationalChart']);
+    Route::post('/register_of_directors', [ComplianceController::class, 'handleRegisterOfDirectors']);
+    Route::post('/formation_document', [ComplianceController::class, 'handleFormationDocument']);
+    // Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
+    Route::get('/compliance/status', [ComplianceController::class, 'status']);
+
+
 
     // Chargeback
     Route::get('/chargeback', [ChargebackController::class, 'index']);
@@ -362,8 +384,18 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/auth/reset-password-personal', [ForgetPasswordController::class, 'resetPasswordapiPersonal']);
     Route::post('/auth/request-forgetpassword-otp-personal', [ForgetPasswordController::class, 'requestForgetPasswordOtpPersonal']);
 
+    Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
+
+
     Route::group(['middleware' => ['auth:personal-api']], function () {
         Route::prefix('personal')->group(function () {
+
+
+        
+        // Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
+        Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
+        Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
+
 
         Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
         Route::post('/personal-add-baneficia', [PersonalAddBeneficiariesController::class, 'store']);
@@ -479,6 +511,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/personal-notifications', [NotificationController::class, 'index']);
         Route::get('/personal-notifications/unread', [NotificationController::class, 'unread']);
         Route::put('/personal-notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+
+
+
+
 
 
 

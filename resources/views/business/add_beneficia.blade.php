@@ -1393,16 +1393,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
 
-    if(
-        data.success === true &&
-        data.status === 200 &&
-        data.data &&
-        data.data.name
-    ){
-        name = data.data.name;
-        valid = true;
-    }
-}
+                if(
+                    data.success === true &&
+                    data.status === 200 &&
+                    data.data &&
+                    data.data.name
+                ){
+                    name = data.data.name;
+                    valid = true;
+                }
+            }
             console.log("Validation result:", name, "Valid:", valid);
             holderInput.value=name;
 
@@ -1526,7 +1526,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 {{-- when i select currency the bank detall will drop --}}
-<script>
+{{-- <script>
 document.addEventListener("DOMContentLoaded", function () {
 
   const currencyRules = @json($currencyRules);
@@ -1561,9 +1561,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!selected) return;
 
     // auto set country
-    if (countrySelect) {
-      countrySelect.value = selected.country;
-    }
+    // if (countrySelect) {
+    //   countrySelect.value = selected.country;
+    // }
 
     // ⭐ IMPORTANT
     // If UGX → do NOT show rules (payment method will handle)
@@ -1581,8 +1581,64 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
-</script>
+</script> --}}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+  const currencyRules = @json($currencyRules);
+
+  const fieldMap = {
+    iban: "iban",
+    accountNumber: "accountNumber",
+    mobileNumber: "mobileNumber",
+    sortCode: "sortCode",
+    bankCode: "bankCode",
+    swiftBic: "swiftBic",
+    routing: "routing",
+    accountType: "accountType"
+  };
+
+  const currencySelect = document.getElementById("currencySelect");
+  const allFields      = document.querySelectorAll(".bank-field");
+
+  if (!currencySelect) return;
+
+  currencySelect.addEventListener("change", function () {
+
+    const currency = this.value;
+    const selected = currencyRules[currency];
+
+    // Hide all rule-based fields first
+    allFields.forEach(field => {
+      field.classList.add("hidden");
+      field.removeAttribute("required");
+    });
+
+    // Stop if currency has no rules
+    if (!selected) return;
+
+    // ⚠️ Important: Skip rule fields for provider-controlled currencies
+    if (["UGX","NGN","TZS","KES","XOF","XAF","ZAR","GHS"].includes(currency)) {
+      return;
+    }
+
+    // Show rule-based fields
+    selected.rules.forEach(rule => {
+
+      const elementId = fieldMap[rule];
+      const el = document.getElementById(elementId);
+
+      if (el) {
+        el.classList.remove("hidden");
+        el.setAttribute("required","required");
+      }
+
+    });
+
+  });
+
+});
+</script>
 
 
 
