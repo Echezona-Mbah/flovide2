@@ -190,7 +190,7 @@
     <!-- blog section end-->
 
     <!-- plans  -->
-    <section   id="plans" class="w-full flex justify-center items-center">
+    {{-- <section   id="plans" class="w-full flex justify-center items-center">
       <section class="bg-[#11402f] text-white max-w-7xl md:rounded-3xl">
         <div class="max-w-7xl mx-auto px-6 py-16 rounded-3xl">
           <div class="text-center max-w-3xl mx-auto">
@@ -333,7 +333,7 @@
           </div>
         </div>
       </section>
-    </section>
+    </section> --}}
 
     <!-- plans end-->
 
@@ -341,7 +341,7 @@
 
 
     <!-- testimonies -->
-    <section class="flex w-full justify-center items-center">
+    {{-- <section class="flex w-full justify-center items-center">
       <section class="bg-white text-gray-900 md:max-w-7xl relative overflow-hidden">
         <section class="px-4 md:max-w-[90rem] md:mx-auto md:px-6 py-12">
           <div class="flex flex-col md:flex-row gap-y-4 justify-center w-full md:justify-between items-center mb-10">
@@ -474,7 +474,7 @@
           </div>
         </section>
       </section>
-    </section>
+    </section> --}}
     <!-- testimonies end -->
 
 

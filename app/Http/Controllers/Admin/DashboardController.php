@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminLoginLog;
 use App\Models\Personal;
 use App\Models\TransactionHistory;
 use App\Models\User;
@@ -33,6 +34,9 @@ class DashboardController extends Controller
         // 👉 Last 7 transactions
         $lastTransactions = TransactionHistory::latest()->take(7)->get();
 
+        $loginLocations = AdminLoginLog::whereNotNull('latitude')
+    ->get(['latitude','longitude','ip_address','country','city']);
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalPersonals',
@@ -40,7 +44,8 @@ class DashboardController extends Controller
             'transactions',
             'totalIncome',
             'incomePercent',
-            'lastTransactions'
+            'lastTransactions',
+            'loginLocations'
         ));
 }
 

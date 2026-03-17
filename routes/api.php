@@ -138,7 +138,7 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 // });
 
     Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
-        Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
+        // Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
 
 
 
@@ -251,7 +251,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/fetchcountrylist', [AddBeneficiariesController::class, 'fetchcountrylist']);
     Route::get('beneficia/all', [AddBeneficiariesController::class, 'allBeneficia']);
     Route::get('/banks/filter', [AddBeneficiariesController::class,'banks']);
-    Route::get('/banks', [AddBeneficiariesController::class, 'getBanks'])->name('api.banks');
+    Route::post('/banks', [AddBeneficiariesController::class, 'getBanks'])->name('api.banks');
 
 
     // api routes for Send Money details
@@ -320,7 +320,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/organisational_chart', [ComplianceController::class, 'handleOrganisationalChart']);
     Route::post('/register_of_directors', [ComplianceController::class, 'handleRegisterOfDirectors']);
     Route::post('/formation_document', [ComplianceController::class, 'handleFormationDocument']);
-    // Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
+    Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
     Route::get('/compliance/status', [ComplianceController::class, 'status']);
 
 

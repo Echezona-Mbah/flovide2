@@ -72,7 +72,7 @@
                 </div>
             </div>
 
-            <div class="border rounded-lg">
+            {{-- <div class="border rounded-lg">
                 <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold">
                     Agreements — United Kingdom
                     <i class="fas fa-chevron-down transition-transform"></i>
@@ -80,10 +80,10 @@
                 <div class="accordion-content hidden px-3 pb-3 space-y-2 text-sm">
                     <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="uk-agreement">UK Privacy Policy</a>
                 </div>
-            </div>
+            </div> --}}
 
 
-            <div class="border rounded-lg">
+            {{-- <div class="border rounded-lg">
                 <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold">
                     Agreements — United State
                     <i class="fas fa-chevron-down transition-transform"></i>
@@ -91,7 +91,7 @@
                 <div class="accordion-content hidden px-3 pb-3 space-y-2 text-sm">
                     <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="us-agreement">Us Privacy Policy</a>
                 </div>
-            </div>
+            </div> --}}
 
 
             <div class="border rounded-lg">
@@ -104,7 +104,7 @@
                 </div>
             </div>
 
-
+{{-- 
             <div class="border rounded-lg">
                 <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold">
                     Agreements — Nigeria
@@ -114,7 +114,7 @@
                     <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="ng-agreement">Term and Condition</a>
                     <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="ng-dispute">Dispute Resolution and Arbitration clause </a>
                 </div>
-            </div>
+            </div> --}}
         </aside>
 
         <!-- Content Area -->

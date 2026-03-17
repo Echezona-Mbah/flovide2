@@ -3,7 +3,7 @@
 <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
 
     <div class="w-full max-w-4xl bg-white shadow-xl rounded-2xl p-8">
-
+{{-- 
         <!-- Header -->
         <div class="text-center mb-8">
             <div class="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-blue-100">
@@ -38,7 +38,7 @@
                 <span>Verification review</span>
             </div>
 
-        </div>
+        </div> --}}
 
         <!-- Sumsub Widget -->
         <div class="border rounded-xl overflow-hidden">
