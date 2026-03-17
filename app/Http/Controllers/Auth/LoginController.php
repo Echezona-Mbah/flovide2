@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
 use App\Mail\LoginOtpMail;
+use App\Models\Bank;
 use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Facades\Http;
@@ -222,6 +223,8 @@ class LoginController extends Controller
         $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)
                     ->getSumsubToken()
                     ->getData(true);
+        $bank = Bank::all();
+
         // dd($chartData);
 
 
@@ -243,6 +246,7 @@ class LoginController extends Controller
                         : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
+                'bank' => $bank,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
                 'transactions' => $transactions,
@@ -446,6 +450,8 @@ class LoginController extends Controller
         $subaccounts = Subaccount::where('personal_id', $account->id)->get();
         $tokenResponse = app(\App\Http\Controllers\Personal\ComplianceController::class)
     ->getSumsubToken($account); // already an array
+            $bank = Bank::all();
+
 
 
         return response()->json([
@@ -464,6 +470,7 @@ class LoginController extends Controller
                         : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
+                'bank' => $bank,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
                 'transactions' => $transactions,

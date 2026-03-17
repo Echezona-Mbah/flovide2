@@ -339,7 +339,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     // Route::post('/admin/register', [RegisterController::class, 'store']);
 
     Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
-    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit');
+    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
+    // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
 
     Route::middleware('admin.auth')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -398,6 +399,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::post('/admin/profile', [AddAdminController::class, 'updateprofile'])->name('admin.profile.update');
         Route::get('/admin/all_admin', [AddAdminController::class, 'indexadmin'])->name('admin.all_admin');
         Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
+        Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+        Route::get('/admin/{id}/activity', [AddAdminController::class, 'activity'])->name('admin.activity');
 
 
         Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');

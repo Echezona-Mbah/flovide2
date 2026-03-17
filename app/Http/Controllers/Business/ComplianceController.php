@@ -559,6 +559,46 @@ private function generateSignature($method, $uri, $body = '')
 
 
 
+// public function getSumsubToken($user = null)
+// {
+//     if (!$user) {
+//      $user = auth()->user();
+//     }
+
+//     if (!$user) {
+//         throw new \Exception("Invalid user passed to getSumsubToken");
+//     }
+
+//     $ts = time();
+//     $uri = '/resources/accessTokens/sdk';
+
+//     $body = json_encode([
+//         'userId' => $user->id,
+//         'levelName' => 'id-and-liveness',
+//         'ttlInSecs' => 600
+//     ]);
+
+//     $signature = hash_hmac(
+//         'sha256',
+//         $ts.'POST'.$uri.$body,
+//         env('SUMSUB_SECRET_KEY')
+//     );
+
+//     $client = new \GuzzleHttp\Client();
+//     $response = $client->post('https://api.sumsub.com'.$uri, [
+//         'headers' => [
+//             'X-App-Token' => env('SUMSUB_APP_TOKEN'),
+//             'X-App-Access-Ts' => $ts,
+//             'X-App-Access-Sig' => $signature,
+//             'Content-Type' => 'application/json'
+//         ],
+//         'body' => $body
+//     ]);
+
+//     // ✅ Return decoded array instead of response
+//     return json_decode($response->getBody(), true);
+// }
+
 
 public function getSumsubToken()
 {
@@ -597,6 +637,8 @@ public function getSumsubToken()
         json_decode($response->getBody(), true)
     );
 }
+
+
 
 public function handle(Request $request)
 {

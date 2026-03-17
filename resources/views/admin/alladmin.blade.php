@@ -98,10 +98,12 @@
 
 
 
- <div class="row">
+<div class="row">
 @foreach($admins as $admin)
     <div class="col-sm-12 col-lg-12 col-xl-4">
         <div class="mb-3 profile-responsive card">
+
+            <!-- Header -->
             <div class="dropdown-menu-header">
                 <div class="dropdown-menu-header-inner bg-dark">
                     <div class="menu-header-image opacity-1"
@@ -129,28 +131,41 @@
                 </div>
             </div>
 
+            <!-- Status & Unlock -->
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     <div class="widget-content pt-4 pb-4 pe-1 ps-1">
                         <div class="text-center">
                             <h5 class="mb-0">
                                 <span class="pe-1">
-                                    <b class="text-danger">{{ rand(5, 20) }}</b> tasks,
+                                    {{-- <b class="text-danger">{{ rand(5, 20) }}</b> tasks, --}}
                                 </span>
-                                <span><b class="text-success">Active</b></span>
+                                @if($admin->locked_until && $admin->locked_until->isFuture())
+                                    <span class="text-danger"><b>Locked admin </b></span>
+                                    <form action="{{ route('admin.unlock', $admin->id) }}" method="POST" class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-warning">Unlock Now</button>
+                                    </form>
+                                @else
+                                    <span class="text-success"><b>Active</b></span>
+                                @endif
                             </h5>
                         </div>
                     </div>
                 </li>
 
+                <!-- Buttons -->
                 <li class="p-0 list-group-item">
                     <div class="grid-menu grid-menu-2col">
                         <div class="g-0 row">
+
                             <div class="col-sm-6">
                                 <div class="p-1">
-                                    <button class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-dark">
-                                        <i class="lnr-lighter text-dark opacity-7 btn-icon-wrapper mb-2"></i> Activity
-                                    </button>
+                                    <a href="{{ route('admin.activity', $admin->id) }}"
+                                       class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-dark">
+                                        <i class="lnr-lighter text-dark opacity-7 btn-icon-wrapper mb-2"></i>
+                                        Activity
+                                    </a>
                                 </div>
                             </div>
 
@@ -181,6 +196,7 @@
                         </div>
                     </div>
                 </li>
+
             </ul>
 
         </div>

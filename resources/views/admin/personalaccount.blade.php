@@ -76,7 +76,35 @@
         
                     
                     
-   
+               <!-- Header -->
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+
+                <h5 class="mb-2 mb-md-0 fw-bold">
+                    Active Personal
+                </h5>
+
+                <form method="GET" action="" class="d-flex align-items-center gap-2">
+
+                    <input 
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control form-control-sm"
+                        placeholder="Search user..."
+                        style="width:220px;"
+                    >
+
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa fa-search"></i>
+                    </button>
+
+                    <a href="{{ url()->current() }}" class="btn btn-light btn-sm border">
+                        Clear
+                    </a>
+
+                </form>
+
+            </div>
             
 
 
@@ -107,6 +135,7 @@
                             <th class="d-none d-lg-table-cell">Balance</th>
                             <th class="d-none d-lg-table-cell">Currency</th>
                             <th>Status</th>
+                            <th>Date</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -180,6 +209,10 @@
                                 </td>
 
 
+                                <td class="d-none d-lg-table-cell">
+                                    {{ $user->created_at ? $user->created_at->format('d M Y H:i') : 'N/A' }}
+                                </td>
+
                                 <!-- Actions -->
                                 <td class="text-end">
 
@@ -234,6 +267,10 @@
 
                 </table>
 
+            </div>
+                        <!-- Pagination -->
+            <div class="p-3">
+                {{ $allpersonal->links('pagination::bootstrap-5') }}
             </div>
 
                                 </div>

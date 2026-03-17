@@ -137,26 +137,26 @@ class AddBeneficiariesController extends Controller
     }
 
     public function getBanks(Request $request)
-{
-    $country  = strtoupper($request->input('country'));   // e.g., NG
-    $provider = $request->input('provider');              // e.g., payaza or pivot
+    {
+        $country  = strtoupper($request->input('country'));   // e.g., NG
+        $provider = $request->input('provider');              // e.g., payaza or pivot
 
-    if (!$country || !$provider) {
+        if (!$country || !$provider) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Country and provider are required'
+            ], 422);
+        }
+
+        $banks = \App\Models\Bank::where('country_iso', $country)
+                    ->where('provider', $provider)
+                    ->get(['name', 'bank_code', 'sort_code', 'type']);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Country and provider are required'
-        ], 422);
+            'success' => true,
+            'data' => $banks
+        ]);
     }
-
-    $banks = \App\Models\Bank::where('country_iso', $country)
-                ->where('provider', $provider)
-                ->get(['name', 'bank_code', 'sort_code', 'type']);
-
-    return response()->json([
-        'success' => true,
-        'data' => $banks
-    ]);
-}
 
 
 
@@ -522,7 +522,7 @@ class AddBeneficiariesController extends Controller
 
         } catch (\Exception $e) {
 
-            logger('Beneficiary Store Error: '.$e->getMessage());
+            // logger('Beneficiary Store Error: '.$e->getMe    ssage());
 
             return $isApi
                 ? response()->json(['success'=>false,'message'=>'Failed to create beneficiary'],500)

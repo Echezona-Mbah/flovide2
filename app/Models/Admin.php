@@ -22,10 +22,15 @@ class Admin extends Authenticatable
         'social_media_accounts',
         'languages_spoken', 
         'emergency_contact',
-        'linkedin_profile'
+        'linkedin_profile',
+        'failed_attempts',
+        'locked_until',
     ];
 
     protected $hidden = [
         'password'
     ];
+    protected $casts = [
+    'locked_until' => 'datetime',
+];
 }

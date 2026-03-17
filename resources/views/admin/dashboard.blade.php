@@ -575,7 +575,45 @@
 
         </div>
     </div>
+<div id="map" style="height: 100px; width: 100%;"></div>
 
+<script>
+    // Initialize map
+    var map = L.map('map').setView([0, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Get locations from Blade
+    var locations = @json($loginLocations);
+
+    var markers = [];
+
+    locations.forEach(function(loc){
+        // Make sure latitude and longitude are numbers
+        if(loc.latitude && loc.longitude){
+            var lat = parseFloat(loc.latitude);
+            var lng = parseFloat(loc.longitude);
+
+            var marker = L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(
+                    "<b>IP:</b> " + loc.ip_address + "<br>" +
+                    "<b>Country:</b> " + loc.country + "<br>" +
+                    "<b>City:</b> " + loc.city
+                );
+
+            markers.push(marker);
+        }
+    });
+
+    // If there are markers, fit map bounds
+    if(markers.length > 0){
+        var group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.2));
+    }
+</script>
 @include('admin.footer')
 
 <!-- Single Modal outside the loop -->
@@ -647,3 +685,8 @@
         });
     });
 </script>
+
+
+
+
+

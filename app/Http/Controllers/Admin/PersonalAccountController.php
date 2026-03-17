@@ -25,12 +25,12 @@ class PersonalAccountController extends Controller
         $allpersonal = Personal::where('typeofuser', 'personal')
                       ->when($search, function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('business_name', 'like', "%{$search}%")
-                  ->orWhere('firstname', 'like', "%{$search}%")
+                $q->where('firstname', 'like', "%{$search}%")
                   ->orWhere('lastname', 'like', "%{$search}%")
+                  ->orWhere('country', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('city', 'like', "%{$search}%")
-                  ->orWhere('business_phone', 'like', "%{$search}%");
+                  ->orWhere('person_phone', 'like', "%{$search}%");
             });
         })
         ->orderBy('created_at', 'desc')

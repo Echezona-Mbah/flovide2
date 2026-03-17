@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\AdminActivityLog;
+use App\Models\AdminLoginLog;
 use App\Models\AdminRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -93,6 +95,27 @@ class AddAdminController extends Controller
         $admin = Admin::findOrFail($id);
         return view('admin.view_admin', compact('admin'));
     }
+
+    public function unlock($id)
+{
+    $admin = Admin::findOrFail($id);
+    $admin->locked_until = null;
+    $admin->failed_attempts = 0;
+    $admin->save();
+
+    return back()->with('success', 'Admin account unlocked successfully!');
+}
+
+
+    public function activity($id)
+{
+    $admin = Admin::findOrFail($id);
+
+    $activities = AdminActivityLog::where('admin_id', $id)->latest()->paginate(10);
+    $logins = AdminLoginLog::where('admin_id', $id)->latest()->paginate(10);
+
+    return view('admin.adminactivity', compact('admin','activities','logins'));
+}
 
 
 

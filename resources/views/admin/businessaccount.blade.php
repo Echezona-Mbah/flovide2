@@ -142,6 +142,7 @@
                             <th class="d-none d-lg-table-cell">Balance</th>
                             <th class="d-none d-lg-table-cell">Currency</th>
                             <th>Status</th>
+                            <th>Date</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -212,6 +213,10 @@
                                             Inactive
                                         </span>
                                     @endif
+                                </td>
+
+                                <td class="d-none d-lg-table-cell">
+                                    {{ $user->created_at ? $user->created_at->format('d M Y H:i') : 'N/A' }}
                                 </td>
 
 
