@@ -33,30 +33,30 @@
             <h4 class="font-semibold mb-4">{{ __('Quick Links') }}</h4>
             <ul class="space-y-2 text-gray-600 text-sm">
                 <li>
-                    <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
-                        {{ __('Blog and news') }}
+                    <a href="{{ url('blog') }}" class="hover:text-gray-900">
+                        {{ __('Blog') }}
                     </a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
                         {{ __('Mobile app') }}
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <a href="{{ route('careers') }}" class="hover:text-gray-900">{{ __('Careers') }}</a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ url('/Coming') }}" class="hover:text-gray-900">
                         {{ __('Why choose us?') }}
                     </a>
                 </li>
                 <li>
                     <a href="{{ url('/business#plans') }}" class="hover:text-gray-900">{{ __('Pricing plan') }}</a>
-                </li>
+                </li> --}}
             </ul>
         </div>
 
-        <div>
+        {{-- <div>
             <h4 class="font-semibold mb-4">{{ __('Our Services') }}</h4>
             <ul class="space-y-2 text-gray-600 text-sm">
                 <li>
@@ -75,7 +75,7 @@
                     </a>
                 </li>
             </ul>
-        </div>
+        </div> --}}
 
 
 
@@ -106,7 +106,7 @@
         class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
         <p>© Flovide 2026</p>
         <div class="flex space-x-4 mt-2 md:mt-0">
-          <a href="{{ route('privacy-policy') }}" class="hover:text-gray-700">{{ __('Terms and conditions') }}</a>
+          <a href="{{ route('terms-condition') }}" class="hover:text-gray-700">{{ __('Terms and conditions') }}</a>
           <a href="{{ route('privacy-policy') }}" class="hover:text-gray-700">{{ __('Privacy policy') }}</a>
         </div>
       </div>

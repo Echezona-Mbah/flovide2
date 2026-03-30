@@ -35,10 +35,10 @@
         </h1>
         <div class="mt-12 rounded-3xl md:border border-gray-400 p-4 md:p-10 flex flex-col gap-8 sm:gap-0 bg-white">
           <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full justify-between">
-            <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
+            {{-- <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
               {{ __('Global Payments') }}
-            </button>
-            <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
+            </button> --}}
+            {{-- <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
               {{ __('Dedicated Support') }}
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
@@ -46,7 +46,7 @@
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
               {{ __('Integrations') }}
-            </button>
+            </button> --}}
           </section>
 
           <section class="flex flex-col md:flex-row gap-y-8 w-full">
@@ -554,14 +554,15 @@
               <h2 class="mt-6 text-xl font-semibold text-gray-900">
                 {{ __('Need to speak with someone?') }}
               </h2>
-              <button
-                class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition"
-                type="button">
-                {{ __('Contact Support') }}
-                <span>
-                  <img src="{{asset('../asserts/arrow-up-black.svg')}}" alt="" width="20px" />
-                </span>
-              </button>
+           <a href="mailto:support@flovide.com" 
+          class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition">
+            
+            {{ __('Contact Support') }}
+
+            <span>
+                <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
+            </span>
+        </a>
             </section>
             <section class="lg:flex-1 max-w-3xl space-y-4">
               <!-- Accordion Item -->

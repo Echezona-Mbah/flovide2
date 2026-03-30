@@ -15,12 +15,11 @@ class CreateBankController extends Controller
 {
       use CurrencyHelper;
 
-    public function create(Request $request)
+   public function create(Request $request)
     {
         $countries = Countries::all();
         $user = auth()->user();
         $balances = Balance::where('user_id', $user->id)->get();
-
 
         // Add currency meta if balances exist
         foreach ($balances as $balance) {
@@ -31,26 +30,24 @@ class CreateBankController extends Controller
         if ($request->expectsJson()) {
             if ($balances->isEmpty()) {
                 return response()->json([
-                    'message' => 'No balance created for this user',
                     'success' => false,
+                    'message' => 'No balance created for this user',
+                    'code' => 'BALANCES_EMPTY',
                     'data' => [
                         'countries' => $countries,
                         'balances' => [],
-                    ],
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
+                    ]
                 ], 200);
             }
 
             return response()->json([
-                'message' => 'Data for add bank form loaded successfully',
                 'success' => true,
+                'message' => 'Data for add bank form loaded successfully',
+                'code' => 'ADD_BANK_DATA_LOADED',
                 'data' => [
                     'countries' => $countries,
                     'balances' => $balances
-                ],
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                ]
             ], 200);
         }
 
@@ -59,29 +56,29 @@ class CreateBankController extends Controller
 
 
     public function createBalance(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'currency' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string',
+        'currency' => 'required|string',
+    ]);
 
-        $userId = Auth::id() ?? $request->user_id;
-           $currency   = strtoupper($request->currency);
+    $userId = Auth::id() ?? $request->user_id;
+    $currency = strtoupper($request->currency);
 
     // 🔎 Check if user already has money in any balance
     $hasMoney = Balance::where('user_id', $userId)
         ->where('amount', '>', 0)
         ->exists();
 
-    if (!$hasMoney) { // ❌ Block if no funds exist
+    if (!$hasMoney) {
         $errorMessage = 'You must have funds in at least one balance before creating a new one';
 
         return $request->expectsJson()
             ? response()->json([
-                'data' => [
-                    'status' => 'error',
-                    'errors' => $errorMessage
-                ]
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'NO_FUNDS',
+                'data' => null
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
@@ -96,89 +93,99 @@ class CreateBankController extends Controller
 
         return $request->expectsJson()
             ? response()->json([
-                'data' => [
-                    'status' => 'error',
-                    'errors' => $errorMessage
-                ]
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'DUPLICATE_BALANCE',
+                'data' => null
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
-        $balance = Balance::create([
-            'user_id' => $userId,
-            'name' => $request->name,
-            'currency' => $request->currency,
-            'balance' => 0,
-        ]);
-        if ($request->expectsJson()) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Balance created successfully.',
-                'data' => $balance
-            ], 201);
-        }
+    $balance = Balance::create([
+        'user_id' => $userId,
+        'name' => $request->name,
+        'currency' => $request->currency,
+        'balance' => 0,
+    ]);
 
-        return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Balance created successfully.',
+            'code' => 'BALANCE_CREATED',
+            'data' => $balance
+        ], 201);
     }
+
+    return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
+}
+
 
 
 
     public function getUserTotalBalance(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $total = Balance::where('user_id', $user->id)->sum('amount');
+    $total = Balance::where('user_id', $user->id)->sum('amount');
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'User total balance fetched successfully',
-                'success' => true,
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'User total balance fetched successfully',
+            'code' => 'TOTAL_BALANCE_FETCHED',
+            'data' => [
                 'user_id' => $user->id,
-                'total_balance' => $total,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ], 200);
-        }
-
-        return view('business.user_balance_total', [
-            'total' => $total
-        ]);
+                'total_balance' => $total
+            ]
+        ], 200);
     }
 
+    return view('business.user_balance_total', [
+        'total' => $total
+    ]);
+}
 
 
-    public function UpdateBalance(Request $request)
-    {
-        $request->validate([
-            'balance_id' => 'required', 
-            'name' => 'required|string|max:255',
-        ]);
 
-        $balanceId = $request->input('balance_id');
-        $newName = $request->input('name');
+ public function UpdateBalance(Request $request)
+{
+    $request->validate([
+        'balance_id' => 'required',
+        'name' => 'required|string|max:255',
+    ]);
 
-        $balance = Balance::where('id', $balanceId)->first();
+    $balanceId = $request->input('balance_id');
+    $newName = $request->input('name');
 
-        if (!$balance) {
-            return $request->expectsJson()
-                ? response()->json(['message' => 'Balance not found.'], 404)
-                : redirect()->back()->with('error', 'Balance not found.');
-        }
+    $balance = Balance::where('id', $balanceId)->first();
 
-        $balance->name = $newName;
-        $balance->save();
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Balance updated successfully.',
-                'data' => $balance,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ], 200);
-        }
-
-        return redirect()->back()->with('success', 'Balance updated successfully.');
+    if (!$balance) {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => 'Balance not found.',
+                'code' => 'BALANCE_NOT_FOUND',
+                'data' => null
+            ], 404)
+            : redirect()->back()->with('error', 'Balance not found.');
     }
+
+    $balance->name = $newName;
+    $balance->save();
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Balance updated successfully.',
+            'code' => 'BALANCE_UPDATED',
+            'data' => $balance
+        ], 200);
+    }
+
+    return redirect()->back()->with('success', 'Balance updated successfully.');
+}
+
 
     public function index(Request $request)
         {

@@ -11,17 +11,17 @@ class refundsController extends Controller
 {
     //
 
-    public function index()
+ public function index()
     {
         $user = Auth::user();
-                // dd($user);
-        // Fetch all refund requests for the authenticated user
+
         $refunds = Refund::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         if (request()->expectsJson()) {
             return response()->json([
-                'status' => 'success',
+                'success' => true,
                 'message' => 'Refund requests retrieved successfully.',
+                'code' => 'REFUNDS_FETCHED',
                 'data' => $refunds,
             ], 200);
         }
@@ -31,7 +31,6 @@ class refundsController extends Controller
 
     public function store(Request $request)
     {
-        // Validate
         $validated = $request->validate([
             'fullname' => 'required|string|max:255',
             'referenceNumber' => 'required|string|max:255',
@@ -41,32 +40,33 @@ class refundsController extends Controller
             'reason' => 'required|string|max:500',
         ]);
 
-        // Check if reference number already exists for the current user
         $exists_for_user = Refund::where('referenceNumber', $validated['referenceNumber'])
             ->where('user_id', Auth::id())
             ->exists();
 
         if ($exists_for_user) {
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'You already used this reference number.',
+                'code' => 'REFERENCE_USED',
+                'data' => null
             ], 422);
         }
 
-        // Check if reference number already exists
         $check_reference_number = Refund::where('referenceNumber', $validated['referenceNumber'])->exists();
 
         if ($check_reference_number) {
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'This reference number already exists.',
+                'code' => 'REFERENCE_EXISTS',
+                'data' => null
             ], 422);
         }
 
         function generateUniqueRefNumber()
         {
             do {
-                // Generate a 20-digit number
                 $ref = '';
                 for ($i = 0; $i < 20; $i++) {
                     $ref .= mt_rand(0, 9);
@@ -75,11 +75,10 @@ class refundsController extends Controller
 
             return $ref;
         }
-        // Generate a unique reference number
+
         $transactionRef = generateUniqueRefNumber();
 
         try {
-            // Create refund record
             $refund = Refund::create([
                 'user_id' => Auth::id(),
                 'name' => $validated['fullname'],
@@ -93,22 +92,23 @@ class refundsController extends Controller
                 'status'   => 'pending',
             ]);
 
-            // If API request → return JSON
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'success',
+                    'success' => true,
                     'message' => 'Refund request created successfully.',
-                    'data'    => $refund
-                ]);
+                    'code' => 'REFUND_CREATED',
+                    'data' => $refund
+                ], 201);
             }
 
-            // Else redirect
             return redirect()->back()->with('success', 'Refund request created successfully.');
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Failed to create refund: ' . $e->getMessage()
+                    'success' => false,
+                    'message' => 'Failed to create refund: ' . $e->getMessage(),
+                    'code' => 'REFUND_CREATE_FAILED',
+                    'data' => null
                 ], 500);
             }
 
@@ -116,9 +116,9 @@ class refundsController extends Controller
         }
     }
 
+
     public function updateStatus(Request $request, $id)
     {
-        // Validate 
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);
@@ -126,11 +126,12 @@ class refundsController extends Controller
         try {
             $refund = Refund::findOrFail($id);
 
-            //authorize only if this refund belongs to the logged-in user
             if ($refund->user_id !== Auth::id()) {
                 return response()->json([
-                    'status' => 'error',
+                    'success' => false,
                     'message' => 'You are not allowed to modify this request.',
+                    'code' => 'FORBIDDEN',
+                    'data' => null
                 ], 403);
             }
 
@@ -140,8 +141,10 @@ class refundsController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status' => 'success',
+                    'success' => true,
                     'message' => 'Request updated successfully.',
+                    'code' => 'REFUND_UPDATED',
+                    'data' => null
                 ], 200);
             }
 
@@ -149,14 +152,17 @@ class refundsController extends Controller
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Failed to process request: ' . $e->getMessage()
+                    'success' => false,
+                    'message' => 'Failed to process request: ' . $e->getMessage(),
+                    'code' => 'REFUND_UPDATE_FAILED',
+                    'data' => null
                 ], 500);
             }
 
             return redirect()->back()->with('error', 'Failed to process request: ' . $e->getMessage());
         }
     }
+
 
 
     public function search(Request $request)

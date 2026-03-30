@@ -82,9 +82,8 @@ class SendMoneyController extends Controller
     //     }
     // }
 
-    public function sendTransaction(Request $request)
+   public function sendTransaction(Request $request)
     {
-        // -------------------- Validate --------------------
         $request->validate([
             'amount' => 'required|numeric|min:1',
             'recipient_id' => 'required|uuid',
@@ -96,34 +95,41 @@ class SendMoneyController extends Controller
             'recipient_amount' => 'required|numeric',
             'account_number' => 'required|string',
             'account_name' => 'required|string',
-            'bank' => 'nullable|string', // 'bank' or 'mobile'
+            'bank' => 'nullable|string',
             'bank_code' => 'nullable|string',
         ]);
 
-        // dd($request->all());
-        // -------------------- Extract currencies --------------------
         $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
         $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
 
         $balance = Balance::find($request->balance_id);
         if (!$balance) {
             return $request->expectsJson()
-                ? response()->json(['error' => 'Invalid balance selected'], 422)
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Invalid balance selected',
+                    'code' => 'INVALID_BALANCE',
+                    'data' => null
+                ], 422)
                 : back()->withErrors(['balance' => 'Invalid balance selected']);
         }
 
         if ($balance->amount < $request->total_amount) {
             return $request->expectsJson()
-                ? response()->json(['error' => 'Insufficient funds'], 422)
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient funds',
+                    'code' => 'INSUFFICIENT_FUNDS',
+                    'data' => null
+                ], 422)
                 : back()->withErrors(['amount' => 'Insufficient funds']);
         }
 
-        // -------------------- Choose provider --------------------
-        $pivotCurrencies = ['UGX']; // Pivot supported currencies
-        $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']; // Payaza supported currencies
+        $pivotCurrencies = ['UGX'];
+        $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES'];
         $appMobileCurrencies = ['GHS'];
 
-       if (
+        if (
             in_array($sendingCurrency, $pivotCurrencies) &&
             filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)
         ) {
@@ -134,7 +140,7 @@ class SendMoneyController extends Controller
             in_array($sendingCurrency, $appMobileCurrencies) &&
             filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)
         ) {
-            return $this->sendViaAppMobile($request, $sendingCurrency, $balance); 
+            return $this->sendViaAppMobile($request, $sendingCurrency, $balance);
         }
 
         if (
@@ -143,39 +149,46 @@ class SendMoneyController extends Controller
         ) {
             return $this->sendViaPayaza($request, $sendingCurrency, $balance);
         }
+
         return $request->expectsJson()
-            ? response()->json(['error' => 'No payment provider available for this currency'], 422)
+            ? response()->json([
+                'success' => false,
+                'message' => 'No payment provider available for this currency',
+                'code' => 'PROVIDER_NOT_AVAILABLE',
+                'data' => null
+            ], 422)
             : back()->with('error', 'No payment provider available for this currency');
     }
 
+
     // -------------------- Pivot Payment --------------------
-   protected function sendViaPivot(Request $request, $currency, $balance)
+    protected function sendViaPivot(Request $request, $currency, $balance)
     {
         $isApi = $request->expectsJson();
         $user = auth()->user();
 
-        // Authenticate Pivot
         $auth = $this->pivot->authenticate();
         if (isset($auth['error'])) {
             return $isApi
-                ? response()->json(['error' => $auth['error']], 500)
+                ? response()->json([
+                    'success' => false,
+                    'message' => $auth['error'],
+                    'code' => 'PIVOT_AUTH_FAILED',
+                    'data' => null
+                ], 500)
                 : back()->withErrors(['error' => $auth['error']]);
         }
 
         $token = $auth['tokenResponse']['accessToken'];
         $merchantTransactionId = 'TXN_' . substr(uniqid(), 0, 10);
 
-        // -------------------- Determine service code --------------------
+        $bankType = strtolower($request->transfer_method ?? 'bank');
 
-        $bankType = strtolower($request->transfer_method ?? 'bank'); // 'mobile' or 'bank'
-
-        // Read service codes from .env
         $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
         $pivotUGXMobileService = env('PIVOT_UGX_MOBILE_SERVICE');
         $pivotKESBankService   = env('PIVOT_KES_BANK_SERVICE', 'KES_BANK_CODE');
         $pivotKESMobileService = env('PIVOT_KES_MOBILE_SERVICE', 'KES_MOBILE_CODE');
 
-        // Choose service code dynamically
         if ($currency === 'UGX') {
             $serviceCode = $bankType === 'mobile' ? $pivotUGXMobileService : $pivotUGXBankService;
             $sortCode    = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SORT', '000000') : $request->bank_code;
@@ -187,7 +200,6 @@ class SendMoneyController extends Controller
             $sortCode    = $bankType === 'mobile' ? '013847' : $request->bank_code;
         }
 
-        // Build payload
         $payload = [
             "serviceCode" => $serviceCode,
             "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',
@@ -201,23 +213,19 @@ class SendMoneyController extends Controller
             "customerName" => $request->account_name,
         ];
 
-        // Add extraData only for bank transfer
         $payload['extraData'] = [
             "bankSortCode" => $sortCode
         ];
 
-        // Only include amount in extraData for bank transfers
         if ($bankType !== 'mobile') {
             $payload['extraData']['amount'] = $request->recipient_amount;
         }
-        // dd($payload);
 
         logger('Pivot REQUEST', $payload);
         $payment = $this->pivot->postTransaction($token, $payload);
         logger('Pivot RESPONSE', $payment);
 
         if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
-            // Success
             $balance->amount -= $request->total_amount;
             $balance->save();
 
@@ -238,39 +246,49 @@ class SendMoneyController extends Controller
             ]);
 
             return $isApi
-                ? response()->json(['message' => 'Pivot transaction successful', 'data' => $payment])
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'Pivot transaction successful',
+                    'code' => 'PIVOT_SUCCESS',
+                    'data' => $payment
+                ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Pivot!');
-        } else {
-            $errorMessage = $payment['statusDescription'] ?? 'Pivot payment failed';
-            return $isApi
-                ? response()->json(['error' => $errorMessage, 'details' => $payment], 422)
-                : back()->with('error', $errorMessage);
         }
+
+        $errorMessage = $payment['statusDescription'] ?? 'Pivot payment failed';
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'PIVOT_FAILED',
+                'data' => $payment
+            ], 422)
+            : back()->with('error', $errorMessage);
     }
+
 
 
     protected function sendViaPayaza(Request $request, $currency, $balance)
     {
-
         $isApi = $request->expectsJson();
         $transactionReference = "TXN_" . time();
 
-        // Payaza account reference
         $accountReference = $this->payaza->getAccountReference($currency);
-        // dd($accountReference);
 
         if (!$accountReference) {
             return $isApi
-                ? response()->json(['error' => 'Unable to retrieve account reference from Payaza'], 500)
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Unable to retrieve account reference from Payaza',
+                    'code' => 'PAYAZA_ACCOUNT_REF_FAILED',
+                    'data' => null
+                ], 500)
                 : back()->with('error', 'Unable to retrieve account reference from Payaza');
         }
 
-        // Determine type: bank or mobile
-        $bankType = strtolower($request->transfer_method ?? 'bank'); // 'bank' or 'mobile'
+        $bankType = strtolower($request->transfer_method ?? 'bank');
 
-
-
-        // ------------------- Transaction type mapping -------------------
         $transactionTypes = [
             'NGN' => 'nuban',
             'GHS' => $bankType === 'mobile' ? 'mobile_money' : 'ghipps',
@@ -284,7 +302,6 @@ class SendMoneyController extends Controller
 
         $transactionType = $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban');
 
-        // ------------------- Build payload -------------------
         $payload = [
             "transaction_type" => $transactionType,
             "service_payload" => [
@@ -311,15 +328,12 @@ class SendMoneyController extends Controller
                 ]
             ]
         ];
-            //   dd($payload);
 
         logger('Payaza REQUEST', $payload);
-
         $response = $this->payaza->initiatePayout($payload);
         logger('Payaza RESPONSE', $response);
 
         if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
-            // Deduct balance
             $balance->amount -= $request->total_amount;
             $balance->save();
 
@@ -340,31 +354,38 @@ class SendMoneyController extends Controller
             ]);
 
             return $isApi
-                ? response()->json(['message' => 'Payaza transaction successful', 'data' => $response])
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'Payaza transaction successful',
+                    'code' => 'PAYAZA_SUCCESS',
+                    'data' => $response
+                ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Payaza!');
         }
 
         $errorMessage = $response['statusDescription'] ?? 'Payaza transaction failed';
+
         return $isApi
-            ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'PAYAZA_FAILED',
+                'data' => $response
+            ], 422)
             : back()->with('error', $errorMessage);
     }
 
 
-    protected function sendViaAppMobile(Request $request, $currency, $balance)
-    {
 
+   protected function sendViaAppMobile(Request $request, $currency, $balance)
+    {
         $isApi = $request->expectsJson();
         $user  = auth()->user();
 
         $exttrid = uniqid('APPM_');
-
         $bankCode = $request->bank_code;
 
-        // Default to bank
         $network = "BNK";
-
-        // If it's mobile money, the bank_code will usually be MTN, VOD, AIR etc
         if (in_array($bankCode, ["MTN", "VOD", "AIR", "VIS", "MAS"])) {
             $network = $bankCode;
         }
@@ -374,7 +395,7 @@ class SendMoneyController extends Controller
             "amount"          => number_format($request->recipient_amount, 2, '.', ''),
             "exttrid"         => $exttrid,
             "reference"       => $request->reference ?? "Wallet Payment",
-            "nw"              => $network, // ✅ Dynamic now
+            "nw"              => $network,
             "bank_code"       => $bankCode,
             "trans_type"      => "MTC",
             "callback_url"    => route('transactionHistory'),
@@ -383,17 +404,10 @@ class SendMoneyController extends Controller
         ];
 
         logger('AppMobile REQUEST', $payload);
-
-        // dd($payload);
-
-
         $response = $this->orchard->sendPayment($payload);
-
         logger('AppMobile RESPONSE', $response);
 
         if (($response['status'] ?? null) === 'SUCCESS' || ($response['success'] ?? false)) {
-
-            // Deduct balance
             $balance->amount -= $request->total_amount;
             $balance->save();
 
@@ -414,16 +428,27 @@ class SendMoneyController extends Controller
             ]);
 
             return $isApi
-                ? response()->json(['message' => 'AppMobile transaction successful', 'data' => $response])
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'AppMobile transaction successful',
+                    'code' => 'APPMOBILE_SUCCESS',
+                    'data' => $response
+                ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via AppMobile!');
         }
 
         $errorMessage = $response['message'] ?? 'AppMobile transaction failed';
 
         return $isApi
-            ? response()->json(['error' => $errorMessage, 'details' => $response], 422)
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'APPMOBILE_FAILED',
+                'data' => $response
+            ], 422)
             : back()->with('error', $errorMessage);
     }
+
 
     // -------------------- IBANQ Payment --------------------
     protected function sendViaIbanq(Request $request, $currency, $balance)
@@ -612,7 +637,7 @@ class SendMoneyController extends Controller
     
 
     
-      public function getUserTotalBalance(Request $request)
+    public function getUserTotalBalance(Request $request)
     {
         $user = auth()->user();
 
@@ -620,12 +645,13 @@ class SendMoneyController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'User total balance fetched successfully',
                 'success' => true,
-                'user_id' => $user->id,
-                'total_balance' => $total,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'message' => 'User total balance fetched successfully',
+                'code' => 'TOTAL_BALANCE_FETCHED',
+                'data' => [
+                    'user_id' => $user->id,
+                    'total_balance' => $total
+                ]
             ], 200);
         }
 
@@ -645,7 +671,12 @@ class SendMoneyController extends Controller
         $result = $this->getExchangeRateFromMap($from, $to);
 
         if (!$result) {
-            return response()->json(['error' => 'Invalid currency'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid currency',
+                'code' => 'INVALID_CURRENCY',
+                'data' => null
+            ], 400);
         }
 
         $rate = $result['rate'];
@@ -653,11 +684,17 @@ class SendMoneyController extends Controller
         $converted = round($amount * $rate, 2);
 
         return response()->json([
-            'rate' => $rate,
-            'converted_amount' => $converted,
-            'transfer_fee' => $fee,
-        ]);
+            'success' => true,
+            'message' => 'Exchange rate fetched',
+            'code' => 'EXCHANGE_RATE_FETCHED',
+            'data' => [
+                'rate' => $rate,
+                'converted_amount' => $converted,
+                'transfer_fee' => $fee,
+            ]
+        ], 200);
     }
+
 
     
     public function getExchangeRates(Request $request)
@@ -670,9 +707,10 @@ class SendMoneyController extends Controller
 
         if (!$result) {
             return response()->json([
-                'data' => [
-                    'errors' => 'Invalid currency'
-                ]
+                'success' => false,
+                'message' => 'Invalid currency',
+                'code' => 'INVALID_CURRENCY',
+                'data' => null
             ], 400);
         }
 
@@ -688,9 +726,14 @@ class SendMoneyController extends Controller
         );
 
         return response()->json([
-            'exchange_rate' => $formatted,
-            'transfer_fee' => $transfer_fee
-        ]);
+            'success' => true,
+            'message' => 'Exchange rate fetched',
+            'code' => 'EXCHANGE_RATE_FETCHED',
+            'data' => [
+                'exchange_rate' => $formatted,
+                'transfer_fee' => $transfer_fee
+            ]
+        ], 200);
     }
 
 
@@ -809,6 +852,20 @@ class SendMoneyController extends Controller
 
 
     
+
+
+        public function indexexc() 
+    {
+        $user = auth()->user();
+        $beneficiaries = Beneficia::where('user_id', $user->id)->get();
+
+        $balances = Balance::where('user_id', $user->id)->get(); 
+        foreach ($balances as $balance) {
+            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+        }
+        $balanceList = $balances;
+        return view('business.exchange_rate', compact('beneficiaries', 'balances'));
+    }
     
     
     

@@ -96,13 +96,12 @@ class ForgetPasswordController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                 'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Validation failed',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
             ], 422);
+
         }
 
         return back()
@@ -116,14 +115,13 @@ class ForgetPasswordController extends Controller
     if (!$account) {
 
         if ($request->expectsJson()) {
-            return response()->json([
-                  'data' => [
-                    'message' => 'Account not found',
-                    'errors' => 'No User found with this email',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+           return response()->json([
+                'success' => false,
+                'message' => 'Account not found',
+                'code' => 'ACCOUNT_NOT_FOUND',
+                'data' => null
             ], 404);
+
         }
 
         return back()->with('error', 'No account found with this email.');
@@ -146,13 +144,14 @@ class ForgetPasswordController extends Controller
     // ✅ Success response
     if ($request->expectsJson()) {
         return response()->json([
-                    'data' => [
-                'message' => 'Password reset OTP sent. Please check your email.',
-                'otp' => $otp,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+            'success' => true,
+            'message' => 'Password reset OTP sent. Please check your email.',
+            'code' => 'OTP_SENT',
+            'data' => [
+                'otp' => $otp
             ]
         ], 201);
+
     }
 
     return redirect()
@@ -227,14 +226,13 @@ class ForgetPasswordController extends Controller
     if ($validator->fails()) {
 
         if ($request->expectsJson()) {
-            return response()->json([
-                 'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+           return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
             ], 422);
+
         }
 
         return back()
@@ -251,13 +249,12 @@ class ForgetPasswordController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'data' => [
-                    'message' => 'Invalid or expired OTP',
-                    'errors' => 'Invalid or expired OTP',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Invalid or expired OTP',
+                'code' => 'OTP_INVALID_OR_EXPIRED',
+                'data' => null
             ], 401);
+
         }
 
         return back()->with('error', 'Invalid or expired OTP.');
@@ -274,13 +271,14 @@ class ForgetPasswordController extends Controller
     // ✅ Success response
     if ($request->expectsJson()) {
         return response()->json([
+            'success' => true,
+            'message' => 'OTP verified',
+            'code' => 'OTP_VERIFIED',
             'data' => [
-                'message' => 'OTP verified',
-                'reset_token' => $account->reset_token,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'reset_token' => $account->reset_token
             ]
         ], 200);
+
     }
 
     // Store token for web flow
@@ -323,11 +321,13 @@ class ForgetPasswordController extends Controller
                     ->first();
 
         if (!$account) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Invalid or expired reset token',
-                ]
+           return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired reset token',
+                'code' => 'RESET_TOKEN_INVALID',
+                'data' => null
             ], 401);
+
         }
 
         $account->update([
@@ -337,11 +337,12 @@ class ForgetPasswordController extends Controller
         ]);
 
         return response()->json([
-            'data' => [
-                'message' => 'Password has been reset successfully',
-                
-            ]
+            'success' => true,
+            'message' => 'Password has been reset successfully',
+            'code' => 'PASSWORD_RESET',
+            'data' => null
         ], 200);
+
     }
 
 
@@ -440,26 +441,23 @@ class ForgetPasswordController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Validation failed',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
             ], 422);
+
         }
 
         // Only User lookup
         $account = \App\Models\User::where('email', $request->email)->first();
 
         if (!$account) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Account not found',
-                    'errors' => 'No User found with this email',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+           return response()->json([
+                'success' => false,
+                'message' => 'Account not found',
+                'code' => 'ACCOUNT_NOT_FOUND',
+                'data' => null
             ], 404);
         }
 
@@ -475,11 +473,11 @@ class ForgetPasswordController extends Controller
         Mail::to($account->email)->send(new ForgetPasswordEmail($otp, $account));
 
         return response()->json([
+            'success' => true,
+            'message' => 'Password reset OTP sent. Please check your email.',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => 'Password reset OTP sent. Please check your email.',
-                'otp' => $otp,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'otp' => $otp
             ]
         ], 201);
     }
@@ -496,12 +494,10 @@ class ForgetPasswordController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Validation failed',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
             ], 422);
         }
 
@@ -509,12 +505,10 @@ class ForgetPasswordController extends Controller
 
         if (!$personal) {
             return response()->json([
-                'data' => [
-                    'message' => 'Personal not found',
-                    'errors' => 'Personal not found with the provided email address',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Personal not found',
+                'code' => 'PERSONAL_NOT_FOUND',
+                'data' => null
             ], 404);
         }
 
@@ -530,11 +524,11 @@ class ForgetPasswordController extends Controller
         Mail::to($personal->email)->send(new ForgetPasswordEmail($otp, $personal));
 
         return response()->json([
+            'success' => true,
+            'message' => 'Password reset OTP sent. Please check your email for OTP',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => 'Password reset OTP sent. Please check your email for OTP',
-                'data' => ['otp' => $otp],
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'otp' => $otp
             ]
         ], 201);
     }
@@ -548,14 +542,12 @@ class ForgetPasswordController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
-            ], 422);
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'code' => 'VALIDATION_ERROR',
+            'data' => $validator->errors()
+        ], 422);
         }
 
         $personal = Personal::where('forget_verification_otp', $request->otp)
@@ -563,13 +555,11 @@ class ForgetPasswordController extends Controller
             ->first();
 
         if (!$personal) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Invalid or expired OTP',
-                    'errors' => 'Invalid or expired OTP',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+           return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP',
+                'code' => 'OTP_INVALID_OR_EXPIRED',
+                'data' => null
             ], 401);
         }
 
@@ -581,11 +571,11 @@ class ForgetPasswordController extends Controller
         ]);
 
         return response()->json([
+            'success' => true,
+            'message' => 'OTP verified',
+            'code' => 'OTP_VERIFIED',
             'data' => [
-                'message' => 'OTP verified',
-                'reset_token' => $personal->reset_token,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'reset_token' => $personal->reset_token
             ]
         ], 200);
     }
@@ -611,10 +601,12 @@ class ForgetPasswordController extends Controller
 
         if (!$personal) {
             return response()->json([
-                'data' => [
-                    'message' => 'Invalid or expired reset token',
-                ]
+                'success' => false,
+                'message' => 'Invalid or expired reset token',
+                'code' => 'RESET_TOKEN_INVALID',
+                'data' => null
             ], 401);
+
         }
 
         $personal->update([
@@ -624,9 +616,10 @@ class ForgetPasswordController extends Controller
         ]);
 
         return response()->json([
-            'data' => [
-                'message' => 'Password has been reset successfully',
-            ]
+            'success' => true,
+            'message' => 'Password has been reset successfully',
+            'code' => 'PASSWORD_RESET',
+            'data' => null
         ], 200);
     }
 
@@ -640,12 +633,10 @@ class ForgetPasswordController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'data' => [
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Validation failed',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
             ], 422);
         }
 
@@ -653,12 +644,10 @@ class ForgetPasswordController extends Controller
 
         if (!$personal) {
             return response()->json([
-                'data' => [
-                    'message' => 'Personal not found',
-                    'errors' => 'Personal not found with the provided email address',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Personal not found',
+                'code' => 'PERSONAL_NOT_FOUND',
+                'data' => null
             ], 404);
         }
 
@@ -674,11 +663,11 @@ class ForgetPasswordController extends Controller
         Mail::to($personal->email)->send(new ForgetPasswordEmail($otp, $personal));
 
         return response()->json([
+            'success' => true,
+            'message' => 'Password reset OTP sent. Please check your email for OTP',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => 'Password reset OTP sent. Please check your email for OTP',
-                'otp' =>  $otp,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'otp' => $otp
             ]
         ], 201);
 }

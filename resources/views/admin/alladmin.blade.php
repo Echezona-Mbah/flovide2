@@ -1,242 +1,506 @@
 @include('admin.head')
-  <style>
-  #toast-container {
-    position: fixed !important;
-    bottom: 20px !important;   /* move to bottom */
-    right: 20px !important;    /* stay aligned right */
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px;
-    z-index: 999999 !important;
-}
 
+<style>
+    :root {
+        --admin-ink: #14213d;
+        --admin-ink-soft: #64748b;
+        --admin-paper: #ffffff;
+        --admin-paper-soft: #f8fafc;
+        --admin-line: #e2e8f0;
+        --admin-blue: #2563eb;
+        --admin-cyan: #0891b2;
+        --admin-green: #16a34a;
+        --admin-red: #dc2626;
+        --admin-amber: #d97706;
+        --admin-shadow: 0 18px 45px rgba(20, 33, 61, 0.08);
+    }
 
-.toast {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    min-width: 280px !important;
-    max-width: 350px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: white;
-    font-weight: 500;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-    position: relative;
-    animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s ease-in-out 3.5s forwards;
-    opacity: 1;
-}
+    #toast-container {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px;
+        z-index: 999999 !important;
+    }
 
-.toast.success {
-    background: #28a745; /* Green */
-}
+    .toast {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-width: 280px !important;
+        max-width: 350px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 13px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0px 10px 24px rgba(0, 0, 0, 0.18);
+        position: relative;
+        animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s ease-in-out 3.5s forwards;
+        opacity: 1;
+    }
 
-.toast.error {
-    background: #dc3545; /* Red */
-}
+    .toast.success {
+        background: linear-gradient(135deg, #16a34a, #10b981);
+    }
 
-.toast .toast-progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.7);
-    width: 100%;
-    animation: progressBar 3s linear forwards;
-}
+    .toast.error {
+        background: linear-gradient(135deg, #dc2626, #f87171);
+    }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .toast .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.7);
+        width: 100%;
+        animation: progressBar 3s linear forwards;
+    }
 
-@keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-20px); }
-}
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-@keyframes progressBar {
-    from { width: 100%; }
-    to { width: 0%; }
-}
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+    }
 
-      
-        </style>
+    @keyframes progressBar {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+
+    .admin-directory-page {
+        padding-bottom: 32px;
+    }
+
+    .admin-hero {
+        border: 0;
+        border-radius: 32px;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 24%),
+            radial-gradient(circle at bottom left, rgba(8,145,178,0.15), transparent 30%),
+            linear-gradient(135deg, #0c1630 0%, #123b9f 52%, #0891b2 100%);
+        box-shadow: 0 26px 70px rgba(17, 24, 39, 0.18);
+        margin-bottom: 24px;
+    }
+
+    .admin-hero .card-body {
+        padding: 34px;
+    }
+
+    .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .hero-title {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 14px 0 10px;
+    }
+
+    .hero-copy {
+        color: rgba(255,255,255,0.82);
+        max-width: 760px;
+        line-height: 1.8;
+        margin-bottom: 0;
+    }
+
+    .hero-metric {
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 20px;
+        padding: 16px 18px;
+        color: #fff;
+        height: 100%;
+    }
+
+    .hero-metric small {
+        display: block;
+        color: rgba(255,255,255,0.70);
+        margin-bottom: 6px;
+    }
+
+    .hero-metric strong {
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .summary-card {
+        background: var(--admin-paper);
+        border: 1px solid var(--admin-line);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: var(--admin-shadow);
+    }
+
+    .summary-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+
+    .icon-blue { background: rgba(37, 99, 235, 0.12); color: var(--admin-blue); }
+    .icon-green { background: rgba(22, 163, 74, 0.12); color: var(--admin-green); }
+    .icon-red { background: rgba(220, 38, 38, 0.12); color: var(--admin-red); }
+    .icon-amber { background: rgba(217, 119, 6, 0.12); color: var(--admin-amber); }
+
+    .summary-label {
+        font-size: 13px;
+        color: var(--admin-ink-soft);
+        margin-bottom: 6px;
+    }
+
+    .summary-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--admin-ink);
+        line-height: 1.1;
+    }
+
+    .admin-card {
+        border: 0;
+        border-radius: 28px;
+        overflow: hidden;
+        background: var(--admin-paper);
+        box-shadow: var(--admin-shadow);
+        transition: transform .2s ease, box-shadow .2s ease;
+        height: 100%;
+    }
+
+    .admin-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.10);
+    }
+
+    .admin-card-top {
+        position: relative;
+        padding: 24px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+            linear-gradient(135deg, #0f172a, #1d4ed8 65%, #0891b2);
+        color: #fff;
+        min-height: 170px;
+    }
+
+    .admin-card-top::after {
+        content: "";
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        top: -30px;
+        right: -30px;
+    }
+
+    .admin-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.16);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.16);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .admin-role-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.14);
+        color: #fff;
+        margin-top: 10px;
+    }
+
+    .admin-card-body {
+        padding: 22px;
+    }
+
+    .admin-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 13px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .status-active {
+        background: rgba(22, 163, 74, 0.12);
+        color: var(--admin-green);
+    }
+
+    .status-locked {
+        background: rgba(220, 38, 38, 0.12);
+        color: var(--admin-red);
+    }
+
+    .admin-meta {
+        color: var(--admin-ink-soft);
+        font-size: 13px;
+        line-height: 1.7;
+        margin: 14px 0 18px;
+    }
+
+    .admin-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .admin-action-btn {
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        transition: all .2s ease;
+        display: block;
+        text-decoration: none;
+    }
+
+    .admin-action-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-view {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--admin-blue);
+    }
+
+    .btn-activity {
+        background: rgba(15, 23, 42, 0.08);
+        color: #334155;
+    }
+
+    .btn-settings {
+        background: rgba(22, 163, 74, 0.12);
+        color: var(--admin-green);
+    }
+
+    .btn-edit {
+        background: rgba(217, 119, 6, 0.12);
+        color: var(--admin-amber);
+    }
+
+    .unlock-box {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 18px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+    }
+
+    .unlock-btn {
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff;
+        padding: 10px 14px;
+        font-weight: 700;
+        width: 100%;
+    }
+</style>
+
 <body>
     <div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
-     @include('admin.header')
-
+        @include('admin.header')
         @include('admin.ui-setting')
         
         <div class="app-main MainAnimation-appear">
             @include('admin.sidebar')
             
-            
             <div class="app-main__outer">
                 <div class="app-main__inner">
 
-                    <div class="app-page-title">
-                        <div class="page-title-wrapper">
-                            <div class="page-title-heading">
-                                <div class="page-title-icon">
-                                    <i class="pe-7s-graph icon-gradient bg-ripe-malin"></i>
-                                </div>
-                                  <div>
-                                        All Admin  
-                                        <div class="page-title-subheading">
-                                            View and manage All Admin
-                                        </div>
-                                    </div>
-
-                            </div>
-                            
-                        </div>
-                    </div> 
-
                     <div id="toast-container"></div>
 
+                    <div class="admin-directory-page">
 
+                        <div class="card admin-hero">
+                            <div class="card-body">
+                                <div class="row align-items-end g-4">
+                                    <div class="col-lg-8">
+                                        <div class="hero-tag">
+                                            <i class="pe-7s-users"></i>
+                                            Team Directory
+                                        </div>
+                                        <h1 class="hero-title">All Admin</h1>
+                                        <p class="hero-copy">
+                                            Review every administrator in one place, monitor active and locked accounts, and jump quickly into activity, profile, settings, or account management actions.
+                                        </p>
+                                    </div>
 
-<div class="row">
-@foreach($admins as $admin)
-    <div class="col-sm-12 col-lg-12 col-xl-4">
-        <div class="mb-3 profile-responsive card">
-
-            <!-- Header -->
-            <div class="dropdown-menu-header">
-                <div class="dropdown-menu-header-inner bg-dark">
-                    <div class="menu-header-image opacity-1"
-                        style="background-image: url('assets/images/dropdown-header/abstract3.jpg');"></div>
-                    <div class="menu-header-content btn-pane-right">
-
-                        <div class="avatar-icon-wrapper me-3 avatar-icon-xl btn-hover-shine">
-                            <div class="avatar-icon rounded">
-                                <img 
-                                    src="{{ $admin->profile_picture ? asset('storage/'.$admin->profile_picture) : asset('assets/images/avatars/default.png') }}" 
-                                    alt="Profile">
+                                    <div class="col-lg-4">
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <div class="hero-metric">
+                                                    <small>Total Admins</small>
+                                                    <strong>{{ $admins->count() }}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="hero-metric">
+                                                    <small>Locked</small>
+                                                    <strong>{{ $admins->filter(fn($a) => $a->locked_until && $a->locked_until->isFuture())->count() }}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="hero-metric">
+                                                    <small>Active</small>
+                                                    <strong>{{ $admins->filter(fn($a) => !($a->locked_until && $a->locked_until->isFuture()))->count() }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <h5 class="menu-header-title">{{ $admin->name }}</h5>
-                            <h6 class="menu-header-subtitle">{{ $admin->role ?? 'Admin' }}</h6>
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <div class="summary-icon icon-blue">
+                                    <i class="pe-7s-users"></i>
+                                </div>
+                                <div class="summary-label">All Admins</div>
+                                <div class="summary-value">{{ $admins->count() }}</div>
+                            </div>
+
+                            <div class="summary-card">
+                                <div class="summary-icon icon-green">
+                                    <i class="pe-7s-check"></i>
+                                </div>
+                                <div class="summary-label">Active Admins</div>
+                                <div class="summary-value">{{ $admins->filter(fn($a) => !($a->locked_until && $a->locked_until->isFuture()))->count() }}</div>
+                            </div>
+
+                            <div class="summary-card">
+                                <div class="summary-icon icon-red">
+                                    <i class="pe-7s-lock"></i>
+                                </div>
+                                <div class="summary-label">Locked Admins</div>
+                                <div class="summary-value">{{ $admins->filter(fn($a) => $a->locked_until && $a->locked_until->isFuture())->count() }}</div>
+                            </div>
+
+                            <div class="summary-card">
+                                <div class="summary-icon icon-amber">
+                                    <i class="pe-7s-tools"></i>
+                                </div>
+                                <div class="summary-label">Roles In Use</div>
+                                <div class="summary-value">{{ $admins->pluck('role')->filter()->unique()->count() }}</div>
+                            </div>
                         </div>
 
-                        <div class="menu-header-btn-pane">
-                            <a href="{{ route('admin.view', $admin->id) }}" class="btn btn-success">View Profile</a>
+                        <div class="row">
+                            @foreach($admins as $admin)
+                                <div class="col-sm-12 col-lg-6 col-xl-4 mb-4">
+                                    <div class="admin-card">
+
+                                        <div class="admin-card-top">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img
+                                                    src="{{ $admin->profile_picture ? asset('storage/'.$admin->profile_picture) : asset('assets/images/avatars/default.png') }}"
+                                                    alt="Profile"
+                                                    class="admin-avatar">
+
+                                                <div>
+                                                    <h4 class="mb-1 text-white">{{ $admin->name }}</h4>
+                                                    <div class="text-white-50 small">{{ $admin->email ?? 'No email available' }}</div>
+                                                    <div class="admin-role-pill">{{ $admin->role ?? 'Admin' }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="admin-card-body">
+                                            @if($admin->locked_until && $admin->locked_until->isFuture())
+                                                <span class="admin-status status-locked">Locked Admin</span>
+                                            @else
+                                                <span class="admin-status status-active">Active Admin</span>
+                                            @endif
+
+                                            <div class="admin-meta">
+                                                Manage this administrator’s profile, inspect recent activity, adjust settings, or update account access from the options below.
+                                            </div>
+
+                                            @if($admin->locked_until && $admin->locked_until->isFuture())
+                                                <div class="unlock-box">
+                                                    <form action="{{ route('admin.unlock', $admin->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="unlock-btn">Unlock Now</button>
+                                                    </form>
+                                                </div>
+                                            @endif
+
+                                            <div class="admin-actions mt-3">
+                                                <a href="{{ route('admin.view', $admin->id) }}" class="admin-action-btn btn-view">
+                                                    View Profile
+                                                </a>
+
+                                                <a href="{{ route('admin.activity', $admin->id) }}" class="admin-action-btn btn-activity">
+                                                    Activity
+                                                </a>
+
+                                                <a href="{{ route('admin.settings', $admin->id) }}" class="admin-action-btn btn-settings">
+                                                    Settings
+                                                </a>
+
+                                                <a href="" class="admin-action-btn btn-edit">
+                                                    Edit
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
 
                     </div>
+
                 </div>
             </div>
-
-            <!-- Status & Unlock -->
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <div class="widget-content pt-4 pb-4 pe-1 ps-1">
-                        <div class="text-center">
-                            <h5 class="mb-0">
-                                <span class="pe-1">
-                                    {{-- <b class="text-danger">{{ rand(5, 20) }}</b> tasks, --}}
-                                </span>
-                                @if($admin->locked_until && $admin->locked_until->isFuture())
-                                    <span class="text-danger"><b>Locked admin </b></span>
-                                    <form action="{{ route('admin.unlock', $admin->id) }}" method="POST" class="mt-2">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-warning">Unlock Now</button>
-                                    </form>
-                                @else
-                                    <span class="text-success"><b>Active</b></span>
-                                @endif
-                            </h5>
-                        </div>
-                    </div>
-                </li>
-
-                <!-- Buttons -->
-                <li class="p-0 list-group-item">
-                    <div class="grid-menu grid-menu-2col">
-                        <div class="g-0 row">
-
-                            <div class="col-sm-6">
-                                <div class="p-1">
-                                    <a href="{{ route('admin.activity', $admin->id) }}"
-                                       class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-dark">
-                                        <i class="lnr-lighter text-dark opacity-7 btn-icon-wrapper mb-2"></i>
-                                        Activity
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <div class="p-1">
-                                    <button class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-danger">
-                                        <i class="lnr-construction text-danger opacity-7 btn-icon-wrapper mb-2"></i> Reports
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <div class="p-1">
-                                    <button class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-success">
-                                        <i class="lnr-bus text-success opacity-7 btn-icon-wrapper mb-2"></i> Settings
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <div class="p-1">
-                                    <button class="btn-icon-vertical btn-transition-text btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-focus">
-                                        <i class="lnr-gift text-focus opacity-7 btn-icon-wrapper mb-2"></i> Edit
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </li>
-
-            </ul>
-
         </div>
     </div>
-@endforeach
-</div>
 
-
-
-
-        
-                    
-                    
-   
-        
-                </div>
-                        {{-- <div class="row">
-                        <div class="col-md-12">
-                            <div class="main-card mb-3 card">
-                                <div class="card-body">
-                              
-                                    <button type="button" class="btn me-2 mb-2 btn-primary" data-bs-toggle="modal"
-                                        data-bs-target=".bd-example-modal-lg">Large modal</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div> --}}
-
-
-      
-            </div>
-
-        </div>
-    </div>
-<!-- Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    function showToast(message, type = "success") { 
+    function showToast(message, type = "success") {
         var toastContainer = document.getElementById("toast-container");
         if (!toastContainer) return;
 
@@ -255,25 +519,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 4000);
     }
 
-    // Laravel Validation Errors
     @if ($errors->any())
         @foreach ($errors->all() as $error)
             showToast("{{ $error }}", "error");
         @endforeach
     @endif
 
-    // Success Toast
     @if (session('success'))
         showToast("{{ session('success') }}", "success");
     @endif
 
-    // Error Toast
     @if (session('error'))
         showToast("{{ session('error') }}", "error");
     @endif
-
 });
 </script>
+
 @include('admin.footer')
-
-

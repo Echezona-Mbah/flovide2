@@ -67,9 +67,9 @@
             </h1>
             @include('business.header_notifical')
         </header>
-     <section class="w-full rounded-3xl bg-white min-h-screen p-4 md:p-8">
+     {{-- <section class="w-full rounded-3xl bg-white min-h-screen p-4 md:p-8"> --}}
 
- <section class="min-h-screen bg-white py-4 px-2">
+ {{-- <section class="min-h-screen bg-white py-4 px-2">
   <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-6 md:p-12 space-y-8">
 
     <!-- Header -->
@@ -79,7 +79,7 @@
     </div>
 
     <!-- Form -->
-    <form method="POST" action="{{ route('add_beneficias.store') }}" class="space-y-6 md:space-y-8">
+    <form method="POST" action="{{ route('add_beneficias.store') }}" class="space-y-6 md:space-y-8" autocomplete="off">
       @csrf
 
       <!-- Alerts -->
@@ -175,13 +175,13 @@
 
         <!-- Individual Fields -->
         <div id="individualFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 hidden">
-          <input type="text" name="firstNames" placeholder="First Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
-          <input type="text" name="lastName" placeholder="Last Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input autocomplete="new-password" type="text" name="firstNames" placeholder="First Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input autocomplete="new-password" type="text" name="lastName" placeholder="Last Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
 
         <!-- Corporate Fields -->
         <div id="corporateFields" class="mt-2 hidden">
-          <input type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          <input autocomplete="new-password" type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
         </div>
 
       </div>
@@ -205,12 +205,7 @@
         <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
         <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
         <input id="mobileNumber" name="bank[mobileNumber]" placeholder="Mobile Number"class="w-full border rounded-xl px-3 py-2 hidden"/>
-        {{-- <select id="bankSelect" name="bank[sortCode]" class="w-full border rounded-xl px-3 py-2 hidden">
-            <option value="">Select Bank</option>
-            @foreach($banks as $bank)
-                <option value="{{ $bank->sort_code }}">{{ $bank->name }}</option>
-            @endforeach
-            </select> --}}
+
 
             <select id="bankSelect" name="bank[bankCode]" class="w-full border rounded-xl px-3 py-2 hidden">
                 <option value="">Select Bank</option>
@@ -223,16 +218,20 @@
           <option value="savings">Savings</option>
         </select>
 
-          <input 
-                id="accountHolder"
-                type="text" 
-                name="bank[accountHolder]" 
-                placeholder="Account Holder"
-                class="w-full border rounded-xl px-3 py-2 transition-all duration-300"
+         <input 
+            id="accountHolder"
+            type="text" 
+            name="bank[accountHolder]" 
+            placeholder="Account Holder"
+            class="w-full border rounded-xl px-3 py-2 transition-all duration-300"
             />
             <div id="accountLoading" class="text-sm text-gray-500 hidden">
-                ⏳ Fetching account name…
+            ⏳ Fetching account name…
             </div>
+            <div id="accountManualHint" class="text-sm text-red-600 hidden">
+            We couldn’t verify this account name. Please enter it manually and ensure it is correct.
+            </div>
+
       </div>
 
       <!-- Buttons -->
@@ -247,10 +246,191 @@
 
     </form>
   </div>
+</section> --}}
+
+<section class="mx-auto max-w-5xl">
+  <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
+    <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Payout Accounts</p>
+        <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Add Beneficiary</h2>
+        <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+            Create a new beneficiary with validated bank details. If validation fails, you can still enter the name manually.
+        </p>
+        </div>
+        <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
+        Environment: <span class="font-semibold">Live/Test</span>
+        </div>
+    </div>
+    </div>
+
+
+    <form method="POST" action="{{ route('add_beneficias.store') }}" class="p-6 md:p-10 space-y-10" autocomplete="off">
+      @csrf
+       <!-- Alerts -->
+      @if ($errors->any())
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json($errors->first()),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('success'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: @json(session('success')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      @if (session('api_error'))
+        <script>
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'error',
+              title: @json(session('api_error')),
+              showConfirmButton: false,
+              timer: 4000,
+              timerProgressBar: true,
+          });
+        </script>
+      @endif
+
+      <!-- Beneficiary Info -->
+      <div class="grid lg:grid-cols-2 gap-8">
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900">Beneficiary</h3>
+            <p class="text-sm text-slate-500">Country, currency, and identity details.</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium mb-1 block">Country</label>
+              <div class="select-wrapper">
+                <select id="countrySelect" name="bank[country]">
+                  <option value=""></option>
+                  @foreach($countries as $country)
+                    <option value="{{ $country->country_iso }}">{{ $country->country_name }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium mb-1 block">Currency</label>
+              <div class="select-wrapper">
+                <select id="currencySelect" name="bank[currency]">
+                  <option value=""></option>
+                  @foreach($countries->unique('currency_iso') as $country)
+                    <option value="{{ $country->currency_iso }}">{{ $country->currency_iso }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium mb-1 block">Beneficiary Type</label>
+            <select id="beneficiaryType" name="type" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base">
+              <option value="">Select Type</option>
+              <option value="individual">Individual</option>
+              <option value="corporate">Corporate</option>
+            </select>
+          </div>
+
+          <div id="individualFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 hidden">
+            <input autocomplete="new-password" type="text" name="firstNames" placeholder="First Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+            <input autocomplete="new-password" type="text" name="lastName" placeholder="Last Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          </div>
+
+          <div id="corporateFields" class="hidden">
+            <input autocomplete="new-password" type="text" name="name" placeholder="Company Name" class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-400 text-sm md:text-base" />
+          </div>
+        </div>
+
+        <!-- Bank Details -->
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900">Bank Details</h3>
+            <p class="text-sm text-slate-500">Account info and validation.</p>
+          </div>
+
+          <select id="transferMethod" name="transfer_method" class="w-full border rounded-xl px-3 py-2 hidden">
+            <option value="">Select Transfer Method</option>
+            <option value="mobile">Mobile Money</option>
+            <option value="bank">Bank Transfer</option>
+          </select>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <input type="text" id="iban" name="bank[iban]" placeholder="IBAN" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+            <input type="text" id="accountNumber" name="bank[accountNumber]" placeholder="Account Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+            <input type="text" id="sortCode" name="bank[sortCode]" placeholder="Sort Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+            <input type="text" id="bankCode" name="bank[bankCode]" placeholder="Bank Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+            <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+            <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+          </div>
+
+          <input id="mobileNumber" name="bank[mobileNumber]" placeholder="Mobile Number" class="w-full border rounded-xl px-3 py-2 hidden"/>
+
+          <select id="bankSelect" name="bank[bankCode]" class="w-full border rounded-xl px-3 py-2 hidden">
+            <option value="">Select Bank</option>
+          </select>
+
+          <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
+            <option value="">Account Type</option>
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+
+          <div>
+            <label class="text-sm font-medium mb-1 block">Account Holder</label>
+            <input 
+              id="accountHolder"
+              type="text" 
+              name="bank[accountHolder]" 
+              placeholder="Account Holder"
+              class="w-full border rounded-xl px-3 py-2 transition-all duration-300"
+            />
+            <div id="accountLoading" class="text-sm text-gray-500 hidden">⏳ Fetching account name…</div>
+            <div id="accountManualHint" class="text-sm text-red-600 hidden">
+              We couldn’t verify this account name. Please enter it manually and ensure it is correct.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+        <button type="submit" class="flex-1 bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition">
+          Create Beneficiary
+        </button>
+        <a href="{{ route('beneficias') }}" class="flex-1 border py-3 rounded-xl text-center hover:bg-slate-50 transition">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
 </section>
 
 
-</section>
+
+{{-- </section> --}}
 
 
     </main>
@@ -1282,140 +1462,271 @@ document.addEventListener("DOMContentLoaded", function() {
      }
 
     /* ================= ACCOUNT VALIDATION ================= */
-    async function validateAccount(){
-        console.log("validateAccount called");
+    // async function validateAccount(){
+    //     console.log("validateAccount called");
 
-        const currency = currencySelect.value;
-        const method   = transferMethod.value;
+    //     const currency = currencySelect.value;
+    //     const method   = transferMethod.value;
 
-        console.log("Currency:", currency, "Method:", method);
+    //     console.log("Currency:", currency, "Method:", method);
 
-        let payload = null;
-        let route   = "";
+    //     let payload = null;
+    //     let route   = "";
 
-        if(currency==="UGX" && pivotEnabled){
-            if(method==="mobile"){
-                const mobile = mobileInput.value.trim();
-                console.log("Pivot mobile payload:", mobile);
-                if(!mobile) return;
-                payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
-            }
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
-                const code = bankSelect.value;
-                console.log("Pivot bank payload:", acc, code);
-                if(!acc || !code) return;
-                payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
-            }
-            route = "{{ route('pivot.account.validation') }}";
-        } else if(PAYAZA_CURRENCIES.includes(currency)){
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
-                const code = bankSelect.value;
-                console.log("Payaza bank payload:", acc, code);
-                if(!acc || !code) return;
-                payload = { currency, account_number: acc, bank_code: code };
-            }
-            if(method==="mobile"){
-                const mobile = mobileInput.value.trim();
-                const code   = bankSelect.value;
-                console.log("Payaza mobile payload:", mobile, code);
-                if(!mobile || !code) return;
-                payload = { currency, account_number: mobile, bank_code: code };
-            }
-            route = "{{ route('payaza.account-enquiry') }}";
+    //     if(currency==="UGX" && pivotEnabled){
+    //         if(method==="mobile"){
+    //             const mobile = mobileInput.value.trim();
+    //             console.log("Pivot mobile payload:", mobile);
+    //             if(!mobile) return;
+    //             payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
+    //         }
+    //         if(method==="bank"){
+    //             const acc  = accountNumber.value.trim();
+    //             const code = bankSelect.value;
+    //             console.log("Pivot bank payload:", acc, code);
+    //             if(!acc || !code) return;
+    //             payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
+    //         }
+    //         route = "{{ route('pivot.account.validation') }}";
+    //     } else if(PAYAZA_CURRENCIES.includes(currency)){
+    //         if(method==="bank"){
+    //             const acc  = accountNumber.value.trim();
+    //             const code = bankSelect.value;
+    //             console.log("Payaza bank payload:", acc, code);
+    //             if(!acc || !code) return;
+    //             payload = { currency, account_number: acc, bank_code: code };
+    //         }
+    //         if(method==="mobile"){
+    //             const mobile = mobileInput.value.trim();
+    //             const code   = bankSelect.value;
+    //             console.log("Payaza mobile payload:", mobile, code);
+    //             if(!mobile || !code) return;
+    //             payload = { currency, account_number: mobile, bank_code: code };
+    //         }
+    //         route = "{{ route('payaza.account-enquiry') }}";
+    //     }
+
+    //     // ===== APP MOBILE GHANA =====
+    //     if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
+
+    //         const method = transferMethod.value;
+    //         const code   = bankSelect.value;
+
+    //         if(method === "bank"){
+    //             const acc = accountNumber.value.trim();
+    //             if(!acc || !code) return;
+
+    //             payload = {
+    //                 customer_number: acc,
+    //                 bank_code: code
+    //             };
+    //         }
+
+    //         if(method === "mobile"){
+    //             const mobile = mobileInput.value.trim();
+    //             if(!mobile || !code) return;
+
+    //             payload = {
+    //                 customer_number: mobile,
+    //                 bank_code: code
+    //             };
+    //         }
+
+    //         route = "{{ route('appmobile.account-enquiry') }}";
+    //     }
+
+    //     if(!payload) return;
+
+    //     try{
+    //         console.log("Sending account validation request:", payload, route);
+    //         loadingText.classList.remove("hidden");
+    //         holderInput.value="";
+    //         holderInput.classList.remove("border-green-500","bg-green-100");
+    //         holderInput.setAttribute("readonly",true);
+
+    //         const res = await fetch(route,{
+    //             method:"POST",
+    //             headers:{
+    //                 "Content-Type":"application/json",
+    //                 "X-CSRF-TOKEN":"{{ csrf_token() }}"
+    //             },
+    //             body:JSON.stringify(payload)
+    //         });
+
+    //         const data = await res.json();
+    //         console.log("Validation response:", data);
+
+    //         loadingText.classList.add("hidden");
+
+    //         let name="Account not found";
+    //         let valid=false;
+
+    //         if(currency==="UGX" && pivotEnabled){
+    //             if(data.accountName){
+    //                 name=data.accountName;
+    //                 valid=true;
+    //             }
+    //         } else if(data.success && data.data?.response_content?.account_name){
+    //             name=data.data.response_content.account_name;
+    //             valid=true;
+    //         }
+
+    //         if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
+
+    //             if(
+    //                 data.success === true &&
+    //                 data.status === 200 &&
+    //                 data.data &&
+    //                 data.data.name
+    //             ){
+    //                 name = data.data.name;
+    //                 valid = true;
+    //             }
+    //         }
+    //         console.log("Validation result:", name, "Valid:", valid);
+    //         holderInput.value=name;
+
+    //         if(valid){
+    //             holderInput.classList.add("border-green-500","bg-green-100");
+    //         }
+
+    //     } catch(e){
+    //         console.error("Validation error:", e);
+    //         loadingText.classList.add("hidden");
+    //         holderInput.value="Validation failed";
+    //     }
+    // }
+
+   async function validateAccount(){
+    console.log("validateAccount called");
+
+    const currency = currencySelect.value;
+    const method   = transferMethod.value;
+    const manualHint = document.getElementById("accountManualHint");
+    const blockedCurrencies = ["NGN","UGX","GHS"];
+
+    let payload = null;
+    let route   = "";
+
+    if(currency==="UGX" && pivotEnabled){
+        if(method==="mobile"){
+            const mobile = mobileInput.value.trim();
+            if(!mobile) return;
+            payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
         }
-
-        // ===== APP MOBILE GHANA =====
-        if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
-
-            const method = transferMethod.value;
+        if(method==="bank"){
+            const acc  = accountNumber.value.trim();
+            const code = bankSelect.value;
+            if(!acc || !code) return;
+            payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
+        }
+        route = "{{ route('pivot.account.validation') }}";
+    } else if(PAYAZA_CURRENCIES.includes(currency)){
+        if(method==="bank"){
+            const acc  = accountNumber.value.trim();
+            const code = bankSelect.value;
+            if(!acc || !code) return;
+            payload = { currency, account_number: acc, bank_code: code };
+        }
+        if(method==="mobile"){
+            const mobile = mobileInput.value.trim();
             const code   = bankSelect.value;
+            if(!mobile || !code) return;
+            payload = { currency, account_number: mobile, bank_code: code };
+        }
+        route = "{{ route('payaza.account-enquiry') }}";
+    }
 
-            if(method === "bank"){
-                const acc = accountNumber.value.trim();
-                if(!acc || !code) return;
+    if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
+        const method = transferMethod.value;
+        const code   = bankSelect.value;
 
-                payload = {
-                    customer_number: acc,
-                    bank_code: code
-                };
-            }
-
-            if(method === "mobile"){
-                const mobile = mobileInput.value.trim();
-                if(!mobile || !code) return;
-
-                payload = {
-                    customer_number: mobile,
-                    bank_code: code
-                };
-            }
-
-            route = "{{ route('appmobile.account-enquiry') }}";
+        if(method === "bank"){
+            const acc = accountNumber.value.trim();
+            if(!acc || !code) return;
+            payload = { customer_number: acc, bank_code: code };
         }
 
-        if(!payload) return;
+        if(method === "mobile"){
+            const mobile = mobileInput.value.trim();
+            if(!mobile || !code) return;
+            payload = { customer_number: mobile, bank_code: code };
+        }
 
-        try{
-            console.log("Sending account validation request:", payload, route);
-            loadingText.classList.remove("hidden");
-            holderInput.value="";
-            holderInput.classList.remove("border-green-500","bg-green-100");
-            holderInput.setAttribute("readonly",true);
+        route = "{{ route('appmobile.account-enquiry') }}";
+    }
 
-            const res = await fetch(route,{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json",
-                    "X-CSRF-TOKEN":"{{ csrf_token() }}"
-                },
-                body:JSON.stringify(payload)
-            });
+    if(!payload) return;
 
-            const data = await res.json();
-            console.log("Validation response:", data);
+    try{
+        loadingText.classList.remove("hidden");
+        holderInput.value = "";
+        holderInput.classList.remove("border-green-500","bg-green-100","border-red-500","bg-red-100");
+        holderInput.readOnly = true;
+        manualHint?.classList.add("hidden");
 
-            loadingText.classList.add("hidden");
+        const res = await fetch(route,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "X-CSRF-TOKEN":"{{ csrf_token() }}"
+            },
+            body:JSON.stringify(payload)
+        });
 
-            let name="Account not found";
-            let valid=false;
+        const data = await res.json();
+        loadingText.classList.add("hidden");
 
-            if(currency==="UGX" && pivotEnabled){
-                if(data.accountName){
-                    name=data.accountName;
-                    valid=true;
-                }
-            } else if(data.success && data.data?.response_content?.account_name){
-                name=data.data.response_content.account_name;
-                valid=true;
+        let name = "";
+        let valid = false;
+
+        if(currency==="UGX" && pivotEnabled && data.accountName){
+            name = data.accountName;
+            valid = true;
+        } else if(data.success && data.data?.response_content?.account_name){
+            name = data.data.response_content.account_name;
+            valid = true;
+        }
+
+        if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
+            if(data.success === true && data.status === 200 && data.data?.name){
+                name = data.data.name;
+                valid = true;
             }
+        }
 
-            if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
+        if(valid){
+            holderInput.value = name;
+            holderInput.classList.add("border-green-500","bg-green-100");
+            holderInput.readOnly = true;
+            manualHint?.classList.add("hidden");
+        } else {
+            holderInput.value = "Account not found";
+            holderInput.readOnly = false;
+            holderInput.classList.add("border-red-500","bg-red-100");
 
-                if(
-                    data.success === true &&
-                    data.status === 200 &&
-                    data.data &&
-                    data.data.name
-                ){
-                    name = data.data.name;
-                    valid = true;
-                }
+            if (blockedCurrencies.includes(currency)) {
+                manualHint?.classList.add("hidden");
+            } else {
+                manualHint?.classList.remove("hidden");
             }
-            console.log("Validation result:", name, "Valid:", valid);
-            holderInput.value=name;
+        }
 
-            if(valid){
-                holderInput.classList.add("border-green-500","bg-green-100");
-            }
+    } catch(e){
+        console.error("Validation error:", e);
+        loadingText.classList.add("hidden");
+        holderInput.value = "Account not found";
+        holderInput.readOnly = false;
+        holderInput.classList.add("border-red-500","bg-red-100");
 
-        } catch(e){
-            console.error("Validation error:", e);
-            loadingText.classList.add("hidden");
-            holderInput.value="Validation failed";
+        if (blockedCurrencies.includes(currency)) {
+            manualHint?.classList.add("hidden");
+        } else {
+            manualHint?.classList.remove("hidden");
         }
     }
+}
+
 
     /* ================= EVENTS ================= */
     currencySelect.addEventListener("change",showFieldsByCurrency);

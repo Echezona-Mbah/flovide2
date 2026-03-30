@@ -1,100 +1,124 @@
 @include('business.head')
-<body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<body class="bg-[#EEF2F7] text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Mobile menu button -->
   @include('business.header')
+  @include('business.sidebar')
 
-    <!-- Sidebar -->
-   @include('business.sidebar')
-    <!-- Overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
-    <!-- Main content -->
-    <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
-        <header class="items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
-            <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Dashboard
-            </h1>
-                           @include('business.header_notifical')
+  <div id="overlay" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden"></div>
 
-        </header>
-        <section class="relative w-full">
+  <main class="flex-1 p-2 md:p-8 overflow-auto">
+    <header class="hidden md:flex items-center justify-between mb-8 gap-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#9a7b4f]">Organization</p>
+        <h1 class="mt-2 text-3xl font-black tracking-tight text-[#162033]">Subscription Plan</h1>
+        <p class="mt-1 text-sm text-slate-500">Manage your plan and billing preferences.</p>
+      </div>
+      @include('business.header_notifical')
+    </header>
 
-            <section
-                class="bg-white text-gray-700 min-h-screen md:w-[80vw] md:rounded-tl-3xl md:p-6 p-2 shadow-md md:absolute right-[-2vw] overflow-x-hidden">
-                <section class="w-full flex flex-col min-h-screen">
-                    <nav class="border-b border-gray-200">
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <ul class="flex space-x-8 text-sm font-normal text-gray-700 h-14 items-center">
-                                <li>
-                                    <a href="{{ route('organization') }}" class="hover:text-gray-900">Team Members</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('organization_setting') }}" class="hover:text-gray-900">Settings</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('organization_plan') }}" aria-current="page"
-                                        class="font-semibold text-gray-900 border-b-2 border-black pb-3">Subscription
-                                        plan</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
+    <section class="w-full">
+      <div class="rounded-[28px] bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
 
-                      <section class="w-full px-4 sm:px-6 lg:px-8 mt-8">
-                    <section class="border border-gray-300 rounded-lg max-w-2xl mx-auto">
-                        <header class="flex justify-between items-center border-b border-gray-300 px-6 py-4">
-                            <h2 class="font-semibold text-gray-900 text-base">Current Plan</h2>
-                            <button
-                                class="text-sm font-normal text-gray-900 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400">Change
-                                Plan</button>
-                        </header>
-                        <div class="flex justify-between items-center px-6 py-4 text-gray-900 text-sm">
-                            <span>Basic</span>
-                            <span class="font-semibold">FREE</span>
-                        </div>
-                    </section>
-                    </section>
-                </section>
-            </section>
+        <!-- Header -->
+        <div class="px-6 md:px-10 py-7 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 border-b border-sky-200/70">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Workspace</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Subscription Plan</h2>
+              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+                Review your current plan and upgrade when you need more capacity.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        </section>
-        </section>
-    </main>
-    <script>
-        const sidebar = document.getElementById("sidebar");
-        const openBtn = document.getElementById("openSidebarBtn");
-        const closeBtn = document.getElementById("closeSidebarBtn");
-        const overlay = document.getElementById("overlay");
+        <!-- Content -->
+        <div class="p-6 md:p-10 space-y-8">
 
-        function openSidebar() {
-            sidebar.classList.remove("-translate-x-full");
-            overlay.classList.remove("hidden");
-            document.body.style.overflow = "hidden";
-        }
+          <!-- Tabs -->
+          <nav class="border-b border-slate-100">
+            <ul class="flex flex-wrap gap-6 text-sm font-semibold text-slate-500">
+              <li><a class="hover:text-slate-900 block pb-3" href="{{ route('organization') }}">Team Members</a></li>
+              <li><a class="hover:text-slate-900 block pb-3" href="{{ route('organization_setting') }}">Settings</a></li>
+              <li><a class="text-slate-900 border-b-2 border-slate-900 pb-3 block" href="{{ route('organization_plan') }}">Subscription plan</a></li>
+            </ul>
+          </nav>
 
-        function closeSidebar() {
-            sidebar.classList.add("-translate-x-full");
-            overlay.classList.add("hidden");
-            document.body.style.overflow = "";
-        }
+          <!-- Plan Card -->
+          <section class="max-w-2xl">
+            <div class="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+              <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Current Plan</p>
+                  <h3 class="mt-2 text-xl font-semibold text-slate-900">Basic</h3>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-slate-500">Price</p>
+                  <p class="text-xl font-black text-slate-900">FREE</p>
+                </div>
+              </div>
 
-        openBtn.addEventListener("click", openSidebar);
-        closeBtn.addEventListener("click", closeSidebar);
-        overlay.addEventListener("click", closeSidebar);
+              <div class="px-6 py-6 space-y-4 text-sm text-slate-600">
+                <div class="flex items-center justify-between">
+                  <span>Team members</span>
+                  <span class="font-semibold text-slate-900">Up to 3</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Monthly transactions</span>
+                  <span class="font-semibold text-slate-900">Limited</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Support</span>
+                  <span class="font-semibold text-slate-900">Standard</span>
+                </div>
+              </div>
 
-        // Close sidebar on window resize if desktop
-        window.addEventListener("resize", () => {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove("-translate-x-full");
-                overlay.classList.add("hidden");
-                document.body.style.overflow = "";
-            } else {
-                sidebar.classList.add("-translate-x-full");
-            }
-        });
+              <div class="px-6 py-5 border-t border-slate-100 flex items-center justify-between">
+                <p class="text-xs text-slate-500">Need more?</p>
+                <button class="text-sm font-semibold text-slate-900 border border-slate-300 rounded-lg px-4 py-2 hover:bg-slate-50">
+                  Change Plan
+                </button>
+              </div>
+            </div>
+          </section>
 
-    </script>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const openBtn = document.getElementById("openSidebarBtn");
+    const closeBtn = document.getElementById("closeSidebarBtn");
+    const overlay = document.getElementById("overlay");
+
+    function openSidebar() {
+      sidebar.classList.remove("-translate-x-full");
+      overlay.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeSidebar() {
+      sidebar.classList.add("-translate-x-full");
+      overlay.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    openBtn.addEventListener("click", openSidebar);
+    closeBtn.addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove("-translate-x-full");
+        overlay.classList.add("hidden");
+        document.body.style.overflow = "";
+      } else {
+        sidebar.classList.add("-translate-x-full");
+      }
+    });
+  </script>
 </body>
-
 </html>

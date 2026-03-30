@@ -156,7 +156,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::post('/refunds/{id}/status', [refundsController::class, 'updateStatus']);
 
       //webhook
-    Route::get('/webhook', [WebhookController::class, 'index'])->name('webhook');
+    // Route::get('/webhook', [WebhookController::class, 'index'])->name('webhook');
     
     //top-up your wallet
     Route::get('/top-up', function () {
@@ -192,6 +192,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/send', [SendMoneyController::class, 'index'])->name('send');
     Route::get('/exchange-rate', [SendMoneyController::class, 'getExchangeRate']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('send');
+    Route::get('/exchangesend', [SendMoneyController::class, 'indexexc'])->name('exchangesend');
+
 
 
     
@@ -217,6 +219,12 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
     Route::get('/notifications', [NotificationController::class, 'index']);
+
+
+    Route::get('/webhook', [WebhookController::class, 'index'])->name('business.webhooks');
+    Route::post('/webhook', [WebhookController::class, 'update'])->name('business.webhooks.update');
+    Route::post('/webhook/regenerate-secret', [WebhookController::class, 'regenerateSecret'])
+        ->name('business.webhooks.regenerate-secret');
 
 
 
@@ -401,6 +409,17 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
         Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
         Route::get('/admin/{id}/activity', [AddAdminController::class, 'activity'])->name('admin.activity');
+        Route::get('/admin/reset-password', [AddAdminController::class, 'showResetForm'])->name('admin.reset.password');
+        Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
+
+        Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
+Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
+Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
+Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
+Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
+Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
+
 
 
         Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');

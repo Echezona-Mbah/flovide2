@@ -9,6 +9,7 @@ class Bank extends Model
  protected $fillable = [
     'name',
     'country_iso',
+     'currency',
     'bank_code',
     'sort_code',
     'provider',

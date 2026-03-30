@@ -51,24 +51,26 @@ class SendMoneyController extends Controller
     
 
     
-      public function getUserTotalBalance(Request $request)
-    {
-        $personalId = auth('personal-api')->id(); 
+  public function getUserTotalBalance(Request $request)
+{
+    $personalId = auth('personal-api')->id();
+    $total = Balance::where('personal_id', $personalId)->sum('amount');
 
-        $total = Balance::where('personal_id', $personalId)->sum('amount');
-
-        if ($request->expectsJson()) {
-            return response()->json([
-             'data' =>[
-                'message' => 'User total balance fetched successfully',
-                'success' => true,
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'User total balance fetched successfully',
+            'code' => 'TOTAL_BALANCE_FETCHED',
+            'data' => [
                 'personal_id' => $personalId,
-                'total_balance' => $total,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]], 200);
-        }
+                'total_balance' => $total
+            ]
+        ], 200);
     }
+
+    return null;
+}
+
 
 
 
@@ -82,9 +84,10 @@ public function getExchangeRate(Request $request)
 
     if (!$result) {
         return response()->json([
-            'data' => [
-                'errors' => 'Invalid currency'
-            ]
+            'success' => false,
+            'message' => 'Invalid currency',
+            'code' => 'INVALID_CURRENCY',
+            'data' => null
         ], 400);
     }
 
@@ -100,9 +103,14 @@ public function getExchangeRate(Request $request)
     );
 
     return response()->json([
-        'exchange_rate' => $formatted,
-        'transfer_fee' => $transfer_fee
-    ]);
+        'success' => true,
+        'message' => 'Exchange rate fetched',
+        'code' => 'EXCHANGE_RATE_FETCHED',
+        'data' => [
+            'exchange_rate' => $formatted,
+            'transfer_fee' => $transfer_fee
+        ]
+    ], 200);
 }
 
 
@@ -238,69 +246,99 @@ public function getExchangeRate(Request $request)
 
 
     public function sendTransaction(Request $request)
-{
-    $personal = auth('personal-api')->user();
-    if (!$personal) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+    {
+        $personal = auth('personal-api')->user();
+        if (!$personal) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'code' => 'UNAUTHORIZED',
+                'data' => null
+            ], 401);
+        }
+
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'recipient_id' => 'required|uuid',
+            'balance_id' => 'required',
+            'reference' => 'nullable|string',
+            'transfer_fee' => 'nullable',
+            'total_amount' => 'required|numeric',
+            'exchange_rate' => 'required|string',
+            'recipient_amount' => 'required|numeric',
+            'account_number' => 'required|string',
+            'account_name' => 'required|string',
+            'bank' => 'nullable|string',
+            'bank_code' => 'nullable|string',
+        ]);
+
+        $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
+        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
+
+        $balance = Balance::find($request->balance_id);
+        if (!$balance) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid balance selected',
+                'code' => 'INVALID_BALANCE',
+                'data' => null
+            ], 422);
+        }
+
+        if ($balance->amount < $request->total_amount) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient funds',
+                'code' => 'INSUFFICIENT_FUNDS',
+                'data' => null
+            ], 422);
+        }
+
+        $pivotCurrencies = ['UGX'];
+        $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES'];
+        $appMobileCurrencies = ['GHS'];
+
+        if (in_array($sendingCurrency, $pivotCurrencies) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+            return $this->sendViaPivot($request, $sendingCurrency, $balance, $personal);
+        }
+
+        if (in_array($sendingCurrency, $appMobileCurrencies) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+            return $this->sendViaAppMobile($request, $sendingCurrency, $balance, $personal);
+        }
+
+        if (in_array($sendingCurrency, $payazaCurrencies) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+            return $this->sendViaPayaza($request, $sendingCurrency, $balance, $personal);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No payment provider available for this currency',
+            'code' => 'PROVIDER_NOT_AVAILABLE',
+            'data' => null
+        ], 422);
     }
-
-    // -------------------- Validate --------------------
-    $request->validate([
-        'amount' => 'required|numeric|min:1',
-        'recipient_id' => 'required|uuid',
-        'balance_id' => 'required',
-        'reference' => 'nullable|string',
-        'transfer_fee' => 'nullable',
-        'total_amount' => 'required|numeric',
-        'exchange_rate' => 'required|string',
-        'recipient_amount' => 'required|numeric',
-        'account_number' => 'required|string',
-        'account_name' => 'required|string',
-        'bank' => 'nullable|string',
-        'bank_code' => 'nullable|string',
-    ]);
-
-    // -------------------- Extract currencies --------------------
-    $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
-    $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
-
-    $balance = Balance::find($request->balance_id);
-    if (!$balance) {
-        return response()->json(['error' => 'Invalid balance selected'], 422);
-    }
-
-    if ($balance->amount < $request->total_amount) {
-        return response()->json(['error' => 'Insufficient funds'], 422);
-    }
-
-    // -------------------- Choose provider --------------------
-    $pivotCurrencies = ['UGX']; // Pivot supported currencies
-    $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']; // Payaza supported currencies
-    $appMobileCurrencies = ['GHS'];
-
-    if (in_array($sendingCurrency, $pivotCurrencies) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-        return $this->sendViaPivot($request, $sendingCurrency, $balance, $personal);
-    }
-
-    if (in_array($sendingCurrency, $appMobileCurrencies) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-        return $this->sendViaAppMobile($request, $sendingCurrency, $balance, $personal); 
-    }
-
-    if (in_array($sendingCurrency, $payazaCurrencies) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-        return $this->sendViaPayaza($request, $sendingCurrency, $balance, $personal);
-    }
-
-    return response()->json(['error' => 'No payment provider available for this currency'], 422);
-}
 
 // -------------------- Pivot Payment --------------------
 protected function sendViaPivot(Request $request, $currency, $balance, $personal)
 {
+    $auth = $this->pivot->authenticate();
+    if (isset($auth['error'])) {
+        return response()->json([
+            'success' => false,
+            'message' => $auth['error'],
+            'code' => 'PIVOT_AUTH_FAILED',
+            'data' => $auth
+        ], 500);
+    }
+
+    $token = $auth['tokenResponse']['accessToken'];
     $merchantTransactionId = 'TXN_' . substr(uniqid(), 0, 10);
     $bankType = strtolower($request->transfer_method ?? 'bank');
 
-    // Determine service code
-    $serviceCode = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SERVICE') : env('PIVOT_UGX_BANK_SERVICE');
+    $serviceCode = $bankType === 'mobile'
+        ? env('PIVOT_UGX_MOBILE_SERVICE')
+        : env('PIVOT_UGX_BANK_SERVICE');
+
     $sortCode = $request->bank_code;
 
     $payload = [
@@ -320,7 +358,7 @@ protected function sendViaPivot(Request $request, $currency, $balance, $personal
         ]
     ];
 
-    $payment = $this->pivot->postTransaction($this->pivot->authenticate()['tokenResponse']['accessToken'], $payload);
+    $payment = $this->pivot->postTransaction($token, $payload);
 
     if (($payment['statusCode'] ?? null) === '237') {
         $balance->amount -= $request->total_amount;
@@ -342,18 +380,37 @@ protected function sendViaPivot(Request $request, $currency, $balance, $personal
             'personal_id' => $personal->id,
         ]);
 
-        return response()->json(['message' => 'Pivot transaction successful', 'data' => $payment]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Pivot transaction successful',
+            'code' => 'PIVOT_SUCCESS',
+            'data' => $payment
+        ], 200);
     }
 
-    return response()->json(['error' => $payment['statusDescription'] ?? 'Pivot payment failed'], 422);
+    return response()->json([
+        'success' => false,
+        'message' => $payment['statusDescription'] ?? 'Pivot payment failed',
+        'code' => 'PIVOT_FAILED',
+        'data' => $payment
+    ], 422);
 }
+
 
 // -------------------- Payaza Payment --------------------
 protected function sendViaPayaza(Request $request, $currency, $balance, $personal)
 {
     $transactionReference = "TXN_" . time();
     $accountReference = $this->payaza->getAccountReference($currency);
-    if (!$accountReference) return response()->json(['error' => 'Unable to retrieve account reference from Payaza'], 500);
+
+    if (!$accountReference) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to retrieve account reference from Payaza',
+            'code' => 'PAYAZA_ACCOUNT_REF_FAILED',
+            'data' => null
+        ], 500);
+    }
 
     $bankType = strtolower($request->transfer_method ?? 'bank');
 
@@ -414,11 +471,22 @@ protected function sendViaPayaza(Request $request, $currency, $balance, $persona
             'personal_id' => $personal->id,
         ]);
 
-        return response()->json(['message' => 'Payaza transaction successful', 'data' => $response]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Payaza transaction successful',
+            'code' => 'PAYAZA_SUCCESS',
+            'data' => $response
+        ], 200);
     }
 
-    return response()->json(['error' => $response['statusDescription'] ?? 'Payaza transaction failed', 'details' => $response], 422);
+    return response()->json([
+        'success' => false,
+        'message' => $response['statusDescription'] ?? 'Payaza transaction failed',
+        'code' => 'PAYAZA_FAILED',
+        'data' => $response
+    ], 422);
 }
+
 
 // -------------------- AppMobile Payment --------------------
 protected function sendViaAppMobile(Request $request, $currency, $balance, $personal)
@@ -462,10 +530,21 @@ protected function sendViaAppMobile(Request $request, $currency, $balance, $pers
             'personal_id' => $personal->id,
         ]);
 
-        return response()->json(['message' => 'AppMobile transaction successful', 'data' => $response]);
+        return response()->json([
+            'success' => true,
+            'message' => 'AppMobile transaction successful',
+            'code' => 'APPMOBILE_SUCCESS',
+            'data' => $response
+        ], 200);
     }
 
-    return response()->json(['error' => $response['message'] ?? 'AppMobile transaction failed', 'details' => $response], 422);
+    return response()->json([
+        'success' => false,
+        'message' => $response['message'] ?? 'AppMobile transaction failed',
+        'code' => 'APPMOBILE_FAILED',
+        'data' => $response
+    ], 422);
 }
+
 
 }

@@ -132,14 +132,14 @@
                     <div class="flex items-center gap-10">
                         {{-- <img alt="OhentPay company logo white on transparent background" class="h-30 w-30" height="40"
                             src="../asserts/Personal/company1.png" /> --}}
-                        <img class="h-30 w-12 dark:invert" src="../asserts/Personal/Capture.png">
+                        {{-- <img class="h-30 w-12 dark:invert" src="../asserts/Personal/Capture.png">
 
                         <img alt="Sound wave style company logo white on transparent background" class="h-30 w-30"
                             height="40" src="../asserts/Personal/company2.png" />
                         <img alt="CentaDesk company logo white on transparent background" class="w-28" height="40"
                             src="../asserts/Personal/company3.png" />
                         <img alt="EW company logo white on transparent background" class="h-30 w-30" height="40"
-                            src="../asserts/Personal/company4.png" />
+                            src="../asserts/Personal/company4.png" /> --}}
                     </div>
                 </div>
             </div>

@@ -14,25 +14,24 @@ class refundsController extends Controller
     public function index()
     {
         $user = Auth::guard('personal-api')->user();
-        // Fetch all refund requests for the authenticated user
+
         $refunds = Refund::where('personal_id', $user->id)->orderBy('created_at', 'desc')->get();
 
         if (request()->expectsJson()) {
             return response()->json([
-                'data' => [
-                    'status' => 'success',
-                    'message' => 'Refund requests retrieved successfully.',
-                    'refunds' => $refunds,
-                ]
+                'success' => true,
+                'message' => 'Refund requests retrieved successfully.',
+                'code' => 'REFUNDS_FETCHED',
+                'data' => $refunds
             ], 200);
         }
 
         return view('business.refunds', ['refunds' => $refunds]);
     }
 
+
     public function store(Request $request)
     {
-        // Validate
         $validated = $request->validate([
             'fullname' => 'required|string|max:255',
             'amount'   => 'required|numeric|min:0',
@@ -44,7 +43,6 @@ class refundsController extends Controller
         function generateUniqueRefNumber()
         {
             do {
-                // Generate a 20-digit number
                 $ref = '';
                 for ($i = 0; $i < 20; $i++) {
                     $ref .= mt_rand(0, 9);
@@ -53,12 +51,11 @@ class refundsController extends Controller
 
             return $ref;
         }
-        // Generate a unique reference number
-        $transactionRef = generateUniqueRefNumber();
 
+        $transactionRef = generateUniqueRefNumber();
         $user = Auth::guard('personal-api')->user();
+
         try {
-            // Create refund record
             $refund = Refund::create([
                 'personal_id' => $user->id,
                 'name' => $validated['fullname'],
@@ -68,30 +65,27 @@ class refundsController extends Controller
                 'transaction_ref_number' => $transactionRef,
                 'currency' => $validated['currency'],
                 'recipient' => 'self',
-                'status'   => 'pending', 
+                'status'   => 'pending',
             ]);
-            // If API request → return JSON
+
             if ($request->expectsJson()) {
                 return response()->json([
-                    'data' => [
-                        'status' => 'success',
-                        'message' => 'Refund request created successfully.',
-                        'refund' => $refund
-                    ]
-                ]);
+                    'success' => true,
+                    'message' => 'Refund request created successfully.',
+                    'code' => 'REFUND_CREATED',
+                    'data' => $refund
+                ], 201);
             }
 
-            // Else redirect
             return redirect()->back()->with('success', 'Refund request created successfully.');
-
 
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'data' => [
-                        'status' => 'error',
-                        'message' => 'Failed to create refund: ' . $e->getMessage()
-                    ]
+                    'success' => false,
+                    'message' => 'Failed to create refund: ' . $e->getMessage(),
+                    'code' => 'REFUND_CREATE_FAILED',
+                    'data' => null
                 ], 500);
             }
 
@@ -99,24 +93,23 @@ class refundsController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, $id)
+  public function updateStatus(Request $request, $id)
     {
-        // Validate
         $validated = $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);
 
         $user = Auth::guard('personal-api')->user();
-        try{
+
+        try {
             $refund = Refund::findOrFail($id);
 
-            //authorize only if this refund belongs to the logged-in user
             if ($refund->personal_id !== $user->id) {
                 return response()->json([
-                    'data' => [
-                        'status' => 'error',
-                        'message' => 'You are not allowed to modify this request.'
-                    ]
+                    'success' => false,
+                    'message' => 'You are not allowed to modify this request.',
+                    'code' => 'FORBIDDEN',
+                    'data' => null
                 ], 403);
             }
 
@@ -126,29 +119,28 @@ class refundsController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'data' => [
-                        'status' => 'success',
-                        'message' => 'Request updated successfully.'
-                    ]
+                    'success' => true,
+                    'message' => 'Request updated successfully.',
+                    'code' => 'REFUND_UPDATED',
+                    'data' => null
                 ], 200);
             }
 
-            return redirect()->back()->with('success', 'Request updated successfully.');    
-        }
-        catch (\Exception $e){
+            return redirect()->back()->with('success', 'Request updated successfully.');
+        } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'data' => [
-                        'status' => 'error',
-                        'message' => 'Failed to process request: ' . $e->getMessage()
-                    ]
+                    'success' => false,
+                    'message' => 'Failed to process request: ' . $e->getMessage(),
+                    'code' => 'REFUND_UPDATE_FAILED',
+                    'data' => null
                 ], 500);
             }
 
             return redirect()->back()->with('error', 'Failed to process request: ' . $e->getMessage());
         }
-
     }
+
 
 
     public function search(Request $request)
@@ -164,21 +156,23 @@ class refundsController extends Controller
     {
         $user = Auth::guard("personal-api")->user();
         $refund = Refund::where('personal_id', $user->id)->find($id);
+
         if (!$refund) {
             return response()->json([
-                'data' => [
-                    'status' => 'error',
-                    'message' => 'Refund request not found.'
-                ]
+                'success' => false,
+                'message' => 'Refund request not found.',
+                'code' => 'REFUND_NOT_FOUND',
+                'data' => null
             ], 404);
         }
+
         return response()->json([
-            'data' => [
-                'status' => 'success',
-                'message' => 'Refund request retrieved successfully.',
-                'data' => $refund
-            ]
+            'success' => true,
+            'message' => 'Refund request retrieved successfully.',
+            'code' => 'REFUND_FETCHED',
+            'data' => $refund
         ], 200);
     }
+
 
 }

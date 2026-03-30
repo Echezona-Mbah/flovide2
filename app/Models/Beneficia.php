@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Beneficia extends Model
 {
+           use HasUuids;
+
     protected $fillable = [
         // Bank & account details
         'bank',                 // bank nickname
@@ -51,7 +54,8 @@ class Beneficia extends Model
     ];
 
     protected $table = 'beneficias';
-    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     // Relationships
     public function user()

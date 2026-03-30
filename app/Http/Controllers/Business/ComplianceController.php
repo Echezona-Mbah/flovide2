@@ -81,11 +81,11 @@ public function handleCac(Request $request)
     $user = auth()->user();
 
     if ($user->cac_certificate && Storage::disk('public')->exists($user->cac_certificate)) {
-
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'CAC document already uploaded.',
+                'code' => 'CAC_ALREADY_UPLOADED',
                 'data' => [
                     'cac_certificate' => $user->cac_certificate,
                     'cac_status' => $user->cac_status,
@@ -104,8 +104,9 @@ public function handleCac(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'CAC document uploaded and under review.',
+            'code' => 'CAC_UPLOADED',
             'data' => [
                 'cac_certificate' => $path,
                 'cac_status' => $user->cac_status,
@@ -115,6 +116,7 @@ public function handleCac(Request $request)
 
     return back()->with('success','CAC document uploaded successfully.');
 }
+
 
 
 public function handleBvn(Request $request)
@@ -152,14 +154,16 @@ public function handleBvn(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => true,
+                'success' => true,
                 'message' => 'BVN verified successfully.',
+                'code' => 'BVN_VERIFIED',
                 'data' => [
                     'bvn' => $bvn,
                     'name' => $data['first_name'].' '.$data['last_name'],
                     'dob' => $data['dob']
                 ]
-            ]);
+            ], 200);
+
         }
 
         return back()->with('success','BVN verified successfully.');
@@ -169,9 +173,11 @@ public function handleBvn(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status' => false,
-            'message' => $errorMessage
-        ],422);
+            'success' => false,
+            'message' => $errorMessage,
+            'code' => 'BVN_VERIFICATION_FAILED',
+            'data' => null
+        ], 422);
     }
 
     return back()->with('error',$errorMessage);
@@ -192,6 +198,7 @@ public function handleValidid(Request $request)
             return response()->json([
                 'status'  => false,
                 'message' => 'Valid ID already uploaded.',
+                'code' => 'VALID_ID_ALREADY_UPLOADED',
                 'data'    => [
                     'valid_id' => $user->valid_id,
                     'valid_id_status' => $user->valid_id_status,
@@ -212,6 +219,7 @@ public function handleValidid(Request $request)
         return response()->json([
             'status' => true,
             'message' => 'Valid ID uploaded and under review.',
+            'code' => 'VALID_ID_UPLOADED',
             'data' => [
                 'valid_id' => $path,
                 'valid_id_status' => $user->valid_id_status
@@ -221,11 +229,6 @@ public function handleValidid(Request $request)
 
     return back()->with('success','Valid ID uploaded successfully.');
 }
-
-
-
-
-
 
 
 
@@ -243,6 +246,7 @@ public function handleTin(Request $request)
             return response()->json([
                 'status' => false,
                 'message' => 'TIN document already uploaded.',
+                'code' => 'TIN_ALREADY_UPLOADED',
                 'data' => [
                     'tin' => $user->tin,
                     'tin_status' => $user->tin_status
@@ -263,6 +267,7 @@ public function handleTin(Request $request)
         return response()->json([
             'status' => true,
             'message' => 'TIN uploaded and under review.',
+            'code' => 'TIN_UPLOADED',
             'data' => [
                 'tin' => $path,
                 'tin_status' => $user->tin_status
@@ -288,6 +293,7 @@ public function handleUtilitybill(Request $request)
             return response()->json([
                 'status' => false,
                 'message' => 'Utility Bill already uploaded.',
+                'code' => 'UTILITY_BILL_ALREADY_UPLOADED',
                 'data' => [
                     'utility_bill' => $user->utility_bill,
                     'utility_bill_status' => $user->utility_bill_status
@@ -308,6 +314,7 @@ public function handleUtilitybill(Request $request)
         return response()->json([
             'status'=>true,
             'message'=>'Utility bill uploaded.',
+            'code' => 'UTILITY_BILL_UPLOADED',
             'data'=>[
                 'utility_bill'=>$path,
                 'utility_bill_status'=>$user->utility_bill_status
@@ -331,9 +338,14 @@ public function handleProofOfIdentity(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'=>false,
-                'message'=>'Proof of Identity already uploaded.'
-            ],409);
+                'success' => false,
+                'message' => 'Proof of Identity already uploaded.',
+                'code' => 'PROOF_OF_IDENTITY_ALREADY_UPLOADED',
+                'data' => [
+                    'proof_of_identity' => $user->proof_of_identity,
+                    'proof_of_identity_status' => $user->proof_of_identity_status
+                ]
+            ], 409);
         }
 
         return back()->with('error','Proof of Identity already uploaded.');
@@ -347,16 +359,19 @@ public function handleProofOfIdentity(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status'=>true,
-            'message'=>'Proof of Identity uploaded.',
-            'data'=>[
-                'proof_of_identity'=>$path
+            'success' => true,
+            'message' => 'Proof of Identity uploaded.',
+            'code' => 'PROOF_OF_IDENTITY_UPLOADED',
+            'data' => [
+                'proof_of_identity' => $path,
+                'proof_of_identity_status' => $user->proof_of_identity_status
             ]
-        ],201);
+        ], 201);
     }
 
     return back()->with('success','Proof of Identity uploaded successfully.');
 }
+
 
 public function handleOwnership(Request $request)
 {
@@ -370,13 +385,14 @@ public function handleOwnership(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'Ownership document already uploaded.',
+                'code' => 'OWNERSHIP_ALREADY_UPLOADED',
                 'data' => [
                     'ownership_document' => $user->ownership_document,
                     'ownership_status' => $user->ownership_status
                 ]
-            ],409);
+            ], 409);
         }
 
         return back()->with('error','Ownership document already uploaded.');
@@ -390,17 +406,19 @@ public function handleOwnership(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Ownership document uploaded.',
+            'code' => 'OWNERSHIP_UPLOADED',
             'data' => [
                 'ownership_document' => $path,
                 'ownership_status' => $user->ownership_status
             ]
-        ],201);
+        ], 201);
     }
 
     return back()->with('success','Ownership document uploaded successfully.');
 }
+
 
 public function handleOrganisationalChart(Request $request)
 {
@@ -414,13 +432,14 @@ public function handleOrganisationalChart(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'=>false,
-                'message'=>'Organisational chart already uploaded.',
-                'data'=>[
-                    'organisational_chart'=>$user->organisational_chart,
-                    'organisational_chart_status'=>$user->organisational_chart_status
+                'success' => false,
+                'message' => 'Organisational chart already uploaded.',
+                'code' => 'ORGANISATIONAL_CHART_ALREADY_UPLOADED',
+                'data' => [
+                    'organisational_chart' => $user->organisational_chart,
+                    'organisational_chart_status' => $user->organisational_chart_status
                 ]
-            ],409);
+            ], 409);
         }
 
         return back()->with('error','Organisational chart already uploaded.');
@@ -434,17 +453,19 @@ public function handleOrganisationalChart(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status'=>true,
-            'message'=>'Organisational chart uploaded.',
-            'data'=>[
-                'organisational_chart'=>$path,
-                'organisational_chart_status'=>$user->organisational_chart_status
+            'success' => true,
+            'message' => 'Organisational chart uploaded.',
+            'code' => 'ORGANISATIONAL_CHART_UPLOADED',
+            'data' => [
+                'organisational_chart' => $path,
+                'organisational_chart_status' => $user->organisational_chart_status
             ]
-        ],201);
+        ], 201);
     }
 
     return back()->with('success','Organisational chart uploaded successfully.');
 }
+
 
 public function handleRegisterOfDirectors(Request $request)
 {
@@ -458,13 +479,14 @@ public function handleRegisterOfDirectors(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'=>false,
-                'message'=>'Register of Directors already uploaded.',
-                'data'=>[
-                    'register_of_directors'=>$user->register_of_directors,
-                    'register_of_directors_status'=>$user->register_of_directors_status
+                'success' => false,
+                'message' => 'Register of Directors already uploaded.',
+                'code' => 'REGISTER_OF_DIRECTORS_ALREADY_UPLOADED',
+                'data' => [
+                    'register_of_directors' => $user->register_of_directors,
+                    'register_of_directors_status' => $user->register_of_directors_status
                 ]
-            ],409);
+            ], 409);
         }
 
         return back()->with('error','Register of Directors already uploaded.');
@@ -478,17 +500,19 @@ public function handleRegisterOfDirectors(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status'=>true,
-            'message'=>'Register of Directors uploaded.',
-            'data'=>[
-                'register_of_directors'=>$path,
-                'register_of_directors_status'=>$user->register_of_directors_status
+            'success' => true,
+            'message' => 'Register of Directors uploaded.',
+            'code' => 'REGISTER_OF_DIRECTORS_UPLOADED',
+            'data' => [
+                'register_of_directors' => $path,
+                'register_of_directors_status' => $user->register_of_directors_status
             ]
-        ],201);
+        ], 201);
     }
 
     return back()->with('success','Register of Directors uploaded successfully.');
 }
+
 
 public function handleFormationDocument(Request $request)
 {
@@ -502,13 +526,14 @@ public function handleFormationDocument(Request $request)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'=>false,
-                'message'=>'Formation document already uploaded.',
-                'data'=>[
-                    'formation_document'=>$user->formation_document,
-                    'formation_document_status'=>$user->formation_document_status
+                'success' => false,
+                'message' => 'Formation document already uploaded.',
+                'code' => 'FORMATION_DOCUMENT_ALREADY_UPLOADED',
+                'data' => [
+                    'formation_document' => $user->formation_document,
+                    'formation_document_status' => $user->formation_document_status
                 ]
-            ],409);
+            ], 409);
         }
 
         return back()->with('error','Formation document already uploaded.');
@@ -522,18 +547,18 @@ public function handleFormationDocument(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'status'=>true,
-            'message'=>'Formation document uploaded.',
-            'data'=>[
-                'formation_document'=>$path,
-                'formation_document_status'=>$user->formation_document_status
+            'success' => true,
+            'message' => 'Formation document uploaded.',
+            'code' => 'FORMATION_DOCUMENT_UPLOADED',
+            'data' => [
+                'formation_document' => $path,
+                'formation_document_status' => $user->formation_document_status
             ]
-        ],201);
+        ], 201);
     }
 
     return back()->with('success','Formation document uploaded successfully.');
 }
-
 
 
 

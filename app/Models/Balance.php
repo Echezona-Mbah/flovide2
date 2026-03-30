@@ -3,11 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 
 class Balance extends Model
 {
 
-protected $fillable = ['user_id', 'personal_id', 'name', 'currency', 'amount'];
+    use HasUuids;
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected $fillable = ['user_id', 'personal_id', 'name', 'currency', 'amount'];
 
 public function user()
 {

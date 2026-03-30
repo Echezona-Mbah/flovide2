@@ -85,6 +85,12 @@ class User extends Authenticatable
         'formation_document_status',
         'identity_verification_status',
         'selfie_verification_status',
+        'secret_key',
+        'public_key',
+        'ip_whitelist',
+        'callback_url',
+        'webhook_url',
+
     ];
 
     /**
@@ -102,20 +108,29 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'addresses' => 'array',
-            'login_otp_expires_at' => 'datetime',
-        ];
-    }
+   protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'addresses' => 'array',
+        'login_otp_expires_at' => 'datetime',
+        'live_ip_whitelist' => 'array',
+        'test_ip_whitelist' => 'array',
+    ];
+}
+
 
     public function balances()
 {
     return $this->hasMany(Balance::class);
 }
+
+public function webhookSetting()
+{
+    return $this->hasOne(WebhookSetting::class);
+}
+
 
 
 public function isFullyVerified(): bool

@@ -118,8 +118,98 @@ class AddAdminController extends Controller
 }
 
 
+public function showResetForm()
+{
+    return view('admin.adminreset_password');
+}
+
+public function resetPassword(Request $request)
+{
+    $request->validate([
+        'old_password' => 'required',
+        'new_password' => 'required|min:6|confirmed',
+    ]);
+
+    $admin = Auth::guard('admin')->user();
+
+    if (!Hash::check($request->old_password, $admin->password)) {
+        return back()->with('error', 'Old password is incorrect');
+    }
+
+    $admin->password = Hash::make($request->new_password);
+    $admin->save();
+
+    return back()->with('success', 'Password updated successfully');
+}
 
 
+public function settings($id)
+{
+    $admin = Admin::findOrFail($id);
+    $roles = AdminRole::get();
+    // dd($roles);
+    return view('admin.adminsetting', compact('admin','roles'));
+}
+
+
+
+public function changeRole(Request $request, $id)
+{
+    $admin = Admin::findOrFail($id);
+    $request->validate([
+        'role' => 'required'
+    ]);
+
+    $admin->role = $request->role;
+    $admin->save();
+
+    return back()->with('success', 'Role updated successfully.');
+}
+
+public function lock($id)
+{
+    $admin = Admin::findOrFail($id);
+    $admin->locked_until = now()->addDays(30);
+    $admin->save();
+
+    return back()->with('success', 'Admin locked successfully.');
+}
+
+// public function unlock($id)
+// {
+//     $admin = Admin::findOrFail($id);
+//     $admin->locked_until = null;
+//     $admin->save();
+
+//     return back()->with('success', 'Admin unlocked successfully.');
+// }
+
+public function deactivate($id)
+{
+    $admin = Admin::findOrFail($id);
+    $admin->status = 'inactive';
+    $admin->save();
+
+    return back()->with('success', 'Admin deactivated successfully.');
+}
+
+public function resetPasswords($id)
+{
+    $admin = Admin::findOrFail($id);
+    $newPassword = 'Admin1234';
+    $admin->password = bcrypt($newPassword);
+    $admin->save();
+
+    return back()->with('success', 'Password reset successfully. New password: ' . $newPassword);
+}
+
+public function destroy($id)
+{
+    $admin = Admin::findOrFail($id);
+    $admin->delete();
+
+    return redirect()->route('admin.list')->with('success', 'Admin deleted successfully.');
+}
 
 
 

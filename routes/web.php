@@ -58,6 +58,10 @@ Route::get('/privacy-policy', function () {
     return view('mainpage.privacy-policy');
 })->name('privacy-policy');
 
+Route::get('/terms-condition', function () {
+    return view('mainpage.terms-condition');
+})->name('terms-condition');
+
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/developer', [DeveloperController::class, 'index'])->name('developer');

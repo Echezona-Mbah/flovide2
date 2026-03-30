@@ -14,29 +14,28 @@ use Illuminate\Support\Facades\Hash;
 
 class OrganizationController extends Controller
 {
-    public function index(Request $request)
+ public function index(Request $request)
     {
         $ownerId = session('owner_id');
 
-        // Get current member's role in the team
         $currentMemberRole = TeamMembers::where('owner_id', $ownerId)
             ->where('user_id', auth()->id())
-            ->value('role'); // This returns only the role string
+            ->value('role');
 
         $members = TeamMembers::where('owner_id', $ownerId)->get();
-                // dd($members);
-
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => true,
+                'success' => true,
                 'message' => 'Team members fetched successfully',
+                'code' => 'TEAM_MEMBERS_FETCHED',
                 'data' => $members
-            ]);
+            ], 200);
         }
 
         return view('business.organization', compact('members', 'currentMemberRole'));
     }
+
 
 
 public function store(Request $request)
@@ -54,10 +53,10 @@ public function store(Request $request)
 
     if ($existingMember) {
         return response()->json([
-            'data' => [
-                'status'  => false,
-                'error' => 'This email is already a member of your team.',
-            ]
+            'success' => false,
+            'message' => 'This email is already a member of your team.',
+            'code' => 'TEAM_MEMBER_EXISTS',
+            'data' => null
         ], 422);
     }
 
@@ -68,7 +67,7 @@ public function store(Request $request)
     $member->email = $request->email;
     $member->role = $request->role;
     $member->invite_token = Str::random(40);
-    $member->invite_token_expires_at = now()->addHours(24); //  expires in 24 hours
+    $member->invite_token_expires_at = now()->addHours(24);
 
     if ($existingUser) {
         $member->user_id = $existingUser->id;
@@ -79,28 +78,26 @@ public function store(Request $request)
 
     $member->save();
 
-    // ✅ Generate invite link
     $inviteLink = url('/team/invite/' . $member->invite_token);
 
-    // ✅ Send mail
     Mail::to($request->email)->send(new TeamInviteMail($owner, $inviteLink));
 
-    // ✅ Response
- // ✅ Success response
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Member added and invite email sent successfully.',
-            'data'    => array_merge($member->toArray(), [
+            'code' => 'TEAM_MEMBER_INVITED',
+            'data' => array_merge($member->toArray(), [
                 'invite_link' => $inviteLink,
             ]),
         ], 201);
     }
 
     return redirect()
-        ->route('organization') // change to your team list page
+        ->route('organization')
         ->with('success', 'Member added and invite email sent successfully.');
 }
+
 
 
 
@@ -110,32 +107,28 @@ public function store(Request $request)
         $member = TeamMembers::where('invite_token', $token)->firstOrFail();
         return view('mainpage.accept-invite', compact('member'));
     }
-
-        // Complete invite (register new user)
     public function completeInvite(Request $request, $token)
     {
-    $member = TeamMembers::with('userOwner')
-        ->where('invite_token', $token)
-        ->first();
+        $member = TeamMembers::with('userOwner')
+            ->where('invite_token', $token)
+            ->first();
 
-    if (!$member) {
-        return response()->json([
-        'data'=>[
-            'status'  => false,
-            'error' => 'This invitation link is invalid or has already been used.',
-        ]
-        ], 404);
-    }
+        if (!$member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This invitation link is invalid or has already been used.',
+                'code' => 'INVITE_INVALID',
+                'data' => null
+            ], 404);
+        }
 
-
-        // ✅ Check if token expired
         if ($member->invite_token_expires_at && $member->invite_token_expires_at->isPast()) {
             return response()->json([
-                'data'=>[
-                    'status'  => false,
-                    'error' => 'This invitation link has expired. Please request a new one.',
-                ]
-            ], 410); // 410 Gone
+                'success' => false,
+                'message' => 'This invitation link has expired. Please request a new one.',
+                'code' => 'INVITE_EXPIRED',
+                'data' => null
+            ], 410);
         }
 
         $request->validate([
@@ -143,7 +136,6 @@ public function store(Request $request)
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // ✅ Create or fetch user
         $user = User::where('email', $member->email)->first();
 
         if (!$user) {
@@ -156,20 +148,20 @@ public function store(Request $request)
             ]);
         }
 
-        // ✅ Activate member
         $member->user_id = $user->id;
         $member->status = 'active';
-        $member->invite_token_used_at = now(); // record usage
-        $member->invite_token = null;          // clear token
+        $member->invite_token_used_at = now();
+        $member->invite_token = null;
         $member->save();
 
         Auth::login($user);
 
         return response()->json([
-            'status'  => true,
+            'success' => true,
             'message' => 'Invitation accepted successfully.',
-            'data'    => [
-                'user'   => $user,
+            'code' => 'INVITE_ACCEPTED',
+            'data' => [
+                'user' => $user,
                 'member' => $member,
                 'team_owner' => $member->userOwner ? [
                     'id' => $member->userOwner->id,
@@ -177,7 +169,7 @@ public function store(Request $request)
                     'email' => $member->userOwner->email,
                 ] : null,
             ],
-        ]);
+        ], 200);
     }
 
 
@@ -186,6 +178,7 @@ public function store(Request $request)
 public function updateRole(Request $request, $id)
 {
     $ownerId = session('owner_id');
+
     $currentMemberRole = TeamMembers::where('owner_id', $ownerId)
         ->where('user_id', auth()->id())
         ->value('role');
@@ -195,16 +188,20 @@ public function updateRole(Request $request, $id)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => false,
-                'message' => $message
+                'success' => false,
+                'message' => $message,
+                'code' => 'FORBIDDEN',
+                'data' => null
             ], 403);
         }
 
         return back()->with('error', $message);
     }
+
     $request->validate([
         'role' => 'required|in:Owner,Admin,Accountant,Author',
     ]);
+
     $member = TeamMembers::where('owner_id', $ownerId)->findOrFail($id);
 
     $oldRole = $member->role;
@@ -213,11 +210,11 @@ public function updateRole(Request $request, $id)
 
     $successMessage = "Role updated successfully from $oldRole to {$member->role}.";
 
-    // If API request
     if ($request->expectsJson()) {
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => $successMessage,
+            'code' => 'ROLE_UPDATED',
             'data' => [
                 'id' => $member->id,
                 'email' => $member->email,
@@ -226,12 +223,12 @@ public function updateRole(Request $request, $id)
                 'owner_id' => $member->owner_id,
                 'updated_at' => $member->updated_at,
             ]
-        ]);
+        ], 200);
     }
 
-    // If web request
     return back()->with('success', $successMessage);
 }
+
 
 
 
@@ -247,9 +244,10 @@ public function updateProfile(Request $request)
     if (!$user) {
         if ($request->expectsJson()) {
             return response()->json([
-                'data' => [
-                    'errors' => 'User record not found'
-                ]
+                'success' => false,
+                'message' => 'User record not found',
+                'code' => 'USER_NOT_FOUND',
+                'data' => null
             ], 404);
         }
         return redirect()->back()->withErrors('User record not found');
@@ -270,21 +268,19 @@ public function updateProfile(Request $request)
 
     $user->save();
 
-    // ✅ If API (JSON request)
     if ($request->expectsJson()) {
         return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'code' => 'PROFILE_UPDATED',
             'data' => [
-                'message' => 'Profile updated successfully',
                 'profile_picture_url' => $user->profile_picture 
                     ? asset($user->profile_picture) 
-                    : null,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                    : null
             ]
-        ]);
+        ], 200);
     }
 
-    // ✅ If Web (normal form submission)
     return redirect()->back()->with('success', 'Profile updated successfully');
 }
 
@@ -317,79 +313,89 @@ public function updateProfile(Request $request)
     }
 
 
-    public function deactivateAccount(Request $request)
-    {
-        $user = auth()->user();
-        if (!$user) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User record not found'
-                ], 404);
-            }
-            return redirect()->back()->withErrors('User record not found');
-        }
-        $user->deletestatus = 'deactivated';
-        $user->save();
-        try {
-            $user->tokens()->delete();
-        } catch (\Exception $e) {
-        }
+  public function deactivateAccount(Request $request)
+{
+    $user = auth()->user();
+
+    if (!$user) {
         if ($request->expectsJson()) {
             return response()->json([
-                'status' => true,
-                'message' => 'Account deactivated successfully',
-                'user_status' => $user->deletestatus,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ], 200);
+                'success' => false,
+                'message' => 'User record not found',
+                'code' => 'USER_NOT_FOUND',
+                'data' => null
+            ], 404);
         }
-        return redirect()
-            ->route('login')
-            ->with('success', 'Account deactivated successfully');
+        return redirect()->back()->withErrors('User record not found');
     }
 
+    $user->deletestatus = 'deactivated';
+    $user->save();
 
-    public function updatePassword(Request $request)
-    {
-        $request->validate([
-            'old_password' => 'required',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                // Strong password rule
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/',
-            ],
-        ]);
+    try {
+        $user->tokens()->delete();
+    } catch (\Exception $e) {
+        // swallow
+    }
 
-        $user = auth()->user();
-
-        // 2. Check if old password matches
-        if (!Hash::check($request->old_password, $user->password)) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                'data'=>[
-                    'status' => false,
-                    'message' => 'Current password is incorrect',
-                ]
-                ], 422);
-            }
-            return back()->withErrors(['old_password' => 'Current password is incorrect']);
-        }
-        $user->password = Hash::make($request->password);
-        $user->save();
-        if ($request->expectsJson()) {
-            return response()->json([
-            'data'=>[
-                'status' => true,
-                'message' => 'Password updated successfully',
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Account deactivated successfully',
+            'code' => 'ACCOUNT_DEACTIVATED',
+            'data' => [
+                'user_status' => $user->deletestatus
             ]
-            ]);
-        }
-        return back()->with('success', 'Password updated successfully');
+        ], 200);
     }
+
+    return redirect()
+        ->route('login')
+        ->with('success', 'Account deactivated successfully');
+}
+
+
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'old_password' => 'required',
+        'password' => [
+            'required',
+            'string',
+            'min:8',
+            'confirmed',
+            'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/',
+        ],
+    ]);
+
+    $user = auth()->user();
+
+    if (!Hash::check($request->old_password, $user->password)) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect',
+                'code' => 'PASSWORD_INCORRECT',
+                'data' => null
+            ], 422);
+        }
+        return back()->withErrors(['old_password' => 'Current password is incorrect']);
+    }
+
+    $user->password = Hash::make($request->password);
+    $user->save();
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully',
+            'code' => 'PASSWORD_UPDATED',
+            'data' => null
+        ], 200);
+    }
+
+    return back()->with('success', 'Password updated successfully');
+}
 
 
 
