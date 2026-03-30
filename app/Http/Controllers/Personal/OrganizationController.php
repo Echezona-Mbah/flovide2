@@ -12,35 +12,21 @@ class OrganizationController extends Controller
 {
 public function updateProfile(Request $request)
 {
-    
-    
     $request->validate([
         'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
-    $personalId = auth('personal-api')->id(); 
+    $personalId = auth('personal-api')->id();
     $personal = Personal::where('id', $personalId)->first();
 
     if (!$personal) {
         return response()->json([
-            'data' => [
-                'errors' => 'Personal record not found'
-            ]
+            'success' => false,
+            'message' => 'Personal record not found',
+            'code' => 'PERSONAL_NOT_FOUND',
+            'data' => null
         ], 404);
     }
-
-
-        //   if ($request->hasFile('profile_picture')) {
-        //     $folder = "profile_pictures/personal";
-        //     $path = $request->file('profile_picture')->store($folder, 'public');
-        //     if ($personal->profile_picture && \Storage::disk('public')->exists($personal->profile_picture)) {
-        //         \Storage::disk('public')->delete($personal->profile_picture);
-        //     }
-
-        //     $personal->profile_picture = $path;
-        // }
-
-        // $personal->save();
 
     if ($request->hasFile('profile_picture')) {
         $folder = 'profile_pictures/personal';
@@ -55,95 +41,95 @@ public function updateProfile(Request $request)
     $personal->save();
 
     return response()->json([
+        'success' => true,
+        'message' => 'Profile updated successfully',
+        'code' => 'PROFILE_UPDATED',
         'data' => [
-            'message' => 'Profile updated successfully',
             'profile_picture_url' => $personal->profile_picture 
                 ? asset($personal->profile_picture) 
-                : null,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
+                : null
         ]
+    ], 200);
+}
+
+public function updateEmail(Request $request)
+{
+    $personalId = auth('personal-api')->id();
+
+    $request->validate([
+        'email' => 'required|email',
     ]);
+
+    $newEmail = $request->email;
+
+    $existsInPersonals = Personal::where('email', $newEmail)
+        ->where('id', '!=', $personalId)
+        ->exists();
+
+    $existsInUsers = User::where('email', $newEmail)->exists();
+
+    if ($existsInPersonals || $existsInUsers) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Email already taken',
+            'code' => 'EMAIL_TAKEN',
+            'data' => null
+        ], 422);
+    }
+
+    $personal = Personal::find($personalId);
+
+    if (!$personal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Personal record not found',
+            'code' => 'PERSONAL_NOT_FOUND',
+            'data' => null
+        ], 404);
+    }
+
+    $personal->email = $newEmail;
+    $personal->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Email updated successfully',
+        'code' => 'EMAIL_UPDATED',
+        'data' => [
+            'email' => $personal->email
+        ]
+    ], 200);
 }
 
 
-    public function updateEmail(Request $request)
-    {
-        $personalId = auth('personal-api')->id();
+ public function deactivateAccount(Request $request)
+{
+    $personalId = auth('personal-api')->id();
+    $personal = Personal::find($personalId);
 
-        $request->validate([
-            'email' => 'required|email',
-        ]);
-
-        $newEmail = $request->email;
-
-        $existsInPersonals = Personal::where('email', $newEmail)
-            ->where('id', '!=', $personalId)
-            ->exists();
-
-        // Check if email already exists in users table
-        $existsInUsers = User::where('email', $newEmail)->exists();
-
-        if ($existsInPersonals || $existsInUsers) {
-            return response()->json([
-                'data' => [
-                    'errors' => 'Email already taken',
-                ]
-            ], 422);
-        }
-
-        $personal = Personal::find($personalId);
-
-        if (!$personal) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Personal record not found'
-                ]
-            ], 404);
-        }
-
-        $personal->email = $newEmail;
-        $personal->save();
-
+    if (!$personal) {
         return response()->json([
-            'data' => [
-                'message' => 'Email updated successfully',
-                'email' => $personal->email,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]
-        ]);
+            'success' => false,
+            'message' => 'Personal record not found',
+            'code' => 'PERSONAL_NOT_FOUND',
+            'data' => null
+        ], 404);
     }
 
-    public function deactivateAccount(Request $request)
-    {
-        $personalId = auth('personal-api')->id();
-        $personal = Personal::find($personalId);
+    $personal->deletestatus = 'deactivated';
+    $personal->save();
 
-        if (!$personal) {
-            return response()->json([
-                'data' => [
-                    'message' => 'Personal record not found'
-                ]
-            ], 404);
-        }
+    $personal->tokens()->delete();
 
-        // Update status
-        $personal->deletestatus = 'deactivated';
-        $personal->save();
-
-        /// Revoke tokens
-     $personal->tokens()->delete();
-
-        return response()->json([
-            'data' => [
-                'message' => 'Account deactivated successfully',
-                'status' => $personal->deletestatus,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Account deactivated successfully',
+        'code' => 'ACCOUNT_DEACTIVATED',
+        'data' => [
+            'status' => $personal->deletestatus
+        ]
+    ], 200);
+}
 
 
 

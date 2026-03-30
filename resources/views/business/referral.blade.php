@@ -1,143 +1,137 @@
 @include('business.head')
 
 <body class="bg-[#E9E9E9] text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-    
-    <!-- Mobile menu button -->
-    @include('business.header')
+  @include('business.header')
+  @include('business.sidebar')
 
-    <!-- Sidebar -->
-    @include('business.sidebar')
-    
-    <!-- Overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
-    
-    <!-- Main content -->
-    <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
-        <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
-            <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                Referral Rewards 
-            </h1>
-            @include('business.header_notifical')
-        </header>
-        <section class="relative w-full">
-            <section class="bg-white text-gray-700 min-h-screen w-full md:rounded-3xl md:p-6 p-2 shadow-md md:absolute overflow-x-hidden ">
-                <div class="max-w-[1200px] mx-auto">
-                    <div class="bg-white max-w-4xl p-8 md:p-12">
-                    
-                        <!-- Heading -->
-                        <h1 class="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-                            Make referrals,<br class="hidden md:block" />
-                            Get rewards!
-                        </h1>
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
 
-                        <!-- Bullet points -->
-                        <ul class="space-y-4 text-gray-600 text-base md:text-lg mb-6">
-                            <li class="flex items-start gap-3">
-                                <span class="mt-2 w-2 h-2 bg-gray-500 rounded-full"></span>
-                                <p>
-                                    Invite a personal account and get 
-                                    <span class="font-semibold text-gray-900">£10</span> 
-                                    when they make a total deposit of 
-                                    <span class="font-semibold text-gray-900">£1,000</span> 
-                                    within 15 days.
-                                </p>
-                            </li>
+  <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
+    <header class="hidden md:flex items-center justify-between mb-8 gap-4">
+      <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
+        Referral Rewards
+      </h1>
+      @include('business.header_notifical')
+    </header>
 
-                            <li class="flex items-start gap-3">
-                                <span class="mt-2 w-2 h-2 bg-gray-500 rounded-full"></span>
-                                <p>
-                                    Invite a business account and get 
-                                    <span class="font-semibold text-gray-900">£50</span> 
-                                    when they make a total deposit of 
-                                    <span class="font-semibold text-gray-900">£2,000</span> 
-                                    within 15 days.
-                                </p>
-                            </li>
-                        </ul>
+    <section class="mx-auto max-w-5xl">
+      <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
 
-                        <!-- Share link -->
-                        <p class="text-blue-600 font-medium mb-2">Share your link</p>
+        <!-- Header -->
+        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Referrals</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Make Referrals, Get Rewards</h2>
+              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+                Invite users and earn cash rewards when they deposit successfully.
+              </p>
+            </div>
+            <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
+              Status: <span class="font-semibold">Active</span>
+            </div>
+          </div>
+        </div>
 
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <!-- Input -->
-                            <div class="flex items-center bg-gray-100 rounded-full px-4 py-3 w-full">
-                                <input type="text" id="referralInput" value="{{ $referralLink }}" readonly  class="bg-transparent w-full outline-none text-gray-700 text-sm"/>
-                            </div>
+        <!-- Body -->
+        <div class="p-6 md:p-10 space-y-8">
 
-                            <!-- Button -->
-                            <button id="copyReferralBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
-                                Share
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M4 6v.01M4 18v.01M12 6l6 6-6 6" />
-                                </svg>
-                            </button>
-                        </div>
+          <!-- Reward Cards -->
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Personal</p>
+              <h3 class="mt-2 text-xl font-semibold text-slate-900">Earn £10</h3>
+              <p class="mt-2 text-sm text-slate-600">
+                When your invitee deposits a total of <span class="font-semibold text-slate-900">£1,000</span> within 15 days.
+              </p>
+            </div>
 
-                    </div>
-                </div>
-            </section>
-        </section>
-    </main>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Business</p>
+              <h3 class="mt-2 text-xl font-semibold text-slate-900">Earn £50</h3>
+              <p class="mt-2 text-sm text-slate-600">
+                When your invitee deposits a total of <span class="font-semibold text-slate-900">£2,000</span> within 15 days.
+              </p>
+            </div>
+          </div>
 
+          <!-- Share Link -->
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+            <p class="text-sm font-semibold text-slate-900 mb-2">Share your referral link</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex items-center bg-white rounded-full px-4 py-3 w-full border border-slate-200">
+                <input type="text" id="referralInput" value="{{ $referralLink }}" readonly
+                  class="bg-transparent w-full outline-none text-slate-700 text-sm" />
+              </div>
+              <button id="copyReferralBtn"
+                class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
+                Share
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M4 6v.01M4 18v.01M12 6l6 6-6 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-    <!-- SweetAlert2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const openBtn = document.getElementById('openSidebarBtn');
-        const closeBtn = document.getElementById('closeSidebarBtn');
-        const overlay = document.getElementById('overlay');
+        </div>
+      </div>
+    </section>
+  </main>
 
-        function openSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('openSidebarBtn');
+    const closeBtn = document.getElementById('closeSidebarBtn');
+    const overlay = document.getElementById('overlay');
 
-        function closeSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
 
-        openBtn.addEventListener('click', openSidebar);
-        closeBtn.addEventListener('click', closeSidebar);
-        overlay.addEventListener('click', closeSidebar);
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
 
-        // Close sidebar on window resize if desktop
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = '';
-            } else {
-                sidebar.classList.add('-translate-x-full');
-            }
+    openBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+    });
+
+    const copyBtn = document.getElementById('copyReferralBtn');
+    const referralInput = document.getElementById('referralInput');
+
+    copyBtn.addEventListener('click', () => {
+      referralInput.select();
+      referralInput.setSelectionRange(0, 99999);
+
+      navigator.clipboard.writeText(referralInput.value).then(() => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Referral link copied!',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true
         });
-
-        const copyBtn = document.getElementById('copyReferralBtn');
-        const referralInput = document.getElementById('referralInput');
-
-        copyBtn.addEventListener('click', () => {
-            referralInput.select();
-            referralInput.setSelectionRange(0, 99999); // For mobile devices
-
-            // Copy to clipboard
-            navigator.clipboard.writeText(referralInput.value).then(() => {
-                // Show toast using SweetAlert2
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Referral link copied!',
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
-            }).catch((err) => {
-                console.error('Failed to copy: ', err);
-            });
-        });
-    </script>
+      }).catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
+    });
+  </script>
 </body>
 </html>

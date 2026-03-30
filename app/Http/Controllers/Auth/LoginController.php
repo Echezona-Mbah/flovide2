@@ -15,6 +15,7 @@ use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
 use App\Mail\LoginOtpMail;
 use App\Models\Bank;
+use App\Models\CountryRule;
 use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Facades\Http;
@@ -69,9 +70,10 @@ class LoginController extends Controller
 
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json([
-                'data' => [
-                    'message' => 'Invalid credentials'
-                ]
+                'success' => false,
+                'message' => 'Invalid credentials',
+                'code' => 'INVALID_CREDENTIALS',
+                'data' => null
             ], 401);
         }
 
@@ -80,10 +82,12 @@ class LoginController extends Controller
         if ($account->email_verified_status !== 'yes') {
             Auth::logout();
             return response()->json([
+                'success' => false,
+                'message' => 'Email not verified. Please verify your email.',
+                'code' => 'EMAIL_NOT_VERIFIED',
                 'data' => [
-                    'message' => 'Email not verified. Please verify your email.',
                     'status' => 'unverified',
-                    'verify_url' => url("/api/auth/verify-email/{$account->email}"),
+                    'verify_url' => url("/api/auth/verify-email/{$account->email}")
                 ]
             ], 403);
         }
@@ -106,15 +110,17 @@ class LoginController extends Controller
         ));
 
         return response()->json([
+            'success' => true,
+            'message' => 'OTP sent to your email',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => 'OTP sent to your email',
                 'status' => 'otp_required',
                 'email' => $account->email
             ]
         ], 200);
     }
 
-    public function verifyUserLoginOtp(Request $request)
+   public function verifyUserLoginOtp(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -125,19 +131,28 @@ class LoginController extends Controller
 
         if (!$account || !$account->login_otp) {
             return response()->json([
-                'data' => ['message' => 'OTP not requested']
+                'success' => false,
+                'message' => 'OTP not requested',
+                'code' => 'OTP_NOT_REQUESTED',
+                'data' => null
             ], 400);
         }
 
         if (now()->gt($account->login_otp_expires_at)) {
             return response()->json([
-                'data' => ['message' => 'OTP expired']
+                'success' => false,
+                'message' => 'OTP expired',
+                'code' => 'OTP_EXPIRED',
+                'data' => null
             ], 400);
         }
 
         if ($account->login_otp != $request->otp) {
             return response()->json([
-                'data' => ['message' => 'Invalid OTP']
+                'success' => false,
+                'message' => 'Invalid OTP',
+                'code' => 'OTP_INVALID',
+                'data' => null
             ], 400);
         }
 
@@ -150,15 +165,13 @@ class LoginController extends Controller
         // Generate token
         $token = $account->createToken('BusinessToken')->plainTextToken;
 
-        // Notify login success
         $account->notify(new GeneralNotification(
-            "Login Successful ✅",
+            "Login Successful",
             "Hello {$account->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
         ));
 
-
         $balances = \App\Models\Balance::where('user_id', $account->id)->get();
-        
+
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
             ->latest()
             ->take(4)
@@ -172,7 +185,6 @@ class LoginController extends Controller
                     'amount'    => $t->currency_symbol . number_format($t->amount, 2),
                     'currency'  => $t->currency,
                     'status' => $t->status,
-                    'type' => $t->type,
                     'reference' => $t->reference,
                     'recipient_details' => [
                         'alias'          => $t->recipient_alias,
@@ -183,17 +195,6 @@ class LoginController extends Controller
                     ]
                 ];
             });
-
-
-        // $chartData = \App\Models\TransactionHistory::where('user_id', $account->id)
-        //     ->where('created_at', '>=', now()->subMonths(3))
-        //     ->select(
-        //         DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
-        //         DB::raw("SUM(amount) as total_amount")
-        //     )
-        //     ->groupBy('month')
-        //     ->orderBy('month', 'asc')
-        //     ->get();
 
         $months = collect(range(0, 2))->map(function ($i) {
             return now()->subMonths($i)->format('Y-m');
@@ -215,7 +216,6 @@ class LoginController extends Controller
         $teamMembership = \App\Models\TeamMembers::where('user_id', $account->id)->first();
         $countryResponse = $this->fetchcountrylist($request);
         $countries = $countryResponse->getData();
-        // $countries = \App\Models\Countries::all();
         $beneficiaries = \App\Models\Beneficia::where('user_id', $account->id)->get();
         $payoutAccounts = \App\Models\BankAccount::where('user_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('user_id', $account->id)->where('status', 'active')->get();
@@ -223,15 +223,14 @@ class LoginController extends Controller
         $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)
                     ->getSumsubToken()
                     ->getData(true);
-        $bank = Bank::all();
+        $countryrule = CountryRule::where('is_active', 1)
+            ->select('country_iso', 'country_name', 'currency_iso')
+            ->get();
 
-        // dd($chartData);
-
-
-        //RECORD LOGIN ACTIVITY
-        // $this->recordLoginActivity($request, $account);
-        
         return response()->json([
+            'success' => true,
+            'message' => 'Login verified successfully',
+            'code' => 'LOGIN_VERIFIED',
             'data' => [
                 'account_type' => 'business',
                 'token' => $token,
@@ -246,7 +245,7 @@ class LoginController extends Controller
                         : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
-                'bank' => $bank,
+                'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
                 'transactions' => $transactions,
@@ -260,35 +259,32 @@ class LoginController extends Controller
                 'role' => $teamMembership ? ($teamMembership->role ?? 'member') : 'Owner',
             ]
         ], 200);
-
     }
 
-    public function resendUserLoginOtp(Request $request)
+
+  public function resendUserLoginOtp(Request $request)
     {
-        
         $request->validate([
             'email' => 'required|email|exists:users,email'
         ]);
 
         $account = User::where('email', $request->email)->first();
 
-        // Rate limit: 60 seconds cooldown
         if ($account->login_otp_expires_at && now()->diffInSeconds($account->login_otp_expires_at->subMinutes(5)) < 60) {
             return response()->json([
-                'data' => [
-                    'message' => 'You can request a new OTP after 60 seconds.'
-                ]
+                'success' => false,
+                'message' => 'You can request a new OTP after 60 seconds.',
+                'code' => 'OTP_RATE_LIMIT',
+                'data' => null
             ], 429);
         }
 
-        // Generate new OTP
         $otp = rand(100000, 999999);
         $account->update([
             'login_otp' => $otp,
             'login_otp_expires_at' => now()->addMinutes(5),
         ]);
 
-        // Send email + notification
         Mail::to($account->email)->send(new LoginOtpMail($account->business_name, $otp));
         $account->notify(new GeneralNotification(
             "Your Login OTP",
@@ -296,15 +292,18 @@ class LoginController extends Controller
         ));
 
         return response()->json([
+            'success' => true,
+            'message' => 'OTP resent successfully',
+            'code' => 'OTP_RESENT',
             'data' => [
-                'message' => 'OTP resent successfully',
                 'status' => 'otp_required'
             ]
         ], 200);
     }
 
 
-    public function loginPersonal(Request $request)
+
+   public function loginPersonal(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -315,23 +314,25 @@ class LoginController extends Controller
 
         if (!$account || !Hash::check($request->password, $account->password)) {
             return response()->json([
-                'data' => [
-                    'message' => 'Invalid credentials'
-                ]
+                'success' => false,
+                'message' => 'Invalid credentials',
+                'code' => 'INVALID_CREDENTIALS',
+                'data' => null
             ], 401);
         }
 
         if ($account->email_verified_status !== 'yes') {
             return response()->json([
+                'success' => false,
+                'message' => 'Email not verified. Please verify your email.',
+                'code' => 'EMAIL_NOT_VERIFIED',
                 'data' => [
-                    'message' => 'Email not verified. Please verify your email.',
                     'status' => 'unverified',
-                    'verify_url' => url("/api/auth/verify-email/{$account->email}"),
+                    'verify_url' => url("/api/auth/verify-email/{$account->email}")
                 ]
             ], 403);
         }
 
-        // Generate OTP
         $otp = rand(100000, 999999);
 
         $account->update([
@@ -339,26 +340,27 @@ class LoginController extends Controller
             'login_otp_expires_at' => now()->addMinutes(5),
         ]);
 
-        // Send OTP notification
         $account->notify(new GeneralNotification(
             "Your Login OTP",
             "Your OTP is: {$otp}. It expires in 5 minutes."
         ));
 
-        //Send OTP email
         Mail::to($account->email)->send(new LoginOtpMail($account->firstname, $otp));
 
         return response()->json([
+            'success' => true,
+            'message' => 'OTP sent to your email',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => 'OTP sent to your email',
                 'status' => 'otp_required',
                 'email' => $account->email
             ]
         ], 200);
     }
 
-    public function verifyLoginOtp(Request $request){
-        
+
+    public function verifyLoginOtp(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|digits:6'
@@ -368,60 +370,65 @@ class LoginController extends Controller
 
         if (!$account || !$account->login_otp) {
             return response()->json([
-                'data' => ['message' => 'OTP not requested']
+                'success' => false,
+                'message' => 'OTP not requested',
+                'code' => 'OTP_NOT_REQUESTED',
+                'data' => null
             ], 400);
         }
 
         if (now()->gt($account->login_otp_expires_at)) {
             return response()->json([
-                'data' => ['message' => 'OTP expired']
+                'success' => false,
+                'message' => 'OTP expired',
+                'code' => 'OTP_EXPIRED',
+                'data' => null
             ], 400);
         }
 
         if ($account->login_otp != $request->otp) {
             return response()->json([
-                'data' => ['message' => 'Invalid OTP']
+                'success' => false,
+                'message' => 'Invalid OTP',
+                'code' => 'OTP_INVALID',
+                'data' => null
             ], 400);
         }
 
-        // Clear OTP
         $account->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
         ]);
 
-        // Generate token after OTP success
         $token = $account->createToken('PersonalToken')->plainTextToken;
 
-
         $account->notify(new GeneralNotification(
-            "Login Successful ✅",
+            "Login Successful",
             "Hello {$account->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
         ));
 
-        // Fetch balances, transactions, chart data
         $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
 
-        $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)->latest()->take(4)->get()->map(function ($t) {
-            return [
-                'type'      => $t->type,
-                'date'      => $t->created_at->format('Y-m-d H:i:s'),
-                'sender'    => $t->sender ?? 'N/A',
-                'recipient' => $t->recipient ?? 'N/A',
-                'amount'    => $t->currency_symbol . number_format($t->amount, 2),
-                'currency'  => $t->currency,
-                'status' => $t->status,
-                'type' => $t->type,
-                'reference' => $t->reference,
-                'recipient_details' => [
-                    'alias'          => $t->recipient_alias,
-                    'account_name'   => $t->recipient_account_name,
-                    'account_number' => $t->recipient_account_number,
-                    'bank_name'      => $t->recipient_bank_name,
-                    'bank_currency'  => $t->recipient_bank_currency,
-                ]
-            ];
-        });
+        $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
+            ->latest()->take(4)->get()->map(function ($t) {
+                return [
+                    'type'      => $t->type,
+                    'date'      => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'    => $t->sender ?? 'N/A',
+                    'recipient' => $t->recipient ?? 'N/A',
+                    'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+                    'currency'  => $t->currency,
+                    'status' => $t->status,
+                    'reference' => $t->reference,
+                    'recipient_details' => [
+                        'alias'          => $t->recipient_alias,
+                        'account_name'   => $t->recipient_account_name,
+                        'account_number' => $t->recipient_account_number,
+                        'bank_name'      => $t->recipient_bank_name,
+                        'bank_currency'  => $t->recipient_bank_currency,
+                    ]
+                ];
+            });
 
         $months = collect(range(0, 2))->map(function ($i) {
             return now()->subMonths($i)->format('Y-m');
@@ -440,8 +447,6 @@ class LoginController extends Controller
             ];
         });
 
-
-        // ✅ Fetch extra lists
         $countryResponse = $this->fetchcountrylist($request);
         $countries = $countryResponse->getData();
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
@@ -449,14 +454,16 @@ class LoginController extends Controller
         $virtualCards = \App\Models\VirtualCards::where('personal_id', $account->id)->where('status', 'active')->get();
         $subaccounts = Subaccount::where('personal_id', $account->id)->get();
         $tokenResponse = app(\App\Http\Controllers\Personal\ComplianceController::class)
-    ->getSumsubToken($account); // already an array
-            $bank = Bank::all();
-
-
+            ->getSumsubToken($account);
+        $countryrule = CountryRule::where('is_active', 1)
+            ->select('country_iso', 'country_name', 'currency_iso')
+            ->get();
 
         return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'code' => 'LOGIN_VERIFIED',
             'data' => [
-                'message' => 'Login successful',
                 'token' => $token,
                 'account_type' => 'personals',
                 'personal' => [
@@ -465,12 +472,10 @@ class LoginController extends Controller
                     'lastname' => $account->lastname,
                     'email' => $account->email,
                     'currency' => $account->currency,
-                    'profile_url' => $account->profile_picture
-                        ? asset($account->profile_picture)
-                        : null,
+                    'profile_url' => $account->profile_picture ? asset($account->profile_picture) : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
-                'bank' => $bank,
+                'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
                 'transactions' => $transactions,
@@ -482,8 +487,8 @@ class LoginController extends Controller
                 'subaccounts' => $subaccounts,
             ]
         ], 200);
-
     }
+
 
     public function resendLoginOtp(Request $request)
     {
@@ -493,16 +498,15 @@ class LoginController extends Controller
 
         $account = Personal::where('email', $request->email)->first();
 
-        //check if last OTP was sent less than 60 seconds ago
         if ($account->login_otp_expires_at && now()->diffInSeconds($account->login_otp_expires_at->subMinutes(5)) < 60) {
             return response()->json([
-                'data' => [
-                    'message' => 'You can request a new OTP after 60 seconds.'
-                ]
-            ], 429); // Too many requests
+                'success' => false,
+                'message' => 'You can request a new OTP after 60 seconds.',
+                'code' => 'OTP_RATE_LIMIT',
+                'data' => null
+            ], 429);
         }
 
-        // Generate new OTP
         $otp = rand(100000, 999999);
 
         $account->update([
@@ -510,18 +514,18 @@ class LoginController extends Controller
             'login_otp_expires_at' => now()->addMinutes(5),
         ]);
 
-        // Send OTP via email
         Mail::to($account->email)->send(new LoginOtpMail($account->firstname, $otp));
 
-        // Send in-app notification
         $account->notify(new GeneralNotification(
             "Your Login OTP",
             "Your new OTP is: {$otp}. It expires in 5 minutes."
         ));
 
         return response()->json([
+            'success' => true,
+            'message' => 'OTP resent successfully',
+            'code' => 'OTP_RESENT',
             'data' => [
-                'message' => 'OTP resent successfully',
                 'status' => 'otp_required'
             ]
         ], 200);

@@ -8,341 +8,277 @@
     <!-- Sidebar -->
    @include('business.sidebar')
     <!-- Overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
-    <!-- Main content -->
-    <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
-        <header class=" items-center justify-between mb-8 flex-wrap gap-4 hidden md:flex">
-            <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-                {{ __('Send to a beneficiary') }}
-            </h1>
-            @include('business.header_notifical')
+ <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
 
-        </header>
-        <section class=" relative w-full">
-            <section class="bg-white text-gray-700 min-h-screen md:rounded-3xl p-2 shadow-md md:absolute w-full overflow-x-hidden">
-                <section class="flex flex-col w-full min-h-screen bg-white p-6 md:p-10">
-                    <!-- Header -->
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-800">{{ __('My Beneficiaries') }}</h2>
-                        <p class="text-sm text-gray-500">{{ __('Send money to your saved beneficiaries.') }}</p>
+  <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
+    <header class="hidden md:flex items-center justify-between mb-8 gap-4">
+      <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
+        {{ __('Send to a beneficiary') }}
+      </h1>
+      @include('business.header_notifical')
+    </header>
+
+    <section class="mx-auto max-w-6xl">
+      <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
+
+        <!-- Header -->
+        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Beneficiaries</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
+                {{ __('My Beneficiaries') }}
+              </h2>
+              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+                {{ __('Send money to your saved beneficiaries.') }}
+              </p>
+            </div>
+            <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
+              Environment: <span class="font-semibold">Live/Test</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <section class="p-6 md:p-10">
+          <!-- Search -->
+          <form class="flex flex-col sm:flex-row gap-4 mb-8">
+            <input 
+              id="search" 
+              type="search" 
+              placeholder="{{ __('Search by name, account number or email') }}"
+              class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" 
+            />
+            <button type="submit" class="bg-slate-900 text-white px-6 py-2 rounded-full text-sm hover:bg-slate-800 transition">
+              {{ __('Search') }}
+            </button>
+          </form>
+
+          <!-- Beneficiaries Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            @forelse($beneficiaries as $beneficiary)
+              @php
+                $destination = strtolower($beneficiary->bank) === 'mobile'
+                  ? $beneficiary->phone
+                  : $beneficiary->account_number;
+              @endphp
+              <div 
+                class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 cursor-pointer"
+                data-id="{{ $beneficiary->recipient_id }}"
+                data-account-name="{{ $beneficiary->account_name }}"
+                data-account-number="{{ $beneficiary->account_number }}"
+                data-bank="{{ $beneficiary->bank }}"
+                data-currency="{{ $beneficiary->currency }}"
+                data-country="{{ $beneficiary->country }}"
+                data-phone="{{ $beneficiary->phone }}"
+                data-sortcode="{{ $beneficiary->bank_code }}"
+                data-transfermethod="{{ $beneficiary->transfer_method }}"
+                data-amount="100"
+                data-gets="0.06"
+                onclick="openModalFromElement(this)">
+
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
+                    {{ Str::substr($beneficiary->account_name ?? 'N/A', 0, 1) }}
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-800 truncate w-40">{{ $beneficiary->account_name }}</h3>
+                    <p class="text-xs text-gray-400">{{ __('Saved Beneficiary') }}</p>
+                  </div>
+                </div>
+
+                <div class="mb-3 space-y-1 text-sm text-gray-700">
+                  <p>
+                    <strong>{{ __('Account:') }}</strong>
+                    @if(strtolower($beneficiary->bank) === 'mobile')
+                      {{ $beneficiary->phone }}
+                    @else
+                      {{ $beneficiary->account_number }}
+                    @endif
+                  </p>
+                  <p><strong>{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
+                </div>
+              </div>
+            @empty
+              <div class="col-span-full text-center text-gray-500">
+                {{ __("You haven't added any beneficiaries yet.") }}
+              </div>
+            @endforelse
+          </div>
+
+          <!-- Transaction Modal -->
+          <div id="transactionModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative border border-slate-100">
+              <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
+
+              <h2 class="text-lg font-bold mb-4">{{ __('Send Money') }}</h2>
+
+              <div class="flex flex-col gap-6 w-full max-w-md">
+                <div class="flex items-center border rounded-lg overflow-hidden">
+                  <span id="sendCurrencySymbol" class="px-3 text-sm text-gray-600 bg-gray-50 border-r">₦</span>
+                  <input 
+                    type="text" 
+                    id="sendAmount"
+                    inputmode="decimal"
+                    class="w-full px-3 py-2 text-sm focus:outline-none"
+                    value="100.00" 
+                    placeholder="{{ __('You Send') }}"
+                  />
+
+                  @if (!empty($balanceList))
+                  <div class="flex items-center gap-2 px-3 py-2 bg-gray-50">
+                    <img 
+                      id="currencyFlag"
+                      src="https://flagcdn.com/24x18/{{ strtolower($balanceList[0]->currency_meta['country'] ?? 'us') }}.png"
+                      alt="Flag"
+                      class="w-5 h-auto rounded shadow"
+                    />
+                    <span id="currencySymbol" class="text-sm font-medium">
+                      {{ $balanceList[0]->currency_meta['symbol'] ?? '₦' }}
+                    </span>
+
+                    <select id="currency" class="bg-transparent text-sm focus:outline-none">
+                      @foreach ($balanceList as $balance)
+                        <option 
+                          value="{{ $balance->currency }}"
+                          data-id="{{ $balance->id }}"
+                          data-symbol="{{ $balance->currency_meta['symbol'] }}"
+                          data-country="{{ $balance->currency_meta['country'] }}"
+                          data-balance="{{ $balance->balance }}">
+                          {{ $balance->currency }} - {{ $balance->name }} ({{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount) }})
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  @endif
+                </div>
+
+                <div id="beneficiaryInfo" class="mb-3 hidden">
+                  <p><strong>Name:</strong> <span id="beneficiaryName">...</span></p>
+                  <p><strong>Account:</strong> <span id="beneficiaryAccount">...</span></p>
+                  <p><strong>Bank:</strong> <span id="beneficiaryBank">...</span></p>
+                </div>
+
+                <div class="space-y-2 mb-6 text-sm text-gray-700">
+                  <div class="flex justify-between">
+                    <span class="font-medium">{{ __('Exchange rate:') }}</span>
+                    <span id="exchangeRateText">NGN 1.00 = $0.0006</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">{{ __('Transfer fee:') }}</span>
+                    <span id="transferFeeText">₦55.00</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="font-medium">{{ __('Delivery:') }}</span>
+                    <span>{{ __('Usually within 15 minutes(Can take up to 2 hours)') }}</span>
+                  </div>
+                </div>
+
+                <div id="rateLoader" class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-2 hidden">
+                  <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                  <span>{{ __('Refreshing exchange rate...') }}</span>
+                </div>
+
+                <h5 class="text-sm font-semibold text-gray-800 mb-2">{{ __('Beneficiary gets') }}</h5>
+                <div class="space-y-2 mb-6 text-sm text-gray-700">
+                  <div class="flex justify-between">
+                    <div class="font-medium flex items-center gap-1">
+                      <span id="recipientSymbol"></span>
+                      <span id="recipientAmount">0.00</span>
                     </div>
-                
-                    <!-- Search bar -->
-                    <form class="flex flex-col sm:flex-row gap-4 mb-8">
-                        <input 
-                            id="search" 
-                            type="search" 
-                            placeholder="{{ __('Search by name, account number or email') }}"
-                            class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" 
-                        />
-                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm hover:bg-blue-700 transition">
-                            {{ __('Search') }}
-                        </button>
-                    </form>
-                
-                    <!-- Beneficiaries Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                            @forelse($beneficiaries as $beneficiary)
-                            @php
-                                    $destination = strtolower($beneficiary->bank) === 'mobile'
-                                        ? $beneficiary->phone
-                                        : $beneficiary->account_number;
-                                @endphp
-                                <div 
-                                class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                                data-id="{{ $beneficiary->recipient_id }}"
-                                data-account-name="{{ $beneficiary->account_name }}"
-                                data-account-number="{{ $beneficiary->account_number }}"
-                                data-bank="{{ $beneficiary->bank }}"
-                                data-currency="{{ $beneficiary->currency }}"
-                                data-country="{{ $beneficiary->country }}"
-                                data-phone="{{ $beneficiary->phone }}"
-                                data-sortcode="{{ $beneficiary->bank_code }}"
-                                data-transfermethod="{{ $beneficiary->transfer_method }}"
-                                data-amount="100"
-                                data-gets="0.06"
-                                onclick="openModalFromElement(this)">
-                    
-                           
-                                                        
-                                <div class="flex items-center gap-4 mb-4">
-                                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                                        {{ Str::substr($beneficiary->account_name ?? 'N/A', 0, 1) }}
-                                    </div>
-                
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-gray-800 truncate w-40" >{{ $beneficiary->account_name }}</h3>
-                                        <p class="text-xs text-gray-400">{{ __('Saved Beneficiary') }}</p>
-                                    </div>
-                                </div>
-                
-                                <div class="mb-3 space-y-1 text-sm text-gray-700">
-                                    <p>
-                                        <strong>{{ __('Account:') }}</strong>
-                                        @if(strtolower($beneficiary->bank) === 'mobile')
-                                            {{ $beneficiary->phone }}
-                                        @else
-                                            {{ $beneficiary->account_number }}
-                                        @endif
-                                    </p>   
-                                    <p><strong >{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
-                                </div>
-                            </div>
-                       
-                        @empty
-                            <div class="col-span-full text-center text-gray-500">
-                                {{ __("You haven't added any beneficiaries yet.") }}
-                            </div>
-                        @endforelse
-                    </div>
-                
-                        <!-- Transaction Modal -->
-                        <div id="transactionModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                            <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-                                <!-- Close Button -->
-                                <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
+                    <span class="font-medium flex items-center gap-1">
+                      <img id="recipientFlag" src="https://flagcdn.com/24x18/us.png" alt="Recipient Flag" class="w-5 h-auto rounded shadow" />
+                      <span id="recipientGets">USD</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                                <h2 class="text-lg font-bold mb-4">{{ __('Send Money') }}</h2>
+              <button id="sendBtn" class="w-full bg-green-600 text-white py-2 rounded-lg text-center hover:bg-green-700 transition">
+                {{ __('Send') }}
+              </button>
+            </div>
+          </div>
 
-                                <!-- First Section: You Send -->
-                                <div class="flex flex-col gap-6 w-full max-w-md">
+          <!-- Summary Modal -->
+          <form method="POST" action="{{ route('send') }}">
+            @csrf
+            @if ($errors->any())
+              <script>
+                Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json($errors->first()), showConfirmButton:false, timer:4000, timerProgressBar:true });
+              </script>
+            @endif
+            @if (session('error'))
+              <script>
+                Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json(session('error')), showConfirmButton:false, timer:4000, timerProgressBar:true });
+              </script>
+            @endif
+            @if (session('success'))
+              <script>
+                Swal.fire({ toast:true, position:'top-end', icon:'success', title:@json(session('success')), showConfirmButton:false, timer:4000, timerProgressBar:true });
+              </script>
+            @endif
 
-                                    <!-- Amount + Currency -->
-                                    <div class="flex items-center border rounded-lg overflow-hidden">
-                                      <span id="sendCurrencySymbol" class="px-3 text-sm text-gray-600 bg-gray-50 border-r">₦</span>
-                                        <input 
-                                                type="text" 
-                                                id="sendAmount"
-                                                inputmode="decimal"
-                                                class="w-full px-3 py-2 text-sm focus:outline-none"
-                                                value="100.00" 
-                                                placeholder="{{ __('You Send') }}"
-                                            />
+            <div id="summaryModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
+              <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative space-y-6 border border-slate-100">
+                <button type="button" id="closeSummaryModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
 
+                <h2 class="text-xl font-bold text-center text-gray-800">{{ __('Confirm Transaction') }}</h2>
 
+                <div class="bg-gray-100 rounded-lg p-4">
+                  <h3 class="text-sm font-semibold text-gray-600 mb-2">{{ __('Beneficiary Info') }}</h3>
+                  <div class="flex justify-between text-sm text-gray-800">
+                    <span>{{ __('Name:') }}</span>
+                    <span id="summaryName">...</span>
+                  </div>
+                  <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryAccountRow">
+                    <span>Account No:</span>
+                    <span id="summaryAccount">...</span>
+                  </div>
+                  <div class="flex justify-between text-sm text-gray-800 mt-1 hidden" id="summaryPhoneRow">
+                    <span>Phone:</span>
+                    <span id="summaryPhone">...</span>
+                  </div>
+                </div>
 
-                                        @if (!empty($balanceList))
-                                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50">
-                                          <img 
-                                                id="currencyFlag"
-                                                src="https://flagcdn.com/24x18/{{ strtolower($balanceList[0]->currency_meta['country'] ?? 'us') }}.png"
-                                                alt="Flag"
-                                                class="w-5 h-auto rounded shadow"
-                                            />
-                                           <span id="currencySymbol" class="text-sm font-medium">
-                                                {{ $balanceList[0]->currency_meta['symbol'] ?? '₦' }}
-                                            </span>
+                <div class="bg-white border rounded-lg p-4 shadow-sm space-y-2 text-sm text-gray-700">
+                  <input type="hidden" name="bank_code" id="sort_codeInput">
+                  <input type="hidden" name="transfer_method" id="transfermethodInput">
+                  <input type="hidden" name="bank" id="bankInput">
+                  <input type="hidden" name="recipient_id" id="recipientIdInput">
+                  <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
+                  <input type="hidden" name="amount" id="amountInput">
+                  <input type="hidden" name="reference" value="For invoice">
+                  <input type="hidden" name="transfer_fee" id="transferFeeInput">
+                  <input type="hidden" name="total_amount" id="totalAmountInput">
+                  <input type="hidden" name="exchange_rate" id="exchangeRateInput">
+                  <input type="hidden" name="recipient_amount" id="recipientAmountInput">
+                  <input type="hidden" name="account_number" id="accountNumberInput">
+                  <input type="hidden" name="account_name" id="accountNameInput">
 
-                                            <select 
-                                                id="currency" 
-                                                class="bg-transparent text-sm focus:outline-none"
-                                            >
-                                               @foreach ($balanceList as $balance)
-                                                    <option 
-                                                        value="{{ $balance->currency }}"
-                                                        data-id="{{ $balance->id }}"
-                                                        data-symbol="{{ $balance->currency_meta['symbol'] }}"
-                                                        data-country="{{ $balance->currency_meta['country'] }}"
-                                                        data-balance="{{ $balance->balance }}">
-                                                        {{ $balance->currency }} - {{ $balance->name }} ({{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount) }})
-                                                    </option>
+                  <div class="flex justify-between"><span>{{ __('Bank:') }}</span><span id="summaryBank">...</span></div>
+                  <div class="flex justify-between"><span>{{ __('Amount Sent:') }}</span><span id="summaryAmountSent">₦0.00</span></div>
+                  <div class="flex justify-between"><span>{{ __('Transfer Fee:') }}</span><span id="summaryFee">₦0.00</span></div>
+                  <div class="flex justify-between"><span>{{ __('Total:') }}</span><span id="summaryTotal">₦0.00</span></div>
+                  <div class="flex justify-between"><span>{{ __('Exchange Rate:') }}</span><span id="summaryRate">...</span></div>
+                  <div class="flex justify-between"><span>{{ __('They\'ll Receive:') }}</span><span id="summaryReceive">...</span></div>
+                </div>
 
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @endif
-                                    </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-center hover:bg-blue-700 transition">
+                  {{ __('Process Transaction') }}
+                </button>
+              </div>
+            </div>
+          </form>
 
-                                    <!-- Hidden Beneficiary Info (inside #transactionModal) -->
-                                    <div id="beneficiaryInfo" class="mb-3 hidden">
-                                        <p><strong>Name:</strong> <span id="beneficiaryName">...</span></p>
-                                        <p><strong>Account:</strong> <span id="beneficiaryAccount">...</span></p>
-                                        <p><strong>Bank:</strong> <span id="beneficiaryBank">...</span></p>
-                                    </div>
-
-                                    <!-- Exchange Info -->
-                                    <div class="space-y-2 mb-6 text-sm text-gray-700">
-                                        <div class="flex justify-between">
-                                            <span class="font-medium">{{ __('Exchange rate:') }}</span>
-                                            <span id="exchangeRateText">NGN 1.00 = $0.0006</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="font-medium">{{ __('Transfer fee:') }}</span>
-                                            <span id="transferFeeText">₦55.00</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="font-medium">{{ __('Delivery:') }}</span>
-                                            <span>{{ __('Usually within 15 minutes(Can take up to 2 hours)') }}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Loader -->
-                                    <div id="rateLoader" class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-2 hidden">
-                                        <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                        </svg>
-                                        <span>{{ __('Refreshing exchange rate...') }}</span>
-                                    </div>
-
-                                    <!-- Recipient Gets -->
-                                    <h5 class="text-sm font-semibold text-gray-800 mb-2">{{ __('Beneficiary gets') }}</h5>
-                                    <div class="space-y-2 mb-6 text-sm text-gray-700">
-                                        <div class="flex justify-between">
-                                           <div class="font-medium flex items-center gap-1">
-                                                <span id="recipientSymbol"></span>
-                                                <span id="recipientAmount">0.00</span>
-                                            </div>
-
-                                            <span class="font-medium flex items-center gap-1">
-                                                <img id="recipientFlag" src="https://flagcdn.com/24x18/us.png" alt="Recipient Flag" class="w-5 h-auto rounded shadow" />
-                                                <span id="recipientGets">USD</span>
-                                            </span>
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Send Button -->
-                                <button id="sendBtn" class="w-full bg-green-600 text-white py-2 rounded-lg text-center hover:bg-green-700 transition">
-                                    {{ __('Send') }}
-                                </button>
-                                
-                            </div>
-                        </div>
-
-                        <!-- Transaction Summary Modal -->
-                        <form method="POST" action="{{ route('send') }}">
-                            @csrf
-
-                                @if ($errors->any())
-                                    <script>
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'error',
-                                            title: @json($errors->first()),
-                                            showConfirmButton: false,
-                                            timer: 4000,
-                                            timerProgressBar: true,
-                                        });
-                                    </script>
-                                @endif
-
-                                @if (session('error'))
-                                    <script>
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'error',
-                                            title: @json(session('error')),
-                                            showConfirmButton: false,
-                                            timer: 4000,
-                                            timerProgressBar: true,
-                                        });
-                                    </script>
-                                @endif
-
-                                @if (session('success'))
-                                    <script>
-                                        Swal.fire({
-                                            toast: true,
-                                            position: 'top-end',
-                                            icon: 'success',
-                                            title: @json(session('success')),
-                                            showConfirmButton: false,
-                                            timer: 4000,
-                                            timerProgressBar: true,
-                                        });
-                                    </script>
-                                @endif
-
-
-                            <div id="summaryModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
-                                <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative space-y-6">
-                                    <button type="button" id="closeSummaryModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
-                        
-                                    <h2 class="text-xl font-bold text-center text-gray-800">{{ __('Confirm Transaction') }}</h2>
-                        
-                                    <!-- Section 1: Beneficiary Info -->
-                                    <div class="bg-gray-100 rounded-lg p-4">
-                                        <h3 class="text-sm font-semibold text-gray-600 mb-2">{{ __('Beneficiary Info') }}</h3>
-                                        <div class="flex justify-between text-sm text-gray-800">
-                                            <span>{{ __('Name:') }}</span>
-                                            <span id="summaryName">...</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryAccountRow">
-                                            <span>Account No:</span>
-                                            <span id="summaryAccount">...</span>
-                                        </div>
-
-                                        <div class="flex justify-between text-sm text-gray-800 mt-1 hidden" id="summaryPhoneRow">
-                                            <span>Phone:</span>
-                                            <span id="summaryPhone">...</span>
-                                        </div>
-                                    </div>
-                        
-                                    <!-- Section 2: Transaction Details -->
-                                    <div class="bg-white border rounded-lg p-4 shadow-sm space-y-2 text-sm text-gray-700">
-                                        {{-- <input type="hidden" name="recipient_id" id="recipientIdInput">
-                                        <input type="hidden" name="balance_id" value="{{ $balanceList[0]['id'] ?? '' }}">
-                                        <input type="hidden" name="amount" id="amountInput">
-                                        <input type="hidden" name="reference" value="For invoice">--}}  
-                                        <input type="hidden" name="bank_code" id="sort_codeInput">
-                                        <input type="hidden" name="transfer_method" id="transfermethodInput">
-                                        <input type="hidden" name="bank" id="bankInput">
-                                        <input type="hidden" name="recipient_id" id="recipientIdInput">
-                                        <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
-                                        <input type="hidden" name="amount" id="amountInput">
-                                        <input type="hidden" name="reference" value="For invoice">
-                                        <input type="hidden" name="transfer_fee" id="transferFeeInput">
-                                        <input type="hidden" name="total_amount" id="totalAmountInput">
-                                        <input type="hidden" name="exchange_rate" id="exchangeRateInput">
-                                        <input type="hidden" name="recipient_amount" id="recipientAmountInput">
-                                        <input type="hidden" name="account_number" id="accountNumberInput">
-                                        <input type="hidden" name="account_name" id="accountNameInput">
-                                        
-
-                                        <div class="flex justify-between">
-                                            <span>{{ __('Bank:') }}</span>
-                                            <span id="summaryBank">...</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>{{ __('Amount Sent:') }}</span>
-                                            <span id="summaryAmountSent">₦0.00</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>{{ __('Transfer Fee:') }}</span>
-                                            <span id="summaryFee">₦0.00</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>{{ __('Total:') }}</span>
-                                            <span id="summaryTotal">₦0.00</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>{{ __('Exchange Rate:') }}</span>
-                                            <span id="summaryRate">...</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>{{ __('They\'ll Receive:') }}</span>
-                                            <span id="summaryReceive">...</span>
-                                        </div>
-                                    </div>
-                        
-                                    <!-- Final Process Button -->
-                                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-center hover:bg-blue-700 transition">
-                                        {{ __('Process Transaction') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                        
-
-                </section>
-                
         </section>
+      </div>
+    </section>
+  </main>
 
-    </main>
 
 
 <!-- JavaScript -->

@@ -104,11 +104,11 @@
             <section class="max-w-6xl mx-auto px-6 mb-16">
                 <div class="flex flex-wrap justify-center gap-3">
                     <button class="px-6 py-2 rounded-full border border-flovide bg-flovide text-white text-sm font-medium">All Topics</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Money Transfers</button>
+                    {{-- <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Money Transfers</button>
                     <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Fintech Tips</button>
                     <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Business Payments</button>
                     <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Security</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Product Updates</button>
+                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Product Updates</button> --}}
                 </div>
             </section> 
 
@@ -125,10 +125,10 @@
                         <p class="text-gray-600 mb-8 leading-relaxed">
                             How digital wallets and real-time payment rails are reducing costs and increasing speed for millions of users across the continent.
                         </p>
-                        <a href="#" class="text-flovide font-bold flex items-center group">
+                        {{-- <a href="#" class="text-flovide font-bold flex items-center group">
                             Read More 
                             <svg class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
             </section>
@@ -138,7 +138,7 @@
             <section class="max-w-6xl mx-auto px-6 mb-24">
                 <div class="flex justify-between items-end mb-10">
                     <h3 class="text-2xl font-bold">Latest Articles</h3>
-                    <a href="#" class="text-sm font-semibold text-flovide">View all →</a>
+                    {{-- <a href="#" class="text-sm font-semibold text-flovide">View all →</a> --}}
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -207,8 +207,8 @@
                             Join thousands of users who trust Flovide for fast, secure, and affordable international payments.
                         </p>
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
-                            <button class="bg-white text-flovide px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition">Get Started</button>
-                            <button class="border border-white border-opacity-30 text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:bg-opacity-10 transition">Contact Sales</button>
+                            {{-- <button class="bg-white text-flovide px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition">Get Started</button>
+                            <button class="border border-white border-opacity-30 text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:bg-opacity-10 transition">Contact Sales</button> --}}
                         </div>
                     </div>
                 </div>

@@ -17,24 +17,23 @@ class AddBeneficiariesController extends Controller
     
 public function index(Request $request)
 {
-    $personalId = auth('personal-api')->id(); 
+    $personalId = auth('personal-api')->id();
 
     $beneficias = Beneficia::where('personal_id', $personalId)
         ->paginate(8);
 
     if ($request->expectsJson()) {
         return response()->json([
-             'data' =>[
-            'message' => 'Personal Beneficia records retrieved successfully',
             'success' => true,
-            'data' => $beneficias,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-        ]], 200);
+            'message' => 'Personal Beneficia records retrieved successfully',
+            'code' => 'PERSONAL_BENEFICIA_FETCHED',
+            'data' => $beneficias
+        ], 200);
     }
 
     return view('personal.beneficiaries', compact('beneficias'));
 }
+
 
 public function allBeneficia(Request $request)
 {
@@ -44,61 +43,33 @@ public function allBeneficia(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-         'data' =>[
-            'message' => 'All Personal Beneficia records retrieved successfully',
             'success' => true,
-            'data' => $beneficias,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-        ]], 200);
+            'message' => 'All Personal Beneficia records retrieved successfully',
+            'code' => 'PERSONAL_BENEFICIA_ALL_FETCHED',
+            'data' => $beneficias
+        ], 200);
     }
 
     return view('personal.all-beneficiaries', compact('beneficias'));
 }
-
-// public function store(Request $request)
-// {
-//     $personalId = auth('personal-api')->id(); 
-
-//     $country = $request->input('country');
-//     $currency = $request->input('currency');
-
- 
-
-//        $personal = \App\Models\Personal::find($personalId);
-//     if ($personal) {
-//         $personal->notify(new GeneralNotification(
-//             "New Beneficiary Added 🎉",
-//             "You successfully added {$beneficia->account_name} ({$beneficia->account_number}) as a beneficiary."
-//         ));
-//     }
-
-//     return $request->expectsJson()
-//         ? response()->json([
-//            'data'=>[
-//              'message' => 'Personal Beneficia created successfully',
-//             'success' => true,
-//             'data'    => $beneficia
-//            ]
-//         ], 201)
-//         : redirect()->route('personal.beneficia.index')->with('success', 'Beneficia created successfully.');
-// }
-
 
 
 public function store(Request $request)
 {
     $isApi = $request->expectsJson();
 
-    // Get the authenticated personal user
     $personal = auth('personal-api')->user();
     if (!$personal) {
-        return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+            'code' => 'UNAUTHORIZED',
+            'data' => null
+        ], 401);
     }
 
     $personalId = $personal->id;
 
-    /* ================= VALIDATION ================= */
     $validator = \Validator::make($request->all(), [
         'type' => 'required|in:individual,corporate',
         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
@@ -114,16 +85,19 @@ public function store(Request $request)
     ]);
 
     if ($validator->fails()) {
-        return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation error',
+            'code' => 'VALIDATION_ERROR',
+            'data' => $validator->errors()
+        ], 422);
     }
 
-    /* ================= EXTRACT DATA ================= */
     $bank       = $request->input('bank', []);
     $countryIso = strtoupper($bank['country']);
     $currency   = strtoupper($bank['currency']);
     $method     = $request->transfer_method;
 
-    /* ================= PROVIDER DETECTION ================= */
     $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
     $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
     $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
@@ -134,20 +108,39 @@ public function store(Request $request)
     if ($currency === 'GHS') {
         if ($appmobileEnabled) $provider = 'app_mobile';
         elseif ($payazaEnabled) $provider = 'payaza';
-        else return response()->json(['success'=>false,'message'=>'No provider enabled for GHS'],403);
+        else return response()->json([
+            'success' => false,
+            'message' => 'No provider enabled for GHS',
+            'code' => 'PROVIDER_DISABLED',
+            'data' => null
+        ], 403);
     } elseif ($currency === 'UGX') {
         if ($pivotEnabled) $provider = 'pivot';
         elseif ($payazaEnabled) { $provider = 'payaza'; $method = 'mobile'; }
-        else return response()->json(['success'=>false,'message'=>'No provider enabled for UGX'],403);
+        else return response()->json([
+            'success' => false,
+            'message' => 'No provider enabled for UGX',
+            'code' => 'PROVIDER_DISABLED',
+            'data' => null
+        ], 403);
     } elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
         if ($payazaEnabled) $provider = 'payaza';
-        else return response()->json(['success'=>false,'message'=>'Payaza disabled'],403);
+        else return response()->json([
+            'success' => false,
+            'message' => 'Payaza disabled',
+            'code' => 'PROVIDER_DISABLED',
+            'data' => null
+        ], 403);
     } else {
         if ($pivotEnabled) $provider = 'pivot';
-        else return response()->json(['success'=>false,'message'=>'Pivot disabled'],403);
+        else return response()->json([
+            'success' => false,
+            'message' => 'Pivot disabled',
+            'code' => 'PROVIDER_DISABLED',
+            'data' => null
+        ], 403);
     }
 
-    /* ================= DETERMINE BANK / MOBILE ================= */
     $bankName     = null;
     $mobileNumber = null;
     if ($method === 'bank') {
@@ -164,7 +157,6 @@ public function store(Request $request)
         $bankName = $bankRow?->name ?? 'mobile';
     }
 
-    /* ================= STORE ================= */
     try {
         $beneficia = Beneficia::create([
             'country'   => $countryIso,
@@ -184,15 +176,24 @@ public function store(Request $request)
             'customer_reference' => strtoupper(\Str::random(7)),
             'recipient_id'       => \Str::uuid(),
             'account_id'         => \Str::uuid(),
-
-            'personal_id' => $personalId, // <-- link to personal user
+            'personal_id' => $personalId,
         ]);
 
-        return response()->json(['success'=>true,'data'=>$beneficia],201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Beneficiary created successfully',
+            'code' => 'BENEFICIARY_CREATED',
+            'data' => $beneficia
+        ], 201);
 
     } catch (\Exception $e) {
         logger('Beneficiary Store Error: '.$e->getMessage());
-        return response()->json(['success'=>false,'message'=>'Failed to create beneficiary'],500);
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create beneficiary',
+            'code' => 'BENEFICIARY_CREATE_FAILED',
+            'data' => null
+        ], 500);
     }
 }
 
@@ -208,10 +209,10 @@ public function destroy(Request $request, $id)
         $message = 'Unauthorized to delete this beneficia';
         return $request->expectsJson()
             ? response()->json([
-               'data'=>[
-                 'status'  => 'error',
-                'errors' => $message
-               ]
+                'success' => false,
+                'message' => $message,
+                'code' => 'FORBIDDEN',
+                'data' => null
             ], 403)
             : redirect()->back()->withErrors(['message' => $message]);
     }
@@ -232,27 +233,25 @@ public function destroy(Request $request, $id)
         $successMessage = 'Beneficia deleted successfully from both system and OhentPay';
         return $request->expectsJson()
             ? response()->json([
-              'data'=>[
-                'status'  => 'success',
-                'success' => $successMessage,
-                'method'  => $request->method(),
-                'url'     => $request->fullUrl()
-              ]
-            ])
+                'success' => true,
+                'message' => $successMessage,
+                'code' => 'BENEFICIA_DELETED',
+                'data' => null
+            ], 200)
             : redirect()->route('personal.beneficia.index')->with('status', $successMessage);
     }
 
     $errorMessage = 'Failed to delete recipient from OhentPay';
     return $request->expectsJson()
         ? response()->json([
-            'data'=>[
-            'status'  => 'error',
+            'success' => false,
             'message' => $errorMessage,
-            'error'   => $ohentResponse->json(),
-            ]
+            'code' => 'BENEFICIA_DELETE_FAILED',
+            'data' => $ohentResponse->json()
         ], 500)
         : redirect()->back()->withErrors(['message' => $errorMessage]);
 }
+
 
 
     

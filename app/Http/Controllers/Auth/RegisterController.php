@@ -58,25 +58,23 @@ public function registerUser(Request $request)
         'trading_city' => 'required|string|max:255',
     ]);
 
-    if ($validator->fails()) {
-        return response()->json([
-             'data' => [
-            'errors' => $validator->errors(),
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-        ]], 422);
-    }
+    return response()->json([
+        'success' => false,
+        'message' => 'Validation error',
+        'code' => 'VALIDATION_ERROR',
+        'data' => $validator->errors()
+    ], 422);
 
     if (
         User::where('email', $request->email)->exists() ||
         Personal::where('email', $request->email)->exists()
     ) {
-        return response()->json([
-            'data' => [
-            'errors' => "Email already taken",
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-            ]], 422);
+       return response()->json([
+            'success' => false,
+            'message' => 'Email already taken',
+            'code' => 'EMAIL_TAKEN',
+            'data' => null
+        ], 422);
     }
 
     if ($request->person_phone && (
@@ -84,11 +82,11 @@ public function registerUser(Request $request)
         Personal::where('person_phone', $request->person_phone)->exists()
     )) {
         return response()->json([
-            'data' => [
-            'errors' => "Phone already taken",
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-            ]], 422);
+            'success' => false,
+            'message' => 'Phone already taken',
+            'code' => 'PHONE_TAKEN',
+            'data' => null
+        ], 422);
     }
 
     $otp = $this->generateOTP();
@@ -145,12 +143,12 @@ public function registerUser(Request $request)
 
 
     return response()->json([
+        'success' => true,
+        'message' => 'Business registration successful. Please check your email for verification',
+        'code' => 'REGISTERED',
         'data' => [
-            'message' => "Business registration successful. Please check your email for verification",
             'token' => $token,
-            'email_verification_otp' => $otp,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
+            'email_verification_otp' => $otp
         ]
     ], 201);
 }
@@ -172,11 +170,11 @@ public function registerUser(Request $request)
             ->first();
         if (!$account) {
             return response()->json([
-                 'data' => [
+                'success' => false,
                 'message' => 'Invalid or expired OTP',
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]], 404);
+                'code' => 'OTP_INVALID_OR_EXPIRED',
+                'data' => null
+            ], 404);
         }
 
         if ($account->email_verification_otp !== $request->otp) {
@@ -184,24 +182,28 @@ public function registerUser(Request $request)
 
             if ($account->email_verification_attempts >= 3) {
                 return response()->json([
-                    'data' => [
-                    'errors' => 'Too many attempts. Please request a new OTP.',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]], 422);
+                    'success' => false,
+                    'message' => 'Too many attempts. Please request a new OTP.',
+                    'code' => 'OTP_TOO_MANY_ATTEMPTS',
+                    'data' => null
+                ], 422);
             }
 
             return response()->json([
-                'data' => [
-                    'message' => 'Invalid OTP',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+                'success' => false,
+                'message' => 'Invalid OTP',
+                'code' => 'OTP_INVALID',
+                'data' => null
             ], 422);
         }
 
         if ($account->email_verified_status !== 'no') {
-            return response()->json(['message' => 'Email already verified']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Email already verified',
+                'code' => 'EMAIL_ALREADY_VERIFIED',
+                'data' => null
+            ], 400);
         }
 
         $account->update([
@@ -211,13 +213,14 @@ public function registerUser(Request $request)
         ]);
 
         return response()->json([
+            'success' => true,
+            'message' => 'Email verified successfully',
+            'code' => 'EMAIL_VERIFIED',
             'data' => [
-                'message' => 'Email verified successfully',
-                'email' => $account->email,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'email' => $account->email
             ]
-        ]);
+        ], 200);
+
     }
 
     public function verifyEmailOtp(Request $request)
@@ -229,13 +232,12 @@ public function registerUser(Request $request)
         $account = \App\Models\User::where('email', $request->email)->first();
 
         if (!$account) {
-            return response()->json([
-                'data' => [
-                    'errors' => 'User not found',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
-            ], 404);
+           return response()->json([
+            'success' => false,
+            'message' => 'User not found',
+            'code' => 'USER_NOT_FOUND',
+            'data' => null
+        ], 404);
         }
 
         $otp = rand(100000, 999999);
@@ -249,12 +251,12 @@ public function registerUser(Request $request)
 
         Mail::to($account->email)->send(new RegisterOtpMail($otp, $account));
 
-        return response()->json([
+      return response()->json([
+            'success' => true,
+            'message' => 'New OTP was sent. Please check your email for verification',
+            'code' => 'OTP_SENT',
             'data' => [
-                'message' => "New OTP was sent. Please check your email for verification",
-                'data' => $otp, 
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'otp' => $otp
             ]
         ], 201);
     }
@@ -266,37 +268,48 @@ public function registerUser(Request $request)
         $user = Auth::user();
 
         if (!$user) {
-            return Response::json([
-                'data' => [
+           return response()->json([
+                'success' => false,
                 'message' => 'No logged-in user',
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]], 404);
+                'code' => 'NO_AUTH_USER',
+                'data' => null
+            ], 404);
+
         }
 
         $method = $request->method();
         $url = $request->fullUrl();
 
-        return response()->json([
-         'data' => [
-            'business' => $user,
-            'method' => $method,
-            'url' => $url
-        ]], 200);
+       return response()->json([
+            'success' => true,
+            'message' => 'User fetched',
+            'code' => 'USER_FETCHED',
+            'data' => [
+                'business' => $user
+            ]
+        ], 200);
+
     }
 
     public function getAllUsers()
     {
         $users = User::all();
         if ($users->isEmpty()) {
-            return Response::json([
-             'data' => [
-                'message' => 'No users found',
-                // 'method' => $request->method(),
-                // 'url' => $request->fullUrl()
-            ]], 404);
+           return response()->json([
+            'success' => false,
+            'message' => 'No users found',
+            'code' => 'USERS_EMPTY',
+            'data' => null
+        ], 404);
+
         }
-        return Response::json($users, 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Users fetched',
+            'code' => 'USERS_FETCHED',
+            'data' => $users
+        ], 200);
+
     }
 
 
@@ -307,15 +320,21 @@ public function registerUser(Request $request)
 
     if ($countries->isEmpty()) {
         return response()->json([
-            'data' => [
-            'message' => 'No Countries found'
-        ]], 404);
+            'success' => false,
+            'message' => 'No countries found',
+            'code' => 'COUNTRIES_EMPTY',
+            'data' => null
+        ], 404);
     }
 
     return response()->json([
+        'success' => true,
+        'message' => 'Countries fetched',
+        'code' => 'COUNTRIES_FETCHED',
         'data' => [
-        'countries' => $countries
-    ]], 200);
+            'countries' => $countries
+        ]
+    ], 200);
 }
 
 
@@ -324,45 +343,37 @@ public function registerUser(Request $request)
         $user = $request->user();
     
         if (!$user) {
-            $method = $request->method();
-            $url = $request->fullUrl();
-            return Response::json([
-             'data' => [
-            'error' => 'Unauthorized', 
-            'method' => $method,
-             'url' => $url
-            ]], 401);
+           return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'code' => 'UNAUTHORIZED',
+                'data' => null
+            ], 401);
         }
-    
-        // if ($user->email !== $email) {
-        //     $method = $request->method();
-        //     $url = $request->fullUrl();
-        //     return Response::json(['error' => 'Forbidden', 'method' => $method, 'url' => $url], 403);
-        // }
     
         $userToDelete = User::where('email', $email)->first();
     
         if (!$userToDelete) {
-            $method = $request->method();
-            $url = $request->fullUrl();
-            return Response::json([
-            'data' => [
-            'error' => 'User not found',
-             'method' => $method,
-              'url' => $url
-            ]], 404);
+           return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+                'code' => 'USER_NOT_FOUND',
+                'data' => null
+            ], 404);
+
         }
     
         // Delete the user
         $userToDelete->delete();
     
         // Return success response
-        return Response::json([
-             'data' => [
+       return response()->json([
+            'success' => true,
             'message' => 'User deleted successfully',
-             'method' => $request->method(), 
-             'url' => $request->fullUrl()
-            ]], 200);
+            'code' => 'USER_DELETED',
+            'data' => null
+        ], 200);
+
     }
 
 
@@ -393,24 +404,25 @@ public function registerUser(Request $request)
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'data' => [
-                'errors' => $validator->errors(),
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]], 422);
+           return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
+            ], 422);
         }
 
         if (
             User::where('email', $request->email)->exists() ||
             Personal::where('email', $request->email)->exists()
         ) {
-            return response()->json([
-                'data' => [
-                    'errors' => 'Email already taken',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]], 422);
+           return response()->json([
+                'success' => false,
+                'message' => 'Email already taken',
+                'code' => 'EMAIL_TAKEN',
+                'data' => null
+            ], 422);
+
         }
 
         if (
@@ -418,11 +430,12 @@ public function registerUser(Request $request)
             Personal::where('person_phone', $request->person_phone)->exists()
         ) {
             return response()->json([
-                'data' => [
-                    'errors' => 'Phone already taken',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]], 422);
+                'success' => false,
+                'message' => 'Phone already taken',
+                'code' => 'PHONE_TAKEN',
+                'data' => null
+            ], 422);
+
         }
 
         $otp = $this->generateOTP();
@@ -458,14 +471,15 @@ public function registerUser(Request $request)
         event(new UserRegistered($user));
 
         return response()->json([
+            'success' => true,
+            'message' => 'Personal registration successful. Please check your email for verification',
+            'code' => 'REGISTERED',
             'data' => [
-                'message' => "Personal registration successful. Please check your email for verification",
                 'token' => $token,
-                'email_verification_otp' => $otp,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'email_verification_otp' => $otp
             ]
         ], 201);
+
     }
 
 
@@ -485,12 +499,12 @@ public function registerUser(Request $request)
        $user = \App\Models\Personal::where('email', $request->email)->first();
         if (!$user) {
             return response()->json([
-                'data' => [
-                    'message' => 'User not found',
-                    'method'  => $request->method(),
-                    'url'     => $request->fullUrl(),
-                ]
+                'success' => false,
+                'message' => 'User not found',
+                'code' => 'USER_NOT_FOUND',
+                'data' => null
             ], 404);
+
         }    
         if ($user->email_verification_otp !== $request->otp) {
             $user->increment('email_verification_attempts');
@@ -498,31 +512,33 @@ public function registerUser(Request $request)
             if ($user->email_verification_attempts >= 3) {
 
                 return response()->json([
-                    'data' => [
-                    'errors' => 'Too many attempts. Please request a new OTP.',
-                    'method' =>  $request->method(),
-                    'url' => $request->fullUrl()
-                ]], 422);
+                    'success' => false,
+                    'message' => 'Too many attempts. Please request a new OTP.',
+                    'code' => 'OTP_TOO_MANY_ATTEMPTS',
+                    'data' => null
+                ], 422);
+
             }
     
             $method = $request->method();
             $url = $request->fullUrl();
             return response()->json([
-                'data' => [
+                'success' => false,
                 'message' => 'Invalid OTP',
-                'method' => $method,
-                'url' => $url
-                ]
+                'code' => 'OTP_INVALID',
+                'data' => null
             ], 422);
+
         }
     
         if ($user->email_verified_status !== 'no') {
             return response()->json([
-            'data' => [
+                'success' => false,
                 'message' => 'Email already verified',
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]]);
+                'code' => 'EMAIL_ALREADY_VERIFIED',
+                'data' => null
+            ], 400);
+
         }
             // dd($user);
 
@@ -533,14 +549,15 @@ public function registerUser(Request $request)
         ]);
         
     
-        return response()->json([
-         'data' => [
+      return response()->json([
+            'success' => true,
             'message' => 'Email verified successfully',
-            'email' => $user->email,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-         ]
-        ]);
+            'code' => 'EMAIL_VERIFIED',
+            'data' => [
+                'email' => $user->email
+            ]
+        ], 200);
+
     }
 
     public function verifyPersonalEmailOtp(Request $request)
@@ -555,12 +572,12 @@ public function registerUser(Request $request)
             $method = $request->method();
             $url = $request->fullUrl();
             return response()->json([
-             'data' => [
-                'errors' => 'User not found', 
-                'method' => $method,
-                 'url' => $url
-             ]
-                ], 404);
+                'success' => false,
+                'message' => 'User not found',
+                'code' => 'USER_NOT_FOUND',
+                'data' => null
+            ], 404);
+
         }
         $otp = rand(100000, 999999);
     
@@ -576,13 +593,15 @@ public function registerUser(Request $request)
         Mail::to($user->email)->send(new RegisterOtpMail($email_verification_otp, $user));
     
     
-        return response()->json([
-         'data' => [
-            'message' => "New OTP was sent. Please check your email for verification",
-            'data' => $otp,
-            'method' => $request->method(),
-            'url' => $request->fullUrl()
-        ]], 201);
+      return response()->json([
+            'success' => true,
+            'message' => 'New OTP was sent. Please check your email for verification',
+            'code' => 'OTP_SENT',
+            'data' => [
+                'otp' => $otp
+            ]
+        ], 201);
+
     }
 
     public function getLoggedInPersonal(Request $request)
@@ -591,34 +610,45 @@ public function registerUser(Request $request)
         $personal = Auth::guard('personal')->user();
 
         if (!$personal) {
-            return Response::json([
-            'data' => [
+           return response()->json([
+                'success' => false,
                 'message' => 'No logged-in personal',
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]], 404);
+                'code' => 'NO_AUTH_USER',
+                'data' => null
+            ], 404);
+
         }
 
         return response()->json([
+            'success' => true,
+            'message' => 'Personal fetched',
+            'code' => 'PERSONAL_FETCHED',
             'data' => [
-                'personal' => $personal,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
+                'personal' => $personal
             ]
         ], 200);
+
     }
 
     public function getAllPersonal()
     {
         $personals = Personal::all();
         if ($personals->isEmpty()) {
-            return Response::json([
-                'data' => [
-                    'message' => 'No personals found'
-                ]
+            return response()->json([
+                'success' => false,
+                'message' => 'No personals found',
+                'code' => 'PERSONALS_EMPTY',
+                'data' => null
             ], 404);
+
         }
-        return Response::json($personals, 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Personals fetched',
+            'code' => 'PERSONALS_FETCHED',
+            'data' => $personals
+        ], 200);
+
     }
 
     public function deletePersonal(Request $request, $email)
@@ -626,36 +656,35 @@ public function registerUser(Request $request)
         $personal = Auth::guard('personal')->user();
 
         if (!$personal) {
-            return Response::json([
-                'data' => [
-                    'error' => 'Unauthorized',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+                'code' => 'UNAUTHORIZED',
+                'data' => null
             ], 401);
         }
 
         $personalToDelete = Personal::where('email', $email)->first();
 
         if (!$personalToDelete) {
-            return Response::json([
-                'data' => [
-                    'error' => 'Personal not found',
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl()
-                ]
+            return response()->json([
+                'success' => false,
+                'message' => 'Personal not found',
+                'code' => 'PERSONAL_NOT_FOUND',
+                'data' => null
             ], 404);
+
         }
 
         $personalToDelete->delete();
 
-        return Response::json([
-            'data' => [
-                'message' => 'Personal deleted successfully',
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ]
+        return response()->json([
+            'success' => true,
+            'message' => 'Personal deleted successfully',
+            'code' => 'PERSONAL_DELETED',
+            'data' => null
         ], 200);
+
     }
 
 

@@ -116,9 +116,15 @@
                 <div class="bg-white rounded-2xl p-6 shadow-sm order-2 md:order-1">
                     <img src="../asserts/customerCare.png" class="rounded-xl mb-4" alt="">
                     <h4 class="font-semibold mb-2">Need to speak with someone?</h4>
-                    <button class="bg-gray-900 text-white px-4 py-2 rounded-full text-sm">
-                        Contact Support →
-                    </button>
+                                <a href="mailto:support@flovide.com" 
+              class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition">
+                
+                {{ __('Contact Support') }}
+
+                <span>
+                    <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
+                </span>
+            </a>
                 </div>
 
                 <!-- FAQ List -->

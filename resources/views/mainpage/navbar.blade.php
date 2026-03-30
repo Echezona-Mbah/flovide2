@@ -20,12 +20,12 @@
           {{ __('Business') }}
         </a>
       </li>
-      <li>
+      {{-- <li>
         <a class="{{ Route::currentRouteName() === 'developer' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
           href="{{ route('developer') }}">
           {{ __('Developer') }}
         </a>
-      </li>
+      </li> --}}
       <li>
         <a class="{{ Route::currentRouteName() === 'blog' ? 'text-[#1D4ED8] font-semibold' : 'hover:text-gray-900' }}"
           href="{{ route('blog') }}">

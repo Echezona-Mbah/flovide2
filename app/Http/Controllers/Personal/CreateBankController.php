@@ -27,27 +27,31 @@ public function create(Request $request)
     if ($request->expectsJson()) {
         if ($balances->isEmpty()) {
             return response()->json([
+                'success' => false,
+                'message' => 'No balance created for this personal account',
+                'code' => 'BALANCES_EMPTY',
                 'data' => [
-                    'status'      => 'error',
                     'personal_id' => $personalId,
-                    'errors'     => 'No balance created for this personal account',
-                    'balances'    => [],
+                    'balances' => []
                 ]
             ], 200);
         }
 
         return response()->json([
+            'success' => true,
+            'message' => 'Data for add bank form loaded successfully',
+            'code' => 'ADD_BANK_DATA_LOADED',
             'data' => [
-                'status'      => 'success',
                 'personal_id' => $personalId,
-                'message'     => 'Data for add bank form loaded successfully',
-                'balances'    => $balances,
+                'balances' => $balances,
+                'countries' => $countries
             ]
         ], 200);
     }
 
     return view('business.add_bank', compact('countries', 'balances'));
 }
+
 
 public function createBalance(Request $request)
 {
@@ -59,25 +63,23 @@ public function createBalance(Request $request)
     $personalId = auth('personal-api')->id();
     $currency   = strtoupper($request->currency);
 
-    // 🔎 Check if user already has money in any balance
     $hasMoney = Balance::where('personal_id', $personalId)
         ->where('amount', '>', 0)
         ->exists();
 
-    if (!$hasMoney) { // ❌ Block if no funds exist
+    if (!$hasMoney) {
         $errorMessage = 'You must have funds in at least one balance before creating a new one';
 
         return $request->expectsJson()
             ? response()->json([
-                'data' => [
-                    'status' => 'error',
-                    'errors' => $errorMessage
-                ]
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'NO_FUNDS',
+                'data' => null
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
-    // 🔎 Check if user already has this currency
     $exists = Balance::where('personal_id', $personalId)
         ->where('currency', $currency)
         ->exists();
@@ -87,15 +89,14 @@ public function createBalance(Request $request)
 
         return $request->expectsJson()
             ? response()->json([
-                'data' => [
-                    'status' => 'error',
-                    'errors' => $errorMessage
-                ]
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'DUPLICATE_BALANCE',
+                'data' => null
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
-    // ✅ Create new balance
     $balance = Balance::create([
         'personal_id' => $personalId,
         'name'        => $request->name,
@@ -105,11 +106,10 @@ public function createBalance(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'data' => [
-                'status'  => 'success',
-                'message' => 'Balance created successfully.',
-                'data'    => $balance,
-            ]
+            'success' => true,
+            'message' => 'Balance created successfully.',
+            'code' => 'BALANCE_CREATED',
+            'data' => $balance
         ], 201);
     }
 
@@ -126,15 +126,19 @@ public function getUserTotalBalance(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
+            'success' => true,
+            'message' => 'Personal total balance fetched successfully',
+            'code' => 'TOTAL_BALANCE_FETCHED',
             'data' => [
-                'status'       => 'success',
-                'personal_id'  => $personalId,
-                'message'      => 'Personal total balance fetched successfully',
-                'total_balance'=> $total,
+                'personal_id' => $personalId,
+                'total_balance' => $total
             ]
         ], 200);
     }
+
+    return null;
 }
+
 
 public function updateBalance(Request $request)
 {
@@ -152,11 +156,10 @@ public function updateBalance(Request $request)
     if (!$balance) {
         return $request->expectsJson()
             ? response()->json([
-                'data' => [
-                    'status'      => 'error',
-                    'personal_id' => $personalId,
-                    'errors'     => 'Balance not found.',
-                ]
+                'success' => false,
+                'message' => 'Balance not found.',
+                'code' => 'BALANCE_NOT_FOUND',
+                'data' => null
             ], 404)
             : redirect()->back()->with('error', 'Balance not found.');
     }
@@ -166,15 +169,16 @@ public function updateBalance(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
-            'data' => [
-                'status'      => 'success',
-                'personal_id' => $personalId,
-                'message'     => 'Balance updated successfully.',
-                'balance'     => $balance,
-            ]
+            'success' => true,
+            'message' => 'Balance updated successfully.',
+            'code' => 'BALANCE_UPDATED',
+            'data' => $balance
         ], 200);
     }
+
+    return null;
 }
+
 
 public function index(Request $request)
 {
@@ -183,15 +187,19 @@ public function index(Request $request)
 
     if ($request->expectsJson()) {
         return response()->json([
+            'success' => true,
+            'message' => 'All balances retrieved successfully',
+            'code' => 'BALANCES_FETCHED',
             'data' => [
-                'status'      => 'success',
                 'personal_id' => $personalId,
-                'message'     => 'All balances retrieved successfully',
-                'balances'    => $balances,
+                'balances' => $balances,
             ]
         ], 200);
     }
+
+    return null;
 }
+
 
     public function dashboardapi(Request $request)
 {

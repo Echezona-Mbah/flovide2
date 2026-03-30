@@ -150,16 +150,16 @@
 
         <div class="mt-16 flex flex-col md:flex-row md:justify-between items-center gap-6 md:gap-0 mx-auto">
           <div class="flex items-center gap-10">
-            <img alt="OhentPay company logo white on transparent background" class="h-30 w-30" height="40"
-              src="../asserts/Personal/company1.png" />
-            <img alt="Sound wave style company logo white on transparent background" class="h-30 w-30" height="40"
+            {{-- <img alt="OhentPay company logo white on transparent background" class="h-30 w-30" height="40"
+              src="../asserts/Personal/company1.png" /> --}}
+            {{-- <img alt="Sound wave style company logo white on transparent background" class="h-30 w-30" height="40"
               src="../asserts/Personal/company2.png" />
             <img alt="CentaDesk company logo white on transparent background" class="w-28" height="40"
-              src="../asserts/Personal/company3.png" />
+              src="../asserts/Personal/company3.png" /> --}}
             <!-- <img alt="EW company logo white on transparent background" class="h-30 w-30" height="40"
               src="../asserts/Personal/company4.png" /> -->
           </div>
-          <div class="flex items-center gap-2">
+          {{-- <div class="flex items-center gap-2">
             <div class="flex -space-x-3">
               <div class="w-10 h-10 rounded-full bg-[#7ea9d9] border-2 border-[#11263b]"></div>
               <div class="w-10 h-10 rounded-full bg-[#7ea9d9] border-2 border-[#11263b]"></div>
@@ -201,7 +201,7 @@
             <p class="text-white text-xs font-normal ml-4">
               from 500+ reviews
             </p>
-          </div>
+          </div> --}}
         </div>
       </div>
     </section>
@@ -743,10 +743,10 @@
         </h1>
         <div class="mt-12 rounded-3xl md:border border-gray-400 p-4 md:p-10 flex flex-col gap-8 sm:gap-0 bg-white">
           <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full justify-between">
-            <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
+            {{-- <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
               {{ __('Global Payments') }}
-            </button>
-            <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
+            </button> --}}
+            {{-- <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
               {{ __('Dedicated Support') }}
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
@@ -754,7 +754,7 @@
             </button>
             <button class="bg-gray-100 text-gray-700 rounded-xl md:px-10 py-2 text-sm" type="button">
               {{ __('Integrations') }}
-            </button>
+            </button> --}}
           </section>
 
           <section class="flex flex-col md:flex-row gap-y-8 w-full">
@@ -802,14 +802,15 @@
               <h2 class="mt-6 text-xl font-semibold text-gray-900">
                 {{ __('Need to speak with someone?') }}
               </h2>
-              <button
-                class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition"
-                type="button">
+            <a href="mailto:support@flovide.com" 
+              class="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-white text-sm font-medium hover:bg-gray-800 transition">
+                
                 {{ __('Contact Support') }}
+
                 <span>
-                  <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
+                    <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                 </span>
-              </button>
+            </a>
             </section>
             <section class="lg:flex-1 max-w-3xl space-y-4">
               <!-- Accordion Item -->
