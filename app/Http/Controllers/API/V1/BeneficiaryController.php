@@ -42,7 +42,7 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_REDACTED")
+     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
@@ -94,7 +94,7 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_REDACTED")
+     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
@@ -241,7 +241,7 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_REDACTED")
+     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
@@ -489,7 +489,7 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_REDACTED")
+     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
@@ -564,7 +564,7 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_REDACTED")
+     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",

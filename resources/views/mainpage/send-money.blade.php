@@ -704,27 +704,12 @@ document.getElementById('sendAmount')
 // =====================
 // Country grid click
 // =====================
+// ✅ allow navigation to the same page with slug
 document.querySelectorAll('.country-link').forEach(link => {
-
-    link.addEventListener('click', function(e) {
-
-        e.preventDefault();
-
-        const code = this.dataset.currency;
-        console.log("🌍 Country clicked:", code);
-
-        document.querySelectorAll('#receiverDropdown .currency-item')
-        .forEach(item => {
-
-            if (item.dataset.code === code) {
-                console.log("🎯 Matching currency found:", code);
-                item.click();
-            }
-
-        });
-
+    link.addEventListener('click', function() {
+        // no preventDefault → link navigates normally
+        console.log("🌍 Country clicked, navigating to:", this.href);
     });
-
 });
 
 
@@ -769,8 +754,8 @@ if (receiverItem) {
 } else {
     console.error("❌ No receiver currency found!");
 }
-
 </script>
+
 
 
     </body>

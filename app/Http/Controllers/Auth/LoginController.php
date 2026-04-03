@@ -171,6 +171,10 @@ class LoginController extends Controller
         ));
 
         $balances = \App\Models\Balance::where('user_id', $account->id)->get();
+        $totalBalance = $balances->sum(function ($b) {
+            return (float) $b->amount;
+        });
+
 
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
             ->latest()
@@ -220,12 +224,32 @@ class LoginController extends Controller
         $payoutAccounts = \App\Models\BankAccount::where('user_id', $account->id)->get();
         $virtualCards = \App\Models\VirtualCards::where('user_id', $account->id)->where('status', 'active')->get();
         $subaccounts = Subaccount::where('user_id', $account->id)->get();
-        $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)
-                    ->getSumsubToken()
-                    ->getData(true);
-        $countryrule = CountryRule::where('is_active', 1)
-            ->select('country_iso', 'country_name', 'currency_iso')
-            ->get();
+        $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)->getSumsubToken()->getData(true);
+        $countryrule = CountryRule::where('is_active', 1)->select('country_iso', 'country_name', 'currency_iso')->get();
+        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')->get()
+            ->mapWithKeys(function ($c) {
+                return [
+                    $c->code => [
+                        'code' => $c->code,
+                        'name' => $c->name,
+                        'symbol' => $c->symbol,
+                        'country_code' => strtolower($c->country_code ?? ''),
+                    ]
+                ];
+            });
+        $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
+            ->map(function ($r) {
+                return [
+                    'from' => $r->fromCurrency->code ?? null,
+                    'to' => $r->toCurrency->code ?? null,
+                    'rate' => (float) $r->rate,
+                    'transfer_fee' => (float) $r->transfer_fee,
+                    'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
+                ];
+            });
+
+        // $exchangeRatesLastUpdated = \App\Models\ExchangeRate::max('updated_at');
+
 
         return response()->json([
             'success' => true,
@@ -245,9 +269,13 @@ class LoginController extends Controller
                         : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
+                'currencies' => $currencies,
+                'exchange_rates' => $exchangeRates,
+                // 'exchange_rates_last_updated' => optional($exchangeRatesLastUpdated)->format('Y-m-d H:i:s'),
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
+                'total_balance' => $totalBalance,
                 'transactions' => $transactions,
                 'chart' => $chartData,
                 'countries' => $countries,
@@ -408,6 +436,9 @@ class LoginController extends Controller
         ));
 
         $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
+        $totalBalance = $balances->sum(function ($b) {
+            return (float) $b->amount;
+        });
 
         $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
             ->latest()->take(4)->get()->map(function ($t) {
@@ -458,6 +489,27 @@ class LoginController extends Controller
         $countryrule = CountryRule::where('is_active', 1)
             ->select('country_iso', 'country_name', 'currency_iso')
             ->get();
+            $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')->get()
+            ->mapWithKeys(function ($c) {
+                return [
+                    $c->code => [
+                        'code' => $c->code,
+                        'name' => $c->name,
+                        'symbol' => $c->symbol,
+                        'country_code' => strtolower($c->country_code ?? ''),
+                    ]
+                ];
+            });
+        $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
+            ->map(function ($r) {
+                return [
+                    'from' => $r->fromCurrency->code ?? null,
+                    'to' => $r->toCurrency->code ?? null,
+                    'rate' => (float) $r->rate,
+                    'transfer_fee' => (float) $r->transfer_fee,
+                    'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
+                ];
+            });
 
         return response()->json([
             'success' => true,
@@ -475,9 +527,12 @@ class LoginController extends Controller
                     'profile_url' => $account->profile_picture ? asset($account->profile_picture) : null,
                     'email_verified_status' => $account->email_verified_status,
                 ],
+                'currencies' => $currencies,
+                'exchange_rates' => $exchangeRates,
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
+                'total_balance' => $totalBalance,
                 'transactions' => $transactions,
                 'chart' => $chartData,
                 'countries' => $countries,

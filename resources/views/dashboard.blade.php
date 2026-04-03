@@ -264,89 +264,285 @@
     });
   </script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const swapBtn = document.querySelector('.swap-btn');
-      const selectors = document.querySelectorAll('.currency-selector');
-      const fromAmount = document.getElementById('fromAmount');
-      const toAmount = document.getElementById('toAmount');
-      const rateText = document.getElementById('rateText');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[init] DOMContentLoaded');
 
-      async function calculate() {
-        const from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
-        const to = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
-        const amt = parseFloat(fromAmount.value);
+  const swapBtn = document.querySelector('.swap-btn');
+  const selectors = document.querySelectorAll('.currency-selector');
+  const fromAmount = document.getElementById('fromAmount');
+  const toAmount = document.getElementById('toAmount');
+  const rateText = document.getElementById('rateText');
 
-        if (!amt || amt <= 0) {
-          toAmount.value = 0;
-          rateText.innerText = '';
-          return;
-        }
+  console.log('[init] swapBtn:', swapBtn);
+  console.log('[init] selectors:', selectors);
+  console.log('[init] fromAmount:', fromAmount);
+  console.log('[init] toAmount:', toAmount);
+  console.log('[init] rateText:', rateText);
 
-        try {
-          const res = await fetch(`/dashboard/exchange-rate?from=${from}&to=${to}`);
-          const data = await res.json();
+  async function calculate() {
+    const from = document.querySelector('.currency-selector[data-type="from"] .code')?.innerText.trim();
+    const to = document.querySelector('.currency-selector[data-type="to"] .code')?.innerText.trim();
+    const amt = parseFloat(fromAmount.value);
 
-          if (data && data.rate) {
-            toAmount.value = (amt * data.rate).toFixed(2);
-            rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
-          }
-        } catch (err) {
-          console.error(err);
-          rateText.innerText = 'Error fetching rate';
-        }
+    console.log('[calculate] from:', from, 'to:', to, 'amt:', amt);
+
+    if (!amt || amt <= 0) {
+      console.log('[calculate] invalid amount, reset output');
+      toAmount.value = 0;
+      rateText.innerText = '';
+      return;
+    }
+
+    try {
+      const url = `/dashboard/exchange-rate?from_currency=${from}&to_currency=${to}&amount=${amt}`;
+      console.log('[fetch] GET', url);
+
+      const res = await fetch(url);
+      console.log('[fetch] status:', res.status);
+
+      const data = await res.json();
+      console.log('[fetch] json:', data);
+
+      if (data?.success && data?.data) {
+        const converted = Number(data.data.converted || 0);
+        const fee = Number(data.data.transfer_fee || 0);
+
+        toAmount.value = converted.toFixed(2);
+        rateText.innerText = `${amt.toFixed(2)} ${from} → ${converted.toFixed(2)} ${to}`;
+
+        console.log('[calculate] converted:', converted, 'fee:', fee);
+      } else {
+        console.log('[calculate] no data or success=false');
+        rateText.innerText = data?.message || 'Rate not found';
       }
+    } catch (err) {
+      console.error('[error] fetch failed:', err);
+      rateText.innerText = 'Error fetching rate';
+    }
+  }
 
-      selectors.forEach(sel => {
-        const dropdown = sel.querySelector('.currency-dropdown');
-        const searchInput = sel.querySelector('.currency-search');
+  selectors.forEach(sel => {
+    const dropdown = sel.querySelector('.currency-dropdown');
+    const searchInput = sel.querySelector('.currency-search');
 
-        sel.addEventListener('click', e => {
-          e.stopPropagation();
-          dropdown.classList.toggle('hidden');
-          searchInput?.focus();
-        });
+    console.log('[selector] init', sel, 'dropdown:', dropdown, 'searchInput:', searchInput);
 
-        searchInput?.addEventListener('input', () => {
-          const filter = searchInput.value.toLowerCase();
-          dropdown.querySelectorAll('.currency-item').forEach(item => {
-            const text = item.innerText.toLowerCase();
-            item.style.display = text.includes(filter) ? 'flex' : 'none';
-          });
-        });
+    sel.addEventListener('click', e => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+      console.log('[selector] toggle dropdown:', dropdown.classList.contains('hidden') ? 'hidden' : 'shown');
+      searchInput?.focus();
+    });
 
-        sel.querySelectorAll('.currency-item').forEach(item => {
-          item.addEventListener('click', e => {
-            e.stopPropagation();
-            sel.querySelector('.code').textContent = item.dataset.code;
-            sel.querySelector('.flag').src = item.dataset.flag;
-            dropdown.classList.add('hidden');
-            calculate();
-          });
-        });
+    searchInput?.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      console.log('[search] filter:', filter);
+
+      dropdown.querySelectorAll('.currency-item').forEach(item => {
+        const text = item.innerText.toLowerCase();
+        const show = text.includes(filter);
+        item.style.display = show ? 'flex' : 'none';
+        console.log('[search] item:', text, 'show:', show);
       });
+    });
 
-      swapBtn.addEventListener('click', () => {
-        const from = document.querySelector('.currency-selector[data-type="from"]');
-        const to = document.querySelector('.currency-selector[data-type="to"]');
+    sel.querySelectorAll('.currency-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.stopPropagation();
 
-        [from.querySelector('.code').innerText, to.querySelector('.code').innerText] =
-        [to.querySelector('.code').innerText, from.querySelector('.code').innerText];
+        console.log('[select] item clicked:', item.dataset);
 
-        [from.querySelector('.flag').src, to.querySelector('.flag').src] =
-        [to.querySelector('.flag').src, from.querySelector('.flag').src];
+        sel.querySelector('.code').textContent = item.dataset.code;
+        sel.querySelector('.flag').src = item.dataset.flag;
 
+        console.log('[select] updated code:', item.dataset.code, 'flag:', item.dataset.flag);
+
+        dropdown.classList.add('hidden');
         calculate();
       });
+    });
+  });
 
-      fromAmount.addEventListener('input', calculate);
+  swapBtn.addEventListener('click', () => {
+    const from = document.querySelector('.currency-selector[data-type="from"]');
+    const to = document.querySelector('.currency-selector[data-type="to"]');
 
-      document.addEventListener('click', () => {
-        document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+    console.log('[swap] before', {
+      fromCode: from.querySelector('.code').innerText,
+      toCode: to.querySelector('.code').innerText,
+      fromFlag: from.querySelector('.flag').src,
+      toFlag: to.querySelector('.flag').src
+    });
+
+    [from.querySelector('.code').innerText, to.querySelector('.code').innerText] =
+    [to.querySelector('.code').innerText, from.querySelector('.code').innerText];
+
+    [from.querySelector('.flag').src, to.querySelector('.flag').src] =
+    [to.querySelector('.flag').src, from.querySelector('.flag').src];
+
+    console.log('[swap] after', {
+      fromCode: from.querySelector('.code').innerText,
+      toCode: to.querySelector('.code').innerText,
+      fromFlag: from.querySelector('.flag').src,
+      toFlag: to.querySelector('.flag').src
+    });
+
+    calculate();
+  });
+
+  fromAmount.addEventListener('input', () => {
+    console.log('[input] fromAmount:', fromAmount.value);
+    calculate();
+  });
+
+  document.addEventListener('click', () => {
+    console.log('[doc] click -> hide dropdowns');
+    document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+  });
+
+  calculate();
+});
+</script>
+
+
+
+ {{-- <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('[init] DOMContentLoaded');
+
+    const swapBtn = document.querySelector('.swap-btn');
+    const selectors = document.querySelectorAll('.currency-selector');
+    const fromAmount = document.getElementById('fromAmount');
+    const toAmount = document.getElementById('toAmount');
+    const rateText = document.getElementById('rateText');
+
+    console.log('[init] swapBtn:', swapBtn);
+    console.log('[init] selectors:', selectors);
+    console.log('[init] fromAmount:', fromAmount);
+    console.log('[init] toAmount:', toAmount);
+    console.log('[init] rateText:', rateText);
+
+    async function calculate() {
+      const from = document.querySelector('.currency-selector[data-type="from"] .code').innerText;
+      const to = document.querySelector('.currency-selector[data-type="to"] .code').innerText;
+      const amt = parseFloat(fromAmount.value);
+
+      console.log('[calculate] from:', from, 'to:', to, 'amt:', amt);
+
+      if (!amt || amt <= 0) {
+        console.log('[calculate] invalid amount, resetting output');
+        toAmount.value = 0;
+        rateText.innerText = '';
+        return;
+      }
+
+      try {
+        const url = `/dashboard/exchange-rate?from=${from}&to=${to}`;
+        console.log('[fetch] GET', url);
+
+        const res = await fetch(url);
+        console.log('[fetch] response status:', res.status);
+
+        const data = await res.json();
+        console.log('[fetch] response json:', data);
+
+        if (data && data.rate) {
+          const computed = (amt * data.rate).toFixed(2);
+          toAmount.value = computed;
+          rateText.innerText = `1 ${from} = ${data.rate} ${to}`;
+          console.log('[calculate] computed:', computed);
+        } else {
+          console.log('[calculate] missing rate in response');
+        }
+      } catch (err) {
+        console.error('[error] fetch failed:', err);
+        rateText.innerText = 'Error fetching rate';
+      }
+    }
+
+    selectors.forEach(sel => {
+      const dropdown = sel.querySelector('.currency-dropdown');
+      const searchInput = sel.querySelector('.currency-search');
+
+      console.log('[selector] init', sel, 'dropdown:', dropdown, 'searchInput:', searchInput);
+
+      sel.addEventListener('click', e => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+        console.log('[selector] click toggle dropdown', dropdown.classList.contains('hidden') ? 'hidden' : 'shown');
+        searchInput?.focus();
+      });
+
+      searchInput?.addEventListener('input', () => {
+        const filter = searchInput.value.toLowerCase();
+        console.log('[search] filter:', filter);
+
+        dropdown.querySelectorAll('.currency-item').forEach(item => {
+          const text = item.innerText.toLowerCase();
+          const show = text.includes(filter);
+          item.style.display = show ? 'flex' : 'none';
+          console.log('[search] item:', text, 'show:', show);
+        });
+      });
+
+      sel.querySelectorAll('.currency-item').forEach(item => {
+        item.addEventListener('click', e => {
+          e.stopPropagation();
+
+          console.log('[select] item clicked:', item.dataset);
+
+          sel.querySelector('.code').textContent = item.dataset.code;
+          sel.querySelector('.flag').src = item.dataset.flag;
+
+          console.log('[select] updated code:', item.dataset.code, 'flag:', item.dataset.flag);
+
+          dropdown.classList.add('hidden');
+          calculate();
+        });
+      });
+    });
+
+    swapBtn.addEventListener('click', () => {
+      const from = document.querySelector('.currency-selector[data-type="from"]');
+      const to = document.querySelector('.currency-selector[data-type="to"]');
+
+      console.log('[swap] before', {
+        fromCode: from.querySelector('.code').innerText,
+        toCode: to.querySelector('.code').innerText,
+        fromFlag: from.querySelector('.flag').src,
+        toFlag: to.querySelector('.flag').src
+      });
+
+      [from.querySelector('.code').innerText, to.querySelector('.code').innerText] =
+      [to.querySelector('.code').innerText, from.querySelector('.code').innerText];
+
+      [from.querySelector('.flag').src, to.querySelector('.flag').src] =
+      [to.querySelector('.flag').src, from.querySelector('.flag').src];
+
+      console.log('[swap] after', {
+        fromCode: from.querySelector('.code').innerText,
+        toCode: to.querySelector('.code').innerText,
+        fromFlag: from.querySelector('.flag').src,
+        toFlag: to.querySelector('.flag').src
       });
 
       calculate();
     });
-  </script>
+
+    fromAmount.addEventListener('input', () => {
+      console.log('[input] fromAmount:', fromAmount.value);
+      calculate();
+    });
+
+    document.addEventListener('click', () => {
+      console.log('[doc] click -> hide dropdowns');
+      document.querySelectorAll('.currency-dropdown').forEach(drop => drop.classList.add('hidden'));
+    });
+
+    calculate();
+  });
+</script> --}}
+
 </body>
 </html>

@@ -4,16 +4,25 @@ namespace App\Http\Controllers\MainPage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Traits\CurrencyHelper;
-
+use App\Models\Currency;
 
 class personalController extends Controller
 {
-            use CurrencyHelper;
+    public function personal()
+    {
+        $currencies = Currency::select('code', 'name', 'symbol', 'country_code')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($c) {
+                return [
+                    $c->code => [
+                        'country' => strtolower($c->name),
+                        'countrycode' => strtolower($c->country_code),
+                        'symbol' => $c->symbol,
+                    ]
+                ];
+            });
 
-    public function personal(){
-            $currencies = $this->getAllCurrencies();
-
-        return view('mainpage.personal',['currencies' => $currencies]);
+        return view('mainpage.personal', ['currencies' => $currencies]);
     }
 }
