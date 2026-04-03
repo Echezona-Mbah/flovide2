@@ -42,14 +42,14 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
+     *         @OA\Schema(type="string", example="env('STRIPE_PUBLIC')")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
      *         in="header",
      *         required=true,
      *         description="User secret key",
-     *         @OA\Schema(type="string", example="REDACTED_STRIPE_KEY")
+     *         @OA\Schema(type="string", example="env('STRIPE_SECRET')")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -94,14 +94,14 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
+     *         @OA\Schema(type="string", example="env('STRIPE_PUBLIC')")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
      *         in="header",
      *         required=true,
      *         description="User secret key",
-     *         @OA\Schema(type="string", example="REDACTED_STRIPE_KEY")
+     *         @OA\Schema(type="string", example="env('STRIPE_SECRET')")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
@@ -241,14 +241,14 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
+     *         @OA\Schema(type="string", example="env('STRIPE_PUBLIC')")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
      *         in="header",
      *         required=true,
      *         description="User secret key",
-     *         @OA\Schema(type="string", example="REDACTED_STRIPE_KEY")
+     *         @OA\Schema(type="string", example="env('STRIPE_SECRET')")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
@@ -489,14 +489,14 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
+     *         @OA\Schema(type="string", example="env('STRIPE_PUBLIC')")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
      *         in="header",
      *         required=true,
      *         description="User secret key",
-     *         @OA\Schema(type="string", example="REDACTED_STRIPE_KEY")
+     *         @OA\Schema(type="string", example="env('STRIPE_SECRET')")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -564,14 +564,14 @@ class BeneficiaryController extends Controller
      *         in="header",
      *         required=true,
      *         description="User public key",
-     *         @OA\Schema(type="string", example="pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm")
+     *         @OA\Schema(type="string", example="env('STRIPE_PUBLIC')")
      *     ),
      *     @OA\Parameter(
      *         name="X-Secret-Key",
      *         in="header",
      *         required=true,
      *         description="User secret key",
-     *         @OA\Schema(type="string", example="REDACTED_STRIPE_KEY")
+     *         @OA\Schema(type="string", example="env('STRIPE_SECRET')")
      *     ),
      *     @OA\Response(
      *         response=200,
