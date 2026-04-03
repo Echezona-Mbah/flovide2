@@ -60,26 +60,109 @@ trait CurrencyHelper
     }
 
 
-    public function getExchangeRateFromMap($from, $to)
+
+// public function getExchangeRateFromMap($from, $to, $amount = 1)
+// {
+//     $from = strtoupper($from);
+//     $to = strtoupper($to);
+
+//     $fromRow = ExchangeRate::where('currency_code', $from)
+//         ->select('rate', 'transfer_fee')
+//         ->first();
+
+//     $toRow = ExchangeRate::where('currency_code', $to)
+//         ->select('rate', 'transfer_fee')
+//         ->first();
+
+
+//     if (!$fromRow || !$toRow) {
+//         return null;
+//     }
+
+//     // USD-base rate table (USD=1, NGN=1550, etc.)
+//     $rate = $toRow->rate / $fromRow->rate;
+
+//     // Amount converted from "from" currency to "to" currency
+//     $converted = $amount * $fromRow->rate;
+
+//     return [
+//         'rate' => $rate,
+//         'converted' => $converted,
+//         'transfer_fee' => $toRow->transfer_fee,
+//     ];
+// }
+
+// public function getExchangeRateFromMap(string $from, string $to, float $amount): ?array
+// {
+//     $from = strtoupper($from);
+//     $to = strtoupper($to);
+
+//     $fromRate = (float) ExchangeRate::where('currency_code', $from)->value('rate');
+//     $toRate   = (float) ExchangeRate::where('currency_code', $to)->value('rate');
+
+//     if ($fromRate <= 0 || $toRate <= 0) {
+//         return null;
+//     }
+
+//     $converted = ($amount / $fromRate) * $toRate;
+
+//     return [
+//         'rate_text' => sprintf(
+//             "%s %s = %s %s",
+//             number_format($amount, 2, '.', ','),
+//             $from,
+//             number_format($converted, 2, '.', ','),
+//             $to
+//         ),
+//         'converted' => round($converted, 2),
+//     ];
+// }
+
+function getExchangeRateFromMap($amount, $from, $to)
 {
-    $from = strtoupper($from);
-    $to = strtoupper($to);
+    $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+            $q->where('code', $from);
+        })
+        ->whereHas('toCurrency', function ($q) use ($to) {
+            $q->where('code', $to);
+        })
+        ->first();
 
-    $fromRate = ExchangeRate::where('currency_code', $from)->first();
-    $toRate   = ExchangeRate::where('currency_code', $to)->first();
-
-    if (!$fromRate || !$toRate) {
-        return null; // currency not found
+    if (!$rate) {
+        throw new \Exception("Rate not found");
     }
 
-    // Calculate exchange rate
-    $rate = round($toRate->rate / $fromRate->rate, 6);
+    $converted = $amount * $rate->rate;
 
     return [
-        'rate' => $rate,
-        'transfer_fee' => $toRate->transfer_fee,
+        'converted' => $converted,
+        'transfer_fee' => $rate->transfer_fee,
     ];
 }
+
+
+
+
+//     public function getExchangeRateFromMap($from, $to)
+// {
+//     $from = strtoupper($from);
+//     $to = strtoupper($to);
+
+//     $fromRate = ExchangeRate::where('currency_code', $from)->first();
+//     $toRate   = ExchangeRate::where('currency_code', $to)->first();
+
+//     if (!$fromRate || !$toRate) {
+//         return null; // currency not found
+//     }
+
+//     // Calculate exchange rate
+//     $rate = round($toRate->rate / $fromRate->rate, 6);
+
+//     return [
+//         'rate' => $rate,
+//         'transfer_fee' => $toRate->transfer_fee,
+//     ];
+// }
 
     public function getAllCurrencies()
     {

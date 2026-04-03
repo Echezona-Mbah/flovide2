@@ -153,6 +153,13 @@
                   @endif
                 </div>
 
+                <div class="flex items-center gap-2 mt-2">
+  <input id="walletToggle" type="checkbox" class="h-4 w-4">
+  <label for="walletToggle" class="text-sm text-gray-700">
+    Transfer from wallet
+  </label>
+</div>
+
                 <div id="beneficiaryInfo" class="mb-3 hidden">
                   <p><strong>Name:</strong> <span id="beneficiaryName">...</span></p>
                   <p><strong>Account:</strong> <span id="beneficiaryAccount">...</span></p>
@@ -286,253 +293,247 @@
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  console.log('[init] DOMContentLoaded');
+
+  const currencySelect = document.getElementById("currency");
+  const amountInput = document.getElementById("sendAmount");
+  const flagImg = document.getElementById("currencyFlag");
+  const symbolSpan = document.getElementById("currencySymbol");
+  const exchangeRateText = document.getElementById("exchangeRateText");
+  const transferFeeText = document.getElementById("transferFeeText");
+  const recipientAmountText = document.getElementById("recipientAmount");
+  const recipientGetsText = document.getElementById("recipientGets");
+  const recipientSymbol = document.getElementById("recipientSymbol");
+  const recipientFlag = document.getElementById("recipientFlag");
+  const sendCurrencySymbol = document.getElementById("sendCurrencySymbol");
+  const walletToggle = document.getElementById("walletToggle");
+
+  const currencySymbols = {
+    USD: "$", NGN: "₦", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R",
+    XOF: "CFA", XAF: "FCFA", BWP: "P", TZS: "TSh", UGX: "USh", MWK: "MK",
+    CAD: "C$", AUD: "A$", INR: "₹", CNY: "¥", JPY: "¥", RUB: "₽", BRL: "R$",
+    MXN: "Mex$", AED: "د.إ", SAR: "﷼", QAR: "ر.ق", EGP: "£", LKR: "Rs", PKR: "₨",
+    THB: "฿", MYR: "RM", IDR: "Rp", PHP: "₱", KRW: "₩", CHF: "Fr", SEK: "kr",
+    NOK: "kr", DKK: "kr", CZK: "Kč", PLN: "zł", HUF: "Ft", TRY: "₺", ARS: "$",
+    CLP: "$", COP: "$", PEN: "S/"
+  };
+
+  function getRecipientCurrency() {
+    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    const cur = selectedBeneficiary?.dataset.currency || "USD";
+    console.log('[recipient] currency:', cur);
+    return cur;
+  }
+
+  async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
+    const url = `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`;
+    console.log('[fetch] GET', url);
+
+    try {
+      const response = await fetch(url);
+      console.log('[fetch] status:', response.status);
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!response.ok || !contentType.includes("application/json")) {
+        throw new Error("Invalid response");
+      }
+
+      const json = await response.json();
+      console.log('[fetch] json:', json);
+      return json;
+    } catch (err) {
+      console.error('[fetch] error:', err);
+      return null;
+    }
+  }
+
+  async function updateRateDisplay() {
+    const selectedOption = currencySelect?.selectedOptions[0];
+    if (!selectedOption) return;
+
+    const fromCurrency = selectedOption.value;
+    const symbol = selectedOption.dataset.symbol || "₦";
+    const country = selectedOption.dataset.country || "us";
+    const amount = parseFloat(amountInput.value || 0);
+    const recipientCurrency = getRecipientCurrency();
+
+    // ✅ update beneficiary currency + flag every time
+    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    const recipientCountry = selectedBeneficiary?.dataset.country || 'us';
+    if (recipientFlag) {
+      recipientFlag.src = `https://flagcdn.com/24x18/${recipientCountry.toLowerCase()}.png`;
+    }
+
+    recipientGetsText.textContent = recipientCurrency;
+    recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
+
+    document.getElementById('rateLoader')?.classList.remove('hidden');
+
+    flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+    symbolSpan.textContent = symbol;
+    sendCurrencySymbol.textContent = symbol;
+
+    if (!amount || amount <= 0) {
+      recipientAmountText.textContent = "0.00";
+      exchangeRateText.textContent = "Rate unavailable";
+      transferFeeText.textContent = `${symbol}0.00`;
+      document.getElementById('rateLoader')?.classList.add('hidden');
+      return;
+    }
+
+    if (fromCurrency === recipientCurrency) {
+      exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} 1.00`;
+      recipientAmountText.textContent = amount.toFixed(2);
+      transferFeeText.textContent = `${symbol}0.00`;
+      document.getElementById('rateLoader')?.classList.add('hidden');
+      return;
+    }
+
+    const rateData = await fetchExchangeRate(fromCurrency, recipientCurrency, amount);
+
+    if (rateData?.success && rateData?.data) {
+      const converted = parseFloat(rateData.data.converted || 0);
+      const fee = parseFloat(rateData.data.transfer_fee || 0);
+
+      exchangeRateText.textContent = `${amount.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${recipientCurrency}`;
+      transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
+      recipientAmountText.textContent = converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      exchangeRateText.textContent = "Rate unavailable";
+      transferFeeText.textContent = `${symbol}0.00`;
+      recipientAmountText.textContent = "0.00";
+    }
+
+    document.getElementById('rateLoader')?.classList.add('hidden');
+  }
+
+  walletToggle?.addEventListener('change', () => {
+    const isOn = walletToggle.checked;
+    currencySelect.disabled = isOn;
+
+    if (isOn) {
+      currencySelect.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      currencySelect.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  });
+
+  window.openModalFromElement = function (el) {
+    document.querySelectorAll('.selected-beneficiary').forEach(x => x.classList.remove('selected-beneficiary'));
+    el.classList.add('selected-beneficiary');
+
+    const name = el.dataset.accountName || "N/A";
+    const account = el.dataset.accountNumber || "";
+    const bank = el.dataset.bank || "";
+    const phone = el.dataset.phone || "";
+    const currency = el.dataset.currency || "USD";
+    const country = el.dataset.country || "us";
+
+    const isMobile = bank.toLowerCase().includes("mobile");
+    const destination = isMobile ? phone : account;
+
+    const modal = document.getElementById("transactionModal");
+    modal.querySelector("#beneficiaryName").textContent = name;
+    modal.querySelector("#beneficiaryAccount").textContent = destination;
+    modal.querySelector("#beneficiaryBank").textContent = bank;
+
+    recipientFlag.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+    document.getElementById("recipientGets").textContent = currency;
+
+    document.getElementById("sendAmount").value = parseFloat(el.dataset.amount || 100);
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    updateRateDisplay();
+  };
+
+  currencySelect?.addEventListener("change", updateRateDisplay);
+  amountInput?.addEventListener("input", updateRateDisplay);
+
+  document.getElementById("closeModalBtn")?.addEventListener("click", () => {
+    document.getElementById("transactionModal").classList.add("hidden");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target.id === "transactionModal") {
+      document.getElementById("transactionModal").classList.add("hidden");
+    }
+  });
+
+  document.getElementById('sendBtn')?.addEventListener('click', () => {
+    const isWallet = walletToggle?.checked;
+    if (isWallet) {
+      window.location.href = '/wallet-transfer';
+      return;
+    }
+
+    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    if (!selectedBeneficiary) {
+      alert('Please select a beneficiary first.');
+      return;
+    }
+
+    const name = document.getElementById('beneficiaryName').textContent || "N/A";
+    const account = document.getElementById('beneficiaryAccount').textContent || "N/A";
+    const bank = document.getElementById('beneficiaryBank').textContent || "N/A";
+    const sortCode = selectedBeneficiary.dataset.sortcode || "";
+    const transfermethod = selectedBeneficiary.dataset.transfermethod || "";
+    const amount = parseFloat(document.getElementById('sendAmount').value || 0);
+    const fee = parseFloat(document.getElementById('transferFeeText').textContent.replace(/[^\d.]/g, '') || 0);
+    const total = amount + fee;
+    const rate = document.getElementById('exchangeRateText').textContent || '';
+    const receive = document.getElementById('recipientAmount').textContent || '0.00';
+    const currency = document.getElementById('recipientGets').textContent || 'USD';
+    const recipientId = selectedBeneficiary.dataset.id || '';
+    const symbol = document.getElementById('sendCurrencySymbol').textContent || '₦';
+    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || '';
+
+    document.getElementById('summaryName').textContent = name;
+    document.getElementById('summaryAccount').textContent = account;
+    document.getElementById('summaryBank').textContent = bank;
+    document.getElementById('summaryAmountSent').textContent = `${symbol}${amount.toFixed(2)}`;
+    document.getElementById('summaryFee').textContent = `${symbol}${fee.toFixed(2)}`;
+    document.getElementById('summaryTotal').textContent = `${symbol}${total.toFixed(2)}`;
+    document.getElementById('summaryRate').textContent = rate;
+    document.getElementById('summaryReceive').textContent = `${currency} ${receive}`;
+
+    document.getElementById('recipientIdInput').value = recipientId;
+    document.getElementById('amountInput').value = amount.toFixed(2);
+    document.getElementById('transferFeeInput').value = fee.toFixed(2);
+    document.getElementById('totalAmountInput').value = total.toFixed(2);
+    document.getElementById('exchangeRateInput').value = rate;
+    document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
+    document.getElementById('accountNumberInput').value = account;
+    document.getElementById('accountNameInput').value = name;
+    document.getElementById('balanceIdInput').value = balanceId;
+    document.getElementById('bankInput').value = bank;
+    document.getElementById('sort_codeInput').value = sortCode;
+    document.getElementById('transfermethodInput').value = transfermethod;
+
+    document.getElementById('summaryModal').classList.remove('hidden');
+  });
+
+  document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
+    document.getElementById("summaryModal").classList.add("hidden");
+  });
+
+  updateRateDisplay();
+});
+</script>
+
+
+
+
+
 
     
 
     
+   
     {{-- <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const currencySelect = document.getElementById("currency");
-            const amountInput = document.getElementById("sendAmount");
-            const flagImg = document.getElementById("currencyFlag");
-            const symbolSpan = document.getElementById("currencySymbol");
-            const exchangeRateText = document.getElementById("exchangeRateText");
-            const transferFeeText = document.getElementById("transferFeeText");
-            const recipientAmountText = document.getElementById("recipientAmount");
-            const recipientGetsText = document.getElementById("recipientGets");
-            const sendCurrencySymbol = document.getElementById("sendCurrencySymbol");
-
-            function formatNumberInput(input) {
-                const cleaned = input.replace(/,/g, '');
-                const number = parseFloat(cleaned);
-                if (isNaN(number)) return '';
-                return number.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-            }
-
-
-        
-            function getRecipientCurrency() {
-                const selectedBeneficiary = document.querySelector('.selected-beneficiary');
-                if (selectedBeneficiary) {
-                    return selectedBeneficiary.dataset.currency || "USD";
-                }
-                return "USD"; // fallback
-            }
-        
-            async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
-                const url = `${window.location.origin}/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`;
-                console.log("🌍 Fetching exchange rate from:", url);
-        
-                try {
-                    const response = await fetch(url);
-                    const contentType = response.headers.get("content-type") || "";
-        
-                    if (!response.ok || !contentType.includes("application/json")) {
-                        const text = await response.text();
-                        console.error("❌ Response not JSON:", text.substring(0, 100));
-                        throw new Error("Invalid response format");
-                    }
-        
-                    const data = await response.json();
-                    console.log("✅ Exchange rate data received:", data);
-                    return data;
-                } catch (err) {
-                    console.error("🚨 Exchange rate fetch error:", err.message);
-                    return null;
-                }
-            }
-        
-            async function updateRateDisplay() {
-                const selectedOption = currencySelect.options[currencySelect.selectedIndex];
-                const fromCurrency = selectedOption.value;
-                const symbol = selectedOption.dataset.symbol;
-                const country = selectedOption.dataset.country;
-                const amount = parseFloat(amountInput.value || 0);
-                const recipientCurrency = getRecipientCurrency();
-
-                // Show loader
-                document.getElementById('rateLoader').classList.remove('hidden');
-
-                // Update flag and currency display
-                flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-                symbolSpan.textContent = symbol;
-
-                // ✅ Update the symbol next to the amount input
-                sendCurrencySymbol.textContent = symbol;
-
-                if (fromCurrency === recipientCurrency) {
-                    exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} 1.00`;
-                    recipientAmountText.textContent = amount.toFixed(2);
-                    transferFeeText.textContent = `${symbol}55.00`;
-                    document.getElementById('rateLoader').classList.add('hidden');
-                    return;
-                }
-
-                const rateData = await fetchExchangeRate(fromCurrency, recipientCurrency, amount);
-
-                if (rateData && rateData.rate) {
-                    const rate = parseFloat(rateData.rate);
-                    const recipientAmount = parseFloat(rateData.converted_amount);
-                    const fee = parseFloat(rateData.transfer_fee || 0);
-
-                    exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} ${rate}`;
-                    transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
-                    recipientAmountText.textContent = recipientAmount.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-
-                    
-
-                    const recipientSymbol = document.getElementById("recipientSymbol");
-                    const currencySymbols = {
-                        USD: "$", NGN: "₦", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R",
-                        XOF: "CFA", XAF: "FCFA", BWP: "P", TZS: "TSh", UGX: "USh", MWK: "MK",
-                        CAD: "C$", AUD: "A$", INR: "₹", CNY: "¥", JPY: "¥", RUB: "₽", BRL: "R$",
-                        MXN: "Mex$", AED: "د.إ", SAR: "﷼", QAR: "ر.ق", EGP: "£", LKR: "Rs", PKR: "₨",
-                        THB: "฿", MYR: "RM", IDR: "Rp", PHP: "₱", KRW: "₩", CHF: "Fr", SEK: "kr",
-                        NOK: "kr", DKK: "kr", CZK: "Kč", PLN: "zł", HUF: "Ft", TRY: "₺", ARS: "$",
-                        CLP: "$", COP: "$", PEN: "S/"
-                    };
-
-                    if (recipientSymbol) {
-                        recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
-                    }
-
-                } else {
-                    exchangeRateText.textContent = "Rate unavailable";
-                    transferFeeText.textContent = `${symbol}0.00`;
-                    recipientAmountText.textContent = "0.00";
-                }
-
-                // Hide loader
-                document.getElementById('rateLoader').classList.add('hidden');
-            }
-
-          
-
-
-
-
-        
-            window.openModalFromElement = function (el) {
-
-                document.querySelectorAll('.selected-beneficiary')
-                    .forEach(x => x.classList.remove('selected-beneficiary'));
-
-                el.classList.add('selected-beneficiary');
-
-                const name = el.dataset.accountName || "N/A";
-                const account = el.dataset.accountNumber || "";
-                const bank = el.dataset.bank || "";
-                const phone = el.dataset.phone || "";
-                const currency = el.dataset.currency || "USD";
-                const recipientId = el.dataset.id || "";
-
-                const isMobile = bank.toLowerCase().includes("mobile");
-
-                // Display destination
-                const destination = isMobile ? phone : account;
-
-                document.getElementById("beneficiaryName").textContent = name;
-                document.getElementById("beneficiaryAccount").textContent = destination;
-                document.getElementById("beneficiaryBank").textContent = bank;
-
-                // Save on element for summary step
-                el.dataset.destination = destination;
-
-                recipientCurrency = currency;
-
-                amountInput.value = parseFloat(el.dataset.amount || 100);
-                recipientGetsText.textContent = currency;
-
-                document.getElementById("recipientFlag").src =
-                    `https://flagcdn.com/24x18/${el.dataset.country?.toLowerCase() || "us"}.png`;
-
-                updateRateDisplay();
-
-                document.getElementById("transactionModal")?.classList?.remove("hidden");
-            };
-        
-            currencySelect?.addEventListener("change", () => {
-                console.log("🔁 Currency changed");
-                updateRateDisplay();
-            });
-        
-            amountInput?.addEventListener("input", () => {
-                console.log("✍️ Amount input changed:", amountInput.value);
-                updateRateDisplay();
-            });
-        
-            document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-                console.log("❌ Transaction modal closed");
-                document.getElementById("transactionModal").classList.add("hidden");
-            });
-        
-            window.addEventListener("click", function (e) {
-                if (e.target.id === "transactionModal") {
-                    console.log("🔒 Clicked outside modal to close");
-                    document.getElementById("transactionModal").classList.add("hidden");
-                }
-            });
-        
-            document.getElementById('sendBtn').addEventListener('click', () => {
-                const name = document.getElementById('beneficiaryName')?.textContent || "N/A";
-                const account = document.getElementById('beneficiaryAccount')?.textContent || "N/A";
-                const bank = document.getElementById('beneficiaryBank')?.textContent || "N/A";
-                const amount = parseFloat(document.getElementById('sendAmount')?.value || 0);
-                const feeText = document.getElementById('transferFeeText')?.textContent || '₦0';
-                const fee = parseFloat(feeText.replace(/[^\d.]/g, '')) || 0;
-                const total = amount + fee;
-                const rate = document.getElementById('exchangeRateText')?.textContent || '';
-                const receive = document.getElementById('recipientAmount')?.textContent || '0.00';
-                const currency = document.getElementById('recipientGets')?.textContent || 'USD';
-                const recipientId = document.querySelector('.selected-beneficiary')?.dataset?.id || '';
-                const symbol = document.getElementById('sendCurrencySymbol')?.textContent || '₦';
-
-                // UI summary display
-                document.getElementById('summaryName').textContent = name;
-                document.getElementById('summaryAccount').textContent = account;
-                document.getElementById('summaryBank').textContent = bank;
-                document.getElementById('summaryAmountSent').textContent = `${symbol}${amount.toFixed(2)}`;
-                document.getElementById('summaryFee').textContent = `${symbol}${fee.toFixed(2)}`;
-                document.getElementById('summaryTotal').textContent = `${symbol}${total.toFixed(2)}`;
-                document.getElementById('summaryRate').textContent = rate;
-                document.getElementById('summaryReceive').textContent = `${currency} ${receive}`;
-
-                // 🛠 Hidden input field updates
-                document.getElementById('recipientIdInput').value = recipientId;
-                document.getElementById('amountInput').value = amount.toFixed(2);
-                document.getElementById('transferFeeInput').value = fee.toFixed(2);
-                document.getElementById('totalAmountInput').value = total.toFixed(2);
-                document.getElementById('exchangeRateInput').value = rate;
-                document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
-                document.getElementById('accountNumberInput').value = account;
-                document.getElementById('accountNameInput').value = name;
-
-                // Get balance ID from selected option
-                const selectedOption = document.getElementById('currency')?.selectedOptions[0];
-                const balanceId = selectedOption?.getAttribute('data-id') || '';
-                document.getElementById('balanceIdInput').value = balanceId;
-
-                document.getElementById('summaryModal').classList.remove('hidden');
-            });
-
-        
-            document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
-                console.log("❌ Summary modal closed");
-                document.getElementById("summaryModal").classList.add("hidden");
-            });
-        
-            console.log("🚀 DOM Ready – initializing with first rate check");
-            updateRateDisplay();
-        });
-    </script>
-         --}}
-    <script>
     document.addEventListener("DOMContentLoaded", function () {
         const currencySelect = document.getElementById("currency");
         const amountInput = document.getElementById("sendAmount");
@@ -718,7 +719,7 @@ document.getElementById('sendBtn')?.addEventListener('click', () => {
 
     updateRateDisplay();
 });
-</script>
+</script> --}}
     
 
     <script>

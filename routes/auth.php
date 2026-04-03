@@ -47,6 +47,7 @@ use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
@@ -142,7 +143,8 @@ Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileA
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {
 
-    
+        Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
+
 
     Route::get('/verify_bvn', [RegisteredUserController::class, 'bvn'])->name('verify_bvn');
     Route::post('/verify_bvn', [RegisteredUserController::class, 'verifyBVN'])->name('bvn.verify.submit');
@@ -427,7 +429,10 @@ Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admi
         Route::put('/admin/exchangerate/{id}', [SettingController::class, 'update'])->name('admin.exchangerate.update');
         Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
         Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
-        Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
+        // Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
+Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
+Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
+
 
 
         Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');

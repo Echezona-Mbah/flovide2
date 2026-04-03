@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Models\Balance;
 use App\Models\Countries;
+use App\Models\Currency;
 use App\Models\ExchangeRate;
 use App\Models\TeamMembers;
 use App\Models\TransactionHistory;
@@ -17,62 +18,86 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
   use CurrencyHelper;
-public function create()
-{
-    $countries = Countries::all();
+ public function create()
+    {
+        $countries = Countries::all();
 
-    // Get the owner ID resolved by middleware
-   $user = auth()->user();
+        $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
 
-    // Check if user is a team member (admin under an owner)
-    $team = TeamMembers::where('user_id', $user->id)->first();
-    // dd($team);
+        $transactions = TransactionHistory::where('user_id', $ownerId)
+            ->latest('created_at')
+            ->take(5)
+            ->get();
 
-    // If team member, use owner_id, else use own id
-    $ownerId = $team ? $team->owner_id : $user->id;
-    
-    // dd($ownerId);
-    // $transactions = TransactionHistory::where('user_id', $user->id)
-    $transactions = TransactionHistory::where('user_id', $ownerId)
-        ->latest('created_at')
-        ->take(5)
-        ->get();
+        $balances = Balance::where('user_id', $ownerId)->get();
 
-    // Fetch balances for the owner
-    $balances = Balance::where('user_id', $ownerId)->get();
+        foreach ($balances as $balance) {
+            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+        }
 
-    foreach ($balances as $balance) {
-        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+        // ✅ currencies from currencies table
+        $allCurrencies = Currency::all()->map(function ($c) {
+            $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
+
+            return [
+                'country_name' => $c->name,
+                'code' => $c->code,
+                'symbol' => $c->symbol ?? '',
+                'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
+            ];
+        })->values()->all();
+
+        return view('dashboard', compact(
+            'countries',
+            'transactions',
+            'balances',
+            'allCurrencies'
+        ));
     }
 
-  $exchangeRates = ExchangeRate::all();
+    public function getExchangeRates(Request $request)
+    {
+        $from = strtoupper($request->input('from_currency'));
+        $to   = strtoupper($request->input('to_currency'));
+        $amount = (float) $request->input('amount', 1);
 
-    $allCurrencies = [];
+        try {
+            $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+                    $q->where('code', $from);
+                })
+                ->whereHas('toCurrency', function ($q) use ($to) {
+                    $q->where('code', $to);
+                })
+                ->first();
 
-    foreach ($exchangeRates as $rate) {
+            if (!$rate) {
+                throw new \Exception("Rate not found");
+            }
 
-        // convert country name to flag code (optional)
-        $countryCode = strtolower(substr($rate->currency_code, 0, 2));
-        //dd($rate->country_name);
+            $converted = $amount * $rate->rate;
 
-        $allCurrencies[] = [
-            'country_name'=>$rate->country_name,
-            'code' => $rate->currency_code,
-            'symbol' => $rate->currency_symbol ?? '',
-            'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
-            'rate' => $rate->rate
-        ];
+            return response()->json([
+                'success' => true,
+                'message' => 'Exchange rate fetched',
+                'code' => 'EXCHANGE_RATE_FETCHED',
+                'data' => [
+                    'converted' => $converted,
+                    'transfer_fee' => $rate->transfer_fee,
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null
+            ], 400);
+        }
     }
 
-
-    // dd($allCurrencies);
-    return view('dashboard', compact(
-        'countries',
-        'transactions',
-        'balances',
-         'allCurrencies'
-    ));
-}
 
 
 

@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Ibanq\IbanqPaymentController;
+use App\Models\Currency;
+use App\Models\ExchangeRate;
 use App\Services\PayazaService;
 use App\Services\PivotService;
 use App\Services\OrchardService;
@@ -620,19 +622,25 @@ class SendMoneyController extends Controller
 
 
     
-    public function index() 
-    {
-        $user = auth()->user();
-        $beneficiaries = Beneficia::where('user_id', $user->id)->get();
+ public function index() 
+{
+    $user = auth()->user();
 
-        $balances = Balance::where('user_id', $user->id)->get(); 
-        foreach ($balances as $balance) {
-            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-        }
-        $balanceList = $balances;
+    $beneficiaries = Beneficia::where('user_id', $user->id)->get();
 
-        return view('business.send', compact('beneficiaries', 'balanceList'));
+    $balances = Balance::where('user_id', $user->id)->get();
+    foreach ($balances as $balance) {
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
+
+    $balanceList = $balances;
+
+    // ✅ add currencies list
+    $currencies = Currency::all();
+
+    return view('business.send', compact('beneficiaries', 'balanceList', 'currencies'));
+}
+
 
     
 
@@ -662,67 +670,33 @@ class SendMoneyController extends Controller
 
 
 
-    public function getExchangeRate(Request $request)
-    {
-        $from = $request->get('from_currency');
-        $to = $request->get('to_currency');
-        $amount = $request->get('amount');
 
-        $result = $this->getExchangeRateFromMap($from, $to);
+public function getExchangeRates(Request $request)
+{
+    $from = strtoupper($request->input('from_currency'));
+    $to   = strtoupper($request->input('to_currency'));
+    $amount = (float) $request->input('amount', 1);
 
-        if (!$result) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid currency',
-                'code' => 'INVALID_CURRENCY',
-                'data' => null
-            ], 400);
+    try {
+        $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+                $q->where('code', $from);
+            })
+            ->whereHas('toCurrency', function ($q) use ($to) {
+                $q->where('code', $to);
+            })
+            ->first();
+
+        if (!$rate) {
+            throw new \Exception("Rate not found");
         }
 
-        $rate = $result['rate'];
-        $fee = $result['transfer_fee'];
-        $converted = round($amount * $rate, 2);
+        $converted = $amount * $rate->rate;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Exchange rate fetched',
-            'code' => 'EXCHANGE_RATE_FETCHED',
-            'data' => [
-                'rate' => $rate,
-                'converted_amount' => $converted,
-                'transfer_fee' => $fee,
-            ]
-        ], 200);
-    }
-
-
-    
-    public function getExchangeRates(Request $request)
-    {
-        $from = $request->input('from_currency');
-        $to = $request->input('to_currency');
-        $amount = $request->input('amount', 1);
-
-        $result = $this->getExchangeRateFromMap($from, $to);
-
-        if (!$result) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid currency',
-                'code' => 'INVALID_CURRENCY',
-                'data' => null
-            ], 400);
-        }
-
-        $rate = $result['rate'];
-        $transfer_fee = $result['transfer_fee'];
-
-        $formatted = sprintf(
-            "%s %.2f = %s %s",
-            strtoupper($from),
-            (float) $amount,
-            strtoupper($to),
-            $rate
+        $rateText = sprintf(
+            "%s 1.00 = %s %s",
+            $from,
+            $to,
+            number_format($rate->rate, 6, '.', '')
         );
 
         return response()->json([
@@ -730,15 +704,27 @@ class SendMoneyController extends Controller
             'message' => 'Exchange rate fetched',
             'code' => 'EXCHANGE_RATE_FETCHED',
             'data' => [
-                'exchange_rate' => $formatted,
-                'transfer_fee' => $transfer_fee
+                'converted' => $converted,
+                'transfer_fee' => $rate->transfer_fee,
+                'exchange_rate' => $rateText,
             ]
         ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'code' => 'RATE_NOT_FOUND',
+            'data' => null
+        ], 400);
     }
+}
 
 
+    
 
 
+    
 
 
     //   public function sendTransaction(Request $request)
