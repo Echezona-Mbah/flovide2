@@ -539,98 +539,30 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
-Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
-    Route::get('/webhooks', [WebhookController::class, 'index']);
-    Route::post('/webhooks', [WebhookController::class, 'store']);
-    Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
+// Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
+//     Route::get('/webhooks', [WebhookController::class, 'index']);
+//     Route::post('/webhooks', [WebhookController::class, 'store']);
+//     Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
 
-    Route::get('/balances', [BalanceController::class, 'index']);
-    Route::post('/balances', [BalanceController::class, 'store']);
-    Route::get('/balances/{id}', [BalanceController::class, 'show']);
+//     Route::get('/balances', [BalanceController::class, 'index']);
+//     Route::post('/balances', [BalanceController::class, 'store']);
+//     Route::get('/balances/{id}', [BalanceController::class, 'show']);
 
-    Route::get('/beneficiaries', [BeneficiaryController::class, 'index']);
-    Route::post('/beneficiaries', [BeneficiaryController::class, 'store']);
-    Route::post('/beneficiaries/account-inquiry', [BeneficiaryController::class, 'accountInquiry']);
-    Route::get('/beneficiaries/{id}', [BeneficiaryController::class, 'show']);
-    Route::delete('/beneficiaries/{id}', [BeneficiaryController::class, 'destroy']);
+//     Route::get('/beneficiaries', [BeneficiaryController::class, 'index']);
+//     Route::post('/beneficiaries', [BeneficiaryController::class, 'store']);
+//     Route::post('/beneficiaries/account-inquiry', [BeneficiaryController::class, 'accountInquiry']);
+//     Route::get('/beneficiaries/{id}', [BeneficiaryController::class, 'show']);
+//     Route::delete('/beneficiaries/{id}', [BeneficiaryController::class, 'destroy']);
 
-    Route::get('/transactions', [TransactionController::class, 'index']);
-    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
-    Route::post('/transactions', [TransactionController::class, 'store']);
+//     Route::get('/transactions', [TransactionController::class, 'index']);
+//     Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+//     Route::post('/transactions', [TransactionController::class, 'store']);
 
-    Route::get('/rates', [RateController::class, 'getExchangeRates']);
-
-
-});
+//     Route::get('/rates', [RateController::class, 'getExchangeRates']);
 
 
-
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/balances" ^
-//   -H "Accept: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
-
-
-// curl -X POST "http://127.0.0.1:8000/api/v1/balances" ^
-//   -H "Accept: application/json" ^
-//   -H "Content-Type: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-//   -d "{\"name\":\"Main Wallet\",\"currency\":\"UGX\",\"amount\":0}"
-
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/balances/70" ^
-//   -H "Accept: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
+// });
 
 
 
-// curl -X POST "http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry" ^
-//   -H "Accept: application/json" ^
-//   -H "Content-Type: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-//   -d "{\"currency\":\"NGN\",\"bank_code\":\"000007\",\"account_number\":\"6322069407\"}"
 
-
-// curl -X POST "http://127.0.0.1:8000/api/v1/beneficiaries" ^
-//   -H "Accept: application/json" ^
-//   -H "Content-Type: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-//   -d "{\"type\":\"individual\",\"firstNames\":\"ECHEZONA\",\"lastName\":\"MBAH\",\"transfer_method\":\"bank\",\"bank\":{\"country\":\"NG\",\"currency\":\"NGN\",\"accountHolder\":\"ECHEZONA ERNEST MBAH\",\"accountNumber\":\"6322069407\",\"bankCode\":\"000007\"}}"
-
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/beneficiaries" ^
-//   -H "Accept: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
-
-
-// curl -X DELETE "http://127.0.0.1:8000/api/v1/beneficiaries/114" \
-//   -H "Accept: application/json" \
-//   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" \
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
-
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/beneficiaries/114" ^
-//   -H "Accept: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/transactions" ^
-//   -H "Accept: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY"
-
-// curl -X POST "http://127.0.0.1:8000/api/v1/transactions" ^
-//   -H "Accept: application/json" ^
-//   -H "Content-Type: application/json" ^
-//   -H "X-Public-Key: pk_live_c37sw4hqsaavglf5f2nrcstnh2ob4rkm" ^
-//   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-//   -d "{\"amount\":1000,\"recipient_id\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"balance_id\":1,\"reference\":\"Test payment\",\"transfer_fee\":0,\"total_amount\":1000,\"exchange_rate\":\"NGN to NGN\",\"recipient_amount\":1000,\"account_number\":\"1234567890\",\"account_name\":\"John Doe\",\"bank\":\"bank\",\"bank_code\":\"058\"}"
-
-
-// curl -X GET "http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100"
