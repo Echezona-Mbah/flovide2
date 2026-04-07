@@ -58,17 +58,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
 
-// Route::get('/test-auth', function () {
-//     return auth()->check() ? 'Logged in' : 'Guest';
-// });
-
-Route::get('/force-logout', function () {
-    Auth::logout();
-    session()->invalidate();
-    session()->regenerateToken();
-    return 'Logged out';
-});
-
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
