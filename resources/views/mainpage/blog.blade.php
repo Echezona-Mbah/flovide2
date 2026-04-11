@@ -6,6 +6,12 @@
         <title>Flovide Blog | Insights on Digital Payments & Remittances</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+        <script>
+            window.fcWidgetMessengerConfig = {
+                open: true,
+            }
+        </script>
+        <script src='//fw-cdn.com/16096204/7073720.js' chat='true'></script>
         <style>
             :root {
                 --flovide-blue: #1E5186;
