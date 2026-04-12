@@ -42,8 +42,9 @@ class TransactionHistoryController extends Controller
    public function transaction()
 {
     $transactions = TransactionHistory::where('user_id', Auth::id())
-        ->orderBy('created_at', 'desc')
-        ->get();
+    ->orderBy('created_at', 'desc')
+    ->paginate(12);
+
 
     if (request()->wantsJson()) {
         $transactions = $transactions->map(function ($t) {

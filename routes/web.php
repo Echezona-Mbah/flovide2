@@ -8,6 +8,7 @@ use App\Http\Controllers\Business\DashboardController;
 use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
+use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\MainPage\businessController;
 use App\Http\Controllers\MainPage\SendMoneyHomePageController;
@@ -79,19 +80,9 @@ Route::get('/Coming', function () {
 
 
 Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
+Route::get('/cron/payaza-check', [SendMoneyController::class, 'runPayazaCheck']);
 
-// Route::get('/dashboard/exchange-rate', function (\Illuminate\Http\Request $request) {
-//     $helper = new class {
-//         use \App\Traits\CurrencyHelper;
-//     };
 
-//     return response()->json(
-//         $helper->getExchangeRateFromMap($request->from, $request->to)
-//     );
-// });
-
-// Route::get('/pivot-auth', [PivotController::class, 'auth']);
-// Route::get('/pivot-test', [PivotPivotController::class, 'sendPayment']);
 
 Route::get('/kyc-verification', function () {
     return view('business.sumsub');
@@ -112,22 +103,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->group(function () {
 
-    // Route::get('/payout', [addBankAccountController::class, 'payouts'])->name('payouts');
-    // Route::post('/payout', [addBankAccountController::class, 'store'])->name('store');
-    // Route::put('bank-account/{id}', [addBankAccountController::class, 'update'])->name('update');
-    // Route::get('bank-account/{id}', [addBankAccountController::class, 'edit'])->name('edit');
-    // Route::delete('delete-account/{id}', [addBankAccountController::class, 'destroy'])->name('destroy');
-    // Route::post('/bank-accounts/{id}/set-default', [addBankAccountController::class, 'setDefault'])->name('setDefault');
-    // Route::delete('bank-accounts/delete-all', [addBankAccountController::class, 'destroyAll'])->name('destroyAll');
-
-    // //subaccount
-    // Route::get('/subaccount', [SubAccountController::class, 'subaccount'])->name('subaccount');
-    // Route::delete('delete-subaccounts/delete-all', [SubAccountController::class, 'destroyAll'])->name('destroyAll');
-    // Route::post('subaccounts', [SubAccountController::class, 'store'])->name('store');
-    // Route::get('edit-subaccount/{id}', [SubAccountController::class, 'edit'])->name('subaccountEdit');
-    // Route::delete('deleteSubaccount/{id}', [SubAccountController::class, 'destroy'])->name('destroy');
-    // Route::put('updateSubaccount/{id}', [SubAccountController::class, 'update'])->name('updateSubAccount');
-    // Route::post('/bankSubAccounts/{id}/set-default', [SubAccountController::class, 'setDefault'])->name('setDefault');
 
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');

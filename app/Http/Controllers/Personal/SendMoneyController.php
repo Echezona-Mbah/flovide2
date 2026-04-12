@@ -272,8 +272,8 @@ public function getExchangeRate(Request $request)
             'bank_code' => 'nullable|string',
         ]);
 
-        $currency = strtoupper(explode(' ', $request->exchange_rate)[0] ?? 'NGN');
-        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[3] ?? 'NGN');
+        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
+        $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
 
         $balance = Balance::find($request->balance_id);
         if (!$balance) {

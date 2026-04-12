@@ -128,6 +128,29 @@
             </tbody>
           </table>
         </div>
+
+        @if(method_exists($transactions, 'links'))
+          <div class="px-6 md:px-10 py-5 border-t border-slate-100 bg-slate-50/40">
+            <div class="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-3">
+              <p class="text-sm text-slate-600">
+                Showing
+                <span class="font-semibold">{{ $transactions->firstItem() ?? 0 }}</span>
+                to
+                <span class="font-semibold">{{ $transactions->lastItem() ?? 0 }}</span>
+                of
+                <span class="font-semibold">{{ $transactions->total() ?? 0 }}</span>
+                transactions
+              </p>
+
+              <div class="pagination-wrapper">
+                {{ $transactions->links() }}
+              </div>
+            </div>
+          </div>
+        @endif
+
+
+
       </div>
     </section>
 
