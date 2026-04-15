@@ -9,7 +9,13 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
   <script>
     window.fcWidgetMessengerConfig = {
-      open: true,
+      open: false,
+      // config: {
+      //   headerProperty:{
+      //     appName: 'Flovide2',
+      //     appLogo: '{{asset("../asserts/mobileLogo.svg") }}',
+      //   }
+      // }
     }
   </script>
   <script src='//fw-cdn.com/16096204/7073720.js' chat='true'></script>
