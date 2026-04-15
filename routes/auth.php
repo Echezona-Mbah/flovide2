@@ -184,6 +184,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/exchange-rate', [SendMoneyController::class, 'getExchangeRate']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('send');
     Route::get('/exchangesend', [SendMoneyController::class, 'indexexc'])->name('exchangesend');
+    Route::post('/exchangesend', [SendMoneyController::class, 'exchangeSubmit'])->name('exchange.submit');
+
 
 
 
@@ -345,6 +347,10 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
+        Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
+        Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+
+
 
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);

@@ -19,6 +19,8 @@ use App\Services\PivotService;
 use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TransactionSentMail;
+use Illuminate\Support\Facades\DB;
+
 
 
 
@@ -44,138 +46,180 @@ class SendMoneyController extends Controller
 
     
 
-    //  public function sendTransaction(Request $request)
-    // {
-    //     // -------------------- Validate --------------------
-    //     $request->validate([
-    //         'amount' => 'required|numeric|min:1',
-    //         'recipient_id' => 'required|uuid',
-    //         'balance_id' => 'required',
-    //         'reference' => 'nullable|string',
-    //         'transfer_fee' => 'nullable',
-    //         'total_amount' => 'required|numeric',
-    //         'exchange_rate' => 'required|string',
-    //         'recipient_amount' => 'required|numeric',
-    //         'account_number' => 'required|string',
-    //         'account_name' => 'required|string',
-    //     ]);
+  
 
-    //     // -------------------- Extract currencies --------------------
-    //     $currency = explode(' ', $request->exchange_rate)[0] ?? 'NGN';
-    //     $sendingCurrency = explode(' ', $request->exchange_rate)[3] ?? 'NGN';
+//    public function sendTransaction(Request $request)
+//     {
+//         $request->validate([
+//             'amount' => 'required|numeric|min:1',
+//             'recipient_id' => 'required|uuid',
+//             'balance_id' => 'required',
+//             'reference' => 'nullable|string',
+//             'transfer_fee' => 'nullable',
+//             'total_amount' => 'required|numeric',
+//             'exchange_rate' => 'required|string',
+//             'recipient_amount' => 'required|numeric',
+//             'account_number' => 'required|string',
+//             'account_name' => 'required|string',
+//             'bank' => 'nullable|string',
+//             'bank_code' => 'nullable|string',
+//         ]);
 
-    //     $balance = Balance::find($request->balance_id);
-    //     if (!$balance) {
-    //         return $request->expectsJson()
-    //             ? response()->json(['error' => 'Invalid balance selected'], 422)
-    //             : back()->withErrors(['balance' => 'Invalid balance selected']);
-    //     }
+//         //dd($request->all());
 
-    //     if ($balance->amount < $request->total_amount) {
-    //         return $request->expectsJson()
-    //             ? response()->json(['error' => 'Insufficient funds'], 422)
-    //             : back()->withErrors(['amount' => 'Insufficient funds']);
-    //     }
+//         $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
+//         // dd($currency);
+//         $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
+//         // $rateParts = preg_split('/\s+/', trim((string) $request->exchange_rate));
+//         // $sendingCurrency = strtoupper($rateParts[1]);
+//         // $currency = strtoupper($rateParts[4]);
+//         // dd($sendingCurrency);
 
-    //     // -------------------- Choose provider --------------------
-    //     if (in_array($sendingCurrency, ['UGX', 'KES'])) {
-    //         // Use Pivot for UGX or KES
-    //         return $this->sendViaPivot($request, $sendingCurrency, $balance);
-    //     } else {
-    //         // Use IBANQ for other currencies
-    //         return $this->sendViaIbanq($request, $sendingCurrency, $balance);
-    //     }
-    // }
 
-   public function sendTransaction(Request $request)
-    {
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'recipient_id' => 'required|uuid',
-            'balance_id' => 'required',
-            'reference' => 'nullable|string',
-            'transfer_fee' => 'nullable',
-            'total_amount' => 'required|numeric',
-            'exchange_rate' => 'required|string',
-            'recipient_amount' => 'required|numeric',
-            'account_number' => 'required|string',
-            'account_name' => 'required|string',
-            'bank' => 'nullable|string',
-            'bank_code' => 'nullable|string',
+//         $balance = Balance::find($request->balance_id);
+//         if (!$balance) {
+//             return $request->expectsJson()
+//                 ? response()->json([
+//                     'success' => false,
+//                     'message' => 'Invalid balance selected',
+//                     'code' => 'INVALID_BALANCE',
+//                     'data' => null
+//                 ], 422)
+//                 : back()->withErrors(['balance' => 'Invalid balance selected']);
+//         }
+
+//         if ($balance->amount < $request->total_amount) {
+//             return $request->expectsJson()
+//                 ? response()->json([
+//                     'success' => false,
+//                     'message' => 'Insufficient funds',
+//                     'code' => 'INSUFFICIENT_FUNDS',
+//                     'data' => null
+//                 ], 422)
+//                 : back()->withErrors(['amount' => 'Insufficient funds']);
+//         }
+
+//         $pivotCurrencies = ['UGX'];
+//         $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES'];
+//         $appMobileCurrencies = ['GHS'];
+
+//         if (
+//             in_array($currency, $pivotCurrencies) &&
+//             filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)
+//         ) {
+//             return $this->sendViaPivot($request, $currency,$sendingCurrency, $balance);
+//         }
+
+//         if (
+//             in_array($currency, $appMobileCurrencies) &&
+//             filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)
+//         ) {
+//             return $this->sendViaAppMobile($request, $currency,$sendingCurrency, $balance);
+//         }
+
+//         if (
+//             in_array($currency,$payazaCurrencies) &&
+//             filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)
+//         ) {
+//             return $this->sendViaPayaza($request, $currency,$sendingCurrency, $balance);
+//         }
+
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'No payment provider available for this currency',
+//                 'code' => 'PROVIDER_NOT_AVAILABLE',
+//                 'data' => null
+//             ], 422)
+//             : back()->with('error', 'No payment provider available for this currency');
+//     }
+
+public function sendTransaction(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:1',
+        'recipient_id' => 'required|uuid',
+        'balance_id' => 'required',
+        'reference' => 'nullable|string',
+        'transfer_fee' => 'nullable',
+        'total_amount' => 'required|numeric',
+        'exchange_rate' => 'required|string',
+        'recipient_amount' => 'required|numeric',
+        'account_number' => 'required|string',
+        'account_name' => 'required|string',
+        'bank' => 'nullable|string',
+        'bank_code' => 'nullable|string',
+    ]);
+
+    //dd($request->all());
+
+    $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
+    $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
+
+    $balance = Balance::find($request->balance_id);
+    if (!$balance) {
+        return response()->json(['success'=>false,'message'=>'Invalid balance','code'=>'INVALID_BALANCE','data'=>null],422);
+    }
+
+    if ($balance->amount < $request->total_amount) {
+        return response()->json(['success'=>false,'message'=>'Insufficient funds','code'=>'INSUFFICIENT_FUNDS','data'=>null],422);
+    }
+
+    DB::beginTransaction();
+    try {
+        // Debit
+        $balance->amount -= $request->total_amount;
+        $balance->save();
+
+        // Create ONE transaction record
+        $tx = TransactionHistory::create([
+            'amount' => $request->amount,
+            'total_amount' => $request->total_amount,
+            'currency' => $sendingCurrency,
+            'balance_id' => $balance->id,
+            'status' => 'pending',
+            'method' => 'withdrawal',
+            'payment_provider' => 'wallect', // will update later
+            'reference' => 'ref-' . Str::uuid(),
+            'user_id' => auth()->id(),
+            'sender_id' => auth()->id(),
+            'sender' => auth()->user()->business_name ?? auth()->user()->name,
+            'recipient_account_number' => $request->account_number,
+            'recipient_account_name' => $request->account_name,
+            'recipient_country' => strtoupper(substr($currency,0,2)),
+            'recipient_bank_currency' => $currency,
+            'to_currency' => $currency,
+            'fees' => $request->transfer_fee,
+            'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
+            'recipient_amount' => $request->recipient_amount,
+
+
         ]);
 
-         //dd($request->all());
-
-        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
-        // dd($currency);
-        $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
-        // $rateParts = preg_split('/\s+/', trim((string) $request->exchange_rate));
-        // $sendingCurrency = strtoupper($rateParts[1]);
-        // $currency = strtoupper($rateParts[4]);
-        // dd($sendingCurrency);
-
-
-        $balance = Balance::find($request->balance_id);
-        if (!$balance) {
-            return $request->expectsJson()
-                ? response()->json([
-                    'success' => false,
-                    'message' => 'Invalid balance selected',
-                    'code' => 'INVALID_BALANCE',
-                    'data' => null
-                ], 422)
-                : back()->withErrors(['balance' => 'Invalid balance selected']);
+        if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id);
+        } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id);
+        } elseif (in_array($currency, ['NGN','TZS','XOF','XAF','ZAR','KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id);
+        } else {
+            DB::rollBack();
+            return response()->json(['success'=>false,'message'=>'No provider','code'=>'PROVIDER_NOT_AVAILABLE','data'=>null],422);
         }
 
-        if ($balance->amount < $request->total_amount) {
-            return $request->expectsJson()
-                ? response()->json([
-                    'success' => false,
-                    'message' => 'Insufficient funds',
-                    'code' => 'INSUFFICIENT_FUNDS',
-                    'data' => null
-                ], 422)
-                : back()->withErrors(['amount' => 'Insufficient funds']);
-        }
+        DB::commit();
+        return $response;
 
-        $pivotCurrencies = ['UGX'];
-        $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES'];
-        $appMobileCurrencies = ['GHS'];
-
-        if (
-            in_array($currency, $pivotCurrencies) &&
-            filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)
-        ) {
-            return $this->sendViaPivot($request, $currency,$sendingCurrency, $balance);
-        }
-
-        if (
-            in_array($currency, $appMobileCurrencies) &&
-            filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)
-        ) {
-            return $this->sendViaAppMobile($request, $currency,$sendingCurrency, $balance);
-        }
-
-        if (
-            in_array($currency,$payazaCurrencies) &&
-            filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)
-        ) {
-            return $this->sendViaPayaza($request, $currency,$sendingCurrency, $balance);
-        }
-
-        return $request->expectsJson()
-            ? response()->json([
-                'success' => false,
-                'message' => 'No payment provider available for this currency',
-                'code' => 'PROVIDER_NOT_AVAILABLE',
-                'data' => null
-            ], 422)
-            : back()->with('error', 'No payment provider available for this currency');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['success'=>false,'message'=>'Transaction failed','code'=>'TXN_FAILED','data'=>$e->getMessage()],500);
     }
+}
+
 
 
     // -------------------- Pivot Payment --------------------
-    protected function sendViaPivot(Request $request, $currency,$sendingCurrency, $balance)
+    protected function sendViaPivot(Request $request, $currency,$sendingCurrency, $balance,$txId)
     {
         $isApi = $request->expectsJson();
         $user = auth()->user();
@@ -239,24 +283,30 @@ class SendMoneyController extends Controller
         logger('Pivot RESPONSE', $payment);
 
         if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
-            $balance->amount -= $request->total_amount;
-            $balance->save();
+            // $balance->amount -= $request->total_amount;
+            // $balance->save();
 
-            TransactionHistory::create([
-                'amount' => $request->total_amount,
-                'currency' => $sendingCurrency,
-                'balance_id' => $balance->id,
-                'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
-                'sender_id' => auth()->id(),
-                'sender' => $user->business_name,
-                'recipient_account_number' => $request->account_number,
-                'recipient_account_name' => $request->account_name,
-                'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
-                'status' => 'pending', 
-                'method' => 'withdrawal',
-                'payment_provider' => 'pivot',
-                'reference' => 'ref-' . Str::uuid(),
-                'user_id' => auth()->id(),
+            // TransactionHistory::create([
+            //     'amount' => $request->total_amount,
+            //     'currency' => $sendingCurrency,
+            //     'balance_id' => $balance->id,
+            //     'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
+            //     'sender_id' => auth()->id(),
+            //     'sender' => $user->business_name,
+            //     'recipient_account_number' => $request->account_number,
+            //     'recipient_account_name' => $request->account_name,
+            //     'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
+            //     'status' => 'pending', 
+            //     'method' => 'withdrawal',
+            //     'payment_provider' => 'pivot',
+            //     'reference' => 'ref-' . Str::uuid(),
+            //     'user_id' => auth()->id(),
+            // ]);
+
+            TransactionHistory::where('id', $txId)->update([
+            'status' => 'pending',
+            'payment_provider' => 'pivot',
+            'order_id' => $payment['merchantTransactionId'] ?? 'N/A'
             ]);
 
             return $isApi
@@ -283,7 +333,7 @@ class SendMoneyController extends Controller
 
 
 
-    protected function sendViaPayaza(Request $request, $currency,$sendingCurrency, $balance)
+    protected function sendViaPayaza(Request $request, $currency,$sendingCurrency, $balance,$txId)
     {
         $isApi = $request->expectsJson();
         $transactionReference = "TXN_" . time();
@@ -349,26 +399,32 @@ class SendMoneyController extends Controller
         logger('Payaza RESPONSE', $response);
 
         if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
-            $balance->amount -= $request->total_amount;
-            $balance->save();
+            // $balance->amount -= $request->total_amount;
+            // $balance->save();
             $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
 
 
-            TransactionHistory::create([
-                'amount' => $request->total_amount,
-                'currency' => $sendingCurrency,
-                'balance_id' => $balance->id,
-                'order_id' => $transactionReference,
-                'sender_id' => auth()->id(),
-                'sender' => auth()->user()->business_name ?? auth()->user()->name,
-                'recipient_account_number' => $request->account_number,
-                'recipient_account_name' => $request->account_name,
-                'recipient_country' => strtoupper(substr($currency,0,2)),
-                'status' => 'pending', 
-                'method' => 'withdrawal',
-                'payment_provider' => 'payaza',
-                'reference' => 'ref-' . Str::uuid(),
-                'user_id' => auth()->id(),
+            // TransactionHistory::create([
+            //     'amount' => $request->total_amount,
+            //     'currency' => $sendingCurrency,
+            //     'balance_id' => $balance->id,
+            //     'order_id' => $transactionReference,
+            //     'sender_id' => auth()->id(),
+            //     'sender' => auth()->user()->business_name ?? auth()->user()->name,
+            //     'recipient_account_number' => $request->account_number,
+            //     'recipient_account_name' => $request->account_name,
+            //     'recipient_country' => strtoupper(substr($currency,0,2)),
+            //     'status' => 'pending', 
+            //     'method' => 'withdrawal',
+            //     'payment_provider' => 'payaza',
+            //     'reference' => 'ref-' . Str::uuid(),
+            //     'user_id' => auth()->id(),
+            // ]);
+
+            TransactionHistory::where('id', $txId)->update([
+            'status' => 'pending',
+            'payment_provider' => 'payaza',
+            'order_id' => $transactionReference
             ]);
 
 
@@ -396,7 +452,7 @@ class SendMoneyController extends Controller
 
 
 
-   protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency, $balance)
+   protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency, $balance,$txId)
     {
         $isApi = $request->expectsJson();
         $user  = auth()->user();
@@ -427,25 +483,30 @@ class SendMoneyController extends Controller
         logger('AppMobile RESPONSE', $response);
 
         if (($response['status'] ?? null) === 'SUCCESS' || ($response['success'] ?? false)) {
-            $balance->amount -= $request->total_amount;
-            $balance->save();
+            // $balance->amount -= $request->total_amount;
+            // $balance->save();
             $this->sendTransactionEmail($request, $balance, $exttrid ?? null);
 
-            TransactionHistory::create([
-                'amount' => $request->total_amount,
-                'currency' => $sendingCurrency,
-                'balance_id' => $balance->id,
-                'order_id' => $exttrid,
-                'sender_id' => auth()->id(),
-                'sender' => $user->business_name ?? $user->name,
-                'recipient_account_number' => $request->account_number,
-                'recipient_account_name' => $request->account_name,
-                'recipient_country' => 'GH',
-                'status' => 'pending', 
-                'method' => 'withdrawal',
-                'payment_provider' => 'appmobile',
-                'reference' => 'ref-' . Str::uuid(),
-                'user_id' => auth()->id(),
+            // TransactionHistory::create([
+            //     'amount' => $request->total_amount,
+            //     'currency' => $sendingCurrency,
+            //     'balance_id' => $balance->id,
+            //     'order_id' => $exttrid,
+            //     'sender_id' => auth()->id(),
+            //     'sender' => $user->business_name ?? $user->name,
+            //     'recipient_account_number' => $request->account_number,
+            //     'recipient_account_name' => $request->account_name,
+            //     'recipient_country' => 'GH',
+            //     'status' => 'pending', 
+            //     'method' => 'withdrawal',
+            //     'payment_provider' => 'appmobile',
+            //     'reference' => 'ref-' . Str::uuid(),
+            //     'user_id' => auth()->id(),
+            // ]);
+
+             TransactionHistory::where('id', $txId)->update([
+                'status' => 'pending',
+                'payment_provider' => 'appmobile'
             ]);
 
             return $isApi
@@ -698,6 +759,142 @@ class SendMoneyController extends Controller
         $balanceList = $balances;
         return view('business.exchange_rate', compact('beneficiaries', 'balances'));
     }
+
+
+
+public function exchangeSubmit(Request $request)
+{
+    //  dd($request->all());
+
+    $request->validate([
+        'from_currency' => 'required|string',
+        'to_currency' => 'required|string',
+        'amount' => 'required|numeric|min:1',
+    ]);
+
+    // dd($request->all());
+
+    $user = auth()->user();
+
+    $from = strtoupper($request->from_currency);
+    $to = strtoupper($request->to_currency);
+    $amount = (float) $request->amount;
+
+    if ($from === $to) {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => 'From and To currency cannot be the same.',
+                'code' => 'SAME_CURRENCY',
+                'data' => null
+            ], 422)
+            : back()->withErrors(['amount' => 'From and To currency cannot be the same.']);
+    }
+
+    $fromBalance = Balance::where('user_id', $user->id)->where('currency', $from)->first();
+    $toBalance = Balance::where('user_id', $user->id)->where('currency', $to)->first();
+
+    if (!$fromBalance || !$toBalance) {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => 'Invalid wallet selection.',
+                'code' => 'INVALID_WALLET',
+                'data' => null
+            ], 422)
+            : back()->withErrors(['amount' => 'Invalid wallet selection.']);
+    }
+
+    if ($fromBalance->amount < $amount) {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => 'Insufficient balance.',
+                'code' => 'INSUFFICIENT_BALANCE',
+                'data' => null
+            ], 422)
+            : back()->withErrors(['amount' => 'Insufficient balance.']);
+    }
+
+    $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $from))
+        ->whereHas('toCurrency', fn($q) => $q->where('code', $to))
+        ->first();
+
+    if (!$rate) {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => 'Rate not found.',
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null
+            ], 422)
+            : back()->withErrors(['amount' => 'Rate not found.']);
+    }
+
+    $converted = $amount * $rate->rate;
+
+    // Update balances
+    $fromBalance->amount -= $amount;
+    $fromBalance->save();
+
+    $toBalance->amount += $converted;
+    $toBalance->save();
+
+    // Log transaction
+    $tx = TransactionHistory::create([
+        'amount' => $amount,
+        'currency' => $from,
+        'balance_id' => $fromBalance->id,
+        'status' => 'success',
+        'method' => 'exchange',
+        'reference' => 'ref-' . Str::uuid(),
+        'user_id' => $user->id,
+        'recipient_country' => strtoupper(substr($to,0,2)),
+        'sender_id' => auth()->id(),
+        'sender' => auth()->user()->business_name ?? auth()->user()->name,
+        'recipient_account_number' => $from,
+        'recipient_account_name' => auth()->user()->business_name ?? auth()->user()->name,
+    ]);
+
+    $this->sendExchangeEmail($request, $from, $to, $amount, $converted, $fromBalance->amount);
+
+
+    return $request->expectsJson()
+        ? response()->json([
+            'success' => true,
+            'message' => 'Exchange completed successfully!',
+            'code' => 'EXCHANGE_SUCCESS',
+            'data' => [
+                'from_currency' => $from,
+                'to_currency' => $to,
+                'amount' => $amount,
+                'converted' => $converted,
+                'reference' => $tx->reference
+            ]
+        ], 200)
+        : back()->with('success', 'Exchange completed successfully!');
+}
+
+
+protected function sendExchangeEmail(Request $request, $from, $to, $amount, $converted, $currentBalance)
+{
+    $user = auth()->user();
+
+    $data = [
+        'name' => $user->business_name ?? $user->name,
+        'amount_sent' => number_format((float) $amount, 2),
+        'recipient_amount' => number_format((float) $converted, 2),
+        'fee' => number_format((float) 0, 2),
+        'total_amount' => number_format((float) $amount, 2),
+        'current_balance' => number_format((float) $currentBalance, 2),
+        'sending_currency' => $from,
+        'recipient_currency' => $to,
+        'reference' => 'Exchange',
+    ];
+
+    Mail::to($user->email)->send(new TransactionSentMail($data));
+}
+
     
     
     
