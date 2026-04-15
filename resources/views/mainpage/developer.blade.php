@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script>
     window.fcWidgetMessengerConfig = {
-      open: true,
+      open: false,
     }
   </script>
   <script src='//fw-cdn.com/16096204/7073720.js' chat='true'></script>

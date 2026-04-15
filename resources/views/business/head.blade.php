@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <script>
         window.fcWidgetMessengerConfig = {
-            open: true,
+            open: false,
         }
     </script>
     <script src='//fw-cdn.com/16096204/7073720.js' chat='true'></script>
