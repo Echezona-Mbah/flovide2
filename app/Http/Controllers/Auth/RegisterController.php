@@ -58,12 +58,21 @@ public function registerUser(Request $request)
         'trading_city' => 'required|string|max:255',
     ]);
 
-    return response()->json([
-        'success' => false,
-        'message' => 'Validation error',
-        'code' => 'VALIDATION_ERROR',
-        'data' => $validator->errors()
-    ], 422);
+    // return response()->json([
+    //     'success' => false,
+    //     'message' => 'Validation error',
+    //     'code' => 'VALIDATION_ERROR',
+    //     'data' => $validator->errors()
+    // ], 422);
+
+      if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation error',
+            'code' => 'VALIDATION_ERROR',
+            'data' => $validator->errors()
+        ], 422);
+    }
 
     if (
         User::where('email', $request->email)->exists() ||
