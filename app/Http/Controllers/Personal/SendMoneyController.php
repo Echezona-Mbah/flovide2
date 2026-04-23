@@ -299,7 +299,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         return response()->json([
             'success' => false,
             'message' => $auth['error'],
-            'code' => 'PIVOT_AUTH_FAILED',
+            'code' => 'FLOVIDE_AUTH_FAILED',
             'data' => $auth
         ], 500);
     }
@@ -362,16 +362,16 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
 
         return response()->json([
             'success' => true,
-            'message' => 'Pivot transaction successful',
-            'code' => 'PIVOT_SUCCESS',
+            'message' => 'flovide transaction successful',
+            'code' => 'FLOVIDE_SUCCESS',
             'data' => $payment
         ], 200);
     }
 
     return response()->json([
         'success' => false,
-        'message' => $payment['statusDescription'] ?? 'Pivot payment failed',
-        'code' => 'PIVOT_FAILED',
+        'message' => $payment['statusDescription'] ?? 'flovide payment failed',
+        'code' => 'FLOVIDE_FAILED',
         'data' => $payment
     ], 422);
 }
@@ -386,8 +386,8 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
     if (!$accountReference) {
         return response()->json([
             'success' => false,
-            'message' => 'Unable to retrieve account reference from Payaza',
-            'code' => 'PAYAZA_ACCOUNT_REF_FAILED',
+            'message' => 'Unable to retrieve account reference from flovide',
+            'code' => 'FLOVIDE_ACCOUNT_REF_FAILED',
             'data' => null
         ], 500);
     }
@@ -462,16 +462,16 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
 
         return response()->json([
             'success' => true,
-            'message' => 'Payaza transaction successful',
-            'code' => 'PAYAZA_SUCCESS',
+            'message' => 'flovide transaction successful',
+            'code' => 'FLOVIDE_SUCCESS',
             'data' => $response
         ], 200);
     }
 
     return response()->json([
         'success' => false,
-        'message' => $response['statusDescription'] ?? 'Payaza transaction failed',
-        'code' => 'PAYAZA_FAILED',
+        'message' => $response['statusDescription'] ?? 'flovide transaction failed',
+        'code' => 'FLOVIDE_FAILED',
         'data' => $response
     ], 422);
 }

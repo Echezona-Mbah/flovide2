@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Services;
+
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Illuminate\Support\Facades\Http;
+
+class FirebaseNotificationService
+{
+    private function accessToken(): ?string
+    {
+        $projectId = config('services.firebase.project_id');
+        $clientEmail = config('services.firebase.client_email');
+        $privateKey = config('services.firebase.private_key');
+
+        if (!$projectId || !$clientEmail || !$privateKey) {
+            return null;
+        }
+
+        $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
+
+        $creds = new ServiceAccountCredentials($scopes, [
+            'type' => 'service_account',
+            'project_id' => $projectId,
+            'client_email' => $clientEmail,
+            'private_key' => $privateKey,
+            'token_uri' => 'https://oauth2.googleapis.com/token',
+        ]);
+
+        $tokenArr = $creds->fetchAuthToken();
+        return $tokenArr['access_token'] ?? null;
+    }
+
+    public function sendToToken(?string $deviceToken, string $title, string $body, array $data = []): bool
+    {
+        if (!$deviceToken) {
+            return false;
+        }
+
+        $accessToken = $this->accessToken();
+        $projectId = config('services.firebase.project_id');
+
+        if (!$accessToken || !$projectId) {
+            return false;
+        }
+
+        $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
+        $payload = [
+            'message' => [
+                'token' => $deviceToken,
+                'notification' => [
+                    'title' => $title,
+                    'body' => $body,
+                ],
+                'data' => $this->stringifyData($data),
+                'android' => ['priority' => 'high'],
+                'apns' => [
+                    'headers' => ['apns-priority' => '10'],
+                    'payload' => ['aps' => ['sound' => 'default']],
+                ],
+            ],
+        ];
+
+        $response = Http::withToken($accessToken)->post($url, $payload);
+
+        return $response->successful();
+    }
+
+    private function stringifyData(array $data): array
+    {
+        $out = [];
+        foreach ($data as $key => $value) {
+            $out[(string) $key] = is_scalar($value) ? (string) $value : json_encode($value);
+        }
+        return $out;
+    }
+}

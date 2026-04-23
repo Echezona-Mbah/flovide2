@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Services\PivotService;
 use App\Services\PayazaService;
 use App\Services\OrchardService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RefundProcessedMail;
 
 class TransactionHistoryController extends Controller
 {
@@ -189,15 +191,66 @@ public function refund($id)
         return back()->withErrors(['error' => 'Balance not found.']);
     }
 
-    $balance->amount += $tx->total_amount;
+    $refundAmount = (float) ($tx->total_amount ?? $tx->amount ?? 0);
+
+    $balance->amount += $refundAmount;
     $balance->save();
 
     $tx->status = 'refunded';
     $tx->payment_provider = 'refunded';
     $tx->save();
 
+    // send refund mail
+    try {
+        $email = null;
+
+        if (!empty($tx->user_id) && class_exists(\App\Models\User::class)) {
+            $user = \App\Models\User::find($tx->user_id);
+            $email = $user->email ?? null;
+        }
+
+        if (!$email && !empty($tx->personal_id) && class_exists(\App\Models\Personal::class)) {
+            $personal = \App\Models\Personal::find($tx->personal_id);
+            $email = $personal->email ?? null;
+        }
+
+        if ($email) {
+            Mail::to($email)->send(new RefundProcessedMail($tx, $refundAmount, $balance->amount));
+        }
+    } catch (\Throwable $e) {
+        \Log::warning('Refund mail failed', [
+            'transaction_id' => $tx->id,
+            'error' => $e->getMessage(),
+        ]);
+    }
+
     return back()->with('success', 'Refund successful.');
 }
+
+
+
+// public function refund($id)
+// {
+//     $tx = TransactionHistory::findOrFail($id);
+
+//     if ($tx->status !== 'pending') {
+//         return back()->withErrors(['error' => 'Only pending transactions can be refunded.']);
+//     }
+
+//     $balance = Balance::find($tx->balance_id);
+//     if (!$balance) {
+//         return back()->withErrors(['error' => 'Balance not found.']);
+//     }
+
+//     $balance->amount += $tx->total_amount;
+//     $balance->save();
+
+//     $tx->status = 'refunded';
+//     $tx->payment_provider = 'refunded';
+//     $tx->save();
+
+//     return back()->with('success', 'Refund successful.');
+// }
 
 
 }

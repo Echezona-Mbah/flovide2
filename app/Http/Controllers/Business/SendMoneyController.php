@@ -230,7 +230,7 @@ public function sendTransaction(Request $request)
                 ? response()->json([
                     'success' => false,
                     'message' => $auth['error'],
-                    'code' => 'PIVOT_AUTH_FAILED',
+                    'code' => 'FLOVIDE_AUTH_FAILED',
                     'data' => null
                 ], 500)
                 : back()->withErrors(['error' => $auth['error']]);
@@ -312,20 +312,20 @@ public function sendTransaction(Request $request)
             return $isApi
                 ? response()->json([
                     'success' => true,
-                    'message' => 'Pivot transaction successful',
-                    'code' => 'PIVOT_SUCCESS',
+                    'message' => 'flovide transaction successful',
+                    'code' => 'FLOVIDE_SUCCESS',
                     'data' => $payment
                 ], 200)
-                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Pivot!');
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
 
-        $errorMessage = $payment['statusDescription'] ?? 'Pivot payment failed';
+        $errorMessage = $payment['statusDescription'] ?? 'flovide payment failed';
 
         return $isApi
             ? response()->json([
                 'success' => false,
                 'message' => $errorMessage,
-                'code' => 'PIVOT_FAILED',
+                'code' => 'FLOVIDE_FAILED',
                 'data' => $payment
             ], 422)
             : back()->with('error', $errorMessage);
@@ -346,7 +346,7 @@ public function sendTransaction(Request $request)
                 ? response()->json([
                     'success' => false,
                     'message' => 'Unable to retrieve account reference from Payaza',
-                    'code' => 'PAYAZA_ACCOUNT_REF_FAILED',
+                    'code' => 'FLOVIDE_ACCOUNT_REF_FAILED',
                     'data' => null
                 ], 500)
                 : back()->with('error', 'Unable to retrieve account reference from Payaza');
@@ -432,19 +432,19 @@ public function sendTransaction(Request $request)
                 ? response()->json([
                     'success' => true,
                     'message' => 'Payaza transaction successful',
-                    'code' => 'PAYAZA_SUCCESS',
+                    'code' => 'FLOVIDE_SUCCESS',
                     'data' => $response
                 ], 200)
-                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via Payaza!');
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
 
-        $errorMessage = $response['statusDescription'] ?? 'Payaza transaction failed';
+        $errorMessage = $response['statusDescription'] ?? 'flovide transaction failed';
 
         return $isApi
             ? response()->json([
                 'success' => false,
                 'message' => $errorMessage,
-                'code' => 'PAYAZA_FAILED',
+                'code' => 'FLOVIDE_FAILED',
                 'data' => $response
             ], 422)
             : back()->with('error', $errorMessage);
@@ -512,20 +512,20 @@ public function sendTransaction(Request $request)
             return $isApi
                 ? response()->json([
                     'success' => true,
-                    'message' => 'AppMobile transaction successful',
-                    'code' => 'APPMOBILE_SUCCESS',
+                    'message' => 'flovide transaction successful',
+                    'code' => 'FLOVIDE_SUCCESS',
                     'data' => $response
                 ], 200)
-                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via AppMobile!');
+                : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
 
-        $errorMessage = $response['message'] ?? 'AppMobile transaction failed';
+        $errorMessage = $response['message'] ?? 'flovide transaction failed';
 
         return $isApi
             ? response()->json([
                 'success' => false,
                 'message' => $errorMessage,
-                'code' => 'APPMOBILE_FAILED',
+                'code' => 'FLOVIDE_FAILED',
                 'data' => $response
             ], 422)
             : back()->with('error', $errorMessage);

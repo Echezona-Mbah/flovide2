@@ -43,7 +43,8 @@ class Personal extends Authenticatable
         'login_otp_expires_at',
         'identity_verification_status',
         'selfie_verification_status',
-        'profile_picture'
+        'profile_picture',
+        'device_token'
     ];
 
 
