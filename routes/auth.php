@@ -359,6 +359,11 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
         Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
+        Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])
+            ->name('admin.business.balance.add');
+
+        Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])
+            ->name('admin.business.balance.remove');
 
         Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
         Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
@@ -366,6 +371,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
+        Route::post('/admin/personal-account/{personal}/balance/{balance}/add-money', [PersonalAccountController::class, 'addMoney'])->name('admin.personal.balance.add');
+        Route::post('/admin/personal-account/{personal}/balance/{balance}/remove-money', [PersonalAccountController::class, 'removeMoney'])->name('admin.personal.balance.remove');
 
         Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
         Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
@@ -410,12 +417,12 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
 
         Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
-Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
-Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
-Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
-Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
-Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
-Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
+        Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
+        Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
+        Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+        Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
+        Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
+        Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
 
 
 
@@ -425,8 +432,8 @@ Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admi
         Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
         Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
         // Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
-Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
-Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
+        Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
+        Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
 
 
 

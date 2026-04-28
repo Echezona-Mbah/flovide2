@@ -12,6 +12,7 @@ use App\Models\Subaccount;
 use App\Models\VirtualCards;
 use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PersonalAccountController extends Controller
 {
@@ -114,10 +115,12 @@ public function destroy($id)
     public function find($id)
 {
     $user = Personal::findOrFail($id);
+        // dd($user);
 
-    $balances = Balance::where('user_id', $user->id)->get();
+
+    $balances = Balance::where('personal_id', $user->id)->get();
     $virtualCards = VirtualCards::where('user_id', $user->id)->get();
-    $beneficia = Beneficia::where('user_id', $user->id)->get();
+    $beneficia = Beneficia::where('personal_id', $user->id)->get();
     $customer = Customer::where('user_id', $user->id)->get();
     $bankAccount = BankAccount::where('user_id', $user->id)->get();
     $Subaccount = Subaccount::where('user_id', $user->id)->get();
@@ -136,4 +139,59 @@ public function destroy($id)
         'Subaccount'
     ));
 }
+
+
+public function addMoney(Request $request, $personalId, $balanceId)
+{
+    return $this->updateBalanceAmount($request, $personalId, $balanceId, 'add');
+}
+
+public function removeMoney(Request $request, $personalId, $balanceId)
+{
+    return $this->updateBalanceAmount($request, $personalId, $balanceId, 'remove');
+}
+
+private function updateBalanceAmount(Request $request, $personalId, $balanceId, string $mode)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01',
+        'note' => 'nullable|string|max:255',
+    ]);
+
+    $personal = Personal::findOrFail($personalId);
+
+    // If your balances table uses user_id for personal, keep user_id.
+    // If it uses personal_id, change this where clause accordingly.
+    $balance = Balance::where('id', $balanceId)
+        ->where('personal_id', $personal->id)
+        ->firstOrFail();
+
+    $amount = (float) $request->amount;
+
+    DB::beginTransaction();
+    try {
+        if ($mode === 'remove') {
+            if ((float) $balance->amount < $amount) {
+                return back()->withErrors(['error' => 'Insufficient balance for deduction.']);
+            }
+            $balance->amount = (float) $balance->amount - $amount;
+        } else {
+            $balance->amount = (float) $balance->amount + $amount;
+        }
+
+        $balance->save();
+        DB::commit();
+
+        $action = $mode === 'remove' ? 'removed from' : 'added to';
+        return back()->with('success', number_format($amount, 2) . " {$balance->currency} {$action} {$balance->name} successfully.");
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return back()->withErrors(['error' => 'Balance update failed: ' . $e->getMessage()]);
+    }
+}
+
+
+
+
+
 }

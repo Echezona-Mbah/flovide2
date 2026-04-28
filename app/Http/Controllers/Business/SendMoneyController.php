@@ -286,22 +286,7 @@ public function sendTransaction(Request $request)
             // $balance->amount -= $request->total_amount;
             // $balance->save();
 
-            // TransactionHistory::create([
-            //     'amount' => $request->total_amount,
-            //     'currency' => $sendingCurrency,
-            //     'balance_id' => $balance->id,
-            //     'order_id' => $payment['merchantTransactionId'] ?? 'N/A',
-            //     'sender_id' => auth()->id(),
-            //     'sender' => $user->business_name,
-            //     'recipient_account_number' => $request->account_number,
-            //     'recipient_account_name' => $request->account_name,
-            //     'recipient_country' => $currency === 'UGX' ? 'UG' : 'KE',
-            //     'status' => 'pending', 
-            //     'method' => 'withdrawal',
-            //     'payment_provider' => 'pivot',
-            //     'reference' => 'ref-' . Str::uuid(),
-            //     'user_id' => auth()->id(),
-            // ]);
+   
 
             TransactionHistory::where('id', $txId)->update([
             'status' => 'pending',
@@ -314,7 +299,7 @@ public function sendTransaction(Request $request)
                     'success' => true,
                     'message' => 'flovide transaction successful',
                     'code' => 'FLOVIDE_SUCCESS',
-                    'data' => $payment
+                    'data' => $this->txData($txId),
                 ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
@@ -326,7 +311,7 @@ public function sendTransaction(Request $request)
                 'success' => false,
                 'message' => $errorMessage,
                 'code' => 'FLOVIDE_FAILED',
-                'data' => $payment
+                'data' => $this->txData($txId),
             ], 422)
             : back()->with('error', $errorMessage);
     }
@@ -334,7 +319,7 @@ public function sendTransaction(Request $request)
 
 
     protected function sendViaPayaza(Request $request, $currency,$sendingCurrency, $balance,$txId)
-    {
+    {   
         $isApi = $request->expectsJson();
         $transactionReference = "TXN_" . time();
 
@@ -404,22 +389,6 @@ public function sendTransaction(Request $request)
             $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
 
 
-            // TransactionHistory::create([
-            //     'amount' => $request->total_amount,
-            //     'currency' => $sendingCurrency,
-            //     'balance_id' => $balance->id,
-            //     'order_id' => $transactionReference,
-            //     'sender_id' => auth()->id(),
-            //     'sender' => auth()->user()->business_name ?? auth()->user()->name,
-            //     'recipient_account_number' => $request->account_number,
-            //     'recipient_account_name' => $request->account_name,
-            //     'recipient_country' => strtoupper(substr($currency,0,2)),
-            //     'status' => 'pending', 
-            //     'method' => 'withdrawal',
-            //     'payment_provider' => 'payaza',
-            //     'reference' => 'ref-' . Str::uuid(),
-            //     'user_id' => auth()->id(),
-            // ]);
 
             TransactionHistory::where('id', $txId)->update([
             'status' => 'pending',
@@ -431,9 +400,9 @@ public function sendTransaction(Request $request)
             return $isApi
                 ? response()->json([
                     'success' => true,
-                    'message' => 'Payaza transaction successful',
+                    'message' => 'Transaction transaction successful',
                     'code' => 'FLOVIDE_SUCCESS',
-                    'data' => $response
+                    'data' => $this->txData($txId),
                 ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
@@ -445,7 +414,7 @@ public function sendTransaction(Request $request)
                 'success' => false,
                 'message' => $errorMessage,
                 'code' => 'FLOVIDE_FAILED',
-                'data' => $response
+                'data' => $this->txData($txId),
             ], 422)
             : back()->with('error', $errorMessage);
     }
@@ -514,7 +483,7 @@ public function sendTransaction(Request $request)
                     'success' => true,
                     'message' => 'flovide transaction successful',
                     'code' => 'FLOVIDE_SUCCESS',
-                    'data' => $response
+                    'data' => $this->txData($txId),
                 ], 200)
                 : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via flovide!');
         }
@@ -526,76 +495,76 @@ public function sendTransaction(Request $request)
                 'success' => false,
                 'message' => $errorMessage,
                 'code' => 'FLOVIDE_FAILED',
-                'data' => $response
+                'data' => $this->txData($txId),
             ], 422)
             : back()->with('error', $errorMessage);
     }
 
 
     // -------------------- IBANQ Payment --------------------
-    protected function sendViaIbanq(Request $request, $currency, $balance)
-    {
-        $isApi = $request->expectsJson();
-        $user = auth()->user();
-        $orderId = (string) Str::uuid();
-        $reference = 'ref-' . Str::uuid();
+    // protected function sendViaIbanq(Request $request, $currency, $balance)
+    // {
+    //     $isApi = $request->expectsJson();
+    //     $user = auth()->user();
+    //     $orderId = (string) Str::uuid();
+    //     $reference = 'ref-' . Str::uuid();
 
-        // Prepare IBANQ payload
-        $ibanqPayload = [
-            'beneficiaryAccountId' => $request->account_id ?? null,
-            'amount' => $request->recipient_amount,
-            'currency' => $currency,
-            'reference' => $reference,
-        ];
+    //     // Prepare IBANQ payload
+    //     $ibanqPayload = [
+    //         'beneficiaryAccountId' => $request->account_id ?? null,
+    //         'amount' => $request->recipient_amount,
+    //         'currency' => $currency,
+    //         'reference' => $reference,
+    //     ];
 
-        // Call IBANQ Payment Controller (assuming you have a service/controller)
-        $ibanqResponse = app()->make('App\Http\Controllers\Ibanq\IbanqPaymentController')
-            ->createPayment($ibanqPayload);
+    //     // Call IBANQ Payment Controller (assuming you have a service/controller)
+    //     $ibanqResponse = app()->make('App\Http\Controllers\Ibanq\IbanqPaymentController')
+    //         ->createPayment($ibanqPayload);
 
-        if (!isset($ibanqResponse['success']) || !$ibanqResponse['success']) {
-            $errorMessage = $ibanqResponse['error'] ?? 'Unknown error from IBANQ';
-            return $isApi
-                ? response()->json(['error' => 'IBANQ Payment failed', 'details' => $errorMessage], 422)
-                : back()->with('error', 'IBANQ Payment failed: ' . $errorMessage);
-        }
+    //     if (!isset($ibanqResponse['success']) || !$ibanqResponse['success']) {
+    //         $errorMessage = $ibanqResponse['error'] ?? 'Unknown error from IBANQ';
+    //         return $isApi
+    //             ? response()->json(['error' => 'IBANQ Payment failed', 'details' => $errorMessage], 422)
+    //             : back()->with('error', 'IBANQ Payment failed: ' . $errorMessage);
+    //     }
 
-        $data = $ibanqResponse['data'] ?? [];
+    //     $data = $ibanqResponse['data'] ?? [];
 
-        // Deduct balance
-        $balance->amount -= $request->total_amount;
-        $balance->save();
+    //     // Deduct balance
+    //     $balance->amount -= $request->total_amount;
+    //     $balance->save();
 
-        // Log transaction
-        TransactionHistory::create([
-            'amount' => $request->total_amount,
-            'fees' => $request->transfer_fee ?? 0,
-            'currency' => $data['currency'] ?? $currency,
-            'balance_id' => $balance->id,
-            'virtual_account_id' => $data['virtual_account_id'] ?? null,
-            'order_id' => $data['order_id'] ?? $orderId,
-            'payment_reference' => $data['payment_reference'] ?? null,
-            'status' => $data['status'] ?? 'unknown',
-            'failure_reason' => $data['failure_reason'] ?? null,
-            'transaction_type' => $data['transaction_type'] ?? 'payment',
-            'payment_method' => $data['payment_method'] ?? null,
-            'sender_id' => $user->id,
-            'sender' => $user->business_name ?? null,
-            'recipient_id' => $data['recipient']['id'] ?? null,
-            'recipient_country' => $data['recipient']['country'] ?? null,
-            'recipient_account_name' => $data['recipient']['bank_account']['account_name'] ?? null,
-            'recipient_bank_name' => $data['recipient']['bank_account']['bank_name'] ?? null,
-            'recipient_account_number' => $data['recipient']['bank_account']['account_number'] ?? null,
-            'exchange_rate' => $data['exchange_rate']['rate'] ?? null,
-            'single_rate' => $data['exchange_rate']['single_rate'] ?? null,
-            'reference' => $data['reference'] ?? $reference,
-            'user_id' => $user->id,
-            'method' => $isApi ? 'api' : 'web',
-        ]);
+    //     // Log transaction
+    //     TransactionHistory::create([
+    //         'amount' => $request->total_amount,
+    //         'fees' => $request->transfer_fee ?? 0,
+    //         'currency' => $data['currency'] ?? $currency,
+    //         'balance_id' => $balance->id,
+    //         'virtual_account_id' => $data['virtual_account_id'] ?? null,
+    //         'order_id' => $data['order_id'] ?? $orderId,
+    //         'payment_reference' => $data['payment_reference'] ?? null,
+    //         'status' => $data['status'] ?? 'unknown',
+    //         'failure_reason' => $data['failure_reason'] ?? null,
+    //         'transaction_type' => $data['transaction_type'] ?? 'payment',
+    //         'payment_method' => $data['payment_method'] ?? null,
+    //         'sender_id' => $user->id,
+    //         'sender' => $user->business_name ?? null,
+    //         'recipient_id' => $data['recipient']['id'] ?? null,
+    //         'recipient_country' => $data['recipient']['country'] ?? null,
+    //         'recipient_account_name' => $data['recipient']['bank_account']['account_name'] ?? null,
+    //         'recipient_bank_name' => $data['recipient']['bank_account']['bank_name'] ?? null,
+    //         'recipient_account_number' => $data['recipient']['bank_account']['account_number'] ?? null,
+    //         'exchange_rate' => $data['exchange_rate']['rate'] ?? null,
+    //         'single_rate' => $data['exchange_rate']['single_rate'] ?? null,
+    //         'reference' => $data['reference'] ?? $reference,
+    //         'user_id' => $user->id,
+    //         'method' => $isApi ? 'api' : 'web',
+    //     ]);
 
-        return $isApi
-            ? response()->json(['message' => 'IBANQ transaction successful', 'data' => $data])
-            : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via IBANQ!');
-    }
+    //     return $isApi
+    //         ? response()->json(['message' => 'IBANQ transaction successful', 'data' => $data])
+    //         : redirect()->route('transactionHistory')->with('success', 'Transaction sent successfully via IBANQ!');
+    // }
 
     protected function sendTransactionEmail(Request $request, $balance, $reference = null)
     {
@@ -619,6 +588,30 @@ public function sendTransaction(Request $request)
 
         Mail::to($user->email)->send(new TransactionSentMail($data));
     }
+
+    // Add this helper in the same controller
+    private function txData(string $txId): array
+    {
+        $tx = TransactionHistory::findOrFail($txId);
+
+        return [
+            'id' => (string) $tx->id,
+            'reference' => $tx->reference,
+            'order_id' => $tx->order_id,
+            'status' => $tx->status,
+            'amount' => (float) $tx->amount,
+            'total_amount' => (float) $tx->total_amount,
+            'fees' => (float) ($tx->fees ?? 0),
+            'currency' => $tx->currency,
+            'to_currency' => $tx->to_currency,
+            'recipient_amount' => (float) ($tx->recipient_amount ?? 0),
+            'payment_provider' => 'Flovide',
+            'recipient_account_name' => $tx->recipient_account_name,
+            'recipient_account_number' => $tx->recipient_account_number,
+            'created_at' => optional($tx->created_at)->toIso8601String(),
+        ];
+    }
+
 
 
 

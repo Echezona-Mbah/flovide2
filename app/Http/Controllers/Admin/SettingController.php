@@ -168,19 +168,19 @@ public function storeExchangeRate(Request $request)
 //         ->with('success', 'Exchange rate updated successfully.');
 // }
 
-Route::get('/test-fcm', function (\App\Services\FirebaseNotificationService $fcm) {
-    $user = \App\Models\User::whereNotNull('device_token')->first();
-    abort_if(!$user, 404, 'No token found');
+// Route::get('/test-fcm', function (\App\Services\FirebaseNotificationService $fcm) {
+//     $user = \App\Models\User::whereNotNull('device_token')->first();
+//     abort_if(!$user, 404, 'No token found');
 
-    $ok = $fcm->sendToToken(
-        $user->device_token,
-        'FCM Test',
-        'If you see this, push is working.',
-        ['type' => 'test']
-    );
+//     $ok = $fcm->sendToToken(
+//         $user->device_token,
+//         'FCM Test',
+//         'If you see this, push is working.',
+//         ['type' => 'test']
+//     );
 
-    return ['success' => $ok];
-});
+//     return ['success' => $ok];
+// });
 
 
 public function update(Request $request, $id, FirebaseNotificationService $firebase)

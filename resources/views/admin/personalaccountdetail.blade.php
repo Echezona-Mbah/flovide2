@@ -333,6 +333,7 @@
         color: #fff;
         opacity: 0.96;
     }
+    .balance-actions .btn { flex: 1; white-space: nowrap; }
 </style>
 
 <body>
@@ -574,13 +575,42 @@
                                                 $bg = $flagColors[$bal->currency] ?? 'background-color:#334155;';
                                             @endphp
 
-                                            <div class="col-md-6 col-xl-3 mb-4">
-                                                <div class="currency-card" style="{{ $bg }}">
-                                                    <div class="small text-white-50 mb-2">Wallet</div>
-                                                    <h5 class="mb-2">{{ $bal->name }}</h5>
-                                                    <div class="h4 mb-0">{{ $bal->currency }} {{ number_format($bal->amount, 2) }}</div>
-                                                </div>
-                                            </div>
+                                           <div class="col-md-6 col-xl-3 mb-4">
+    <div class="currency-card d-flex flex-column" style="{{ $bg }}">
+        <div class="small text-white-50 mb-2">Wallet</div>
+        <h5 class="mb-2">{{ $bal->name }}</h5>
+        <div class="h4 mb-0">{{ $bal->currency }} {{ number_format($bal->amount, 2) }}</div>
+
+        <div class="mt-3 d-flex flex-row gap-2 balance-actions">
+            <button
+                type="button"
+                class="btn btn-sm btn-soft-primary personal-balance-action-btn"
+                data-mode="add"
+                data-user-id="{{ $user->id }}"
+                data-balance-id="{{ $bal->id }}"
+                data-balance-name="{{ $bal->name }}"
+                data-currency="{{ $bal->currency }}"
+                data-bs-toggle="modal"
+                data-bs-target="#personalBalanceActionModal">
+                Add Money
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-soft-dark personal-balance-action-btn"
+                data-mode="remove"
+                data-user-id="{{ $user->id }}"
+                data-balance-id="{{ $bal->id }}"
+                data-balance-name="{{ $bal->name }}"
+                data-currency="{{ $bal->currency }}"
+                data-bs-toggle="modal"
+                data-bs-target="#personalBalanceActionModal">
+                Remove Money
+            </button>
+        </div>
+    </div>
+</div>
+
                                         @endforeach
                                     </div>
                                 </div>
@@ -719,8 +749,70 @@
             </div>
         </div>
     </div>
+<div class="modal fade" id="personalBalanceActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;">
+            <form id="personalBalanceActionForm" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="personalBalanceActionTitle">Update Balance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2 text-muted" id="personalBalanceActionMeta"></p>
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" name="amount" step="0.01" min="0.01" class="form-control" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Note (optional)</label>
+                        <input type="text" name="note" class="form-control" maxlength="255">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="personalBalanceActionSubmitBtn" class="btn btn-soft-primary">Submit</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @include('admin.footer')
+
+<script>
+document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
+    btn.addEventListener('click', function () {
+        const mode = this.dataset.mode;
+        const userId = this.dataset.userId;
+        const balanceId = this.dataset.balanceId;
+        const balanceName = this.dataset.balanceName;
+        const currency = this.dataset.currency;
+
+        const form = document.getElementById('personalBalanceActionForm');
+        const title = document.getElementById('personalBalanceActionTitle');
+        const meta = document.getElementById('personalBalanceActionMeta');
+        const submitBtn = document.getElementById('personalBalanceActionSubmitBtn');
+
+        const addUrl = "{{ url('/admin/personal-account') }}/" + userId + "/balance/" + balanceId + "/add-money";
+        const removeUrl = "{{ url('/admin/personal-account') }}/" + userId + "/balance/" + balanceId + "/remove-money";
+
+        if (mode === 'remove') {
+            form.action = removeUrl;
+            title.textContent = 'Remove Money';
+            meta.textContent = `Deduct from ${balanceName} (${currency})`;
+            submitBtn.textContent = 'Remove';
+        } else {
+            form.action = addUrl;
+            title.textContent = 'Add Money';
+            meta.textContent = `Fund ${balanceName} (${currency})`;
+            submitBtn.textContent = 'Add';
+        }
+    });
+});
+</script>
+
+
 
 <script>
     const tabs = document.querySelectorAll('.dashboard-tabs .nav-link');
