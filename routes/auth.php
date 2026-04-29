@@ -184,6 +184,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/exchange-rate', [SendMoneyController::class, 'getExchangeRate']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('send');
     Route::get('/exchangesend', [SendMoneyController::class, 'indexexc'])->name('exchangesend');
+    Route::post('/exchangesend', [SendMoneyController::class, 'exchangeSubmit'])->name('exchange.submit');
+
 
 
 
@@ -334,17 +336,21 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-    // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
-    // Route::post('/admin/register', [RegisterController::class, 'store']);
+        // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
+        // Route::post('/admin/register', [RegisterController::class, 'store']);
 
-    Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
-    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
-    // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
+        Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
+        Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
+        // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
 
     Route::middleware('admin.auth')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
+        Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
+        Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+
+
 
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
@@ -404,12 +410,12 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
 
         Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
-Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
-Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
-Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
-Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
-Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
-Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
+        Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
+        Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
+        Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+        Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
+        Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
+        Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
 
 
 
@@ -419,8 +425,8 @@ Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admi
         Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
         Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
         // Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
-Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
-Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
+        Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
+        Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
 
 
 

@@ -9,6 +9,7 @@ use App\Models\Currency;
 use App\Models\Personal;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
+use App\Services\FirebaseNotificationService; 
 
 class SettingController extends Controller
 {
@@ -122,7 +123,67 @@ public function storeExchangeRate(Request $request)
 }
 
 
-public function update(Request $request, $id)
+// public function update(Request $request, $id)
+// {
+//     $request->validate([
+//         'country_name' => 'nullable|string|max:255',
+//         'currency_code' => 'nullable|string|max:10',
+//         'rate' => 'nullable|numeric|min:0',
+//         'transfer_fee' => 'nullable|numeric|min:0',
+//     ]);
+
+//     $rate = ExchangeRate::findOrFail($id);
+
+//     $rate->update([
+//         'country_name' => $request->country_name,
+//         'currency_code' => strtoupper($request->currency_code),
+//         'rate' => $request->rate,
+//         'transfer_fee' => $request->transfer_fee,
+//     ]);
+
+//     $rate->load(['fromCurrency', 'toCurrency']);
+
+//     $fromCode = $rate->fromCurrency->code ?? 'N/A';
+//     $toCode = $rate->toCurrency->code ?? 'N/A';
+
+//     $title = "Exchange Rate Updated";
+//     $message = "The exchange rate {$fromCode} → {$toCode} was updated. New rate: {$rate->rate}.";
+
+
+//     // ✅ Notify all Users
+//     User::chunk(500, function ($users) use ($title, $message) {
+//         foreach ($users as $user) {
+//             $user->notify(new GeneralNotification($title, $message));
+//         }
+//     });
+
+//     // ✅ Notify all Personal users
+//     Personal::chunk(500, function ($users) use ($title, $message) {
+//         foreach ($users as $user) {
+//             $user->notify(new GeneralNotification($title, $message));
+//         }
+//     });
+
+//     return redirect()->route('admin.exchangerate.edit', $id)
+//         ->with('success', 'Exchange rate updated successfully.');
+// }
+
+Route::get('/test-fcm', function (\App\Services\FirebaseNotificationService $fcm) {
+    $user = \App\Models\User::whereNotNull('device_token')->first();
+    abort_if(!$user, 404, 'No token found');
+
+    $ok = $fcm->sendToToken(
+        $user->device_token,
+        'FCM Test',
+        'If you see this, push is working.',
+        ['type' => 'test']
+    );
+
+    return ['success' => $ok];
+});
+
+
+public function update(Request $request, $id, FirebaseNotificationService $firebase)
 {
     $request->validate([
         'country_name' => 'nullable|string|max:255',
@@ -145,21 +206,48 @@ public function update(Request $request, $id)
     $fromCode = $rate->fromCurrency->code ?? 'N/A';
     $toCode = $rate->toCurrency->code ?? 'N/A';
 
-    $title = "Exchange Rate Updated";
-    $message = "The exchange rate {$fromCode} → {$toCode} was updated. New rate: {$rate->rate}.";
+    $title = 'Exchange Rate Updated';
+    $message = "The exchange rate {$fromCode} -> {$toCode} was updated. New rate: {$rate->rate}.";
 
-
-    // ✅ Notify all Users
-    User::chunk(500, function ($users) use ($title, $message) {
+    // Notify all business users
+    User::chunk(500, function ($users) use ($title, $message, $firebase, $fromCode, $toCode, $rate) {
         foreach ($users as $user) {
             $user->notify(new GeneralNotification($title, $message));
+
+            if (!empty($user->device_token)) {
+                $firebase->sendToToken(
+                    $user->device_token,
+                    $title,
+                    $message,
+                    [
+                        'type' => 'exchange_rate_update',
+                        'from_currency' => $fromCode,
+                        'to_currency' => $toCode,
+                        'rate' => (string) $rate->rate,
+                    ]
+                );
+            }
         }
     });
 
-    // ✅ Notify all Personal users
-    Personal::chunk(500, function ($users) use ($title, $message) {
+    // Notify all personal users
+    Personal::chunk(500, function ($users) use ($title, $message, $firebase, $fromCode, $toCode, $rate) {
         foreach ($users as $user) {
             $user->notify(new GeneralNotification($title, $message));
+
+            if (!empty($user->device_token)) {
+                $firebase->sendToToken(
+                    $user->device_token,
+                    $title,
+                    $message,
+                    [
+                        'type' => 'exchange_rate_update',
+                        'from_currency' => $fromCode,
+                        'to_currency' => $toCode,
+                        'rate' => (string) $rate->rate,
+                    ]
+                );
+            }
         }
     });
 

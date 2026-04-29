@@ -56,6 +56,10 @@ class TransactionHistory extends Model
         'expiry_month',
         'expiry_year',
         'cvv',
+        'payment_provider',
+        'exchange_rate',
+        'recipient_amount',
+        'total_amount',
 
     ];
 

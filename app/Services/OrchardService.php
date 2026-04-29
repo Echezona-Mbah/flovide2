@@ -102,4 +102,43 @@ class OrchardService
 }
 
 
+
+
+public function checkTransaction(string $exttrid, string $transType = 'TSC'): array
+{
+    $payload = [
+        "exttrid" => $exttrid,
+        "trans_type" => $transType,
+        "service_id" => env('ORCHARD_SERVICE_ID'),
+    ];
+
+    $jsonPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
+
+    $signature = hash_hmac('sha256', $jsonPayload, $this->clientSecret);
+    $authorization = $this->clientId . ':' . $signature;
+
+    try {
+        $response = Http::withHeaders([
+            'Content-Type'  => 'application/json',
+            'Authorization' => $authorization,
+        ])
+        ->withBody($jsonPayload, 'application/json')
+        ->post($this->baseUrl . 'checkTransaction');
+
+        return [
+            'success' => $response->successful(),
+            'status'  => $response->status(),
+            'data'    => $response->json(),
+            'raw'     => $response->body(),
+        ];
+    } catch (\Exception $e) {
+        return [
+            'success' => false,
+            'error'   => $e->getMessage(),
+        ];
+    }
+}
+
+
+
 }

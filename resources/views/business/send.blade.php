@@ -169,11 +169,11 @@
                 <div class="space-y-2 mb-6 text-sm text-gray-700">
                   <div class="flex justify-between">
                     <span class="font-medium">{{ __('Exchange rate:') }}</span>
-                    <span id="exchangeRateText">NGN 1.00 = $0.0006</span>
+                    <span id="exchangeRateText">--</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">{{ __('Transfer fee:') }}</span>
-                    <span id="transferFeeText">₦55.00</span>
+                    <span id="transferFeeText">--</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="font-medium">{{ __('Delivery:') }}</span>
@@ -322,9 +322,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function getRecipientCurrency() {
     const selectedBeneficiary = document.querySelector('.selected-beneficiary');
-    const cur = selectedBeneficiary?.dataset.currency || "USD";
-    console.log('[recipient] currency:', cur);
-    return cur;
+    return selectedBeneficiary?.dataset.currency || null;
+  }
+
+  function formatRate(amount, from, converted, to) {
+    return `${amount.toFixed(2)} ${from} = ${converted.toFixed(2)} ${to}`;
   }
 
   async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
@@ -353,14 +355,21 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedOption = currencySelect?.selectedOptions[0];
     if (!selectedOption) return;
 
+    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    if (!selectedBeneficiary) {
+      exchangeRateText.textContent = "--";
+      transferFeeText.textContent = "--";
+      recipientAmountText.textContent = "0.00";
+      recipientGetsText.textContent = "--";
+      return;
+    }
+
     const fromCurrency = selectedOption.value;
     const symbol = selectedOption.dataset.symbol || "₦";
     const country = selectedOption.dataset.country || "us";
     const amount = parseFloat(amountInput.value || 0);
     const recipientCurrency = getRecipientCurrency();
 
-    // ✅ update beneficiary currency + flag every time
-    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
     const recipientCountry = selectedBeneficiary?.dataset.country || 'us';
     if (recipientFlag) {
       recipientFlag.src = `https://flagcdn.com/24x18/${recipientCountry.toLowerCase()}.png`;
@@ -384,7 +393,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (fromCurrency === recipientCurrency) {
-      exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} 1.00`;
+      const sameAmount = amount.toFixed(2);
+      exchangeRateText.textContent = `${sameAmount} ${fromCurrency} = ${sameAmount} ${recipientCurrency}`;
       recipientAmountText.textContent = amount.toFixed(2);
       transferFeeText.textContent = `${symbol}0.00`;
       document.getElementById('rateLoader')?.classList.add('hidden');
@@ -397,7 +407,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const converted = parseFloat(rateData.data.converted || 0);
       const fee = parseFloat(rateData.data.transfer_fee || 0);
 
-      exchangeRateText.textContent = `${amount.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${recipientCurrency}`;
+      exchangeRateText.textContent = formatRate(amount, fromCurrency, converted, recipientCurrency);
       transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
       recipientAmountText.textContent = converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } else {
