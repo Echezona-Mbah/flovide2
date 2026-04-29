@@ -263,6 +263,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // api routes for Send Money details
     Route::post('/exchange-rate', [SendMoneyController::class, 'getExchangeRates']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('transactions.send');
+    Route::post('/exchange-send', [SendMoneyController::class, 'exchangeSubmit']);
+
     // api routes for Balance details
     Route::get('balances', [CreateBankController::class, 'index']);
     Route::get('/singlebalances', [CreateBankController::class, 'create']);
@@ -500,6 +502,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         // api routes for Send Money detailsdeactivateAccount
         Route::post('/personal-exchange-rate', [PersonalSendMoneyController::class, 'getExchangeRate']);
         Route::post('/personal-send', [PersonalSendMoneyController::class, 'sendTransaction'])->name('transactions.send');
+        Route::post('/exchange-send', [PersonalSendMoneyController::class, 'exchangeSubmit']);
+
 
 
         // Update Profile
@@ -562,7 +566,7 @@ Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
 
 
 });
-
+// git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
 
 
 

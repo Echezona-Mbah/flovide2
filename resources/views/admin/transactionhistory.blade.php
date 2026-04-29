@@ -303,6 +303,37 @@
         
         <div class="app-main MainAnimation-appear">
             @include('admin.sidebar')
+<<<<<<< HEAD
+=======
+            @if ($errors->any())
+<script>
+  Swal.fire({
+    toast:true,
+    position:'top-end',
+    icon:'error',
+    title:@json($errors->first()),
+    showConfirmButton:false,
+    timer:4000,
+    timerProgressBar:true
+  });
+</script>
+@endif
+
+@if (session('success'))
+<script>
+  Swal.fire({
+    toast:true,
+    position:'top-end',
+    icon:'success',
+    title:@json(session('success')),
+    showConfirmButton:false,
+    timer:4000,
+    timerProgressBar:true
+  });
+</script>
+@endif
+
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162
             
             <div class="app-main__outer">
                 <div class="app-main__inner">
@@ -428,6 +459,25 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="action-wrap">
+<<<<<<< HEAD
+=======
+                                                        @if($item->status === 'pending')
+                                                        <form method="POST" action="{{ route('transactionhistory.process', $item->id) }}" class="process-form" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-brand">Process</button>
+                                                            </form>
+                                                        @endif
+
+                                                        @if ($item->status === 'pending')
+                                                        <form method="POST" action="{{ route('transactionhistory.refund', $item->id) }}" class="refund-form" style="display:inline;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-delete">Refund</button>
+                                                        </form>
+
+                                                        @endif
+
+
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162
                                                         <button type="button" class="btn btn-view view-transaction-btn"
                                                             data-bs-toggle="modal" data-bs-target="#transactionModal"
                                                             data-sender="{{ $item->sender }}"
@@ -671,3 +721,43 @@ document.addEventListener('DOMContentLoaded', function () {
     updateVisibleCount();
 });
 </script>
+<<<<<<< HEAD
+=======
+
+<script>
+document.querySelectorAll('.process-form').forEach(form => {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Process transaction?',
+      text: 'This will send the payment to provider.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, process'
+    }).then((result) => {
+      if (result.isConfirmed) form.submit();
+    });
+  });
+});
+
+document.querySelectorAll('.refund-form').forEach(form => {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Refund transaction?',
+      text: 'This will return the amount to the user immediately.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, refund'
+    }).then((result) => {
+      if (result.isConfirmed) form.submit();
+    });
+  });
+});
+</script>
+
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162

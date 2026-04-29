@@ -90,6 +90,7 @@ class User extends Authenticatable
         'ip_whitelist',
         'callback_url',
         'webhook_url',
+        'device_token',
 
     ];
 

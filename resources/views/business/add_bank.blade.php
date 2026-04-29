@@ -77,11 +77,17 @@
                 <div class="relative">
                   <button id="currencyDropdownButton" type="button"
                     class="w-full flex items-center justify-between border border-gray-300 px-4 py-2 text-sm text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @php
+                      $mainCurrency = $currencies->first();
+                    @endphp
+
                     <div id="selectedCurrency" class="flex items-center gap-2">
-                      <img src="https://flagcdn.com/w40/gb.png" alt="United Kingdom flag"
+                      <img src="https://flagcdn.com/w40/{{ strtolower($mainCurrency->country_code ?? 'us') }}.png"
+                        alt="{{ $mainCurrency->name ?? 'Currency' }} flag"
                         class="w-6 h-6 rounded-full border-2 border-gray-200 object-cover">
-                      <span>Pound Sterling (GBP)</span>
+                      <span>{{ $mainCurrency->name ?? 'Currency' }} ({{ $mainCurrency->code ?? 'USD' }})</span>
                     </div>
+
                     <svg class="w-4 h-4 ml-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M19 9l-7 7-7-7" />
@@ -90,18 +96,19 @@
 
                   <div id="currencyDropdown"
                     class="hidden absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow mt-2 max-h-60 overflow-y-auto">
-                    @foreach ($countries as $country)
+                    @foreach ($currencies as $currency)
                       <div class="currency-option flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100"
-                        data-value="{{ $country['currency_code'] }}"
-                        data-label="{{ $country['currency'] }} ({{ $country['currency_code'] }})"
-                        data-flag="https://flagcdn.com/w40/{{ strtolower($country['code']) }}.png"
-                        data-alt="{{ $country['name'] }} flag">
-                        <img src="https://flagcdn.com/w40/{{ strtolower($country['code']) }}.png"
-                          alt="{{ $country['name'] }} flag"
+                        data-value="{{ $currency->code }}"
+                        data-label="{{ $currency->name }} ({{ $currency->code }})"
+                        data-flag="https://flagcdn.com/w40/{{ strtolower($currency->country_code) }}.png"
+                        data-alt="{{ $currency->name }} flag">
+                        <img src="https://flagcdn.com/w40/{{ strtolower($currency->country_code) }}.png"
+                          alt="{{ $currency->name }} flag"
                           class="w-6 h-6 rounded-full border-2 border-gray-200 object-cover">
-                        <span>{{ $country['currency'] }} ({{ $country['currency_code'] }})</span>
+                        <span>{{ $currency->name }} ({{ $currency->code }})</span>
                       </div>
                     @endforeach
+
                   </div>
 
                   <input type="hidden" id="currency" name="currency" value="GBP">

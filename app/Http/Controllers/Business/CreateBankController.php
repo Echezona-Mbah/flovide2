@@ -7,6 +7,7 @@ use App\Models\Countries;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Balance;
+use App\Models\Currency;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,7 @@ class CreateBankController extends Controller
 
    public function create(Request $request)
     {
-        $countries = Countries::all();
+        $currencies = Currency::all();
         $user = auth()->user();
         $balances = Balance::where('user_id', $user->id)->get();
 
@@ -34,7 +35,7 @@ class CreateBankController extends Controller
                     'message' => 'No balance created for this user',
                     'code' => 'BALANCES_EMPTY',
                     'data' => [
-                        'countries' => $countries,
+                        'currencies' => $currencies,
                         'balances' => [],
                     ]
                 ], 200);
@@ -45,13 +46,13 @@ class CreateBankController extends Controller
                 'message' => 'Data for add bank form loaded successfully',
                 'code' => 'ADD_BANK_DATA_LOADED',
                 'data' => [
-                    'countries' => $countries,
+                    'currencies' => $currencies,
                     'balances' => $balances
                 ]
             ], 200);
         }
 
-        return view('business.add_bank', compact('countries', 'balances'));
+        return view('business.add_bank', compact('currencies', 'balances'));
     }
 
 
