@@ -3,11 +3,13 @@ const dropdownContent = document.getElementById('dropdownContent');
 const hiddenInput = document.getElementById('selectedCountryId');
 const form = document.getElementById('countryForm');
 
+// Read comments
 // Toggle dropdown visibility when button is clicked
 dropdownButton.addEventListener('click', () => {
     dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
 });
 
+// Read comments
 // When a country is selected from the dropdown
 document.querySelectorAll('.country-option').forEach(option => {
     option.addEventListener('click', () => {
