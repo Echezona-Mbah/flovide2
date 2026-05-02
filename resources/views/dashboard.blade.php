@@ -6,6 +6,7 @@
   @include('business.sidebar')
 
   {{-- <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div> --}}
+  {{-- <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div> --}}
     <div id="overlay" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden"></div>
 
   <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
