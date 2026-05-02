@@ -359,6 +359,11 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
         Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
+        Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])
+            ->name('admin.business.balance.add');
+
+        Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])
+            ->name('admin.business.balance.remove');
 
         Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
         Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
@@ -366,6 +371,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
+        Route::post('/admin/personal-account/{personal}/balance/{balance}/add-money', [PersonalAccountController::class, 'addMoney'])->name('admin.personal.balance.add');
+        Route::post('/admin/personal-account/{personal}/balance/{balance}/remove-money', [PersonalAccountController::class, 'removeMoney'])->name('admin.personal.balance.remove');
 
         Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
         Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
