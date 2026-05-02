@@ -293,10 +293,12 @@
 
 
 
+{{-- IMPORTANT: in your <option> change data-balance to amount --}}
+{{-- from: data-balance="{{ $balance->balance }}" --}}
+{{-- to:   data-balance="{{ $balance->amount }}" --}}
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  console.log('[init] DOMContentLoaded');
-
   const currencySelect = document.getElementById("currency");
   const amountInput = document.getElementById("sendAmount");
   const flagImg = document.getElementById("currencyFlag");
@@ -321,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   function getRecipientCurrency() {
-    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
     return selectedBeneficiary?.dataset.currency || null;
   }
 
@@ -330,23 +332,19 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
-    const url = `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`;
-    console.log('[fetch] GET', url);
+    const url = `/dashboard/exchange-rate?from_currency=${encodeURIComponent(fromCurrency)}&to_currency=${encodeURIComponent(toCurrency)}&amount=${encodeURIComponent(amount)}`;
 
     try {
-      const response = await fetch(url);
-      console.log('[fetch] status:', response.status);
-
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
       const contentType = response.headers.get("content-type") || "";
+
       if (!response.ok || !contentType.includes("application/json")) {
         throw new Error("Invalid response");
       }
 
-      const json = await response.json();
-      console.log('[fetch] json:', json);
-      return json;
+      return await response.json();
     } catch (err) {
-      console.error('[fetch] error:', err);
+      console.error("Rate fetch error:", err);
       return null;
     }
   }
@@ -355,8 +353,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedOption = currencySelect?.selectedOptions[0];
     if (!selectedOption) return;
 
-    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
-    if (!selectedBeneficiary) {
+    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
+    const fromCurrency = selectedOption.value;
+    const symbol = selectedOption.dataset.symbol || "₦";
+    const country = selectedOption.dataset.country || "us";
+    const amount = parseFloat((amountInput?.value || "0").replace(/,/g, ""));
+    const recipientCurrency = getRecipientCurrency();
+
+    flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+    symbolSpan.textContent = symbol;
+    sendCurrencySymbol.textContent = symbol;
+
+    if (!selectedBeneficiary || !recipientCurrency) {
       exchangeRateText.textContent = "--";
       transferFeeText.textContent = "--";
       recipientAmountText.textContent = "0.00";
@@ -364,40 +372,26 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const fromCurrency = selectedOption.value;
-    const symbol = selectedOption.dataset.symbol || "₦";
-    const country = selectedOption.dataset.country || "us";
-    const amount = parseFloat(amountInput.value || 0);
-    const recipientCurrency = getRecipientCurrency();
-
-    const recipientCountry = selectedBeneficiary?.dataset.country || 'us';
-    if (recipientFlag) {
-      recipientFlag.src = `https://flagcdn.com/24x18/${recipientCountry.toLowerCase()}.png`;
-    }
-
+    const recipientCountry = selectedBeneficiary.dataset.country || "us";
+    recipientFlag.src = `https://flagcdn.com/24x18/${recipientCountry.toLowerCase()}.png`;
     recipientGetsText.textContent = recipientCurrency;
     recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
 
-    document.getElementById('rateLoader')?.classList.remove('hidden');
-
-    flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-    symbolSpan.textContent = symbol;
-    sendCurrencySymbol.textContent = symbol;
+    document.getElementById("rateLoader")?.classList.remove("hidden");
 
     if (!amount || amount <= 0) {
       recipientAmountText.textContent = "0.00";
       exchangeRateText.textContent = "Rate unavailable";
       transferFeeText.textContent = `${symbol}0.00`;
-      document.getElementById('rateLoader')?.classList.add('hidden');
+      document.getElementById("rateLoader")?.classList.add("hidden");
       return;
     }
 
     if (fromCurrency === recipientCurrency) {
-      const sameAmount = amount.toFixed(2);
-      exchangeRateText.textContent = `${sameAmount} ${fromCurrency} = ${sameAmount} ${recipientCurrency}`;
+      exchangeRateText.textContent = `1.00 ${fromCurrency} = 1.00 ${recipientCurrency}`;
       recipientAmountText.textContent = amount.toFixed(2);
       transferFeeText.textContent = `${symbol}0.00`;
-      document.getElementById('rateLoader')?.classList.add('hidden');
+      document.getElementById("rateLoader")?.classList.add("hidden");
       return;
     }
 
@@ -416,23 +410,20 @@ document.addEventListener("DOMContentLoaded", function () {
       recipientAmountText.textContent = "0.00";
     }
 
-    document.getElementById('rateLoader')?.classList.add('hidden');
+    document.getElementById("rateLoader")?.classList.add("hidden");
   }
 
-  walletToggle?.addEventListener('change', () => {
+  walletToggle?.addEventListener("change", () => {
     const isOn = walletToggle.checked;
     currencySelect.disabled = isOn;
 
-    if (isOn) {
-      currencySelect.classList.add('opacity-50', 'cursor-not-allowed');
-    } else {
-      currencySelect.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
+    if (isOn) currencySelect.classList.add("opacity-50", "cursor-not-allowed");
+    else currencySelect.classList.remove("opacity-50", "cursor-not-allowed");
   });
 
   window.openModalFromElement = function (el) {
-    document.querySelectorAll('.selected-beneficiary').forEach(x => x.classList.remove('selected-beneficiary'));
-    el.classList.add('selected-beneficiary');
+    document.querySelectorAll(".selected-beneficiary").forEach(x => x.classList.remove("selected-beneficiary"));
+    el.classList.add("selected-beneficiary");
 
     const name = el.dataset.accountName || "N/A";
     const account = el.dataset.accountNumber || "";
@@ -450,9 +441,9 @@ document.addEventListener("DOMContentLoaded", function () {
     modal.querySelector("#beneficiaryBank").textContent = bank;
 
     recipientFlag.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-    document.getElementById("recipientGets").textContent = currency;
+    recipientGetsText.textContent = currency;
 
-    document.getElementById("sendAmount").value = parseFloat(el.dataset.amount || 100);
+    amountInput.value = "100.00";
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
@@ -473,57 +464,73 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  document.getElementById('sendBtn')?.addEventListener('click', () => {
+  document.getElementById("sendBtn")?.addEventListener("click", () => {
     const isWallet = walletToggle?.checked;
     if (isWallet) {
-      window.location.href = '/wallet-transfer';
+      window.location.href = "/wallet-transfer";
       return;
     }
 
-    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
+    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
     if (!selectedBeneficiary) {
-      alert('Please select a beneficiary first.');
+      Swal.fire({ icon: "error", title: "Select beneficiary first" });
       return;
     }
 
-    const name = document.getElementById('beneficiaryName').textContent || "N/A";
-    const account = document.getElementById('beneficiaryAccount').textContent || "N/A";
-    const bank = document.getElementById('beneficiaryBank').textContent || "N/A";
+    const rate = (exchangeRateText.textContent || "").trim();
+    const receiveRaw = (recipientAmountText.textContent || "0").replace(/,/g, "");
+    const receiveAmount = parseFloat(receiveRaw || "0");
+    const amount = parseFloat((amountInput.value || "0").replace(/,/g, ""));
+
+    if (!amount || amount <= 0) {
+      Swal.fire({ icon: "error", title: "Enter valid amount" });
+      return;
+    }
+
+    if (!rate || rate.toLowerCase().includes("unavailable") || !receiveAmount || receiveAmount <= 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Exchange rate not available",
+        text: "Please wait for a valid rate before sending."
+      });
+      return;
+    }
+
+    const name = document.getElementById("beneficiaryName").textContent || "N/A";
+    const account = document.getElementById("beneficiaryAccount").textContent || "N/A";
+    const bank = document.getElementById("beneficiaryBank").textContent || "N/A";
     const sortCode = selectedBeneficiary.dataset.sortcode || "";
     const transfermethod = selectedBeneficiary.dataset.transfermethod || "";
-    const amount = parseFloat(document.getElementById('sendAmount').value || 0);
-    const fee = parseFloat(document.getElementById('transferFeeText').textContent.replace(/[^\d.]/g, '') || 0);
+    const fee = parseFloat((transferFeeText.textContent || "0").replace(/[^\d.]/g, "")) || 0;
     const total = amount + fee;
-    const rate = document.getElementById('exchangeRateText').textContent || '';
-    const receive = document.getElementById('recipientAmount').textContent || '0.00';
-    const currency = document.getElementById('recipientGets').textContent || 'USD';
-    const recipientId = selectedBeneficiary.dataset.id || '';
-    const symbol = document.getElementById('sendCurrencySymbol').textContent || '₦';
-    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || '';
+    const currency = recipientGetsText.textContent || "USD";
+    const recipientId = selectedBeneficiary.dataset.id || "";
+    const symbol = sendCurrencySymbol.textContent || "₦";
+    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || "";
 
-    document.getElementById('summaryName').textContent = name;
-    document.getElementById('summaryAccount').textContent = account;
-    document.getElementById('summaryBank').textContent = bank;
-    document.getElementById('summaryAmountSent').textContent = `${symbol}${amount.toFixed(2)}`;
-    document.getElementById('summaryFee').textContent = `${symbol}${fee.toFixed(2)}`;
-    document.getElementById('summaryTotal').textContent = `${symbol}${total.toFixed(2)}`;
-    document.getElementById('summaryRate').textContent = rate;
-    document.getElementById('summaryReceive').textContent = `${currency} ${receive}`;
+    document.getElementById("summaryName").textContent = name;
+    document.getElementById("summaryAccount").textContent = account;
+    document.getElementById("summaryBank").textContent = bank;
+    document.getElementById("summaryAmountSent").textContent = `${symbol}${amount.toFixed(2)}`;
+    document.getElementById("summaryFee").textContent = `${symbol}${fee.toFixed(2)}`;
+    document.getElementById("summaryTotal").textContent = `${symbol}${total.toFixed(2)}`;
+    document.getElementById("summaryRate").textContent = rate;
+    document.getElementById("summaryReceive").textContent = `${currency} ${receiveAmount.toFixed(2)}`;
 
-    document.getElementById('recipientIdInput').value = recipientId;
-    document.getElementById('amountInput').value = amount.toFixed(2);
-    document.getElementById('transferFeeInput').value = fee.toFixed(2);
-    document.getElementById('totalAmountInput').value = total.toFixed(2);
-    document.getElementById('exchangeRateInput').value = rate;
-    document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
-    document.getElementById('accountNumberInput').value = account;
-    document.getElementById('accountNameInput').value = name;
-    document.getElementById('balanceIdInput').value = balanceId;
-    document.getElementById('bankInput').value = bank;
-    document.getElementById('sort_codeInput').value = sortCode;
-    document.getElementById('transfermethodInput').value = transfermethod;
+    document.getElementById("recipientIdInput").value = recipientId;
+    document.getElementById("amountInput").value = amount.toFixed(2);
+    document.getElementById("transferFeeInput").value = fee.toFixed(2);
+    document.getElementById("totalAmountInput").value = total.toFixed(2);
+    document.getElementById("exchangeRateInput").value = rate;
+    document.getElementById("recipientAmountInput").value = receiveAmount.toFixed(2);
+    document.getElementById("accountNumberInput").value = account;
+    document.getElementById("accountNameInput").value = name;
+    document.getElementById("balanceIdInput").value = balanceId;
+    document.getElementById("bankInput").value = bank;
+    document.getElementById("sort_codeInput").value = sortCode;
+    document.getElementById("transfermethodInput").value = transfermethod;
 
-    document.getElementById('summaryModal').classList.remove('hidden');
+    document.getElementById("summaryModal").classList.remove("hidden");
   });
 
   document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {

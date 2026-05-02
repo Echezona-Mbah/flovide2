@@ -13,7 +13,7 @@ use App\Models\User;
 use App\Models\VirtualCards;
 use Illuminate\Http\Request;
 use App\Traits\CurrencyHelper;
-
+use Illuminate\Support\Facades\DB;
 
 class BusinessAccountController extends Controller
 {
@@ -164,6 +164,57 @@ public function find($id)
                    ($status === 'rejected' ? 'bg-danger' : 'bg-secondary'))
     ]);
 }
+
+
+
+ public function addMoney(Request $request, $userId, $balanceId)
+    {
+        return $this->updateBalanceAmount($request, $userId, $balanceId, 'add');
+    }
+
+    public function removeMoney(Request $request, $userId, $balanceId)
+    {
+        return $this->updateBalanceAmount($request, $userId, $balanceId, 'remove');
+    }
+
+    private function updateBalanceAmount(Request $request, $userId, $balanceId, string $mode)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::findOrFail($userId);
+
+        $balance = Balance::where('id', $balanceId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $amount = (float) $request->amount;
+
+        DB::beginTransaction();
+        try {
+            if ($mode === 'remove') {
+                if ((float) $balance->amount < $amount) {
+                    return back()->withErrors(['error' => 'Insufficient balance for deduction.']);
+                }
+                $balance->amount = (float) $balance->amount - $amount;
+            } else {
+                $balance->amount = (float) $balance->amount + $amount;
+            }
+
+            $balance->save();
+
+            DB::commit();
+
+            $action = $mode === 'remove' ? 'removed from' : 'added to';
+            return back()->with('success', number_format($amount, 2) . " {$balance->currency} {$action} {$balance->name} successfully.");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Balance update failed: ' . $e->getMessage()]);
+        }
+    }
+
 
 
 

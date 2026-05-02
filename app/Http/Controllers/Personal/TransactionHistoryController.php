@@ -78,4 +78,31 @@ class TransactionHistoryController extends Controller
 }
 
 
+public function showAllTransactions(Request $request)
+{
+    $personal = auth('personal-api')->user();
+
+    if (! $personal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+            'code' => 'UNAUTHORIZED',
+            'data' => null
+        ], 401);
+    }
+
+    $transactions = TransactionHistory::where('personal_id', $personal->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Personal transactions retrieved successfully.',
+        'code' => 'PERSONAL_TRANSACTIONS_FETCHED',
+        'data' => $transactions
+    ], 200);
+}
+
+
+
 }

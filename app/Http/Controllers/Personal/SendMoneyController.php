@@ -364,7 +364,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
             'success' => true,
             'message' => 'flovide transaction successful',
             'code' => 'FLOVIDE_SUCCESS',
-            'data' => $payment
+            'data' => $this->txData($txId)
         ], 200);
     }
 
@@ -372,7 +372,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         'success' => false,
         'message' => $payment['statusDescription'] ?? 'flovide payment failed',
         'code' => 'FLOVIDE_FAILED',
-        'data' => $payment
+        'data' =>  $this->txData($txId)
     ], 422);
 }
 
@@ -436,24 +436,6 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
         // $balance->save();
         $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
 
-
-        // TransactionHistory::create([
-        //     'amount' => $request->total_amount,
-        //     'currency' => $sendingCurrency,
-        //     'balance_id' => $balance->id,
-        //     'order_id' => $transactionReference,
-        //     'sender_id' => $personal->id,
-        //     'sender' => $personal->name,
-        //     'recipient_account_number' => $request->account_number,
-        //     'recipient_account_name' => $request->account_name,
-        //     'recipient_country' => strtoupper(substr($currency,0,2)),
-        //     'status' => 'pending', 
-        //     'method' => 'withdrawal',
-        //     'payment_provider' => 'payaza',
-        //     'reference' => 'ref-' . Str::uuid(),
-        //     'personal_id' => $personal->id,
-        // ]);
-
          TransactionHistory::where('id', $txId)->update([
             'status' => 'pending',
             'payment_provider' => 'payaza',
@@ -464,7 +446,7 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
             'success' => true,
             'message' => 'flovide transaction successful',
             'code' => 'FLOVIDE_SUCCESS',
-            'data' => $response
+            'data' => $this->txData($txId)
         ], 200);
     }
 
@@ -472,7 +454,7 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
         'success' => false,
         'message' => $response['statusDescription'] ?? 'flovide transaction failed',
         'code' => 'FLOVIDE_FAILED',
-        'data' => $response
+        'data' =>  $this->txData($txId)
     ], 422);
 }
 
@@ -528,7 +510,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'success' => true,
             'message' => 'AppMobile transaction successful',
             'code' => 'APPMOBILE_SUCCESS',
-            'data' => $response
+            'data' =>  $this->txData($txId)
         ], 200);
     }
 
@@ -536,7 +518,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
         'success' => false,
         'message' => $response['message'] ?? 'AppMobile transaction failed',
         'code' => 'APPMOBILE_FAILED',
-        'data' => $response
+        'data' =>  $this->txData($txId)
     ], 422);
 }
 
@@ -562,6 +544,29 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
         ];
 
         Mail::to($user->email)->send(new TransactionSentMail($data));
+    }
+
+
+        private function txData(string $txId): array
+    {
+        $tx = TransactionHistory::findOrFail($txId);
+
+        return [
+            'id' => (string) $tx->id,
+            'reference' => $tx->reference,
+            'order_id' => $tx->order_id,
+            'status' => $tx->status,
+            'amount' => (float) $tx->amount,
+            'total_amount' => (float) $tx->total_amount,
+            'fees' => (float) ($tx->fees ?? 0),
+            'currency' => $tx->currency,
+            'to_currency' => $tx->to_currency,
+            'recipient_amount' => (float) ($tx->recipient_amount ?? 0),
+            'payment_provider' => 'Flovide',
+            'recipient_account_name' => $tx->recipient_account_name,
+            'recipient_account_number' => $tx->recipient_account_number,
+            'created_at' => optional($tx->created_at)->toIso8601String(),
+        ];
     }
 
 
