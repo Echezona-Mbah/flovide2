@@ -452,7 +452,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-
+        //Route::post('/admin/logout', [DashboardController::class, 'logout'])->name('admin.logout');
+        //Route::post('/admin/logout', [DashboardController::class, 'logout'])->name('admin.logout');
 
 
         Route::post('/admin/logout', [DashboardController::class, 'logout'])->name('admin.logout');
