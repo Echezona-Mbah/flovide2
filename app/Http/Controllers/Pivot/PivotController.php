@@ -204,8 +204,7 @@ public function accountValidation(Request $request)
             "extraData" => $request->extraData ?? [],
         ];
 
-              logger('Pivot REQUEST', $payload);
-
+        logger('Pivot REQUEST', $payload);
         $response = $this->pivot->postCardPayment($token, $payload);
         logger('Pivot RESPONSE', $response);
 

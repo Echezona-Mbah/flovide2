@@ -3,63 +3,65 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
-use App\Traits\CurrencyHelper;
-use App\Traits\SelectsBalanceId;
+use App\Models\ExchangeRate;
 use Illuminate\Http\Request;
 
 class RateController extends Controller
 {
-        use CurrencyHelper;
-    use SelectsBalanceId;
-    /**
-     * Get exchange rates
-     */
     public function getExchangeRates(Request $request)
     {
-        $from = $request->input('from_currency');
-        $to = $request->input('to_currency');
-        $amount = $request->input('amount', 1);
+        $request->validate([
+            'from_currency' => 'required|string|size:3',
+            'to_currency' => 'required|string|size:3',
+            'amount' => 'nullable|numeric|min:0',
+            'to_amount' => 'nullable|numeric|min:0',
+        ]);
 
-        $result = $this->getExchangeRateFromMap($from, $to);
+        $from = strtoupper($request->input('from_currency'));
+        $to = strtoupper($request->input('to_currency'));
+        $amount = (float) $request->input('amount', 1);
+        $toAmountInput = $request->input('to_amount');
 
-        if (! $result) {
+        $rateRow = ExchangeRate::whereHas('fromCurrency', fn ($q) => $q->where('code', $from))
+            ->whereHas('toCurrency', fn ($q) => $q->where('code', $to))
+            ->first();
+
+        if (! $rateRow) {
             return response()->json([
-                'data' => [
-                    'errors' => 'Invalid currency'
-                ]
-            ], 400);
+                'success' => false,
+                'message' => 'Rate not found.',
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null,
+            ], 404);
         }
 
-        $rate = $result['rate'];
-        $transfer_fee = $result['transfer_fee'];
-
-        $formatted = sprintf(
-            "%s %.2f = %s %s",
-            strtoupper($from),
-            (float) $amount,
-            strtoupper($to),
-            $rate
-        );
+        $rateValue = (float) $rateRow->rate;
+        $recipientAmount = $toAmountInput !== null
+            ? (float) $toAmountInput
+            : round($amount * $rateValue, 3);
 
         return response()->json([
-            'exchange_rate' => $formatted,
-            // 'transfer_fee' => $transfer_fee
-        ]);
+            'rate' => [
+                'from_currency' => [
+                    'currency_code' => $from,
+                    'amount' => 1,
+                ],
+                'to_currency' => [
+                    'currency_code' => $to,
+                    'amount' => number_format($rateValue, 3, '.', ''),
+                ],
+                'last_updated' => optional($rateRow->updated_at)->toIso8601String(),
+                'outside_market_hours' => false,
+            ],
+            'sender' => [
+                'currency_code' => $from,
+                'amount' => $amount,
+            ],
+            'recipient' => [
+                'currency_code' => $to,
+                'amount' => $recipientAmount,
+            ],
+            'reversed' => false,
+        ], 200);
     }
-
-    /**
-     * Example rate map (replace with your real logic)
-     */
-    // protected function getExchangeRateFromMap($from, $to)
-    // {
-    //     $rates = [
-    //         'USD_NGN' => ['rate' => '1500.00', 'transfer_fee' => 10],
-    //         'NGN_USD' => ['rate' => '0.00067', 'transfer_fee' => 10],
-    //         'GBP_NGN' => ['rate' => '1800.00', 'transfer_fee' => 15],
-    //     ];
-
-    //     $key = strtoupper($from).'_'.strtoupper($to);
-
-    //     return $rates[$key] ?? null;
-    // }
 }
