@@ -337,12 +337,12 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-    // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
-    // Route::post('/admin/register', [RegisterController::class, 'store']);
+        // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
+        // Route::post('/admin/register', [RegisterController::class, 'store']);
 
-    Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
-    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
-    // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
+        Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
+        Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
+        // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
 
     Route::middleware('admin.auth')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');

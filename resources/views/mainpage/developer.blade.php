@@ -586,80 +586,80 @@
                 </section>
 
                 <section id="errors" class="mb-20">
-  <h2 class="text-3xl font-bold text-slate-900 mb-6">Error Handling</h2>
-  <p class="text-slate-600 mb-6">
-    All errors return a consistent structure: <code>success</code>, <code>message</code>, <code>code</code>, and optional <code>errors</code>/<code>data</code>.
-  </p>
+                  <h2 class="text-3xl font-bold text-slate-900 mb-6">Error Handling</h2>
+                  <p class="text-slate-600 mb-6">
+                    All errors return a consistent structure: <code>success</code>, <code>message</code>, <code>code</code>, and optional <code>errors</code>/<code>data</code>.
+                  </p>
 
-  <div class="mb-6 bg-slate-900 rounded-xl overflow-hidden">
-    <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Error Response Example</div>
-    <div class="p-6 overflow-x-auto hide-scrollbar">
-      <pre class="text-slate-300 text-sm leading-6">{
-  "success": false,
-  "message": "Validation failed",
-  "code": "VALIDATION_ERROR",
-  "errors": {
-    "amount": ["The amount field is required."]
-  },
-  "data": null
-}</pre>
-    </div>
-  </div>
+                  <div class="mb-6 bg-slate-900 rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Error Response Example</div>
+                    <div class="p-6 overflow-x-auto hide-scrollbar">
+                      <pre class="text-slate-300 text-sm leading-6">{
+                  "success": false,
+                  "message": "Validation failed",
+                  "code": "VALIDATION_ERROR",
+                  "errors": {
+                    "amount": ["The amount field is required."]
+                  },
+                  "data": null
+                }</pre>
+                    </div>
+                  </div>
 
-  <div class="overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">HTTP Status</th>
-          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Error Code</th>
-          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Meaning</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-200">
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">400</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">BAD_REQUEST</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Malformed or invalid request payload.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">401</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">UNAUTHORIZED</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Missing or invalid authentication credentials/API keys.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">403</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">FORBIDDEN</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Authenticated but not allowed to perform this action.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">404</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">NOT_FOUND</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Requested resource was not found.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">VALIDATION_ERROR</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Validation failed for one or more request fields.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">INSUFFICIENT_FUNDS</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Wallet balance is not enough to complete the transaction.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">SERVER_ERROR</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Unexpected internal server error occurred.</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
-          <td class="px-6 py-4 font-mono text-sm text-slate-800">TXN_FAILED</td>
-          <td class="px-6 py-4 text-sm text-slate-600">Transaction processing failed on the server/provider side.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+                  <div class="overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <table class="min-w-full divide-y divide-slate-200">
+                      <thead class="bg-slate-50">
+                        <tr>
+                          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">HTTP Status</th>
+                          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Error Code</th>
+                          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Meaning</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-200">
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">400</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">BAD_REQUEST</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Malformed or invalid request payload.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">401</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">UNAUTHORIZED</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Missing or invalid authentication credentials/API keys.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">403</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">FORBIDDEN</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Authenticated but not allowed to perform this action.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">404</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">NOT_FOUND</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Requested resource was not found.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">VALIDATION_ERROR</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Validation failed for one or more request fields.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">INSUFFICIENT_FUNDS</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Wallet balance is not enough to complete the transaction.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">SERVER_ERROR</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Unexpected internal server error occurred.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">TXN_FAILED</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">Transaction processing failed on the server/provider side.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
 
 
                 <section id="sdks" class="mb-20">

@@ -303,6 +303,8 @@
         
         <div class="app-main MainAnimation-appear">
             @include('admin.sidebar')
+<<<<<<< HEAD
+=======
             @if ($errors->any())
 <script>
   Swal.fire({
@@ -331,6 +333,7 @@
 </script>
 @endif
 
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162
             
             <div class="app-main__outer">
                 <div class="app-main__inner">
@@ -456,6 +459,8 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="action-wrap">
+<<<<<<< HEAD
+=======
                                                         @if($item->status === 'pending')
                                                         <form method="POST" action="{{ route('transactionhistory.process', $item->id) }}" class="process-form" style="display:inline;">
                                                             @csrf
@@ -472,6 +477,7 @@
                                                         @endif
 
 
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162
                                                         <button type="button" class="btn btn-view view-transaction-btn"
                                                             data-bs-toggle="modal" data-bs-target="#transactionModal"
                                                             data-sender="{{ $item->sender }}"
@@ -715,6 +721,8 @@ document.addEventListener('DOMContentLoaded', function () {
     updateVisibleCount();
 });
 </script>
+<<<<<<< HEAD
+=======
 
 <script>
 document.querySelectorAll('.process-form').forEach(form => {
@@ -752,3 +760,4 @@ document.querySelectorAll('.refund-form').forEach(form => {
 });
 </script>
 
+>>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162

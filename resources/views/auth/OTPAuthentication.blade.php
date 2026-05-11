@@ -64,7 +64,7 @@
                     <!-- Links -->
                     <div class="flex justify-between text-sm mb-8">
                         <button type="button" id="resendOtp" class="text-blue-600 hover:underline">
-                            Resend OTP (<span id="countdown">60</span>s)
+                            Resend OTP (<span id="countdown">05:00</span>s)
                         </button>
                         <!-- <a href="#" class="text-blue-600 hover:underline">
                             Use backup code
@@ -117,22 +117,37 @@
             hiddenInput.value = otp;
         }
 
-        // ===== RESEND OTP FUNCTIONALITY =====
+        //RESEND OTP FUNCTIONALITY
         const resendBtn = document.getElementById('resendOtp');
         const countdownSpan = document.getElementById('countdown');
-        let countdown = 60;
+
+        let countdown = 300;
         let timer;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
 
         function startCountdown() {
             resendBtn.disabled = true;
+
+            countdownSpan.textContent = formatTime(countdown);
+
             timer = setInterval(() => {
                 countdown--;
-                countdownSpan.textContent = countdown;
+
+                countdownSpan.textContent = formatTime(countdown);
+
                 if (countdown <= 0) {
                     clearInterval(timer);
-                    countdown = 60;
-                    countdownSpan.textContent = countdown;
+
                     resendBtn.disabled = false;
+
+                    countdown = 300;
+                    countdownSpan.textContent = formatTime(countdown);
                 }
             }, 1000);
         }
