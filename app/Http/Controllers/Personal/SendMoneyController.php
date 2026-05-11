@@ -230,6 +230,33 @@ public function sendTransaction(Request $request)
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
     $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
 
+
+     // Currency limits (configured from admin on currencies table)
+    $limit = \App\Models\Currency::where('code', $sendingCurrency)
+        ->where('is_active', true)
+        ->first();
+
+    if ($limit) {
+        if (!is_null($limit->min_amount) && $request->amount < $limit->min_amount) {
+            return response()->json([
+                'success' => false,
+                'message' => "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}",
+                'code' => 'AMOUNT_BELOW_MINIMUM',
+                'data' => null
+            ], 422);
+        }
+
+        if (!is_null($limit->max_amount) && $request->amount > $limit->max_amount) {
+            return response()->json([
+                'success' => false,
+                'message' => "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}",
+                'code' => 'AMOUNT_ABOVE_MAXIMUM',
+                'data' => null
+            ], 422);
+        }
+    }
+
+
     $balance = Balance::find($request->balance_id);
     if (!$balance) {
         return response()->json(['success'=>false,'message'=>'Invalid balance','code'=>'INVALID_BALANCE','data'=>null],422);
