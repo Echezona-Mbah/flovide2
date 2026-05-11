@@ -78,6 +78,7 @@
             <a href="#beneficiaries" class="text-lg font-semibold text-black">Beneficiaries</a>
             <a href="#transactions" class="text-lg font-semibold text-black">Transactions</a>
             <a href="#rates" class="text-lg font-semibold text-black">Rates</a>
+            <a href="#reference-data" class="text-lg font-semibold text-black">Reference Data</a>
             <a href="#webhooks" class="text-lg font-semibold text-black">Webhooks</a>
             <a href="#sdks" class="text-lg font-semibold text-black">SDKs</a>
             <hr>
@@ -160,7 +161,7 @@
           </button>
         </div>
         <div class="p-6 overflow-x-auto hide-scrollbar">
-          <pre id="quick-start-code" class="text-[#f4a261] text-sm leading-6">curl -X GET "http://127.0.0.1:8000/api/v1/balances" ^
+          <pre id="quick-start-code" class="text-[#f4a261] text-sm leading-6">curl -X GET "https://flovide.com/api/v1/balances" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"</pre>
@@ -180,6 +181,8 @@
           <a href="#beneficiaries" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Beneficiaries</a>
           <a href="#transactions" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Transactions</a>
           <a href="#rates" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Rates</a>
+          <a href="#reference-data" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Reference Data</a>
+
 
           <a href="#webhooks" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Webhooks</a>
 
@@ -511,6 +514,57 @@
                 </section>
 
 
+                <!-- Reference Data Section -->
+                <section id="reference-data" class="mb-20">
+                  <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900">Reference Data API</h2>
+                    <span class="px-2 py-1 bg-slate-200 text-slate-600 rounded text-[10px] font-bold uppercase tracking-wider">Reference</span>
+                  </div>
+
+                  <div class="space-y-8">
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                      <div class="p-6 md:p-8">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                          <span class="px-3 py-1 bg-sky-100 text-sky-700 rounded-md font-bold text-xs">GET</span>
+                          <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/reference-data/currencies</code>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Currencies only</h3>
+                        <p class="text-slate-600 mb-6">Returns all supported currencies.</p>
+                        <div class="api-block" data-group="reference-data-currencies"></div>
+                      </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                      <div class="p-6 md:p-8">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                          <span class="px-3 py-1 bg-sky-100 text-sky-700 rounded-md font-bold text-xs">GET</span>
+                          <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/reference-data/banks</code>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Banks only</h3>
+                        <p class="text-slate-600 mb-6">Returns banks, optionally filtered by <code>country_iso</code> and <code>currency</code>.</p>
+
+                        <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
+                          <summary class="cursor-pointer font-semibold text-slate-800">Query Params</summary>
+                          <div class="mt-4 space-y-3">
+                            <div class="flex justify-between">
+                              <div><span class="font-mono text-sm font-semibold">country_iso</span></div>
+                              <span class="text-xs text-slate-400 font-semibold uppercase">Optional</span>
+                            </div>
+                            <div class="flex justify-between">
+                              <div><span class="font-mono text-sm font-semibold">currency</span></div>
+                              <span class="text-xs text-slate-400 font-semibold uppercase">Optional</span>
+                            </div>
+                          </div>
+                        </details>
+
+                        <div class="api-block" data-group="reference-data-banks"></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+
+
 
 
 
@@ -532,24 +586,81 @@
                 </section>
 
                 <section id="errors" class="mb-20">
-                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Error Handling</h2>
-                    <div class="overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Code</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Meaning</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200">
-                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">400 - Bad Request</td><td class="px-6 py-4 text-sm text-slate-600">The request was unacceptable, often due to missing parameters.</td></tr>
-                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">401 - Unauthorized</td><td class="px-6 py-4 text-sm text-slate-600">No valid API key provided.</td></tr>
-                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">404 - Not Found</td><td class="px-6 py-4 text-sm text-slate-600">The requested resource doesn't exist.</td></tr>
-                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">500 - Server Error</td><td class="px-6 py-4 text-sm text-slate-600">Something went wrong on our end.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+  <h2 class="text-3xl font-bold text-slate-900 mb-6">Error Handling</h2>
+  <p class="text-slate-600 mb-6">
+    All errors return a consistent structure: <code>success</code>, <code>message</code>, <code>code</code>, and optional <code>errors</code>/<code>data</code>.
+  </p>
+
+  <div class="mb-6 bg-slate-900 rounded-xl overflow-hidden">
+    <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Error Response Example</div>
+    <div class="p-6 overflow-x-auto hide-scrollbar">
+      <pre class="text-slate-300 text-sm leading-6">{
+  "success": false,
+  "message": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "errors": {
+    "amount": ["The amount field is required."]
+  },
+  "data": null
+}</pre>
+    </div>
+  </div>
+
+  <div class="overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">HTTP Status</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Error Code</th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Meaning</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200">
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">400</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">BAD_REQUEST</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Malformed or invalid request payload.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">401</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">UNAUTHORIZED</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Missing or invalid authentication credentials/API keys.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">403</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">FORBIDDEN</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Authenticated but not allowed to perform this action.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">404</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">NOT_FOUND</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Requested resource was not found.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">VALIDATION_ERROR</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Validation failed for one or more request fields.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">INSUFFICIENT_FUNDS</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Wallet balance is not enough to complete the transaction.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">SERVER_ERROR</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Unexpected internal server error occurred.</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
+          <td class="px-6 py-4 font-mono text-sm text-slate-800">TXN_FAILED</td>
+          <td class="px-6 py-4 text-sm text-slate-600">Transaction processing failed on the server/provider side.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 
                 <section id="sdks" class="mb-20">
                     <h2 class="text-3xl font-bold text-slate-900 mb-8">Official SDKs</h2>
@@ -570,11 +681,11 @@
     <script>
         const codeExamples = {
             'balances-get': {
-                curl: `curl -X GET "http://127.0.0.1:8000/api/v1/balances" ^
+                curl: `curl -X GET "https://flovide.com/api/v1/balances" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/balances', {
+                javascript: `fetch('https://flovide.com/api/v1/balances', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -593,7 +704,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/balances", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -608,7 +719,7 @@ func main() {
                 python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/balances",
+    "https://flovide.com/api/v1/balances",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -618,7 +729,7 @@ response = requests.get(
 
 print(response.json())`,
                 java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/balances"))
+    .uri(URI.create("https://flovide.com/api/v1/balances"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -635,7 +746,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/balances");
+var response = await client.GetAsync("https://flovide.com/api/v1/balances");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -650,11 +761,11 @@ Console.WriteLine(body);`,
 ]`
             },
             'balances-single': {
-                curl: `curl -X GET "http://127.0.0.1:8000/api/v1/balances/70" ^
+                curl: `curl -X GET "https://flovide.com/api/v1/balances/70" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/balances/70', {
+                javascript: `fetch('https://flovide.com/api/v1/balances/70', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -673,7 +784,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/balances/70", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances/70", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -688,7 +799,7 @@ func main() {
                 python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/balances/70",
+    "https://flovide.com/api/v1/balances/70",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -698,7 +809,7 @@ response = requests.get(
 
 print(response.json())`,
                 java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/balances/70"))
+    .uri(URI.create("https://flovide.com/api/v1/balances/70"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -715,7 +826,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/balances/70");
+var response = await client.GetAsync("https://flovide.com/api/v1/balances/70");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -728,12 +839,12 @@ Console.WriteLine(body);`,
 }`
             },
             'balances-post': {
-                curl: `curl -X POST "http://127.0.0.1:8000/api/v1/balances" ^
+                curl: `curl -X POST "https://flovide.com/api/v1/balances" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/balances', {
+                javascript: `fetch('https://flovide.com/api/v1/balances', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -765,7 +876,7 @@ func main() {
     "amount":0
   }\`)
 
-  req, _ := http.NewRequest("POST", "http://127.0.0.1:8000/api/v1/balances", bytes.NewBuffer(jsonData))
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/balances", bytes.NewBuffer(jsonData))
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -781,7 +892,7 @@ func main() {
                 python: `import requests
 
 response = requests.post(
-    "http://127.0.0.1:8000/api/v1/balances",
+    "https://flovide.com/api/v1/balances",
     headers={
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -805,7 +916,7 @@ print(response.json())`,
 """;
 
 HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/balances"))
+    .uri(URI.create("https://flovide.com/api/v1/balances"))
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -834,7 +945,7 @@ var json = """
 """;
 
 var content = new StringContent(json, Encoding.UTF8, "application/json");
-var response = await client.PostAsync("http://127.0.0.1:8000/api/v1/balances", content);
+var response = await client.PostAsync("https://flovide.com/api/v1/balances", content);
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -848,12 +959,12 @@ Console.WriteLine(body);`,
             },
 
             'beneficiary-inquiry': {
-                curl: `curl -X POST "http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry" ^
+                curl: `curl -X POST "https://flovide.com/api/v1/beneficiaries/account-inquiry" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry', {
+                javascript: `fetch('https://flovide.com/api/v1/beneficiaries/account-inquiry', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -885,7 +996,7 @@ func main() {
     "account_number":"6322069407"
   }\`)
 
-  req, _ := http.NewRequest("POST", "http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry", bytes.NewBuffer(jsonData))
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries/account-inquiry", bytes.NewBuffer(jsonData))
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -901,7 +1012,7 @@ func main() {
                 python: `import requests
 
 response = requests.post(
-    "http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry",
+    "https://flovide.com/api/v1/beneficiaries/account-inquiry",
     headers={
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -925,7 +1036,7 @@ print(response.json())`,
 """;
 
 HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/account-inquiry"))
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -954,7 +1065,7 @@ var json = """
 """;
 
 var content = new StringContent(json, Encoding.UTF8, "application/json");
-var response = await client.PostAsync("http://127.0.0.1:8000/api/v1/beneficiaries/account-inquiry", content);
+var response = await client.PostAsync("https://flovide.com/api/v1/beneficiaries/account-inquiry", content);
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -978,12 +1089,12 @@ Console.WriteLine(body);`,
 }`
             },
             'beneficiary-create': {
-                curl: `curl -X POST "http://127.0.0.1:8000/api/v1/beneficiaries" ^
+                curl: `curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/beneficiaries', {
+                javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -1031,7 +1142,7 @@ func main() {
     }
   }\`)
 
-  req, _ := http.NewRequest("POST", "http://127.0.0.1:8000/api/v1/beneficiaries", bytes.NewBuffer(jsonData))
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries", bytes.NewBuffer(jsonData))
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -1047,7 +1158,7 @@ func main() {
                 python: `import requests
 
 response = requests.post(
-    "http://127.0.0.1:8000/api/v1/beneficiaries",
+    "https://flovide.com/api/v1/beneficiaries",
     headers={
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -1087,7 +1198,7 @@ print(response.json())`,
 """;
 
 HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/beneficiaries"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -1124,7 +1235,7 @@ var json = """
 """;
 
 var content = new StringContent(json, Encoding.UTF8, "application/json");
-var response = await client.PostAsync("http://127.0.0.1:8000/api/v1/beneficiaries", content);
+var response = await client.PostAsync("https://flovide.com/api/v1/beneficiaries", content);
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1150,11 +1261,11 @@ Console.WriteLine(body);`,
             },
 
             'beneficiary-list': {
-                curl: `curl -X GET "http://127.0.0.1:8000/api/v1/beneficiaries" ^
+                curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('http://127.0.0.1:8000/api/v1/beneficiaries', {
+                javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -1173,7 +1284,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/beneficiaries", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1188,7 +1299,7 @@ func main() {
                 python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/beneficiaries",
+    "https://flovide.com/api/v1/beneficiaries",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1198,7 +1309,7 @@ response = requests.get(
 
 print(response.json())`,
                 java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/beneficiaries"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1215,7 +1326,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/beneficiaries");
+var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1234,11 +1345,11 @@ Console.WriteLine(body);`,
             },
 
             'beneficiary-single': {
-  curl: `curl -X GET "http://127.0.0.1:8000/api/v1/beneficiaries/114" ^
+  curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries/114" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/beneficiaries/114', {
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -1257,7 +1368,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/beneficiaries/114", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries/114", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1272,7 +1383,7 @@ func main() {
   python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/beneficiaries/114",
+    "https://flovide.com/api/v1/beneficiaries/114",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1282,7 +1393,7 @@ response = requests.get(
 
 print(response.json())`,
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/beneficiaries/114"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1299,7 +1410,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/beneficiaries/114");
+var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries/114");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1315,11 +1426,11 @@ Console.WriteLine(body);`,
 },
 
             'beneficiary-delete': {
-  curl: `curl -X DELETE "http://127.0.0.1:8000/api/v1/beneficiaries/114" ^
+  curl: `curl -X DELETE "https://flovide.com/api/v1/beneficiaries/114" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/beneficiaries/114', {
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
   method: 'DELETE',
   headers: {
     'Accept': 'application/json',
@@ -1338,7 +1449,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("DELETE", "http://127.0.0.1:8000/api/v1/beneficiaries/114", nil)
+  req, _ := http.NewRequest("DELETE", "https://flovide.com/api/v1/beneficiaries/114", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1353,7 +1464,7 @@ func main() {
   python: `import requests
 
 response = requests.delete(
-    "http://127.0.0.1:8000/api/v1/beneficiaries/114",
+    "https://flovide.com/api/v1/beneficiaries/114",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1363,7 +1474,7 @@ response = requests.delete(
 
 print(response.json())`,
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/beneficiaries/114"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1380,7 +1491,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.DeleteAsync("http://127.0.0.1:8000/api/v1/beneficiaries/114");
+var response = await client.DeleteAsync("https://flovide.com/api/v1/beneficiaries/114");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1391,11 +1502,11 @@ Console.WriteLine(body);`,
 },
 
 'transactions-list': {
-  curl: `curl -X GET "http://127.0.0.1:8000/api/v1/transactions" ^
+  curl: `curl -X GET "https://flovide.com/api/v1/transactions" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/transactions', {
+  javascript: `fetch('https://flovide.com/api/v1/transactions', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -1414,7 +1525,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/transactions", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/transactions", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1429,7 +1540,7 @@ func main() {
   python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/transactions",
+    "https://flovide.com/api/v1/transactions",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1439,7 +1550,7 @@ response = requests.get(
 
 print(response.json())`,
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/transactions"))
+    .uri(URI.create("https://flovide.com/api/v1/transactions"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1456,7 +1567,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/transactions");
+var response = await client.GetAsync("https://flovide.com/api/v1/transactions");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1468,11 +1579,11 @@ Console.WriteLine(body);`,
 },
 
 'transactions-single': {
-  curl: `curl -X GET "http://127.0.0.1:8000/api/v1/transactions/1" ^
+  curl: `curl -X GET "https://flovide.com/api/v1/transactions/1" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/transactions/1', {
+  javascript: `fetch('https://flovide.com/api/v1/transactions/1', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -1491,7 +1602,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "http://127.0.0.1:8000/api/v1/transactions/1", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/transactions/1", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1506,7 +1617,7 @@ func main() {
   python: `import requests
 
 response = requests.get(
-    "http://127.0.0.1:8000/api/v1/transactions/1",
+    "https://flovide.com/api/v1/transactions/1",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1516,7 +1627,7 @@ response = requests.get(
 
 print(response.json())`,
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/transactions/1"))
+    .uri(URI.create("https://flovide.com/api/v1/transactions/1"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
@@ -1533,7 +1644,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/transactions/1");
+var response = await client.GetAsync("https://flovide.com/api/v1/transactions/1");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1550,13 +1661,13 @@ Console.WriteLine(body);`,
 },
 
 'transactions-post': {
-  curl: `curl -X POST "http://127.0.0.1:8000/api/v1/transactions" ^
+  curl: `curl -X POST "https://flovide.com/api/v1/transactions" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
   -d "{\"amount\":1000,\"recipient_id\":\"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234\",\"balance_id\":1,\"reference\":\"Test payment\",\"transfer_fee\":0,\"total_amount\":1000,\"exchange_rate\":\"NGN to NGN\",\"recipient_amount\":1000,\"account_number\":\"1234567890\",\"account_name\":\"John Doe\",\"bank\":\"bank\",\"bank_code\":\"058\"}"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/transactions', {
+  javascript: `fetch('https://flovide.com/api/v1/transactions', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -1606,7 +1717,7 @@ func main() {
     "bank_code":"058"
   }\`)
 
-  req, _ := http.NewRequest("POST", "http://127.0.0.1:8000/api/v1/transactions", bytes.NewBuffer(jsonData))
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/transactions", bytes.NewBuffer(jsonData))
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -1622,7 +1733,7 @@ func main() {
   python: `import requests
 
 response = requests.post(
-    "http://127.0.0.1:8000/api/v1/transactions",
+    "https://flovide.com/api/v1/transactions",
     headers={
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -1664,7 +1775,7 @@ print(response.json())`,
 """;
 
 HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/transactions"))
+    .uri(URI.create("https://flovide.com/api/v1/transactions"))
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
@@ -1702,7 +1813,7 @@ var json = """
 """;
 
 var content = new StringContent(json, Encoding.UTF8, "application/json");
-var response = await client.PostAsync("http://127.0.0.1:8000/api/v1/transactions", content);
+var response = await client.PostAsync("https://flovide.com/api/v1/transactions", content);
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1711,11 +1822,24 @@ Console.WriteLine(body);`,
 }`
 },
 
+
 'rates-get': {
-  curl: `curl -X GET "http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100"`,
-  javascript: `fetch('http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100')
+  curl: `curl -X GET "https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112" ^
+  -H "Accept: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+
+  javascript: `fetch('https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+  }
+})
   .then(res => res.json())
   .then(data => console.log(data));`,
+
   go: `package main
 
 import (
@@ -1725,18 +1849,43 @@ import (
 )
 
 func main() {
-  resp, _ := http.Get("http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100")
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112", nil)
+  req.Header.Set("Accept", "application/json")
+  req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+
+  client := &http.Client{}
+  resp, _ := client.Do(req)
   defer resp.Body.Close()
 
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
 }`,
+
   python: `import requests
 
-response = requests.get("http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100")
+response = requests.get(
+    "https://flovide.com/api/v1/rates",
+    params={
+        "from_currency": "GBP",
+        "to_currency": "EUR",
+        "amount": 100,
+        "to_amount": 112
+    },
+    headers={
+        "Accept": "application/json",
+        "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+    },
+)
+
 print(response.json())`,
+
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100"))
+    .uri(URI.create("https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112"))
+    .header("Accept", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
     .GET()
     .build();
 
@@ -1744,15 +1893,245 @@ HttpResponse<String> response = HttpClient.newHttpClient()
     .send(request, HttpResponse.BodyHandlers.ofString());
 
 System.out.println(response.body());`,
+
   csharp: `using var client = new HttpClient();
-var response = await client.GetAsync("http://127.0.0.1:8000/api/v1/rates?from_currency=USD&to_currency=NGN&amount=100");
+
+client.DefaultRequestHeaders.Add("Accept", "application/json");
+client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+
+var response = await client.GetAsync("https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112");
 var body = await response.Content.ReadAsStringAsync();
 Console.WriteLine(body);`,
+
   response: `{
-  "exchange_rate": "USD 100.00 = NGN 1500.00"
- 
+  "rate": {
+    "from_currency": {
+      "currency_code": "GBP",
+      "amount": 1
+    },
+    "to_currency": {
+      "currency_code": "EUR",
+      "amount": "1.127"
+    },
+    "last_updated": "2026-05-05T10:30:00+00:00",
+    "outside_market_hours": false
+  },
+  "sender": {
+    "currency_code": "GBP",
+    "amount": 100
+  },
+  "recipient": {
+    "currency_code": "EUR",
+    "amount": 112
+  },
+  "reversed": false
 }`
-}
+},
+
+// Keep these two only in codeExamples.
+// Remove: 'reference-data-all': { ... },
+
+'reference-data-currencies': {
+  curl: `curl -X GET "https://flovide.com/api/v1/reference-data/currencies" ^
+  -H "Accept: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+
+  javascript: `fetch('https://flovide.com/api/v1/reference-data/currencies', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`,
+
+  go: `package main
+
+import (
+  "fmt"
+  "io"
+  "net/http"
+)
+
+func main() {
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/reference-data/currencies", nil)
+  req.Header.Set("Accept", "application/json")
+  req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+
+  client := &http.Client{}
+  resp, _ := client.Do(req)
+  defer resp.Body.Close()
+
+  body, _ := io.ReadAll(resp.Body)
+  fmt.Println(string(body))
+}`,
+
+  python: `import requests
+
+response = requests.get(
+    "https://flovide.com/api/v1/reference-data/currencies",
+    headers={
+        "Accept": "application/json",
+        "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+    },
+)
+
+print(response.json())`,
+
+  java: `HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://flovide.com/api/v1/reference-data/currencies"))
+    .header("Accept", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .GET()
+    .build();
+
+HttpResponse<String> response = HttpClient.newHttpClient()
+    .send(request, HttpResponse.BodyHandlers.ofString());
+
+System.out.println(response.body());`,
+
+  csharp: `using var client = new HttpClient();
+
+client.DefaultRequestHeaders.Add("Accept", "application/json");
+client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+
+var response = await client.GetAsync("https://flovide.com/api/v1/reference-data/currencies");
+var body = await response.Content.ReadAsStringAsync();
+
+Console.WriteLine(body);`,
+
+  response: `{
+  "success": true,
+  "message": "Currencies fetched successfully",
+  "code": "CURRENCIES_FETCHED",
+  "data": [
+    {
+      "code": "NGN",
+      "country_code": "NG",
+      "name": "Nigerian Naira"
+    },
+    {
+      "code": "GBP",
+      "country_code": "GB",
+      "name": "British Pound"
+    },
+    {
+      "code": "EGP",
+      "country_code": "EG",
+      "name": "Egyptian Pound"
+    },
+  ]
+}`
+},
+
+'reference-data-banks': {
+  curl: `curl -X GET "https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN" ^
+  -H "Accept: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+
+  javascript: `fetch('https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`,
+
+  go: `package main
+
+import (
+  "fmt"
+  "io"
+  "net/http"
+)
+
+func main() {
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN", nil)
+  req.Header.Set("Accept", "application/json")
+  req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+
+  client := &http.Client{}
+  resp, _ := client.Do(req)
+  defer resp.Body.Close()
+
+  body, _ := io.ReadAll(resp.Body)
+  fmt.Println(string(body))
+}`,
+
+  python: `import requests
+
+response = requests.get(
+    "https://flovide.com/api/v1/reference-data/banks",
+    params={
+        "country_iso": "NG",
+        "currency": "NGN",
+    },
+    headers={
+        "Accept": "application/json",
+        "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+    },
+)
+
+print(response.json())`,
+
+  java: `HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN"))
+    .header("Accept", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .GET()
+    .build();
+
+HttpResponse<String> response = HttpClient.newHttpClient()
+    .send(request, HttpResponse.BodyHandlers.ofString());
+
+System.out.println(response.body());`,
+
+  csharp: `using var client = new HttpClient();
+
+client.DefaultRequestHeaders.Add("Accept", "application/json");
+client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+
+var response = await client.GetAsync("https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN");
+var body = await response.Content.ReadAsStringAsync();
+
+Console.WriteLine(body);`,
+
+  response: `{
+  "success": true,
+  "message": "Banks fetched successfully",
+  "code": "BANKS_FETCHED",
+  "data": [
+    {
+      "name": "FIDELITY BANK",
+      "country_iso": "NG",
+      "currency": "NGN",
+      "bank_code": "000007",
+      "sort_code": null,
+      "type": "bank"
+    }
+  ]
+}`
+},
+
+
+
+
 
 
 
@@ -1808,6 +2187,7 @@ Console.WriteLine(body);`,
                 </div>
             `;
         }
+
 
         document.querySelectorAll('.api-block').forEach((el) => {
             el.innerHTML = buildApiBlock(el.dataset.group);
