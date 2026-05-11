@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountInquiryController;
 use App\Http\Controllers\API\V1\BalanceController;
 use App\Http\Controllers\API\V1\BeneficiaryController;
 use App\Http\Controllers\API\V1\RateController;
+use App\Http\Controllers\API\V1\ReferenceDataController;
 use App\Http\Controllers\API\V1\TransactionController;
 use App\Http\Controllers\API\V1\WebhookController;
 use App\Http\Controllers\Auth\ForgetPasswordController;
@@ -510,14 +511,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
         Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
         Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
-
-
         Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
 
 
 
         Route::get('/personal-transactions', [PersonalTransactionHistoryController::class, 'personalTransactions']);
         Route::get('/personal-transactions/{status}', [PersonalTransactionHistoryController::class, 'filterPersonalTransactions']);
+        Route::get('/personal-personalTransactions', [PersonalTransactionHistoryController::class, 'showAllTransactions']);
+
 
         Route::get('/personal-notifications', [NotificationController::class, 'index']);
         Route::get('/personal-notifications/unread', [NotificationController::class, 'unread']);
@@ -528,13 +529,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
-
-
-
-
-
-
-        // ...other personal routes
     });
 });
 
@@ -565,8 +559,11 @@ Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
     Route::get('/rates', [RateController::class, 'getExchangeRates']);
 
 
+    Route::get('/reference-data', [ReferenceDataController::class, 'index']);
+    Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
+    Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+
+
 });
 // git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
-
-
 
