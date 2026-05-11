@@ -133,9 +133,12 @@
 
                                      
                                     <section class="mt-4 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-5 ">
-                                        <button type="submit" class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]"
-                                           >
-                                            {{ __('Sign In') }}
+                                        <button type="submit" id="signInBtn" class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C] flex items-center justify-center gap-2 transition-all duration-200">
+                                            <span id="btnText">{{ __('Sign In') }}</span>
+                                            <span id="btnSpinner" class="hidden">
+                                                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                                {{ __('Processing...') }}
+                                            </span>
                                         </button>
 
                                         <div class="flex items-center">
@@ -204,6 +207,22 @@
             // Toggle icon
             eyeIcon.classList.toggle('fa-eye');
             eyeIcon.classList.toggle('fa-eye-slash');
+        });
+
+        // Sign In Loading State
+        const loginForm = document.querySelector('form');
+        const signInBtn = document.getElementById('signInBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        loginForm.addEventListener('submit', function () {
+            // Disable button
+            signInBtn.disabled = true;
+            signInBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            
+            // Toggle visibility
+            btnText.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
         });
     </script>
 

@@ -230,7 +230,6 @@ public function update(Request $request, $id, FirebaseNotificationService $fireb
         ->with('success', 'Exchange rate updated successfully.');
 }
 
-
     public function destroy($id)
 {
     $exchangeRate = ExchangeRate::findOrFail($id);

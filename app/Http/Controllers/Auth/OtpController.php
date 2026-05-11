@@ -80,10 +80,10 @@ class OtpController extends Controller
             }
 
             // Check if OTP is still valid to prevent abuse
-            if ($user->login_otp_expires_at && now()->lt($user->login_otp_expires_at->subSeconds(60))) {
+            if ($user->login_otp_expires_at && now()->lt($user->login_otp_expires_at->subSeconds(300))) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'You can resend OTP after 1 minute.'
+                    'message' => 'You can resend OTP after 5 minutes.'
                 ], 400);
             }
 
