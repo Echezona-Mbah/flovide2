@@ -6,7 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Currency extends Model
 {
-       protected $fillable = ['code', 'name','symbol','country_code'];
+    protected $fillable = [
+        'code',
+        'name',
+        'symbol',
+        'country_code',
+        'min_amount',
+        'max_amount',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'min_amount' => 'decimal:2',
+        'max_amount' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
 
     public function ratesFrom()
     {

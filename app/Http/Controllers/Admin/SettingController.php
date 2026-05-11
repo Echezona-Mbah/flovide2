@@ -15,31 +15,6 @@ class SettingController extends Controller
 {
 
 
-// public function index(Request $request)
-// {
-//     $search = $request->search;
-
-//     $currencies = Currency::query()
-//         ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")
-//             ->orWhere('code', 'like', "%{$search}%"))
-//         ->orderBy('name')
-//         ->get();
-
-//     $selectedCode = $request->get('currency', $currencies->first()?->code);
-
-//     $exchangeRates = ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
-//         ->when($selectedCode, function ($q) use ($selectedCode) {
-//             $q->whereHas('fromCurrency', fn($sub) => $sub->where('code', $selectedCode))
-//               ->orWhereHas('toCurrency', fn($sub) => $sub->where('code', $selectedCode));
-//         })
-//         ->get();
-
-//     return view('admin.exchangerate', [
-//     'currencies' => $currencies,
-//     'exchangerates' => $exchangeRates, // <- match view
-//     'selectedCode' => $selectedCode,
-// ]);
-// }
 
 
 

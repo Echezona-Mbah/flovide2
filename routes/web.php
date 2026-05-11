@@ -130,4 +130,39 @@ Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->
 
 });
 
+// Route::prefix('v1/interac')->group(function () {
+//     Route::post('/customer', [InteracController::class, 'createCustomer']);
+//     Route::get('/customer/{customerId}', [InteracController::class, 'getCustomer']);
+//     Route::put('/customer/{customerId}', [InteracController::class, 'updateCustomer']);
+//     Route::patch('/customer/{customerId}/enable', [InteracController::class, 'enableCustomer']);
+//     Route::patch('/customer/{customerId}/disable', [InteracController::class, 'disableCustomer']);
+
+//     Route::post('/customer/{customerId}/alias', [InteracController::class, 'createAlias']);
+//     Route::get('/customer/{customerId}/alias', [InteracController::class, 'listAliases']);
+//     Route::get('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'getAlias']);
+//     Route::delete('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'deleteAlias']);
+
+//     Route::post('/payment/options', [InteracController::class, 'retrievePaymentOptions']);
+//     Route::post('/payment', [InteracController::class, 'initiatePayment']);
+//     Route::put('/payment/{paymentRefId}', [InteracController::class, 'submitPayment']);
+//     Route::post('/payment/{paymentRefId}/reverse', [InteracController::class, 'reverseInitiatedPayment']);
+//     Route::post('/payment/{paymentRefId}/cancel', [InteracController::class, 'cancelPayment']);
+//     Route::get('/payment/{paymentRefId}', [InteracController::class, 'getPayment']);
+//     Route::get('/payment', [InteracController::class, 'listPayments']);
+
+//      Route::post('/request', [InteracController::class, 'createRequestPayment']);
+//     Route::get('/request/{requestId}', [InteracController::class, 'getRequestPayment']);
+//     Route::post('/request/{requestId}/cancel', [InteracController::class, 'cancelRequestPayment']);
+//     Route::post('/request/receive', [InteracController::class, 'retrieveIncomingRequestPayment']);
+//     Route::post('/v1/interac/request/receive/{networkRequestRefId}/decline', [InteracController::class, 'declineIncomingRequestPayment']);
+
+//       Route::post('{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
+//     Route::post('{account_num}/transaction', [InteracAccountController::class, 'transaction']);
+//     Route::post('{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
+
+//     Route::patch('/v1/interac/fraud/status', [InteracController::class, 'updateFraudStatus']);
+
+
+// });
+
 require __DIR__ . '/auth.php';

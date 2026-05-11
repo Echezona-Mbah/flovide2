@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AddAdminController;
+use App\Http\Controllers\Admin\AdminCurrencyLimitController;
 use App\Http\Controllers\Admin\AllAccountController;
 use App\Http\Controllers\Admin\AllBeneficiasController;
 use App\Http\Controllers\Admin\AllBillPaymentController;
@@ -443,6 +444,10 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/career-view/{id}',  [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
         Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
         Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+
+
+        Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+        Route::patch('/currency-limits/{currency}', [AdminCurrencyLimitController::class, 'update'])->name('admin.currency.limits.update');
 
 
 
