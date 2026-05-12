@@ -233,11 +233,11 @@
                                         <div class="dropdown-content" id="dropdownContent">
                                             @foreach ($countries as $country)
                                                 <div class="country-option flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100" 
-                                                    data-id="{{ $country->code }}" 
+                                                    data-id="{{ $country->country_code }}" 
                                                     data-name="{{ $country->name }}" 
-                                                    data-flag="{{ $country->flag ?? 'https://flagcdn.com/' . strtolower($country->code) . '.svg' }}"
-                                                    data-code="{{ $country->code ?? 'US' }}">
-                                                    <img src="{{ $country->flag ?? 'https://flagcdn.com/' . strtolower($country->code) . '.svg' }}" 
+                                                    data-flag="{{ $country->flag ?? 'https://flagcdn.com/' . strtolower($country->country_code) . '.svg' }}"
+                                                    data-code="{{ $country->country_code ?? 'US' }}">
+                                                    <img src="{{ $country->flag ?? 'https://flagcdn.com/' . strtolower($country->country_code) . '.svg' }}" 
                                                         alt="{{ $country->name }} flag" 
                                                         class="w-6 h-6 rounded-full border-2 border-gray-200 object-cover">
                                                     <span>{{ $country->name }}</span>

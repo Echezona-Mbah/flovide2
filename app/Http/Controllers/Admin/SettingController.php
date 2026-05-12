@@ -10,6 +10,8 @@ use App\Models\Personal;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
 use App\Services\FirebaseNotificationService; 
+use Illuminate\Support\Facades\Log;
+
 
 class SettingController extends Controller
 {
@@ -158,6 +160,115 @@ public function storeExchangeRate(Request $request)
 // });
 
 
+// public function update(Request $request, $id, FirebaseNotificationService $firebase)
+// {
+//     $request->validate([
+//         'country_name' => 'nullable|string|max:255',
+//         'currency_code' => 'nullable|string|max:10',
+//         'rate' => 'nullable|numeric|min:0',
+//         'transfer_fee' => 'nullable|numeric|min:0',
+//     ]);
+
+
+//     try {
+//         $rate = ExchangeRate::findOrFail($id);
+
+//         $rate->update([
+//             'country_name' => $request->country_name,
+//             'currency_code' => $request->filled('currency_code')
+//                 ? strtoupper($request->currency_code)
+//                 : $rate->currency_code,
+//             'rate' => $request->rate,
+//             'transfer_fee' => $request->transfer_fee,
+//         ]);
+
+//         $rate->load(['fromCurrency', 'toCurrency']);
+
+//         $fromCode = $rate->fromCurrency->code ?? 'N/A';
+//         $toCode   = $rate->toCurrency->code ?? 'N/A';
+
+//         $title = 'Exchange Rate Updated';
+//         $message = "The exchange rate {$fromCode} -> {$toCode} was updated. New rate: {$rate->rate}.";
+
+//         $dataPayload = [
+//             'type' => 'exchange_rate_update',
+//             'from_currency' => $fromCode,
+//             'to_currency' => $toCode,
+//             'rate' => (string) $rate->rate,
+//         ];
+
+
+
+//         $notifyUsers = function ($users) use ($title, $message, $firebase, $dataPayload) {
+//             foreach ($users as $user) {
+//                 try {
+//                     // In-app/database notification
+//                     $user->notify(new GeneralNotification($title, $message));
+
+//                     // Push notification (Firebase)
+//                     if (!empty($user->device_token)) {
+//                         $firebase->sendToToken(
+//                             $user->device_token,
+//                             $title,
+//                             $message,
+//                             $dataPayload
+//                         );
+//                     }
+//                 } catch (\Throwable $e) {
+//                     Log::warning('Notification failed for user', [
+//                         'user_id' => $user->id ?? null,
+//                         'error' => $e->getMessage(),
+//                     ]);
+//                 }
+//             }
+//         };
+
+
+//         // Business + Personal app users
+//         User::whereNotNull('device_token')->orWhereNotNull('id')->chunk(500, $notifyUsers);
+//         Personal::whereNotNull('device_token')->orWhereNotNull('id')->chunk(500, $notifyUsers);
+
+
+
+//         if ($request->expectsJson()) {
+//             return response()->json([
+//                 'success' => true,
+//                 'message' => 'Exchange rate updated successfully.',
+//                 'code' => 'EXCHANGE_RATE_UPDATED',
+//                 'data' => [
+//                     'id' => $rate->id,
+//                     'from_currency' => $fromCode,
+//                     'to_currency' => $toCode,
+//                     'rate' => $rate->rate,
+//                     'transfer_fee' => $rate->transfer_fee,
+//                 ],
+//             ], 200);
+//         }
+
+//         return redirect()
+//             ->route('admin.exchangerate.edit', $id)
+//             ->with('success', 'Exchange rate updated successfully.');
+//     } catch (\Throwable $e) {
+//         Log::error('Exchange rate update failed', [
+//             'exchange_rate_id' => $id,
+//             'error' => $e->getMessage(),
+//         ]);
+
+//         if ($request->expectsJson()) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Failed to update exchange rate.',
+//                 'code' => 'EXCHANGE_RATE_UPDATE_FAILED',
+//                 'data' => $e->getMessage(),
+//             ], 500);
+//         }
+
+//         return back()->withInput()->with('error', 'Failed to update exchange rate.');
+//     }
+// }
+
+
+
 public function update(Request $request, $id, FirebaseNotificationService $firebase)
 {
     $request->validate([
@@ -167,68 +278,120 @@ public function update(Request $request, $id, FirebaseNotificationService $fireb
         'transfer_fee' => 'nullable|numeric|min:0',
     ]);
 
-    $rate = ExchangeRate::findOrFail($id);
+    try {
+        $rate = ExchangeRate::findOrFail($id);
 
-    $rate->update([
-        'country_name' => $request->country_name,
-        'currency_code' => strtoupper($request->currency_code),
-        'rate' => $request->rate,
-        'transfer_fee' => $request->transfer_fee,
-    ]);
+        $rate->update([
+            'country_name' => $request->country_name,
+            'currency_code' => $request->filled('currency_code')
+                ? strtoupper($request->currency_code)
+                : $rate->currency_code,
+            'rate' => $request->rate,
+            'transfer_fee' => $request->transfer_fee,
+        ]);
 
-    $rate->load(['fromCurrency', 'toCurrency']);
+        $rate->load(['fromCurrency', 'toCurrency']);
 
-    $fromCode = $rate->fromCurrency->code ?? 'N/A';
-    $toCode = $rate->toCurrency->code ?? 'N/A';
+        $fromCode = $rate->fromCurrency->code ?? 'N/A';
+        $toCode   = $rate->toCurrency->code ?? 'N/A';
 
-    $title = 'Exchange Rate Updated';
-    $message = "The exchange rate {$fromCode} -> {$toCode} was updated. New rate: {$rate->rate}.";
+        $title = 'Exchange Rate Updated';
+        $message = "The exchange rate {$fromCode} -> {$toCode} was updated. New rate: {$rate->rate}.";
 
-    // Notify all business users
-    User::chunk(500, function ($users) use ($title, $message, $firebase, $fromCode, $toCode, $rate) {
-        foreach ($users as $user) {
-            $user->notify(new GeneralNotification($title, $message));
+        $dataPayload = [
+            'type' => 'exchange_rate_update',
+            'from_currency' => $fromCode,
+            'to_currency' => $toCode,
+            'rate' => (string) $rate->rate,
+        ];
 
-            if (!empty($user->device_token)) {
-                $firebase->sendToToken(
-                    $user->device_token,
-                    $title,
-                    $message,
-                    [
-                        'type' => 'exchange_rate_update',
-                        'from_currency' => $fromCode,
-                        'to_currency' => $toCode,
-                        'rate' => (string) $rate->rate,
-                    ]
-                );
+        $stats = [
+            'business_notified' => 0,
+            'personal_notified' => 0,
+            'push_sent' => 0,
+            'push_failed' => 0,
+        ];
+
+        $notifyUsers = function ($users, string $group) use ($title, $message, $firebase, $dataPayload, &$stats) {
+            foreach ($users as $user) {
+                try {
+                    // In-app/database notification -> ALL users
+                    $user->notify(new GeneralNotification($title, $message));
+
+                    if ($group === 'business') {
+                        $stats['business_notified']++;
+                    } else {
+                        $stats['personal_notified']++;
+                    }
+
+                    // Optional push (only if token exists)
+                    if (!empty($user->device_token)) {
+                        $sent = $firebase->sendToToken($user->device_token, $title, $message, $dataPayload);
+                        $sent ? $stats['push_sent']++ : $stats['push_failed']++;
+                    }
+                } catch (\Throwable $e) {
+                    $stats['push_failed']++;
+                    Log::warning('Notification failed', [
+                        'group' => $group,
+                        'user_id' => $user->id ?? null,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
+        };
+
+        User::query()->chunk(500, fn($users) => $notifyUsers($users, 'business'));
+        Personal::query()->chunk(500, fn($users) => $notifyUsers($users, 'personal'));
+
+        Log::info('Exchange rate notification summary', [
+            'exchange_rate_id' => $rate->id,
+            'from_currency' => $fromCode,
+            'to_currency' => $toCode,
+            'rate' => $rate->rate,
+            'stats' => $stats,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Exchange rate updated successfully.',
+                'code' => 'EXCHANGE_RATE_UPDATED',
+                'data' => [
+                    'id' => $rate->id,
+                    'from_currency' => $fromCode,
+                    'to_currency' => $toCode,
+                    'rate' => $rate->rate,
+                    'transfer_fee' => $rate->transfer_fee,
+                    'notification_stats' => $stats,
+                ],
+            ], 200);
         }
-    });
 
-    // Notify all personal users
-    Personal::chunk(500, function ($users) use ($title, $message, $firebase, $fromCode, $toCode, $rate) {
-        foreach ($users as $user) {
-            $user->notify(new GeneralNotification($title, $message));
+        return redirect()
+            ->route('admin.exchangerate.edit', $id)
+            ->with('success', 'Exchange rate updated successfully.');
+    } catch (\Throwable $e) {
+        Log::error('Exchange rate update failed', [
+            'exchange_rate_id' => $id,
+            'error' => $e->getMessage(),
+        ]);
 
-            if (!empty($user->device_token)) {
-                $firebase->sendToToken(
-                    $user->device_token,
-                    $title,
-                    $message,
-                    [
-                        'type' => 'exchange_rate_update',
-                        'from_currency' => $fromCode,
-                        'to_currency' => $toCode,
-                        'rate' => (string) $rate->rate,
-                    ]
-                );
-            }
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update exchange rate.',
+                'code' => 'EXCHANGE_RATE_UPDATE_FAILED',
+                'data' => $e->getMessage(),
+            ], 500);
         }
-    });
 
-    return redirect()->route('admin.exchangerate.edit', $id)
-        ->with('success', 'Exchange rate updated successfully.');
+        return back()->withInput()->with('error', 'Failed to update exchange rate.');
+    }
 }
+
+
+
+
 
     public function destroy($id)
 {

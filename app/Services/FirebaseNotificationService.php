@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class FirebaseNotificationService
 {
@@ -63,6 +65,13 @@ class FirebaseNotificationService
         ];
 
         $response = Http::withToken($accessToken)->post($url, $payload);
+
+        \Log::info('FCM PUSH RESPONSE', [
+            'device_token' => substr($deviceToken, 0, 20) . '...',
+            'status' => $response->status(),
+            'body' => $response->json(),
+        ]);
+
 
         return $response->successful();
     }

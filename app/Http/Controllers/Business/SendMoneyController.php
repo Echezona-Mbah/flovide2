@@ -93,7 +93,7 @@ public function sendTransaction(Request $request)
                 : back()->withInput()->with('error', $msg);
         }
     }
-dd($request->all());
+    // dd($request->all());
     $balance = Balance::find($request->balance_id);
     if (!$balance) {
         $msg = 'Invalid balance';
