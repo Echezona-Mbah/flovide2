@@ -1,9 +1,5 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,23 +7,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <title>{{ __('Varify OTP') }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <section>
-
         <!-- logo -->
-                 <section class="relative">
-                <div class="max-w-[300px] px-10 absolute top-10">
-                    <a href="{{ route('personal') }}">
-                        <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
-                    </a>
-                </div>
-            </section>
+        <section class="relative">
+            <div class="max-w-[300px] px-10 absolute top-10">
+                <a href="{{ route('personal') }}">
+                    <img src="../asserts/auth/Logo.svg" alt="" class="w-[90px]" />
+                </a>
+            </div>
+        </section>
         <!-- logo end-->
 
 
@@ -90,9 +84,13 @@
                                     </div>
                             
                                     <section class="mt-4 flex flex-col md:flex-row md:justify-between md:items-center w-full gap-5 ">
-                                        <button type="submit"
-                                            class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C]">
-                                            {{ __('Continue') }}
+                                        <button type="submit" id="submitBtn"
+                                            class="md:w-[10em] w-full rounded-full p-2 h-12 bg-[#D6E7F5] text-[#215F9C] flex items-center justify-center gap-2">
+                                            <span id="btnText">{{ __('Continue') }}</span>
+                                            <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-[#215F9C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
                                         </button>
                                     </section>
                             
@@ -131,6 +129,24 @@
 
 
     <script>
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                submitBtn.disabled = true;
+                btnText.textContent = 'Processing...';
+                btnSpinner.classList.remove('hidden');
+                document.querySelectorAll('.otp-input').forEach(input => input.disabled = true);
+            } else {
+                submitBtn.disabled = false;
+                btnText.textContent = "{{ __('Continue') }}";
+                btnSpinner.classList.add('hidden');
+                document.querySelectorAll('.otp-input').forEach(input => input.disabled = false);
+            }
+        }
+
         document.getElementById('otpForm').addEventListener('submit', function (e) {
             let otp = '';
             for (let i = 1; i <= 6; i++) {
@@ -152,18 +168,77 @@
             }
     
             document.getElementById('otp-hidden').value = otp;
+            setLoading(true);
         });
-    
-        // Optional: Auto-focus next input
-        document.querySelectorAll('.otp-input').forEach((input, index, inputs) => {
+
+
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const otpForm = document.getElementById('otpForm');
+
+        otpInputs.forEach((input, index, inputs) => {
+
+            // Typing functionality
             input.addEventListener('input', () => {
+
+                // Allow only numbers
+                input.value = input.value.replace(/\D/g, '');
+
+                // Move to next box
                 if (input.value.length === 1 && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
+
+                checkAndSubmitOTP();
+            });
+
+            // Backspace functionality
+            input.addEventListener('keydown', (e) => {
+
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            // Paste functionality
+            input.addEventListener('paste', (e) => {
+
+                e.preventDefault();
+
+                let pastedData = (e.clipboardData || window.clipboardData)
+                    .getData('text')
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
+
+                if (!pastedData) return;
+
+                pastedData.split('').forEach((digit, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = digit;
+                    }
+                });
+
+                checkAndSubmitOTP();
             });
         });
-    </script>
-    
-</body>
 
+        function checkAndSubmitOTP() {
+
+            let otp = '';
+
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+
+            document.getElementById('otp-hidden').value = otp;
+
+            // Auto submit when complete
+            if (otp.length === 6 && !submitBtn.disabled) {
+
+                setLoading(true);
+
+                otpForm.submit();
+            }
+        }
+    </script>
+</body>
 </html>
