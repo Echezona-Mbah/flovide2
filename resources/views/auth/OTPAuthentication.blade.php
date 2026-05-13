@@ -72,8 +72,12 @@
                     </div>
 
                     <!-- Continue Button -->
-                    <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition">
-                        Continue
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition flex items-center justify-center gap-2">
+                        <span id="btnText">Continue</span>
+                        <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </button>
 
                 </form>
@@ -93,31 +97,105 @@
     <script>
         const inputs = document.querySelectorAll(".otp-box");
         const hiddenInput = document.getElementById("otp");
+        const otpForm = document.getElementById("otpForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const btnText = document.getElementById("btnText");
+        const btnSpinner = document.getElementById("btnSpinner");
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                submitBtn.disabled = true;
+                btnText.textContent = "Processing...";
+                btnSpinner.classList.remove("hidden");
+                inputs.forEach(input => input.disabled = true);
+            } else {
+                submitBtn.disabled = false;
+                btnText.textContent = "Continue";
+                btnSpinner.classList.add("hidden");
+                inputs.forEach(input => input.disabled = false);
+            }
+        }
+
+        otpForm.addEventListener("submit", (e) => {
+            setLoading(true);
+        });
 
         inputs.forEach((input, index) => {
-            input.addEventListener("input", () => {
+
+            // Typing functionality
+            input.addEventListener("input", (e) => {
+
+                // Allow only numbers
+                input.value = input.value.replace(/\D/g, '');
+
                 if (input.value.length === 1 && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
+
                 updateOTP();
+
+                // Auto submit when complete
+                autoSubmitIfComplete();
             });
 
+            // Backspace functionality
             input.addEventListener("keydown", (e) => {
                 if (e.key === "Backspace" && !input.value && index > 0) {
                     inputs[index - 1].focus();
                 }
             });
+
+            // Paste functionality
+            input.addEventListener("paste", (e) => {
+                e.preventDefault();
+
+                const pastedData = (e.clipboardData || window.clipboardData)
+                    .getData("text")
+                    .replace(/\D/g, '')
+                    .slice(0, inputs.length);
+
+                if (!pastedData) return;
+
+                pastedData.split('').forEach((char, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = char;
+                    }
+                });
+
+                updateOTP();
+
+                // Focus last filled input
+                const lastIndex = pastedData.length - 1;
+
+                if (inputs[lastIndex]) {
+                    inputs[lastIndex].focus();
+                }
+
+                // Auto submit when complete
+                autoSubmitIfComplete();
+            });
         });
 
         function updateOTP() {
             let otp = "";
+
             inputs.forEach((input) => {
                 otp += input.value;
             });
+
             hiddenInput.value = otp;
         }
 
-        //RESEND OTP FUNCTIONALITY
+        function autoSubmitIfComplete() {
+            const otp = hiddenInput.value;
+
+            if (otp.length === inputs.length) {
+                setLoading(true);
+                otpForm.submit();
+            }
+        }
+
+        // RESEND OTP FUNCTIONALITY
         const resendBtn = document.getElementById('resendOtp');
         const countdownSpan = document.getElementById('countdown');
 
@@ -152,7 +230,6 @@
             }, 1000);
         }
 
-
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -162,6 +239,7 @@
         });
 
         resendBtn.addEventListener('click', function() {
+
             resendBtn.disabled = true;
 
             fetch("{{ route('otp.resend') }}", {
@@ -175,10 +253,12 @@
             })
             .then(res => res.json())
             .then(data => {
+
                 Toast.fire({
                     icon: data.status === 'success' ? 'success' : 'error',
                     title: data.message || "OTP resent successfully!"
                 });
+
                 if (data.status === 'success') {
                     startCountdown();
                 } else {
@@ -186,10 +266,12 @@
                 }
             })
             .catch(err => {
+
                 Toast.fire({
                     icon: 'error',
                     title: "Failed to resend OTP. Try again."
                 });
+
                 resendBtn.disabled = false;
             });
         });
