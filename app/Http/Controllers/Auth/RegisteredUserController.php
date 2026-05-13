@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\RegisterOtpMail;
 use App\Mail\WelcomeMail;
 use App\Models\Countries;
+use App\Models\Currency;
 use App\Models\Industry;
 use App\Models\State;
 use App\Models\User;
@@ -28,7 +29,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        $countries = Countries::all();
+         $countries = Currency::orderBy('name', 'asc')->get(); 
         $industries = Industry::all();
         $states = State::all();
         return view('auth.register', compact('countries','industries','states'));
@@ -54,6 +55,7 @@ class RegisteredUserController extends Controller
     {
         // Log::info('Request data:', ['all_data' => $request->all()]);
 
+       // dd($request->all());
         // Validate the input data
         $validated = $request->validate([
             'country' => 'nullable|string|max:255',

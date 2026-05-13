@@ -124,7 +124,9 @@ class LoginController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'otp' => 'required|digits:6'
+            'otp' => 'required|digits:6',
+            'device_token' => 'nullable|string|max:1000',
+
         ]);
 
         $account = User::where('email', $request->email)->first();
@@ -160,6 +162,8 @@ class LoginController extends Controller
         $account->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
+            'device_token' => $request->filled('device_token') ? $request->device_token : $account->device_token,
+
         ]);
 
         // Generate token
@@ -391,7 +395,8 @@ class LoginController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'otp' => 'required|digits:6'
+            'otp' => 'required|digits:6',
+            'device_token' => 'nullable|string|max:1000',
         ]);
 
         $account = Personal::where('email', $request->email)->first();
@@ -426,6 +431,8 @@ class LoginController extends Controller
         $account->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
+            'device_token' => $request->filled('device_token') ? $request->device_token : $account->device_token,
+
         ]);
 
         $token = $account->createToken('PersonalToken')->plainTextToken;

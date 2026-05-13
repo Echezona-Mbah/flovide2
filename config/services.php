@@ -44,11 +44,10 @@ return [
         'app_token' => env('SUMSUB_APP_TOKEN'),
         'secret_key' => env('SUMSUB_SECRET_KEY'),
     ],
-
     'firebase' => [
-    'project_id' => env('FIREBASE_PROJECT_ID'),
-    'client_email' => env('FIREBASE_CLIENT_EMAIL'),
-    'private_key' => str_replace("\\n", "\n", env('FIREBASE_PRIVATE_KEY')),
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'client_email' => env('FIREBASE_CLIENT_EMAIL'),
+        'private_key' => str_replace('\n', "\n", env('FIREBASE_PRIVATE_KEY')),
     ],
 
 
