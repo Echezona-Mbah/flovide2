@@ -202,7 +202,7 @@ public function index(Request $request)
 }
 
 
-    public function dashboardapi(Request $request)
+ public function dashboardapi(Request $request)
 {
     $account = auth('personal-api')->id();
 
@@ -214,6 +214,7 @@ public function index(Request $request)
     }
 
     $balances = \App\Models\Balance::where('personal_id', $account)->get();
+
     $transactions = \App\Models\TransactionHistory::where('personal_id', $account)
         ->latest()
         ->take(4)
@@ -238,10 +239,6 @@ public function index(Request $request)
             ];
         });
 
-
-    // -------------------------
-    // 3️⃣ CHART DATA (LAST 3 MONTHS)
-    // -------------------------
     $months = collect(range(0, 2))->map(function ($i) {
         return now()->subMonths($i)->format('Y-m');
     })->reverse()->values();
@@ -259,32 +256,39 @@ public function index(Request $request)
         ];
     });
 
+    // ✅ Exchange rates included
+    $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
+        ->get()
+        ->map(function ($r) {
+            return [
+                'from_currency' => $r->fromCurrency->code ?? null,
+                'to_currency' => $r->toCurrency->code ?? null,
+                'rate' => (float) $r->rate,
+                'transfer_fee' => (float) $r->transfer_fee,
+                'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
+            ];
+        });
 
-    // -------------------------
-    // 4️⃣ RETURN JSON FOR API
-    // -------------------------
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',
             'data' => [
-                'balances'     => $balances,
-                'chart_data'   => $chartData,
-                'recent_history' => $transactions,
+                'balances'        => $balances,
+                'chart_data'      => $chartData,
+                'recent_history'  => $transactions,
+                'exchange_rates'  => $exchangeRates,
             ]
         ], 200);
     }
 
-    // -------------------------
-    // 5️⃣ RETURN WEB VIEW
-    // -------------------------
     return view('dashboard.index', [
         'balances' => $balances,
         'chartData' => $chartData,
         'transactions' => $transactions,
+        'exchangeRates' => $exchangeRates,
     ]);
 }
-
     
 
 

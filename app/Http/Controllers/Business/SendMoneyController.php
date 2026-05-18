@@ -20,7 +20,8 @@ use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TransactionSentMail;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\WebhookSetting;
+use App\Models\User;
 
 
 
@@ -69,6 +70,16 @@ public function sendTransaction(Request $request)
         'bank_code' => 'nullable|string',
         'transfer_method' => 'nullable|string',
     ]);
+    
+
+     // Resolve actor: API key user first, then normal auth user
+    $actor = $this->resolveKeyUser($request) ?? auth()->user();
+    if (!$actor) {
+        $msg = 'Unauthorized';
+        return $isApi
+            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'UNAUTHORIZED', 'data' => null], 401)
+            : back()->withInput()->with('error', $msg);
+    }
 
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
     $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
@@ -123,9 +134,9 @@ public function sendTransaction(Request $request)
             'method' => 'withdrawal',
             'payment_provider' => 'wallect',
             'reference' => 'ref-' . Str::uuid(),
-            'user_id' => auth()->id(),
-            'sender_id' => auth()->id(),
-            'sender' => auth()->user()->business_name ?? auth()->user()->name,
+            'user_id' => $actor->id,
+            'sender_id' => $actor->id,
+            'sender' => $actor->business_name ?? $actor->name,
             'recipient_account_number' => $request->account_number,
             'recipient_account_name' => $request->account_name,
             'recipient_country' => strtoupper(substr($currency,0,2)),
@@ -137,11 +148,11 @@ public function sendTransaction(Request $request)
         ]);
 
         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id);
+            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor);
         } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id);
+            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor);
         } elseif (in_array($currency, ['NGN','TZS','XOF','XAF','ZAR','KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id);
+            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor);
         } else {
             DB::rollBack();
             $msg = 'No provider';
@@ -166,7 +177,7 @@ public function sendTransaction(Request $request)
 
 
     // -------------------- Pivot Payment --------------------
-    protected function sendViaPivot(Request $request, $currency,$sendingCurrency, $balance,$txId)
+    protected function sendViaPivot(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor)
     {
         $isApi = $request->expectsJson();
         $user = auth()->user();
@@ -265,7 +276,7 @@ public function sendTransaction(Request $request)
 
 
 
-    protected function sendViaPayaza(Request $request, $currency,$sendingCurrency, $balance,$txId)
+    protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor)
     {   
         $isApi = $request->expectsJson();
         $transactionReference = "TXN_" . time();
@@ -316,10 +327,10 @@ public function sendTransaction(Request $request)
                         "narration" => $request->reference ?? "Payment",
                         "transaction_reference" => $transactionReference,
                         "sender" => [
-                            "sender_name" => auth()->user()->business_name ?? auth()->user()->name,
-                            "sender_id" => auth()->id(),
-                            "sender_phone_number" => auth()->user()->business_phone ?? null,
-                            "sender_address" => auth()->user()->street_address ?? null
+                            "sender_name" => $actor->business_name ?? $actor->name ?? 'Flovide User',
+                            "sender_id" => $actor->id,
+                            "sender_phone_number" => $actor->business_phone ?? null,
+                            "sender_address" => $actor->street_address ?? null
                         ]
                     ]
                 ]
@@ -368,11 +379,10 @@ public function sendTransaction(Request $request)
 
 
 
-   protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency, $balance,$txId)
+   protected function sendViaAppMobile(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor)
     {
         $isApi = $request->expectsJson();
-        $user  = auth()->user();
-
+        
         $exttrid = uniqid('APPM_');
         $bankCode = $request->bank_code;
 
@@ -677,6 +687,31 @@ public function sendTransaction(Request $request)
         }
     }
 
+    public function refreshExchangeRates(Request $request)
+    {
+        $rates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
+            ->get()
+            ->map(function ($r) {
+                return [
+                    'from_currency' => $r->fromCurrency->code ?? null,
+                    'to_currency' => $r->toCurrency->code ?? null,
+                    'rate' => (float) $r->rate,
+                    'transfer_fee' => (float) $r->transfer_fee,
+                    'updated_at' => optional($r->updated_at)->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All exchange rates refreshed successfully',
+            'code' => 'EXCHANGE_RATES_REFRESHED',
+            'data' => [
+                'rates' => $rates,
+                'last_updated' => optional(\App\Models\ExchangeRate::max('updated_at'))->toIso8601String(),
+                'count' => $rates->count(),
+            ],
+        ], 200);
+    }
 
     
 
@@ -809,7 +844,8 @@ public function exchangeSubmit(Request $request)
                 'to_currency' => $to,
                 'amount' => $amount,
                 'converted' => $converted,
-                'reference' => $tx->reference
+                'reference' => $tx->reference,
+                'method' => $tx->method,
             ]
         ], 200)
         : back()->with('success', 'Exchange completed successfully!');
@@ -837,6 +873,27 @@ protected function sendExchangeEmail(Request $request, $from, $to, $amount, $con
 
     
     
-    
+      private function resolveKeyUser(Request $request): ?User
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (! $publicKey || ! $secretKey) {
+            return null;
+        }
+
+        $webhookSetting = WebhookSetting::query()
+            ->where(function ($query) use ($publicKey, $secretKey) {
+                $query->where('live_public_key', $publicKey)
+                    ->where('live_secret_key', $secretKey);
+            })
+            ->orWhere(function ($query) use ($publicKey, $secretKey) {
+                $query->where('test_public_key', $publicKey)
+                    ->where('test_secret_key', $secretKey);
+            })
+            ->first();
+
+        return $webhookSetting ? User::find($webhookSetting->user_id) : null;
+    }
 
 }

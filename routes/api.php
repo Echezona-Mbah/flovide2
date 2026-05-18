@@ -59,6 +59,8 @@ use App\Http\Controllers\Payaza\PayoutController;
 use App\Http\Controllers\Personal\ComplianceController as PersonalComplianceController;
 use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
+use App\Http\Controllers\Interac\InteracController;
+use App\Http\Controllers\Interac\InteracAccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -132,7 +134,36 @@ Route::post('/orchard/payout',[OrchardController::class, 'debit']);
 Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquiry']);
 
 
+   Route::post('/v1/customer', [InteracController::class, 'createCustomer']);
+    Route::get('/customer/{customerId}', [InteracController::class, 'getCustomer']);
+    Route::put('/customer/{customerId}', [InteracController::class, 'updateCustomer']);
+    Route::patch('/customer/{customerId}/enable', [InteracController::class, 'enableCustomer']);
+    Route::patch('/customer/{customerId}/disable', [InteracController::class, 'disableCustomer']);
 
+    Route::post('/customer/{customerId}/alias', [InteracController::class, 'createAlias']);
+    Route::get('/customer/{customerId}/alias', [InteracController::class, 'listAliases']);
+    Route::get('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'getAlias']);
+    Route::delete('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'deleteAlias']);
+
+    Route::post('/payment/options', [InteracController::class, 'retrievePaymentOptions']);
+    Route::post('/payment', [InteracController::class, 'initiatePayment']);
+    Route::put('/payment/{paymentRefId}', [InteracController::class, 'submitPayment']);
+    Route::post('/payment/{paymentRefId}/reverse', [InteracController::class, 'reverseInitiatedPayment']);
+    Route::post('/payment/{paymentRefId}/cancel', [InteracController::class, 'cancelPayment']);
+    Route::get('/payment/{paymentRefId}', [InteracController::class, 'getPayment']);
+    Route::get('/payment', [InteracController::class, 'listPayments']);
+
+    Route::post('/request', [InteracController::class, 'createRequestPayment']);
+    Route::get('/request/{requestId}', [InteracController::class, 'getRequestPayment']);
+    Route::post('/request/{requestId}/cancel', [InteracController::class, 'cancelRequestPayment']);
+    Route::post('/request/receive', [InteracController::class, 'retrieveIncomingRequestPayment']);
+    Route::post('/v1/interac/request/receive/{networkRequestRefId}/decline', [InteracController::class, 'declineIncomingRequestPayment']);
+
+    Route::post('{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
+    Route::post('{account_num}/transaction', [InteracAccountController::class, 'transaction']);
+    Route::post('{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
+
+    Route::patch('/v1/interac/fraud/status', [InteracController::class, 'updateFraudStatus']);
 
 
 
@@ -263,6 +294,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // api routes for Send Money details
     Route::post('/exchange-rate', [SendMoneyController::class, 'getExchangeRates']);
+    Route::get('/exchange-rate/refresh', [SendMoneyController::class, 'refreshExchangeRates']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('transactions.send');
     Route::post('/exchange-send', [SendMoneyController::class, 'exchangeSubmit']);
 
@@ -276,13 +308,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
     // api routes for Customers details
-    Route::get('/customers', [AddCustomerController::class, 'index']);
-    Route::post('/add-customers', [AddCustomerController::class, 'store']);
-    Route::post('/fetchBanks-customers', [AddCustomerController::class, 'fetchBanks']);
-    Route::post('/validate-account-customers', [AddCustomerController::class, 'validateRecipient']);
-    Route::get('/fetchcountrylist-customers', [AddCustomerController::class, 'fetchcountrylist']);
-    // Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
-    Route::delete('customers/{id}', [AddCustomerController::class, 'destroy'])->name('customers.destroy');
+    // Route::get('/customers', [AddCustomerController::class, 'index']);
+    // Route::post('/add-customers', [AddCustomerController::class, 'store']);
+    // Route::post('/fetchBanks-customers', [AddCustomerController::class, 'fetchBanks']);
+    // Route::post('/validate-account-customers', [AddCustomerController::class, 'validateRecipient']);
+    // Route::get('/fetchcountrylist-customers', [AddCustomerController::class, 'fetchcountrylist']);
+    // // Route::put('customers/{id}', [AddCustomerController::class, 'update'])->name('customers.update');
+    // Route::delete('customers/{id}', [AddCustomerController::class, 'destroy'])->name('customers.destroy');
     
     // api routes for Subscriptions details
     Route::get('/subscriptions', [SubscriptionController::class, 'index']);
@@ -566,5 +598,6 @@ Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
 
 });
 // git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
+
 
 

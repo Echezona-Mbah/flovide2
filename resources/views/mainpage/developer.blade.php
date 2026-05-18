@@ -292,7 +292,7 @@
                                     <div class="mt-4 space-y-3">
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">name</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">currency</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">amount</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Optional</span></div>
+                                        {{-- <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">amount</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Optional</span></div> --}}
                                     </div>
                                 </details>
 
@@ -351,6 +351,9 @@
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.country</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.currency</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.accountHolder</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.accountNumber</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Bank)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.bankCode</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Bank)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.mobileNumber</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Mobile)</span></div>
                                     </div>
                                 </details>
 
@@ -854,8 +857,7 @@ Console.WriteLine(body);`,
   },
   body: JSON.stringify({
     name: 'Main Wallet',
-    currency: 'GBP',
-    amount: 0
+    currency: 'GBP'
   })
 })
   .then(res => res.json())
@@ -872,8 +874,7 @@ import (
 func main() {
   jsonData := []byte(\`{
     "name":"Main Wallet",
-    "currency":"GBP",
-    "amount":0
+    "currency":"GBP"
   }\`)
 
   req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/balances", bytes.NewBuffer(jsonData))
@@ -901,8 +902,7 @@ response = requests.post(
     },
     json={
         "name": "Main Wallet",
-        "currency": "GBP",
-        "amount": 0,
+        "currency": "GBP"
     },
 )
 
@@ -939,8 +939,7 @@ client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 var json = """
 {
   "name": "Main Wallet",
-  "currency": "GBP",
-  "amount": 0
+  "currency": "GBP"
 }
 """;
 
