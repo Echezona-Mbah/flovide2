@@ -27,6 +27,8 @@ class Personal extends Authenticatable
         'forget_verification_otp',
         'forgot_password_otp_expires_at',
         'currency',
+        'referral_code',
+        'referral_link',
         'balance',
         'default_currency',
         'default_currency_balance',
