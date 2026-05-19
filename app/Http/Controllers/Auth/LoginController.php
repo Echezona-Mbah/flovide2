@@ -537,6 +537,8 @@ class LoginController extends Controller
                     'currency' => $account->currency,
                     'profile_url' => $account->profile_picture ? asset($account->profile_picture) : null,
                     'email_verified_status' => $account->email_verified_status,
+                    'referral_code' => $account->referral_code,
+                    'referral_link' => $account->referral_link,
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,
