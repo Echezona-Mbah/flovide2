@@ -678,7 +678,8 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
                 'to_currency' => $to,
                 'amount' => $amount,
                 'converted' => $converted,
-                'reference' => $tx->reference
+                'reference' => $tx->reference,
+                'method' => $tx->method,
             ]
         ], 200)
         : back()->with('success', 'Exchange completed successfully!');

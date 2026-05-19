@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Balance;
 use App\Models\WebhookSetting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\Currency;
+
 
 class BalanceController extends Controller
 {
@@ -105,35 +108,44 @@ class BalanceController extends Controller
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
-    public function store(Request $request)
-    {
-        $webhookSetting = $this->resolveKeyOwner($request);
 
-        if (! $webhookSetting) {
-            return response()->json(['error' => 'Invalid public key or secret key'], 401);
-        }
+public function store(Request $request)
+{
+    $webhookSetting = $this->resolveKeyOwner($request);
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'currency' => ['required', 'string', 'size:3'],
-            'amount' => ['nullable', 'integer', 'min:0'],
-        ]);
-
-        $balance = Balance::create([
-            'user_id' => $webhookSetting->user_id,
-            'name' => $validated['name'],
-            'currency' => strtoupper($validated['currency']),
-            'amount' => $validated['amount'] ?? 0,
-        ]);
-
-        return response()->json([
-            'id' => (string) $balance->id,
-            'name' => $balance->name,
-            'currency' => $balance->currency,
-            'balance' => (int) $balance->amount,
-            'created' => $balance->created_at->toIso8601String(),
-        ], 201);
+    if (! $webhookSetting) {
+        return response()->json(['error' => 'Invalid public key or secret key'], 401);
     }
+
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'currency' => [
+            'required',
+            'string',
+            'size:3',
+            Rule::exists('currencies', 'code'),
+        ],
+        // 'amount' => ['nullable', 'numeric', 'min:0'],
+    ]);
+
+    $currencyCode = strtoupper($validated['currency']);
+
+    $balance = Balance::create([
+        'user_id' => $webhookSetting->user_id,
+        'name' => $validated['name'],
+        'currency' => $currencyCode,
+        'amount' => $validated['amount'] ?? 0,
+    ]);
+
+    return response()->json([
+        'id' => (string) $balance->id,
+        'name' => $balance->name,
+        'currency' => $balance->currency,
+        'balance' => (float) $balance->amount,
+        'created' => $balance->created_at->toIso8601String(),
+    ], 201);
+}
+
 
     private function resolveKeyOwner(Request $request): ?WebhookSetting
     {

@@ -60,6 +60,9 @@ use App\Http\Middleware\HtmlMinifier;
 use App\Http\Middleware\SecurityHeaders;
 
 
+
+
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
 
@@ -132,6 +135,7 @@ Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileA
 
 // HtmlMinifier::class
 Route::middleware(['auth','business.verified'])->group(function () {
+
 
         Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
 

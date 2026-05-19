@@ -156,9 +156,9 @@ Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->
 //     Route::post('/request/receive', [InteracController::class, 'retrieveIncomingRequestPayment']);
 //     Route::post('/v1/interac/request/receive/{networkRequestRefId}/decline', [InteracController::class, 'declineIncomingRequestPayment']);
 
-//       Route::post('{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
-//     Route::post('{account_num}/transaction', [InteracAccountController::class, 'transaction']);
-//     Route::post('{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
+    //   Route::post('{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
+    // Route::post('{account_num}/transaction', [InteracAccountController::class, 'transaction']);
+    // Route::post('{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
 
 //     Route::patch('/v1/interac/fraud/status', [InteracController::class, 'updateFraudStatus']);
 
