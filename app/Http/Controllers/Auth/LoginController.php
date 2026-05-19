@@ -244,8 +244,8 @@ class LoginController extends Controller
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
-                    'from' => $r->fromCurrency->code ?? null,
-                    'to' => $r->toCurrency->code ?? null,
+                    'from_currency' => $r->fromCurrency->code ?? null,
+                    'to_currency' => $r->toCurrency->code ?? null,
                     'rate' => (float) $r->rate,
                     'transfer_fee' => (float) $r->transfer_fee,
                     'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
@@ -512,8 +512,8 @@ class LoginController extends Controller
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
-                    'from' => $r->fromCurrency->code ?? null,
-                    'to' => $r->toCurrency->code ?? null,
+                    'from_currency' => $r->fromCurrency->code ?? null,
+                    'to_currency' => $r->toCurrency->code ?? null,
                     'rate' => (float) $r->rate,
                     'transfer_fee' => (float) $r->transfer_fee,
                     'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
