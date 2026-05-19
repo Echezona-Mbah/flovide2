@@ -202,11 +202,13 @@ public function store(Request $request)
 
 public function destroy(Request $request, $id)
 {
-    $personalId = auth('personal-api')->id(); 
-    $beneficia = Beneficia::find($id);
+    $personalId = auth('personal-api')->id();
+    $beneficia = Beneficia::findOrFail($id);
 
+    // Only allow owner
     if ($beneficia->personal_id != $personalId) {
-        $message = 'Unauthorized to delete this beneficia';
+        $message = 'Unauthorized to delete this beneficiary';
+
         return $request->expectsJson()
             ? response()->json([
                 'success' => false,
@@ -217,39 +219,34 @@ public function destroy(Request $request, $id)
             : redirect()->back()->withErrors(['message' => $message]);
     }
 
-    $ohentResponse = Http::withHeaders([
-        'Authorization' => 'Bearer ' . env('OHENTPAY_API_KEY'),
-        'Accept'        => 'application/json',
-    ])->delete(env('OHENTPAY_BASE_URL') . '/recipients/' . $beneficia->recipient_id);
-
-    logger()->info('OhentPay delete response', [
-        'recipient_id' => $beneficia->recipient_id,
-        'response'     => $ohentResponse->body()
-    ]);
-
-    if ($ohentResponse->successful() && $ohentResponse->json('result') === 'ok') {
+    try {
         $beneficia->delete();
 
-        $successMessage = 'Beneficia deleted successfully from both system and OhentPay';
+        $successMessage = 'Beneficiary deleted successfully';
+
         return $request->expectsJson()
             ? response()->json([
                 'success' => true,
                 'message' => $successMessage,
-                'code' => 'BENEFICIA_DELETED',
+                'code' => 'BENEFICIARY_DELETED',
                 'data' => null
             ], 200)
-            : redirect()->route('personal.beneficia.index')->with('status', $successMessage);
-    }
+            : redirect()->back()->with('success', $successMessage);
 
-    $errorMessage = 'Failed to delete recipient from OhentPay';
-    return $request->expectsJson()
-        ? response()->json([
-            'success' => false,
-            'message' => $errorMessage,
-            'code' => 'BENEFICIA_DELETE_FAILED',
-            'data' => $ohentResponse->json()
-        ], 500)
-        : redirect()->back()->withErrors(['message' => $errorMessage]);
+    } catch (\Exception $e) {
+        logger($e);
+
+        $errorMessage = 'Failed to delete beneficiary';
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'BENEFICIARY_DELETE_FAILED',
+                'data' => null
+            ], 500)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
 }
 
 
