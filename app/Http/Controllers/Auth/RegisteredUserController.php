@@ -10,6 +10,7 @@ use App\Models\Currency;
 use App\Models\Industry;
 use App\Models\State;
 use App\Models\User;
+use App\Models\Personal;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,7 +47,12 @@ class RegisteredUserController extends Controller
     {
         do {
             $code = strtoupper(substr(bin2hex(random_bytes($length)), 0, $length));
-        } while (User::where('referral_code', $code)->exists());
+
+            $existsInPersonals = Personal::where('referral_code', $code)->exists();
+
+            $existsInUsers = User::where('referral_code', $code)->exists();
+
+        } while ($existsInPersonals || $existsInUsers);
 
         return $code;
     }

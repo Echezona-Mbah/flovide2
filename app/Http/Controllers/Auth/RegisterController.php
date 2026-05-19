@@ -24,6 +24,20 @@ use Illuminate\Support\Facades\Auth;
 class RegisterController extends Controller
 {
 
+    private function generateReferralCode($length = 10)
+    {
+        do {
+            $code = strtoupper(substr(bin2hex(random_bytes($length)), 0, $length));
+
+            $existsInPersonals = Personal::where('referral_code', $code)->exists();
+
+            $existsInUsers = User::where('referral_code', $code)->exists();
+
+        } while ($existsInPersonals || $existsInUsers);
+
+        return $code;
+    }
+
 
 public function registerUser(Request $request)
 {
@@ -102,6 +116,9 @@ public function registerUser(Request $request)
     $existingcountry = Countries::where('name', $request->country)->first();
     $currency_code = $existingcountry->currency_code;
 
+    $referral_code = $this->generateReferralCode();
+    $referral_link = url('/register/' . $referral_code);
+
     $user = User::create([
         'countries_id' => $request->country,
         'street_address' => $request->street_address,
@@ -112,6 +129,8 @@ public function registerUser(Request $request)
         'email_verification_otp' => $otp,
         'email_verification_otp_expires_at' => now()->addMinutes(10),
         'typeofuser' => 'business',
+        'referral_code' => $referral_code,
+        'referral_link' => $referral_link,
         'currency' => $currency_code,
         'firstname' => $request->firstname,
         'lastname' => $request->lastname,
@@ -451,6 +470,11 @@ public function registerUser(Request $request)
         $existingcountry = Countries::where('name', $request->country)->first();
         $currency_code = $existingcountry->currency_code;
 
+
+        // REFERRAL CODE & LINK
+        $referral_code = $this->generateReferralCode();
+        $referral_link = url('/register/' . $referral_code);
+
         $user = Personal::create([
             'country' => $request->country,
             'firstname' => $request->firstname,
@@ -462,6 +486,8 @@ public function registerUser(Request $request)
             'city' => $request->city,
             'state' => $request->state,
             'currency' => $currency_code,
+            'referral_code' => $referral_code,
+            'referral_link' => $referral_link,
             'email_verification_otp' => $otp,
             'email_verification_otp_expires_at' => now()->addMinutes(10),
         ]);
