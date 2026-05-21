@@ -221,12 +221,22 @@ class AddBeneficiariesController extends Controller
     {
         $isApi = $request->expectsJson();
 
-        $userId = auth('api')->id() ?? auth()->id();
-        $user   = auth()->user();
+        $authUser = auth('api')->user() ?? auth()->user();
 
-        /* ================= ROLE CHECK ================= */
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $role = $team ? $team->role : 'Owner';
+            if (!$authUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                    'code' => 'UNAUTHORIZED',
+                    'data' => null
+                ], 401);
+            }
+
+            $team = TeamMembers::where('user_id', $authUser->id)->first();
+
+            $ownerId = $team ? $team->owner_id : $authUser->id;
+            $memberId = $team ? $authUser->id : null; // only set when team member created it
+            $role = $team ? $team->role : 'Owner';
 
         if (!in_array($role, ['Owner', 'Admin'])) {
             $msg = 'Only the business owner or an admin can add beneficiaries.';
@@ -432,7 +442,8 @@ class AddBeneficiariesController extends Controller
                 'recipient_id' => \Str::uuid(),
                 'account_id'   => \Str::uuid(),
 
-                'user_id' => $userId,
+                'user_id' => $ownerId,
+                'created_by_member_id' => $memberId,
             ]);
 
             return $isApi

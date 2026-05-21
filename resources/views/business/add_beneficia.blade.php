@@ -269,47 +269,30 @@
     <form method="POST" action="{{ route('add_beneficias.store') }}" class="p-6 md:p-10 space-y-10" autocomplete="off">
       @csrf
        <!-- Alerts -->
-      @if ($errors->any())
-        <script>
-          Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'error',
-              title: @json($errors->first()),
-              showConfirmButton: false,
-              timer: 4000,
-              timerProgressBar: true,
-          });
-        </script>
-      @endif
+    @if(session('error') || session('success') || session('api_error') || $errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const msg = @json(session('error') ?? session('api_error') ?? session('success') ?? ($errors->any() ? $errors->first() : null));
+    const icon = @json(session('error') || session('api_error') || $errors->any() ? 'error' : 'success');
 
-      @if (session('success'))
-        <script>
-          Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'success',
-              title: @json(session('success')),
-              showConfirmButton: false,
-              timer: 4000,
-              timerProgressBar: true,
-          });
-        </script>
-      @endif
+    if (!msg) return;
 
-      @if (session('api_error'))
-        <script>
-          Swal.fire({
-              toast: true,
-              position: 'top-end',
-              icon: 'error',
-              title: @json(session('api_error')),
-              showConfirmButton: false,
-              timer: 4000,
-              timerProgressBar: true,
-          });
-        </script>
-      @endif
+    if (window.Swal) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: icon,
+            title: msg,
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true
+        });
+    } else {
+        alert(msg);
+    }
+});
+</script>
+@endif
 
       <!-- Beneficiary Info -->
       <div class="grid lg:grid-cols-2 gap-8">
@@ -1686,7 +1669,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-<script>
+{{-- <script>
 document.addEventListener("DOMContentLoaded", function () {
   const options = {
     allowEmptyOption: true,
@@ -1697,7 +1680,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-</script>
+</script> --}}
 
 
 

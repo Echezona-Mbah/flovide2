@@ -46,6 +46,8 @@ class Beneficia extends Model
         // User & personal
         'user_id',
         'personal_id',
+        'created_by_member_id',
+
 
         // Optional: extra info if needed
         'email',

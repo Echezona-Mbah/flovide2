@@ -597,7 +597,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
     }
 
 
-    public function exchangeSubmit(Request $request)
+public function exchangeSubmit(Request $request)
 {
     $request->validate([
         'from_currency' => 'required|string',
@@ -613,22 +613,37 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
 
     if ($from === $to) {
         return $request->expectsJson()
-            ? response()->json(['success'=>false,'message'=>'From and To currency cannot be the same.','code'=>'SAME_CURRENCY','data'=>null],422)
+            ? response()->json([
+                'success' => false,
+                'message' => 'From and To currency cannot be the same.',
+                'code' => 'SAME_CURRENCY',
+                'data' => null
+            ], 422)
             : back()->withErrors(['amount' => 'From and To currency cannot be the same.']);
     }
 
     $fromBalance = Balance::where('personal_id', $user->id)->where('currency', $from)->first();
-    $toBalance   = Balance::where('personal_id', $user->id)->where('currency', $to)->first();
+    $toBalance = Balance::where('personal_id', $user->id)->where('currency', $to)->first();
 
     if (!$fromBalance || !$toBalance) {
         return $request->expectsJson()
-            ? response()->json(['success'=>false,'message'=>'Invalid wallet selection.','code'=>'INVALID_WALLET','data'=>null],422)
+            ? response()->json([
+                'success' => false,
+                'message' => 'Invalid wallet selection.',
+                'code' => 'INVALID_WALLET',
+                'data' => null
+            ], 422)
             : back()->withErrors(['amount' => 'Invalid wallet selection.']);
     }
 
     if ($fromBalance->amount < $amount) {
         return $request->expectsJson()
-            ? response()->json(['success'=>false,'message'=>'Insufficient balance.','code'=>'INSUFFICIENT_BALANCE','data'=>null],422)
+            ? response()->json([
+                'success' => false,
+                'message' => 'Insufficient balance.',
+                'code' => 'INSUFFICIENT_BALANCE',
+                'data' => null
+            ], 422)
             : back()->withErrors(['amount' => 'Insufficient balance.']);
     }
 
@@ -638,7 +653,12 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
 
     if (!$rate) {
         return $request->expectsJson()
-            ? response()->json(['success'=>false,'message'=>'Rate not found.','code'=>'RATE_NOT_FOUND','data'=>null],422)
+            ? response()->json([
+                'success' => false,
+                'message' => 'Rate not found.',
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null
+            ], 422)
             : back()->withErrors(['amount' => 'Rate not found.']);
     }
 
@@ -658,15 +678,43 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
         'method' => 'exchange',
         'reference' => 'ref-' . Str::uuid(),
         'personal_id' => $user->id,
-        'recipient_country' => strtoupper(substr($to,0,2)),
+        'recipient_country' => strtoupper(substr($to, 0, 2)),
         'sender' => $user->business_name ?? $user->name,
         'recipient_account_number' => $from,
         'recipient_account_name' => $user->business_name ?? $user->name,
-
+        'to_currency' => $to,
+        'recipient_amount' => $converted,
+        'exchange_rate' => $rate->rate,
     ]);
 
-    // ✅ Send exchange email
     $this->sendExchangeEmail($user, $from, $to, $amount, $converted, $fromBalance->amount);
+
+    $balances = Balance::where('personal_id', $user->id)
+        ->get()
+        ->map(function ($balance) {
+            return [
+                'id' => $balance->id,
+                'currency' => $balance->currency,
+                'amount' => $balance->amount,
+            ];
+        })
+        ->values();
+
+    $transaction = [
+        'id' => $tx->id,
+        'reference' => $tx->reference,
+        'status' => $tx->status,
+        'method' => $tx->method,
+        'amount' => $tx->amount,
+        'currency' => $tx->currency,
+        'to_currency' => $tx->to_currency,
+        'recipient_amount' => $tx->recipient_amount,
+        'exchange_rate' => $tx->exchange_rate,
+        'sender' => $tx->sender,
+        'recipient_account_number' => $tx->recipient_account_number,
+        'recipient_account_name' => $tx->recipient_account_name,
+        'created_at' => $tx->created_at->format('Y-m-d H:i:s'),
+    ];
 
     return $request->expectsJson()
         ? response()->json([
@@ -680,11 +728,12 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
                 'converted' => $converted,
                 'reference' => $tx->reference,
                 'method' => $tx->method,
+                'balances' => $balances,
+                'transaction' => $transaction,
             ]
         ], 200)
         : back()->with('success', 'Exchange completed successfully!');
 }
-
 protected function sendExchangeEmail($user, $from, $to, $amount, $converted, $currentBalance)
 {
     $data = [
