@@ -324,9 +324,9 @@ class BeneficiaryController extends Controller
             'bank.country' => 'required|string|min:2|max:3',
             'bank.currency' => 'required|string|size:3',
             'bank.accountHolder' => 'required|string|max:100',
-            'bank.accountNumber' => 'required|string|max:34',
-            'bank.bankCode' => 'required|string|max:20',
-            'bank.mobileNumber' => 'required|string|max:30',
+            'bank.accountNumber'  => 'nullable|string|max:34',
+            'bank.bankCode'       => 'nullable|string|max:20',
+            'bank.mobileNumber'   => 'nullable|string|max:30',
         ]);
 
         if ($validator->fails()) {

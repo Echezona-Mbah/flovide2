@@ -133,7 +133,8 @@ class InteracController extends Controller
         'contact' => ['required', 'array'],
         'contact.email_address' => ['nullable', 'email', 'max:64'],
         'contact.mobile_number' => ['nullable', 'string', 'size:10'],
-        'contact.account_number' => ['nullable', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
+        'contact.account' => ['nullable', 'array'],
+        'contact.account.account_number' => ['nullable', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
     ]);
 
     if ($validator->fails()) {
@@ -151,6 +152,9 @@ public function initiatePayment(Request $request)
         'payment_type' => ['required', 'in:ALIAS_REGULAR,ALIAS_AUTODEPOSIT,ALIAS_REALTIME,ACCOUNT_DEPOSIT_REGULAR,ACCOUNT_DEPOSIT_REALTIME,REQUEST_FULFILLMENT'],
         'contact' => ['required', 'array'],
         'contact.name' => ['required', 'string', 'min:1', 'max:100'],
+        'contact.account.account_number' => ['required', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
+        'contact.email_address' => ['nullable', 'email', 'max:64'],
+        'contact.mobile_number' => ['nullable', 'string', 'size:10'],
         'account_name' => ['required', 'string', 'min:3', 'max:80'],
         'account_number' => ['required', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
         'device_info' => ['required', 'array'],
@@ -234,6 +238,8 @@ public function listPayments(Request $request)
     $query = array_filter($validator->validated(), fn ($v) => $v !== null);
     return $this->respond($this->interacService->listPayments($query), 200);
 }
+
+
 
 
 
@@ -331,21 +337,32 @@ public function declineReceivePayment(Request $request, string $paymentRefId)
 }
 
 
+
+
+
+
+
+
 public function createRequestPayment(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'customer_id' => ['required', 'regex:/^[a-zA-Z0-9]{6,12}$/'],
         'end_to_end_id' => ['nullable', 'string', 'min:6', 'max:32', 'regex:/^[a-zA-Z0-9\-.]+$/'],
+
         'contact' => ['required', 'array'],
         'contact.name' => ['required', 'string', 'min:3', 'max:100'],
         'contact.email_address' => ['nullable', 'email', 'max:64'],
         'contact.mobile_number' => ['nullable', 'string', 'size:10'],
-        'contact.amount' => ['required', 'numeric', 'min:0.01'],
-        'contact.account_name' => ['required', 'string', 'min:3', 'max:80'],
-        'contact.account_number' => ['required', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
-        'contact.options.amount_modification' => ['nullable', 'boolean'],
-        'contact.options.expire_after_days' => ['nullable', 'integer', 'min:1'],
-        'contact.options.enable_notification' => ['nullable', 'boolean'],
+
+        'amount' => ['required', 'numeric', 'min:0.01'],
+        'account_name' => ['required', 'string', 'min:3', 'max:80'],
+        'account_number' => ['required', 'regex:/^[0-9]{3}-[0-9]{5}-[0-9]{2,24}$/'],
+
+        'options' => ['nullable', 'array'],
+        'options.amount_modification' => ['nullable', 'boolean'],
+        'options.expire_after_days' => ['nullable', 'integer', 'min:1'],
+        'options.enable_notification' => ['nullable', 'boolean'],
+
         'language' => ['nullable', 'in:EN,FR'],
         'memo' => ['nullable', 'string', 'max:420'],
     ]);
@@ -354,7 +371,25 @@ public function createRequestPayment(Request $request)
         return $this->errorResponse('Validation failed', 'VALIDATION_ERROR', 422, $validator->errors());
     }
 
-    return $this->respond($this->interacService->createRequestPayment($validator->validated()), 201);
+    $payload = $validator->validated();
+
+    if (empty($payload['contact']['email_address']) && empty($payload['contact']['mobile_number'])) {
+        return $this->errorResponse(
+            'Either contact.email_address or contact.mobile_number is required',
+            'VALIDATION_ERROR',
+            422
+        );
+    }
+
+    if (!empty($payload['contact']['email_address']) && !empty($payload['contact']['mobile_number'])) {
+        return $this->errorResponse(
+            'contact.email_address and contact.mobile_number are mutually exclusive',
+            'VALIDATION_ERROR',
+            422
+        );
+    }
+
+    return $this->respond($this->interacService->createRequestPayment($payload), 201);
 }
 
 public function getRequestPayment(string $requestId)
@@ -428,6 +463,12 @@ public function declineIncomingRequestPayment(Request $request, string $networkR
 }
 
 
+
+
+
+
+
+
 public function updateFraudStatus(Request $request)
 {
     $validator = Validator::make($request->all(), [
@@ -460,6 +501,8 @@ public function updateFraudStatus(Request $request)
 
     return $this->respond($this->interacService->updateFraudStatus($validator->validated()), 204);
 }
+
+
 
 
 

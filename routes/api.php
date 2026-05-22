@@ -135,35 +135,35 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 
 
    Route::post('/v1/customer', [InteracController::class, 'createCustomer']);
-    Route::get('/customer/{customerId}', [InteracController::class, 'getCustomer']);
-    Route::put('/customer/{customerId}', [InteracController::class, 'updateCustomer']);
-    Route::patch('/customer/{customerId}/enable', [InteracController::class, 'enableCustomer']);
-    Route::patch('/customer/{customerId}/disable', [InteracController::class, 'disableCustomer']);
+    Route::get('/v1/customer/{customerId}', [InteracController::class, 'getCustomer']);
+    Route::put('/v1/customer/{customerId}', [InteracController::class, 'updateCustomer']);
+    Route::patch('/v1/customer/{customerId}/enable', [InteracController::class, 'enableCustomer']);
+    Route::patch('/v1/customer/{customerId}/disable', [InteracController::class, 'disableCustomer']);
 
-    Route::post('/customer/{customerId}/alias', [InteracController::class, 'createAlias']);
-    Route::get('/customer/{customerId}/alias', [InteracController::class, 'listAliases']);
-    Route::get('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'getAlias']);
-    Route::delete('/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'deleteAlias']);
+    Route::post('/v1/customer/{customerId}/alias', [InteracController::class, 'createAlias']);
+    Route::get('/v1/customer/{customerId}/alias', [InteracController::class, 'listAliases']);
+    Route::get('/v1/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'getAlias']);
+    Route::delete('/v1/customer/{customerId}/alias/{aliasId}', [InteracController::class, 'deleteAlias']);
 
-    Route::post('/payment/options', [InteracController::class, 'retrievePaymentOptions']);
-    Route::post('/payment', [InteracController::class, 'initiatePayment']);
-    Route::put('/payment/{paymentRefId}', [InteracController::class, 'submitPayment']);
-    Route::post('/payment/{paymentRefId}/reverse', [InteracController::class, 'reverseInitiatedPayment']);
-    Route::post('/payment/{paymentRefId}/cancel', [InteracController::class, 'cancelPayment']);
-    Route::get('/payment/{paymentRefId}', [InteracController::class, 'getPayment']);
-    Route::get('/payment', [InteracController::class, 'listPayments']);
+    Route::post('/v1/payment/options', [InteracController::class, 'retrievePaymentOptions']);
+    Route::post('/v1/payment', [InteracController::class, 'initiatePayment']);
+    Route::put('/v1/payment/{paymentRefId}', [InteracController::class, 'submitPayment']);
+    Route::post('v1/payment/{paymentRefId}/reverse', [InteracController::class, 'reverseInitiatedPayment']);
+    Route::post('/v1/payment/{paymentRefId}/cancel', [InteracController::class, 'cancelPayment']);
+    Route::get('/v1/payment/{paymentRefId}', [InteracController::class, 'getPayment']);
+    Route::get('/v1/payment', [InteracController::class, 'listPayments']);
 
-    Route::post('/request', [InteracController::class, 'createRequestPayment']);
-    Route::get('/request/{requestId}', [InteracController::class, 'getRequestPayment']);
-    Route::post('/request/{requestId}/cancel', [InteracController::class, 'cancelRequestPayment']);
-    Route::post('/request/receive', [InteracController::class, 'retrieveIncomingRequestPayment']);
-    Route::post('/v1/interac/request/receive/{networkRequestRefId}/decline', [InteracController::class, 'declineIncomingRequestPayment']);
+    Route::post('/v1/request', [InteracController::class, 'createRequestPayment']);
+    Route::get('/v1/request/{requestId}', [InteracController::class, 'getRequestPayment']);
+    Route::post('/v1/request/{requestId}/cancel', [InteracController::class, 'cancelRequestPayment']);
+    Route::post('/v1/request/receive', [InteracController::class, 'retrieveIncomingRequestPayment']);
+    Route::post('/v1/request/receive/{networkRequestRefId}/decline', [InteracController::class, 'declineIncomingRequestPayment']);
 
-    Route::post('{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
-    Route::post('{account_num}/transaction', [InteracAccountController::class, 'transaction']);
-    Route::post('{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
+    Route::post('/v1/{account_num}/eligibility', [InteracAccountController::class, 'eligibility']);
+    Route::post('/v1/{account_num}/transaction', [InteracAccountController::class, 'transaction']);
+    Route::post('/v1/{account_num}/{transaction_id}/reversal', [InteracAccountController::class, 'reversal']);
 
-    Route::patch('/v1/interac/fraud/status', [InteracController::class, 'updateFraudStatus']);
+    Route::patch('/v1/fraud/status', [InteracController::class, 'updateFraudStatus']);
 
 
 
@@ -598,6 +598,3 @@ Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
 
 });
 // git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
-
-
-
