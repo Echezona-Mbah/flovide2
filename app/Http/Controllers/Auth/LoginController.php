@@ -230,22 +230,23 @@ class LoginController extends Controller
         $subaccounts = Subaccount::where('user_id', $account->id)->get();
         $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)->getSumsubToken()->getData(true);
         $countryrule = CountryRule::where('is_active', 1)->select('country_iso', 'country_name', 'currency_iso')->get();
-        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')->get()
-            ->mapWithKeys(function ($c) {
+        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')
+            ->get()
+            ->map(function ($c) {
                 return [
-                    $c->code => [
-                        'code' => $c->code,
-                        'name' => $c->name,
-                        'symbol' => $c->symbol,
-                        'country_code' => strtolower($c->country_code ?? ''),
-                    ]
+                    'code' => $c->code,
+                    'name' => $c->name,
+                    'symbol' => $c->symbol,
+                    'country_code' => strtolower($c->country_code ?? ''),
                 ];
-            });
+            })
+            ->values()
+            ->toArray();
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
-                    'from' => $r->fromCurrency->code ?? null,
-                    'to' => $r->toCurrency->code ?? null,
+                    'from_currency' => $r->fromCurrency->code ?? null,
+                    'to_currency' => $r->toCurrency->code ?? null,
                     'rate' => (float) $r->rate,
                     'transfer_fee' => (float) $r->transfer_fee,
                     'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
@@ -274,8 +275,7 @@ class LoginController extends Controller
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
                     'email_verified_status' => $account->email_verified_status,
-                    'referral_code' => $account->referral_code,
-                    'referral_link' => $account->referral_link,
+
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,
@@ -500,22 +500,23 @@ class LoginController extends Controller
         $countryrule = CountryRule::where('is_active', 1)
             ->select('country_iso', 'country_name', 'currency_iso')
             ->get();
-            $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')->get()
-            ->mapWithKeys(function ($c) {
+        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')
+            ->get()
+            ->map(function ($c) {
                 return [
-                    $c->code => [
-                        'code' => $c->code,
-                        'name' => $c->name,
-                        'symbol' => $c->symbol,
-                        'country_code' => strtolower($c->country_code ?? ''),
-                    ]
+                    'code' => $c->code,
+                    'name' => $c->name,
+                    'symbol' => $c->symbol,
+                    'country_code' => strtolower($c->country_code ?? ''),
                 ];
-            });
+            })
+            ->values()
+            ->toArray();
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
-                    'from' => $r->fromCurrency->code ?? null,
-                    'to' => $r->toCurrency->code ?? null,
+                    'from_currency' => $r->fromCurrency->code ?? null,
+                    'to_currency' => $r->toCurrency->code ?? null,
                     'rate' => (float) $r->rate,
                     'transfer_fee' => (float) $r->transfer_fee,
                     'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),

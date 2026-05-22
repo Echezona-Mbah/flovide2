@@ -34,6 +34,15 @@
 </div> --}}
 
 
+@if(!$isOwner)
+<section class="bg-white rounded-2xl p-8 shadow">
+    <h2 class="text-xl font-bold text-gray-900">Compliance Access Restricted</h2>
+    <p class="text-gray-600 mt-2">
+        Only the business owner can view or submit compliance documents.
+    </p>
+</section>
+@else
+
         <section class=" relative w-full ">
             @if (!auth()->user()->isFullyVerified())
             <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
@@ -1234,6 +1243,9 @@
             </section>
 
         </section>
+
+@endif
+
     </main>
 
 

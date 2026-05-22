@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Models\TeamMembers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\TransactionHistory;
@@ -41,7 +42,11 @@ class TransactionHistoryController extends Controller
 
    public function transaction()
 {
-    $transactions = TransactionHistory::where('user_id', Auth::id())
+    $user = auth()->user();
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+
+    $transactions = TransactionHistory::where('user_id', $ownerId)
     ->orderBy('created_at', 'desc')
     ->paginate(12);
 
@@ -95,27 +100,14 @@ public function showAllTransactions()
 }
 
 
-    // public function UserTransaction($id)
-    // {
-    //     $transaction = TransactionHistory::where('user_id', Auth::id())
-    //         ->where('id', $id)
-    //         ->first();
 
-    //     if (!$transaction) {
-    //         return response()->json([
-    //             'message' => 'Transaction not found.'
-    //         ], 404);
-    //     }
-
-    //     return response()->json([
-    //         'message' => 'User Transaction retrieved successfully.',
-    //         'data' => $transaction
-    //     ]);
-    // }
 
 public function UserTransaction($id)
 {
-    $transaction = TransactionHistory::where('user_id', Auth::id())
+        $user = auth()->user();
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+    $transaction = TransactionHistory::where('user_id', $ownerId)
         ->where('id', $id)
         ->first();
 

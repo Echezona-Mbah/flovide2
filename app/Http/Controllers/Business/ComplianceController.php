@@ -22,13 +22,25 @@ class ComplianceController extends Controller
 
 
 
-        public function index(Request $request)
-    {
+    //     public function index(Request $request)
+    // {
     
-        return view('business.compliance', [
-            'user' => auth()->user()
-        ]);
-    }
+    //     return view('business.compliance', [
+    //         'user' => auth()->user()
+    //     ]);
+    // }
+
+
+    public function index(Request $request)
+{
+    $actor = auth()->user();
+    $team = \App\Models\TeamMembers::where('user_id', $actor->id)->first();
+    $isOwner = $team ? false : true;
+
+    $user = $isOwner ? $actor : null;
+
+    return view('business.compliance', compact('user', 'isOwner'));
+}
 
           public function store(Request $request)
     {
