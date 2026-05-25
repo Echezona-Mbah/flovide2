@@ -306,10 +306,10 @@ class LoginController extends Controller
 
         $account = User::where('email', $request->email)->first();
 
-        if ($account->login_otp_expires_at && now()->diffInSeconds($account->login_otp_expires_at->subMinutes(5)) < 60) {
+        if ($account->login_otp_expires_at && now()->diffInSeconds($account->login_otp_expires_at->subMinutes(5)) < 300) {
             return response()->json([
                 'success' => false,
-                'message' => 'You can request a new OTP after 60 seconds.',
+                'message' => 'You can request a new OTP after 5 minutes.',
                 'code' => 'OTP_RATE_LIMIT',
                 'data' => null
             ], 429);
