@@ -1087,13 +1087,13 @@ Console.WriteLine(body);`,
   }
 }`
             },
-            'beneficiary-create': {
-                curl: `curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
+     'beneficiary-create': {
+  curl: `curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -1117,7 +1117,7 @@ Console.WriteLine(body);`,
 })
   .then(res => res.json())
   .then(data => console.log(data));`,
-                go: `package main
+  go: `package main
 
 import (
   "bytes"
@@ -1154,7 +1154,7 @@ func main() {
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
 }`,
-                python: `import requests
+  python: `import requests
 
 response = requests.post(
     "https://flovide.com/api/v1/beneficiaries",
@@ -1180,7 +1180,7 @@ response = requests.post(
 )
 
 print(response.json())`,
-                java: `String json = """
+  java: `String json = """
 {
   "type": "individual",
   "firstNames": "ECHEZONA",
@@ -1209,7 +1209,7 @@ HttpResponse<String> response = HttpClient.newHttpClient()
     .send(request, HttpResponse.BodyHandlers.ofString());
 
 System.out.println(response.body());`,
-                csharp: `using System.Text;
+  csharp: `using System.Text;
 
 using var client = new HttpClient();
 
@@ -1238,43 +1238,46 @@ var response = await client.PostAsync("https://flovide.com/api/v1/beneficiaries"
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
-                response: `{
+  response: `{
   "success": true,
   "message": "Beneficiary created successfully",
   "data": {
+    "id": "019e5ef7-0f62-72eb-8202-bfdf33e4c9fc",
     "country": "NG",
-    "currency": "NGN",
+    "default_reference": null,
+    "alias": null,
     "type": "individual",
-    "first_names": "ECHEZONA",
-    "last_name": "MBAH",
-    "beneficiary_name": null,
-    "account_number": "6322069407",
-    "account_name": "ECHEZONA ERNEST MBAH",
-    "phone": null,
-    "bank": "FIDELITY BANK",
-    "transfer_method": "bank",
-    "bank_code": "000007",
-    "id": 019d0a58-ac0f-70de-9b54-b280179a2598
+    "created": "2026-05-25T11:48:30+00:00",
+    "bank_account": {
+      "account_name": "ECHEZONA ERNEST MBAH",
+      "sort_code": null,
+      "bank_code": "000007",
+      "account_number": "6322069407",
+      "bank_name": "FIDELITY BANK",
+      "currency": "NGN"
+    }
   }
 }`
-            },
+},
 
-            'beneficiary-list': {
-                curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries" ^
+        'beneficiary-list': {
+  curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
-                javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
+
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
   .then(data => console.log(data));`,
-                go: `package main
+
+  go: `package main
 
 import (
   "fmt"
@@ -1286,7 +1289,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1295,69 +1298,104 @@ func main() {
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
 }`,
-                python: `import requests
+
+  python: `import requests
 
 response = requests.get(
     "https://flovide.com/api/v1/beneficiaries",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
 print(response.json())`,
-                java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
-    .header("Accept", "application/json")
-    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
-    .GET()
-    .build();
 
-HttpResponse<String> response = HttpClient.newHttpClient()
-    .send(request, HttpResponse.BodyHandlers.ofString());
+  java: `import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-System.out.println(response.body());`,
-                csharp: `using var client = new HttpClient();
+public class Main {
+  public static void main(String[] args) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
+        .header("Accept", "application/json")
+        .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+        .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+        .GET()
+        .build();
 
-client.DefaultRequestHeaders.Add("Accept", "application/json");
-client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+    HttpResponse<String> response = HttpClient.newHttpClient()
+        .send(request, HttpResponse.BodyHandlers.ofString());
 
-var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries");
-var body = await response.Content.ReadAsStringAsync();
+    System.out.println(response.body());
+  }
+}`,
 
-Console.WriteLine(body);`,
-                response: `{
+  csharp: `using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+class Program
+{
+  static async Task Main()
+  {
+    using var client = new HttpClient();
+
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+    client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
+
+    var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries");
+    var body = await response.Content.ReadAsStringAsync();
+
+    Console.WriteLine(body);
+  }
+}`,
+
+  response: `{
   "message": "Beneficiaries retrieved successfully",
   "success": true,
   "data": [
     {
-      "id": 019d0a58-ac0f-70de-9b54-b280179a2598,
-      "account_name": "ECHEZONA ERNEST MBAH",
-      "bank": "FIDELITY BANK",
-      "currency": "NGN"
+      "id": "88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
+      "country": "GB",
+      "default_reference": "Invoice",
+      "alias": "John's Savings",
+      "type": "personal",
+      "created": "2019-09-02T13:16:47+01:00",
+      "bank_account": {
+        "account_name": "John Doe",
+        "sort_code": "040004",
+        "bank_code": "058",
+        "account_number": "12345678",
+        "bank_name": "Monzo Bank Limited",
+        "currency": "GBP"
+      }
     }
   ]
 }`
-            },
+},
 
-            'beneficiary-single': {
+           'beneficiary-single': {
   curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries/114" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
+
   javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
   .then(data => console.log(data));`,
+
   go: `package main
 
 import (
@@ -1370,7 +1408,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries/114", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1379,6 +1417,7 @@ func main() {
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
 }`,
+
   python: `import requests
 
 response = requests.get(
@@ -1386,40 +1425,73 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
 print(response.json())`,
-  java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
-    .header("Accept", "application/json")
-    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
-    .GET()
-    .build();
 
-HttpResponse<String> response = HttpClient.newHttpClient()
-    .send(request, HttpResponse.BodyHandlers.ofString());
+  java: `import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-System.out.println(response.body());`,
-  csharp: `using var client = new HttpClient();
+public class Main {
+  public static void main(String[] args) throws Exception {
+    HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
+        .header("Accept", "application/json")
+        .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+        .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+        .GET()
+        .build();
 
-client.DefaultRequestHeaders.Add("Accept", "application/json");
-client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+    HttpResponse<String> response = HttpClient.newHttpClient()
+        .send(request, HttpResponse.BodyHandlers.ofString());
 
-var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries/114");
-var body = await response.Content.ReadAsStringAsync();
+    System.out.println(response.body());
+  }
+}`,
 
-Console.WriteLine(body);`,
+  csharp: `using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+class Program
+{
+  static async Task Main()
+  {
+    using var client = new HttpClient();
+
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+    client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
+
+    var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries/114");
+    var body = await response.Content.ReadAsStringAsync();
+
+    Console.WriteLine(body);
+  }
+}`,
+
   response: `{
   "success": true,
+  "message": "Beneficiary retrieved successfully",
   "data": {
-    "id": 019d0a58-ac0f-70de-9b54-b280179a2598,
-    "account_name": "ECHEZONA ERNEST MBAH",
-    "bank": "FIDELITY BANK",
-    "currency": "NGN"
+    "id": "88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
+    "country": "GB",
+    "default_reference": "Invoice",
+    "alias": "John's Savings",
+    "type": "personal",
+    "created": "2019-09-02T13:16:47+01:00",
+    "bank_account": {
+      "account_name": "John Doe",
+      "sort_code": "040004",
+      "bank_code": "058",
+      "account_number": "12345678",
+      "bank_name": "Monzo Bank Limited",
+      "currency": "GBP"
+    }
   }
 }`
 },
@@ -1499,7 +1571,6 @@ Console.WriteLine(body);`,
   "message": "Beneficiary deleted successfully"
 }`
 },
-
 'transactions-list': {
   curl: `curl -X GET "https://flovide.com/api/v1/transactions" ^
   -H "Accept: application/json" ^
@@ -1573,7 +1644,48 @@ Console.WriteLine(body);`,
   response: `{
   "success": true,
   "message": "Transactions retrieved successfully",
-  "data": []
+  "data": [
+    {
+      "id": "019e3d04-4d27-7034-aa43-5a5e939cd6b2",
+      "amount": 100,
+      "fees": 0,
+      "currency": "NGN",
+      "to_currency": null,
+      "balance_id": "b6820b8a-2434-11f1-a9fd-84a93e49c6d5",
+      "status": "success",
+      "transaction_type": "exchange",
+      "recipient": {
+        "id": null,
+        "country": "GH",
+        "bank_account": {
+          "account_name": "Echezona Mbah",
+          "account_number": "NGN",
+          "bank_name": null,
+          "currency": null
+        }
+      }
+    },
+    {
+      "id": "019e0261-9d94-7343-abb7-70a7de3a02bf",
+      "amount": 50,
+      "fees": 55,
+      "currency": "GBP",
+      "to_currency": "NGN",
+      "balance_id": "b6821788-2434-11f1-a9fd-84a93e49c6d5",
+      "status": "pending",
+      "transaction_type": "withdrawal",
+      "recipient": {
+        "id": null,
+        "country": "NG",
+        "bank_account": {
+          "account_name": "ALPHA  MPANGO",
+          "account_number": "256755289333",
+          "bank_name": null,
+          "currency": "NGN"
+        }
+      }
+    }
+  ]
 }`
 },
 
@@ -1651,11 +1763,28 @@ Console.WriteLine(body);`,
   "success": true,
   "message": "Transaction retrieved successfully",
   "data": {
-    "id": 1,
-    "amount": "5000.00",
+    "id": "019e0261-9d94-7343-abb7-70a7de3a02bf",
+    "amount": 50,
+    "fees": 55,
     "currency": "GBP",
-    "status": "successful"
-  }
+    "to_currency": "NGN",
+    "balance_id": "b6821788-2434-11f1-a9fd-84a93e49c6d5",
+    "status": "pending",
+    "transaction_type": "withdrawal",
+    "recipient": {
+      "id": null,
+      "country": "NG",
+      "created": null,
+      "bank_account": {
+        "account_name": "ALPHA  MPANGO",
+        "account_number": "256755289333",
+        "bank_name": null,
+        "currency": "NGN"
+      }
+    }
+  },
+  "method": "GET",
+  "url": "https://flovide.com/api/v1/transactions/1"
 }`
 },
 
@@ -1665,7 +1794,7 @@ Console.WriteLine(body);`,
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-  -d "{\"amount\":1000,\"recipient_id\":\"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234\",\"balance_id\":1,\"reference\":\"Test payment\",\"transfer_fee\":0,\"total_amount\":1000,\"exchange_rate\":\"NGN to NGN\",\"recipient_amount\":1000,\"account_number\":\"1234567890\",\"account_name\":\"John Doe\",\"bank\":\"bank\",\"bank_code\":\"058\"}"`,
+  -d "{\"amount\":100,\"recipient_id\":\"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234\",\"balance_id\":\"019d86e0-1afb-733f-ac4b-4af1a8a224ee\",\"reference\":\"Test payment\",\"transfer_fee\":0,\"total_amount\":100,\"exchange_rate\":\"1.00 KES = 89700.00 NGN\",\"recipient_amount\":100,\"account_number\":\"8172653823\",\"account_name\":\"Mbah Echezona Ernest\",\"bank\":\"bank\",\"bank_code\":\"100004\"}"`,
   javascript: `fetch('https://flovide.com/api/v1/transactions', {
   method: 'POST',
   headers: {
@@ -1675,18 +1804,18 @@ Console.WriteLine(body);`,
     'X-Secret-Key': 'REDACTED_STRIPE_KEY'
   },
   body: JSON.stringify({
-    amount: 1000,
+    amount: 100,
     recipient_id: '97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234',
-    balance_id: 1,
+    balance_id: '019d86e0-1afb-733f-ac4b-4af1a8a224ee',
     reference: 'Test payment',
     transfer_fee: 0,
-    total_amount: 1000,
-    exchange_rate: 'NGN to NGN',
-    recipient_amount: 1000,
-    account_number: '1234567890',
-    account_name: 'John Doe',
+    total_amount: 100,
+    exchange_rate: '1.00 KES = 89700.00 NGN',
+    recipient_amount: 100,
+    account_number: '8172653823',
+    account_name: 'Mbah Echezona Ernest',
     bank: 'bank',
-    bank_code: '058'
+    bank_code: '100004'
   })
 })
   .then(res => res.json())
@@ -1702,18 +1831,18 @@ import (
 
 func main() {
   jsonData := []byte(\`{
-    "amount":1000,
+    "amount":100,
     "recipient_id":"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
-    "balance_id":1,
+    "balance_id":"019d86e0-1afb-733f-ac4b-4af1a8a224ee",
     "reference":"Test payment",
     "transfer_fee":0,
-    "total_amount":1000,
-    "exchange_rate":"NGN to NGN",
-    "recipient_amount":1000,
-    "account_number":"1234567890",
-    "account_name":"John Doe",
+    "total_amount":100,
+    "exchange_rate":"1.00 KES = 89700.00 NGN",
+    "recipient_amount":100,
+    "account_number":"8172653823",
+    "account_name":"Mbah Echezona Ernest",
     "bank":"bank",
-    "bank_code":"058"
+    "bank_code":"100004"
   }\`)
 
   req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/transactions", bytes.NewBuffer(jsonData))
@@ -1740,36 +1869,36 @@ response = requests.post(
         "X-Secret-Key": "REDACTED_STRIPE_KEY",
     },
     json={
-        "amount": 1000,
+        "amount": 100,
         "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
-        "balance_id": 1,
+        "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
         "reference": "Test payment",
         "transfer_fee": 0,
-        "total_amount": 1000,
-        "exchange_rate": "NGN to NGN",
-        "recipient_amount": 1000,
-        "account_number": "1234567890",
-        "account_name": "John Doe",
+        "total_amount": 100,
+        "exchange_rate": "1.00 KES = 89700.00 NGN",
+        "recipient_amount": 100,
+        "account_number": "8172653823",
+        "account_name": "Mbah Echezona Ernest",
         "bank": "bank",
-        "bank_code": "058"
+        "bank_code": "100004"
     },
 )
 
 print(response.json())`,
   java: `String json = """
 {
-  "amount": 1000,
+  "amount": 100,
   "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
-  "balance_id": 1,
+  "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
   "reference": "Test payment",
   "transfer_fee": 0,
-  "total_amount": 1000,
-  "exchange_rate": "NGN to NGN",
-  "recipient_amount": 1000,
-  "account_number": "1234567890",
-  "account_name": "John Doe",
+  "total_amount": 100,
+  "exchange_rate": "1.00 KES = 89700.00 NGN",
+  "recipient_amount": 100,
+  "account_number": "8172653823",
+  "account_name": "Mbah Echezona Ernest",
   "bank": "bank",
-  "bank_code": "058"
+  "bank_code": "100004"
 }
 """;
 
@@ -1796,18 +1925,18 @@ client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
 var json = """
 {
-  "amount": 1000,
+  "amount": 100,
   "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
-  "balance_id": 1,
+  "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
   "reference": "Test payment",
   "transfer_fee": 0,
-  "total_amount": 1000,
-  "exchange_rate": "NGN to NGN",
-  "recipient_amount": 1000,
-  "account_number": "1234567890",
-  "account_name": "John Doe",
+  "total_amount": 100,
+  "exchange_rate": "1.00 KES = 89700.00 NGN",
+  "recipient_amount": 100,
+  "account_number": "8172653823",
+  "account_name": "Mbah Echezona Ernest",
   "bank": "bank",
-  "bank_code": "058"
+  "bank_code": "100004"
 }
 """;
 
@@ -1817,7 +1946,25 @@ var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
   response: `{
-  "message": "Transaction initiated successfully"
+  "success": true,
+  "message": "Transaction transaction successful",
+  "code": "FLOVIDE_SUCCESS",
+  "data": {
+    "id": "019e5fbb-903a-7216-8927-56cdda359d62",
+    "reference": "ref-3309da96-1e9b-48e8-bdaa-efd3697e8a48",
+    "order_id": "TXN_1779722588",
+    "status": "pending",
+    "amount": 100,
+    "total_amount": 100,
+    "fees": 0,
+    "currency": "KES",
+    "to_currency": "NGN",
+    "recipient_amount": 100,
+    "payment_provider": "Flovide",
+    "recipient_account_name": "Mbah Echezona Ernest",
+    "recipient_account_number": "8172653823",
+    "created_at": "2026-05-25T15:23:08+00:00"
+  }
 }`
 },
 

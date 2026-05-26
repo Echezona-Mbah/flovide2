@@ -74,12 +74,29 @@ class BeneficiaryController extends Controller
 
         $beneficias = Beneficia::where('user_id', $user->id)->latest()->get();
 
+        $data = $beneficias->map(function ($b) {
+            return [
+                'id' => $b->id,
+                'country' => $b->country,
+                'default_reference' => $b->default_reference ?? 'Invoice',
+                'alias' => $b->alias,
+                'type' => $b->type,
+                'created' => optional($b->created_at)->toIso8601String(),
+                'bank_account' => [
+                    'account_name' => $b->account_name,
+                    'sort_code' => $b->sort_code ?? null,
+                    'bank_code' => $b->bank_code,
+                    'account_number' => $b->account_number,
+                    'bank_name' => $b->bank ?? null,
+                    'currency' => $b->currency,
+                ],
+            ];
+        });
+
         return response()->json([
             'message' => 'Beneficiaries retrieved successfully',
             'success' => true,
-            'data' => $beneficias,
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
+            'data' => $data,
         ], 200);
     }
 
@@ -431,11 +448,26 @@ class BeneficiaryController extends Controller
                 'user_id' => $user->id,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Beneficiary created successfully',
-                'data' => $beneficia,
-            ], 201);
+             return response()->json([
+            'success' => true,
+            'message' => 'Beneficiary created successfully',
+            'data' => [
+                'id' => (string) ($beneficia->id),
+                'country' => $beneficia->country,
+                'default_reference' => $beneficia->default_reference,
+                'alias' => $beneficia->alias,
+                'type' => $beneficia->type,
+                'created' => optional($beneficia->created_at)->toIso8601String(),
+                'bank_account' => [
+                    'account_name' => $beneficia->account_name,
+                    'sort_code' => $beneficia->sort_code,
+                    'bank_code' => $beneficia->bank_code,
+                    'account_number' => $beneficia->account_number,
+                    'bank_name' => $beneficia->bank,
+                    'currency' => $beneficia->currency,
+                ],
+            ],
+        ], 201);
         } catch (\Exception $e) {
             logger('Beneficiary Store Error: ' . $e->getMessage());
 
@@ -512,37 +544,49 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
-    public function show(Request $request, $id)
-    {
-        $user = $this->resolveKeyUser($request);
+public function show(Request $request, $id)
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
-
-        $beneficia = Beneficia::where('user_id', $user->id)
-            ->where('id', $id)
-            ->first();
-
-        if (! $beneficia) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Beneficiary not found',
-            ], 404);
-        }
-
+    if (! $user) {
         return response()->json([
-            'success' => true,
-            'message' => 'Beneficiary retrieved successfully',
-            'data' => $beneficia,
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
-        ], 200);
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
 
+    $beneficia = Beneficia::where('user_id', $user->id)
+        ->where('id', $id)
+        ->first();
+
+    if (! $beneficia) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Beneficiary not found',
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Beneficiary retrieved successfully',
+        'data' => [
+            'id' => (string) ($beneficia->recipient_id ?? $beneficia->id),
+            'country' => $beneficia->country,
+            'default_reference' => $beneficia->default_reference,
+            'alias' => $beneficia->alias,
+            'type' => $beneficia->type,
+            'created' => optional($beneficia->created_at)->toIso8601String(),
+            'bank_account' => [
+                'account_name' => $beneficia->account_name,
+                'sort_code' => $beneficia->sort_code,
+                'bank_code' => $beneficia->bank_code,
+                'account_number' => $beneficia->account_number,
+                'bank_name' => $beneficia->bank,
+                'currency' => $beneficia->currency,
+            ],
+        ],
+    ], 200);
+}
 
 
 

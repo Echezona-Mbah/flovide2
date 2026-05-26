@@ -50,12 +50,38 @@ class TransactionController extends Controller
             ->latest()
             ->get();
 
+        $data = $transactions->map(function ($tx) {
+            return [
+                'id' => $tx->id,
+                'amount' => $tx->amount !== null ? (float) $tx->amount : 0,
+                'fees' => $tx->fees !== null ? (float) $tx->fees : 0,
+                'currency' => $tx->currency,
+                'to_currency' => $tx->to_currency,
+                'balance_id' => $tx->balance_id,
+                'status' => $tx->status,
+                'transaction_type' => $tx->transaction_type ?? $tx->method,
+                'recipient' => [
+                    'id' => $tx->recipient_id ?? $tx->beneficias_id,
+                    'country' => $tx->recipient_country,
+                    // 'default_reference' => $tx->recipient_default_reference,
+                    // 'alias' => $tx->recipient_alias,
+                    // 'type' => $tx->recipient_type,
+                    // 'created' => $tx->recipient_created_at,
+                    'bank_account' => [
+                        'account_name' => $tx->recipient_account_name,
+                        // 'sort_code' => $tx->recipient_sort_code,
+                        'account_number' => $tx->recipient_account_number,
+                        'bank_name' => $tx->recipient_bank_name,
+                        'currency' => $tx->recipient_bank_currency ?? $tx->to_currency,
+                    ],
+                ],
+            ];
+        })->values();
+
         return response()->json([
             'success' => true,
             'message' => 'Transactions retrieved successfully',
-            'data' => $transactions,
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
+            'data' => $data,
         ], 200);
     }
 
@@ -91,36 +117,67 @@ class TransactionController extends Controller
      *     @OA\Response(response=404, description="Transaction not found")
      * )
      */
-    public function show(Request $request, $id)
-    {
-        $user = $this->resolveKeyUser($request);
+public function show(Request $request, $id)
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
-
-        $transaction = TransactionHistory::where('user_id', $user->id)
-            ->where('id', $id)
-            ->first();
-
-        if (! $transaction) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Transaction not found',
-            ], 404);
-        }
-
+    if (! $user) {
         return response()->json([
-            'success' => true,
-            'message' => 'Transaction retrieved successfully',
-            'data' => $transaction,
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
-        ], 200);
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $transaction = TransactionHistory::where('user_id', $user->id)
+        ->where('id', $id)
+        ->first();
+
+    if (! $transaction) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction not found',
+        ], 404);
+    }
+
+    $data = [
+        'id' => $transaction->id,
+        'amount' => $transaction->amount !== null ? (float) $transaction->amount : 0,
+        'fees' => $transaction->fees !== null ? (float) $transaction->fees : 0,
+        'currency' => $transaction->currency,
+        'to_currency' => $transaction->to_currency,
+        'balance_id' => $transaction->balance_id,
+        // 'virtual_account_id' => $transaction->virtual_account_id,
+        // 'order_id' => $transaction->order_id,
+        'payment_reference' => $transaction->payment_reference,
+        'status' => $transaction->status,
+        // 'failure_reason' => $transaction->failure_reason,
+        'transaction_type' => $transaction->transaction_type ?? $transaction->method,
+        // 'payment_method' => $transaction->payment_method,
+        'recipient' => [
+            'id' => $transaction->recipient_id ?? $transaction->beneficias_id,
+            'country' => $transaction->recipient_country,
+            // 'default_reference' => $transaction->recipient_default_reference,
+            // 'alias' => $transaction->recipient_alias,
+            // 'type' => $transaction->recipient_type,
+            'created' => $transaction->recipient_created_at,
+            'bank_account' => [
+                'account_name' => $transaction->recipient_account_name,
+                // 'sort_code' => $transaction->recipient_sort_code,
+                'account_number' => $transaction->recipient_account_number,
+                'bank_name' => $transaction->recipient_bank_name,
+                'currency' => $transaction->recipient_bank_currency ?? $transaction->to_currency,
+            ],
+        ],
+    ];
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Transaction retrieved successfully',
+        'data' => $data,
+        'method' => $request->method(),
+        'url' => $request->fullUrl(),
+    ], 200);
+}
 
     /**
      * @OA\Post(

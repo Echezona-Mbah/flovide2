@@ -85,6 +85,8 @@ class SendMoneyController extends Controller
             'transfer_method' => 'nullable|string',
         ]);
 
+        // dd($request->all());die();
+
         $actor = $this->resolveKeyUser($request) ?? auth()->user();
         if (! $actor) {
             $msg = 'Unauthorized';
@@ -152,6 +154,7 @@ class SendMoneyController extends Controller
                 'sender' => $actor->business_name ?? $actor->name,
                 'recipient_account_number' => $request->account_number,
                 'recipient_account_name' => $request->account_name,
+                'recipient_id' => $request->recipient_id,
                 'recipient_country' => strtoupper(substr($currency, 0, 2)),
                 'recipient_bank_currency' => $currency,
                 'to_currency' => $currency,
