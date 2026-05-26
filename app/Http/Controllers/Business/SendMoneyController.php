@@ -1021,7 +1021,10 @@ public function exchangeSubmit(Request $request)
             'currency' => $from,
             'balance_id' => $fromBalance->id,
             'status' => 'success',
-            'method' => 'exchange',
+            
+            // 'method' => 'exchange',
+            'method' => 'Swap ' . $from . ' to ' . $to,
+
             'reference' => 'ref-' . Str::uuid(),
             'user_id' => $ownerId,
             'created_by_member_id' => $memberId,

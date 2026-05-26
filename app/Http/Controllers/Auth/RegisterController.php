@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 
 
+use Illuminate\Support\Facades\Http;
 
 
 class RegisterController extends Controller
@@ -36,6 +37,34 @@ class RegisterController extends Controller
         } while ($existsInPersonals || $existsInUsers);
 
         return $code;
+    }
+
+
+
+
+    public function fetchcountrylist(Request $request)
+    {
+        $country_name = $request->get('country_name', 'NG'); 
+        $alpha2 = $request->get('alpha2', 'NGN'); 
+
+        $response = Http::withToken(env('OHENTPAY_API_KEY'))
+            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries', [
+                'country_name' => $country_name,
+                'alpha2' => $alpha2
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'fields' => $response->json()
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to fetch bank fields',
+            'details' => $response->json()
+        ], $response->status());
     }
 
 
@@ -342,28 +371,31 @@ public function registerUser(Request $request)
 
 
 
-    public function getAllCountry()
-{
-    $countries = Countries::all();
+    public function getAllCountry(Request $request) {
+        // $countries = Countries::all();
 
-    if ($countries->isEmpty()) {
+        $countryResponse = $this->fetchcountrylist($request);
+        $countries = $countryResponse->getData();
+
+        // if ($countries->isEmpty()) {
+        if (!$countries) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No countries found',
+                'code' => 'COUNTRIES_EMPTY',
+                'data' => null
+            ], 404);
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'No countries found',
-            'code' => 'COUNTRIES_EMPTY',
-            'data' => null
-        ], 404);
+            'success' => true,
+            'message' => 'Countries fetched',
+            'code' => 'COUNTRIES_FETCHED',
+            'data' => [
+                'countries' => $countries
+            ]
+        ], 200);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Countries fetched',
-        'code' => 'COUNTRIES_FETCHED',
-        'data' => [
-            'countries' => $countries
-        ]
-    ], 200);
-}
 
 
     public function deleteUser(Request $request, $email)

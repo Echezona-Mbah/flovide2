@@ -137,7 +137,7 @@ Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileA
 Route::middleware(['auth','business.verified'])->group(function () {
 
 
-        Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
+    Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
 
 
     Route::get('/verify_bvn', [RegisteredUserController::class, 'bvn'])->name('verify_bvn');

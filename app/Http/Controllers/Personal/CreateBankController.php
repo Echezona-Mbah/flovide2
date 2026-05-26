@@ -215,6 +215,9 @@ public function index(Request $request)
 
     $balances = \App\Models\Balance::where('personal_id', $account)->get();
 
+    //Total balance
+    $totalBalance = $balances->sum('amount');
+
     $transactions = \App\Models\TransactionHistory::where('personal_id', $account)
         ->latest()
         ->take(4)
@@ -274,6 +277,7 @@ public function index(Request $request)
             'success' => true,
             'message' => 'Dashboard data fetched successfully',
             'data' => [
+                'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'balances'        => $balances,
                 'chart_data'      => $chartData,
                 'recent_history'  => $transactions,
@@ -283,6 +287,7 @@ public function index(Request $request)
     }
 
     return view('dashboard.index', [
+        'totalBalance' => $totalBalance,
         'balances' => $balances,
         'chartData' => $chartData,
         'transactions' => $transactions,
