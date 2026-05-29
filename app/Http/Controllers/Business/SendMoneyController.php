@@ -83,9 +83,11 @@ class SendMoneyController extends Controller
             'bank' => 'nullable|string',
             'bank_code' => 'nullable|string',
             'transfer_method' => 'nullable|string',
+            // 'transaction_type' => 'nullable|in:payment',
+            // 'order_id' => 'nullable|string|max:100',
         ]);
 
-        // dd($request->all());die();
+        //  dd($request->all());die();
 
         $actor = $this->resolveKeyUser($request) ?? auth()->user();
         if (! $actor) {
@@ -147,7 +149,8 @@ class SendMoneyController extends Controller
                 'status' => 'pending',
                 'method' => 'withdrawal',
                 'payment_provider' => 'wallect',
-                'reference' => 'ref-' . Str::uuid(),
+                'order_id' => $request->order_id,
+                'reference' => $request->reference ?? 'ref-' . Str::uuid(),
                 'user_id' => $ownerId,
                 'created_by_member_id' => $memberId,
                 'sender_id' => $ownerId,
@@ -161,6 +164,7 @@ class SendMoneyController extends Controller
                 'fees' => $request->transfer_fee,
                 'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
                 'recipient_amount' => $request->recipient_amount,
+
             ]);
 
             if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
