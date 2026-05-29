@@ -322,6 +322,7 @@ public function dashboardapi(Request $request)
                 'currency'  => $t->currency,
                 'status'    => $t->status,
                 'reference' => $t->reference,
+                'method' => $t->method,
                 'recipient_details' => [
                     'alias'          => $t->recipient_alias,
                     'account_name'   => $t->recipient_account_name,
