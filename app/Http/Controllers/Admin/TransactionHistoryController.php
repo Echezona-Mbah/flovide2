@@ -49,7 +49,7 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
 
     try {
         // ✅ Pivot
-        if (in_array($currency, ['UGX','KES'])) {
+        if (in_array($currency, ['UGX'])) {
             $auth = $pivot->authenticate();
             if (isset($auth['error'])) {
                 return back()->withErrors(['error' => $auth['error']]);

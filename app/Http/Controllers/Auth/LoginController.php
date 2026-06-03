@@ -174,10 +174,40 @@ class LoginController extends Controller
             "Hello {$account->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
         ));
 
-        $balances = \App\Models\Balance::where('user_id', $account->id)->get();
-        $totalBalance = $balances->sum(function ($b) {
-            return (float) $b->amount;
-        });
+        $balances = \App\Models\Balance::where('user_id', $account->id)
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+        $defaultBalance = $balances->first();
+        $defaultCurrency = strtoupper($defaultBalance?->currency ?? $account->currency ?? 'USD');
+
+        $totalBalance = 0;
+
+        foreach ($balances as $balance) {
+            $balanceCurrency = strtoupper($balance->currency);
+            $balanceAmount = (float) $balance->amount;
+
+            if ($balanceAmount <= 0) {
+                continue;
+            }
+
+            if ($balanceCurrency === $defaultCurrency) {
+                $totalBalance += $balanceAmount;
+                continue;
+            }
+
+            $rate = \App\Models\ExchangeRate::whereHas('fromCurrency', function ($q) use ($balanceCurrency) {
+                    $q->where('code', $balanceCurrency);
+                })
+                ->whereHas('toCurrency', function ($q) use ($defaultCurrency) {
+                    $q->where('code', $defaultCurrency);
+                })
+                ->first();
+
+            if ($rate) {
+                $totalBalance += $balanceAmount * (float) $rate->rate;
+            }
+        }
 
 
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
@@ -283,7 +313,8 @@ class LoginController extends Controller
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
-                'total_balance' => $totalBalance,
+                'total_balance' => number_format($totalBalance, 2, '.', ''),
+                'total_balance_currency' => $defaultCurrency,
                 'transactions' => $transactions,
                 'chart' => $chartData,
                 'countries' => $countries,
@@ -446,10 +477,39 @@ class LoginController extends Controller
             "Hello {$account->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
         ));
 
-        $balances = \App\Models\Balance::where('personal_id', $account->id)->get();
-        $totalBalance = $balances->sum(function ($b) {
-            return (float) $b->amount;
-        });
+        $balances = \App\Models\Balance::where('personal_id', $account->id) ->orderBy('created_at', 'asc')
+        ->get();
+
+        $defaultBalance = $balances->first();
+        $defaultCurrency = strtoupper($defaultBalance?->currency ?? $account->currency ?? 'USD');
+
+        $totalBalance = 0;
+
+        foreach ($balances as $balance) {
+            $balanceCurrency = strtoupper($balance->currency);
+            $balanceAmount = (float) $balance->amount;
+
+            if ($balanceAmount <= 0) {
+                continue;
+            }
+
+            if ($balanceCurrency === $defaultCurrency) {
+                $totalBalance += $balanceAmount;
+                continue;
+            }
+
+            $rate = \App\Models\ExchangeRate::whereHas('fromCurrency', function ($q) use ($balanceCurrency) {
+                    $q->where('code', $balanceCurrency);
+                })
+                ->whereHas('toCurrency', function ($q) use ($defaultCurrency) {
+                    $q->where('code', $defaultCurrency);
+                })
+                ->first();
+
+            if ($rate) {
+                $totalBalance += $balanceAmount * (float) $rate->rate;
+            }
+        }
 
         $transactions = \App\Models\TransactionHistory::where('personal_id', $account->id)
             ->latest()->take(4)->get()->map(function ($t) {
@@ -546,7 +606,8 @@ class LoginController extends Controller
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
-                'total_balance' => $totalBalance,
+                'total_balance' => number_format($totalBalance, 2, '.', ''),
+                'total_balance_currency' => $defaultCurrency,
                 'transactions' => $transactions,
                 'chart' => $chartData,
                 'countries' => $countries,

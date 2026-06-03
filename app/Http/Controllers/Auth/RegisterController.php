@@ -451,7 +451,7 @@ public function registerUser(Request $request)
             'email' => 'required|string|email|max:255',
             'password' => [
                 'required','string','min:8','confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]+$/'
             ],
             'password_confirmation' => 'required|string|min:8|same:password',
             'country' => 'required|string|max:255',
@@ -543,7 +543,7 @@ public function registerUser(Request $request)
             'code' => 'REGISTERED',
             'data' => [
                 'token' => $token,
-                'email_verification_otp' => $otp
+                // 'email_verification_otp' => $otp
             ]
         ], 201);
 

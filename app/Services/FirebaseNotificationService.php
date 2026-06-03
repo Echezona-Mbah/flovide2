@@ -84,4 +84,30 @@ class FirebaseNotificationService
         }
         return $out;
     }
+
+    public function sendSilentToToken(string $token, array $data = []): bool
+    {
+        try {
+            $payload = [
+                'message' => [
+                    'token' => $token,
+                    'data' => collect($data)
+                        ->mapWithKeys(fn ($value, $key) => [$key => (string) $value])
+                        ->toArray(),
+                ],
+            ];
+
+            $response = $this->send($payload);
+
+            return $response !== false;
+        } catch (\Throwable $e) {
+            \Log::warning('Firebase silent notification failed', [
+                'token' => $token,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
 }
