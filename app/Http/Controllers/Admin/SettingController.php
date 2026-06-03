@@ -298,11 +298,15 @@ public function update(Request $request, $id, FirebaseNotificationService $fireb
         $title = 'Exchange Rate Updated';
         $message = "The exchange rate {$fromCode} -> {$toCode} was updated. New rate: {$rate->rate}.";
 
+        // $dataPayload = [
+        //     'type' => 'exchange_rate_update',
+        //     'from_currency' => $fromCode,
+        //     'to_currency' => $toCode,
+        //     'rate' => (string) $rate->rate,
+        // ];
+
         $dataPayload = [
-            'type' => 'exchange_rate_update',
-            'from_currency' => $fromCode,
-            'to_currency' => $toCode,
-            'rate' => (string) $rate->rate,
+            'type' => 'refresh_rate',
         ];
 
         $stats = [
@@ -312,26 +316,52 @@ public function update(Request $request, $id, FirebaseNotificationService $fireb
             'push_failed' => 0,
         ];
 
-        $notifyUsers = function ($users, string $group) use ($title, $message, $firebase, $dataPayload, &$stats) {
+        // $notifyUsers = function ($users, string $group) use ($title, $message, $firebase, $dataPayload, &$stats) {
+        //     foreach ($users as $user) {
+        //         try {
+        //             // In-app/database notification -> ALL users
+        //             $user->notify(new GeneralNotification($title, $message));
+
+        //             if ($group === 'business') {
+        //                 $stats['business_notified']++;
+        //             } else {
+        //                 $stats['personal_notified']++;
+        //             }
+
+        //             // Optional push (only if token exists)
+        //             if (!empty($user->device_token)) {
+        //                 $sent = $firebase->sendToToken($user->device_token, $title, $message, $dataPayload);
+        //                 $sent ? $stats['push_sent']++ : $stats['push_failed']++;
+        //             }
+        //         } catch (\Throwable $e) {
+        //             $stats['push_failed']++;
+        //             Log::warning('Notification failed', [
+        //                 'group' => $group,
+        //                 'user_id' => $user->id ?? null,
+        //                 'error' => $e->getMessage(),
+        //             ]);
+        //         }
+        //     }
+        // };
+
+        $notifyUsers = function ($users, string $group) use ($firebase, $dataPayload, &$stats) {
             foreach ($users as $user) {
                 try {
-                    // In-app/database notification -> ALL users
-                    $user->notify(new GeneralNotification($title, $message));
-
                     if ($group === 'business') {
                         $stats['business_notified']++;
                     } else {
                         $stats['personal_notified']++;
                     }
 
-                    // Optional push (only if token exists)
+                    // Silent Firebase push only: no title, no body
                     if (!empty($user->device_token)) {
-                        $sent = $firebase->sendToToken($user->device_token, $title, $message, $dataPayload);
+                        $sent = $firebase->sendSilentToToken($user->device_token, $dataPayload);
                         $sent ? $stats['push_sent']++ : $stats['push_failed']++;
                     }
                 } catch (\Throwable $e) {
                     $stats['push_failed']++;
-                    Log::warning('Notification failed', [
+
+                    Log::warning('Silent rate refresh notification failed', [
                         'group' => $group,
                         'user_id' => $user->id ?? null,
                         'error' => $e->getMessage(),

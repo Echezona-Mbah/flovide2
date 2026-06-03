@@ -348,110 +348,267 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
         // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
 
-    Route::middleware('admin.auth')->group(function () {
-        Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+
+
+ Route::middleware('admin.auth')->group(function () {
+
+        Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+    ->middleware('admin.permission:view_dashboard')
+    ->name('admin.dashboard');
+
+
+
+    Route::middleware('admin.permission:view_transactions')->group(function () {
         Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
+    });
+
+    Route::middleware('admin.permission:manage_transactions')->group(function () {
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
         Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
         Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+    });
 
 
-
+    Route::middleware('admin.permission:view_users')->group(function () {
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
+
+        Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
+        Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
+
+        Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
+        Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
+        Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
+        Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
+    });
+
+    Route::middleware('admin.permission:manage_users')->group(function () {
         Route::post('/admin/business-account-status/{id}', [BusinessAccountController::class, 'updateStatus']);
         Route::get('/admin/business-account/deactivate/{id}', [BusinessAccountController::class,'deactivate']);
         Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
         Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
-        Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])
-            ->name('admin.business.balance.add');
 
-        Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])
-            ->name('admin.business.balance.remove');
-
-        Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
-        Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
+    });
+
+
+    Route::middleware('admin.permission:manage_balances')->group(function () {
+        Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])->name('admin.business.balance.add');
+        Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])->name('admin.business.balance.remove');
+
         Route::post('/admin/personal-account/{personal}/balance/{balance}/add-money', [PersonalAccountController::class, 'addMoney'])->name('admin.personal.balance.add');
         Route::post('/admin/personal-account/{personal}/balance/{balance}/remove-money', [PersonalAccountController::class, 'removeMoney'])->name('admin.personal.balance.remove');
+    });
 
-        Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
-        Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
-        Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
-        Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
-        Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
-        Route::get('/admin/allbillpayment', [AllBillPaymentController::class, 'index'])->name('admin.allbillpayment');
 
-        Route::get('/admin/donation', [AllDonationController::class, 'index'])->name('admin.donation');
-        Route::get('/admin/donation/{id}', [AllDonationController::class, 'show']);
+    Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])
+        ->middleware('admin.permission:view_beneficiaries')
+        ->name('admin.allbeneficias');
 
-        Route::get('/admin/payment', [AllPaymentController::class, 'index'])->name('admin.payment');
-        Route::get('/admin/payment/{id}', [AllPaymentController::class, 'show']);
 
-        Route::get('/admin/remita', [AllRemitaController::class, 'index'])->name('admin.remita');
-        Route::get('/admin/remita/{id}', [AllRemitaController::class, 'show']);
+        Route::middleware('admin.permission:view_reports')->group(function () {
+            Route::get('/admin/allbillpayment', [AllBillPaymentController::class, 'index'])->name('admin.allbillpayment');
+            Route::get('/admin/donation', [AllDonationController::class, 'index'])->name('admin.donation');
+            Route::get('/admin/donation/{id}', [AllDonationController::class, 'show']);
+            Route::get('/admin/payment', [AllPaymentController::class, 'index'])->name('admin.payment');
+            Route::get('/admin/payment/{id}', [AllPaymentController::class, 'show']);
+            Route::get('/admin/remita', [AllRemitaController::class, 'index'])->name('admin.remita');
+            Route::get('/admin/remita/{id}', [AllRemitaController::class, 'show']);
+            Route::get('/admin/subscription', [AllSubscriptionController::class, 'index'])->name('admin.subscription');
+            Route::get('/admin/subscription/{id}', [AllSubscriptionController::class, 'show']);
+            Route::get('/admin/invoice', [AllInvoiceController::class, 'index'])->name('admin.invoice');
+            Route::get('/admin/invoice/{id}', [AllInvoiceController::class, 'show']);
+            Route::get('/admin/refund', [AllRefundController::class, 'index'])->name('admin.refund');
+        });
 
-        Route::get('/admin/subscription', [AllSubscriptionController::class, 'index'])->name('admin.subscription');
-        Route::get('/admin/subscription/{id}', [AllSubscriptionController::class, 'show']);
 
-        Route::get('/admin/invoice', [AllInvoiceController::class, 'index'])->name('admin.invoice');
-        Route::get('/admin/invoice/{id}', [AllInvoiceController::class, 'show']);
+        Route::middleware('admin.permission:manage_risk')->group(function () {
+            Route::get('/admin/chargeback', [AllChargebackController::class, 'index'])->name('admin.chargeback');
+            Route::post('/admin/chargeback/{id}/update-status', [AllChargebackController::class, 'updateStatus'])->name('chargeback.updateStatus');
+            Route::post('/admin/chargeback/submitEvidence', [AllChargebackController::class, 'submitEvidence'])->name('admin.chargeback.submitEvidence');
+        });
 
-        Route::get('/admin/refund', [AllRefundController::class, 'index'])->name('admin.refund');
+
+        Route::middleware('admin.permission:manage_admin_access')->group(function () {
+            Route::get('/admin/add_admin', [AddAdminController::class, 'index'])->name('admin.add_admin');
+            Route::post('/admin/add_admin', [AddAdminController::class, 'store'])->name('admin.add_admin.store');
+            Route::get('/admin/all_admin', [AddAdminController::class, 'indexadmin'])->name('admin.all_admin');
+            Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
+            Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+            Route::get('/admin/{id}/activity', [AddAdminController::class, 'activity'])->name('admin.activity');
+            Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
+            Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
+            Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
+            Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
+            Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
+            Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
+        });
+
+
+        Route::middleware('admin.permission:view_profile')->group(function () {
+            Route::get('/admin/profile', [AddAdminController::class, 'indexprofile'])->name('admin.profile');
+            Route::post('/admin/profile', [AddAdminController::class, 'updateprofile'])->name('admin.profile.update');
+            Route::get('/admin/reset-password', [AddAdminController::class, 'showResetForm'])->name('admin.reset.password');
+            Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
+        });
+
+
+
+        Route::middleware('admin.permission:manage_settings_exchange')->group(function () {
+            Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
+            Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+
+        });
+
+
+        Route::middleware('admin.permission:manage_settings')->group(function () {
+            // Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
+            Route::get('/admin/exchangerate/{id}/edit', [SettingController::class, 'edit'])->name('admin.exchangerate.edit');
+            Route::put('/admin/exchangerate/{id}', [SettingController::class, 'update'])->name('admin.exchangerate.update');
+            Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
+            Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
+            Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
+            Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
+
+            Route::patch('/currency-limits/{currency}', [AdminCurrencyLimitController::class, 'update'])->name('admin.currency.limits.update');
+        });
+
+
+        Route::middleware('admin.permission:manage_content')->group(function () {
+            Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');
+            Route::post('/admin/career', [CareerController::class, 'store'])->name('admin.career.store');
+            Route::get('/admin/career-view', [CareerController::class, 'index'])->name('admin.career.index');
+            Route::delete('/admin/career-view/{id}', [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
+            Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
+            Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+        // Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
+        // Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
+        // Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
+        // Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+
+
+
+        // Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
+        // Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
+        // Route::post('/admin/business-account-status/{id}', [BusinessAccountController::class, 'updateStatus']);
+        // Route::get('/admin/business-account/deactivate/{id}', [BusinessAccountController::class,'deactivate']);
+        // Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
+        // Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
+        // Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
+        // Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])
+        //     ->name('admin.business.balance.add');
+
+        // Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])
+        //     ->name('admin.business.balance.remove');
+
+        // Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
+        // Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
+        // Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
+        // Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
+        // Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
+        // Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
+        // Route::post('/admin/personal-account/{personal}/balance/{balance}/add-money', [PersonalAccountController::class, 'addMoney'])->name('admin.personal.balance.add');
+        // Route::post('/admin/personal-account/{personal}/balance/{balance}/remove-money', [PersonalAccountController::class, 'removeMoney'])->name('admin.personal.balance.remove');
+
+        // Route::get('/admin/allbeneficias', [AllBeneficiasController::class, 'index'])->name('admin.allbeneficias');
+        // Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
+        // Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
+        // Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
+        // Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
+        // Route::get('/admin/allbillpayment', [AllBillPaymentController::class, 'index'])->name('admin.allbillpayment');
+
+        // Route::get('/admin/donation', [AllDonationController::class, 'index'])->name('admin.donation');
+        // Route::get('/admin/donation/{id}', [AllDonationController::class, 'show']);
+
+        // Route::get('/admin/payment', [AllPaymentController::class, 'index'])->name('admin.payment');
+        // Route::get('/admin/payment/{id}', [AllPaymentController::class, 'show']);
+
+        // Route::get('/admin/remita', [AllRemitaController::class, 'index'])->name('admin.remita');
+        // Route::get('/admin/remita/{id}', [AllRemitaController::class, 'show']);
+
+        // Route::get('/admin/subscription', [AllSubscriptionController::class, 'index'])->name('admin.subscription');
+        // Route::get('/admin/subscription/{id}', [AllSubscriptionController::class, 'show']);
+
+        // Route::get('/admin/invoice', [AllInvoiceController::class, 'index'])->name('admin.invoice');
+        // Route::get('/admin/invoice/{id}', [AllInvoiceController::class, 'show']);
+
+        // Route::get('/admin/refund', [AllRefundController::class, 'index'])->name('admin.refund');
 
         
-        Route::get('/admin/chargeback', [AllChargebackController::class, 'index'])->name('admin.chargeback');
-        Route::post('/admin/chargeback/{id}/update-status', [AllChargebackController::class, 'updateStatus'])->name('chargeback.updateStatus');
-        Route::post('/admin/chargeback/submitEvidence', [AllChargebackController::class, 'submitEvidence'])->name('admin.chargeback.submitEvidence');
+        // Route::get('/admin/chargeback', [AllChargebackController::class, 'index'])->name('admin.chargeback');
+        // Route::post('/admin/chargeback/{id}/update-status', [AllChargebackController::class, 'updateStatus'])->name('chargeback.updateStatus');
+        // Route::post('/admin/chargeback/submitEvidence', [AllChargebackController::class, 'submitEvidence'])->name('admin.chargeback.submitEvidence');
 
 
 
-        Route::get('/admin/add_admin', [AddAdminController::class, 'index'])->name('admin.add_admin');
-        Route::post('/admin/add_admin', [AddAdminController::class, 'store'])->name('admin.add_admin.store');
-        Route::get('/admin/profile', [AddAdminController::class, 'indexprofile'])->name('admin.profile');
-        Route::post('/admin/profile', [AddAdminController::class, 'updateprofile'])->name('admin.profile.update');
-        Route::get('/admin/all_admin', [AddAdminController::class, 'indexadmin'])->name('admin.all_admin');
-        Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
-        Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
-        Route::get('/admin/{id}/activity', [AddAdminController::class, 'activity'])->name('admin.activity');
-        Route::get('/admin/reset-password', [AddAdminController::class, 'showResetForm'])->name('admin.reset.password');
-        Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
+        // Route::get('/admin/add_admin', [AddAdminController::class, 'index'])->name('admin.add_admin');
+        // Route::post('/admin/add_admin', [AddAdminController::class, 'store'])->name('admin.add_admin.store');
+        // Route::get('/admin/profile', [AddAdminController::class, 'indexprofile'])->name('admin.profile');
+        // Route::post('/admin/profile', [AddAdminController::class, 'updateprofile'])->name('admin.profile.update');
+        // Route::get('/admin/all_admin', [AddAdminController::class, 'indexadmin'])->name('admin.all_admin');
+        // Route::get('/admin/view/{id}', [AddAdminController::class, 'view'])->name('admin.view');
+        // Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+        // Route::get('/admin/{id}/activity', [AddAdminController::class, 'activity'])->name('admin.activity');
+        // Route::get('/admin/reset-password', [AddAdminController::class, 'showResetForm'])->name('admin.reset.password');
+        // Route::post('/admin/reset-password', [AddAdminController::class, 'resetPassword']);
 
-        Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
-        Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
-        Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
-        Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
-        Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
-        Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
-        Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
-
-
-
-        Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
-        Route::get('/admin/exchangerate/{id}/edit', [SettingController::class, 'edit'])->name('admin.exchangerate.edit');
-        Route::put('/admin/exchangerate/{id}', [SettingController::class, 'update'])->name('admin.exchangerate.update');
-        Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
-        Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
-        // Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
-        Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
-        Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
+        // Route::get('/admin/{id}/settings', [AddAdminController::class, 'settings'])->name('admin.settings');
+        // Route::post('/admin/{id}/change-role', [AddAdminController::class, 'changeRole'])->name('admin.changeRole');
+        // Route::post('/admin/{id}/lock', [AddAdminController::class, 'lock'])->name('admin.lock');
+        // Route::post('/admin/{id}/unlock', [AddAdminController::class, 'unlock'])->name('admin.unlock');
+        // Route::post('/admin/{id}/deactivate', [AddAdminController::class, 'deactivate'])->name('admin.deactivate');
+        // Route::post('/admin/{id}/reset-password', [AddAdminController::class, 'resetPassword'])->name('admin.resetPassword');
+        // Route::delete('/admin/{id}', [AddAdminController::class, 'destroy'])->name('admin.delete');
 
 
 
-        Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');
-        Route::post('/admin/career', [CareerController::class, 'store'])->name('admin.career.store');
-        Route::get('/admin/career-view', [CareerController::class, 'index'])->name('admin.career.index');
-        Route::delete('/admin/career-view/{id}',  [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
-        Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
-        Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+        // Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
+        // Route::get('/admin/exchangerate/{id}/edit', [SettingController::class, 'edit'])->name('admin.exchangerate.edit');
+        // Route::put('/admin/exchangerate/{id}', [SettingController::class, 'update'])->name('admin.exchangerate.update');
+        // Route::delete('/admin/exchangerate/{id}', [SettingController::class, 'destroy'])->name('admin.exchangerate.destroy');
+        // Route::get('/admin/exchangerate/create', [SettingController::class, 'create'])->name('admin.exchangerate.create');
+        // // Route::post('/admin/exchangerate/store', [SettingController::class, 'store'])->name('admin.exchangerate.store');
+        // Route::post('/admin/currency/store', [SettingController::class, 'storeCurrency'])->name('admin.currency.store');
+        // Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
 
 
-        Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
-        Route::patch('/currency-limits/{currency}', [AdminCurrencyLimitController::class, 'update'])->name('admin.currency.limits.update');
+
+        // Route::get('/admin/career', [CareerController::class, 'create'])->name('admin.career.create');
+        // Route::post('/admin/career', [CareerController::class, 'store'])->name('admin.career.store');
+        // Route::get('/admin/career-view', [CareerController::class, 'index'])->name('admin.career.index');
+        // Route::delete('/admin/career-view/{id}',  [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
+        // Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
+        // Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+
+
+        // Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+        // Route::patch('/currency-limits/{currency}', [AdminCurrencyLimitController::class, 'update'])->name('admin.currency.limits.update');
 
 
 
@@ -482,5 +639,5 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
 
 
-    });
+ });
 

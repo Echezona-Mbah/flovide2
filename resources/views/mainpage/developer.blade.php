@@ -1794,7 +1794,8 @@ Console.WriteLine(body);`,
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
-  -d "{\"amount\":100,\"recipient_id\":\"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234\",\"balance_id\":\"019d86e0-1afb-733f-ac4b-4af1a8a224ee\",\"reference\":\"Test payment\",\"transfer_fee\":0,\"total_amount\":100,\"exchange_rate\":\"1.00 KES = 89700.00 NGN\",\"recipient_amount\":100,\"account_number\":\"8172653823\",\"account_name\":\"Mbah Echezona Ernest\",\"bank\":\"bank\",\"bank_code\":\"100004\"}"`,
+  -d "{\"transaction_type\":\"payment\",\"amount\":1,\"recipient_id\":\"eb3a39c0-97f7-403a-8bc6-1e57a443cdeb\",\"balance_id\":\"019d86e0-1afb-733f-ac4b-4af1a8a224ee\",\"order_id\":\"9d4b15224c4e11e9900f2d9954c22966\",\"reference\":\"019e83ba-f543-7359-9a07-81685f147ba5\"}"`,
+
   javascript: `fetch('https://flovide.com/api/v1/transactions', {
   method: 'POST',
   headers: {
@@ -1804,22 +1805,17 @@ Console.WriteLine(body);`,
     'X-Secret-Key': 'REDACTED_STRIPE_KEY'
   },
   body: JSON.stringify({
-    amount: 100,
-    recipient_id: '97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234',
+    transaction_type: 'payment',
+    amount: 1,
+    recipient_id: 'eb3a39c0-97f7-403a-8bc6-1e57a443cdeb',
     balance_id: '019d86e0-1afb-733f-ac4b-4af1a8a224ee',
-    reference: 'Test payment',
-    transfer_fee: 0,
-    total_amount: 100,
-    exchange_rate: '1.00 KES = 89700.00 NGN',
-    recipient_amount: 100,
-    account_number: '8172653823',
-    account_name: 'Mbah Echezona Ernest',
-    bank: 'bank',
-    bank_code: '100004'
+    order_id: '9d4b15224c4e11e9900f2d9954c22966',
+    reference: '019e83ba-f543-7359-9a07-81685f147ba5'
   })
 })
   .then(res => res.json())
   .then(data => console.log(data));`,
+
   go: `package main
 
 import (
@@ -1831,18 +1827,12 @@ import (
 
 func main() {
   jsonData := []byte(\`{
-    "amount":100,
-    "recipient_id":"97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
+    "transaction_type":"payment",
+    "amount":1,
+    "recipient_id":"eb3a39c0-97f7-403a-8bc6-1e57a443cdeb",
     "balance_id":"019d86e0-1afb-733f-ac4b-4af1a8a224ee",
-    "reference":"Test payment",
-    "transfer_fee":0,
-    "total_amount":100,
-    "exchange_rate":"1.00 KES = 89700.00 NGN",
-    "recipient_amount":100,
-    "account_number":"8172653823",
-    "account_name":"Mbah Echezona Ernest",
-    "bank":"bank",
-    "bank_code":"100004"
+    "order_id":"9d4b15224c4e11e9900f2d9954c22966",
+    "reference":"019e83ba-f543-7359-9a07-81685f147ba5"
   }\`)
 
   req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/transactions", bytes.NewBuffer(jsonData))
@@ -1858,6 +1848,7 @@ func main() {
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
 }`,
+
   python: `import requests
 
 response = requests.post(
@@ -1869,36 +1860,25 @@ response = requests.post(
         "X-Secret-Key": "REDACTED_STRIPE_KEY",
     },
     json={
-        "amount": 100,
-        "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
+        "transaction_type": "payment",
+        "amount": 1,
+        "recipient_id": "eb3a39c0-97f7-403a-8bc6-1e57a443cdeb",
         "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
-        "reference": "Test payment",
-        "transfer_fee": 0,
-        "total_amount": 100,
-        "exchange_rate": "1.00 KES = 89700.00 NGN",
-        "recipient_amount": 100,
-        "account_number": "8172653823",
-        "account_name": "Mbah Echezona Ernest",
-        "bank": "bank",
-        "bank_code": "100004"
+        "order_id": "9d4b15224c4e11e9900f2d9954c22966",
+        "reference": "019e83ba-f543-7359-9a07-81685f147ba5"
     },
 )
 
 print(response.json())`,
+
   java: `String json = """
 {
-  "amount": 100,
-  "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
+  "transaction_type": "payment",
+  "amount": 1,
+  "recipient_id": "eb3a39c0-97f7-403a-8bc6-1e57a443cdeb",
   "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
-  "reference": "Test payment",
-  "transfer_fee": 0,
-  "total_amount": 100,
-  "exchange_rate": "1.00 KES = 89700.00 NGN",
-  "recipient_amount": 100,
-  "account_number": "8172653823",
-  "account_name": "Mbah Echezona Ernest",
-  "bank": "bank",
-  "bank_code": "100004"
+  "order_id": "9d4b15224c4e11e9900f2d9954c22966",
+  "reference": "019e83ba-f543-7359-9a07-81685f147ba5"
 }
 """;
 
@@ -1915,6 +1895,7 @@ HttpResponse<String> response = HttpClient.newHttpClient()
     .send(request, HttpResponse.BodyHandlers.ofString());
 
 System.out.println(response.body());`,
+
   csharp: `using System.Text;
 
 using var client = new HttpClient();
@@ -1925,18 +1906,12 @@ client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
 
 var json = """
 {
-  "amount": 100,
-  "recipient_id": "97dfe8c1-3f6d-4c2f-9f13-0d7f1e9c1234",
+  "transaction_type": "payment",
+  "amount": 1,
+  "recipient_id": "eb3a39c0-97f7-403a-8bc6-1e57a443cdeb",
   "balance_id": "019d86e0-1afb-733f-ac4b-4af1a8a224ee",
-  "reference": "Test payment",
-  "transfer_fee": 0,
-  "total_amount": 100,
-  "exchange_rate": "1.00 KES = 89700.00 NGN",
-  "recipient_amount": 100,
-  "account_number": "8172653823",
-  "account_name": "Mbah Echezona Ernest",
-  "bank": "bank",
-  "bank_code": "100004"
+  "order_id": "9d4b15224c4e11e9900f2d9954c22966",
+  "reference": "019e83ba-f543-7359-9a07-81685f147ba5"
 }
 """;
 
@@ -1945,25 +1920,26 @@ var response = await client.PostAsync("https://flovide.com/api/v1/transactions",
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
+
   response: `{
   "success": true,
   "message": "Transaction transaction successful",
   "code": "FLOVIDE_SUCCESS",
   "data": {
-    "id": "019e5fbb-903a-7216-8927-56cdda359d62",
-    "reference": "ref-3309da96-1e9b-48e8-bdaa-efd3697e8a48",
-    "order_id": "TXN_1779722588",
+    "id": "019e83bc-87a5-7067-82b6-fd4a0f9b1c95",
+    "reference": "019e83ba-f543-7359-9a07-81685f147ba5",
+    "order_id": "TXN_1780326631",
     "status": "pending",
-    "amount": 100,
-    "total_amount": 100,
+    "amount": 1,
+    "total_amount": 1,
     "fees": 0,
     "currency": "KES",
     "to_currency": "NGN",
     "recipient_amount": 100,
     "payment_provider": "Flovide",
-    "recipient_account_name": "Mbah Echezona Ernest",
+    "recipient_account_name": "ECHEZONA ERNEST MBAH",
     "recipient_account_number": "8172653823",
-    "created_at": "2026-05-25T15:23:08+00:00"
+    "created_at": "2026-06-01T15:10:31+00:00"
   }
 }`
 },

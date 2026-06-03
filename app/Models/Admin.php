@@ -32,5 +32,14 @@ class Admin extends Authenticatable
     ];
     protected $casts = [
     'locked_until' => 'datetime',
-];
+    ];
+
+
+    public function hasPermission(string $permission): bool
+{
+    $permissions = config('admin_permissions.' . $this->role, []);
+
+    return in_array('*', $permissions, true) || in_array($permission, $permissions, true);
+}
+
 }

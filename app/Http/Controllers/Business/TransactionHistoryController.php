@@ -62,6 +62,7 @@ class TransactionHistoryController extends Controller
                 'currency'  => $t->currency,
                 'status'    => $t->status,
                 'reference' => $t->reference,
+                'method' => $t->method,
                 'recipient_details' => [
                     'alias'          => $t->recipient_alias,
                     'account_name'   => $t->recipient_account_name,
@@ -129,6 +130,7 @@ public function UserTransaction($id)
         'currency'  => $transaction->currency,
         'status'    => $transaction->status,
         'reference' => $transaction->reference,
+        'method' => $t->method,
         'recipient_details' => [
             'alias'          => $transaction->recipient_alias,
             'account_name'   => $transaction->recipient_account_name,
