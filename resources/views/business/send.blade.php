@@ -33,9 +33,9 @@
                 {{ __('Send money to your saved beneficiaries.') }}
               </p>
             </div>
-            <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
+            <!-- <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
               Environment: <span class="font-semibold">Live/Test</span>
-            </div>
+            </div> -->
           </div>
         </div>
 
