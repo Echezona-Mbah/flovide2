@@ -22,7 +22,7 @@ use App\Mail\TransactionSentMail;
 use App\Models\ExchangeRate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Validator;
 
 
 class TransactionController extends Controller
@@ -285,14 +285,25 @@ public function show(Request $request, $id)
         ], 422);
     }
 
-    $validated = $request->validate([
+    $validator = Validator::make($request->all(), [
         'transaction_type' => 'required|in:payment',
         'amount' => 'required|numeric|min:1',
         'recipient_id' => 'required|uuid',
         'balance_id' => 'required|uuid',
         'order_id' => 'required|string|max:100',
-        'reference' => 'nullable|uuid',
+        'reference' => 'nullable|uuid|unique:transactions_history,reference',
     ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed',
+            'code' => 'VALIDATION_ERROR',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    $validated = $validator->validated();
 
     $actor = $this->resolveKeyUser($request) ?? auth()->user();
 
