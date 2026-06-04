@@ -85,29 +85,61 @@ class FirebaseNotificationService
         return $out;
     }
 
-    public function sendSilentToToken(string $token, array $data = []): bool
-    {
-        try {
-            $payload = [
-                'message' => [
-                    'token' => $token,
-                    'data' => collect($data)
-                        ->mapWithKeys(fn ($value, $key) => [$key => (string) $value])
-                        ->toArray(),
-                ],
-            ];
-
-            $response = $this->send($payload);
-
-            return $response !== false;
-        } catch (\Throwable $e) {
-            \Log::warning('Firebase silent notification failed', [
-                'token' => $token,
-                'error' => $e->getMessage(),
-            ]);
-
-            return false;
-        }
+public function sendSilentToToken(?string $deviceToken, array $data = []): bool
+{
+    if (!$deviceToken) {
+        return false;
     }
+
+    $accessToken = $this->accessToken();
+    $projectId = config('services.firebase.project_id');
+
+    if (!$accessToken || !$projectId) {
+        Log::warning('FCM silent push missing credentials', [
+            'has_access_token' => (bool) $accessToken,
+            'has_project_id' => (bool) $projectId,
+        ]);
+
+        return false;
+    }
+
+    $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+
+    $payload = [
+        'message' => [
+            'token' => $deviceToken,
+
+            // Data-only payload. No title, no body.
+            'data' => $this->stringifyData($data),
+
+            'android' => [
+                'priority' => 'high',
+            ],
+
+            'apns' => [
+                'headers' => [
+                    'apns-priority' => '5',
+                    'apns-push-type' => 'background',
+                ],
+                'payload' => [
+                    'aps' => [
+                        'content-available' => 1,
+                    ],
+                ],
+            ],
+        ],
+    ];
+
+    $response = Http::withToken($accessToken)->post($url, $payload);
+
+    Log::info('FCM SILENT PUSH RESPONSE', [
+        'device_token' => substr($deviceToken, 0, 20) . '...',
+        'status' => $response->status(),
+        'body' => $response->json(),
+        'payload' => $payload,
+    ]);
+
+    return $response->successful();
+}
 
 }

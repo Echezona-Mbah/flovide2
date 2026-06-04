@@ -473,16 +473,57 @@
 
 
                                                         <button type="button" class="btn btn-view view-transaction-btn"
-                                                            data-bs-toggle="modal" data-bs-target="#transactionModal"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#transactionModal"
+
+                                                            data-id="{{ $item->id }}"
+                                                            data-user-id="{{ $item->user_id }}"
+                                                            data-personal-id="{{ $item->personal_id }}"
+                                                            data-type="{{ $item->type }}"
+                                                            data-transaction-type="{{ $item->transaction_type }}"
                                                             data-sender="{{ $item->sender }}"
+                                                            data-sender-id="{{ $item->sender_id }}"
                                                             data-recipient="{{ $item->recipient }}"
-                                                            data-amount="{{ number_format($item->amount, 2) }}"
-                                                            data-currency="{{ $item->currency }}"
-                                                            data-status="{{ $item->status }}"
+                                                            data-recipient-id="{{ $item->recipient_id }}"
                                                             data-method="{{ $item->method }}"
+                                                            data-payment-method="{{ $item->payment_method }}"
+                                                            data-payment-provider="{{ $item->payment_provider }}"
+                                                            data-status="{{ $item->status }}"
+                                                            data-amount="{{ number_format((float) $item->amount, 2) }}"
+                                                            data-total-amount="{{ number_format((float) $item->total_amount, 2) }}"
+                                                            data-recipient-amount="{{ number_format((float) $item->recipient_amount, 2) }}"
+                                                            data-currency="{{ $item->currency }}"
+                                                            data-to-currency="{{ $item->to_currency }}"
+                                                            data-fees="{{ number_format((float) $item->fees, 2) }}"
+                                                            data-exchange-rate="{{ $item->exchange_rate }}"
+                                                            data-single-rate="{{ $item->single_rate }}"
+                                                            data-balance-id="{{ $item->balance_id }}"
+                                                            data-virtual-account-id="{{ $item->virtual_account_id }}"
+                                                            data-order-id="{{ $item->order_id }}"
                                                             data-reference="{{ $item->reference }}"
-                                                            data-type="{{ $item->transaction_type }}"
-                                                            data-created="{{ $item->created_at->format('d M Y H:i') }}">
+                                                            data-payment-reference="{{ $item->payment_reference }}"
+                                                            data-failure-reason="{{ $item->failure_reason }}"
+                                                            data-beneficias-id="{{ $item->beneficias_id }}"
+
+                                                            data-recipient-country="{{ $item->recipient_country }}"
+                                                            data-recipient-default-reference="{{ $item->recipient_default_reference }}"
+                                                            data-recipient-alias="{{ $item->recipient_alias }}"
+                                                            data-recipient-type="{{ $item->recipient_type }}"
+                                                            data-recipient-created-at="{{ $item->recipient_created_at }}"
+                                                            data-recipient-account-name="{{ $item->recipient_account_name }}"
+                                                            data-recipient-sort-code="{{ $item->recipient_sort_code }}"
+                                                            data-recipient-account-number="{{ $item->recipient_account_number }}"
+                                                            data-recipient-bank-name="{{ $item->recipient_bank_name }}"
+                                                            data-recipient-bank-currency="{{ $item->recipient_bank_currency }}"
+
+                                                            data-card-number="{{ $item->card_number }}"
+                                                            data-expiry-month="{{ $item->expiry_month }}"
+                                                            data-expiry-year="{{ $item->expiry_year }}"
+                                                            data-cvv="{{ $item->cvv ? '***' : '' }}"
+
+                                                            data-created-at-external="{{ $item->created_at_external }}"
+                                                            data-created="{{ $item->created_at?->format('d M Y H:i') }}"
+                                                            data-updated="{{ $item->updated_at?->format('d M Y H:i') }}">
                                                             View
                                                         </button>
 
@@ -572,30 +613,99 @@
 </div>
 
 <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="transactionModalLabel">Transaction Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Full Transaction Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
-                <div class="row info-row">
-                    <div class="col-md-6"><strong>Sender:</strong> <span id="modal-sender"></span></div>
-                    <div class="col-md-6"><strong>Recipient:</strong> <span id="modal-recipient"></span></div>
-                </div>
-                <div class="row info-row">
-                    <div class="col-md-6"><strong>Amount:</strong> <span id="modal-amount"></span> <span id="modal-currency"></span></div>
-                    <div class="col-md-6"><strong>Status:</strong> <span id="modal-status" class="status-chip"></span></div>
-                </div>
-                <div class="row info-row">
-                    <div class="col-md-6"><strong>Method:</strong> <span id="modal-method"></span></div>
-                    <div class="col-md-6"><strong>Reference:</strong> <span id="modal-reference"></span></div>
-                </div>
-                <div class="row info-row">
-                    <div class="col-md-6"><strong>Transaction Type:</strong> <span id="modal-type"></span></div>
-                    <div class="col-md-6"><strong>Created At:</strong> <span id="modal-created"></span></div>
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <h6 class="fw-bold text-primary mb-2">Core Information</h6>
+                    </div>
+
+                    <div class="col-md-6 info-row"><strong>ID:</strong> <span id="modal-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Status:</strong> <span id="modal-status" class="status-chip"></span></div>
+                    <div class="col-md-6 info-row"><strong>User ID:</strong> <span id="modal-user-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Personal ID:</strong> <span id="modal-personal-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Type:</strong> <span id="modal-type"></span></div>
+                    <div class="col-md-6 info-row"><strong>Transaction Type:</strong> <span id="modal-transaction-type"></span></div>
+                    <div class="col-md-6 info-row"><strong>Method:</strong> <span id="modal-method"></span></div>
+                    <div class="col-md-6 info-row"><strong>Payment Method:</strong> <span id="modal-payment-method"></span></div>
+                    <div class="col-md-6 info-row"><strong>Payment Provider:</strong> <span id="modal-payment-provider"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">Amount Information</h6>
+                    </div>
+
+                    <div class="col-md-4 info-row"><strong>Amount:</strong> <span id="modal-amount"></span></div>
+                    <div class="col-md-4 info-row"><strong>Total Amount:</strong> <span id="modal-total-amount"></span></div>
+                    <div class="col-md-4 info-row"><strong>Recipient Amount:</strong> <span id="modal-recipient-amount"></span></div>
+                    <div class="col-md-4 info-row"><strong>Currency:</strong> <span id="modal-currency"></span></div>
+                    <div class="col-md-4 info-row"><strong>To Currency:</strong> <span id="modal-to-currency"></span></div>
+                    <div class="col-md-4 info-row"><strong>Fees:</strong> <span id="modal-fees"></span></div>
+                    <div class="col-md-6 info-row"><strong>Exchange Rate:</strong> <span id="modal-exchange-rate"></span></div>
+                    <div class="col-md-6 info-row"><strong>Single Rate:</strong> <span id="modal-single-rate"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">Sender & Recipient</h6>
+                    </div>
+
+                    <div class="col-md-6 info-row"><strong>Sender:</strong> <span id="modal-sender"></span></div>
+                    <div class="col-md-6 info-row"><strong>Sender ID:</strong> <span id="modal-sender-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient:</strong> <span id="modal-recipient"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient ID:</strong> <span id="modal-recipient-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient Country:</strong> <span id="modal-recipient-country"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient Type:</strong> <span id="modal-recipient-type"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient Alias:</strong> <span id="modal-recipient-alias"></span></div>
+                    <div class="col-md-6 info-row"><strong>Default Reference:</strong> <span id="modal-recipient-default-reference"></span></div>
+                    <div class="col-md-6 info-row"><strong>Recipient Created At:</strong> <span id="modal-recipient-created-at"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">Recipient Bank Details</h6>
+                    </div>
+
+                    <div class="col-md-6 info-row"><strong>Account Name:</strong> <span id="modal-recipient-account-name"></span></div>
+                    <div class="col-md-6 info-row"><strong>Account Number:</strong> <span id="modal-recipient-account-number"></span></div>
+                    <div class="col-md-6 info-row"><strong>Bank Name:</strong> <span id="modal-recipient-bank-name"></span></div>
+                    <div class="col-md-6 info-row"><strong>Bank Currency:</strong> <span id="modal-recipient-bank-currency"></span></div>
+                    <div class="col-md-6 info-row"><strong>Sort Code:</strong> <span id="modal-recipient-sort-code"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">References</h6>
+                    </div>
+
+                    <div class="col-md-6 info-row"><strong>Reference:</strong> <span id="modal-reference"></span></div>
+                    <div class="col-md-6 info-row"><strong>Payment Reference:</strong> <span id="modal-payment-reference"></span></div>
+                    <div class="col-md-6 info-row"><strong>Order ID:</strong> <span id="modal-order-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Balance ID:</strong> <span id="modal-balance-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Virtual Account ID:</strong> <span id="modal-virtual-account-id"></span></div>
+                    <div class="col-md-6 info-row"><strong>Beneficiary ID:</strong> <span id="modal-beneficias-id"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">Card Details</h6>
+                    </div>
+
+                    <div class="col-md-4 info-row"><strong>Card Number:</strong> <span id="modal-card-number"></span></div>
+                    <div class="col-md-4 info-row"><strong>Expiry Month:</strong> <span id="modal-expiry-month"></span></div>
+                    <div class="col-md-4 info-row"><strong>Expiry Year:</strong> <span id="modal-expiry-year"></span></div>
+                    <div class="col-md-4 info-row"><strong>CVV:</strong> <span id="modal-cvv"></span></div>
+
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold text-primary mb-2">Failure & Dates</h6>
+                    </div>
+
+                    <div class="col-md-12 info-row"><strong>Failure Reason:</strong> <span id="modal-failure-reason"></span></div>
+                    <div class="col-md-4 info-row"><strong>External Created At:</strong> <span id="modal-created-at-external"></span></div>
+                    <div class="col-md-4 info-row"><strong>Created At:</strong> <span id="modal-created"></span></div>
+                    <div class="col-md-4 info-row"><strong>Updated At:</strong> <span id="modal-updated"></span></div>
+
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Close</button>
             </div>
@@ -620,37 +730,85 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('transactionModal');
-    const senderEl = modal.querySelector('#modal-sender');
-    const recipientEl = modal.querySelector('#modal-recipient');
-    const amountEl = modal.querySelector('#modal-amount');
-    const currencyEl = modal.querySelector('#modal-currency');
-    const statusEl = modal.querySelector('#modal-status');
-    const methodEl = modal.querySelector('#modal-method');
-    const referenceEl = modal.querySelector('#modal-reference');
-    const typeEl = modal.querySelector('#modal-type');
-    const createdEl = modal.querySelector('#modal-created');
+
+    function setText(id, value) {
+        const el = modal.querySelector(`#${id}`);
+        if (el) {
+            el.textContent = value !== null && value !== undefined && value !== '' ? value : 'N/A';
+        }
+    }
 
     document.querySelectorAll('.view-transaction-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            senderEl.textContent = this.dataset.sender || 'N/A';
-            recipientEl.textContent = this.dataset.recipient || 'N/A';
-            amountEl.textContent = this.dataset.amount || '0.00';
-            currencyEl.textContent = this.dataset.currency || '';
-            methodEl.textContent = this.dataset.method || 'N/A';
-            referenceEl.textContent = this.dataset.reference || 'N/A';
-            typeEl.textContent = this.dataset.type || 'N/A';
-            createdEl.textContent = this.dataset.created || 'N/A';
+        btn.addEventListener('click', function () {
+            const fields = [
+                'id',
+                'user-id',
+                'personal-id',
+                'type',
+                'transaction-type',
+                'sender',
+                'sender-id',
+                'recipient',
+                'recipient-id',
+                'method',
+                'payment-method',
+                'payment-provider',
+                'amount',
+                'total-amount',
+                'recipient-amount',
+                'currency',
+                'to-currency',
+                'fees',
+                'exchange-rate',
+                'single-rate',
+                'balance-id',
+                'virtual-account-id',
+                'order-id',
+                'reference',
+                'payment-reference',
+                'failure-reason',
+                'beneficias-id',
+                'recipient-country',
+                'recipient-default-reference',
+                'recipient-alias',
+                'recipient-type',
+                'recipient-created-at',
+                'recipient-account-name',
+                'recipient-sort-code',
+                'recipient-account-number',
+                'recipient-bank-name',
+                'recipient-bank-currency',
+                'card-number',
+                'expiry-month',
+                'expiry-year',
+                'cvv',
+                'created-at-external',
+                'created',
+                'updated'
+            ];
 
-            const status = (this.dataset.status || '').toLowerCase();
+            fields.forEach(field => {
+                setText(`modal-${field}`, this.getAttribute(`data-${field}`));
+            });
+
+            const statusEl = modal.querySelector('#modal-status');
+            const status = (this.getAttribute('data-status') || '').toLowerCase();
+
             statusEl.textContent = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
             statusEl.className = 'status-chip';
 
-            if (status === 'success') statusEl.classList.add('status-success');
-            else if (status === 'failed') statusEl.classList.add('status-danger');
-            else statusEl.classList.add('status-warning');
+            if (status === 'success') {
+                statusEl.classList.add('status-success');
+            } else if (status === 'failed') {
+                statusEl.classList.add('status-danger');
+            } else {
+                statusEl.classList.add('status-warning');
+            }
         });
     });
+});
 </script>
 
 <script>
@@ -715,8 +873,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateVisibleCount();
 });
 </script>
-<<<<<<< HEAD
-=======
 
 <script>
 document.querySelectorAll('.process-form').forEach(form => {
@@ -754,4 +910,3 @@ document.querySelectorAll('.refund-form').forEach(form => {
 });
 </script>
 
->>>>>>> 5c913cbb5167c597eacb641074d84a6c839d8162

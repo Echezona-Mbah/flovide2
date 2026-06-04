@@ -573,6 +573,7 @@ class SendMoneyController extends Controller
             'reference' => $tx->reference,
             'order_id' => $tx->order_id,
             'status' => $tx->status,
+            'method' => $tx->method,
             'amount' => (float) $tx->amount,
             'total_amount' => (float) $tx->total_amount,
             'fees' => (float) ($tx->fees ?? 0),

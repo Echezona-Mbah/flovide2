@@ -223,6 +223,7 @@ class LoginController extends Controller
                     'amount'    => $t->currency_symbol . number_format($t->amount, 2),
                     'currency'  => $t->currency,
                     'status' => $t->status,
+                    'method' => $t->method,
                     'reference' => $t->reference,
                     'recipient_details' => [
                         'alias'          => $t->recipient_alias,
@@ -521,6 +522,7 @@ class LoginController extends Controller
                     'amount'    => $t->currency_symbol . number_format($t->amount, 2),
                     'currency'  => $t->currency,
                     'status' => $t->status,
+                    'method' => $t->method,
                     'reference' => $t->reference,
                     'recipient_details' => [
                         'alias'          => $t->recipient_alias,
