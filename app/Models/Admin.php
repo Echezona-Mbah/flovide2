@@ -13,7 +13,7 @@ class Admin extends Authenticatable
         'name',
         'email',
         'password',
-         'phone',
+        'phone',
         'role',
         'skills',
         'experience',
@@ -31,10 +31,32 @@ class Admin extends Authenticatable
         'password'
     ];
     protected $casts = [
-    'locked_until' => 'datetime',
+        'locked_until' => 'datetime',
     ];
 
+    // Admins can create many blog posts
+    public function blogPosts()
+    {
+        return $this->hasMany(BlogPost::class, 'author_id');
+    }
 
+    // Role helpers
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'Super Admin';
+    }
+
+    public function isEditor(): bool
+    {
+        return $this->role === 'Editor';
+    }
+
+    public function isContentManager(): bool
+    {
+        return $this->role === 'Content Manager';
+    }
+
+    // Permissions
     public function hasPermission(string $permission): bool
 {
     $permissions = config('admin_permissions.' . $this->role, []);

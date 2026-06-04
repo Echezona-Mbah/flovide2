@@ -354,6 +354,9 @@
                                                 <li class="nav-item">
                                                     <a href="{{ route('admin.dashboard') }}" class="nav-link">Dashboard</a>
                                                 </li>
+                                                <li class="nav-item">
+                                                    <a href="{{ route('admin.blog') }}" class="nav-link">Blog Post</a>
+                                                </li>
                                             </ul>
                                         </div>
 
