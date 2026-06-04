@@ -164,7 +164,7 @@
           <pre id="quick-start-code" class="text-[#f4a261] text-sm leading-6">curl -X GET "https://flovide.com/api/v1/balances" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"</pre>
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"</pre>
         </div>
       </div>
     </section>
@@ -264,14 +264,14 @@
                                 <p class="text-slate-600 mb-6">Returns one balance record for the matched account.</p>
 
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
-                                    <summary class="cursor-pointer font-semibold text-slate-800">Path Parameter</summary>
-                                    <div class="mt-4 flex justify-between">
-                                        <div>
-                                            <span class="font-mono text-sm font-semibold text-slate-900">id</span>
-                                            <span class="text-xs text-slate-400 ml-2 italic">Integer</span>
-                                        </div>
-                                        <span class="text-xs text-red-500 font-semibold uppercase">Required</span>
-                                    </div>
+                                  <summary class="cursor-pointer font-semibold text-slate-800">Path Parameter</summary>
+                                  <div class="mt-4 flex justify-between">
+                                      <div>
+                                          <span class="font-mono text-sm font-semibold text-slate-900">id</span>
+                                          <span class="text-xs text-slate-400 ml-2 italic">Integer</span>
+                                      </div>
+                                      <span class="text-xs text-red-500 font-semibold uppercase">Required</span>
+                                  </div>
                                 </details>
 
                                 <div class="api-block" data-group="balances-single"></div>
@@ -478,6 +478,23 @@
                             </div>
                             <h3 class="text-xl font-bold mb-3">Initiate transaction</h3>
                             <p class="text-slate-600 mb-6">Creates a new transaction for the matched account.</p>
+                            <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
+                              <summary class="cursor-pointer font-semibold text-slate-800">Path Parameter</summary>
+                              <div class="mt-4 flex justify-between">
+                                  <div>
+                                    <span class="font-mono text-sm font-semibold text-slate-900">order_id</span>
+                                    <span class="text-xs text-slate-400 ml-2 italic">Random UUID generate by you</span>
+                                  </div>
+                                  <span class="text-xs text-red-500 font-semibold uppercase">Required</span>
+                              </div>
+                              <div class="mt-4 flex justify-between">
+                                  <div>
+                                    <span class="font-mono text-sm font-semibold text-slate-900">reference</span>
+                                    <span class="text-xs text-slate-400 ml-2 italic">Random UUID generate by you</span>
+                                  </div>
+                                  <span class="text-xs text-red-500 font-semibold uppercase">Required</span>
+                              </div>
+                            </details>
 
                             <div class="api-block" data-group="transactions-post"></div>
                         </div>
@@ -687,13 +704,13 @@
                 curl: `curl -X GET "https://flovide.com/api/v1/balances" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
                 javascript: `fetch('https://flovide.com/api/v1/balances', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -710,7 +727,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -726,7 +743,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -735,7 +752,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/balances"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -747,7 +764,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/balances");
 var body = await response.Content.ReadAsStringAsync();
@@ -767,13 +784,13 @@ Console.WriteLine(body);`,
                 curl: `curl -X GET "https://flovide.com/api/v1/balances/70" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
                 javascript: `fetch('https://flovide.com/api/v1/balances/70', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -790,7 +807,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances/70", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -806,7 +823,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -815,7 +832,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/balances/70"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -827,7 +844,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/balances/70");
 var body = await response.Content.ReadAsStringAsync();
@@ -846,14 +863,14 @@ Console.WriteLine(body);`,
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
                 javascript: `fetch('https://flovide.com/api/v1/balances', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   },
   body: JSON.stringify({
     name: 'Main Wallet',
@@ -881,7 +898,7 @@ func main() {
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -898,7 +915,7 @@ response = requests.post(
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
     json={
         "name": "Main Wallet",
@@ -920,7 +937,7 @@ HttpRequest request = HttpRequest.newBuilder()
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .POST(HttpRequest.BodyPublishers.ofString(json))
     .build();
 
@@ -934,7 +951,7 @@ using var client = new HttpClient();
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var json = """
 {
@@ -962,14 +979,14 @@ Console.WriteLine(body);`,
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
                 javascript: `fetch('https://flovide.com/api/v1/beneficiaries/account-inquiry', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   },
   body: JSON.stringify({
     currency: 'NGN',
@@ -999,7 +1016,7 @@ func main() {
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1016,7 +1033,7 @@ response = requests.post(
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
     json={
         "currency": "NGN",
@@ -1039,7 +1056,7 @@ HttpRequest request = HttpRequest.newBuilder()
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .POST(HttpRequest.BodyPublishers.ofString(json))
     .build();
 
@@ -1053,7 +1070,7 @@ using var client = new HttpClient();
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var json = """
 {
@@ -1092,14 +1109,14 @@ Console.WriteLine(body);`,
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
   javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   },
   body: JSON.stringify({
     type: 'individual',
@@ -1111,7 +1128,8 @@ Console.WriteLine(body);`,
       currency: 'NGN',
       accountHolder: 'ECHEZONA ERNEST MBAH',
       accountNumber: '6322069407',
-      bankCode: '000007'
+      bankCode: '000007',
+      mobileNumber: 'bank'
     }
   })
 })
@@ -1137,7 +1155,8 @@ func main() {
       "currency":"NGN",
       "accountHolder":"ECHEZONA ERNEST MBAH",
       "accountNumber":"6322069407",
-      "bankCode":"000007"
+      "bankCode":"000007",
+      "mobileNumber":"bank"
     }
   }\`)
 
@@ -1145,7 +1164,7 @@ func main() {
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1162,7 +1181,7 @@ response = requests.post(
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
     json={
         "type": "individual",
@@ -1174,7 +1193,8 @@ response = requests.post(
             "currency": "NGN",
             "accountHolder": "ECHEZONA ERNEST MBAH",
             "accountNumber": "6322069407",
-            "bankCode": "000007"
+            "bankCode": "000007",
+            "mobileNumber": "bank"
         }
     },
 )
@@ -1191,7 +1211,8 @@ print(response.json())`,
     "currency": "NGN",
     "accountHolder": "ECHEZONA ERNEST MBAH",
     "accountNumber": "6322069407",
-    "bankCode": "000007"
+    "bankCode": "000007",
+    "mobileNumber": "bank"
   }
 }
 """;
@@ -1201,7 +1222,7 @@ HttpRequest request = HttpRequest.newBuilder()
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .POST(HttpRequest.BodyPublishers.ofString(json))
     .build();
 
@@ -1215,7 +1236,7 @@ using var client = new HttpClient();
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var json = """
 {
@@ -1228,7 +1249,8 @@ var json = """
     "currency": "NGN",
     "accountHolder": "ECHEZONA ERNEST MBAH",
     "accountNumber": "6322069407",
-    "bankCode": "000007"
+    "bankCode": "000007",
+    "mobileNumber": "bank"
   }
 }
 """;
@@ -1500,13 +1522,13 @@ class Program
   curl: `curl -X DELETE "https://flovide.com/api/v1/beneficiaries/114" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
   javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
   method: 'DELETE',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -1523,7 +1545,7 @@ func main() {
   req, _ := http.NewRequest("DELETE", "https://flovide.com/api/v1/beneficiaries/114", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1539,7 +1561,7 @@ response = requests.delete(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -1548,7 +1570,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .DELETE()
     .build();
 
@@ -1560,7 +1582,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.DeleteAsync("https://flovide.com/api/v1/beneficiaries/114");
 var body = await response.Content.ReadAsStringAsync();
@@ -1575,13 +1597,13 @@ Console.WriteLine(body);`,
   curl: `curl -X GET "https://flovide.com/api/v1/transactions" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
   javascript: `fetch('https://flovide.com/api/v1/transactions', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -1598,7 +1620,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/transactions", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1614,7 +1636,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -1623,7 +1645,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/transactions"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -1635,7 +1657,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/transactions");
 var body = await response.Content.ReadAsStringAsync();
@@ -1693,13 +1715,13 @@ Console.WriteLine(body);`,
   curl: `curl -X GET "https://flovide.com/api/v1/transactions/1" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
   javascript: `fetch('https://flovide.com/api/v1/transactions/1', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -1716,7 +1738,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/transactions/1", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1732,7 +1754,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -1741,7 +1763,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/transactions/1"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -1753,7 +1775,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/transactions/1");
 var body = await response.Content.ReadAsStringAsync();
@@ -1793,7 +1815,7 @@ Console.WriteLine(body);`,
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY" ^
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
   -d "{\"transaction_type\":\"payment\",\"amount\":1,\"recipient_id\":\"eb3a39c0-97f7-403a-8bc6-1e57a443cdeb\",\"balance_id\":\"019d86e0-1afb-733f-ac4b-4af1a8a224ee\",\"order_id\":\"9d4b15224c4e11e9900f2d9954c22966\",\"reference\":\"019e83ba-f543-7359-9a07-81685f147ba5\"}"`,
 
   javascript: `fetch('https://flovide.com/api/v1/transactions', {
@@ -1802,7 +1824,7 @@ Console.WriteLine(body);`,
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   },
   body: JSON.stringify({
     transaction_type: 'payment',
@@ -1839,7 +1861,7 @@ func main() {
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1857,7 +1879,7 @@ response = requests.post(
         "Accept": "application/json",
         "Content-Type": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
     json={
         "transaction_type": "payment",
@@ -1887,7 +1909,7 @@ HttpRequest request = HttpRequest.newBuilder()
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .POST(HttpRequest.BodyPublishers.ofString(json))
     .build();
 
@@ -1902,7 +1924,7 @@ using var client = new HttpClient();
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var json = """
 {
@@ -1949,14 +1971,14 @@ Console.WriteLine(body);`,
   curl: `curl -X GET "https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
 
   javascript: `fetch('https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -1974,7 +1996,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -1997,7 +2019,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -2007,7 +2029,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -2020,7 +2042,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/rates?from_currency=GBP&to_currency=EUR&amount=100&to_amount=112");
 var body = await response.Content.ReadAsStringAsync();
@@ -2058,14 +2080,14 @@ Console.WriteLine(body);`,
   curl: `curl -X GET "https://flovide.com/api/v1/reference-data/currencies" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
 
   javascript: `fetch('https://flovide.com/api/v1/reference-data/currencies', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -2083,7 +2105,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/reference-data/currencies", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -2100,7 +2122,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -2110,7 +2132,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/reference-data/currencies"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -2123,7 +2145,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/reference-data/currencies");
 var body = await response.Content.ReadAsStringAsync();
@@ -2158,14 +2180,14 @@ Console.WriteLine(body);`,
   curl: `curl -X GET "https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: REDACTED_STRIPE_KEY"`,
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
 
   javascript: `fetch('https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
     'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
-    'X-Secret-Key': 'REDACTED_STRIPE_KEY'
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
   }
 })
   .then(res => res.json())
@@ -2183,7 +2205,7 @@ func main() {
   req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-  req.Header.Set("X-Secret-Key", "REDACTED_STRIPE_KEY")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
   client := &http.Client{}
   resp, _ := client.Do(req)
@@ -2204,7 +2226,7 @@ response = requests.get(
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "REDACTED_STRIPE_KEY",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
     },
 )
 
@@ -2214,7 +2236,7 @@ print(response.json())`,
     .uri(URI.create("https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
-    .header("X-Secret-Key", "REDACTED_STRIPE_KEY")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
     .GET()
     .build();
 
@@ -2227,7 +2249,7 @@ System.out.println(response.body());`,
 
 client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
-client.DefaultRequestHeaders.Add("X-Secret-Key", "REDACTED_STRIPE_KEY");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
 var response = await client.GetAsync("https://flovide.com/api/v1/reference-data/banks?country_iso=NG&currency=NGN");
 var body = await response.Content.ReadAsStringAsync();
