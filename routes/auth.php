@@ -48,6 +48,7 @@ use App\Http\Controllers\Business\SendMoneyController;
 use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
@@ -486,6 +487,15 @@ Route::middleware(['auth','business.verified'])->group(function () {
             Route::delete('/admin/career-view/{id}', [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
             Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
             Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+
+
+            Route::get('/admin/blog', [BlogController::class, 'index'])->name('admin.blog');
+            Route::post('/admin/blog/create', [BlogController::class, 'store'])->name('admin.blog.store');
+            // Route::put('/admin/blog/{id}/update', [BlogController::class, 'update'])->name('admin.blog.update');
+            Route::delete('/admin/blog/{id}/delete', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
+            Route::get('/admin/blog/view', [BlogController::class, 'view'])->name('admin.blog.view');
+            Route::patch('/admin/blog/{id}/publish', [BlogController::class, 'publish'])->name('admin.blog.publish');
+
         });
 
 
