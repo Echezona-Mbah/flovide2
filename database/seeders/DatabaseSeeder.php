@@ -25,6 +25,10 @@ class DatabaseSeeder extends Seeder
         $this->call(PaymentRecordsBussinessSeeder::class);
         $this->call(SubscriptionRecordSeeder::class);
 
+        $this->call([
+            CategorySeeder::class,
+            TagSeeder::class,
+        ]);
 
 
     }

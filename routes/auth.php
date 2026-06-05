@@ -491,8 +491,9 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
             Route::get('/admin/blog', [BlogController::class, 'index'])->name('admin.blog');
             Route::post('/admin/blog/create', [BlogController::class, 'store'])->name('admin.blog.store');
-            Route::put('/admin/blog/{id}/update', [BlogController::class, 'update'])->name('admin.blog.update');
+            // Route::put('/admin/blog/{id}/update', [BlogController::class, 'update'])->name('admin.blog.update');
             Route::delete('/admin/blog/{id}/delete', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
+            Route::get('/admin/blog/view', [BlogController::class, 'view'])->name('admin.blog.view');
         });
 
 

@@ -277,10 +277,78 @@
 
                     <div id="toast-container"></div>
 
+                    <section class="mb-4">
+                        <div class="main-card card" style="border-radius: 12px; border: 0.5px solid #e2e8f0;">
+                            <div class="card-body p-4">
+
+                                {{-- Header --}}
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="width:40px; height:40px; border-radius:8px; background:#f8fafc; border:0.5px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
+                                            <i class="pe-7s-news-paper" style="font-size:20px; color:#64748b;"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-500" style="font-size:15px; color:#1e293b;">Blog posts</p>
+                                            <p class="mb-0" style="font-size:13px; color:#94a3b8;">Manage your published content</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Stats --}}
+                                <div class="row g-2 mb-4">
+                                    <div class="col-4">
+                                        <div style="background:#f8fafc; border-radius:8px; padding:12px; text-align:center;">
+                                            <span style="display:block; font-size:22px; font-weight:500; color:#1e293b; line-height:1.2;">
+                                                {{ $totalPosts ?? 0 }}
+                                            </span>
+                                            <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px;">
+                                                Total
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div style="background:#f8fafc; border-radius:8px; padding:12px; text-align:center;">
+                                            <span style="display:block; font-size:22px; font-weight:500; color:#16a34a; line-height:1.2;">
+                                                {{ $publishedPosts ?? 0 }}
+                                            </span>
+                                            <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px;">
+                                                Published
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div style="background:#f8fafc; border-radius:8px; padding:12px; text-align:center;">
+                                            <span style="display:block; font-size:22px; font-weight:500; color:#d97706; line-height:1.2;">
+                                                {{ $draftPosts ?? 0 }}
+                                            </span>
+                                            <span style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px;">
+                                                Drafts
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Divider --}}
+                                <hr style="border:none; border-top:0.5px solid #e2e8f0; margin:0 0 1.25rem;">
+
+                                {{-- Actions --}}
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('admin.blog.view') }}"
+                                    style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#1e293b; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; text-decoration:none; transition:opacity 0.15s;"
+                                    onmouseover="this.style.opacity='0.85'"
+                                    onmouseout="this.style.opacity='1'">
+                                        <i class="pe-7s-display2" style="font-size:15px;"></i> View all posts
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- Blog Post Form -->
-                    <form id="blog-update-form" class="row" action="{{ route('admin.blog.update', 1) }}" method="POST" enctype="multipart/form-data">
+                    <form id="blog-update-form" class="row" action="{{ route('admin.blog.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        @method('PUT')
+                        {{-- @method('PUT') --}}
                         
                         <div class="col-lg-8 col-md-12">
                             <!-- Title & Body Card -->
@@ -352,25 +420,22 @@
                                             <div class="google-preview-url">
                                                 <span>https://flovide.com</span>
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                                                <span id="preview-url-slug">blog/the-future-of-digital-banking-in-sub-saharan-africa</span>
+                                                <span id="preview-url-slug">blog/</span>
                                             </div>
-                                            <div class="google-preview-title" id="preview-seo-title">The Future of Digital Banking in Africa | FinTech Insights</div>
-                                            <div class="google-preview-description" id="preview-seo-desc">Explore how open banking, APIs, and digital wallets are driving financial inclusion and reshaping financial services in Sub-Saharan Africa.</div>
+                                            <div class="google-preview-title" id="preview-seo-title"></div>
+                                            <div class="google-preview-description" id="preview-seo-desc"></div>
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Meta Title</label>
-                                        <input type="text" id="meta-title" name="meta_title" class="form-control" 
-                                               value="The Future of Digital Banking in Africa | FinTech Insights" 
-                                               placeholder="Recommended length: 50-60 characters">
+                                        <input type="text" id="meta-title" name="meta_title" class="form-control" placeholder="Recommended length: 50-60 characters">
                                         <span class="char-counter" id="meta-title-counter">0 / 60 characters</span>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Meta Description</label>
-                                        <textarea id="meta-description" name="meta_description" class="form-control" rows="3" 
-                                                  placeholder="Recommended length: 120-160 characters">Explore how open banking, APIs, and digital wallets are driving financial inclusion and reshaping financial services in Sub-Saharan Africa.</textarea>
+                                        <textarea id="meta-description" name="meta_description" class="form-control" rows="3" placeholder="Recommended length: 120-160 characters"></textarea>
                                         <span class="char-counter" id="meta-desc-counter">0 / 160 characters</span>
                                     </div>
                                 </div>
@@ -401,22 +466,23 @@
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Visibility</label>
                                         <select name="visibility" class="form-control form-control-sm">
-                                            <option value="public" selected>Public</option>
+                                            <option value="public">Public</option>
                                             <option value="private">Private (Admin only)</option>
                                         </select>
                                     </div>
 
-                                    <div class="mb-3" id="scheduled-date-group" style="display: none;">
+                                    <div class="mb-3" id="scheduled-date-group">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Schedule Date & Time</label>
-                                        <input type="datetime-local" name="published_at" class="form-control form-control-sm" value="2026-06-05T12:00">
+                                        <input type="datetime-local" name="published_at" class="form-control form-control-sm">
                                     </div>
                                     
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Author</label>
                                         <select name="author_id" class="form-control form-control-sm">
-                                            <option value="1" selected>Super Admin</option>
-                                            <option value="2">Content Manager</option>
-                                            <option value="3">Editor Team</option>
+                                            <option value="">No Author</option>
+                                            @foreach($authors as $author)
+                                                <option value="{{ $author->id }}">{{ $author->name }} ({{ $author->role }})</option>
+                                            @endforeach
                                         </select>
                                     </div>
 
@@ -455,6 +521,7 @@
                                         </div>
                                     </div>
                                     <input type="file" id="featured-image-input" name="featured_image" accept="image/*" style="display: none;">
+                                    <input type="hidden" id="remove-featured-image-input" name="remove_featured_image" value="0">
                                     <small class="text-muted d-block mt-2 font-size-xs text-center">Supports PNG, JPG or WebP. Suggested ratio: 16:9.</small>
                                 </div>
                             </div>
@@ -470,23 +537,23 @@
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Primary Category</label>
                                         <select name="category_id" class="form-control form-control-sm">
-                                            <option value="1">Company News</option>
-                                            <option value="2" selected>FinTech & Innovation</option>
-                                            <option value="3">Product Updates</option>
-                                            <option value="4">Developer Tutorials</option>
+                                            <option value="">No Category</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label font-weight-bold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Tags</label>
                                         <div class="tags-container" id="tags-wrapper">
-                                            <!-- Rendered by JS -->
+                                            <!-- tags will be rendered here -->
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <input type="text" id="tag-input-field" class="form-control" placeholder="Add tag & press Enter">
                                             <button class="btn btn-outline-primary" type="button" id="btn-add-tag">Add</button>
                                         </div>
-                                        <input type="hidden" id="tags-hidden-input" name="tags" value="Fintech,Digital Banking,Africa,API">
+                                        <input type="hidden" id="tags-hidden-input" name="tags" value="{{ $tags->pluck('name')->implode(',') }}">
                                     </div>
                                 </div>
                             </div>
@@ -502,309 +569,374 @@
     @include('admin.footer')
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // ----------------------------------------------------
-        // 1. Slug Auto-generation
-        // ----------------------------------------------------
-        const titleInput = document.getElementById('post-title');
-        const slugInput = document.getElementById('post-slug');
-        const urlSlugPreview = document.getElementById('preview-url-slug');
-        const btnRegenerateSlug = document.getElementById('btn-regenerate-slug');
+        document.addEventListener('DOMContentLoaded', function () {
 
-        function generateSlug(text) {
-            return text
-                .toString()
-                .toLowerCase()
-                .normalize('NFD') // remove accents
-                .replace(/[\u0300-\u036f]/g, '') // remove accents helper
-                .replace(/\s+/g, '-') // replace spaces with -
-                .replace(/[^\w\-]+/g, '') // remove non-word chars
-                .replace(/\-\-+/g, '-') // replace multiple - with single -
-                .replace(/^-+/, '') // trim - from start
-                .replace(/-+$/, ''); // trim - from end
-        }
+            // 1. Slug Auto-generation
+            const titleInput = document.getElementById('post-title');
+            const slugInput = document.getElementById('post-slug');
+            const urlSlugPreview = document.getElementById('preview-url-slug');
+            const btnRegenerateSlug = document.getElementById('btn-regenerate-slug');
 
-        titleInput.addEventListener('input', function() {
-            // Auto update slug if it was matched to title before
-            const calculatedSlug = generateSlug(this.value);
-            slugInput.value = calculatedSlug;
-            urlSlugPreview.textContent = 'blog/' + (calculatedSlug || 'your-post-title');
-            updateGooglePreview();
-        });
-
-        slugInput.addEventListener('input', function() {
-            this.value = generateSlug(this.value);
-            urlSlugPreview.textContent = 'blog/' + (this.value || 'your-post-title');
-            updateGooglePreview();
-        });
-
-        btnRegenerateSlug.addEventListener('click', function() {
-            const calculatedSlug = generateSlug(titleInput.value);
-            slugInput.value = calculatedSlug;
-            urlSlugPreview.textContent = 'blog/' + (calculatedSlug || 'your-post-title');
-            updateGooglePreview();
-        });
-
-        // ----------------------------------------------------
-        // 2. SEO Google Preview and Counter
-        // ----------------------------------------------------
-        const metaTitle = document.getElementById('meta-title');
-        const metaDesc = document.getElementById('meta-description');
-        const previewTitle = document.getElementById('preview-seo-title');
-        const previewDesc = document.getElementById('preview-seo-desc');
-        const titleCounter = document.getElementById('meta-title-counter');
-        const descCounter = document.getElementById('meta-desc-counter');
-
-        function updateGooglePreview() {
-            // Fallbacks
-            const t = metaTitle.value.trim() || titleInput.value.trim() || 'Untitled Post';
-            const d = metaDesc.value.trim() || 'Please write a meta description to see the search snippet preview here...';
-            
-            previewTitle.textContent = t;
-            previewDesc.textContent = d;
-
-            // Counters
-            const tLength = metaTitle.value.length;
-            titleCounter.textContent = tLength + ' / 60 characters';
-            if (tLength > 60) {
-                titleCounter.style.color = '#dc3545';
-            } else if (tLength >= 50) {
-                titleCounter.style.color = '#28a745';
-            } else {
-                titleCounter.style.color = '#6c757d';
+            function generateSlug(text) {
+                return text
+                    .toString()
+                    .toLowerCase()
+                    .normalize('NFD') // remove accents
+                    .replace(/[\u0300-\u036f]/g, '') // remove accents helper
+                    .replace(/\s+/g, '-') // replace spaces with -
+                    .replace(/[^\w\-]+/g, '') // remove non-word chars
+                    .replace(/\-\-+/g, '-') // replace multiple - with single -
+                    .replace(/^-+/, '') // trim - from start
+                    .replace(/-+$/, ''); // trim - from end
             }
 
-            const dLength = metaDesc.value.length;
-            descCounter.textContent = dLength + ' / 160 characters';
-            if (dLength > 160) {
-                descCounter.style.color = '#dc3545';
-            } else if (dLength >= 120) {
-                descCounter.style.color = '#28a745';
-            } else {
-                descCounter.style.color = '#6c757d';
-            }
-        }
+            titleInput.addEventListener('input', function() {
+                // Auto update slug if it was matched to title before
+                const calculatedSlug = generateSlug(this.value);
+                slugInput.value = calculatedSlug;
+                urlSlugPreview.textContent = 'blog/' + (calculatedSlug || 'your-post-title');
+                updateGooglePreview();
+            });
 
-        metaTitle.addEventListener('input', updateGooglePreview);
-        metaDesc.addEventListener('input', updateGooglePreview);
+            slugInput.addEventListener('input', function() {
+                this.value = generateSlug(this.value);
+                urlSlugPreview.textContent = 'blog/' + (this.value || 'your-post-title');
+                updateGooglePreview();
+            });
 
-        // Initial SEO update
-        updateGooglePreview();
+            btnRegenerateSlug.addEventListener('click', function() {
+                const calculatedSlug = generateSlug(titleInput.value);
+                slugInput.value = calculatedSlug;
+                urlSlugPreview.textContent = 'blog/' + (calculatedSlug || 'your-post-title');
+                updateGooglePreview();
+            });
 
-        // ----------------------------------------------------
-        // 3. Status Badge and Date Input
-        // ----------------------------------------------------
-        const statusSelect = document.getElementById('post-status');
-        const statusBadge = document.getElementById('status-badge');
-        const dateGroup = document.getElementById('scheduled-date-group');
 
-        statusSelect.addEventListener('change', function() {
-            statusBadge.className = 'status-indicator';
-            if (this.value === 'published') {
-                statusBadge.classList.add('status-published');
-                dateGroup.style.display = 'none';
-            } else if (this.value === 'draft') {
-                statusBadge.classList.add('status-draft');
-                dateGroup.style.display = 'none';
-            } else if (this.value === 'scheduled') {
-                statusBadge.classList.add('status-scheduled');
-                dateGroup.style.display = 'block';
-            }
-        });
 
-        // ----------------------------------------------------
-        // 4. Image Upload & Preview
-        // ----------------------------------------------------
-        const imageInput = document.getElementById('featured-image-input');
-        const dropzonePrompt = document.getElementById('dropzone-prompt');
-        const imagePreview = document.getElementById('image-preview');
-        const removeImageBtn = document.getElementById('btn-remove-image');
 
-        // Set a beautiful linear gradient with tech circles as a default simulated featured image
-        const defaultCoverGradient = 'linear-gradient(135deg, #a5b4fc, #818cf8)';
-        imagePreview.style.backgroundImage = defaultCoverGradient;
-        dropzonePrompt.style.display = 'none';
-        imagePreview.style.display = 'block';
+            // 2. SEO Google Preview and Counter
+            const metaTitle = document.getElementById('meta-title');
+            const metaDesc = document.getElementById('meta-description');
+            const previewTitle = document.getElementById('preview-seo-title');
+            const previewDesc = document.getElementById('preview-seo-desc');
+            const titleCounter = document.getElementById('meta-title-counter');
+            const descCounter = document.getElementById('meta-desc-counter');
 
-        imageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.style.backgroundImage = `url('${e.target.result}')`;
-                    dropzonePrompt.style.display = 'none';
-                    imagePreview.style.display = 'block';
+            function updateGooglePreview() {
+                // Fallbacks
+                const t = metaTitle.value.trim() || titleInput.value.trim() || 'Untitled Post';
+                const d = metaDesc.value.trim() || 'Please write a meta description to see the search snippet preview here...';
+                
+                previewTitle.textContent = t;
+                previewDesc.textContent = d;
+
+                // Counters
+                const tLength = metaTitle.value.length;
+                titleCounter.textContent = tLength + ' / 60 characters';
+                if (tLength > 60) {
+                    titleCounter.style.color = '#dc3545';
+                } else if (tLength >= 50) {
+                    titleCounter.style.color = '#28a745';
+                } else {
+                    titleCounter.style.color = '#6c757d';
                 }
-                reader.readAsDataURL(file);
-            }
-        });
 
-        removeImageBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // prevent triggering click on parent dropzone
-            imageInput.value = '';
+                const dLength = metaDesc.value.length;
+                descCounter.textContent = dLength + ' / 160 characters';
+                if (dLength > 160) {
+                    descCounter.style.color = '#dc3545';
+                } else if (dLength >= 120) {
+                    descCounter.style.color = '#28a745';
+                } else {
+                    descCounter.style.color = '#6c757d';
+                }
+            }
+
+            metaTitle.addEventListener('input', updateGooglePreview);
+            metaDesc.addEventListener('input', updateGooglePreview);
+
+            // Initial SEO update
+            updateGooglePreview();
+
+
+
+
+            // 3. Status Badge and Date Input
+            const statusSelect = document.getElementById('post-status');
+            const statusBadge = document.getElementById('status-badge');
+            const dateGroup = document.getElementById('scheduled-date-group');
+
+            statusSelect.addEventListener('change', function() {
+                statusBadge.className = 'status-indicator';
+                if (this.value === 'published') {
+                    statusBadge.classList.add('status-published');
+                    dateGroup.style.display = 'none';
+                } else if (this.value === 'draft') {
+                    statusBadge.classList.add('status-draft');
+                    dateGroup.style.display = 'none';
+                } else if (this.value === 'scheduled') {
+                    statusBadge.classList.add('status-scheduled');
+                    dateGroup.style.display = 'block';
+                }
+            });
+
+
+
+
+            // 4. Image Upload & Preview
+            const imageInput = document.getElementById('featured-image-input');
+            const dropzonePrompt = document.getElementById('dropzone-prompt');
+            const imagePreview = document.getElementById('image-preview');
+            const removeImageBtn = document.getElementById('btn-remove-image');
+            const removeImageHiddenInput = document.getElementById('remove-featured-image-input');
+
             imagePreview.style.backgroundImage = 'none';
             imagePreview.style.display = 'none';
             dropzonePrompt.style.display = 'block';
-        });
+            
 
-        // Drag and drop events
-        const dropzone = document.querySelector('.image-dropzone');
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, function(e) {
-                e.preventDefault();
-                dropzone.style.borderColor = '#3f51b5';
-                dropzone.style.background = '#f1f3f9';
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, function(e) {
-                e.preventDefault();
-                dropzone.style.borderColor = '#ced4da';
-                dropzone.style.background = '#f8fafc';
-            }, false);
-        });
-
-        dropzone.addEventListener('drop', function(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length) {
-                imageInput.files = files;
-                // Trigger change event to load preview
-                const event = new Event('change');
-                imageInput.dispatchEvent(event);
-            }
-        });
-
-        // ----------------------------------------------------
-        // 5. Tags System
-        // ----------------------------------------------------
-        const tagsWrapper = document.getElementById('tags-wrapper');
-        const tagInputField = document.getElementById('tag-input-field');
-        const btnAddTag = document.getElementById('btn-add-tag');
-        const tagsHiddenInput = document.getElementById('tags-hidden-input');
-
-        let tagsList = tagsHiddenInput.value.split(',').filter(t => t.trim() !== '');
-
-        function renderTags() {
-            tagsWrapper.innerHTML = '';
-            tagsList.forEach((tag, index) => {
-                const badge = document.createElement('div');
-                badge.className = 'tag-badge';
-                badge.innerHTML = `${tag} <span class="remove-tag" data-index="${index}">&times;</span>`;
-                tagsWrapper.appendChild(badge);
+            imageInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    removeImageHiddenInput.value = '0';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.style.backgroundImage = `url('${e.target.result}')`;
+                        dropzonePrompt.style.display = 'none';
+                        imagePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
             });
-            
-            tagsHiddenInput.value = tagsList.join(',');
-            
-            // Bind remove buttons
-            document.querySelectorAll('.tag-badge .remove-tag').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const idx = parseInt(this.getAttribute('data-index'));
-                    tagsList.splice(idx, 1);
-                    renderTags();
+
+            removeImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // prevent triggering click on parent dropzone
+                imageInput.value = '';
+                imagePreview.style.backgroundImage = 'none';
+                imagePreview.style.display = 'none';
+                dropzonePrompt.style.display = 'block';
+                removeImageHiddenInput.value = '1';
+            });
+
+            // Drag and drop events
+            const dropzone = document.querySelector('.image-dropzone');
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    dropzone.style.borderColor = '#3f51b5';
+                    dropzone.style.background = '#f1f3f9';
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    dropzone.style.borderColor = '#ced4da';
+                    dropzone.style.background = '#f8fafc';
+                }, false);
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    imageInput.files = files;
+                    // Trigger change event to load preview
+                    const event = new Event('change');
+                    imageInput.dispatchEvent(event);
+                }
+            });
+
+
+
+
+            // 5. Tags System
+            const tagsWrapper = document.getElementById('tags-wrapper');
+            const tagInputField = document.getElementById('tag-input-field');
+            const btnAddTag = document.getElementById('btn-add-tag');
+            const tagsHiddenInput = document.getElementById('tags-hidden-input');
+
+            // Load all tags from hidden input
+            let tagsList = tagsHiddenInput.value
+                .split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag !== '');
+
+            function renderTags() {
+                tagsWrapper.innerHTML = '';
+
+                tagsList.forEach((tag, index) => {
+                    const badge = document.createElement('div');
+
+                    badge.className = 'tag-badge';
+
+                    badge.innerHTML = `
+                        ${tag}
+                        <span class="remove-tag" data-index="${index}">
+                            &times;
+                        </span>
+                    `;
+
+                    tagsWrapper.appendChild(badge);
                 });
-            });
-        }
 
-        function addTagFromInput() {
-            const val = tagInputField.value.trim().replace(/,/g, '');
-            if (val && !tagsList.includes(val)) {
-                tagsList.push(val);
+                tagsHiddenInput.value = tagsList.join(',');
+
+                document.querySelectorAll('.remove-tag').forEach(btn => {
+                    btn.addEventListener('click', function () {
+
+                        const index = parseInt(this.dataset.index);
+
+                        tagsList.splice(index, 1);
+
+                        renderTags();
+                    });
+                });
+            }
+
+            function addTagFromInput() {
+
+                const value = tagInputField.value.trim();
+
+                if (!value) return;
+
+                if (!tagsList.includes(value)) {
+                    tagsList.push(value);
+                }
+
+                tagInputField.value = '';
+
                 renderTags();
             }
-            tagInputField.value = '';
-        }
 
-        tagInputField.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ',') {
-                e.preventDefault();
-                addTagFromInput();
-            }
-        });
+            btnAddTag.addEventListener('click', addTagFromInput);
 
-        btnAddTag.addEventListener('click', function() {
-            addTagFromInput();
-        });
+            tagInputField.addEventListener('keydown', function(e) {
 
-        // Initialize tags
-        renderTags();
+                if (e.key === 'Enter') {
 
-        // ----------------------------------------------------
-        // 6. Content Editor Formatting Helpers
-        // ----------------------------------------------------
-        window.wrapText = function(before, after = before) {
-            const textarea = document.getElementById('editor-textarea');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            const selected = text.substring(start, end);
-            const replacement = before + selected + after;
-            
-            textarea.value = text.substring(0, start) + replacement + text.substring(end);
-            
-            // Reset selection range
-            textarea.focus();
-            textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
-        };
+                    e.preventDefault();
 
-        window.insertLink = function() {
-            const url = prompt('Enter the link URL:', 'https://');
-            if (url) {
-                wrapText('[', `](${url})`);
-            }
-        };
+                    addTagFromInput();
+                }
+            });
 
-        // ----------------------------------------------------
-        // 7. Simulated Submit Loading state
-        // ----------------------------------------------------
-        const form = document.getElementById('blog-update-form');
-        const submitBtn = document.getElementById('btn-submit-post');
-        const submitSpinner = document.getElementById('submit-spinner');
-        const submitIcon = document.getElementById('submit-icon');
-        const submitText = document.getElementById('submit-text');
+            renderTags();
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Don't submit for real since it's UI only
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitSpinner.style.display = 'inline-block';
-            submitIcon.style.display = 'none';
-            submitText.textContent = 'Saving Changes...';
 
-            // Simulate network delay
-            setTimeout(() => {
-                // Restore button
-                submitBtn.disabled = false;
-                submitSpinner.style.display = 'none';
-                submitIcon.style.display = 'inline-block';
-                submitText.textContent = 'Update Post';
+
+
+            // 6. Content Editor Formatting Helpers
+            window.wrapText = function(before, after = before) {
+                const textarea = document.getElementById('editor-textarea');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const selected = text.substring(start, end);
+                const replacement = before + selected + after;
                 
-                // Show toast message
-                showToastMessage('Blog post updated successfully!', 'success');
-            }, 1500);
-        });
+                textarea.value = text.substring(0, start) + replacement + text.substring(end);
+                
+                // Reset selection range
+                textarea.focus();
+                textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
+            };
 
-        function showToastMessage(message, type = 'success') {
-            const container = document.getElementById('toast-container') || document.body;
-            
-            // Simple toast element
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <div class="toast-progress"></div>
-            `;
-            
-            container.appendChild(toast);
-            
-            // Auto remove toast after 3.8s
-            setTimeout(() => {
-                toast.remove();
-            }, 3800);
-        }
-    });
+            window.insertLink = function() {
+                const url = prompt('Enter the link URL:', 'https://');
+                if (url) {
+                    wrapText('[', `](${url})`);
+                }
+            };
+
+
+
+            // 7. AJAX Submit
+            const form = document.getElementById('blog-update-form');
+            const submitBtn = document.getElementById('btn-submit-post');
+            const submitSpinner = document.getElementById('submit-spinner');
+            const submitIcon = document.getElementById('submit-icon');
+            const submitText = document.getElementById('submit-text');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitSpinner.style.display = 'inline-block';
+                submitIcon.style.display = 'none';
+                submitText.textContent = 'Saving Changes...';
+
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST', // standard HTML post with PUT override inside formData
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    return response.json().then(data => {
+                        if (!response.ok) {
+                            throw new Error(data.message || 'An error occurred while saving.');
+                        }
+                        return data;
+                    });
+                })
+                .then(data => {
+                    // Restore button
+                    submitBtn.disabled = false;
+                    submitSpinner.style.display = 'none';
+                    submitIcon.style.display = 'inline-block';
+                    submitText.textContent = 'Update Post';
+                    
+                    // Show toast message
+                    showToastMessage(data.message || 'Blog post updated successfully!', 'success');
+                    
+                    // Update slug preview URL text in snippet
+                    const slugInputVal = document.getElementById('post-slug').value;
+                    document.getElementById('preview-url-slug').textContent = 'blog/' + slugInputVal;
+                    
+                    // If a featured image was uploaded or removed, update the view state
+                    if (data.featured_image_url) {
+                        imagePreview.style.backgroundImage = `url('${data.featured_image_url}')`;
+                        dropzonePrompt.style.display = 'none';
+                        imagePreview.style.display = 'block';
+                        document.getElementById('remove-featured-image-input').value = '0';
+                    }
+                })
+                .catch(error => {
+                    // Restore button
+                    submitBtn.disabled = false;
+                    submitSpinner.style.display = 'none';
+                    submitIcon.style.display = 'inline-block';
+                    submitText.textContent = 'Update Post';
+                    
+                    // Show toast error message
+                    showToastMessage(error.message || 'An unexpected error occurred.', 'error');
+                });
+            });
+
+            function showToastMessage(message, type = 'success') {
+                const container = document.getElementById('toast-container') || document.body;
+                
+                // Simple toast element
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span>${message}</span>
+                    <div class="toast-progress"></div>
+                `;
+                
+                container.appendChild(toast);
+                
+                // Auto remove toast after 3.8s
+                setTimeout(() => {
+                    toast.remove();
+                }, 3800);
+            }
+        });
     </script>
 </body>
 </html>
