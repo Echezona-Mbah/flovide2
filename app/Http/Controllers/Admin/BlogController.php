@@ -42,12 +42,29 @@ class BlogController extends Controller
 
     public function view(Request $request)
     {
-        $posts = BlogPost::with(['category'])
+        $posts = BlogPost::with(['category', 'author'])
             ->latest()
             ->paginate(20);
 
+        if ($request->filled('status')) {
+            $posts->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $posts->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        $totalPosts = BlogPost::count();
+        $publishedCount = BlogPost::published()->count();
+        $draftCount = BlogPost::draft()->count();
+        $scheduledCount = BlogPost::scheduled()->count();
+
         return view('admin.viewblog', compact(
             'posts',
+            'totalPosts',
+            'publishedCount',
+            'draftCount',
+            'scheduledCount'
         ));
     }
 
@@ -244,9 +261,22 @@ class BlogController extends Controller
     //         : redirect()->route('admin.blog')->with('success', 'Blog post updated successfully!');
     // }
 
-    /**
-     * Remove the specified blog post from storage.
-     */
+
+    // Publish action
+    public function publish($id)
+    {
+        $post = BlogPost::findOrFail($id);
+
+        $post->update([
+            'status' => 'published',
+            'visibility' => 'public',
+            'published_at' => now(),
+        ]);
+
+        return back()->with('success', 'Post published successfully.');
+    }
+
+    // delete action
     public function destroy($id)
     {
         $post = BlogPost::findOrFail($id);
@@ -260,6 +290,6 @@ class BlogController extends Controller
 
         return request()->ajax()
             ? response()->json(['success' => true, 'message' => 'Blog post deleted successfully!'])
-            : redirect()->route('admin.blog')->with('success', 'Blog post deleted successfully!');
+            : back()->with('success', 'Blog post deleted successfully!');
     }
 }

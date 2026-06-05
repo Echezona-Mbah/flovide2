@@ -494,6 +494,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
             // Route::put('/admin/blog/{id}/update', [BlogController::class, 'update'])->name('admin.blog.update');
             Route::delete('/admin/blog/{id}/delete', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
             Route::get('/admin/blog/view', [BlogController::class, 'view'])->name('admin.blog.view');
+            Route::patch('/admin/blog/{id}/publish', [BlogController::class, 'publish'])->name('admin.blog.publish');
+
         });
 
 
