@@ -48,6 +48,7 @@ class TransactionHistory extends Model
         'recipient_sort_code',
         'recipient_account_number',
         'recipient_bank_name',
+        'bank_code',
         'recipient_bank_currency',
         'exchange_rate',
         'single_rate',

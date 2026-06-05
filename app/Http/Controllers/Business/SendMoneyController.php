@@ -87,7 +87,6 @@ class SendMoneyController extends Controller
             // 'order_id' => 'nullable|string|max:100',
         ]);
 
-        //  dd($request->all());die();
 
         $actor = $this->resolveKeyUser($request) ?? auth()->user();
         if (! $actor) {
@@ -135,6 +134,7 @@ class SendMoneyController extends Controller
             return $isApi ? response()->json(['success'=>false,'message'=>$msg,'code'=>'INSUFFICIENT_FUNDS','data'=>null],422)
                 : back()->withInput()->with('error',$msg);
         }
+    
 
         DB::beginTransaction();
         try {
@@ -150,13 +150,14 @@ class SendMoneyController extends Controller
                 'method' => 'withdrawal',
                 'payment_provider' => 'wallect',
                 'order_id' => $request->order_id,
-                'reference' => $request->reference ?? 'ref-' . Str::uuid(),
+                'reference' => 'ref-' . Str::uuid(),
                 'user_id' => $ownerId,
                 'created_by_member_id' => $memberId,
                 'sender_id' => $ownerId,
                 'sender' => $actor->business_name ?? $actor->name,
                 'recipient_account_number' => $request->account_number,
                 'recipient_account_name' => $request->account_name,
+                'bank_code' => $request->bank_code,
                 'recipient_id' => $request->recipient_id,
                 'recipient_country' => strtoupper(substr($currency, 0, 2)),
                 'recipient_bank_currency' => $currency,
@@ -166,7 +167,6 @@ class SendMoneyController extends Controller
                 'recipient_amount' => $request->recipient_amount,
 
             ]);
-
             if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
                 $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
             } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
@@ -254,9 +254,9 @@ class SendMoneyController extends Controller
             $payload['extraData']['amount'] = $request->recipient_amount;
         }
 
-        logger('Pivot REQUEST', $payload);
+        // logger('Pivot REQUEST', $payload);
         $payment = $this->pivot->postTransaction($token, $payload);
-        logger('Pivot RESPONSE', $payment);
+        // logger('Pivot RESPONSE', $payment);
 
         if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
             // $balance->amount -= $request->total_amount;
@@ -296,6 +296,9 @@ class SendMoneyController extends Controller
 
     protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor, User $owner)
     {   
+
+                     
+
         $isApi = $request->expectsJson();
         $transactionReference = "TXN_" . time();
 
@@ -362,7 +365,7 @@ class SendMoneyController extends Controller
         if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
             // $balance->amount -= $request->total_amount;
             // $balance->save();
-            $this->sendTransactionEmail($request, $balance, $owner, $transactionReference);
+            // $this->sendTransactionEmail($request, $balance, $owner, $transactionReference);
 
 
 
@@ -422,31 +425,14 @@ class SendMoneyController extends Controller
             "ts"              => now()->utc()->format('Y-m-d H:i:s'),
         ];
 
-        logger('AppMobile REQUEST', $payload);
+        // logger('AppMobile REQUEST', $payload);
         $response = $this->orchard->sendPayment($payload);
-        logger('AppMobile RESPONSE', $response);
+        // logger('AppMobile RESPONSE', $response);
 
         if (($response['status'] ?? null) === 'SUCCESS' || ($response['success'] ?? false)) {
             // $balance->amount -= $request->total_amount;
             // $balance->save();
-            $this->sendTransactionEmail($request, $balance, $owner, $exttrid);
-
-            // TransactionHistory::create([
-            //     'amount' => $request->total_amount,
-            //     'currency' => $sendingCurrency,
-            //     'balance_id' => $balance->id,
-            //     'order_id' => $exttrid,
-            //     'sender_id' => auth()->id(),
-            //     'sender' => $user->business_name ?? $user->name,
-            //     'recipient_account_number' => $request->account_number,
-            //     'recipient_account_name' => $request->account_name,
-            //     'recipient_country' => 'GH',
-            //     'status' => 'pending', 
-            //     'method' => 'withdrawal',
-            //     'payment_provider' => 'appmobile',
-            //     'reference' => 'ref-' . Str::uuid(),
-            //     'user_id' => auth()->id(),
-            // ]);
+            // $this->sendTransactionEmail($request, $balance, $owner, $exttrid);
 
              TransactionHistory::where('id', $txId)->update([
                 'status' => 'pending',

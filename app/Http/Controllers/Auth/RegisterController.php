@@ -8,6 +8,7 @@ use App\Mail\RegisterOtpMail;
 use App\Mail\WelcomeMail;
 use App\Models\Balance;
 use App\Models\Countries;
+use App\Models\Currency;
 use App\Models\Personal;
 use App\Models\TeamMembers;
 use App\Models\User;
@@ -371,31 +372,72 @@ public function registerUser(Request $request)
 
 
 
-    public function getAllCountry(Request $request) {
-        // $countries = Countries::all();
+    // public function getAllCountry(Request $request) {
+    //     // $countries = Countries::all();
 
-        $countryResponse = $this->fetchcountrylist($request);
-        $countries = $countryResponse->getData();
+    //     $countryResponse = $this->fetchcountrylist($request);
+    //     $countries = $countryResponse->getData();
 
-        // if ($countries->isEmpty()) {
-        if (!$countries) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No countries found',
-                'code' => 'COUNTRIES_EMPTY',
-                'data' => null
-            ], 404);
-        }
+    //     // $countries = Currency::orderBy('name', 'asc')->get(); 
 
+    //     // if ($countries->isEmpty()) {
+    //     if (!$countries) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'No countries found',
+    //             'code' => 'COUNTRIES_EMPTY',
+    //             'data' => null
+    //         ], 404);
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Countries fetched',
+    //         'code' => 'COUNTRIES_FETCHED',
+    //         'data' => [
+    //             'countries' => $countries
+    //         ]
+    //     ], 200);
+    // }
+
+    public function getAllCountry(Request $request)
+{
+    // $countryResponse = $this->fetchcountrylist($request);
+    // $countries = $countryResponse->getData();
+
+    $countries = Currency::where('is_active', true)
+        ->orderBy('name', 'asc')
+        ->get()
+        ->map(function ($currency) {
+            return [
+                'code' => $currency->code,
+                'name' => $currency->name,
+                'symbol' => $currency->symbol,
+                'country_code' => strtolower($currency->country_code ?? ''),
+                'country_name' => $currency->country_name,
+
+            ];
+        })
+        ->values();
+
+    if ($countries->isEmpty()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Countries fetched',
-            'code' => 'COUNTRIES_FETCHED',
-            'data' => [
-                'countries' => $countries
-            ]
-        ], 200);
+            'success' => false,
+            'message' => 'No currencies found',
+            'code' => 'CURRENCIES_EMPTY',
+            'data' => null
+        ], 404);
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Currencies fetched',
+        'code' => 'CURRENCIES_FETCHED',
+        'data' => [
+            'countries' => $countries
+        ]
+    ], 200);
+}
 
 
     public function deleteUser(Request $request, $email)

@@ -460,6 +460,7 @@ public function show(Request $request, $id)
             'recipient_account_number' => $request->account_number,
             'recipient_account_name' => $request->account_name,
             'recipient_id' => $validated['recipient_id'],
+            'bank_code' => $request->bank_code,
             'recipient_country' => strtoupper(substr($currency, 0, 2)),
             'recipient_bank_currency' => $currency,
             'to_currency' => $currency,

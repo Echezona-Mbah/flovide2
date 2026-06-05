@@ -151,11 +151,20 @@ public function store(Request $request)
         $bankName = $bankRow?->name;
     }
 
-    if ($method === 'mobile') {
-        $mobileNumber = $bank['mobileNumber'] ?? null;
-        $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-        $bankName = $bankRow?->name ?? 'mobile';
-    }
+        if ($method === 'mobile') {
+            $mobileNumber = $bank['mobileNumber'] ?? null;
+
+            if ($mobileNumber !== null) {
+                $mobileNumber = trim($mobileNumber);
+
+                if (str_starts_with($mobileNumber, '+')) {
+                    $mobileNumber = substr($mobileNumber, 1);
+                }
+            }
+
+            $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+            $bankName = $bankRow?->name ?? 'mobile';
+        }
 
     try {
         $beneficia = Beneficia::create([

@@ -66,7 +66,7 @@ class AddBeneficiariesController extends Controller
             'ugx_bank_service'   => env('PIVOT_UGX_BANK_SERVICE'),
             'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE'),
         ];
-
+        // dd($countryRules);
         return view('business.add_beneficia', compact(
             'countries',
             'countryRules',
@@ -251,6 +251,8 @@ class AddBeneficiariesController extends Controller
         }
 
 
+
+
         /* ================= VALIDATION ================= */
         $validator = \Validator::make($request->all(), [
 
@@ -288,7 +290,7 @@ class AddBeneficiariesController extends Controller
         $currency   = strtoupper($bank['currency']);
         $method     = $request->transfer_method;
 
-    /* ================= PROVIDER DETECTION ================= */
+        /* ================= PROVIDER DETECTION ================= */
 
         $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
 
@@ -325,6 +327,7 @@ class AddBeneficiariesController extends Controller
                 : back()->with('error', 'No provider enabled for UGX');
         }
         }
+        
 
         /*
         |--------------------------------------------------------------------------
@@ -400,7 +403,7 @@ class AddBeneficiariesController extends Controller
         }
         }
 
-                // dd($request->all());
+                //dd($request->all());
 
         /* ================= DETERMINE BANK / MOBILE ================= */
         $bankName     = null;
@@ -415,9 +418,19 @@ class AddBeneficiariesController extends Controller
 
         if ($method === 'mobile') {
             $mobileNumber = $bank['mobileNumber'] ?? null;
+
+            if ($mobileNumber !== null) {
+                $mobileNumber = trim($mobileNumber);
+
+                if (str_starts_with($mobileNumber, '+')) {
+                    $mobileNumber = substr($mobileNumber, 1);
+                }
+            }
+
             $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
             $bankName = $bankRow?->name ?? 'mobile';
         }
+         //dd($request->all());
 
         /* ================= STORE ================= */
 

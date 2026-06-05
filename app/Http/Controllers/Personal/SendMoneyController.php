@@ -284,9 +284,10 @@ public function sendTransaction(Request $request)
             'reference' => 'ref-' . Str::uuid(),
             'personal_id' => $personal->id,
             'sender_id' => $personal->id,
-            'sender' => $personal->name,
+            'sender' => $personal->firstname,
             'recipient_account_number' => $request->account_number,
             'recipient_account_name' => $request->account_name,
+            'bank_code' => $request->bank_code,
             'recipient_country' => strtoupper(substr($currency,0,2)),
             'recipient_bank_currency' => $currency,
             'to_currency' => $currency,
@@ -461,7 +462,7 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
     if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
         // $balance->amount -= $request->total_amount;
         // $balance->save();
-        $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
+        // $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
 
          TransactionHistory::where('id', $txId)->update([
             'status' => 'pending',
