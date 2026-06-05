@@ -106,99 +106,148 @@
                 </div>
             </section>
             
-            <!-- Categories Section -->
+            <!-- Categories Filter -->
             <section class="max-w-6xl mx-auto px-6 mb-16">
                 <div class="flex flex-wrap justify-center gap-3">
-                    <button class="px-6 py-2 rounded-full border border-flovide bg-flovide text-white text-sm font-medium">All Topics</button>
-                    {{-- <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Money Transfers</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Fintech Tips</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Business Payments</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Security</button>
-                    <button class="px-6 py-2 rounded-full border border-gray-200 hover:border-flovide hover:text-flovide transition text-sm font-medium">Product Updates</button> --}}
+                    <a href="{{ route('blog') }}"
+                       class="px-6 py-2 rounded-full border text-sm font-medium transition {{ !$activeCategory ? 'border-flovide bg-flovide text-white' : 'border-gray-200 hover:border-flovide hover:text-flovide' }}">
+                        All Topics
+                    </a>
+                    @foreach($categories as $cat)
+                    <a href="{{ route('blog', ['category' => $cat->slug]) }}"
+                       class="px-6 py-2 rounded-full border text-sm font-medium transition {{ $activeCategory && $activeCategory->id === $cat->id ? 'border-flovide bg-flovide text-white' : 'border-gray-200 hover:border-flovide hover:text-flovide' }}">
+                        {{ $cat->name }}
+                    </a>
+                    @endforeach
                 </div>
-            </section> 
+            </section>
 
         
             <!-- Featured Blog Section -->
+            @if($featuredPost)
             <section class="max-w-6xl mx-auto px-6 md:mt-20 mb-20">
+                <a href="{{ route('blog.show', $featuredPost->slug) }}" class="block">
                 <div class="premium-card bg-white rounded-3xl overflow-hidden flex flex-col md:flex-row border border-gray-50">
                     <div class="md:w-3/5 h-64 md:h-auto bg-gray-200 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1200" alt="Featured Article" class="absolute inset-0 w-full h-full object-cover">
+                        @if($featuredPost->featured_image)
+                            <img src="{{ asset('storage/' . $featuredPost->featured_image) }}" alt="{{ $featuredPost->title }}" class="absolute inset-0 w-full h-full object-cover">
+                        @else
+                            <div class="absolute inset-0 w-full h-full" style="background: linear-gradient(135deg, #1E5186 0%, #3b82f6 100%);"></div>
+                        @endif
                     </div>
                     <div class="md:w-2/5 p-8 md:p-12 flex flex-col justify-center">
-                        <span class="category-tag px-3 py-1 rounded-md inline-block mb-4 self-start">Remittance</span>
-                        <h2 class="text-3xl font-bold mb-4 leading-tight">The Future of Cross-Border Payments in Africa</h2>
+                        @if($featuredPost->category)
+                            <span class="category-tag px-3 py-1 rounded-md inline-block mb-4 self-start">{{ $featuredPost->category->name }}</span>
+                        @endif
+                        <h2 class="text-3xl font-bold mb-4 leading-tight">{{ $featuredPost->title }}</h2>
+                        @if($featuredPost->excerpt)
                         <p class="text-gray-600 mb-8 leading-relaxed">
-                            How digital wallets and real-time payment rails are reducing costs and increasing speed for millions of users across the continent.
+                            {{ Str::limit($featuredPost->excerpt, 180) }}
                         </p>
-                        {{-- <a href="#" class="text-flovide font-bold flex items-center group">
-                            Read More 
-                            <svg class="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </a> --}}
+                        @endif
+                        <div class="flex items-center text-xs text-gray-400 gap-2">
+                            <span>{{ $featuredPost->published_at ? $featuredPost->published_at->format('M d, Y') : $featuredPost->created_at->format('M d, Y') }}</span>
+                            @if($featuredPost->read_time)
+                                <span>•</span>
+                                <span>{{ $featuredPost->read_time }} min read</span>
+                            @endif
+                        </div>
+                        <div class="mt-6 flex items-center gap-2 text-flovide font-semibold text-sm">
+                            Read article
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
                 </div>
+                </a>
             </section>
+            @endif
 
 
             <!-- Latest Articles Grid -->
             <section class="max-w-6xl mx-auto px-6 mb-24">
                 <div class="flex justify-between items-end mb-10">
-                    <h3 class="text-2xl font-bold">Latest Articles</h3>
-                    {{-- <a href="#" class="text-sm font-semibold text-flovide">View all →</a> --}}
+                    <h3 class="text-2xl font-bold">
+                        {{ $activeCategory ? $activeCategory->name : 'Latest Articles' }}
+                    </h3>
+                    <span class="text-sm text-gray-400">{{ $posts->total() }} {{ Str::plural('article', $posts->total()) }}</span>
                 </div>
-                
+
+                @if($posts->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <!-- Article 1 -->
-                    <div class="premium-card rounded-2xl overflow-hidden border border-gray-50 flex flex-col">
+                    @foreach($posts as $post)
+                    <a href="{{ route('blog.show', $post->slug) }}" class="premium-card rounded-2xl overflow-hidden border border-gray-50 flex flex-col group" style="text-decoration: none; color: inherit;">
                         <div class="h-48 bg-gray-100 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1611974717483-5853dc9cce9c?auto=format&fit=crop&q=80&w=600" alt="Post" class="w-full h-full object-cover">
+                            @if($post->featured_image)
+                                <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                            @endif
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
-                            <span class="category-tag px-2 py-1 rounded inline-block mb-3 self-start">Security</span>
-                            <h4 class="text-xl font-bold mb-3">5 Ways to Secure Your Online Transactions</h4>
-                            <p class="text-gray-500 text-sm mb-6 flex-grow">Protecting your financial data is our top priority. Learn how to stay one step ahead of digital threats.</p>
+                            @if($post->category)
+                                <span class="category-tag px-2 py-1 rounded inline-block mb-3 self-start">{{ $post->category->name }}</span>
+                            @endif
+                            <h4 class="text-xl font-bold mb-3 leading-snug">{{ $post->title }}</h4>
+                            @if($post->excerpt)
+                                <p class="text-gray-500 text-sm mb-6 flex-grow">{{ Str::limit($post->excerpt, 120) }}</p>
+                            @else
+                                <p class="text-gray-500 text-sm mb-6 flex-grow">{{ Str::limit(strip_tags($post->content), 120) }}</p>
+                            @endif
                             <div class="flex items-center text-xs text-gray-400 mt-auto pt-4 border-t border-gray-50">
-                                <span>Oct 24, 2023</span>
-                                <span class="mx-2">•</span>
-                                <span>5 min read</span>
+                                <span>{{ $post->published_at ? $post->published_at->format('M d, Y') : $post->created_at->format('M d, Y') }}</span>
+                                @if($post->read_time)
+                                    <span class="mx-2">•</span>
+                                    <span>{{ $post->read_time }} min read</span>
+                                @endif
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Article 2 -->
-                    <div class="premium-card rounded-2xl overflow-hidden border border-gray-50 flex flex-col">
-                        <div class="h-48 bg-gray-100 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=600" alt="Post" class="w-full h-full object-cover">
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <span class="category-tag px-2 py-1 rounded inline-block mb-3 self-start">Business</span>
-                            <h4 class="text-xl font-bold mb-3">Expanding Your Business Beyond Borders</h4>
-                            <p class="text-gray-500 text-sm mb-6 flex-grow">The ultimate guide for African entrepreneurs looking to receive payments from international clients effortlessly.</p>
-                            <div class="flex items-center text-xs text-gray-400 mt-auto pt-4 border-t border-gray-50">
-                                <span>Oct 20, 2023</span>
-                                <span class="mx-2">•</span>
-                                <span>8 min read</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Article 3 -->
-                    <div class="premium-card rounded-2xl overflow-hidden border border-gray-50 flex flex-col">
-                        <div class="h-48 bg-gray-100 overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=600" alt="Post" class="w-full h-full object-cover">
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <span class="category-tag px-2 py-1 rounded inline-block mb-3 self-start">Fintech Tips</span>
-                            <h4 class="text-xl font-bold mb-3">Understanding Exchange Rates: What You Need to Know</h4>
-                            <p class="text-gray-500 text-sm mb-6 flex-grow">Why rates fluctuate and how Flovide ensures you get the most value for your transfers every single time.</p>
-                            <div class="flex items-center text-xs text-gray-400 mt-auto pt-4 border-t border-gray-50">
-                                <span>Oct 18, 2023</span>
-                                <span class="mx-2">•</span>
-                                <span>4 min read</span>
-                            </div>
-                        </div>
-                    </div>
+                    </a>
+                    @endforeach
                 </div>
+
+                @else
+                <div class="text-center py-20">
+                    <svg class="mx-auto mb-4 text-gray-300" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <p class="text-gray-400 text-lg">No articles found{{ $activeCategory ? ' in this category' : '' }}.</p>
+                    @if($activeCategory)
+                        <a href="{{ route('blog') }}" class="mt-4 inline-block text-sm font-semibold text-flovide">Browse all articles →</a>
+                    @endif
+                </div>
+                @endif
+
+                {{-- Pagination --}}
+                @if($posts->hasPages())
+                <div class="flex justify-center mt-14">
+                    <nav class="flex items-center gap-1" aria-label="Pagination">
+                        {{-- Previous --}}
+                        @if($posts->onFirstPage())
+                            <span class="px-4 py-2 rounded-full border border-gray-200 text-gray-300 text-sm cursor-not-allowed">← Prev</span>
+                        @else
+                            <a href="{{ $posts->previousPageUrl() }}" class="px-4 py-2 rounded-full border border-gray-200 text-gray-600 text-sm hover:border-flovide hover:text-flovide transition">← Prev</a>
+                        @endif
+
+                        {{-- Page Numbers --}}
+                        @foreach($posts->getUrlRange(max(1, $posts->currentPage() - 2), min($posts->lastPage(), $posts->currentPage() + 2)) as $page => $url)
+                            @if($page == $posts->currentPage())
+                                <span class="px-4 py-2 rounded-full text-sm font-semibold text-white bg-flovide border border-flovide">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="px-4 py-2 rounded-full border border-gray-200 text-sm text-gray-600 hover:border-flovide hover:text-flovide transition">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        {{-- Next --}}
+                        @if($posts->hasMorePages())
+                            <a href="{{ $posts->nextPageUrl() }}" class="px-4 py-2 rounded-full border border-gray-200 text-gray-600 text-sm hover:border-flovide hover:text-flovide transition">Next →</a>
+                        @else
+                            <span class="px-4 py-2 rounded-full border border-gray-200 text-gray-300 text-sm cursor-not-allowed">Next →</span>
+                        @endif
+                    </nav>
+                </div>
+                <p class="text-center text-xs text-gray-400 mt-3">Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }} &mdash; {{ $posts->total() }} total articles</p>
+                @endif
+
             </section>
 
             <!-- Call to Action Section -->
