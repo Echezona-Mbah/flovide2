@@ -61,6 +61,9 @@ class TransactionHistory extends Model
         'exchange_rate',
         'recipient_amount',
         'total_amount',
+        'interac_email',
+        'interac_first_name',
+        'interac_last_name',
 
     ];
 

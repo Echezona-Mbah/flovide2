@@ -8,6 +8,7 @@ class Currency extends Model
 {
     protected $fillable = [
         'code',
+        'currency_code',
         'name',
         'country_name',
         'symbol',

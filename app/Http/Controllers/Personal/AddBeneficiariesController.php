@@ -71,17 +71,20 @@ public function store(Request $request)
     $personalId = $personal->id;
 
     $validator = \Validator::make($request->all(), [
-        'type' => 'required|in:individual,corporate',
-        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
-        'lastName'   => 'nullable|required_if:type,individual|string|max:100',
-        'name'       => 'nullable|required_if:type,corporate|string|max:200',
+        'type'            => 'required|in:individual,corporate',
+        'firstNames'      => 'nullable|required_if:type,individual|string|max:100',
+        'lastName'        => 'nullable|required_if:type,individual|string|max:100',
+        'name'            => 'nullable|required_if:type,corporate|string|max:200',
         'transfer_method' => 'required|in:bank,mobile',
-        'bank.country'        => 'required|string|min:2|max:3',
-        'bank.currency'       => 'required|string|size:3',
-        'bank.accountHolder'  => 'required|string|max:100',
-        'bank.accountNumber'  => 'nullable|string|max:34',
-        'bank.bankCode'       => 'nullable|string|max:20',
-        'bank.mobileNumber'   => 'nullable|string|max:30',
+        'bank.country'       => 'required|string|min:2|max:3',
+        'bank.currency'      => 'required|string|size:3',
+        'bank.accountHolder' => 'nullable|string|max:100',
+        'bank.accountNumber' => 'nullable|string|max:34',
+        'bank.bankCode'      => 'nullable|string|max:20',
+        'bank.mobileNumber'  => 'nullable|string|max:30',
+        'bank.interac_first_name'  => 'nullable|string|max:30',
+        'bank.interac_last_name'  => 'nullable|string|max:30',
+        'bank.interac_email'  => 'nullable|string|max:30',
     ]);
 
     if ($validator->fails()) {
@@ -105,81 +108,130 @@ public function store(Request $request)
 
     $provider = null;
 
-    if ($currency === 'GHS') {
-        if ($appmobileEnabled) $provider = 'app_mobile';
-        elseif ($payazaEnabled) $provider = 'payaza';
-        else return response()->json([
-            'success' => false,
-            'message' => 'No provider enabled for GHS',
-            'code' => 'PROVIDER_DISABLED',
-            'data' => null
-        ], 403);
+    // ── CAD → Interac ────────────────────────────────────────────────────
+    if ($currency === 'CAD') {
+        $provider = 'interac';
+        $method   = 'bank';
+
+        // Validate CAD-specific fields
+        if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
+            return $isApi
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'First name, last name, and email are required for CAD Interac.',
+                    'code'    => 'CAD_INTERAC_FIELDS_REQUIRED',
+                    'data'    => null,
+                ], 422)
+                : back()->with('error', 'First name, last name, and email are required for CAD Interac.');
+        }
+
+    } elseif ($currency === 'GHS') {
+        if ($appmobileEnabled) {
+            $provider = 'app_mobile';
+        } elseif ($payazaEnabled) {
+            $provider = 'payaza';
+        } else {
+            Log::warning('[Beneficiary Store] No provider for GHS');
+            return $isApi
+                ? response()->json(['success' => false, 'message' => 'No provider enabled for GHS', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
+                : back()->with('error', 'No provider enabled for GHS');
+        }
     } elseif ($currency === 'UGX') {
-        if ($pivotEnabled) $provider = 'pivot';
-        elseif ($payazaEnabled) { $provider = 'payaza'; $method = 'mobile'; }
-        else return response()->json([
-            'success' => false,
-            'message' => 'No provider enabled for UGX',
-            'code' => 'PROVIDER_DISABLED',
-            'data' => null
-        ], 403);
+        if ($pivotEnabled) {
+            $provider = 'pivot';
+        } elseif ($payazaEnabled) {
+            $provider = 'payaza';
+            $method   = 'mobile';
+        } else {
+            Log::warning('[Beneficiary Store] No provider for UGX');
+            return $isApi
+                ? response()->json(['success' => false, 'message' => 'No provider enabled for UGX', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
+                : back()->with('error', 'No provider enabled for UGX');
+        }
     } elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
-        if ($payazaEnabled) $provider = 'payaza';
-        else return response()->json([
-            'success' => false,
-            'message' => 'Payaza disabled',
-            'code' => 'PROVIDER_DISABLED',
-            'data' => null
-        ], 403);
+        if ($payazaEnabled) {
+            $provider = 'payaza';
+        } else {
+            Log::warning('[Beneficiary Store] Payaza disabled for currency', ['currency' => $currency]);
+            return $isApi
+                ? response()->json(['success' => false, 'message' => 'Payaza disabled', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
+                : back()->with('error', 'Payaza disabled');
+        }
     } else {
-        if ($pivotEnabled) $provider = 'pivot';
-        else return response()->json([
-            'success' => false,
-            'message' => 'Pivot disabled',
-            'code' => 'PROVIDER_DISABLED',
-            'data' => null
-        ], 403);
+        if ($pivotEnabled) {
+            $provider = 'pivot';
+        } else {
+            Log::warning('[Beneficiary Store] Pivot disabled for currency', ['currency' => $currency]);
+            return $isApi
+                ? response()->json(['success' => false, 'message' => 'Pivot disabled', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
+                : back()->with('error', 'Pivot disabled');
+        }
     }
+
+    Log::info('[Beneficiary Store] Provider resolved', [
+        'provider' => $provider,
+        'method'   => $method,
+        'currency' => $currency,
+    ]);
 
     $bankName     = null;
     $mobileNumber = null;
-    if ($method === 'bank') {
-        $bankRow = Bank::where(function ($q) use ($bank) {
+    // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
+    if ($currency === 'CAD') {
+        $bankName = 'Interac';
+        Log::info('[Beneficiary Store] CAD Interac fields', [
+            'interac_first_name' => $bank['interac_first_name'] ?? null,
+            'interac_last_name'  => $bank['interac_last_name']  ?? null,
+            'interac_email'      => $bank['interac_email']       ?? null,
+        ]);
+    } elseif ($method === 'bank') {
+        $bankRow  = Bank::where(function ($q) use ($bank) {
             $q->where('bank_code', $bank['bankCode'] ?? null)
-              ->orWhere('sort_code', $bank['bankCode'] ?? null);
+            ->orWhere('sort_code', $bank['bankCode'] ?? null);
         })->first();
         $bankName = $bankRow?->name;
-    }
 
-        if ($method === 'mobile') {
-            $mobileNumber = $bank['mobileNumber'] ?? null;
+        Log::info('[Beneficiary Store] Bank lookup', [
+            'bank_code' => $bank['bankCode'] ?? null,
+            'bank_name' => $bankName,
+        ]);
+    } elseif ($method === 'mobile') {
+        $mobileNumber = $bank['mobileNumber'] ?? null;
 
-            if ($mobileNumber !== null) {
-                $mobileNumber = trim($mobileNumber);
-
-                if (str_starts_with($mobileNumber, '+')) {
-                    $mobileNumber = substr($mobileNumber, 1);
-                }
+        if ($mobileNumber !== null) {
+            $mobileNumber = trim($mobileNumber);
+            if (str_starts_with($mobileNumber, '+')) {
+                $mobileNumber = substr($mobileNumber, 1);
             }
-
-            $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-            $bankName = $bankRow?->name ?? 'mobile';
         }
+
+        $bankRow  = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+        $bankName = $bankRow?->name ?? 'mobile';
+
+        Log::info('[Beneficiary Store] Mobile lookup', [
+            'mobile_number' => $mobileNumber,
+            'bank_code'     => $bank['bankCode'] ?? null,
+            'bank_name'     => $bankName,
+        ]);
+    }
 
     try {
         $beneficia = Beneficia::create([
-            'country'   => $countryIso,
-            'currency'  => $currency,
-            'type'      => $request->type,
-            'first_names'       => $request->firstNames ?? null,
-            'last_name'         => $request->lastName ?? null,
-            'beneficiary_name'  => $request->name ?? null,
-            'account_number'    => $bank['accountNumber'] ?? null,
-            'account_name'      => $bank['accountHolder'] ?? null,
-            'phone'             => $mobileNumber,
-            'bank'              => $bankName,
-            'transfer_method'   => $method,
-            'bank_code'         => $bank['bankCode'] ?? null,
+            'country'              => $countryIso,
+            'currency'             => $currency,
+            'type'                 => $request->type,
+            'first_names'          => $request->firstNames ?? null,
+            'last_name'            => $request->lastName ?? null,
+            'beneficiary_name'     => $request->name ?? null,
+            'account_number'       => $bank['accountNumber'] ?? $mobileNumber ?? $bank['interac_email'] ?? null,
+            'account_name'         => $bank['accountHolder'] ?? trim(($bank['interac_first_name'] ?? '') . ' ' . ($bank['interac_last_name'] ?? '')) ?? null,
+            'interac_first_name'   => $bank['interac_first_name'] ?? null,
+            'interac_last_name'    => $bank['interac_last_name'] ?? null,
+            'email'                 => $bank['interac_email'] ?? null,
+            'phone'                => $mobileNumber,
+            'bank'                 => $bankName,
+            'transfer_method'      => $method,
+            'bank_code'            => $bank['bankCode'] ?? null,
             'provider'          => $provider,
             'unique_reference'   => strtoupper(\Str::random(7)),
             'customer_reference' => strtoupper(\Str::random(7)),

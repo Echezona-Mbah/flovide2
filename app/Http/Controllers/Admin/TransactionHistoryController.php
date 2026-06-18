@@ -132,6 +132,8 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
                 return back()->withErrors(['error' => 'Unable to retrieve Payaza account reference']);
             }
 
+            
+
             $payload = [
                 "transaction_type" => "nuban",
                 "service_payload" => [

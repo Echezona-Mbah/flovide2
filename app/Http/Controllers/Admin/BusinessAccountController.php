@@ -216,6 +216,42 @@ public function find($id)
     }
 
 
+public function downloadDocument(Request $request, $id)
+{
+    $user = User::findOrFail($id);
 
+    $field = $request->query('field');
+
+    $allowedFields = [
+        'cac_certificate', 'valid_id', 'tin', 'utility_bill',
+        'proof_of_identity', 'ownership_document',
+        'organisational_chart', 'register_of_directors', 'formation_document',
+    ];
+
+    if (!in_array($field, $allowedFields)) {
+        abort(403, 'Invalid document field.');
+    }
+
+    $relativePath = $user->$field;
+
+    if (!$relativePath) {
+        abort(404, 'Document not found.');
+    }
+
+    $fullPath = storage_path('app/public/' . $relativePath);
+
+    if (!file_exists($fullPath)) {
+        // try public path as fallback
+        $fullPath = public_path('storage/' . $relativePath);
+    }
+
+    if (!file_exists($fullPath)) {
+        abort(404, 'File does not exist on disk.');
+    }
+
+    $filename = basename($fullPath);
+
+    return response()->download($fullPath, $filename);
+}
 
 }

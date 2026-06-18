@@ -91,6 +91,7 @@ class User extends Authenticatable
         'callback_url',
         'webhook_url',
         'device_token',
+        'blaaiz_id'
 
     ];
 

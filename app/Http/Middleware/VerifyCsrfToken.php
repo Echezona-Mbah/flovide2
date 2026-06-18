@@ -15,5 +15,7 @@ class VerifyCsrfToken extends Middleware
         // Exclude your Sumsub webhook route from CSRF verification
         // 'sumsub/webhook',  
          'api/sumsub/webhook',
+           'api/webhooks/blaaiz',
+        'webhooks/blaaiz',
     ];
 }

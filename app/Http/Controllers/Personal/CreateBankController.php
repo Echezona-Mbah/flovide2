@@ -64,22 +64,22 @@ public function createBalance(Request $request)
     $personalId = auth('personal-api')->id();
     $currency   = strtoupper($request->currency);
 
-    $hasMoney = Balance::where('personal_id', $personalId)
-        ->where('amount', '>', 0)
-        ->exists();
+    // $hasMoney = Balance::where('personal_id', $personalId)
+    //     ->where('amount', '>', 0)
+    //     ->exists();
 
-    if (!$hasMoney) {
-        $errorMessage = 'You must have funds in at least one balance before creating a new one';
+    // if (!$hasMoney) {
+    //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
 
-        return $request->expectsJson()
-            ? response()->json([
-                'success' => false,
-                'message' => $errorMessage,
-                'code' => 'NO_FUNDS',
-                'data' => null
-            ], 400)
-            : redirect()->back()->withErrors(['message' => $errorMessage]);
-    }
+    //     return $request->expectsJson()
+    //         ? response()->json([
+    //             'success' => false,
+    //             'message' => $errorMessage,
+    //             'code' => 'NO_FUNDS',
+    //             'data' => null
+    //         ], 400)
+    //         : redirect()->back()->withErrors(['message' => $errorMessage]);
+    // }
 
     $exists = Balance::where('personal_id', $personalId)
         ->where('currency', $currency)
@@ -269,6 +269,8 @@ public function index(Request $request)
                     'account_number' => $t->recipient_account_number,
                     'bank_name'      => $t->recipient_bank_name,
                     'bank_currency'  => $t->recipient_bank_currency,
+                    'recipient_amount'  => $t->recipient_amount,
+                    'fees'  => $t->fees,
                 ]
             ];
         });
@@ -302,18 +304,36 @@ public function index(Request $request)
                 'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
             ];
         });
+             $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'code' => $c->code,
+                    'currency_code' =>$c->currency_code,
+                    'name' => $c->name,
+                    'symbol' => $c->symbol,
+                    'country_code' => strtolower($c->country_code ?? ''),
+                ];
+            })
+            ->values()
+            ->toArray();
 
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',
             'data' => [
+                'app_update' => [                                              // ← ADD HERE
+                    'latest_version' => config('app.latest_version', '1.0.0+8'),
+                    'force_update'   => config('app.force_update', true),
+                ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'balances'        => $balances,
                 'chart_data'      => $chartData,
                 'recent_history'  => $transactions,
                 'exchange_rates'  => $exchangeRates,
+                'currencies' => $currencies,
             ]
         ], 200);
     }
@@ -324,6 +344,7 @@ public function index(Request $request)
         'chartData' => $chartData,
         'transactions' => $transactions,
         'exchangeRates' => $exchangeRates,
+        'currencies' => $currencies,
     ]);
 }
     

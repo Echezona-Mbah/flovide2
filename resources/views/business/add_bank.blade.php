@@ -69,28 +69,24 @@
               </script>
               @endif
 
-              <div>
-                <label for="currency" class="block mb-2 text-xs font-semibold text-gray-500 uppercase">
-                  {{ __('Currency') }}
-                </label>
+              @php
+                $mainCurrency = $currencies->first();
+              @endphp
 
-                <div class="relative">
+              <div class="relative">
+                @if($mainCurrency)
                   <button id="currencyDropdownButton" type="button"
                     class="w-full flex items-center justify-between border border-gray-300 px-4 py-2 text-sm text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    @php
-                      $mainCurrency = $currencies->first();
-                    @endphp
 
                     <div id="selectedCurrency" class="flex items-center gap-2">
                       <img src="https://flagcdn.com/w40/{{ strtolower($mainCurrency->country_code ?? 'us') }}.png"
                         alt="{{ $mainCurrency->name ?? 'Currency' }} flag"
                         class="w-6 h-6 rounded-full border-2 border-gray-200 object-cover">
-                      <span>{{ $mainCurrency->name ?? 'Currency' }} ({{ $mainCurrency->code ?? 'USD' }})</span>
+                      <span>{{ $mainCurrency->name }} ({{ $mainCurrency->code }})</span>
                     </div>
 
                     <svg class="w-4 h-4 ml-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 9l-7 7-7-7" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
 
@@ -98,21 +94,26 @@
                     class="hidden absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow mt-2 max-h-60 overflow-y-auto">
                     @foreach ($currencies as $currency)
                       <div class="currency-option flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100"
-                        data-value="{{ $currency->code }}"
-                        data-label="{{ $currency->name }} ({{ $currency->code }})"
-                        data-flag="https://flagcdn.com/w40/{{ strtolower($currency->country_code) }}.png"
+                        data-value="{{ strtoupper($currency->code) }}"
+                        data-label="{{ $currency->name }} ({{ strtoupper($currency->code) }})"
+                        data-flag="https://flagcdn.com/w40/{{ strtolower($currency->country_code ?? 'us') }}.png"
                         data-alt="{{ $currency->name }} flag">
-                        <img src="https://flagcdn.com/w40/{{ strtolower($currency->country_code) }}.png"
+                        <img src="https://flagcdn.com/w40/{{ strtolower($currency->country_code ?? 'us') }}.png"
                           alt="{{ $currency->name }} flag"
                           class="w-6 h-6 rounded-full border-2 border-gray-200 object-cover">
-                        <span>{{ $currency->name }} ({{ $currency->code }})</span>
+                        <span>{{ $currency->name }} ({{ strtoupper($currency->code) }})</span>
                       </div>
                     @endforeach
-
                   </div>
 
-                  <input type="hidden" id="currency" name="currency" value="GBP">
-                </div>
+                  <input type="hidden" id="currency" name="currency" value="{{ strtoupper($mainCurrency->code) }}">
+                @else
+                  <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                    You have already created balances for all available currencies.
+                  </div>
+
+                  <input type="hidden" id="currency" name="currency" value="">
+                @endif
               </div>
 
               <div class="flex flex-col gap-1">
@@ -130,8 +131,9 @@
               </div>
 
               <button id="bankAccountForm"
-                class="self-start bg-blue-600 text-white font-semibold text-sm rounded-full py-2.5 px-6 mt-2 hover:bg-blue-700 transition"
-                type="submit">
+                class="self-start bg-blue-600 text-white font-semibold text-sm rounded-full py-2.5 px-6 mt-2 hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                type="submit"
+                @disabled($currencies->isEmpty())>
                 {{ __('Add Account') }}
               </button>
             </form>

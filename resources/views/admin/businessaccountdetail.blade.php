@@ -538,7 +538,7 @@
                                 </div>
 
                                 <div class="card-body">
-                                    @php
+                                    {{-- @php
                                         $documents = [
                                             ['label' => 'CAC Certificate', 'file' => $user->cac_certificate, 'status' => $user->cac_status, 'field' => 'cac_status'],
                                             ['label' => 'Valid ID', 'file' => $user->valid_id, 'status' => $user->valid_id_status, 'field' => 'valid_id_status'],
@@ -549,6 +549,19 @@
                                             ['label' => 'Organisational Chart', 'file' => $user->organisational_chart, 'status' => $user->organisational_chart_status, 'field' => 'organisational_chart_status'],
                                             ['label' => 'Register Of Directors', 'file' => $user->register_of_directors, 'status' => $user->register_of_directors_status, 'field' => 'register_of_directors_status'],
                                             ['label' => 'Formation Document', 'file' => $user->formation_document, 'status' => $user->formation_document_status, 'field' => 'formation_document_status'],
+                                        ];
+                                    @endphp --}}
+                                    @php
+                                        $documents = [
+                                            ['label' => 'CAC Certificate',       'file' => $user->cac_certificate,       'file_field' => 'cac_certificate',       'status' => $user->cac_status,                   'field' => 'cac_status'],
+                                            ['label' => 'Valid ID',               'file' => $user->valid_id,               'file_field' => 'valid_id',               'status' => $user->valid_id_status,              'field' => 'valid_id_status'],
+                                            ['label' => 'TIN Document',           'file' => $user->tin,                    'file_field' => 'tin',                    'status' => $user->tin_status,                   'field' => 'tin_status'],
+                                            ['label' => 'Utility Bill',           'file' => $user->utility_bill,           'file_field' => 'utility_bill',           'status' => $user->utility_bill_status,          'field' => 'utility_bill_status'],
+                                            ['label' => 'Proof Of Identity',      'file' => $user->proof_of_identity,      'file_field' => 'proof_of_identity',      'status' => $user->proof_of_identity_status,     'field' => 'proof_of_identity_status'],
+                                            ['label' => 'Ownership Document',     'file' => $user->ownership_document,     'file_field' => 'ownership_document',     'status' => $user->ownership_status,             'field' => 'ownership_status'],
+                                            ['label' => 'Organisational Chart',   'file' => $user->organisational_chart,   'file_field' => 'organisational_chart',   'status' => $user->organisational_chart_status,  'field' => 'organisational_chart_status'],
+                                            ['label' => 'Register Of Directors',  'file' => $user->register_of_directors,  'file_field' => 'register_of_directors',  'status' => $user->register_of_directors_status, 'field' => 'register_of_directors_status'],
+                                            ['label' => 'Formation Document',     'file' => $user->formation_document,     'file_field' => 'formation_document',     'status' => $user->formation_document_status,    'field' => 'formation_document_status'],
                                         ];
                                     @endphp
 
@@ -571,7 +584,7 @@
                                                         </td>
 
                                                         <td class="text-center">
-                                                            @if($doc['file'])
+                                                            {{-- @if($doc['file'])
                                                                 @php
                                                                     $filePath = 'storage/' . $doc['file'];
                                                                     $extension = pathinfo($doc['file'], PATHINFO_EXTENSION);
@@ -586,7 +599,27 @@
                                                                 </a>
                                                             @else
                                                                 <span class="custom-status status-danger">No File</span>
-                                                            @endif
+                                                            @endif --}}
+
+                                                            <td class="text-center">
+                                                                @if($doc['file'])
+                                                                    @php
+                                                                        $filePath  = 'storage/' . $doc['file'];
+                                                                        $extension = strtolower(pathinfo($doc['file'], PATHINFO_EXTENSION));
+                                                                    @endphp
+
+                                                                    <a href="{{ route('admin.document.download', ['id' => $user->id, 'field' => $doc['file_field']]) }}" target="_blank">
+                                                                        @if(in_array($extension, ['jpg','jpeg','png','webp']))
+                                                                            <img src="{{ asset($filePath) }}" class="compliance-thumb"
+                                                                                onerror="this.src='{{ asset('assets/dashboard/file.png') }}'">
+                                                                        @else
+                                                                            <i class="fa fa-file-pdf fa-2x text-danger"></i>
+                                                                        @endif
+                                                                    </a>
+                                                                @else
+                                                                    <span class="custom-status status-danger">No File</span>
+                                                                @endif
+                                                            </td>
                                                         </td>
 
                                                         <td class="text-center">

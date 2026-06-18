@@ -40,8 +40,8 @@ trait CurrencyHelper
             'MYR' => ['symbol' => 'RM', 'country' => 'my', 'rate' => 4.7],
             'THB' => ['symbol' => '฿', 'country' => 'th', 'rate' => 36],
             'IDR' => ['symbol' => 'Rp', 'country' => 'id', 'rate' => 16250],
-            'PKR' => ['symbol' => '₨', 'country' => 'pk', 'rate' => 277],
-            'EGP' => ['symbol' => '£', 'country' => 'eg', 'rate' => 48],
+            'CIV' => ['symbol' => 'CFA', 'country' => 'CI', 'rate' => 277],
+            'BEN' => ['symbol' => 'CFA', 'country' => 'BJ', 'rate' => 48],
         ];
 
         // Generate dynamic rate map

@@ -22,25 +22,28 @@ class ComplianceController extends Controller
 
 
 
-    //     public function index(Request $request)
-    // {
+        public function index(Request $request)
+    {
     
-    //     return view('business.compliance', [
-    //         'user' => auth()->user()
-    //     ]);
-    // }
+        return view('business.compliance', [
+            'user' => auth()->user()
+        ]);
+    }
 
 
-    public function index(Request $request)
-{
-    $actor = auth()->user();
-    $team = \App\Models\TeamMembers::where('user_id', $actor->id)->first();
-    $isOwner = $team ? false : true;
+// public function index(Request $request)
+// {
+//     $actor = auth()->user();
 
-    $user = $isOwner ? $actor : null;
+//     // A team MEMBER has a record where user_id = their ID
+//     // An OWNER is referenced as owner_id, not user_id
+//     $team    = \App\Models\TeamMembers::where('user_id', $actor->id)->first();
+//     $isOwner = $team === null; // no team record = they ARE the owner
 
-    return view('business.compliance', compact('user', 'isOwner'));
-}
+//     $user = $actor; // always pass the actor, view can use $isOwner to decide what to show
+
+//     return view('business.compliance', compact('user', 'isOwner'));
+// }
 
           public function store(Request $request)
     {
