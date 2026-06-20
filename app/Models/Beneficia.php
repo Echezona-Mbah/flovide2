@@ -33,6 +33,8 @@ class Beneficia extends Model
         'first_names',           // individual only
         'last_name',             // individual only
         'name',                  // corporate only
+        'interac_first_name',
+        'interac_last_name',
 
         // Address
         'address_line1',

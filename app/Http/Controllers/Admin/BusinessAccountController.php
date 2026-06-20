@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\VirtualCards;
 use Illuminate\Http\Request;
 use App\Traits\CurrencyHelper;
+use App\Services\FidelityService;
+use App\Services\BlaaizService;
 use Illuminate\Support\Facades\DB;
 
 class BusinessAccountController extends Controller
@@ -215,6 +217,123 @@ public function find($id)
         }
     }
 
+
+public function downloadDocument(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+
+    $field = $request->query('field');
+
+    $allowedFields = [
+        'cac_certificate', 'valid_id', 'tin', 'utility_bill',
+        'proof_of_identity', 'ownership_document',
+        'organisational_chart', 'register_of_directors', 'formation_document',
+    ];
+
+    if (!in_array($field, $allowedFields)) {
+        abort(403, 'Invalid document field.');
+    }
+
+    $relativePath = $user->$field;
+
+    if (!$relativePath) {
+        abort(404, 'Document not found.');
+    }
+
+    $fullPath = storage_path('app/public/' . $relativePath);
+
+    if (!file_exists($fullPath)) {
+        // try public path as fallback
+        $fullPath = public_path('storage/' . $relativePath);
+    }
+
+    if (!file_exists($fullPath)) {
+        abort(404, 'File does not exist on disk.');
+    }
+
+    $filename = basename($fullPath);
+
+    return response()->download($fullPath, $filename);
+}
+
+
+
+
+public function submitToFidelity(Request $request, $id, FidelityService $fidelity)
+{
+    $user = User::findOrFail($id);
+
+    // dd($user);
+
+    if ($user->virtual_account_number) {
+        return back()->with('error', 'This business already has a Fidelity virtual account.');
+    }
+
+    $response = $fidelity->generateStaticVirtualAccount([
+        'first_name'    => $user->firstname ?? $user->business_name,
+        'last_name'     => $user->lastname,
+        'email'         => $user->email,
+        'bvn'           => $user->bvn,
+        'nin'           => $user->nin,
+        'phone_number'  => $user->business_phone ?? $user->person_phone,
+        'date_of_birth' => $user->date_of_birth,
+    ]);
+
+    if (!$response['success']) {
+        $msg = $response['data']['messageCode'] ?? 'Failed to create Fidelity virtual account.';
+        return back()->with('error', $msg);
+    }
+
+    $accountInfo = $response['data']['data']['accountInformation'] ?? [];
+    $processId   = $response['data']['data']['processId'] ?? null;
+
+    $user->virtual_account_number = $accountInfo['accountNumber'] ?? null;
+    $user->virtual_account_name   = $accountInfo['accountName'] ?? null;
+    $user->virtual_account_bank   = $accountInfo['bankName'] ?? null;
+    $user->fidelty_process_id     = $processId;
+    $user->save();
+
+    return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
+}
+
+
+public function submitToBlaaiz(Request $request, $id, BlaaizService $blaaiz)
+{
+    $user = User::findOrFail($id);
+
+    if ($user->blaaiz_id) {
+        return back()->with('error', 'This business is already registered with Blaaiz.');
+    }
+
+    $payload = [
+        'type'                  => 'business',
+        'email'                 => $user->email,
+        'country'               => $user->countries_id ?? 'CA',
+        'phone'                 => $user->business_phone,
+        'business_name'         => $user->business_name,
+        'registration_number'   => $user->registration_number,
+        'incorporation_country' => $user->countries_id ?? 'CA',
+        'business_type'         => $user->business_type,
+        'business_description'  => $user->nature_of_business,
+        'website'                => $user->company_url,
+    ];
+
+    $payload = array_filter($payload, fn($v) => !is_null($v) && $v !== '');
+
+    $response = $blaaiz->createCustomer($payload);
+
+    if (!$response['success']) {
+        $msg = $response['data']['message'] ?? 'Failed to register business with Blaaiz.';
+        return back()->with('error', $msg);
+    }
+
+    $responseData = $response['data']['data'] ?? $response['data'];
+
+    $user->blaaiz_id = $responseData['id'] ?? null;
+    $user->save();
+
+    return back()->with('success', 'Business registered with Blaaiz successfully: ' . ($responseData['id'] ?? ''));
+}
 
 
 

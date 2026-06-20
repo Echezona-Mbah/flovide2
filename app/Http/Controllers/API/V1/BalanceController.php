@@ -130,6 +130,23 @@ public function store(Request $request)
 
     $currencyCode = strtoupper($validated['currency']);
 
+      $exists = Balance::where('user_id', $webhookSetting->user_id)
+        ->where('currency', $currencyCode)
+        ->exists();
+
+    if ($exists) {
+        $errorMessage = "You already have a $currencyCode balance. Duplicates are not allowed.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'DUPLICATE_BALANCE',
+                'data' => null
+            ], 400)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
+
     $balance = Balance::create([
         'user_id' => $webhookSetting->user_id,
         'name' => $validated['name'],

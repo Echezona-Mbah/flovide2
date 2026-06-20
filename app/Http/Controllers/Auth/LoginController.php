@@ -223,6 +223,7 @@ class LoginController extends Controller
                     'amount'    => $t->currency_symbol . number_format($t->amount, 2),
                     'currency'  => $t->currency,
                     'status' => $t->status,
+                    'method' => $t->method,
                     'reference' => $t->reference,
                     'recipient_details' => [
                         'alias'          => $t->recipient_alias,
@@ -260,18 +261,19 @@ class LoginController extends Controller
         $subaccounts = Subaccount::where('user_id', $account->id)->get();
         $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)->getSumsubToken()->getData(true);
         $countryrule = CountryRule::where('is_active', 1)->select('country_iso', 'country_name', 'currency_iso')->get();
-        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')
-            ->get()
-            ->map(function ($c) {
-                return [
-                    'code' => $c->code,
-                    'name' => $c->name,
-                    'symbol' => $c->symbol,
-                    'country_code' => strtolower($c->country_code ?? ''),
-                ];
-            })
-            ->values()
-            ->toArray();
+              $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+        ->get()
+        ->map(function ($c) {
+            return [
+                'code' => $c->code,
+                'currency_code' =>$c->currency_code,
+                'name' => $c->name,
+                'symbol' => $c->symbol,
+                'country_code' => strtolower($c->country_code ?? ''),
+            ];
+        })
+        ->values()
+        ->toArray();
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
@@ -293,6 +295,10 @@ class LoginController extends Controller
             'data' => [
                 'account_type' => 'business',
                 'token' => $token,
+                // 'app_update' => [                          // ← ADD THIS
+                //     'latest_version' => config('app.latest_version', '1.0.0+8'),
+                //     'force_update'   => config('app.force_update', false),
+                // ],
                 'business' => [
                     'id' => $account->id,
                     'firstname' => $account->firstname,
@@ -521,6 +527,7 @@ class LoginController extends Controller
                     'amount'    => $t->currency_symbol . number_format($t->amount, 2),
                     'currency'  => $t->currency,
                     'status' => $t->status,
+                    'method' => $t->method,
                     'reference' => $t->reference,
                     'recipient_details' => [
                         'alias'          => $t->recipient_alias,
@@ -560,18 +567,19 @@ class LoginController extends Controller
         $countryrule = CountryRule::where('is_active', 1)
             ->select('country_iso', 'country_name', 'currency_iso')
             ->get();
-        $currencies = \App\Models\Currency::select('code', 'name', 'symbol', 'country_code')
-            ->get()
-            ->map(function ($c) {
-                return [
-                    'code' => $c->code,
-                    'name' => $c->name,
-                    'symbol' => $c->symbol,
-                    'country_code' => strtolower($c->country_code ?? ''),
-                ];
-            })
-            ->values()
-            ->toArray();
+              $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+                ->get()
+                ->map(function ($c) {
+                    return [
+                        'code' => $c->code,
+                        'currency_code' =>$c->currency_code,
+                        'name' => $c->name,
+                        'symbol' => $c->symbol,
+                        'country_code' => strtolower($c->country_code ?? ''),
+                    ];
+                })
+                ->values()
+                ->toArray();
         $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])->get()
             ->map(function ($r) {
                 return [
@@ -590,6 +598,10 @@ class LoginController extends Controller
             'data' => [
                 'token' => $token,
                 'account_type' => 'personals',
+                // 'app_update' => [                          // ← ADD THIS
+                //     'latest_version' => config('app.latest_version', '1.0.0+8'),
+                //     'force_update'   => config('app.force_update', false),
+                // ],
                 'personal' => [
                     'id' => $account->id,
                     'firstname' => $account->firstname,
@@ -600,6 +612,7 @@ class LoginController extends Controller
                     'email_verified_status' => $account->email_verified_status,
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
+                    
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,

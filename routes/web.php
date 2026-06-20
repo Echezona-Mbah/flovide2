@@ -20,6 +20,7 @@ use App\Http\Controllers\PivotController;
 use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Services\BlaaizService;
 
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
@@ -78,27 +79,14 @@ Route::get('/Coming', function () {
     return view('mainpage.comesoon');
 })->name('Coming');
 
-// Route::get('/test-fcm', function (\App\Services\FirebaseNotificationService $fcm) {
-//     $user = \App\Models\User::whereNotNull('device_token')
-//         ->where('device_token', '!=', '')
-//         ->first();
 
-//     abort_if(!$user, 404, 'No token found');
 
-//     $ok = $fcm->sendToToken(
-//         $user->device_token,
-//         'FCM Test',
-//         'If you see this, push is working.',
-//         ['type' => 'test']
-//     );
 
-//     return [
-//         'success' => $ok,
-//         'user_id' => $user->id,
-//         'has_token' => !empty($user->device_token),
-//     ];
-// });
-    
+Route::get('/test-blaaiz-token', function (BlaaizService $blaaiz) {
+    return response()->json([
+        'token' => $blaaiz->getAccessToken(),
+    ]);
+});
 
 Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
 Route::get('/cron/payaza-check', [SendMoneyController::class, 'runPayazaCheck']);

@@ -27,15 +27,18 @@ return new class extends Migration
             $table->timestamp('published_at')->nullable();
 
             // Classification
-            $table->foreignId('category_id')
-                ->nullable()
-                ->constrained('categories')
-                ->nullOnDelete();
+            // $table->foreignId('category_id')
+            //     ->nullable()
+            //     ->constrained('categories')
+            //     ->nullOnDelete();
 
-            $table->foreignId('author_id')
-                ->nullable()
-                ->constrained('admins')
-                ->nullOnDelete();
+            // $table->foreignId('author_id')
+            //     ->nullable()
+            //     ->constrained('admins')
+            //     ->nullOnDelete();
+
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->unsignedBigInteger('author_id')->nullable();
 
             // SEO
             $table->string('meta_title')->nullable();

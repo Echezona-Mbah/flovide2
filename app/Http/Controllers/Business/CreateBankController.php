@@ -16,38 +16,70 @@ class CreateBankController extends Controller
 {
       use CurrencyHelper;
 
-   public function create(Request $request)
+//    public function create(Request $request)
+//     {
+//         $currencies = Currency::all();
+//         $user = auth()->user();
+//         $balances = Balance::where('user_id', $user->id)->get();
+//         // dd($balances);
+
+//         // Add currency meta if balances exist
+//         foreach ($balances as $balance) {
+//             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+//         }
+
+//         // If API request
+//         if ($request->expectsJson()) {
+//             if ($balances->isEmpty()) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'No balance created for this user',
+//                     'code' => 'BALANCES_EMPTY',
+//                     'data' => [
+//                         'currencies' => $currencies,
+//                         'balances' => [],
+//                     ]
+//                 ], 200);
+//             }
+
+//             return response()->json([
+//                 'success' => true,
+//                 'message' => 'Data for add bank form loaded successfully',
+//                 'code' => 'ADD_BANK_DATA_LOADED',
+//                 'data' => [
+//                     'currencies' => $currencies,
+//                     'balances' => $balances
+//                 ]
+//             ], 200);
+//         }
+
+//         return view('business.add_bank', compact('currencies', 'balances'));
+//     }
+
+    public function create(Request $request)
     {
-        $currencies = Currency::all();
         $user = auth()->user();
         $balances = Balance::where('user_id', $user->id)->get();
 
-        // Add currency meta if balances exist
+        $existingCurrencies = $balances
+            ->pluck('currency')
+            ->map(fn ($currency) => strtoupper($currency))
+            ->toArray();
+
+        $currencies = Currency::whereNotIn('code', $existingCurrencies)->get();
+
         foreach ($balances as $balance) {
             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
         }
 
-        // If API request
         if ($request->expectsJson()) {
-            if ($balances->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No balance created for this user',
-                    'code' => 'BALANCES_EMPTY',
-                    'data' => [
-                        'currencies' => $currencies,
-                        'balances' => [],
-                    ]
-                ], 200);
-            }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data for add bank form loaded successfully',
                 'code' => 'ADD_BANK_DATA_LOADED',
                 'data' => [
                     'currencies' => $currencies,
-                    'balances' => $balances
+                    'balances' => $balances,
                 ]
             ], 200);
         }
@@ -67,22 +99,22 @@ class CreateBankController extends Controller
     $currency = strtoupper($request->currency);
 
     // 🔎 Check if user already has money in any balance
-    $hasMoney = Balance::where('user_id', $userId)
-        ->where('amount', '>', 0)
-        ->exists();
+    // $hasMoney = Balance::where('user_id', $userId)
+    //     ->where('amount', '>', 0)
+    //     ->exists();
 
-    if (!$hasMoney) {
-        $errorMessage = 'You must have funds in at least one balance before creating a new one';
+    // if (!$hasMoney) {
+    //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
 
-        return $request->expectsJson()
-            ? response()->json([
-                'success' => false,
-                'message' => $errorMessage,
-                'code' => 'NO_FUNDS',
-                'data' => null
-            ], 400)
-            : redirect()->back()->withErrors(['message' => $errorMessage]);
-    }
+    //     return $request->expectsJson()
+    //         ? response()->json([
+    //             'success' => false,
+    //             'message' => $errorMessage,
+    //             'code' => 'NO_FUNDS',
+    //             'data' => null
+    //         ], 400)
+    //         : redirect()->back()->withErrors(['message' => $errorMessage]);
+    // }
 
     // 🔎 Check if user already has this currency
     $exists = Balance::where('user_id', $userId)
@@ -207,90 +239,6 @@ class CreateBankController extends Controller
 
 
 
-//     public function dashboardapi(Request $request)
-// {
-//     $account = Auth::user();
-
-//     if (!$account) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Unauthenticated'
-//         ], 401);
-//     }
-
-//     $balances = \App\Models\Balance::where('user_id', $account->id)->get();
-//     $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
-//         ->latest()
-//         ->take(4)
-//         ->get()
-//         ->map(function ($t) {
-//             return [
-//                 'type'      => $t->type,
-//                 'date'      => $t->created_at->format('Y-m-d H:i:s'),
-//                 'sender'    => $t->sender ?? 'N/A',
-//                 'recipient' => $t->recipient ?? 'N/A',
-//                 'amount'    => $t->currency_symbol . number_format($t->amount, 2),
-//                 'currency'  => $t->currency,
-//                 'status'    => $t->status,
-//                 'reference' => $t->reference,
-//                 'recipient_details' => [
-//                     'alias'          => $t->recipient_alias,
-//                     'account_name'   => $t->recipient_account_name,
-//                     'account_number' => $t->recipient_account_number,
-//                     'bank_name'      => $t->recipient_bank_name,
-//                     'bank_currency'  => $t->recipient_bank_currency,
-//                 ]
-//             ];
-//         });
-
-
-//     // -------------------------
-//     // 3️⃣ CHART DATA (LAST 3 MONTHS)
-//     // -------------------------
-//     $months = collect(range(0, 2))->map(function ($i) {
-//         return now()->subMonths($i)->format('Y-m');
-//     })->reverse()->values();
-
-//     $dbData = \App\Models\TransactionHistory::where('user_id', $account->id)
-//         ->where('created_at', '>=', now()->subMonths(3))
-//         ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total_amount")
-//         ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
-//         ->pluck('total_amount', 'month');
-
-//     $chartData = $months->map(function ($m) use ($dbData) {
-//         return [
-//             'month' => $m,
-//             'total_amount' => $dbData[$m] ?? 0,
-//         ];
-//     });
-
-
-//     // -------------------------
-//     // 4️⃣ RETURN JSON FOR API
-//     // -------------------------
-//     if ($request->expectsJson()) {
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Dashboard data fetched successfully',
-//             'data' => [
-//                 'balances'     => $balances,
-//                 'chart_data'   => $chartData,
-//                 'recent_history' => $transactions,
-//             ]
-//         ], 200);
-//     }
-
-//     // -------------------------
-//     // 5️⃣ RETURN WEB VIEW
-//     // -------------------------
-//     return view('dashboard.index', [
-//         'balances' => $balances,
-//         'chartData' => $chartData,
-//         'transactions' => $transactions,
-//     ]);
-// }
-
-
 
 public function dashboardapi(Request $request)
 {
@@ -361,6 +309,9 @@ public function dashboardapi(Request $request)
                     'account_number' => $t->recipient_account_number,
                     'bank_name'      => $t->recipient_bank_name,
                     'bank_currency'  => $t->recipient_bank_currency,
+                    'recipient_amount'  => $t->recipient_amount,
+                    'fees'  => $t->fees,
+
                 ]
             ];
         });
@@ -395,17 +346,37 @@ public function dashboardapi(Request $request)
             ];
         });
 
+      $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+    ->get()
+    ->map(function ($c) {
+        return [
+            'code' => $c->code,
+            'currency_code' =>$c->currency_code,
+            'name' => $c->name,
+            'symbol' => $c->symbol,
+            'country_code' => strtolower($c->country_code ?? ''),
+        ];
+    })
+    ->values()
+    ->toArray();
+
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',
             'data' => [
+                'app_update' => [                                              // ← ADD HERE
+                    'latest_version' => config('app.latest_version', '1.0.0+8'),
+                    'force_update'   => config('app.force_update', true),
+                ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'balances'       => $balances,
                 'chart_data'     => $chartData,
                 'recent_history' => $transactions,
                 'exchange_rates' => $exchangeRates, // ✅ added
+                'currencies' => $currencies,
+
             ]
         ], 200);
     }
@@ -416,6 +387,7 @@ public function dashboardapi(Request $request)
         'chartData' => $chartData,
         'transactions' => $transactions,
         'exchangeRates' => $exchangeRates, // optional for web view
+        'currencies' => $currencies,
     ]);
 }
     

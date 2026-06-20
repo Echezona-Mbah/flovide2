@@ -17,7 +17,9 @@ use App\Services\PayazaService;
 use App\Services\PivotService;
 use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
-    use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 
 class SendMoneyController extends Controller
@@ -221,10 +223,14 @@ public function sendTransaction(Request $request)
         'total_amount' => 'required|numeric',
         'exchange_rate' => 'required|string',
         'recipient_amount' => 'required|numeric',
-        'account_number' => 'required|string',
-        'account_name' => 'required|string',
+        'account_number' => 'nullable|string',
+        'account_name' => 'nullable|string',
         'bank' => 'nullable|string',
         'bank_code' => 'nullable|string',
+        'transfer_method' => 'nullable|string',
+        'interac_email'    => 'nullable|email',    // ← ADD
+        'interac_first_name' => 'nullable|string', // ← ADD
+        'interac_last_name'  => 'nullable|string', 
     ]);
 
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
@@ -284,15 +290,23 @@ public function sendTransaction(Request $request)
             'reference' => 'ref-' . Str::uuid(),
             'personal_id' => $personal->id,
             'sender_id' => $personal->id,
-            'sender' => $personal->name,
+            'sender' => $personal->firstname,
             'recipient_account_number' => $request->account_number,
-            'recipient_account_name' => $request->account_name,
+            'recipient_account_name' => $request->account_name 
+            ?? trim(($request->interac_first_name ?? '') . ' ' . ($request->interac_last_name ?? '')) 
+            ?: null,
+            'bank_code' => $request->bank_code,
+            'recipient_bank_name' => $request->bank,
             'recipient_country' => strtoupper(substr($currency,0,2)),
             'recipient_bank_currency' => $currency,
             'to_currency' => $currency,
             'fees' => $request->transfer_fee,
             'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
             'recipient_amount' => $request->recipient_amount,
+            'interac_email'      => $request->interac_email      ?? null,
+            'interac_first_name' => $request->interac_first_name ?? null,
+            'interac_last_name'  => $request->interac_last_name  ?? null,
+            
 
         ]);
 
@@ -302,7 +316,9 @@ public function sendTransaction(Request $request)
             $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $personal, $tx->id);
         } elseif (in_array($currency, ['NGN','TZS','XOF','XAF','ZAR','KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
             $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $personal, $tx->id);
-        } else {
+        } elseif ($currency === 'CAD') {                                              // ← ADD THIS
+                $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $personal);
+        }else {
             DB::rollBack();
             return response()->json(['success'=>false,'message'=>'No provider','code'=>'PROVIDER_NOT_AVAILABLE','data'=>null],422);
         }
@@ -363,7 +379,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
     if (($payment['statusCode'] ?? null) === '237') {
         // $balance->amount -= $request->total_amount;
         // $balance->save();
-
+        $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
         // TransactionHistory::create([
         //     'amount' => $request->total_amount,
         //     'currency' => $sendingCurrency,
@@ -382,7 +398,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         // ]);
 
         TransactionHistory::where('id', $txId)->update([
-            'status' => 'pending',
+            'status' => 'success',
             'payment_provider' => 'pivot',
             'order_id' => $payment['merchantTransactionId'] ?? 'N/A'
             ]);
@@ -461,7 +477,7 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
     if (($response['statusCode'] ?? null) === '200' || ($response['success'] ?? false)) {
         // $balance->amount -= $request->total_amount;
         // $balance->save();
-        $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
+        // $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
 
          TransactionHistory::where('id', $txId)->update([
             'status' => 'pending',
@@ -550,6 +566,87 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
 }
 
 
+    protected function sendViaBlaaizInterac(Request $request, $currency, $sendingCurrency, $balance, $txId, $personal)
+{
+    $isApi = $request->expectsJson();
+
+    Log::info('[Blaaiz Interac] Initiating payout', [
+        'amount'       => $request->recipient_amount,
+        'email'        => $request->interac_email,
+        'first_name'   => $request->interac_first_name,
+        'last_name'    => $request->interac_last_name,
+        'currency'     => $currency,
+        'tx_id'        => $txId,
+        'actor_id'     => $personal->id,
+    ]);
+
+    $blaaiz     = app(\App\Services\BlaaizService::class);  // ← ADD THIS
+    $customerId = "019ec763-8348-73d5-9bdb-c85b22c6333b";
+    $cadWallet = "61c1135d-b5ce-49c8-add9-0717af84e392";
+
+    $payload = [
+        'wallet_id'          => $cadWallet,
+        'customer_id'        => $customerId,
+        'method'             => 'interac',
+        'from_currency_id'   => 'CAD',
+        'to_currency_id'     => 'CAD',
+        'from_amount'        => $request->recipient_amount,
+        'email'              => $request->interac_email,
+        'interac_first_name' => $request->interac_first_name,
+        'interac_last_name'  => $request->interac_last_name,
+    ];
+
+    Log::info('[Blaaiz Interac] Sending payout payload', $payload);
+
+    $response = $blaaiz->payout($payload);
+
+    Log::info('[Blaaiz Interac] Payout response', [
+        'success' => $response['success'],
+        'status'  => $response['status'],
+        'data'    => $response['data'],
+    ]);
+
+    if ($response['success']) {
+        $transaction = $response['data']['transaction'] ?? [];
+
+        TransactionHistory::where('id', $txId)->update([
+            'status'            => 'pending',
+            'payment_provider'  => 'blaaiz_interac',
+            'order_id'          => $transaction['id']        ?? null,
+            'payment_reference' => $transaction['reference'] ?? null,
+        ]);
+
+        Log::info('[Blaaiz Interac] Transaction updated', ['tx_id' => $txId]);
+
+        return $isApi
+            ? response()->json([
+                'success' => true,
+                'message' => 'Interac payout initiated successfully.',
+                'code'    => 'FLOVIDE_INTERAC_SUCCESS',
+                'data'    => $this->txData($txId),
+            ], 200)
+            : redirect()->route('transactionHistory')->with('success', 'Interac payout sent successfully!');
+    }
+
+    $errorMsg = $response['data']['message']
+        ?? $response['data']['error_description']
+        ?? 'Blaaiz Interac payout failed.';
+
+    Log::warning('[Blaaiz Interac] Payout failed', [
+        'error' => $errorMsg,
+        'tx_id' => $txId,
+    ]);
+
+    return $isApi
+        ? response()->json([
+            'success' => false,
+            'message' => $errorMsg,
+            'code'    => 'FLOVIDE_INTERAC_FAILED',
+            'data'    => $this->txData($txId),
+        ], 422)
+        : back()->with('error', $errorMsg);
+}
+
     protected function sendTransactionEmail(Request $request, $balance, $reference = null)
     {
      $user = auth('personal-api')->user();
@@ -583,6 +680,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'reference' => $tx->reference,
             'order_id' => $tx->order_id,
             'status' => $tx->status,
+            'method' => $tx->method,
             'amount' => (float) $tx->amount,
             'total_amount' => (float) $tx->total_amount,
             'fees' => (float) ($tx->fees ?? 0),
@@ -592,6 +690,9 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'payment_provider' => 'Flovide',
             'recipient_account_name' => $tx->recipient_account_name,
             'recipient_account_number' => $tx->recipient_account_number,
+            'interac_email'      => $tx->interac_email      ?? null,
+            'interac_first_name' => $tx->interac_first_name ?? null,
+            'interac_last_name'  => $tx->interac_last_name  ?? null,
             'created_at' => optional($tx->created_at)->toIso8601String(),
         ];
     }

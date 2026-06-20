@@ -319,10 +319,10 @@ document.addEventListener('DOMContentLoaded', function () {
               <label class="text-sm font-medium mb-1 block">Currency</label>
               <div class="select-wrapper">
                 <select id="currencySelect" name="bank[currency]">
-                  <option value=""></option>
-                  @foreach($countries->unique('currency_iso') as $country)
-                    <option value="{{ $country->currency_iso }}">{{ $country->currency_iso }}</option>
-                  @endforeach
+                <option value=""></option>
+                    @foreach($countries->unique('currency_iso') as $country)
+                        <option value="{{ $country->currency_iso }}">{{ $country->currency_iso }}</option>
+                    @endforeach
                 </select>
               </div>
             </div>
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <!-- Bank Details -->
-        <div class="space-y-6">
+        {{-- <div class="space-y-6">
           <div>
             <h3 class="text-base font-semibold text-slate-900">Bank Details</h3>
             <p class="text-sm text-slate-500">Account info and validation.</p>
@@ -374,12 +374,26 @@ document.addEventListener('DOMContentLoaded', function () {
           <select id="bankSelect" name="bank[bankCode]" class="w-full border rounded-xl px-3 py-2 hidden">
             <option value="">Select Bank</option>
           </select>
+          
 
           <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
             <option value="">Account Type</option>
             <option value="checking">Checking</option>
             <option value="savings">Savings</option>
           </select>
+
+          
+            <div id="cadInteracFields" class="grid sm:grid-cols-2 gap-4 hidden">
+                <input type="text" id="interacFirstName" name="bank[interac_first_name]" 
+                    placeholder="First Name" 
+                    class="w-full border rounded-xl px-3 py-2 text-sm md:text-base" />
+                <input type="text" id="interacLastName" name="bank[interac_last_name]" 
+                    placeholder="Last Name" 
+                    class="w-full border rounded-xl px-3 py-2 text-sm md:text-base" />
+                <input type="email" id="interacEmail" name="bank[interac_email]" 
+                    placeholder="Email Address" 
+                    class="w-full border rounded-xl px-3 py-2 text-sm md:text-base sm:col-span-2" />
+            </div>
 
           <div>
             <label class="text-sm font-medium mb-1 block">Account Holder</label>
@@ -391,11 +405,78 @@ document.addEventListener('DOMContentLoaded', function () {
               class="w-full border rounded-xl px-3 py-2 transition-all duration-300"
             />
             <div id="accountLoading" class="text-sm text-gray-500 hidden">⏳ Fetching account name…</div>
-            <div id="accountManualHint" class="text-sm text-red-600 hidden">
-              We couldn’t verify this account name. Please enter it manually and ensure it is correct.
+           <div id="accountManualHint" class="text-sm text-amber-600 hidden">
+            Automatic name verification is not available for this account. Please enter the account holder name carefully.
             </div>
           </div>
-        </div>
+        </div> --}}
+
+        <!-- Bank Details -->
+<div class="space-y-6">
+  <div>
+    <h3 class="text-base font-semibold text-slate-900">Bank Details</h3>
+    <p class="text-sm text-slate-500">Account info and validation.</p>
+  </div>
+
+  {{-- Visible select — NO name attribute --}}
+  <select id="transferMethod" class="w-full border rounded-xl px-3 py-2 hidden">
+    <option value="">Select Payment Method</option>
+    <option value="mobile">Mobile Money</option>
+    <option value="bank">Bank Transfer</option>
+  </select>
+
+  {{-- Hidden input — this actually submits --}}
+  <input type="hidden" id="transferMethodHidden" name="transfer_method" value="">
+
+  <div class="grid sm:grid-cols-2 gap-4">
+    <input type="text" id="iban" name="bank[iban]" placeholder="IBAN" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+    <input type="text" id="accountNumber" name="bank[accountNumber]" placeholder="Account Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+    <input type="text" id="sortCode" name="bank[sortCode]" placeholder="Sort Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+    <input type="text" id="bankCode" name="bank[bankCode]" placeholder="Bank Code" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+    <input type="text" id="swiftBic" name="bank[swiftBic]" placeholder="SWIFT / BIC" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+    <input type="text" id="routing" name="bank[routing]" placeholder="Routing Number" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden" />
+  </div>
+
+  <input id="mobileNumber" name="bank[mobileNumber]" placeholder="Mobile Number" class="w-full border rounded-xl px-3 py-2 hidden"/>
+
+  <select id="bankSelect" name="bank[bankCode]" class="w-full border rounded-xl px-3 py-2 hidden">
+    <option value="">Select Bank</option>
+  </select>
+
+  <select id="accountType" name="bank[accountType]" class="bank-field w-full border rounded-xl px-3 py-2 text-sm md:text-base hidden">
+    <option value="">Account Type</option>
+    <option value="checking">Checking</option>
+    <option value="savings">Savings</option>
+  </select>
+
+  {{-- CAD Interac Fields --}}
+  <div id="cadInteracFields" class="grid sm:grid-cols-2 gap-4 hidden">
+    <input type="text" id="interacFirstName" name="bank[interac_first_name]"
+      placeholder="Interact First Name"
+      class="w-full border rounded-xl px-3 py-2 text-sm md:text-base" />
+    <input type="text" id="interacLastName" name="bank[interac_last_name]"
+      placeholder="Interact Last Name"
+      class="w-full border rounded-xl px-3 py-2 text-sm md:text-base" />
+    <input type="email" id="interacEmail" name="bank[interac_email]"
+      placeholder="Email Address"
+      class="w-full border rounded-xl px-3 py-2 text-sm md:text-base sm:col-span-2" />
+  </div>
+
+  <div id="accountHolderDiv">
+    <label class="text-sm font-medium mb-1 block">Account Holder</label>
+    <input
+      id="accountHolder"
+      type="text"
+      name="bank[accountHolder]"
+      placeholder="Account Holder"
+      class="w-full border rounded-xl px-3 py-2 transition-all duration-300"
+    />
+    <div id="accountLoading" class="text-sm text-gray-500 hidden">⏳ Fetching account name…</div>
+    <div id="accountManualHint" class="text-sm text-amber-600 hidden">
+      Automatic name verification is not available for this account. Please enter the account holder name carefully.
+    </div>
+  </div>
+</div>
       </div>
 
       <!-- Actions -->
@@ -413,50 +494,688 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-{{-- </section> --}}
-
-
     </main>
 
 
 
-
-
-
-
-
-{{-- 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
+    const countryRules    = @json($countryRules);
+    const currencyRules   = @json($currencyRules);
+    const countries       = @json($countries->values());
+    const SERVICES        = @json($pivotServices);
 
+    const countrySelect   = document.getElementById("countrySelect");
     const currencySelect  = document.getElementById("currencySelect");
     const transferMethod  = document.getElementById("transferMethod");
+    const transferHidden  = document.getElementById("transferMethodHidden");
     const accountNumber   = document.getElementById("accountNumber");
     const bankSelect      = document.getElementById("bankSelect");
     const holderInput     = document.getElementById("accountHolder");
+    const holderDiv       = document.getElementById("accountHolderDiv");
     const loadingText     = document.getElementById("accountLoading");
     const mobileInput     = document.getElementById("mobileNumber");
-    const countrySelect   = document.getElementById("countrySelect");
-    const SERVICES        = @json($pivotServices);
+    const manualHint      = document.getElementById("accountManualHint");
+    const cadInteracFields = document.getElementById("cadInteracFields");
+    const interacFirstName = document.getElementById("interacFirstName");
+    const interacLastName  = document.getElementById("interacLastName");
+    const interacEmail     = document.getElementById("interacEmail");
+    const allRuleFields   = document.querySelectorAll(".bank-field");
+
+    const banksFilterUrl  = "{{ route('banks.filter') }}";
+
+    const PAYAZA_CURRENCIES       = ["NGN", "TZS", "KES", "XOF", "XAF", "ZAR"];
+    const XOF_COUNTRIES           = ["BJ", "BF", "CI", "GW", "ML", "NE", "SN", "TG"];
+    const PROVIDER_CURRENCIES     = ["UGX", "NGN", "TZS", "KES", "XOF", "XAF", "ZAR", "GHS"];
+    const MUST_VALIDATE_CURRENCIES = ["NGN", "UGX", "GHS"];
+    const PAYAZA_COUNTRY_CODES    = {BJ:"BEN",BF:"BFA",CI:"CIV",GW:"GNB",ML:"MLI",NE:"NER",SN:"SEN",TG:"TGO"};
+
+    function getPayazaCountryCode(c) { return PAYAZA_COUNTRY_CODES[c] || c; }
+
+    const COUNTRY_DIAL_CODES = {
+        BJ:"229",BF:"226",CI:"225",GW:"245",ML:"223",NE:"227",SN:"221",TG:"228",
+        NG:"234",GH:"233",UG:"256",KE:"254",TZ:"255",ZA:"27",CM:"237"
+    };
+
+    const pivotEnabled     = @json(filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN));
+    const payazaEnabled    = @json(filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN));
+    const appmobileEnabled = @json(filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN));
 
     let timer;
+    let countryTom  = null;
+    let currencyTom = null;
+    let payazaProviders   = { bank: [], mobile: [] };
+    let appmobileProvider = { bank: [], mobile: [] };
+
+    const flagUrl = (iso) => iso ? `https://flagcdn.com/w20/${String(iso).toLowerCase()}.png` : "";
+
+    const currencyDefaultCountry = {};
+    countries.forEach(c => { if (!currencyDefaultCountry[c.currency_iso]) currencyDefaultCountry[c.currency_iso] = c.country_iso; });
+
+    countrySelect.querySelectorAll("option").forEach(o => { if (o.value) o.setAttribute("data-flag", flagUrl(o.value)); });
+    currencySelect.querySelectorAll("option").forEach(o => { if (o.value) o.setAttribute("data-flag", flagUrl(currencyDefaultCountry[o.value])); });
+
+    function renderOption(item, escape) {
+        const flag = item.flag || (item.$option ? item.$option.getAttribute("data-flag") : "");
+        return `<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;">
+            ${flag ? `<img src="${flag}" style="width:20px;height:14px;"/>` : ""}
+            <span>${escape(item.text)}</span></div>`;
+    }
+    function renderItem(item, escape) {
+        const flag = item.flag || (item.$option ? item.$option.getAttribute("data-flag") : "");
+        return `<div style="display:inline-flex;align-items:center;gap:6px;">
+            ${flag ? `<img src="${flag}" style="width:20px;height:14px;"/>` : ""}
+            <span>${escape(item.text)}</span></div>`;
+    }
+
+    countryTom  = new TomSelect("#countrySelect",  { allowEmptyOption: true, render: { option: renderOption, item: renderItem } });
+    currencyTom = new TomSelect("#currencySelect", { allowEmptyOption: true, render: { option: renderOption, item: renderItem } });
+
+    // ── Core helper ──────────────────────────────────────────────────────
+    function setTransferMethod(value) {
+        transferMethod.value = value;
+        transferHidden.value = value;
+    }
+
+    function normalizeCurrency(c) { return String(c || "").trim().toUpperCase(); }
+    function mustValidateCurrency(c = currencySelect.value) { return MUST_VALIDATE_CURRENCIES.includes(normalizeCurrency(c)); }
+
+    function setCurrencyFlag(currency, countryIso) {
+        if (!currency || !countryIso || !currencyTom.options[currency]) return;
+        const flag   = flagUrl(countryIso);
+        const option = currencySelect.querySelector(`option[value="${currency}"]`);
+        if (option) option.setAttribute("data-flag", flag);
+        currencyTom.updateOption(currency, { ...currencyTom.options[currency], flag });
+        currencyTom.refreshOptions(false);
+        currencyTom.refreshItems();
+    }
+
+    function getValidatedAccountName(data) {
+        return data?.accountName || data?.account_name
+            || data?.response_content?.account_name
+            || data?.data?.account_name
+            || data?.data?.response_content?.account_name
+            || data?.data?.data?.account_name
+            || data?.data?.name || "";
+    }
+
+    function getSelectedDialCode() { return COUNTRY_DIAL_CODES[countrySelect.value] || ""; }
+
+    function resetMobileInput() {
+        const d = getSelectedDialCode();
+        mobileInput.placeholder = d ? `${d} Mobile Number` : "Mobile Number";
+        if (!mobileInput.classList.contains("hidden")) mobileInput.value = d;
+    }
+
+    function prepareMobileInput() {
+        const d = getSelectedDialCode();
+        if (!d) { mobileInput.placeholder = "Mobile Number"; return; }
+        mobileInput.placeholder = `${d} Mobile Number`;
+        if (!mobileInput.value.trim()) { mobileInput.value = d; return; }
+        if (!mobileInput.value.startsWith("+")) mobileInput.value = `${d}${mobileInput.value.replace(/^0+/, "")}`;
+    }
+
+    function resetHolderState() {
+        holderInput.classList.remove("border-green-500","bg-green-100","border-red-500","bg-red-100","border-amber-400","bg-amber-50");
+        holderInput.value = ""; holderInput.placeholder = "Account Holder"; holderInput.readOnly = false;
+        manualHint?.classList.add("hidden");
+    }
+
+    function setHolderValidated(name) {
+        holderInput.value = name; holderInput.readOnly = true;
+        holderInput.classList.remove("border-red-500","bg-red-100","border-amber-400","bg-amber-50");
+        holderInput.classList.add("border-green-500","bg-green-100");
+        manualHint?.classList.add("hidden");
+    }
+
+    function setHolderValidationFailed() {
+        holderInput.value = "Account not found"; holderInput.readOnly = false;
+        holderInput.classList.remove("border-green-500","bg-green-100","border-amber-400","bg-amber-50");
+        holderInput.classList.add("border-red-500","bg-red-100");
+        if (manualHint) { manualHint.textContent = "We couldn't verify this account name. Please check and try again."; manualHint.classList.remove("hidden","text-amber-600"); manualHint.classList.add("text-red-600"); }
+    }
+
+    function setHolderManualFallback(msg) {
+        if (mustValidateCurrency()) { setHolderValidationFailed(); return; }
+        holderInput.value = ""; holderInput.placeholder = "Enter account holder name"; holderInput.readOnly = false;
+        holderInput.classList.remove("border-green-500","bg-green-100","border-red-500","bg-red-100");
+        holderInput.classList.add("border-amber-400","bg-amber-50");
+        if (manualHint) { manualHint.textContent = msg || "Please enter the account holder name carefully."; manualHint.classList.remove("hidden","text-red-600"); manualHint.classList.add("text-amber-600"); }
+    }
+
+    function toggleField(field, show, required = false) {
+        if (!field) return;
+        if (show) { field.classList.remove("hidden"); field.disabled = false; if (required) field.setAttribute("required","required"); }
+        else { field.classList.add("hidden"); field.disabled = true; field.removeAttribute("required"); field.value = ""; }
+    }
+
+    function hideRuleFields() {
+        allRuleFields.forEach(f => { f.classList.add("hidden"); f.removeAttribute("required"); f.disabled = true; });
+    }
+
+    function showRuleFields(currency) {
+        hideRuleFields();
+        if (!currencyRules[currency] || PROVIDER_CURRENCIES.includes(currency)) return;
+        const fieldMap = { iban:"iban", accountNumber:"accountNumber", mobileNumber:"mobileNumber", sortCode:"sortCode", bankCode:"bankCode", swiftBic:"swiftBic", routing:"routing", accountType:"accountType" };
+        currencyRules[currency].rules.forEach(rule => {
+            const field = document.getElementById(fieldMap[rule]);
+            if (field) { field.classList.remove("hidden"); field.disabled = false; field.setAttribute("required","required"); }
+        });
+    }
+
+    // ── CAD helpers ──────────────────────────────────────────────────────
+    function showCadInteracFields() {
+        cadInteracFields.classList.remove("hidden");
+        interacFirstName.setAttribute("required","required");
+        interacLastName.setAttribute("required","required");
+        interacEmail.setAttribute("required","required");
+        holderDiv.classList.add("hidden");
+        holderInput.removeAttribute("required");
+        holderInput.value = "";
+    }
+
+    function hideCadFields() {
+        cadInteracFields.classList.add("hidden");
+        interacFirstName.removeAttribute("required"); interacFirstName.value = "";
+        interacLastName.removeAttribute("required");  interacLastName.value  = "";
+        interacEmail.removeAttribute("required");     interacEmail.value     = "";
+        holderDiv.classList.remove("hidden");
+    }
+
+    function resetProviderFields() {
+        payazaProviders   = { bank: [], mobile: [] };
+        appmobileProvider = { bank: [], mobile: [] };
+        transferMethod.innerHTML = '<option value="">Select Payment Method</option>';
+        bankSelect.innerHTML     = '<option value="">Select Bank</option>';
+        toggleField(transferMethod, false);
+        toggleField(bankSelect, false);
+        toggleField(accountNumber, false);
+        toggleField(mobileInput, false);
+        setTransferMethod("");
+        hideCadFields();
+        resetMobileInput();
+        resetHolderState();
+    }
+
+    // ── Provider loaders ─────────────────────────────────────────────────
+    function loadPivotBanks() {
+        const country = countrySelect.value;
+        if (!country) return;
+        fetch(`${banksFilterUrl}?country=${country}&provider=pivot`)
+            .then(r => r.json())
+            .then(list => {
+                let html = '<option value="">Select Bank</option>';
+                list.forEach(b => { html += `<option value="${b.sort_code || b.bank_code}">${b.name}</option>`; });
+                bankSelect.innerHTML = html;
+            });
+    }
+
+    function loadAppmobileProviders() {
+        const currency = normalizeCurrency(currencySelect.value);
+        if (currency !== "GHS" || !appmobileEnabled) return;
+        const url = new URL(banksFilterUrl, window.location.origin);
+        url.searchParams.set("country","GHA"); url.searchParams.set("currency","GHS"); url.searchParams.set("provider","app_mobile");
+        fetch(url.toString()).then(r => r.json()).then(res => {
+            const list = res.data || res;
+            appmobileProvider = { bank: [], mobile: [] };
+            list.forEach(i => { if (i.type === "mobile_money") appmobileProvider.mobile.push(i); else appmobileProvider.bank.push(i); });
+            showTransferMethods();
+        });
+    }
+
+    function loadPayazaProviders() {
+        const selectedCountry = countrySelect.value;
+        const country  = getPayazaCountryCode(selectedCountry);
+        const currency = normalizeCurrency(currencySelect.value);
+        if (!selectedCountry || !PAYAZA_CURRENCIES.includes(currency) || !payazaEnabled) return;
+        const url = new URL(banksFilterUrl, window.location.origin);
+        url.searchParams.set("country", country); url.searchParams.set("currency", currency); url.searchParams.set("provider","payaza");
+        fetch(url.toString()).then(r => r.json()).then(res => {
+            const list = res.data || res;
+            payazaProviders = { bank: [], mobile: [] };
+            list.forEach(i => { if (i.type === "mobile_money") payazaProviders.mobile.push(i); else payazaProviders.bank.push(i); });
+            showTransferMethods();
+        }).catch(err => console.error("Payaza fetch error:", err));
+    }
+
+    function showTransferMethods() {
+        const country  = countrySelect.value;
+        const currency = normalizeCurrency(currencySelect.value);
+        let html = '<option value="">Select Payment Method</option>';
+        if (country === "GH" && currency === "GHS" && appmobileEnabled) {
+            if (appmobileProvider.bank.length)   html += '<option value="bank">Bank</option>';
+            if (appmobileProvider.mobile.length) html += '<option value="mobile">Mobile</option>';
+            transferMethod.innerHTML = html;
+            toggleField(transferMethod, appmobileProvider.bank.length || appmobileProvider.mobile.length, true);
+            return;
+        }
+        if (payazaProviders.bank.length)   html += '<option value="bank">Bank</option>';
+        if (payazaProviders.mobile.length) html += '<option value="mobile">Mobile</option>';
+        transferMethod.innerHTML = html;
+        toggleField(transferMethod, payazaProviders.bank.length || payazaProviders.mobile.length, true);
+    }
+
+    // ── Main currency change ─────────────────────────────────────────────
+    function showFieldsByCurrency() {
+        resetProviderFields();
+        const currency = normalizeCurrency(currencySelect.value);
+
+        if (currency === "CAD") {
+            // Show payment method dropdown with only Interac
+            transferMethod.innerHTML = `
+                <option value="">Select Payment Method</option>
+                <option value="interac">Interac</option>
+            `;
+            transferMethod.classList.remove("hidden");
+            transferMethod.disabled = false;
+            return;
+        }
+
+        showRuleFields(currency);
+        if (currency === "GHS" && appmobileEnabled) { loadAppmobileProviders(); return; }
+        if (PAYAZA_CURRENCIES.includes(currency))   { loadPayazaProviders();    return; }
+        if (currency === "UGX" && pivotEnabled) {
+            transferMethod.innerHTML = `<option value="">Select Method</option><option value="bank">Bank</option><option value="mobile">Mobile</option>`;
+            toggleField(transferMethod, true, true);
+        }
+    }
+
+    // ── Transfer method change ───────────────────────────────────────────
+    function showFieldsByMethod() {
+        const currency = normalizeCurrency(currencySelect.value);
+        const method   = transferMethod.value;
+
+        // Sync hidden input
+        transferHidden.value = method;
+
+        // CAD + Interac selected → show interac fields
+        if (currency === "CAD" && method === "interac") {
+            showCadInteracFields();
+            setTransferMethod("bank"); // backend expects "bank" for CAD
+            return;
+        }
+
+        // CAD but nothing selected yet
+        if (currency === "CAD" && !method) {
+            hideCadFields();
+            return;
+        }
+
+        toggleField(bankSelect, false);
+        toggleField(accountNumber, false);
+        toggleField(mobileInput, false);
+        resetHolderState();
+
+        const country = countrySelect.value;
+
+        if (currency === "UGX" && pivotEnabled) {
+            if (method === "mobile") { toggleField(mobileInput, true, true); prepareMobileInput(); }
+            if (method === "bank")   { loadPivotBanks(); toggleField(bankSelect, true, true); toggleField(accountNumber, true, true); }
+            return;
+        }
+
+        if (country === "GH" && currency === "GHS" && appmobileEnabled) {
+            if (method === "bank") {
+                let html = '<option value="">Select Bank</option>';
+                appmobileProvider.bank.forEach(b => { html += `<option value="${b.bank_code||b.code}">${b.name}</option>`; });
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(accountNumber, true, true);
+            }
+            if (method === "mobile") {
+                let html = '<option value="">Select Provider</option>';
+                appmobileProvider.mobile.forEach(p => { html += `<option value="${p.bank_code||p.code}">${p.name}</option>`; });
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(mobileInput, true, true); prepareMobileInput();
+            }
+            return;
+        }
+
+        if (PAYAZA_CURRENCIES.includes(currency)) {
+            if (method === "bank") {
+                let html = '<option value="">Select Bank</option>';
+                payazaProviders.bank.forEach(b => { html += `<option value="${b.code||b.bank_code}">${b.name}</option>`; });
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(accountNumber, true, true);
+            }
+            if (method === "mobile") {
+                let html = '<option value="">Select Provider</option>';
+                payazaProviders.mobile.forEach(p => { html += `<option value="${p.code||p.bank_code}">${p.name}</option>`; });
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(mobileInput, true, true); prepareMobileInput();
+            }
+        }
+    }
+
+    function syncCurrencyFromCountry(countryIso) {
+        if (!countryIso || !countryRules[countryIso]) return;
+        resetMobileInput();
+        const currency = XOF_COUNTRIES.includes(countryIso) ? "XOF" : countryRules[countryIso].currency;
+        if (!currency) return;
+        currencyTom.setValue(currency, true);
+        setCurrencyFlag(currency, countryIso);
+        currencySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    async function validateAccount() {
+        const currency = normalizeCurrency(currencySelect.value);
+        const method   = transferMethod.value;
+        let payload = null, route = "";
+
+        if (currency === "UGX" && pivotEnabled) {
+            if (method === "mobile") {
+                const mobile = mobileInput.value.trim(); if (!mobile) return;
+                payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
+            }
+            if (method === "bank") {
+                const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
+                payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
+            }
+            route = "{{ route('pivot.account.validation') }}";
+        } else if (PAYAZA_CURRENCIES.includes(currency)) {
+            if (method === "bank") {
+                const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
+                payload = { currency, account_number: acc, bank_code: code };
+            }
+            if (method === "mobile") {
+                const mobile = mobileInput.value.trim(), code = bankSelect.value; if (!mobile || !code) return;
+                payload = { currency, account_number: mobile, bank_code: code };
+            }
+            route = "{{ route('payaza.account-enquiry') }}";
+        }
+
+        if (countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled) {
+            const code = bankSelect.value;
+            if (method === "bank") { const acc = accountNumber.value.trim(); if (!acc || !code) return; payload = { customer_number: acc, bank_code: code }; }
+            if (method === "mobile") { const mobile = mobileInput.value.trim(); if (!mobile || !code) return; payload = { customer_number: mobile, bank_code: code }; }
+            route = "{{ route('appmobile.account-enquiry') }}";
+        }
+
+        if (!payload) return;
+
+        try {
+            loadingText.classList.remove("hidden");
+            holderInput.value = ""; holderInput.classList.remove("border-green-500","bg-green-100","border-red-500","bg-red-100","border-amber-400","bg-amber-50"); holderInput.readOnly = true;
+            manualHint?.classList.add("hidden");
+            const res  = await fetch(route, { method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            loadingText.classList.add("hidden");
+            const accountName = getValidatedAccountName(data);
+            if (accountName) setHolderValidated(accountName);
+            else if (mustValidateCurrency(currency)) setHolderValidationFailed();
+            else setHolderManualFallback("Automatic name verification is not available for this account. Please enter the account holder name carefully.");
+        } catch (err) {
+            console.error("Validation error:", err);
+            loadingText.classList.add("hidden");
+            if (mustValidateCurrency(currency)) setHolderValidationFailed();
+            else setHolderManualFallback("Automatic name verification is not available right now. Please enter the account holder name carefully.");
+        }
+    }
+
+    // ── Event listeners ──────────────────────────────────────────────────
+    countryTom.on("change", syncCurrencyFromCountry);
+    currencyTom.on("change", showFieldsByCurrency);
+    transferMethod.addEventListener("change", showFieldsByMethod);
+    bankSelect.addEventListener("change", validateAccount);
+    accountNumber.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(validateAccount, 700); });
+    mobileInput.addEventListener("input",   () => { clearTimeout(timer); timer = setTimeout(validateAccount, 700); });
+
+    if (countrySelect.value) syncCurrencyFromCountry(countrySelect.value);
+    else if (currencySelect.value) showFieldsByCurrency();
+});
+</script>
+
+
+
+{{-- <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const countryRules = @json($countryRules);
+    const currencyRules = @json($currencyRules);
+    const countries = @json($countries->values());
+    const SERVICES = @json($pivotServices);
+
+    const countrySelect = document.getElementById("countrySelect");
+    const currencySelect = document.getElementById("currencySelect");
+    const transferMethod = document.getElementById("transferMethod");
+    const accountNumber = document.getElementById("accountNumber");
+    const bankSelect = document.getElementById("bankSelect");
+    const holderInput = document.getElementById("accountHolder");
+    const loadingText = document.getElementById("accountLoading");
+    const mobileInput = document.getElementById("mobileNumber");
+    const manualHint = document.getElementById("accountManualHint");
+    const allRuleFields = document.querySelectorAll(".bank-field");
 
     const banksFilterUrl = "{{ route('banks.filter') }}";
-    const PAYAZA_CURRENCIES = ["NGN","GHS","TZS","KES","XOF","XAF","ZAR","UGX"];
 
-    let payazaProviders = { bank: [], mobile: [] };
+    const PAYAZA_CURRENCIES = ["NGN", "TZS", "KES", "XOF", "XAF", "ZAR"];
+    const XOF_COUNTRIES = ["BJ", "BF", "CI", "GW", "ML", "NE", "SN", "TG"];
+    const PROVIDER_CURRENCIES = ["UGX", "NGN", "TZS", "KES", "XOF", "XAF", "ZAR", "GHS"];
+    const MUST_VALIDATE_CURRENCIES = ["NGN", "UGX", "GHS"];
+    const PAYAZA_COUNTRY_CODES = {BJ: "BEN",BF: "BFA", CI: "CIV",GW: "GNB", ML: "MLI", NE: "NER", SN: "SEN", TG: "TGO"};
 
-    const pivotEnabled  = @json(filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN));
+    function getPayazaCountryCode(country) {
+        return PAYAZA_COUNTRY_CODES[country] || country;
+    }
+
+    const COUNTRY_DIAL_CODES = {
+        BJ: "229",
+        BF: "226",
+        CI: "225",
+        GW: "245",
+        ML: "223",
+        NE: "227",
+        SN: "221",
+        TG: "228",
+        NG: "234",
+        GH: "233",
+        UG: "256",
+        KE: "254",
+        TZ: "255",
+        ZA: "27",
+        CM: "237"
+    };
+
+    const pivotEnabled = @json(filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN));
     const payazaEnabled = @json(filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN));
+    const appmobileEnabled = @json(filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN));
 
-    /* ================= FIELD TOGGLER ================= */
-    function toggleField(field, show, required=false){
-        if(!field) return;
+    let timer;
+    let countryTom = null;
+    let currencyTom = null;
+    let payazaProviders = { bank: [], mobile: [] };
+    let appmobileProvider = { bank: [], mobile: [] };
 
-        if(show){
+    const flagUrl = (iso) => iso ? `https://flagcdn.com/w20/${String(iso).toLowerCase()}.png` : "";
+
+    const currencyDefaultCountry = {};
+    countries.forEach((country) => {
+        if (!currencyDefaultCountry[country.currency_iso]) {
+            currencyDefaultCountry[country.currency_iso] = country.country_iso;
+        }
+    });
+
+    countrySelect.querySelectorAll("option").forEach((option) => {
+        if (option.value) {
+            option.setAttribute("data-flag", flagUrl(option.value));
+        }
+    });
+
+    currencySelect.querySelectorAll("option").forEach((option) => {
+        if (option.value) {
+            option.setAttribute("data-flag", flagUrl(currencyDefaultCountry[option.value]));
+        }
+    });
+
+    function renderOption(item, escape) {
+        const flag = item.flag || (item.$option ? item.$option.getAttribute("data-flag") : "");
+
+        return `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px;">
+            ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ""}
+            <span>${escape(item.text)}</span>
+        </div>`;
+    }
+
+    function renderItem(item, escape) {
+        const flag = item.flag || (item.$option ? item.$option.getAttribute("data-flag") : "");
+
+        return `<div style="display:inline-flex; align-items:center; gap:6px;">
+            ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ""}
+            <span>${escape(item.text)}</span>
+        </div>`;
+    }
+
+    countryTom = new TomSelect("#countrySelect", {
+        allowEmptyOption: true,
+        render: {
+            option: renderOption,
+            item: renderItem
+        }
+    });
+
+    currencyTom = new TomSelect("#currencySelect", {
+        allowEmptyOption: true,
+        render: {
+            option: renderOption,
+            item: renderItem
+        }
+    });
+
+    function setCurrencyFlag(currency, countryIso) {
+        if (!currency || !countryIso || !currencyTom.options[currency]) {
+            return;
+        }
+
+        const flag = flagUrl(countryIso);
+        const option = currencySelect.querySelector(`option[value="${currency}"]`);
+
+        if (option) {
+            option.setAttribute("data-flag", flag);
+        }
+
+        currencyTom.updateOption(currency, {
+            ...currencyTom.options[currency],
+            flag: flag
+        });
+
+        currencyTom.refreshOptions(false);
+        currencyTom.refreshItems();
+    }
+
+    function normalizeCurrency(currency) {
+        return String(currency || "").trim().toUpperCase();
+    }
+
+    function mustValidateCurrency(currency = currencySelect.value) {
+        return MUST_VALIDATE_CURRENCIES.includes(normalizeCurrency(currency));
+    }
+
+    function getValidatedAccountName(data) {
+        return data?.accountName
+            || data?.account_name
+            || data?.response_content?.account_name
+            || data?.data?.account_name
+            || data?.data?.response_content?.account_name
+            || data?.data?.data?.account_name
+            || data?.data?.data?.response_content?.account_name
+            || data?.data?.name
+            || "";
+    }
+
+    function getSelectedDialCode() {
+        return COUNTRY_DIAL_CODES[countrySelect.value] || "";
+    }
+
+    function resetMobileInput() {
+        const dialCode = getSelectedDialCode();
+
+        mobileInput.placeholder = dialCode ? `${dialCode} Mobile Number` : "Mobile Number";
+
+        if (!mobileInput.classList.contains("hidden")) {
+            mobileInput.value = dialCode;
+        }
+    }
+
+    function prepareMobileInput() {
+        const dialCode = getSelectedDialCode();
+
+        if (!dialCode) {
+            mobileInput.placeholder = "Mobile Number";
+            return;
+        }
+
+        mobileInput.placeholder = `${dialCode} Mobile Number`;
+
+        if (!mobileInput.value.trim()) {
+            mobileInput.value = dialCode;
+            return;
+        }
+
+        if (!mobileInput.value.startsWith("+")) {
+            mobileInput.value = `${dialCode}${mobileInput.value.replace(/^0+/, "")}`;
+        }
+    }
+
+    function resetHolderState() {
+        holderInput.classList.remove(
+            "border-green-500",
+            "bg-green-100",
+            "border-red-500",
+            "bg-red-100",
+            "border-amber-400",
+            "bg-amber-50"
+        );
+
+        holderInput.value = "";
+        holderInput.placeholder = "Account Holder";
+        holderInput.readOnly = false;
+        manualHint?.classList.add("hidden");
+    }
+
+    function setHolderValidated(name) {
+        holderInput.value = name;
+        holderInput.readOnly = true;
+        holderInput.classList.remove("border-red-500", "bg-red-100", "border-amber-400", "bg-amber-50");
+        holderInput.classList.add("border-green-500", "bg-green-100");
+        manualHint?.classList.add("hidden");
+    }
+
+    function setHolderValidationFailed() {
+        holderInput.value = "Account not found";
+        holderInput.readOnly = false;
+        holderInput.classList.remove("border-green-500", "bg-green-100", "border-amber-400", "bg-amber-50");
+        holderInput.classList.add("border-red-500", "bg-red-100");
+
+        if (manualHint) {
+            manualHint.textContent = "We couldn’t verify this account name. Please check the details and try again.";
+            manualHint.classList.remove("hidden", "text-amber-600");
+            manualHint.classList.add("text-red-600");
+        }
+    }
+
+    function setHolderManualFallback(message) {
+        if (mustValidateCurrency()) {
+            setHolderValidationFailed();
+            return;
+        }
+
+        holderInput.value = "";
+        holderInput.placeholder = "Enter account holder name";
+        holderInput.readOnly = false;
+        holderInput.classList.remove("border-green-500", "bg-green-100", "border-red-500", "bg-red-100");
+        holderInput.classList.add("border-amber-400", "bg-amber-50");
+
+        if (manualHint) {
+            manualHint.textContent = message || "Automatic name verification is not available for this account. Please enter the account holder name carefully.";
+            manualHint.classList.remove("hidden", "text-red-600");
+            manualHint.classList.add("text-amber-600");
+        }
+    }
+
+    function toggleField(field, show, required = false) {
+        if (!field) return;
+
+        if (show) {
             field.classList.remove("hidden");
             field.disabled = false;
-            if(required) field.setAttribute("required","required");
+
+            if (required) {
+                field.setAttribute("required", "required");
+            }
         } else {
             field.classList.add("hidden");
             field.disabled = true;
@@ -465,175 +1184,379 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    /* ================= LOAD PIVOT BANKS ================= */
-    function loadPivotBanks(){
+    function resetProviderFields() {
+        payazaProviders = { bank: [], mobile: [] };
+        appmobileProvider = { bank: [], mobile: [] };
+
+        transferMethod.innerHTML = '<option value="">Select Method</option>';
+        bankSelect.innerHTML = '<option value="">Select Bank</option>';
+
+        toggleField(transferMethod, false);
+        toggleField(bankSelect, false);
+        toggleField(accountNumber, false);
+        toggleField(mobileInput, false);
+
+        hideCadFields(); 
+        resetMobileInput();
+        resetHolderState();
+    }
+
+    function hideRuleFields() {
+        allRuleFields.forEach((field) => {
+            field.classList.add("hidden");
+            field.removeAttribute("required");
+            field.disabled = true;
+        });
+    }
+
+    function showRuleFields(currency) {
+        hideRuleFields();
+
+        if (!currencyRules[currency] || PROVIDER_CURRENCIES.includes(currency)) {
+            return;
+        }
+
+        const fieldMap = {
+            iban: "iban",
+            accountNumber: "accountNumber",
+            mobileNumber: "mobileNumber",
+            sortCode: "sortCode",
+            bankCode: "bankCode",
+            swiftBic: "swiftBic",
+            routing: "routing",
+            accountType: "accountType"
+        };
+
+        currencyRules[currency].rules.forEach((rule) => {
+            const elementId = fieldMap[rule];
+            const field = document.getElementById(elementId);
+
+            if (field) {
+                field.classList.remove("hidden");
+                field.disabled = false;
+                field.setAttribute("required", "required");
+            }
+        });
+    }
+
+    function loadPivotBanks() {
         const country = countrySelect.value;
-        if(!country) return;
+
+        if (!country) return;
 
         fetch(`${banksFilterUrl}?country=${country}&provider=pivot`)
-        .then(r=>r.json())
-        .then(list=>{
-            let html='<option value="">Select Bank</option>';
-            list.forEach(b=>{
-                html+=`<option value="${b.sort_code || b.bank_code}">${b.name}</option>`;
+            .then((response) => response.json())
+            .then((list) => {
+                let html = '<option value="">Select Bank</option>';
+
+                list.forEach((bank) => {
+                    html += `<option value="${bank.sort_code || bank.bank_code}">${bank.name}</option>`;
+                });
+
+                bankSelect.innerHTML = html;
             });
-            bankSelect.innerHTML=html;
-        });
     }
 
-    /* ================= LOAD PAYAZA ================= */
-    function loadPayazaProviders(){
+    function loadAppmobileProviders() {
+        const currency = normalizeCurrency(currencySelect.value);
 
-        const country  = countrySelect.value;
-        const currency = currencySelect.value;
-
-        if(!country || !PAYAZA_CURRENCIES.includes(currency) || !payazaEnabled) return;
-
-        // If UGX and Pivot is ON, stop Payaza
-        if(currency === "UGX" && pivotEnabled) return;
-
-        fetch(`${banksFilterUrl}?country=${country}&currency=${currency}&provider=payaza`)
-        .then(r=>r.json())
-        .then(res=>{
-
-            const list = res.data || res;
-
-            payazaProviders.bank   = [];
-            payazaProviders.mobile = [];
-
-            list.forEach(item=>{
-                if(item.type === "mobile_money"){
-                    payazaProviders.mobile.push(item);
-                } else {
-                    payazaProviders.bank.push(item);
-                }
-            });
-
-            showTransferMethods();
-        })
-        .catch(err=>{
-            console.error("Payaza fetch error:", err);
-        });
-    }
-
-    /* ================= SHOW METHODS ================= */
-    function showTransferMethods(){
-
-        let html='<option value="">Select Method</option>';
-
-        if(payazaProviders.bank.length)
-            html+='<option value="bank">Bank</option>';
-
-        if(payazaProviders.mobile.length)
-            html+='<option value="mobile">Mobile</option>';
-
-        transferMethod.innerHTML=html;
-
-        if(payazaProviders.bank.length || payazaProviders.mobile.length){
-            toggleField(transferMethod,true,true);
-        } else {
-            toggleField(transferMethod,false);
+        if (currency !== "GHS" || !appmobileEnabled) {
+            return;
         }
 
-        showFieldsByMethod();
+        const url = new URL(banksFilterUrl, window.location.origin);
+        url.searchParams.set("country", "GHA");
+        url.searchParams.set("currency", "GHS");
+        url.searchParams.set("provider", "app_mobile");
+
+        fetch(url.toString())
+            .then((response) => response.json())
+            .then((res) => {
+                const list = res.data || res;
+
+                appmobileProvider = { bank: [], mobile: [] };
+
+                list.forEach((item) => {
+                    if (item.type === "mobile_money") {
+                        appmobileProvider.mobile.push(item);
+                    } else {
+                        appmobileProvider.bank.push(item);
+                    }
+                });
+
+                showTransferMethods();
+            });
     }
 
-    /* ================= CURRENCY CHANGE ================= */
-    function showFieldsByCurrency(){
+    function loadPayazaProviders() {
+        const selectedCountry = countrySelect.value;
+        const country = getPayazaCountryCode(selectedCountry);
+        const currency = normalizeCurrency(currencySelect.value);
 
-        toggleField(transferMethod,false);
-        toggleField(bankSelect,false);
-        toggleField(accountNumber,false);
-        toggleField(mobileInput,false);
+        console.log("loadPayazaProviders called", {
+            selectedCountry,
+            country,
+            currency,
+            payazaEnabled,
+            banksFilterUrl
+        });
 
-        const currency = currencySelect.value;
+        if (!selectedCountry || !PAYAZA_CURRENCIES.includes(currency) || !payazaEnabled) {
+            console.log("Payaza load skipped", {
+                selectedCountry,
+                country,
+                currency,
+                hasCountry: !!selectedCountry,
+                currencyAllowed: PAYAZA_CURRENCIES.includes(currency),
+                payazaEnabled
+            });
+            return;
+        }
 
-        if(currency === "UGX"){
+        const url = new URL(banksFilterUrl, window.location.origin);
+        url.searchParams.set("country", country);
+        url.searchParams.set("currency", currency);
+        url.searchParams.set("provider", "payaza");
 
-            if(pivotEnabled){
-                toggleField(transferMethod,true,true);
-            } 
-            else if(payazaEnabled){
-                loadPayazaProviders();
-            }
+        console.log("Payaza banks fetch URL:", url.toString());
 
-        } else if(PAYAZA_CURRENCIES.includes(currency)){
+        fetch(url.toString())
+            .then((response) => {
+                console.log("Payaza banks HTTP status:", response.status);
+                return response.json();
+            })
+            .then((res) => {
+                console.log("Payaza banks response:", res);
+
+                const list = res.data || res;
+
+                payazaProviders = { bank: [], mobile: [] };
+
+                list.forEach((item) => {
+                    if (item.type === "mobile_money") {
+                        payazaProviders.mobile.push(item);
+                    } else {
+                        payazaProviders.bank.push(item);
+                    }
+                });
+
+                console.log("Payaza providers grouped:", payazaProviders);
+
+                showTransferMethods();
+            })
+            .catch((error) => {
+                console.error("Payaza fetch error:", error);
+            });
+    }
+
+    function showTransferMethods() {
+        const country = countrySelect.value;
+        const currency = normalizeCurrency(currencySelect.value);
+        let html = '<option value="">Select Method</option>';
+
+        if (country === "GH" && currency === "GHS" && appmobileEnabled) {
+            if (appmobileProvider.bank.length) html += '<option value="bank">Bank</option>';
+            if (appmobileProvider.mobile.length) html += '<option value="mobile">Mobile</option>';
+
+            transferMethod.innerHTML = html;
+            toggleField(transferMethod, appmobileProvider.bank.length || appmobileProvider.mobile.length, true);
+            return;
+        }
+
+        if (payazaProviders.bank.length) html += '<option value="bank">Bank</option>';
+        if (payazaProviders.mobile.length) html += '<option value="mobile">Mobile</option>';
+
+        transferMethod.innerHTML = html;
+        toggleField(transferMethod, payazaProviders.bank.length || payazaProviders.mobile.length, true);
+    }
+
+    function showCadInteracFields() {
+        const cadFields = document.getElementById("cadInteracFields");
+        const firstName = document.getElementById("interacFirstName");
+        const lastName  = document.getElementById("interacLastName");
+        const email     = document.getElementById("interacEmail");
+        const holderDiv = document.getElementById("accountHolder").closest("div"); // ← hide parent div
+
+        cadFields.classList.remove("hidden");
+        firstName.setAttribute("required", "required");
+        lastName.setAttribute("required", "required");
+        email.setAttribute("required", "required");
+
+        holderDiv.classList.add("hidden");          // ← hide Account Holder
+        holderInput.removeAttribute("required");
+        holderInput.value = "";
+
+        transferMethod.value = "bank";
+    }
+
+    function hideCadFields() {
+        const cadFields = document.getElementById("cadInteracFields");
+        const firstName = document.getElementById("interacFirstName");
+        const lastName  = document.getElementById("interacLastName");
+        const email     = document.getElementById("interacEmail");
+        const holderDiv = document.getElementById("accountHolder").closest("div"); // ← restore parent div
+
+        cadFields.classList.add("hidden");
+        firstName.removeAttribute("required");
+        lastName.removeAttribute("required");
+        email.removeAttribute("required");
+        firstName.value = "";
+        lastName.value  = "";
+        email.value     = "";
+
+        holderDiv.classList.remove("hidden");       // ← show Account Holder again
+    }
+
+    function showFieldsByCurrency() {
+        resetProviderFields();
+        hideCadFields(); 
+
+        const currency = normalizeCurrency(currencySelect.value);
+
+        // ── CAD → Interac only ───────────────────────────────────────────
+        if (currency === "CAD") {
+            showCadInteracFields();
+            return;
+        }
+
+        showRuleFields(currency);
+
+        if (currency === "GHS" && appmobileEnabled) {
+            loadAppmobileProviders();
+            return;
+        }
+
+        if (PAYAZA_CURRENCIES.includes(currency)) {
             loadPayazaProviders();
+            return;
+        }
+
+        if (currency === "UGX" && pivotEnabled) {
+            transferMethod.innerHTML = `
+                <option value="">Select Method</option>
+                <option value="bank">Bank</option>
+                <option value="mobile">Mobile</option>
+            `;
+
+            toggleField(transferMethod, true, true);
         }
     }
 
-    /* ================= METHOD CHANGE ================= */
-    function showFieldsByMethod(){
+    function showFieldsByMethod() {
+        toggleField(bankSelect, false);
+        toggleField(accountNumber, false);
+        toggleField(mobileInput, false);
 
-        toggleField(bankSelect,false);
-        toggleField(accountNumber,false);
-        toggleField(mobileInput,false);
+        resetHolderState();
 
-        const currency = currencySelect.value;
-        const method   = transferMethod.value;
+        const country = countrySelect.value;
+        const currency = normalizeCurrency(currencySelect.value);
+        const method = transferMethod.value;
 
-        /* ===== PIVOT ===== */
-        if(currency==="UGX" && pivotEnabled){
-
-            if(method==="mobile"){
-                toggleField(mobileInput,true,true);
+        if (currency === "UGX" && pivotEnabled) {
+            if (method === "mobile") {
+                toggleField(mobileInput, true, true);
+                prepareMobileInput();
             }
 
-            if(method==="bank"){
+            if (method === "bank") {
                 loadPivotBanks();
-                toggleField(bankSelect,true,true);
-                toggleField(accountNumber,true,true);
+                toggleField(bankSelect, true, true);
+                toggleField(accountNumber, true, true);
             }
+
+            return;
         }
 
-        /* ===== PAYAZA ===== */
-        else if(PAYAZA_CURRENCIES.includes(currency)){
+        if (country === "GH" && currency === "GHS" && appmobileEnabled) {
+            if (method === "bank") {
+                let html = '<option value="">Select Bank</option>';
 
-            if(method==="bank"){
-
-                let html='<option value="">Select Bank</option>';
-
-                payazaProviders.bank.forEach(b=>{
-                    html+=`<option value="${b.code || b.bank_code}">${b.name}</option>`;
+                appmobileProvider.bank.forEach((bank) => {
+                    html += `<option value="${bank.bank_code || bank.code}">${bank.name}</option>`;
                 });
 
-                bankSelect.innerHTML=html;
-
-                toggleField(bankSelect,true,true);
-                toggleField(accountNumber,true,true);
+                bankSelect.innerHTML = html;
+                toggleField(bankSelect, true, true);
+                toggleField(accountNumber, true, true);
             }
 
-            if(method==="mobile"){
+            if (method === "mobile") {
+                let html = '<option value="">Select Provider</option>';
 
-                let html='<option value="">Select Provider</option>';
-
-                payazaProviders.mobile.forEach(m=>{
-                    html+=`<option value="${m.code || m.bank_code}">${m.name}</option>`;
+                appmobileProvider.mobile.forEach((provider) => {
+                    html += `<option value="${provider.bank_code || provider.code}">${provider.name}</option>`;
                 });
 
-                bankSelect.innerHTML=html;
+                bankSelect.innerHTML = html;
+                toggleField(bankSelect, true, true);
+                toggleField(mobileInput, true, true);
+                prepareMobileInput();
+            }
 
-                toggleField(bankSelect,true,true);
-                toggleField(mobileInput,true,true);
+            return;
+        }
+
+        if (PAYAZA_CURRENCIES.includes(currency)) {
+            if (method === "bank") {
+                let html = '<option value="">Select Bank</option>';
+
+                payazaProviders.bank.forEach((bank) => {
+                    html += `<option value="${bank.code || bank.bank_code}">${bank.name}</option>`;
+                });
+
+                bankSelect.innerHTML = html;
+                toggleField(bankSelect, true, true);
+                toggleField(accountNumber, true, true);
+            }
+
+            if (method === "mobile") {
+                let html = '<option value="">Select Provider</option>';
+
+                payazaProviders.mobile.forEach((provider) => {
+                    html += `<option value="${provider.code || provider.bank_code}">${provider.name}</option>`;
+                });
+
+                bankSelect.innerHTML = html;
+                toggleField(bankSelect, true, true);
+                toggleField(mobileInput, true, true);
+                prepareMobileInput();
             }
         }
     }
 
-    /* ================= ACCOUNT VALIDATION ================= */
-    async function validateAccount(){
+    function syncCurrencyFromCountry(countryIso) {
+        if (!countryIso || !countryRules[countryIso]) {
+            return;
+        }
 
-        const currency = currencySelect.value;
-        const method   = transferMethod.value;
+        resetMobileInput();
+
+        const currency = XOF_COUNTRIES.includes(countryIso)
+            ? "XOF"
+            : countryRules[countryIso].currency;
+
+        if (!currency) {
+            return;
+        }
+
+        currencyTom.setValue(currency, true);
+        setCurrencyFlag(currency, countryIso);
+
+        currencySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    async function validateAccount() {
+        const currency = normalizeCurrency(currencySelect.value);
+        const method = transferMethod.value;
 
         let payload = null;
-        let route   = "";
+        let route = "";
 
-        /* ===== PIVOT ===== */
-        if(currency==="UGX" && pivotEnabled){
-
-            if(method==="mobile"){
+        if (currency === "UGX" && pivotEnabled) {
+            if (method === "mobile") {
                 const mobile = mobileInput.value.trim();
-                if(!mobile) return;
+                if (!mobile) return;
 
                 payload = {
                     serviceCode: SERVICES.ugx_mobile_service,
@@ -642,1193 +1565,188 @@ document.addEventListener("DOMContentLoaded", function() {
                 };
             }
 
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
+            if (method === "bank") {
+                const acc = accountNumber.value.trim();
                 const code = bankSelect.value;
-                if(!acc || !code) return;
+                if (!acc || !code) return;
 
                 payload = {
                     serviceCode: SERVICES.ugx_bank_service,
                     accountNumber: acc,
                     msisdn: acc,
-                    extraData: { bankSortCode: code, amount: "0" }
+                    extraData: {
+                        bankSortCode: code,
+                        amount: "0"
+                    }
                 };
             }
 
             route = "{{ route('pivot.account.validation') }}";
-        }
-
-        /* ===== PAYAZA ===== */
-        else if(PAYAZA_CURRENCIES.includes(currency)){
-
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
+        } else if (PAYAZA_CURRENCIES.includes(currency)) {
+            if (method === "bank") {
+                const acc = accountNumber.value.trim();
                 const code = bankSelect.value;
-                if(!acc || !code) return;
+                if (!acc || !code) return;
 
-                payload = { currency, account_number: acc, bank_code: code };
+                payload = {
+                    currency,
+                    account_number: acc,
+                    bank_code: code
+                };
             }
 
-            if(method==="mobile"){
+            if (method === "mobile") {
                 const mobile = mobileInput.value.trim();
-                const code   = bankSelect.value;
-                if(!mobile || !code) return;
+                const code = bankSelect.value;
+                if (!mobile || !code) return;
 
-                payload = { currency, account_number: mobile, bank_code: code};
+                payload = {
+                    currency,
+                    account_number: mobile,
+                    bank_code: code
+                };
             }
 
             route = "{{ route('payaza.account-enquiry') }}";
         }
 
-        if(!payload) return;
-
-        try{
-
-            loadingText.classList.remove("hidden");
-            holderInput.value="";
-            holderInput.classList.remove("border-green-500","bg-green-100");
-            holderInput.setAttribute("readonly",true);
-
-            const res = await fetch(route,{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json",
-                    "X-CSRF-TOKEN":"{{ csrf_token() }}"
-                },
-                body:JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            loadingText.classList.add("hidden");
-
-            let name="Account not found";
-            let valid=false;
-
-            if(currency==="UGX" && pivotEnabled){
-                if(data.accountName){
-                    name=data.accountName;
-                    valid=true;
-                }
-            }
-            else if(data.success && data.data?.response_content?.account_name){
-                name=data.data.response_content.account_name;
-                valid=true;
-            }
-
-            holderInput.value=name;
-
-            if(valid){
-                holderInput.classList.add("border-green-500","bg-green-100");
-            }
-
-        } catch(e){
-            console.error(e);
-            loadingText.classList.add("hidden");
-            holderInput.value="Validation failed";
-        }
-    }
-
-    /* ================= EVENTS ================= */
-    currencySelect.addEventListener("change",showFieldsByCurrency);
-    transferMethod.addEventListener("change",showFieldsByMethod);
-
-    accountNumber.addEventListener("input",()=>{
-        clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
-    });
-
-    mobileInput.addEventListener("input",()=>{
-        clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
-    });
-
-    bankSelect.addEventListener("change",validateAccount);
-
-    countrySelect.addEventListener("change",showFieldsByCurrency);
-
-    showFieldsByCurrency();
-
-});
-</script> --}}
-
-{{-- <script>
-document.addEventListener("DOMContentLoaded", function() {
-
-    const currencySelect  = document.getElementById("currencySelect");
-    const transferMethod  = document.getElementById("transferMethod");
-    const accountNumber   = document.getElementById("accountNumber");
-    const bankSelect      = document.getElementById("bankSelect");
-    const holderInput     = document.getElementById("accountHolder");
-    const loadingText     = document.getElementById("accountLoading");
-    const mobileInput     = document.getElementById("mobileNumber");
-    const countrySelect   = document.getElementById("countrySelect");
-    const SERVICES        = @json($pivotServices);
-
-    console.log("SERVICES:", SERVICES);
-
-    let timer;
-
-    const banksFilterUrl = "{{ route('banks.filter') }}";
-    const PAYAZA_CURRENCIES = ["NGN","TZS","KES","XOF","XAF","ZAR","UGX"];
-    const APPMOBILE_CURRENCIES = ["GHS"];
-
-
-    let payazaProviders = { bank: [], mobile: [] };
-
-    let appmobileProvider = { bank: []}
-
-    const pivotEnabled  = @json(filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN));
-    const payazaEnabled = @json(filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN));
-    const appmobileEnabled = @json(filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN));
-
-
-    console.log("Pivot enabled:", pivotEnabled);
-    console.log("Payaza enabled:", payazaEnabled);
-    console.log("appmobileEnabled enabled:", appmobileEnabled);
-
-
-    /* ================= FIELD TOGGLER ================= */
-    function toggleField(field, show, required=false){
-        console.log(`toggleField: ${field?.id}, show=${show}, required=${required}`);
-        if(!field) return;
-
-        if(show){
-            field.classList.remove("hidden");
-            field.disabled = false;
-            if(required) field.setAttribute("required","required");
-        } else {
-            field.classList.add("hidden");
-            field.disabled = true;
-            field.removeAttribute("required");
-            field.value = "";
-        }
-    }
-
-    /* ================= LOAD PIVOT BANKS ================= */
-    function loadPivotBanks(){
-        const country = countrySelect.value;
-        console.log("loadPivotBanks for country:", country);
-        if(!country) return;
-
-        fetch(`${banksFilterUrl}?country=${country}&provider=pivot`)
-        .then(r=>r.json())
-        .then(list=>{
-            console.log("Pivot banks response:", list);
-            let html='<option value="">Select Bank</option>';
-            list.forEach(b=>{
-                html+=`<option value="${b.sort_code || b.bank_code}">${b.name}</option>`;
-            });
-            bankSelect.innerHTML=html;
-        });
-    }
-
-    /* ================= LOAD APPMOBILE ================= */
-    function loadAppmobileProviders(){
-
-        const country  = countrySelect.value;
-        const currency = currencySelect.value;
-
-        console.log("Loading AppMobile...");
-
-        // ONLY GH + GHS + enabled
-        if(country !== "GH" || currency !== "GHS" || !appmobileEnabled){
-            console.log("AppMobile skipped");
-            return;
-        }
-
-        fetch(`${banksFilterUrl}?country=GH&currency=GHS&provider=app_mobile`)
-        .then(r=>r.json())
-        .then(res=>{
-
-            const list = res.data || res;
-
-            appmobileProvider.bank = list; // ONLY BANKS
-
-            showTransferMethods();
-
-        })
-        .catch(err=>{
-            console.error("AppMobile fetch error:", err);
-        });
-    }
-
-        /* ================= LOAD PAYAZA ================= */
-    function loadPayazaProviders(){
-        const country  = countrySelect.value;
-        const currency = currencySelect.value;
-        console.log("loadPayazaProviders for country:", country, "currency:", currency);
-
-        if(!country || !PAYAZA_CURRENCIES.includes(currency) || !payazaEnabled){
-            console.log("Skipping Payaza load");
-            return;
-        }
-
-        if(currency === "UGX" && pivotEnabled){
-            console.log("UGX + Pivot enabled, skipping Payaza");
-            return;
-        }
-
-        fetch(`${banksFilterUrl}?country=${country}&currency=${currency}&provider=payaza`)
-        .then(r=>r.json())
-        .then(res=>{
-            console.log("Payaza response:", res);
-            const list = res.data || res;
-
-            payazaProviders.bank   = [];
-            payazaProviders.mobile = [];
-
-            list.forEach(item=>{
-                console.log("Processing Payaza item:", item);
-                if(item.type === "mobile_money"){
-                    payazaProviders.mobile.push(item);
-                } else {
-                    payazaProviders.bank.push(item);
-                }
-            });
-
-            console.log("PayazaProviders after processing:", payazaProviders);
-            showTransferMethods();
-        })
-        .catch(err=>{
-            console.error("Payaza fetch error:", err);
-        });
-    }
-
-    /* ================= SHOW METHODS ================= */
-    function showTransferMethods(){
-        console.log("showTransferMethods called");
-
-        let html='<option value="">Select Method</option>';
-
-        if(payazaProviders.bank.length)
-            html+='<option value="bank">Bank</option>';
-
-        if(appmobileProvider.bank.length)
-            html+='<option value="bank">Bank</option>';
-
-        if(payazaProviders.mobile.length)
-            html+='<option value="mobile">Mobile</option>';
-
-        console.log("Transfer methods HTML:", html);
-
-        transferMethod.innerHTML=html;
-
-        if(payazaProviders.bank.length || payazaProviders.mobile.length || appmobileProvider.mobile.length){
-            toggleField(transferMethod,true,true);
-        } else {
-            toggleField(transferMethod,false);
-        }
-
-        showFieldsByMethod();
-    }
-
-    /* ================= CURRENCY CHANGE ================= */
-    function showFieldsByCurrency(){
-        console.log("Currency changed:", currencySelect.value);
-
-        toggleField(transferMethod,false);
-        toggleField(bankSelect,false);
-        toggleField(accountNumber,false);
-        toggleField(mobileInput,false);
-
-        const currency = currencySelect.value;
-
-        if(currency === "UGX"){
-            if(pivotEnabled){
-                console.log("UGX + Pivot enabled: show transfer method");
-                toggleField(transferMethod,true,true);
-            } 
-            else if(payazaEnabled){
-                console.log("UGX + Payaza enabled: load Payaza providers");
-                loadPayazaProviders();
-            }
-        } else if(PAYAZA_CURRENCIES.includes(currency)){
-            console.log("Other Payaza currency: load providers");
-            loadPayazaProviders();
-        }
-    }
-
-    /* ================= METHOD CHANGE ================= */
-    function showFieldsByMethod(){
-        console.log("Transfer method changed:", transferMethod.value);
-
-        toggleField(bankSelect,false);
-        toggleField(accountNumber,false);
-        toggleField(mobileInput,false);
-
-        const currency = currencySelect.value;
-        const method   = transferMethod.value;
-
-        if(currency==="UGX" && pivotEnabled){
-            if(method==="mobile"){
-                console.log("Pivot mobile method selected");
-                toggleField(mobileInput,true,true);
-            }
-            if(method==="bank"){
-                console.log("Pivot bank method selected");
-                loadPivotBanks();
-                toggleField(bankSelect,true,true);
-                toggleField(accountNumber,true,true);
-            }
-        } else if(PAYAZA_CURRENCIES.includes(currency)){
-            if(method==="bank"){
-                console.log("Payaza bank method selected");
-                let html='<option value="">Select Bank</option>';
-                payazaProviders.bank.forEach(b=>{
-                    html+=`<option value="${b.code || b.bank_code}">${b.name}</option>`;
-                });
-                bankSelect.innerHTML=html;
-                toggleField(bankSelect,true,true);
-                toggleField(accountNumber,true,true);
-            }
-            if(method==="mobile"){
-                console.log("Payaza mobile method selected");
-                let html='<option value="">Select Provider</option>';
-                payazaProviders.mobile.forEach(m=>{
-                    html+=`<option value="${m.code || m.bank_code}">${m.name}</option>`;
-                });
-                bankSelect.innerHTML=html;
-                toggleField(bankSelect,true,true);
-                toggleField(mobileInput,true,true);
-            }
-        }
-    }
-
-    /* ================= ACCOUNT VALIDATION ================= */
-    async function validateAccount(){
-        console.log("validateAccount called");
-
-        const currency = currencySelect.value;
-        const method   = transferMethod.value;
-
-        console.log("Currency:", currency, "Method:", method);
-
-        let payload = null;
-        let route   = "";
-
-        if(currency==="UGX" && pivotEnabled){
-            if(method==="mobile"){
-                const mobile = mobileInput.value.trim();
-                console.log("Pivot mobile payload:", mobile);
-                if(!mobile) return;
-                payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
-            }
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
-                const code = bankSelect.value;
-                console.log("Pivot bank payload:", acc, code);
-                if(!acc || !code) return;
-                payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
-            }
-            route = "{{ route('pivot.account.validation') }}";
-        } else if(PAYAZA_CURRENCIES.includes(currency)){
-            if(method==="bank"){
-                const acc  = accountNumber.value.trim();
-                const code = bankSelect.value;
-                console.log("Payaza bank payload:", acc, code);
-                if(!acc || !code) return;
-                payload = { currency, account_number: acc, bank_code: code };
-            }
-            if(method==="mobile"){
-                const mobile = mobileInput.value.trim();
-                const code   = bankSelect.value;
-                console.log("Payaza mobile payload:", mobile, code);
-                if(!mobile || !code) return;
-                payload = { currency, account_number: mobile, bank_code: code };
-            }
-            route = "{{ route('payaza.account-enquiry') }}";
-        }
-
-        if(!payload) return;
-
-        try{
-            console.log("Sending account validation request:", payload, route);
-            loadingText.classList.remove("hidden");
-            holderInput.value="";
-            holderInput.classList.remove("border-green-500","bg-green-100");
-            holderInput.setAttribute("readonly",true);
-
-            const res = await fetch(route,{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json",
-                    "X-CSRF-TOKEN":"{{ csrf_token() }}"
-                },
-                body:JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            console.log("Validation response:", data);
-
-            loadingText.classList.add("hidden");
-
-            let name="Account not found";
-            let valid=false;
-
-            if(currency==="UGX" && pivotEnabled){
-                if(data.accountName){
-                    name=data.accountName;
-                    valid=true;
-                }
-            } else if(data.success && data.data?.response_content?.account_name){
-                name=data.data.response_content.account_name;
-                valid=true;
-            }
-
-            console.log("Validation result:", name, "Valid:", valid);
-            holderInput.value=name;
-
-            if(valid){
-                holderInput.classList.add("border-green-500","bg-green-100");
-            }
-
-        } catch(e){
-            console.error("Validation error:", e);
-            loadingText.classList.add("hidden");
-            holderInput.value="Validation failed";
-        }
-    }
-
-    /* ================= EVENTS ================= */
-    currencySelect.addEventListener("change",showFieldsByCurrency);
-    transferMethod.addEventListener("change",showFieldsByMethod);
-
-    accountNumber.addEventListener("input",()=>{
-        clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
-    });
-
-    mobileInput.addEventListener("input",()=>{
-        clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
-    });
-
-    bankSelect.addEventListener("change",validateAccount);
-    countrySelect.addEventListener("change",showFieldsByCurrency);
-
-    showFieldsByCurrency();
-
-});
-</script> --}}
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-
-    const currencySelect  = document.getElementById("currencySelect");
-    const transferMethod  = document.getElementById("transferMethod");
-    const accountNumber   = document.getElementById("accountNumber");
-    const bankSelect      = document.getElementById("bankSelect");
-    const holderInput     = document.getElementById("accountHolder");
-    const loadingText     = document.getElementById("accountLoading");
-    const mobileInput     = document.getElementById("mobileNumber");
-    const countrySelect   = document.getElementById("countrySelect");
-    const SERVICES        = @json($pivotServices);
-
-    console.log("SERVICES:", SERVICES);
-
-    let timer;
-
-    const banksFilterUrl = "{{ route('banks.filter') }}";
-    const PAYAZA_CURRENCIES = ["NGN","TZS","KES","XOF","XAF","ZAR"];
-    const APPMOBILE_CURRENCIES = ["GHS"];
-
-
-    let payazaProviders = { bank: [], mobile: [] };
-
-   let appmobileProvider = { bank: [], mobile: [] }
-
-    const pivotEnabled  = @json(filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN));
-    const payazaEnabled = @json(filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN));
-    const appmobileEnabled = @json(filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN));
-
-
-    console.log("Pivot enabled:", pivotEnabled);
-    console.log("Payaza enabled:", payazaEnabled);
-    console.log("appmobileEnabled enabled:", appmobileEnabled);
-
-
-    /* ================= FIELD TOGGLER ================= */
-    function toggleField(field, show, required=false){
-        console.log(`toggleField: ${field?.id}, show=${show}, required=${required}`);
-        if(!field) return;
-
-        if(show){
-            field.classList.remove("hidden");
-            field.disabled = false;
-            if(required) field.setAttribute("required","required");
-        } else {
-            field.classList.add("hidden");
-            field.disabled = true;
-            field.removeAttribute("required");
-            field.value = "";
-        }
-    }
-
-    /* ================= LOAD PIVOT BANKS ================= */
-    function loadPivotBanks(){
-        const country = countrySelect.value;
-        console.log("loadPivotBanks for country:", country);
-        if(!country) return;
-
-        fetch(`${banksFilterUrl}?country=${country}&provider=pivot`)
-        .then(r=>r.json())
-        .then(list=>{
-            console.log("Pivot banks response:", list);
-            let html='<option value="">Select Bank</option>';
-            list.forEach(b=>{
-                html+=`<option value="${b.sort_code || b.bank_code}">${b.name}</option>`;
-            });
-            bankSelect.innerHTML=html;
-        });
-    }
-
-    /* ================= LOAD APPMOBILE ================= */
-    function loadAppmobileProviders(){
-
-        const currency = currencySelect.value;
-
-        console.log("Loading AppMobile (FORCED provider=app_mobile)");
-
-        // Only allow GHS + enabled
-        if(currency !== "GHS" || !appmobileEnabled){
-            console.log("AppMobile skipped");
-            return;
-        }
-
-        const url = new URL(banksFilterUrl, window.location.origin);
-
-        // 🔒 HARD LOCK PROVIDER
-        url.searchParams.set("country", "GHA");       // or GH if your backend uses ISO2
-        url.searchParams.set("currency", "GHS");
-        url.searchParams.set("provider", "app_mobile"); // <-- FORCED
-
-        fetch(url.toString())
-        .then(r => r.json())
-        .then(res => {
-
-            const list = res.data || res;
-
-            appmobileProvider.bank = [];
-            appmobileProvider.mobile = [];
-
-            list.forEach(item => {
-                if(item.type === "mobile_money"){
-                    appmobileProvider.mobile.push(item);
-                } else {
-                    appmobileProvider.bank.push(item);
-                }
-            });
-
-            showTransferMethods();
-        })
-        .catch(err => {
-            console.error("AppMobile fetch error:", err);
-        });
-    }
-
-        /* ================= LOAD PAYAZA ================= */
-    function loadPayazaProviders(){
-        const country  = countrySelect.value;
-        const currency = currencySelect.value;
-        console.log("loadPayazaProviders for country:", country, "currency:", currency);
-
-        if(!country || !PAYAZA_CURRENCIES.includes(currency) || !payazaEnabled){
-            console.log("Skipping Payaza load");
-            return;
-        }
-
-        if(currency === "UGX" && pivotEnabled){
-            console.log("UGX + Pivot enabled, skipping Payaza");
-            return;
-        }
-
-        
-
-        fetch(`${banksFilterUrl}?country=${country}&currency=${currency}&provider=payaza`)
-        .then(r=>r.json())
-        .then(res=>{
-            console.log("Payaza response:", res);
-            const list = res.data || res;
-
-            payazaProviders.bank   = [];
-            payazaProviders.mobile = [];
-
-            list.forEach(item=>{
-                console.log("Processing Payaza item:", item);
-                if(item.type === "mobile_money"){
-                    payazaProviders.mobile.push(item);
-                } else {
-                    payazaProviders.bank.push(item);
-                }
-            });
-
-            console.log("PayazaProviders after processing:", payazaProviders);
-            showTransferMethods();
-        })
-        .catch(err=>{
-            console.error("Payaza fetch error:", err);
-        });
-    }
-
-    /* ================= SHOW METHODS ================= */
-      function showTransferMethods(){
-
-        let html = '<option value="">Select Method</option>';
-
-        const currency = currencySelect.value;
-        const country  = countrySelect.value;
-
-        // ===== APP MOBILE (GHANA ONLY) =====
-        if(country === "GH" && currency === "GHS" && appmobileEnabled){
-
-            if(appmobileProvider.bank.length)
-                html += '<option value="bank">Bank</option>';
-
-            if(appmobileProvider.mobile.length)
-                html += '<option value="mobile">Mobile</option>';
-
-            transferMethod.innerHTML = html;
-
-            if(appmobileProvider.bank.length || appmobileProvider.mobile.length){
-                toggleField(transferMethod,true,true);
-            } else {
-                toggleField(transferMethod,false);
-            }
-
-            return;
-        }
-
-        // ===== PAYAZA =====
-        if(payazaProviders.bank.length)
-            html += '<option value="bank">Bank</option>';
-
-        if(payazaProviders.mobile.length)
-            html += '<option value="mobile">Mobile</option>';
-
-        transferMethod.innerHTML = html;
-
-        if(payazaProviders.bank.length || payazaProviders.mobile.length){
-            toggleField(transferMethod,true,true);
-        } else {
-            toggleField(transferMethod,false);
-        }
-    }
-
-    /* ================= CURRENCY CHANGE ================= */
-    function showFieldsByCurrency(){
-
-         // 🔥 CLEAR PREVIOUS STATE
-      payazaProviders = { bank: [], mobile: [] };
-      appmobileProvider = { bank: [], mobile: [] };
-
-      transferMethod.innerHTML = '<option value="">Select Method</option>';
-
-      toggleField(transferMethod,false);
-      toggleField(bankSelect,false);
-      toggleField(accountNumber,false);
-      toggleField(mobileInput,false);
-
-      const currency = currencySelect.value;
-
-      // 🔒 HARD LOCK GHS TO APP_MOBILE
-      if(currency === "GHS" && appmobileEnabled){
-          loadAppmobileProviders();
-          return; // 🚨 STOP HERE (NO PAYAZA)
-      }
-
-      // ===== PAYAZA =====
-      if(PAYAZA_CURRENCIES.includes(currency)){
-          loadPayazaProviders();
-          return;
-      }
-
-      // ===== PIVOT =====
-      if(currency === "UGX" && pivotEnabled){
-
-          let html = '<option value="">Select Method</option>';
-          html += '<option value="bank">Bank</option>';
-          html += '<option value="mobile">Mobile</option>';
-
-          transferMethod.innerHTML = html;
-          toggleField(transferMethod,true,true);
-
-          return;
-      }
-    }
-
-    /* ================= METHOD CHANGE ================= */
-    function showFieldsByMethod(){
-
-      toggleField(bankSelect,false);
-      toggleField(accountNumber,false);
-      toggleField(mobileInput,false);
-
-      const currency = currencySelect.value;
-      const country  = countrySelect.value;
-      const method   = transferMethod.value;
-
-      /* ================= PIVOT (UGX) ================= */
-      if(currency === "UGX" && pivotEnabled){
-
-          if(method === "mobile"){
-              console.log("Pivot mobile selected");
-
-              toggleField(mobileInput,true,true);
-          }
-
-          if(method === "bank"){
-              console.log("Pivot bank selected");
-
-              loadPivotBanks(); // LOAD BANKS
-              toggleField(bankSelect,true,true);
-              toggleField(accountNumber,true,true);
-          }
-
-          return;
-      }
-
-      /* ================= APP MOBILE (GHANA) ================= */
-     if(country === "GH" && currency === "GHS" && appmobileEnabled){
-
-          if(method === "bank"){
-              let html = '<option value="">Select Bank</option>';
-
-              appmobileProvider.bank.forEach(b=>{
-                  html += `<option value="${b.bank_code || b.code}">${b.name}</option>`;
-              });
-
-              bankSelect.innerHTML = html;
-
-              toggleField(bankSelect,true,true);
-              toggleField(accountNumber,true,true);
-          }
-
-          if(method === "mobile"){
-              let html = '<option value="">Select Provider</option>';
-
-              appmobileProvider.mobile.forEach(m=>{
-                  html += `<option value="${m.bank_code || m.code}">${m.name}</option>`;
-              });
-
-              bankSelect.innerHTML = html;
-
-              toggleField(bankSelect,true,true);
-              toggleField(mobileInput,true,true);
-          }
-
-          return;
-      }
-
-      /* ================= PAYAZA ================= */
-      if(PAYAZA_CURRENCIES.includes(currency)){
-
-          if(method==="bank"){
-              let html='<option value="">Select Bank</option>';
-              payazaProviders.bank.forEach(b=>{
-                  html+=`<option value="${b.code || b.bank_code}">${b.name}</option>`;
-              });
-              bankSelect.innerHTML=html;
-              toggleField(bankSelect,true,true);
-              toggleField(accountNumber,true,true);
-          }
-
-          if(method==="mobile"){
-              let html='<option value="">Select Provider</option>';
-              payazaProviders.mobile.forEach(m=>{
-                  html+=`<option value="${m.code || m.bank_code}">${m.name}</option>`;
-              });
-              bankSelect.innerHTML=html;
-              toggleField(bankSelect,true,true);
-              toggleField(mobileInput,true,true);
-          }
-      }
-     }
-
-    /* ================= ACCOUNT VALIDATION ================= */
-   async function validateAccount(){
-    console.log("validateAccount called");
-
-    const currency = currencySelect.value;
-    const method   = transferMethod.value;
-    const manualHint = document.getElementById("accountManualHint");
-    const blockedCurrencies = ["NGN","UGX","GHS"];
-
-    let payload = null;
-    let route   = "";
-
-    if(currency==="UGX" && pivotEnabled){
-        if(method==="mobile"){
-            const mobile = mobileInput.value.trim();
-            if(!mobile) return;
-            payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
-        }
-        if(method==="bank"){
-            const acc  = accountNumber.value.trim();
+        if (countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled) {
             const code = bankSelect.value;
-            if(!acc || !code) return;
-            payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
-        }
-        route = "{{ route('pivot.account.validation') }}";
-    } else if(PAYAZA_CURRENCIES.includes(currency)){
-        if(method==="bank"){
-            const acc  = accountNumber.value.trim();
-            const code = bankSelect.value;
-            if(!acc || !code) return;
-            payload = { currency, account_number: acc, bank_code: code };
-        }
-        if(method==="mobile"){
-            const mobile = mobileInput.value.trim();
-            const code   = bankSelect.value;
-            if(!mobile || !code) return;
-            payload = { currency, account_number: mobile, bank_code: code };
-        }
-        route = "{{ route('payaza.account-enquiry') }}";
-    }
 
-    if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
-        const method = transferMethod.value;
-        const code   = bankSelect.value;
+            if (method === "bank") {
+                const acc = accountNumber.value.trim();
+                if (!acc || !code) return;
 
-        if(method === "bank"){
-            const acc = accountNumber.value.trim();
-            if(!acc || !code) return;
-            payload = { customer_number: acc, bank_code: code };
-        }
-
-        if(method === "mobile"){
-            const mobile = mobileInput.value.trim();
-            if(!mobile || !code) return;
-            payload = { customer_number: mobile, bank_code: code };
-        }
-
-        route = "{{ route('appmobile.account-enquiry') }}";
-    }
-
-    if(!payload) return;
-
-    try{
-        loadingText.classList.remove("hidden");
-        holderInput.value = "";
-        holderInput.classList.remove("border-green-500","bg-green-100","border-red-500","bg-red-100");
-        holderInput.readOnly = true;
-        manualHint?.classList.add("hidden");
-
-        const res = await fetch(route,{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json",
-                "X-CSRF-TOKEN":"{{ csrf_token() }}"
-            },
-            body:JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        loadingText.classList.add("hidden");
-
-        let name = "";
-        let valid = false;
-
-        if(currency==="UGX" && pivotEnabled && data.accountName){
-            name = data.accountName;
-            valid = true;
-        } else if(data.success && data.data?.response_content?.account_name){
-            name = data.data.response_content.account_name;
-            valid = true;
-        }
-
-        if(countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled){
-            if(data.success === true && data.status === 200 && data.data?.name){
-                name = data.data.name;
-                valid = true;
+                payload = {
+                    customer_number: acc,
+                    bank_code: code
+                };
             }
+
+            if (method === "mobile") {
+                const mobile = mobileInput.value.trim();
+                if (!mobile || !code) return;
+
+                payload = {
+                    customer_number: mobile,
+                    bank_code: code
+                };
+            }
+
+            route = "{{ route('appmobile.account-enquiry') }}";
         }
 
-        if(valid){
-            holderInput.value = name;
-            holderInput.classList.add("border-green-500","bg-green-100");
+        if (!payload) return;
+
+        try {
+            loadingText.classList.remove("hidden");
+            holderInput.value = "";
+            holderInput.classList.remove("border-green-500", "bg-green-100", "border-red-500", "bg-red-100", "border-amber-400", "bg-amber-50");
             holderInput.readOnly = true;
             manualHint?.classList.add("hidden");
-        } else {
-            holderInput.value = "Account not found";
-            holderInput.readOnly = false;
-            holderInput.classList.add("border-red-500","bg-red-100");
 
-            if (blockedCurrencies.includes(currency)) {
-                manualHint?.classList.add("hidden");
+            const res = await fetch(route, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            loadingText.classList.add("hidden");
+
+            const accountName = getValidatedAccountName(data);
+
+            if (accountName) {
+                setHolderValidated(accountName);
+            } else if (mustValidateCurrency(currency)) {
+                setHolderValidationFailed();
             } else {
-                manualHint?.classList.remove("hidden");
+                setHolderManualFallback("Automatic name verification is not available for this account. Please enter the account holder name carefully.");
+            }
+        } catch (error) {
+            console.error("Validation error:", error);
+            loadingText.classList.add("hidden");
+
+            if (mustValidateCurrency(currency)) {
+                setHolderValidationFailed();
+            } else {
+                setHolderManualFallback("Automatic name verification is not available right now. Please enter the account holder name carefully.");
             }
         }
-
-    } catch(e){
-        console.error("Validation error:", e);
-        loadingText.classList.add("hidden");
-        holderInput.value = "Account not found";
-        holderInput.readOnly = false;
-        holderInput.classList.add("border-red-500","bg-red-100");
-
-        if (blockedCurrencies.includes(currency)) {
-            manualHint?.classList.add("hidden");
-        } else {
-            manualHint?.classList.remove("hidden");
-        }
     }
-}
 
+    countryTom.on("change", syncCurrencyFromCountry);
+    currencyTom.on("change", showFieldsByCurrency);
+    transferMethod.addEventListener("change", showFieldsByMethod);
+    bankSelect.addEventListener("change", validateAccount);
 
-    /* ================= EVENTS ================= */
-    currencySelect.addEventListener("change",showFieldsByCurrency);
-    transferMethod.addEventListener("change",showFieldsByMethod);
-
-    accountNumber.addEventListener("input",()=>{
+    accountNumber.addEventListener("input", () => {
         clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
+        timer = setTimeout(validateAccount, 700);
     });
 
-    mobileInput.addEventListener("input",()=>{
+    mobileInput.addEventListener("input", () => {
         clearTimeout(timer);
-        timer=setTimeout(validateAccount,700);
+        timer = setTimeout(validateAccount, 700);
     });
 
-    bankSelect.addEventListener("change",validateAccount);
-    countrySelect.addEventListener("change",showFieldsByCurrency);
-
-    showFieldsByCurrency();
-
+    if (countrySelect.value) {
+        syncCurrencyFromCountry(countrySelect.value);
+    } else if (currencySelect.value) {
+        showFieldsByCurrency();
+    }
 });
-</script>
-
-
-
-
-
-    {{-- for both country and currency logo --}}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  // --- COUNTRY SELECT ---
-  const countrySelect = document.querySelector("#countrySelect");
-  countrySelect.querySelectorAll("option").forEach(option => {
-    if(option.value) {
-      option.setAttribute("data-flag", `https://flagcdn.com/w20/${option.value.toLowerCase()}.png`);
-    }
-  });
-
-  // --- CURRENCY SELECT ---
-  const currencySelect = document.querySelector("#currencySelect");
-  currencySelect.querySelectorAll("option").forEach(option => {
-    if(option.value) {
-      // Find country ISO for this currency
-      const country = @json($countries->keyBy('currency_iso'));
-      const iso = country[option.value] ? country[option.value].country_iso.toLowerCase() : '';
-      if(iso) {
-        option.setAttribute("data-flag", `https://flagcdn.com/w20/${iso}.png`);
-      }
-    }
-  });
-
-  // Initialize TomSelect for COUNTRY
-  new TomSelect("#countrySelect", {
-    allowEmptyOption: true,
-    render: {
-      option: function(item, escape) {
-        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
-        return `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px;">
-                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
-                  <span>${escape(item.text)}</span>
-                </div>`;
-      },
-      item: function(item, escape) {
-        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
-        return `<div style="display:inline-flex; align-items:center; gap:6px;">
-                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
-                  <span>${escape(item.text)}</span>
-                </div>`;
-      }
-    }
-  });
-
-  // Initialize TomSelect for CURRENCY
-  new TomSelect("#currencySelect", {
-    allowEmptyOption: true,
-    render: {
-      option: function(item, escape) {
-        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
-        return `<div style="display:flex; align-items:center; gap:8px; padding:4px 8px;">
-                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
-                  <span>${escape(item.text)}</span>
-                </div>`;
-      },
-      item: function(item, escape) {
-        const flag = item.$option ? item.$option.getAttribute('data-flag') : '';
-        return `<div style="display:inline-flex; align-items:center; gap:6px;">
-                  ${flag ? `<img src="${flag}" style="width:20px;height:14px;display:inline-block;"/>` : ''}
-                  <span>${escape(item.text)}</span>
-                </div>`;
-      }
-    }
-  });
-});
-</script>
-{{-- <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const options = {
-    allowEmptyOption: true,
-  };
-
-  new TomSelect("#countrySelect", options);
-  new TomSelect("#currencySelect", options);
-});
-
-
 </script> --}}
 
 
 
-{{-- when i select currency the bank detall will drop --}}
-{{-- <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  const currencyRules = @json($currencyRules);
-
-  const fieldMap = {
-    iban: "iban",
-    accountNumber: "accountNumber",
-    mobileNumber: "mobileNumber",
-    sortCode: "sortCode",
-    bankCode: "bankCode",
-    swiftBic: "swiftBic",
-    routing: "routing",
-    accountType: "accountType"
-  };
-
-  const currencySelect = document.getElementById("currencySelect");
-  const countrySelect  = document.getElementById("countrySelect");
-  const allFields      = document.querySelectorAll(".bank-field");
-
-  if (!currencySelect) return;
-
-  currencySelect.addEventListener("change", function () {
-
-    const selected = currencyRules[this.value];
-
-    // hide all bank fields first
-    allFields.forEach(f => {
-      f.classList.add("hidden");
-      f.removeAttribute("required");
-    });
-
-    if (!selected) return;
-
-    // auto set country
-    // if (countrySelect) {
-    //   countrySelect.value = selected.country;
-    // }
-
-    // ⭐ IMPORTANT
-    // If UGX → do NOT show rules (payment method will handle)
-    if (this.value === "UGX") return;
-
-    // show required fields for other currencies
-    selected.rules.forEach(field => {
-      const el = document.getElementById(fieldMap[field]);
-      if (el) {
-        el.classList.remove("hidden");
-        el.setAttribute("required", "required");
-      }
-    });
-
-  });
-
-});
-</script> --}}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  const currencyRules = @json($currencyRules);
-
-  const fieldMap = {
-    iban: "iban",
-    accountNumber: "accountNumber",
-    mobileNumber: "mobileNumber",
-    sortCode: "sortCode",
-    bankCode: "bankCode",
-    swiftBic: "swiftBic",
-    routing: "routing",
-    accountType: "accountType"
-  };
-
-  const currencySelect = document.getElementById("currencySelect");
-  const allFields      = document.querySelectorAll(".bank-field");
-
-  if (!currencySelect) return;
-
-  currencySelect.addEventListener("change", function () {
-
-    const currency = this.value;
-    const selected = currencyRules[currency];
-
-    // Hide all rule-based fields first
-    allFields.forEach(field => {
-      field.classList.add("hidden");
-      field.removeAttribute("required");
-    });
-
-    // Stop if currency has no rules
-    if (!selected) return;
-
-    // ⚠️ Important: Skip rule fields for provider-controlled currencies
-    if (["UGX","NGN","TZS","KES","XOF","XAF","ZAR","GHS"].includes(currency)) {
-      return;
-    }
-
-    // Show rule-based fields
-    selected.rules.forEach(rule => {
-
-      const elementId = fieldMap[rule];
-      const el = document.getElementById(elementId);
-
-      if (el) {
-        el.classList.remove("hidden");
-        el.setAttribute("required","required");
-      }
-
-    });
-
-  });
-
-});
-</script>
-
-
-
-
-
 
 
 <script>
-    const typeSelect = document.getElementById('beneficiaryType');
-    const individualFields = document.getElementById('individualFields');
-    const corporateFields = document.getElementById('corporateFields');
+document.addEventListener("DOMContentLoaded", function () {
+    const typeSelect = document.getElementById("beneficiaryType");
+    const individualFields = document.getElementById("individualFields");
+    const corporateFields = document.getElementById("corporateFields");
 
-    function toggleFields() {
+    if (!typeSelect || !individualFields || !corporateFields) {
+        return;
+    }
 
-        individualFields.classList.add('hidden');
-        corporateFields.classList.add('hidden');
+    function setRequired(container, required) {
+        container.querySelectorAll("input").forEach((input) => {
+            if (required) {
+                input.setAttribute("required", "required");
+            } else {
+                input.removeAttribute("required");
+                input.value = "";
+            }
+        });
+    }
 
-        if (typeSelect.value === 'individual') {
-            individualFields.classList.remove('hidden');
+    function toggleBeneficiaryFields() {
+        individualFields.classList.add("hidden");
+        corporateFields.classList.add("hidden");
+
+        setRequired(individualFields, false);
+        setRequired(corporateFields, false);
+
+        if (typeSelect.value === "individual") {
+            individualFields.classList.remove("hidden");
+            setRequired(individualFields, true);
         }
 
-        if (typeSelect.value === 'corporate') {
-            corporateFields.classList.remove('hidden');
+        if (typeSelect.value === "corporate") {
+            corporateFields.classList.remove("hidden");
+            setRequired(corporateFields, true);
         }
     }
 
-    // Run on change
-    typeSelect.addEventListener('change', toggleFields);
-
-    // Run once on page load
-    toggleFields();
+    typeSelect.addEventListener("change", toggleBeneficiaryFields);
+    toggleBeneficiaryFields();
+});
 </script>
 
     

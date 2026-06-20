@@ -34,6 +34,7 @@ use App\Http\Controllers\Business\BillPaymentController;
 use App\Http\Controllers\Business\ChargebackController;
 use App\Http\Controllers\Business\ComplianceController;
 use App\Http\Controllers\Business\SubAccountController;
+use App\Http\Controllers\Blaaiz\BlaaizController;
 use App\Http\Controllers\Business\SubscriptionController;
 use App\Http\Controllers\Business\TransactionHistoryController;
 use App\Http\Controllers\Business\InvoicesController;
@@ -49,6 +50,7 @@ use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
@@ -131,6 +133,7 @@ Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry
 
 Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
+    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
 
 
 
@@ -215,6 +218,13 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
     
     Route::get('/add_money', [AddMoneyController::class, 'index'])->name('add_money');
+    Route::post('/add-money', [AddMoneyController::class, 'addMoneyStore'])->name('add_money.store');
+    Route::get('/add-money/interac', [AddMoneyController::class, 'interacDetails'])->name('add_money.interac');
+    Route::post('/blaaiz/interac/accept', [BlaaizController::class, 'acceptInteracMoneyRequest'])->name('blaaiz.interac.accept');
+    Route::post('/blaaiz/interac/initiate', [BlaaizController::class, 'initiateInteracMoneyRequest'])
+        ->name('blaaiz.interac.initiate');
+
+
 
 
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -390,6 +400,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::delete('/admin/business-account/delete/{id}', [BusinessAccountController::class,'destroy']);
         Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
+        Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
 
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
@@ -463,6 +474,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::middleware('admin.permission:manage_settings_exchange')->group(function () {
             Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
             Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+            Route::post('/admin/business-account/{id}/submit-fidelity', [BusinessAccountController::class, 'submitToFidelity'])->name('admin.business.submit-fidelity');
+            Route::post('/admin/business-account/{id}/submit-blaaiz', [BusinessAccountController::class, 'submitToBlaaiz'])->name('admin.business.submit-blaaiz');
 
         });
 

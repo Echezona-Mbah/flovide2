@@ -13,6 +13,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Mail\TransactionSentMail;
+use App\Models\Balance;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CheckOrchardTransactions implements ShouldQueue
 {
@@ -54,23 +58,124 @@ class CheckOrchardTransactions implements ShouldQueue
                 $tx->save();
 
                 $this->sendTransactionStatusNotification($tx, $firebase);
+
+                    if (in_array($mapped, ['success', 'failed'])) {
+                        $this->sendTransactionEmailFromCron($tx);
+                    }
             }
         }
     }
 
-    protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
-    {
-        $user = User::find($tx->user_id) ?? Personal::find($tx->user_id);
 
-        if (!$user || empty($user->device_token)) {
+    protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
+{
+    $user = $tx->user_id ? User::find($tx->user_id) : null;
+    $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+
+    if (!$user || empty($user->device_token)) {
+        return;
+    }
+
+    $statusText = ucfirst((string) $tx->status);
+    $currency = strtoupper((string) $tx->currency);
+    $amount = number_format((float) $tx->amount, 2);
+
+    $title = match ($tx->status) {
+        'success' => 'Transaction Successful',
+        'failed' => 'Transaction Failed',
+        default => 'Transaction Updated',
+    };
+
+    $body = match ($tx->status) {
+        'success' => "Your transaction of {$currency} {$amount} was successful.",
+        'failed' => "Your transaction of {$currency} {$amount} failed.",
+        default => "Your transaction status is now {$statusText}.",
+    };
+
+    $firebase->sendToToken($user->device_token, $title, $body, [
+        'type' => 'transaction',
+        'transaction_id' => (string) $tx->id,
+        'status' => (string) $tx->status,
+    ]);
+}
+
+
+
+//     protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
+// {
+//     $user = User::find($tx->user_id) ?? Personal::find($tx->user_id);
+
+//     if (!$user || empty($user->device_token)) {
+//         return;
+//     }
+
+//     $statusText = ucfirst((string) $tx->status);
+//     $currency = strtoupper((string) $tx->currency);
+//     $amount = number_format((float) $tx->amount, 2);
+
+//     $title = match ($tx->status) {
+//         'success' => 'Transaction Successful',
+//         'failed' => 'Transaction Failed',
+//         default => 'Transaction Updated',
+//     };
+
+//     $body = match ($tx->status) {
+//         'success' => "Your transaction of {$currency} {$amount} was successful.",
+//         'failed' => "Your transaction of {$currency} {$amount} failed.",
+//         default => "Your transaction status is now {$statusText}.",
+//     };
+
+//     $firebase->sendToToken($user->device_token, $title, $body, [
+//         'type' => 'transaction',
+//         'transaction_id' => (string) $tx->id,
+//         'status' => (string) $tx->status,
+//     ]);
+// }
+
+
+
+protected function sendTransactionEmailFromCron(TransactionHistory $tx): void
+{
+    try {
+        $user = $tx->user_id ? User::find($tx->user_id) : null;
+        $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+
+        if (!$user || empty($user->email)) {
             return;
         }
 
-        $firebase->sendSilentToToken($user->device_token, [
+        $balance = Balance::find($tx->balance_id);
+        $statusText = ucfirst((string) $tx->status);
+
+        $data = [
+            'name' => $user->business_name ?? $user->name ?? $user->firstname ?? 'Customer',
+            'amount_sent' => number_format((float) $tx->amount, 2),
+            'recipient_amount' => number_format((float) $tx->recipient_amount, 2),
+            'fee' => number_format((float) ($tx->fees ?? 0), 2),
+            'total_amount' => number_format((float) ($tx->total_amount ?? $tx->amount), 2),
+            'current_balance' => number_format((float) ($balance->amount ?? 0), 2),
+            'sending_currency' => strtoupper((string) $tx->currency),
+            'recipient_currency' => strtoupper((string) ($tx->to_currency ?? $tx->recipient_bank_currency)),
+            'reference' => $tx->reference ?? $tx->order_id ?? 'N/A',
+            'status' => $tx->status,
+            'status_text' => $statusText,
+            'failure_reason' => $tx->failure_reason,
+            'status_message' => $tx->status === 'success'
+                ? 'Your transfer was processed successfully. Here is a clear summary of your transaction.'
+                : 'Your transfer could not be completed. Here is the transaction summary.',
+        ];
+
+        Mail::to($user->email)->send(new TransactionSentMail($data));
+    } catch (\Throwable $e) {
+        Log::warning('Cron transaction email failed', [
             'transaction_id' => $tx->id,
             'status' => $tx->status,
+            'error' => $e->getMessage(),
         ]);
     }
+}
+
+
 }
 
 

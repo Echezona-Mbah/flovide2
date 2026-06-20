@@ -50,6 +50,20 @@ return [
         'private_key' => str_replace('\n', "\n", env('FIREBASE_PRIVATE_KEY')),
     ],
 
-
+    'blaaiz' => [
+        'base_url' => env('BLAAIZ_BASE_URL', 'https://api-prod.blaaiz.com'),
+        'client_id' => env('BLAAIZ_CLIENT_ID'),
+        'client_secret' => env('BLAAIZ_CLIENT_SECRET'),
+        'scopes' => env('BLAAIZ_SCOPES'),
+        'webhook_secret' => env('BLAAIZ_WEBHOOK_SECRET'),
+    ],
+    'latest_version' => env('APP_LATEST_VERSION', '1.0.0+1'),
+    'force_update'   => env('APP_FORCE_UPDATE', false),
+    
+    'fidelity' => [
+        'base_url'      => env('FIDELITY_BASE_URL'),
+        'client_id'      => env('FIDELITY_CLIENT_ID'),
+        'client_secret'  => env('FIDELITY_CLIENT_SECRET'),
+    ],
 
 ];

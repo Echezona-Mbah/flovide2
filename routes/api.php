@@ -11,6 +11,8 @@ use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Blaaiz\BlaaizController;
+use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Personal\addBankAccountController as PersonaladdBankAccountController;
 use App\Http\Controllers\Business\SubAccountController;
@@ -46,6 +48,7 @@ use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyContro
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use App\Http\Controllers\Business\DonationController;
+use App\Http\Controllers\Fidelity\FidelityWebhookController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryApprovalController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
@@ -174,7 +177,9 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 // });
 
     Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
-        // Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
+    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+    Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
+
 
 
 
@@ -184,6 +189,16 @@ Route::get('/test-pivot-auth', function(PivotService $pivot) {
     return response()->json($response);
 });
 
+    // Route::post('/blaaiz/interac/initiate', [BlaaizController::class, 'initiateInteracMoneyRequest']);
+    // Route::post('/blaaiz/interac/accept', [BlaaizController::class, 'acceptInteracMoneyRequest']);
+
+        Route::post('/blaaiz/simulate/interac-webhook', [BlaaizController::class, 'simulateInteracWebhook'])
+        ->name('blaaiz.simulate.interac');
+        Route::post('/blaaiz/customer', [BlaaizController::class, 'createCustomer'])->name('blaaiz.customer.create');
+        Route::get('/blaaiz/customers',          [BlaaizController::class, 'listCustomers'])->name('blaaiz.customers.list');
+        Route::get('/blaaiz/customers/{id}',     [BlaaizController::class, 'getCustomer'])->name('blaaiz.customers.get');
+        Route::get('/blaaiz/wallets', [BlaaizController::class, 'listWallets'])->name('blaaiz.wallets.list');
+        Route::post('/blaaiz/payout', [BlaaizController::class, 'createPayout'])->name('blaaiz.payout.create');
 
 
 
@@ -371,6 +386,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/chargeback/submitEvidence', [ChargeBackController::class, 'submitEvidence'])->name('chargeback.submitEvidence');
 
 
+    Route::post('/addMoney/interac/initiate', [BusinessAddMoneyController::class, 'topupWithInterac']);
     Route::post('/topup', [BusinessAddMoneyController::class, 'topupWithCard']);
 
     //notifications
@@ -386,6 +402,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/team', [BusinessOrganizationController::class, 'index']);
     Route::post('/team', [BusinessOrganizationController::class, 'store']);
     Route::patch('/team/{id}', [BusinessOrganizationController::class, 'updateRole'])->name('members.updateRole');
+
+
 
 
 
@@ -543,6 +561,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-profile', [OrganizationController::class, 'updateProfile']);
         Route::post('/personal-email', [OrganizationController::class, 'updateEmail']);
         Route::post('/personal-deactivate-account', [OrganizationController::class, 'deactivateAccount']);
+
+
+        Route::post('/personal-addMoney/interac/initiate', [AddMoneyController::class, 'topupWithInteracc']);
         Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
 
 

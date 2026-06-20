@@ -48,6 +48,7 @@ class DashboardController extends Controller
                 'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
             ];
         })->values()->all();
+        //dd($balance->currency_meta);
 
         return view('dashboard', compact(
             'countries',

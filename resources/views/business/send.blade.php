@@ -73,6 +73,9 @@
                 data-phone="{{ $beneficiary->phone }}"
                 data-sortcode="{{ $beneficiary->bank_code }}"
                 data-transfermethod="{{ $beneficiary->transfer_method }}"
+                data-interac-email="{{ $beneficiary->email }}"
+                data-interac-first-name="{{ $beneficiary->interac_first_name }}"
+                data-interac-last-name="{{ $beneficiary->interac_last_name }}"
                 data-amount="100"
                 data-gets="0.06"
                 onclick="openModalFromElement(this)">
@@ -145,7 +148,7 @@
                           data-symbol="{{ $balance->currency_meta['symbol'] }}"
                           data-country="{{ $balance->currency_meta['country'] }}"
                           data-balance="{{ $balance->balance }}">
-                          {{ $balance->currency }} - {{ $balance->name }} ({{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount) }})
+                          {{ $balance->currency }} ({{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }})
                         </option>
                       @endforeach
                     </select>
@@ -249,6 +252,10 @@
                     <span>Phone:</span>
                     <span id="summaryPhone">...</span>
                   </div>
+                  <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryInteracRow">
+                    <span>Interac Email:</span>
+                    <span id="summaryInteracEmail">...</span>
+                </div>
                 </div>
 
                 <div class="bg-white border rounded-lg p-4 shadow-sm space-y-2 text-sm text-gray-700">
@@ -265,6 +272,9 @@
                   <input type="hidden" name="recipient_amount" id="recipientAmountInput">
                   <input type="hidden" name="account_number" id="accountNumberInput">
                   <input type="hidden" name="account_name" id="accountNameInput">
+                  <input type="hidden" name="interac_email" id="interacEmailInput">
+                  <input type="hidden" name="interac_first_name" id="interacFirstNameInput">
+                  <input type="hidden" name="interac_last_name" id="interacLastNameInput">
 
                   <div class="flex justify-between"><span>{{ __('Bank:') }}</span><span id="summaryBank">...</span></div>
                   <div class="flex justify-between"><span>{{ __('Amount Sent:') }}</span><span id="summaryAmountSent">₦0.00</span></div>
@@ -507,6 +517,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const recipientId = selectedBeneficiary.dataset.id || "";
     const symbol = sendCurrencySymbol.textContent || "₦";
     const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || "";
+    const interacEmail     = selectedBeneficiary.dataset.interacEmail     || "";
+    const interacFirstName = selectedBeneficiary.dataset.interacFirstName || "";
+    const interacLastName  = selectedBeneficiary.dataset.interacLastName  || "";
 
     document.getElementById("summaryName").textContent = name;
     document.getElementById("summaryAccount").textContent = account;
@@ -530,12 +543,26 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("sort_codeInput").value = sortCode;
     document.getElementById("transfermethodInput").value = transfermethod;
 
+    document.getElementById("interacEmailInput").value     = interacEmail;
+    document.getElementById("interacFirstNameInput").value = interacFirstName;
+    document.getElementById("interacLastNameInput").value  = interacLastName;
+
+    const summaryInteracRow = document.getElementById("summaryInteracRow");
+    document.getElementById("summaryInteracEmail").textContent = interacEmail;
+    if (interacEmail) {
+        summaryInteracRow.classList.remove("hidden");
+    } else {
+        summaryInteracRow.classList.add("hidden");
+    }
+
     document.getElementById("summaryModal").classList.remove("hidden");
   });
 
   document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
     document.getElementById("summaryModal").classList.add("hidden");
   });
+
+  
 
   updateRateDisplay();
 });

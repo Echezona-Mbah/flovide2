@@ -33,6 +33,8 @@ class TransactionHistoryController extends Controller
                     'account_number' => $t->recipient_account_number,
                     'bank_name'      => $t->recipient_bank_name,
                     'bank_currency'  => $t->recipient_bank_currency,
+                    'recipient_amount'  => $t->recipient_amount,
+                    'fees'  => $t->fees,
                 ]
             ];
         });
