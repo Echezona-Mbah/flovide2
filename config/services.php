@@ -59,6 +59,11 @@ return [
     ],
     'latest_version' => env('APP_LATEST_VERSION', '1.0.0+1'),
     'force_update'   => env('APP_FORCE_UPDATE', false),
-
+    
+    'fidelity' => [
+        'base_url'      => env('FIDELITY_BASE_URL'),
+        'client_id'      => env('FIDELITY_CLIENT_ID'),
+        'client_secret'  => env('FIDELITY_CLIENT_SECRET'),
+    ],
 
 ];

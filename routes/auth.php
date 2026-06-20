@@ -474,6 +474,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::middleware('admin.permission:manage_settings_exchange')->group(function () {
             Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
             Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+            Route::post('/admin/business-account/{id}/submit-fidelity', [BusinessAccountController::class, 'submitToFidelity'])->name('admin.business.submit-fidelity');
+            Route::post('/admin/business-account/{id}/submit-blaaiz', [BusinessAccountController::class, 'submitToBlaaiz'])->name('admin.business.submit-blaaiz');
 
         });
 

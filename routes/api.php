@@ -48,6 +48,7 @@ use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyContro
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use App\Http\Controllers\Business\DonationController;
+use App\Http\Controllers\Fidelity\FidelityWebhookController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryApprovalController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
@@ -176,8 +177,8 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 // });
 
     Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
-        // Route::get('/sumsub-token',[ComplianceController::class,'getSumsubToken']);
-    // Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+    Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
 
 
 

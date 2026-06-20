@@ -14,8 +14,10 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         // Exclude your Sumsub webhook route from CSRF verification
         // 'sumsub/webhook',  
-         'api/sumsub/webhook',
-           'api/webhooks/blaaiz',
+        'api/sumsub/webhook',
+        'api/webhooks/blaaiz',
         'webhooks/blaaiz',
+        'api/webhooks/fidelity',
+
     ];
 }

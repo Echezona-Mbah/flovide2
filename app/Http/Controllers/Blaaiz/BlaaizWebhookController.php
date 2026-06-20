@@ -17,13 +17,13 @@ class BlaaizWebhookController extends Controller
 {
     public function handle(Request $request)
     {
-           Log::info('[BlaaizWebhook] Raw content', [
-        'headers'      => $request->headers->all(),
-        'content_type' => $request->header('Content-Type'),
-        'raw_body'     => $request->getContent(),
-        'all'          => $request->all(),
-        'json'         => $request->json()->all(),
-    ]);
+        Log::info('[BlaaizWebhook] Raw content', [
+            'headers'      => $request->headers->all(),
+            'content_type' => $request->header('Content-Type'),
+            'raw_body'     => $request->getContent(),
+            'all'          => $request->all(),
+            'json'         => $request->json()->all(),
+        ]);
     
         $payload = $request->all();
 

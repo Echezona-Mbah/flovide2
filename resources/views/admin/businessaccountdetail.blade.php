@@ -374,6 +374,123 @@
     flex: 1;
     white-space: nowrap;
 }
+
+.bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+}
+
+.bank-tile {
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 22px;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.bank-tile:hover {
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
+}
+
+.bank-tile-active {
+    border-color: rgba(22, 163, 74, 0.35);
+    background: linear-gradient(180deg, #ffffff, #f0fdf4);
+}
+
+.bank-tile-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bank-flag-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border-soft);
+    flex-shrink: 0;
+}
+
+.bank-tile-name {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--text-main);
+}
+
+.bank-tile-region {
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.bank-tile-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.bank-tile-pulse.pulse-on {
+    background: #16a34a;
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
+    animation: bankPulse 2s infinite;
+}
+
+@keyframes bankPulse {
+    0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+    70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.bank-tile-body {
+    flex: 1;
+}
+
+.bank-tile-empty {
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.6;
+}
+
+.bank-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13px;
+}
+
+.bank-detail-row:last-child {
+    border-bottom: 0;
+}
+
+.bank-detail-row span {
+    color: var(--text-soft);
+}
+
+.bank-detail-row strong {
+    color: var(--text-main);
+}
+
+.bank-tile-status {
+    align-self: flex-start;
+}
+
+.banking-integrations-card .card-header .custom-status i {
+    margin-right: 4px;
+}
 </style>
 
 <body>
@@ -708,40 +825,40 @@
                                             @endphp
 
                                            <div class="col-md-6 col-xl-3 mb-4">
-    <div class="currency-card d-flex flex-column" style="{{ $bg }}">
-        <div class="small text-white-50 mb-2">Wallet</div>
-        <h5 class="mb-2">{{ $bal->name }}</h5>
-        <div class="h4 mb-0">{{ $bal->currency }} {{ number_format($bal->amount, 2) }}</div>
+                                                <div class="currency-card d-flex flex-column" style="{{ $bg }}">
+                                                    <div class="small text-white-50 mb-2">Wallet</div>
+                                                    <h5 class="mb-2">{{ $bal->name }}</h5>
+                                                    <div class="h4 mb-0">{{ $bal->currency }} {{ number_format($bal->amount, 2) }}</div>
 
-        <div class="mt-3 d-flex flex-row gap-2 balance-actions">
-            <button
-                type="button"
-                class="btn btn-sm btn-soft-primary balance-action-btn"
-                data-mode="add"
-                data-user-id="{{ $user->id }}"
-                data-balance-id="{{ $bal->id }}"
-                data-balance-name="{{ $bal->name }}"
-                data-currency="{{ $bal->currency }}"
-                data-bs-toggle="modal"
-                data-bs-target="#balanceActionModal">
-                Add Money
-            </button>
+                                                    <div class="mt-3 d-flex flex-row gap-2 balance-actions">
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-soft-primary balance-action-btn"
+                                                            data-mode="add"
+                                                            data-user-id="{{ $user->id }}"
+                                                            data-balance-id="{{ $bal->id }}"
+                                                            data-balance-name="{{ $bal->name }}"
+                                                            data-currency="{{ $bal->currency }}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#balanceActionModal">
+                                                            Add Money
+                                                        </button>
 
-            <button
-                type="button"
-                class="btn btn-sm btn-soft-dark balance-action-btn"
-                data-mode="remove"
-                data-user-id="{{ $user->id }}"
-                data-balance-id="{{ $bal->id }}"
-                data-balance-name="{{ $bal->name }}"
-                data-currency="{{ $bal->currency }}"
-                data-bs-toggle="modal"
-                data-bs-target="#balanceActionModal">
-                Remove Money
-            </button>
-        </div>
-    </div>
-</div>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-soft-dark balance-action-btn"
+                                                            data-mode="remove"
+                                                            data-user-id="{{ $user->id }}"
+                                                            data-balance-id="{{ $bal->id }}"
+                                                            data-balance-name="{{ $bal->name }}"
+                                                            data-currency="{{ $bal->currency }}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#balanceActionModal">
+                                                            Remove Money
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
 
 
                                         @endforeach
@@ -868,6 +985,8 @@
                                     @endif
                                 </div>
                             </div>
+
+                        
                         </div>
 
                         <div class="tab-content-section d-none" id="tab-profile">
@@ -883,12 +1002,112 @@
                         </div>
 
                         <div class="tab-content-section d-none" id="tab-accounts">
+
+
+                            <div class="dashboard-card banking-integrations-card">
+                                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="section-title">Banking Integrations</div>
+                                        <div class="section-subtitle">Submit this business's details to regional banking partners to provision settlement accounts.</div>
+                                    </div>
+                                    <span class="custom-status status-muted">
+                                        <i class="pe-7s-link"></i> {{ ($user->virtual_account_number ? 1 : 0) + ($user->blaaiz_id ? 1 : 0) }}/2 Connected
+                                    </span>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="bank-grid">
+
+                                        {{-- Fidelity Bank (Nigeria) --}}
+                                        <div class="bank-tile {{ $user->virtual_account_number ? 'bank-tile-active' : '' }}">
+                                            <div class="bank-tile-top">
+                                                <div class="bank-flag-badge flag-ng">🇳🇬</div>
+                                                <div>
+                                                    <div class="bank-tile-name">Fidelity Bank</div>
+                                                    <div class="bank-tile-region">Nigeria · NGN Settlements</div>
+                                                </div>
+                                                <div class="bank-tile-pulse {{ $user->virtual_account_number ? 'pulse-on' : '' }}"></div>
+                                            </div>
+
+                                            @if($user->virtual_account_number)
+                                                <div class="bank-tile-body">
+                                                    <div class="bank-detail-row">
+                                                        <span>Account Number</span>
+                                                        <strong>{{ $user->virtual_account_number }}</strong>
+                                                    </div>
+                                                    <div class="bank-detail-row">
+                                                        <span>Account Name</span>
+                                                        <strong>{{ $user->virtual_account_name ?? 'N/A' }}</strong>
+                                                    </div>
+                                                    <div class="bank-detail-row">
+                                                        <span>Bank</span>
+                                                        <strong>{{ $user->virtual_account_bank ?? 'N/A' }}</strong>
+                                                    </div>
+                                                </div>
+                                                <span class="custom-status status-success bank-tile-status">
+                                                    <i class="pe-7s-check"></i> Virtual Account Active
+                                                </span>
+                                            @else
+                                                <div class="bank-tile-body bank-tile-empty">
+                                                    No virtual account has been provisioned for this business yet. Submitting will create a permanent NGN settlement account via Fidelity Bank.
+                                                </div>
+                                                <form method="POST" action="{{ route('admin.business.submit-fidelity', $user->id) }}" class="confirm-submit-form" data-confirm="Submit this business's details to Fidelity Bank to generate a virtual account?">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-soft-primary btn-sm w-100">
+                                                        <i class="pe-7s-cloud-upload"></i> Submit to Fidelity Bank
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+
+                                        {{-- Blaaiz Interac (Canada) --}}
+                                        <div class="bank-tile {{ $user->blaaiz_id ? 'bank-tile-active' : '' }}">
+                                            <div class="bank-tile-top">
+                                                <div class="bank-flag-badge flag-ca">🇨🇦</div>
+                                                <div>
+                                                    <div class="bank-tile-name">Blaaiz Interac</div>
+                                                    <div class="bank-tile-region">Canada · CAD Settlements</div>
+                                                </div>
+                                                <div class="bank-tile-pulse {{ $user->blaaiz_id ? 'pulse-on' : '' }}"></div>
+                                            </div>
+
+                                            @if($user->blaaiz_id)
+                                                <div class="bank-tile-body">
+                                                    <div class="bank-detail-row">
+                                                        <span>Blaaiz Customer ID</span>
+                                                        <strong>{{ $user->blaaiz_id }}</strong>
+                                                    </div>
+                                                </div>
+                                                <span class="custom-status status-success bank-tile-status">
+                                                    <i class="pe-7s-check"></i> Registered with Blaaiz
+                                                </span>
+                                            @else
+                                                <div class="bank-tile-body bank-tile-empty">
+                                                    This business has not been registered with Blaaiz yet. Submitting will enable Interac e-Transfer collections for this account.
+                                                </div>
+                                                <form method="POST" action="{{ route('admin.business.submit-blaaiz', $user->id) }}" class="confirm-submit-form" data-confirm="Submit this business's details to Blaaiz to enable Interac transfers?">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-soft-dark btn-sm w-100">
+                                                        <i class="pe-7s-cloud-upload"></i> Submit to Blaaiz Interac
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
                             @php
                                 $accountCollections = [
                                     'Beneficia' => $beneficia,
-                                    'Customers' => $customer,
-                                    'Bank Accounts' => $bankAccount,
-                                    'Subaccounts' => $Subaccount
+                                    // 'Customers' => $customer,
+                                    // 'Bank Accounts' => $bankAccount,
+                                    // 'Subaccounts' => $Subaccount
                                 ];
                             @endphp
 
@@ -1069,6 +1288,16 @@ document.querySelectorAll('.balance-action-btn').forEach((btn) => {
                     }
                 }
             });
+        });
+    });
+</script>
+<script>
+    document.querySelectorAll('.confirm-submit-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            const message = this.dataset.confirm || 'Are you sure you want to submit this?';
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
         });
     });
 </script>

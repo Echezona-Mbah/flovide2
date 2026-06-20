@@ -163,7 +163,9 @@ class SendMoneyController extends Controller
                 'sender_id' => $ownerId,
                 'sender' => $actor->business_name ?? $actor->name,
                 'recipient_account_number' => $request->account_number,
-                'recipient_account_name' => $request->account_name,
+                'recipient_account_name' => $request->account_name 
+                    ?? trim(($request->interac_first_name ?? '') . ' ' . ($request->interac_last_name ?? '')) 
+                    ?: null,
                 'bank_code' => $request->bank_code,
                 'recipient_bank_name' => $request->bank,
                 'recipient_id' => $request->recipient_id,
@@ -274,11 +276,11 @@ class SendMoneyController extends Controller
         if (isset($payment['statusCode']) && $payment['statusCode'] === '237') {
             // $balance->amount -= $request->total_amount;
             // $balance->save();
-
+             $this->sendTransactionEmail($request, $balance, $owner);
    
 
             TransactionHistory::where('id', $txId)->update([
-            'status' => 'pending',
+            'status' => 'success',
             'payment_provider' => 'pivot',
             'order_id' => $payment['merchantTransactionId'] ?? 'N/A'
             ]);
@@ -521,7 +523,7 @@ class SendMoneyController extends Controller
 
         TransactionHistory::where('id', $txId)->update([
             'status'            => 'pending',
-            'payment_provider'  => 'blaaiz_interac',
+            'payment_provider'  => 'interac',
             'order_id'          => $transaction['id']        ?? null,
             'payment_reference' => $transaction['reference'] ?? null,
         ]);
@@ -668,6 +670,10 @@ class SendMoneyController extends Controller
             'payment_provider' => 'Flovide',
             'recipient_account_name' => $tx->recipient_account_name,
             'recipient_account_number' => $tx->recipient_account_number,
+            // 'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
+            'interac_email'      => $tx->interac_email      ?? null,
+            'interac_first_name' => $tx->interac_first_name ?? null,
+            'interac_last_name'  => $tx->interac_last_name  ?? null,
             'created_at' => optional($tx->created_at)->toIso8601String(),
         ];
     }

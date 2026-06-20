@@ -151,7 +151,7 @@ public function isFullyVerified(): bool
         $this->selfie_verification_status === 'confirmed';
         (
             $this->countries_id !== 'Nigeria' ||
-            $this->bvn_status === 'yes'
+            $this->bvn_status === 'confirmed'
         );
 }
 

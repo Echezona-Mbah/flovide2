@@ -292,7 +292,9 @@ public function sendTransaction(Request $request)
             'sender_id' => $personal->id,
             'sender' => $personal->firstname,
             'recipient_account_number' => $request->account_number,
-            'recipient_account_name' => $request->account_name,
+            'recipient_account_name' => $request->account_name 
+            ?? trim(($request->interac_first_name ?? '') . ' ' . ($request->interac_last_name ?? '')) 
+            ?: null,
             'bank_code' => $request->bank_code,
             'recipient_bank_name' => $request->bank,
             'recipient_country' => strtoupper(substr($currency,0,2)),
@@ -377,7 +379,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
     if (($payment['statusCode'] ?? null) === '237') {
         // $balance->amount -= $request->total_amount;
         // $balance->save();
-
+        $this->sendTransactionEmail($request, $balance, $transactionReference ?? null);
         // TransactionHistory::create([
         //     'amount' => $request->total_amount,
         //     'currency' => $sendingCurrency,
@@ -396,7 +398,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         // ]);
 
         TransactionHistory::where('id', $txId)->update([
-            'status' => 'pending',
+            'status' => 'success',
             'payment_provider' => 'pivot',
             'order_id' => $payment['merchantTransactionId'] ?? 'N/A'
             ]);
@@ -688,6 +690,9 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'payment_provider' => 'Flovide',
             'recipient_account_name' => $tx->recipient_account_name,
             'recipient_account_number' => $tx->recipient_account_number,
+            'interac_email'      => $tx->interac_email      ?? null,
+            'interac_first_name' => $tx->interac_first_name ?? null,
+            'interac_last_name'  => $tx->interac_last_name  ?? null,
             'created_at' => optional($tx->created_at)->toIso8601String(),
         ];
     }
