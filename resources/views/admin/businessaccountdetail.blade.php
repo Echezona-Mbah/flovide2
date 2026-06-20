@@ -570,6 +570,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" data-tab="accounts" href="javascript:void(0);">Accounts</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.alltransactions.history', $user->id) }}">Transactions</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
