@@ -246,6 +246,22 @@
     .status-draft { background-color: #f7b924; }
     .status-published { background-color: #3ac47d; }
     .status-scheduled { background-color: #16aaff; }
+
+    .badge-success {
+        background-color: #099244 !important;
+    }
+
+    .badge-debit {
+        background-color: #dc3545 !important;
+    }
+
+    .badge-warning {
+        background-color: #ffc107 !important;
+    }
+
+    .badge-pending {
+        background-color: #f7b924 !important;
+    }
 </style>
 
 <body>
@@ -407,23 +423,23 @@
                                             Method
                                             <span class="font-weight-bold">{{ $transaction->method ?? 'N/A' }}</span>
                                         </li>
-                                        @if($transaction->recipient_account_name || $transaction->recipient)
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Recipient
-                                            <span class="font-weight-bold">{{ $transaction->recipient_account_name ?? $transaction->recipient ?? 'N/A' }}</span>
-                                        </li>
+                                        @if($transaction->recipient_account_name || $transaction->recipient_alias)
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Recipient
+                                                <span class="font-weight-bold">{{ $transaction->recipient_account_name ?? $transaction->recipient_alias ?? 'N/A' }}</span>
+                                            </li>
                                         @endif
                                         @if($transaction->recipient_bank_name)
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Bank Name
-                                            <span class="font-weight-bold">{{ $transaction->recipient_bank_name ?? 'N/A' }}</span>
-                                        </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Bank Name
+                                                <span class="font-weight-bold">{{ $transaction->recipient_bank_name ?? 'N/A' }}</span>
+                                            </li>
                                         @endif
                                         @if($transaction->recipient_account_number)
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Account Number
-                                            <span class="font-weight-bold">{{ $transaction->recipient_account_number ?? 'N/A' }}</span>
-                                        </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Account Number
+                                                <span class="font-weight-bold">{{ $transaction->recipient_account_number ?? 'N/A' }}</span>
+                                            </li>
                                         @endif
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Date
