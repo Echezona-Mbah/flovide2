@@ -262,6 +262,14 @@
     .badge-pending {
         background-color: #f7b924 !important;
     }
+
+    .modal {
+        z-index: 9999 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 9998 !important;
+    }
 </style>
 
 <body>
@@ -364,7 +372,7 @@
                                                 <span class="text-muted" style="font-size: 0.85em;">{{ $transaction->created_at->format('h:i A') }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#transactionModal{{ $transaction->id }}">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#transactionModal{{ $transaction->id }}">
                                                     Details
                                                 </button>
                                             </td>
@@ -390,76 +398,80 @@
                         </div>
                     </section>
 
-                    <!-- Transaction Modals -->
-                    @foreach($transactions as $transaction)
-                    <div class="modal fade" id="transactionModal{{ $transaction->id }}" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel{{ $transaction->id }}" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="transactionModalLabel{{ $transaction->id }}">Transaction Details</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Reference
-                                            <span class="font-weight-bold">{{ $transaction->reference ?? 'N/A' }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Amount
-                                            <span class="font-weight-bold">{{ number_format($transaction->amount, 2) }} {{ strtoupper($transaction->currency) }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Type
-                                            <span class="font-weight-bold text-capitalize">{{ $transaction->type }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Status
-                                            <span class="font-weight-bold text-capitalize">{{ $transaction->status }}</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Method
-                                            <span class="font-weight-bold">{{ $transaction->method ?? 'N/A' }}</span>
-                                        </li>
-                                        @if($transaction->recipient_account_name || $transaction->recipient_alias)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Recipient
-                                                <span class="font-weight-bold">{{ $transaction->recipient_account_name ?? $transaction->recipient_alias ?? 'N/A' }}</span>
-                                            </li>
-                                        @endif
-                                        @if($transaction->recipient_bank_name)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Bank Name
-                                                <span class="font-weight-bold">{{ $transaction->recipient_bank_name ?? 'N/A' }}</span>
-                                            </li>
-                                        @endif
-                                        @if($transaction->recipient_account_number)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Account Number
-                                                <span class="font-weight-bold">{{ $transaction->recipient_account_number ?? 'N/A' }}</span>
-                                            </li>
-                                        @endif
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Date
-                                            <span class="font-weight-bold">{{ $transaction->created_at->format('M d, Y h:i A') }}</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-
                 </div>
             </div>
         </div>
 
     </div>
+
+
+
+
+    <!-- Transaction Modals -->
+    @foreach($transactions as $transaction)
+        <div class="modal fade" id="transactionModal{{ $transaction->id }}" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel{{ $transaction->id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="transactionModalLabel{{ $transaction->id }}">Transaction Details</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Reference
+                                <span class="font-weight-bold">{{ $transaction->reference ?? 'N/A' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Amount
+                                <span class="font-weight-bold">{{ number_format($transaction->amount, 2) }} {{ strtoupper($transaction->currency) }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Type
+                                <span class="font-weight-bold text-capitalize">{{ $transaction->type }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Status
+                                <span class="font-weight-bold text-capitalize">{{ $transaction->status }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Method
+                                <span class="font-weight-bold">{{ $transaction->method ?? 'N/A' }}</span>
+                            </li>
+                            @if($transaction->recipient_account_name || $transaction->recipient_alias)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Recipient
+                                    <span class="font-weight-bold">{{ $transaction->recipient_account_name ?? $transaction->recipient_alias ?? 'N/A' }}</span>
+                                </li>
+                            @endif
+                            @if($transaction->recipient_bank_name)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Bank Name
+                                    <span class="font-weight-bold">{{ $transaction->recipient_bank_name ?? 'N/A' }}</span>
+                                </li>
+                            @endif
+                            @if($transaction->recipient_account_number)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Account Number
+                                    <span class="font-weight-bold">{{ $transaction->recipient_account_number ?? 'N/A' }}</span>
+                                </li>
+                            @endif
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Date
+                                <span class="font-weight-bold">{{ $transaction->created_at->format('M d, Y h:i A') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     
     @include('admin.footer')
 
