@@ -187,6 +187,8 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/ohentpay/balances', [CreateBankController::class, 'getBalances']);
     Route::post('/update-balance', [CreateBankController::class, 'UpdateBalance'])->name('update.balance');
     Route::post('/update-main-balance', [CreateBankController::class, 'updateMainBalance'])->name('main.balance.update');
+    Route::get('/balance/{id}', [CreateBankController::class, 'show'])->name('balance.show');
+
 
 
     // Send

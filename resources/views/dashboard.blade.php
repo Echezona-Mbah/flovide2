@@ -113,7 +113,7 @@
 
             <div class="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:overflow-visible">
               @foreach($balances as $balance)
-              <div class="min-w-[260px] sm:min-w-0 border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition">
+              <a href="{{ route('balance.show', $balance->id) }}" class="min-w-[260px] sm:min-w-0 border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md hover:border-blue-300 transition cursor-pointer block">
                 <div class="flex items-center gap-2 mb-3">
                   <img
                     src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
@@ -123,12 +123,13 @@
                   <span class="text-sm font-semibold uppercase tracking-wide">
                     {{ $balance->currency }}
                   </span>
+                  <i class="fas fa-chevron-right text-xs text-gray-300 ml-auto"></i>
                 </div>
                 <p class="text-xs text-gray-400 mb-1">{{ $balance->name }}</p>
                 <p class="text-xl font-bold text-gray-900">
                   {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
                 </p>
-              </div>
+              </a>
               @endforeach
             </div>
           </section>

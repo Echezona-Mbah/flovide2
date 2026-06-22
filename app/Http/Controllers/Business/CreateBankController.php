@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Balance;
 use App\Models\Currency;
+use App\Models\TransactionHistory;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,45 +17,7 @@ class CreateBankController extends Controller
 {
       use CurrencyHelper;
 
-//    public function create(Request $request)
-//     {
-//         $currencies = Currency::all();
-//         $user = auth()->user();
-//         $balances = Balance::where('user_id', $user->id)->get();
-//         // dd($balances);
 
-//         // Add currency meta if balances exist
-//         foreach ($balances as $balance) {
-//             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-//         }
-
-//         // If API request
-//         if ($request->expectsJson()) {
-//             if ($balances->isEmpty()) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'No balance created for this user',
-//                     'code' => 'BALANCES_EMPTY',
-//                     'data' => [
-//                         'currencies' => $currencies,
-//                         'balances' => [],
-//                     ]
-//                 ], 200);
-//             }
-
-//             return response()->json([
-//                 'success' => true,
-//                 'message' => 'Data for add bank form loaded successfully',
-//                 'code' => 'ADD_BANK_DATA_LOADED',
-//                 'data' => [
-//                     'currencies' => $currencies,
-//                     'balances' => $balances
-//                 ]
-//             ], 200);
-//         }
-
-//         return view('business.add_bank', compact('currencies', 'balances'));
-//     }
 
     public function create(Request $request)
     {
@@ -393,7 +356,28 @@ public function dashboardapi(Request $request)
     
     
     
+public function show(Request $request, $id)
+{
+    $user = auth()->user();
 
+    $balance = Balance::where('id', $id)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    // Only select columns you actually use in the view
+    $transactions = TransactionHistory::where('balance_id', $balance->id)
+        ->select([
+            'id', 'type', 'transaction_type', 'amount', 'currency',
+            'status', 'reference', 'order_id', 'sender',
+            'recipient_account_name', 'method', 'created_at'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->paginate(15); // reduce from 20
+
+    return view('business.balance-detail', compact('balance', 'transactions'));
+}
 
 
 
