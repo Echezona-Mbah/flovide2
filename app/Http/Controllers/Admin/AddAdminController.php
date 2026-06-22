@@ -8,8 +8,12 @@ use App\Models\AdminActivityLog;
 use App\Models\AdminLoginLog;
 use App\Models\AdminRole;
 use Illuminate\Http\Request;
+use App\Mail\AdminAccountMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class AddAdminController extends Controller
 {
@@ -29,14 +33,42 @@ class AddAdminController extends Controller
             'password' => 'required|min:6',
             'passwordrep' => 'required|same:password',
         ]);
-        Admin::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role_id,
-        ]);
 
-        return redirect()->route('admin.add_admin')->with('success', 'Admin created successfully!');
+        try {
+            DB::beginTransaction();
+
+            Admin::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role_id,
+            ]);
+
+            // Resolve the role name for the email
+            $roleName = AdminRole::find($request->role_id)?->name ?? 'Admin';
+
+            // Send account details to email
+            Mail::to($request->email)->send(
+                new AdminAccountMail(
+                    name: $request->name,
+                    email: $request->email,
+                    password: $request->password,
+                    role: $roleName,
+                )
+            );
+            
+            DB::commit();
+
+            return redirect()->route('admin.add_admin')->with('success', 'Admin created successfully!');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Failed to create admin. ' . $e->getMessage());
+        }
     }
 
     public function indexprofile(Request $request)
