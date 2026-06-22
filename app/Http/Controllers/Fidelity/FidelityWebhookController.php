@@ -98,7 +98,7 @@ class FidelityWebhookController extends Controller
             'currency'          => $currency,
             'status'            => 'success',
             'reference'         => $payload['settlementId'] ?? $transactionId,
-            'order_id'          => $transactionId, // used for dedup
+            'order_id'          => $transactionId,
             'sender'            => $senderAccountName,
             'recipient_account_number' => $merchantAccountNumber,
             'recipient_account_name'   => $merchantAccountName,
