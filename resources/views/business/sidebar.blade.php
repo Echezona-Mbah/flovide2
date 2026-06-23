@@ -42,12 +42,12 @@
     </a>
 
     <!-- Refunds -->
-    <a href="{{ route('refunds.index') }}"
+    {{-- <a href="{{ route('refunds.index') }}"
       class="flex items-center gap-3 py-2.5 px-3 rounded-full
         {{ request()->routeIs('refunds.*') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-undo text-base"></i>
       {{ __('Refunds') }}
-    </a>
+    </a> --}}
 
     <!-- Compliance -->
     <a href="{{ route('compliance') }}"

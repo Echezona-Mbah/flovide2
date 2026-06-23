@@ -14,7 +14,7 @@ class Balance extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['user_id', 'personal_id', 'name', 'currency', 'amount'];
+    protected $fillable = ['user_id', 'personal_id', 'name', 'currency', 'amount','mode'];
 
 public function user()
 {

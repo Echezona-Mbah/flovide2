@@ -119,6 +119,12 @@ Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->
 
 });
 
+Route::post('/switch-mode', function (\Illuminate\Http\Request $request) {
+    $mode = $request->input('mode', 'live');
+    session(['mode' => $mode]);
+    return response()->json(['success' => true, 'mode' => $mode]);
+})->name('switch.mode')->middleware('auth');
+
 // Route::prefix('v1/interac')->group(function () {
 //     Route::post('/customer', [InteracController::class, 'createCustomer']);
 //     Route::get('/customer/{customerId}', [InteracController::class, 'getCustomer']);

@@ -114,6 +114,20 @@
     </header>
 
   <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- ENVIRONMENT TOGGLE -->
+    <div class="flex items-center justify-end gap-2 mb-6">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Environment:</span>
+      <div id="envPill" class="inline-flex items-center gap-1 rounded-full bg-slate-200 p-1">
+        <button id="envLiveBtn" class="env-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-black text-white" data-env="live">
+          Live
+        </button>
+        <button id="envTestBtn" class="env-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-600" data-env="test">
+          Test
+        </button>
+      </div>
+    </div>
+
     <section id="quick-start" class="mb-24">
       <h2 class="text-2xl font-bold mb-8 flex items-center gap-3">
         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-black text-white text-sm">1</span>
@@ -292,7 +306,6 @@
                                     <div class="mt-4 space-y-3">
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">name</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">currency</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
-                                        {{-- <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">amount</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Optional</span></div> --}}
                                     </div>
                                 </details>
 
@@ -582,10 +595,6 @@
                     </div>
                   </div>
                 </section>
-
-
-
-
 
 
                 <section id="webhooks" class="mb-20">
@@ -2073,9 +2082,6 @@ Console.WriteLine(body);`,
 }`
 },
 
-// Keep these two only in codeExamples.
-// Remove: 'reference-data-all': { ... },
-
 'reference-data-currencies': {
   curl: `curl -X GET "https://flovide.com/api/v1/reference-data/currencies" ^
   -H "Accept: application/json" ^
@@ -2273,13 +2279,18 @@ Console.WriteLine(body);`,
 }`
 },
 
-
-
-
-
-
-
         };
+
+        // ── Environment state ────────────────────────────────────────────
+        let currentEnv = 'live'; // 'live' | 'test'
+
+        function applyEnv(str, env) {
+            if (env === 'live') return str;
+            return str
+                .replace(/https:\/\/flovide\.com\/api\/v1/g, 'https://flovide.com/api/test/v1')
+                .replace(/pk_live_/g, 'pk_test_')
+                .replace(/sk_live_/g, 'sk_test_');
+        }
 
         function escapeHtml(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -2315,7 +2326,7 @@ Console.WriteLine(body);`,
                         <div class="code-panels" data-group="${group}">
                             ${tabs.map((tab, index) => `
                                 <div class="code-panel ${index === 0 ? '' : 'hidden'} p-6 overflow-x-auto hide-scrollbar" data-panel="${tab}">
-                                    <pre class="text-slate-300 text-sm leading-6">${escapeHtml(codeExamples[group][tab])}</pre>
+                                    <pre class="text-slate-300 text-sm leading-6">${escapeHtml(applyEnv(codeExamples[group][tab], currentEnv))}</pre>
                                 </div>
                             `).join('')}
                         </div>
@@ -2326,16 +2337,64 @@ Console.WriteLine(body);`,
                         <div class="px-4 py-3 text-xs font-bold text-white border-b-2 border-indigo-500 bg-slate-800/50">Response Object</div>
                     </div>
                     <div class="p-6 overflow-x-auto hide-scrollbar">
-                        <pre class="text-slate-300 text-sm leading-6">${escapeHtml(codeExamples[group].response)}</pre>
+                        <pre class="text-slate-300 text-sm leading-6">${escapeHtml(applyEnv(codeExamples[group].response, currentEnv))}</pre>
                     </div>
                 </div>
             `;
         }
 
+        function renderAllBlocks() {
+            document.querySelectorAll('.api-block').forEach((el) => {
+                el.innerHTML = buildApiBlock(el.dataset.group);
+            });
+        }
 
-        document.querySelectorAll('.api-block').forEach((el) => {
-            el.innerHTML = buildApiBlock(el.dataset.group);
-        });
+        function setEnv(env) {
+            currentEnv = env;
+
+            const liveBtn = document.getElementById('envLiveBtn');
+            const testBtn = document.getElementById('envTestBtn');
+
+            if (env === 'live') {
+                liveBtn.classList.add('bg-black', 'text-white');
+                liveBtn.classList.remove('text-slate-600');
+                testBtn.classList.remove('bg-black', 'text-white');
+                testBtn.classList.add('text-slate-600');
+            } else {
+                testBtn.classList.add('bg-black', 'text-white');
+                testBtn.classList.remove('text-slate-600');
+                liveBtn.classList.remove('bg-black', 'text-white');
+                liveBtn.classList.add('text-slate-600');
+            }
+
+            const quickStart = document.getElementById('quick-start-code');
+            if (quickStart) {
+                quickStart.textContent = applyEnv(
+                    `curl -X GET "https://flovide.com/api/v1/balances" ^
+  -H "Accept: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
+                    env
+                );
+            }
+
+            const activeTabs = {};
+            document.querySelectorAll('.code-tab.text-white').forEach(tab => {
+                activeTabs[tab.dataset.group] = tab.dataset.target;
+            });
+
+            renderAllBlocks();
+
+            Object.entries(activeTabs).forEach(([group, target]) => {
+                const tab = document.querySelector(`.code-tab[data-group="${group}"][data-target="${target}"]`);
+                if (tab) tab.click();
+            });
+        }
+
+        document.getElementById('envLiveBtn').addEventListener('click', () => setEnv('live'));
+        document.getElementById('envTestBtn').addEventListener('click', () => setEnv('test'));
+
+        renderAllBlocks();
 
         document.addEventListener('click', (e) => {
             const tab = e.target.closest('.code-tab');

@@ -39,61 +39,69 @@ class TransactionHistoryController extends Controller
     //     }
     // }
 
+public function transaction()
+    {
+        $user    = auth()->user();
+        $team    = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+        $mode    = session('mode', 'live');
 
-   public function transaction()
-{
-    $user = auth()->user();
-    $team = TeamMembers::where('user_id', $user->id)->first();
-    $ownerId = $team ? $team->owner_id : $user->id;
+        $transactions = TransactionHistory::where('user_id', $ownerId)
+            ->where('mode', $mode)
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-    $transactions = TransactionHistory::where('user_id', $ownerId)
-    ->orderBy('created_at', 'desc')
-    ->paginate(12);
+        if (request()->wantsJson()) {
+            $transactions = $transactions->map(function ($t) {
+                return [
+                    'type'      => $t->type,
+                    'date'      => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'    => $t->sender ?? 'N/A',
+                    'recipient' => $t->recipient ?? 'N/A',
+                    'amount'    => $t->currency_symbol . number_format($t->amount, 2),
+                    'currency'  => $t->currency,
+                    'status'    => $t->status,
+                    'reference' => $t->reference,
+                    'method'    => $t->method,
+                    'mode'      => $t->mode,
+                    'recipient_details' => [
+                        'alias'            => $t->recipient_alias,
+                        'account_name'     => $t->recipient_account_name,
+                        'account_number'   => $t->recipient_account_number,
+                        'bank_name'        => $t->recipient_bank_name,
+                        'bank_currency'    => $t->recipient_bank_currency,
+                        'recipient_amount' => $t->recipient_amount,
+                        'fees'             => $t->fees,
+                    ]
+                ];
+            });
 
+            return response()->json([
+                'success' => true,
+                'message' => 'Transactions retrieved successfully.',
+                'code'    => 'TRANSACTIONS_FETCHED',
+                'data'    => $transactions
+            ], 200);
+        }
 
-    if (request()->wantsJson()) {
-        $transactions = $transactions->map(function ($t) {
-            return [
-                'type'      => $t->type,
-                'date'      => $t->created_at->format('Y-m-d H:i:s'),
-                'sender'    => $t->sender ?? 'N/A',
-                'recipient' => $t->recipient ?? 'N/A',
-                'amount'    => $t->currency_symbol . number_format($t->amount, 2),
-                'currency'  => $t->currency,
-                'status'    => $t->status,
-                'reference' => $t->reference,
-                'method' => $t->method,
-                'recipient_details' => [
-                    'alias'          => $t->recipient_alias,
-                    'account_name'   => $t->recipient_account_name,
-                    'account_number' => $t->recipient_account_number,
-                    'bank_name'      => $t->recipient_bank_name,
-                    'bank_currency'  => $t->recipient_bank_currency,
-                    'recipient_amount'  => $t->recipient_amount,
-                    'fees'  => $t->fees,
-
-                ]
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Transactions retrieved successfully.',
-            'code' => 'TRANSACTIONS_FETCHED',
-            'data' => $transactions
-        ], 200);
+        $latestTransaction = $transactions->first();
+        return view('business.transactionHistory', compact('transactions', 'latestTransaction', 'mode'));
     }
-
-    $latestTransaction = $transactions->first();
-    return view('business.transactionHistory', compact('transactions', 'latestTransaction'));
-}
 
 
 
 
 public function showAllTransactions()
 {
-    $transactions = TransactionHistory::orderBy('created_at', 'desc')->get();
+     $user    = auth()->user();
+        $team    = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+        $mode    = session('mode', 'live');
+
+        $transactions = TransactionHistory::where('user_id', $ownerId)
+            ->where('mode', $mode)
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
     return response()->json([
         'success' => true,
@@ -155,42 +163,43 @@ public function UserTransaction($id)
 
 
 
-   public function storeTransaction(Request $request)
-{
-    $validated = $request->validate([
-        'type' => ['required', 'in:credit,debit'],
-        'sender' => ['required', 'string', 'max:255'],
-        'sender_id' => ['nullable', 'exists:users,id'],
-        'recipient' => ['required', 'string', 'max:255'],
-        'recipient_id' => ['nullable', 'exists:users,id'],
-        'method' => ['required', 'in:transfer,withdrawal,deposit'],
-        'amount' => [
-            'required',
-            'numeric',
-            'min:0.01',
-            'max:1000000000',
-            new ValidAmountBasedOnType($request->type, $request->currency)
-        ],
-        'currency' => ['required', 'string', 'in:USD,GBP,EUR,NGN,CAD,AUD'],
-        'status' => ['required', 'in:pending,successful,failed'],
-        'reference' => [
-            'required',
-            'string',
-            'unique:transactions_history,reference',
-            new ValidTransactionReference()
-        ],
-    ]);
+public function storeTransaction(Request $request)
+    {
+        $validated = $request->validate([
+            'type'         => ['required', 'in:credit,debit'],
+            'sender'       => ['required', 'string', 'max:255'],
+            'sender_id'    => ['nullable', 'exists:users,id'],
+            'recipient'    => ['required', 'string', 'max:255'],
+            'recipient_id' => ['nullable', 'exists:users,id'],
+            'method'       => ['required', 'in:transfer,withdrawal,deposit'],
+            'amount' => [
+                'required',
+                'numeric',
+                'min:0.01',
+                'max:1000000000',
+                new ValidAmountBasedOnType($request->type, $request->currency)
+            ],
+            'currency' => ['required', 'string', 'in:USD,GBP,EUR,NGN,CAD,AUD'],
+            'status'   => ['required', 'in:pending,successful,failed'],
+            'reference' => [
+                'required',
+                'string',
+                'unique:transactions_history,reference',
+                new ValidTransactionReference()
+            ],
+        ]);
 
-    $transaction = TransactionHistory::create(array_merge($validated, [
-        'user_id' => Auth::user()->id
-    ]));
+        $transaction = TransactionHistory::create(array_merge($validated, [
+            'user_id' => Auth::user()->id,
+            'mode'    => session('mode', 'live'),
+        ]));
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Transaction recorded successfully.',
-        'code' => 'TRANSACTION_CREATED',
-        'data' => $transaction
-    ], 201);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction recorded successfully.',
+            'code'    => 'TRANSACTION_CREATED',
+            'data'    => $transaction
+        ], 201);
+    }
 
 }

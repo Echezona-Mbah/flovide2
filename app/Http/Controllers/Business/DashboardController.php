@@ -18,45 +18,89 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
   use CurrencyHelper;
- public function create()
-    {
-        $countries = Countries::all();
+//  public function create()
+//     {
+//         $countries = Countries::all();
 
-        $user = auth()->user();
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $ownerId = $team ? $team->owner_id : $user->id;
+//         $user = auth()->user();
+//         $team = TeamMembers::where('user_id', $user->id)->first();
+//         $ownerId = $team ? $team->owner_id : $user->id;
 
-        $transactions = TransactionHistory::where('user_id', $ownerId)
-            ->latest('created_at')
-            ->take(5)
-            ->get();
+//         $transactions = TransactionHistory::where('user_id', $ownerId)
+//             ->latest('created_at')
+//             ->take(5)
+//             ->get();
 
-        $balances = Balance::where('user_id', $ownerId)->get();
+//         $balances = Balance::where('user_id', $ownerId)->get();
 
-        foreach ($balances as $balance) {
-            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-        }
+//         foreach ($balances as $balance) {
+//             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+//         }
 
-        // ✅ currencies from currencies table
-        $allCurrencies = Currency::all()->map(function ($c) {
-            $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
+//         // ✅ currencies from currencies table
+//         $allCurrencies = Currency::all()->map(function ($c) {
+//             $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
 
-            return [
-                'country_name' => $c->name,
-                'code' => $c->code,
-                'symbol' => $c->symbol ?? '',
-                'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
-            ];
-        })->values()->all();
-        //dd($balance->currency_meta);
+//             return [
+//                 'country_name' => $c->name,
+//                 'code' => $c->code,
+//                 'symbol' => $c->symbol ?? '',
+//                 'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
+//             ];
+//         })->values()->all();
+//         //dd($balance->currency_meta);
 
-        return view('dashboard', compact(
-            'countries',
-            'transactions',
-            'balances',
-            'allCurrencies'
-        ));
+//         return view('dashboard', compact(
+//             'countries',
+//             'transactions',
+//             'balances',
+//             'allCurrencies'
+//         ));
+//     }
+
+
+
+public function create()
+{
+    $countries = Countries::all();
+
+    $user    = auth()->user();
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+    $mode    = session('mode', 'live');
+
+    $transactions = TransactionHistory::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->latest('created_at')
+        ->take(5)
+        ->get();
+
+    $balances = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
+
+    foreach ($balances as $balance) {
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
+
+    $allCurrencies = Currency::all()->map(function ($c) {
+        $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
+        return [
+            'country_name' => $c->name,
+            'code'         => $c->code,
+            'symbol'       => $c->symbol ?? '',
+            'flag'         => "https://flagcdn.com/w20/{$countryCode}.png",
+        ];
+    })->values()->all();
+
+    return view('dashboard', compact(
+        'countries',
+        'transactions',
+        'balances',
+        'allCurrencies',
+        'mode'
+    ));
+}
 
     public function getExchangeRates(Request $request)
     {

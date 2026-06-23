@@ -70,6 +70,13 @@ class SendMoneyController extends Controller
     public function sendTransaction(Request $request)
     {
         $isApi = $request->expectsJson();
+           $mode  = session('mode', 'live');
+
+        // ── Block web-based deletion while in Test mode ──────────────────────
+        if (!$isApi && $mode === 'test') {
+            $message = 'Sending Money in Test Mode is only available via the API.';
+            return redirect()->back()->withErrors(['message' => $message]);
+        }
         
         $request->validate([
             'amount' => 'required|numeric|min:1',
@@ -722,52 +729,64 @@ class SendMoneyController extends Controller
 // }
 
     public function index(Request $request)
-    {
-        $actor = auth()->user();
-        [$ownerId, $memberId, $role] = $this->resolveOwnerAndMember($request, $actor);
+{
+    $actor = auth()->user();
+    [$ownerId, $memberId, $role] = $this->resolveOwnerAndMember($request, $actor);
 
-        if (! $ownerId) {
-            return redirect()->back()->with('error', 'Unauthorized');
-        }
-
-        $beneficiaries = Beneficia::where('user_id', $ownerId)->get();
-
-        $balances = Balance::where('user_id', $ownerId)->get();
-        foreach ($balances as $balance) {
-            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-        }
-
-        $balanceList = $balances;
-        $currencies = Currency::all();
-
-        return view('business.send', compact('beneficiaries', 'balanceList', 'currencies'));
-    }
-    
-
-    
-    public function getUserTotalBalance(Request $request)
-    {
-        $user = auth()->user();
-
-        $total = Balance::where('user_id', $user->id)->sum('amount');
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'User total balance fetched successfully',
-                'code' => 'TOTAL_BALANCE_FETCHED',
-                'data' => [
-                    'user_id' => $user->id,
-                    'total_balance' => $total
-                ]
-            ], 200);
-        }
-
-        return view('business.user_balance_total', [
-            'total' => $total
-        ]);
+    if (! $ownerId) {
+        return redirect()->back()->with('error', 'Unauthorized');
     }
 
+    $mode = session('mode', 'live');
+
+    $beneficiaries = Beneficia::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
+
+    $balances = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
+
+    foreach ($balances as $balance) {
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+    }
+
+    $balanceList = $balances;
+    $currencies = Currency::all();
+
+    return view('business.send', compact('beneficiaries', 'balanceList', 'currencies', 'mode'));
+}
+    
+
+public function getUserTotalBalance(Request $request)
+{
+    $user = auth()->user();
+    $mode = session('mode', 'live');
+
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+
+    $total = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->sum('amount');
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'User total balance fetched successfully',
+            'code' => 'TOTAL_BALANCE_FETCHED',
+            'data' => [
+                'user_id' => $ownerId,
+                'mode' => $mode,
+                'total_balance' => $total
+            ]
+        ], 200);
+    }
+
+    return view('business.user_balance_total', [
+        'total' => $total
+    ]);
+}
 
 
 
@@ -881,20 +900,35 @@ public function indexexc(Request $request)
         return back()->with('error', 'Unauthorized');
     }
 
-    $beneficiaries = Beneficia::where('user_id', $ownerId)->get();
+    $mode = session('mode', 'live');
 
-    $balances = Balance::where('user_id', $ownerId)->get();
+    $beneficiaries = Beneficia::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
+
+    $balances = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
+
     foreach ($balances as $balance) {
         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
 
     $balanceList = $balances;
 
-    return view('business.exchange_rate', compact('beneficiaries', 'balances', 'balanceList'));
+    return view('business.exchange_rate', compact('beneficiaries', 'balances', 'balanceList', 'mode'));
 }
-
 public function exchangeSubmit(Request $request)
 {
+
+    $isApi = $request->expectsJson();
+           $mode  = session('mode', 'live');
+
+        // ── Block web-based deletion while in Test mode ──────────────────────
+        if (!$isApi && $mode === 'test') {
+            $message = 'Exchange Money in Test Mode is only available via the API.';
+            return redirect()->back()->withErrors(['message' => $message]);
+        }
     $request->validate([
         'from_currency' => 'required|string',
         'to_currency' => 'required|string',

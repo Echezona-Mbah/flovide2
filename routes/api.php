@@ -590,33 +590,61 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
-Route::prefix('v1')->middleware('ip.whitelist')->group(function () {
-    Route::get('/webhooks', [WebhookController::class, 'index']);
-    Route::post('/webhooks', [WebhookController::class, 'store']);
-    Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
+Route::prefix('v1')
+    ->middleware('ip.whitelist')
+    ->group(function () {
+        Route::get('/webhooks', [WebhookController::class, 'index']);
+        Route::post('/webhooks', [WebhookController::class, 'store']);
+        Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
 
-    Route::get('/balances', [BalanceController::class, 'index']);
-    Route::post('/balances', [BalanceController::class, 'store']);
-    Route::get('/balances/{id}', [BalanceController::class, 'show']);
+        Route::get('/balances', [BalanceController::class, 'index']);
+        Route::post('/balances', [BalanceController::class, 'store']);
+        Route::get('/balances/{id}', [BalanceController::class, 'show']);
 
-    Route::get('/beneficiaries', [BeneficiaryController::class, 'index']);
-    Route::post('/beneficiaries', [BeneficiaryController::class, 'store']);
-    Route::post('/beneficiaries/account-inquiry', [BeneficiaryController::class, 'accountInquiry']);
-    Route::get('/beneficiaries/{id}', [BeneficiaryController::class, 'show']);
-    Route::delete('/beneficiaries/{id}', [BeneficiaryController::class, 'destroy']);
+        Route::get('/beneficiaries', [BeneficiaryController::class, 'index']);
+        Route::post('/beneficiaries', [BeneficiaryController::class, 'store']);
+        Route::post('/beneficiaries/account-inquiry', [BeneficiaryController::class, 'accountInquiry']);
+        Route::get('/beneficiaries/{id}', [BeneficiaryController::class, 'show']);
+        Route::delete('/beneficiaries/{id}', [BeneficiaryController::class, 'destroy']);
 
-    Route::get('/transactions', [TransactionController::class, 'index']);
-    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
-    Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+        Route::post('/transactions', [TransactionController::class, 'store']);
 
-    Route::get('/rates', [RateController::class, 'getExchangeRates']);
+        Route::get('/rates', [RateController::class, 'getExchangeRates']);
+
+        Route::get('/reference-data', [ReferenceDataController::class, 'index']);
+        Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
+        Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+    });
 
 
-    Route::get('/reference-data', [ReferenceDataController::class, 'index']);
-    Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
-    Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+Route::prefix('test/v1')
+    ->middleware('ip.whitelist')
+    ->group(function () {
+        Route::get('/webhooks', [WebhookController::class, 'index']);
+        Route::post('/webhooks', [WebhookController::class, 'store']);
+        Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
 
+        Route::get('/balances', [BalanceController::class, 'index']);
+        Route::post('/balances', [BalanceController::class, 'store']);
+        Route::get('/balances/{id}', [BalanceController::class, 'show']);
 
-});
+        Route::get('/beneficiaries', [BeneficiaryController::class, 'index']);
+        Route::post('/beneficiaries', [BeneficiaryController::class, 'store']);
+        Route::post('/beneficiaries/account-inquiry', [BeneficiaryController::class, 'accountInquiry']);
+        Route::get('/beneficiaries/{id}', [BeneficiaryController::class, 'show']);
+        Route::delete('/beneficiaries/{id}', [BeneficiaryController::class, 'destroy']);
+
+        Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+        Route::post('/transactions', [TransactionController::class, 'store']);
+
+        Route::get('/rates', [RateController::class, 'getExchangeRates']);
+
+        Route::get('/reference-data', [ReferenceDataController::class, 'index']);
+        Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
+        Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+    });
 // git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
 

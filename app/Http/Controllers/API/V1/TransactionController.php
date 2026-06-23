@@ -73,55 +73,137 @@ class TransactionController extends Controller
      *     @OA\Response(response=401, description="Invalid public key or secret key")
      * )
      */
+    // public function index(Request $request)
+    // {
+    //     $user = $this->resolveKeyUser($request);
+
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $transactions = TransactionHistory::where('user_id', $user->id)
+    //         ->latest()
+    //         ->get();
+
+    //     $data = $transactions->map(function ($tx) {
+    //         return [
+    //             'id' => $tx->id,
+    //             'amount' => $tx->amount !== null ? (float) $tx->amount : 0,
+    //             'fees' => $tx->fees !== null ? (float) $tx->fees : 0,
+    //             'currency' => $tx->currency,
+    //             'to_currency' => $tx->to_currency,
+    //             'balance_id' => $tx->balance_id,
+    //             'status' => $tx->status,
+    //             'transaction_type' => $tx->transaction_type ?? $tx->method,
+    //             'recipient' => [
+    //                 'id' => $tx->recipient_id ?? $tx->beneficias_id,
+    //                 'country' => $tx->recipient_country,
+    //                 // 'default_reference' => $tx->recipient_default_reference,
+    //                 // 'alias' => $tx->recipient_alias,
+    //                 // 'type' => $tx->recipient_type,
+    //                 // 'created' => $tx->recipient_created_at,
+    //                 'bank_account' => [
+    //                     'account_name' => $tx->recipient_account_name,
+    //                     // 'sort_code' => $tx->recipient_sort_code,
+    //                     'account_number' => $tx->recipient_account_number,
+    //                     'bank_name' => $tx->recipient_bank_name,
+    //                     'currency' => $tx->recipient_bank_currency ?? $tx->to_currency,
+    //                 ],
+    //             ],
+    //         ];
+    //     })->values();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Transactions retrieved successfully',
+    //         'data' => $data,
+    //     ], 200);
+    // }
+    
+
     public function index(Request $request)
-    {
-        $user = $this->resolveKeyUser($request);
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
-
-        $transactions = TransactionHistory::where('user_id', $user->id)
-            ->latest()
-            ->get();
-
-        $data = $transactions->map(function ($tx) {
-            return [
-                'id' => $tx->id,
-                'amount' => $tx->amount !== null ? (float) $tx->amount : 0,
-                'fees' => $tx->fees !== null ? (float) $tx->fees : 0,
-                'currency' => $tx->currency,
-                'to_currency' => $tx->to_currency,
-                'balance_id' => $tx->balance_id,
-                'status' => $tx->status,
-                'transaction_type' => $tx->transaction_type ?? $tx->method,
-                'recipient' => [
-                    'id' => $tx->recipient_id ?? $tx->beneficias_id,
-                    'country' => $tx->recipient_country,
-                    // 'default_reference' => $tx->recipient_default_reference,
-                    // 'alias' => $tx->recipient_alias,
-                    // 'type' => $tx->recipient_type,
-                    // 'created' => $tx->recipient_created_at,
-                    'bank_account' => [
-                        'account_name' => $tx->recipient_account_name,
-                        // 'sort_code' => $tx->recipient_sort_code,
-                        'account_number' => $tx->recipient_account_number,
-                        'bank_name' => $tx->recipient_bank_name,
-                        'currency' => $tx->recipient_bank_currency ?? $tx->to_currency,
-                    ],
-                ],
-            ];
-        })->values();
-
+    if (! $user) {
         return response()->json([
-            'success' => true,
-            'message' => 'Transactions retrieved successfully',
-            'data' => $data,
-        ], 200);
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+
+    $transactions = TransactionHistory::where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->latest()
+        ->get();
+
+    $data = $transactions->map(function ($tx) {
+        return [
+            'id' => $tx->id,
+            'amount' => $tx->amount !== null ? (float) $tx->amount : 0,
+            'fees' => $tx->fees !== null ? (float) $tx->fees : 0,
+            'currency' => $tx->currency,
+            'to_currency' => $tx->to_currency,
+            'balance_id' => $tx->balance_id,
+            'status' => $tx->status,
+            'transaction_type' => $tx->transaction_type ?? $tx->method,
+            'recipient' => [
+                'id' => $tx->recipient_id ?? $tx->beneficias_id,
+                'country' => $tx->recipient_country,
+                'bank_account' => [
+                    'account_name' => $tx->recipient_account_name,
+                    'account_number' => $tx->recipient_account_number,
+                    'bank_name' => $tx->recipient_bank_name,
+                    'currency' => $tx->recipient_bank_currency ?? $tx->to_currency,
+                ],
+            ],
+        ];
+    })->values();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Transactions retrieved successfully',
+        'mode' => $mode,
+        'data' => $data,
+    ], 200);
+}
+
 
     /**
      * @OA\Get(
@@ -155,7 +237,71 @@ class TransactionController extends Controller
      *     @OA\Response(response=404, description="Transaction not found")
      * )
      */
-public function show(Request $request, $id)
+// public function show(Request $request, $id)
+// {
+//     $user = $this->resolveKeyUser($request);
+
+//     if (! $user) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid public key or secret key',
+//         ], 401);
+//     }
+
+//     $transaction = TransactionHistory::where('user_id', $user->id)
+//         ->where('id', $id)
+//         ->first();
+
+//     if (! $transaction) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Transaction not found',
+//         ], 404);
+//     }
+
+//     $data = [
+//         'id' => $transaction->id,
+//         'amount' => $transaction->amount !== null ? (float) $transaction->amount : 0,
+//         'fees' => $transaction->fees !== null ? (float) $transaction->fees : 0,
+//         'currency' => $transaction->currency,
+//         'to_currency' => $transaction->to_currency,
+//         'balance_id' => $transaction->balance_id,
+//         // 'virtual_account_id' => $transaction->virtual_account_id,
+//         // 'order_id' => $transaction->order_id,
+//         'payment_reference' => $transaction->payment_reference,
+//         'status' => $transaction->status,
+//         // 'failure_reason' => $transaction->failure_reason,
+//         'transaction_type' => $transaction->transaction_type ?? $transaction->method,
+//         // 'payment_method' => $transaction->payment_method,
+//         'recipient' => [
+//             'id' => $transaction->recipient_id ?? $transaction->beneficias_id,
+//             'country' => $transaction->recipient_country,
+//             // 'default_reference' => $transaction->recipient_default_reference,
+//             // 'alias' => $transaction->recipient_alias,
+//             // 'type' => $transaction->recipient_type,
+//             'created' => $transaction->recipient_created_at,
+//             'bank_account' => [
+//                 'account_name' => $transaction->recipient_account_name,
+//                 // 'sort_code' => $transaction->recipient_sort_code,
+//                 'account_number' => $transaction->recipient_account_number,
+//                 'bank_name' => $transaction->recipient_bank_name,
+//                 'currency' => $transaction->recipient_bank_currency ?? $transaction->to_currency,
+//             ],
+//         ],
+//     ];
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Transaction retrieved successfully',
+//         'data' => $data,
+//         'method' => $request->method(),
+//         'url' => $request->fullUrl(),
+//     ], 200);
+// }
+
+
+
+    public function show(Request $request, $id)
 {
     $user = $this->resolveKeyUser($request);
 
@@ -166,7 +312,41 @@ public function show(Request $request, $id)
         ], 401);
     }
 
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+
     $transaction = TransactionHistory::where('user_id', $user->id)
+        ->where('mode', $mode)
         ->where('id', $id)
         ->first();
 
@@ -174,6 +354,7 @@ public function show(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Transaction not found',
+            'mode' => $mode,
         ], 404);
     }
 
@@ -184,23 +365,15 @@ public function show(Request $request, $id)
         'currency' => $transaction->currency,
         'to_currency' => $transaction->to_currency,
         'balance_id' => $transaction->balance_id,
-        // 'virtual_account_id' => $transaction->virtual_account_id,
-        // 'order_id' => $transaction->order_id,
         'payment_reference' => $transaction->payment_reference,
         'status' => $transaction->status,
-        // 'failure_reason' => $transaction->failure_reason,
         'transaction_type' => $transaction->transaction_type ?? $transaction->method,
-        // 'payment_method' => $transaction->payment_method,
         'recipient' => [
             'id' => $transaction->recipient_id ?? $transaction->beneficias_id,
             'country' => $transaction->recipient_country,
-            // 'default_reference' => $transaction->recipient_default_reference,
-            // 'alias' => $transaction->recipient_alias,
-            // 'type' => $transaction->recipient_type,
             'created' => $transaction->recipient_created_at,
             'bank_account' => [
                 'account_name' => $transaction->recipient_account_name,
-                // 'sort_code' => $transaction->recipient_sort_code,
                 'account_number' => $transaction->recipient_account_number,
                 'bank_name' => $transaction->recipient_bank_name,
                 'currency' => $transaction->recipient_bank_currency ?? $transaction->to_currency,
@@ -211,6 +384,7 @@ public function show(Request $request, $id)
     return response()->json([
         'success' => true,
         'message' => 'Transaction retrieved successfully',
+        'mode' => $mode,
         'data' => $data,
         'method' => $request->method(),
         'url' => $request->fullUrl(),
@@ -242,24 +416,251 @@ public function show(Request $request, $id)
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
-    // public function store(Request $request)
-    // {
-    //     $user = $this->resolveKeyUser($request);
 
-    //     if (! $user) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid public key or secret key',
-    //         ], 401);
-    //     }
 
-    //     // Delegate to your existing SendMoneyController
-    //     $sendMoney = app()->make(\App\Http\Controllers\Business\SendMoneyController::class);
+//  public function store(Request $request)
+// {
+//     $isApi = $request->expectsJson();
 
-    //     return $sendMoney->sendTransaction($request);
-    // }
+//     $user = $this->resolveKeyUser($request);
 
- public function store(Request $request)
+//     if (! $user) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid public key or secret key',
+//         ], 401);
+//     }
+
+//     $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference'];
+//     $extraFields = array_diff(array_keys($request->all()), $allowedFields);
+
+//     if (! empty($extraFields)) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid request fields',
+//             'errors' => [
+//                 'fields' => array_values($extraFields),
+//             ],
+//         ], 422);
+//     }
+
+//     $validator = Validator::make($request->all(), [
+//         'transaction_type' => 'required|in:payment',
+//         'amount' => 'required|numeric|min:1',
+//         'recipient_id' => 'required|uuid',
+//         'balance_id' => 'required|uuid',
+//         'order_id' => 'required|string|max:100',
+//         'reference' => 'nullable|uuid|unique:transactions_history,reference',
+//     ]);
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Validation failed',
+//             'code' => 'VALIDATION_ERROR',
+//             'errors' => $validator->errors(),
+//         ], 422);
+//     }
+
+//     $validated = $validator->validated();
+
+//     $actor = $this->resolveKeyUser($request) ?? auth()->user();
+
+//     if (! $actor) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Unauthorized',
+//             'code' => 'UNAUTHORIZED',
+//             'data' => null,
+//         ], 401);
+//     }
+
+//     [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
+
+//     if (! $ownerId || ! $owner) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Owner account not found',
+//             'code' => 'OWNER_NOT_FOUND',
+//             'data' => null,
+//         ], 422);
+//     }
+
+//     $recipient = Beneficia::where('user_id', $ownerId)
+//         ->where('recipient_id', $validated['recipient_id'])
+//         ->first();
+
+//     if (! $recipient) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid recipient',
+//             'code' => 'INVALID_RECIPIENT',
+//             'data' => null,
+//         ], 422);
+//     }
+
+//     $balance = Balance::where('id', $validated['balance_id'])
+//         ->where('user_id', $ownerId)
+//         ->first();
+
+//     if (! $balance) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid balance',
+//             'code' => 'INVALID_BALANCE',
+//             'data' => null,
+//         ], 422);
+//     }
+
+//     $sendingCurrency = strtoupper($balance->currency);
+//     $currency = strtoupper($recipient->currency);
+
+//     $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($sendingCurrency) {
+//             $q->where('code', $sendingCurrency);
+//         })
+//         ->whereHas('toCurrency', function ($q) use ($currency) {
+//             $q->where('code', $currency);
+//         })
+//         ->first();
+
+//     if (! $rate) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => "Rate not found for {$sendingCurrency} to {$currency}",
+//             'code' => 'RATE_NOT_FOUND',
+//             'data' => null,
+//         ], 400);
+//     }
+
+//     $transferFee = (float) ($rate->transfer_fee ?? 0);
+//     $totalAmount = (float) $validated['amount'] + $transferFee;
+//     $recipientAmount = round((float) $validated['amount'] * (float) $rate->rate, 2);
+
+//       //   dd($recipientAmount);
+
+
+
+
+
+//     if ($balance->amount < $totalAmount) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Insufficient funds',
+//             'code' => 'INSUFFICIENT_FUNDS',
+//             'data' => null,
+//         ], 422);
+//     }
+
+//     $limit = Currency::where('code', $sendingCurrency)
+//         ->where('is_active', true)
+//         ->first();
+
+//     if ($limit) {
+//         if (! is_null($limit->min_amount) && $validated['amount'] < $limit->min_amount) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}",
+//                 'code' => 'AMOUNT_BELOW_MINIMUM',
+//                 'data' => null,
+//             ], 422);
+//         }
+
+//         if (! is_null($limit->max_amount) && $validated['amount'] > $limit->max_amount) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}",
+//                 'code' => 'AMOUNT_ABOVE_MAXIMUM',
+//                 'data' => null,
+//             ], 422);
+//         }
+//     }
+
+//     $exchangeRateText = sprintf(
+//         "%s 1.00 = %s %s",
+//         $sendingCurrency,
+//         $currency,
+//         number_format((float) $rate->rate, 6, '.', '')
+//     );
+
+//     $request->merge([
+//         'balance_id' => $balance->id,
+//         'transfer_fee' => $transferFee,
+//         'total_amount' => $totalAmount,
+//         'recipient_amount' => $recipientAmount,
+//         'exchange_rate' => $exchangeRateText,
+//         'exchange_rate_value' => (float) $rate->rate,
+//         'account_number' => $recipient->account_number ?? $recipient->phone,
+//         'account_name' => $recipient->account_name,
+//         'bank' => $recipient->bank,
+//         'bank_code' => $recipient->bank_code,
+//         'transfer_method' => $recipient->transfer_method,
+//     ]);
+
+//     DB::beginTransaction();
+
+//     try {
+//         $balance->amount -= $totalAmount;
+//         $balance->save();
+
+//         $tx = TransactionHistory::create([
+//             'amount' => $validated['amount'],
+//             'total_amount' => $totalAmount,
+//             'currency' => $sendingCurrency,
+//             'balance_id' => $balance->id,
+//             'status' => 'pending',
+//             'method' => 'withdrawal',
+//             'payment_provider' => 'wallect',
+//             'order_id' => $validated['order_id'],
+//             'reference' => $validated['reference'] ?? 'ref-' . Str::uuid(),
+//             'user_id' => $ownerId,
+//             'created_by_member_id' => $memberId,
+//             'sender_id' => $ownerId,
+//             'sender' => $actor->business_name ?? $actor->name,
+//             'recipient_account_number' => $request->account_number,
+//             'recipient_account_name' => $request->account_name,
+//             'recipient_id' => $validated['recipient_id'],
+//             'bank_code' => $request->bank_code,
+//             'recipient_country' => strtoupper(substr($currency, 0, 2)),
+//             'recipient_bank_currency' => $currency,
+//             'to_currency' => $currency,
+//             'fees' => $transferFee,
+//             'exchange_rate' => (float) $rate->rate,
+//             'recipient_amount' => $recipientAmount,
+//         ]);
+
+//         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+//             $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+//         } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+//             $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+//         } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+//             $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+//         } else {
+//             DB::rollBack();
+
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'No provider',
+//                 'code' => 'PROVIDER_NOT_AVAILABLE',
+//                 'data' => null,
+//             ], 422);
+//         }
+
+//         DB::commit();
+
+//         return $response;
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Transaction failed',
+//             'code' => 'TXN_FAILED',
+//             'data' => $e->getMessage(),
+//         ], 500);
+//     }
+// }
+
+public function store(Request $request)
 {
     $isApi = $request->expectsJson();
 
@@ -272,34 +673,67 @@ public function show(Request $request, $id)
         ], 401);
     }
 
+    // ── Test / Live gate ──
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path      = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success'  => false,
+            'message'  => 'Test API requires test keys',
+            'path'     => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success'  => false,
+            'message'  => 'Live API requires live keys',
+            'path'     => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+    // ── End gate ──
+
     $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference'];
-    $extraFields = array_diff(array_keys($request->all()), $allowedFields);
+    $extraFields   = array_diff(array_keys($request->all()), $allowedFields);
 
     if (! empty($extraFields)) {
         return response()->json([
             'success' => false,
             'message' => 'Invalid request fields',
-            'errors' => [
-                'fields' => array_values($extraFields),
-            ],
+            'errors'  => ['fields' => array_values($extraFields)],
         ], 422);
     }
 
     $validator = Validator::make($request->all(), [
         'transaction_type' => 'required|in:payment',
-        'amount' => 'required|numeric|min:1',
-        'recipient_id' => 'required|uuid',
-        'balance_id' => 'required|uuid',
-        'order_id' => 'required|string|max:100',
-        'reference' => 'nullable|uuid|unique:transactions_history,reference',
+        'amount'           => 'required|numeric|min:1',
+        'recipient_id'     => 'required|uuid',
+        'balance_id'       => 'required|uuid',
+        'order_id'         => 'required|string|max:100',
+        'reference'        => 'nullable|uuid|unique:transactions_history,reference',
     ]);
 
     if ($validator->fails()) {
         return response()->json([
             'success' => false,
             'message' => 'Validation failed',
-            'code' => 'VALIDATION_ERROR',
-            'errors' => $validator->errors(),
+            'code'    => 'VALIDATION_ERROR',
+            'errors'  => $validator->errors(),
         ], 422);
     }
 
@@ -311,8 +745,8 @@ public function show(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Unauthorized',
-            'code' => 'UNAUTHORIZED',
-            'data' => null,
+            'code'    => 'UNAUTHORIZED',
+            'data'    => null,
         ], 401);
     }
 
@@ -322,8 +756,8 @@ public function show(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Owner account not found',
-            'code' => 'OWNER_NOT_FOUND',
-            'data' => null,
+            'code'    => 'OWNER_NOT_FOUND',
+            'data'    => null,
         ], 422);
     }
 
@@ -335,8 +769,8 @@ public function show(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Invalid recipient',
-            'code' => 'INVALID_RECIPIENT',
-            'data' => null,
+            'code'    => 'INVALID_RECIPIENT',
+            'data'    => null,
         ], 422);
     }
 
@@ -348,61 +782,49 @@ public function show(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Invalid balance',
-            'code' => 'INVALID_BALANCE',
-            'data' => null,
+            'code'    => 'INVALID_BALANCE',
+            'data'    => null,
         ], 422);
     }
 
     $sendingCurrency = strtoupper($balance->currency);
-    $currency = strtoupper($recipient->currency);
+    $currency        = strtoupper($recipient->currency);
 
-    $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($sendingCurrency) {
-            $q->where('code', $sendingCurrency);
-        })
-        ->whereHas('toCurrency', function ($q) use ($currency) {
-            $q->where('code', $currency);
-        })
+    $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $sendingCurrency))
+        ->whereHas('toCurrency',   fn($q) => $q->where('code', $currency))
         ->first();
 
     if (! $rate) {
         return response()->json([
             'success' => false,
             'message' => "Rate not found for {$sendingCurrency} to {$currency}",
-            'code' => 'RATE_NOT_FOUND',
-            'data' => null,
+            'code'    => 'RATE_NOT_FOUND',
+            'data'    => null,
         ], 400);
     }
 
-    $transferFee = (float) ($rate->transfer_fee ?? 0);
-    $totalAmount = (float) $validated['amount'] + $transferFee;
+    $transferFee     = (float) ($rate->transfer_fee ?? 0);
+    $totalAmount     = (float) $validated['amount'] + $transferFee;
     $recipientAmount = round((float) $validated['amount'] * (float) $rate->rate, 2);
-
-      //   dd($recipientAmount);
-
-
-
-
 
     if ($balance->amount < $totalAmount) {
         return response()->json([
             'success' => false,
             'message' => 'Insufficient funds',
-            'code' => 'INSUFFICIENT_FUNDS',
-            'data' => null,
+            'code'    => 'INSUFFICIENT_FUNDS',
+            'data'    => null,
         ], 422);
     }
 
-    $limit = Currency::where('code', $sendingCurrency)
-        ->where('is_active', true)
-        ->first();
+    $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
 
     if ($limit) {
         if (! is_null($limit->min_amount) && $validated['amount'] < $limit->min_amount) {
             return response()->json([
                 'success' => false,
                 'message' => "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}",
-                'code' => 'AMOUNT_BELOW_MINIMUM',
-                'data' => null,
+                'code'    => 'AMOUNT_BELOW_MINIMUM',
+                'data'    => null,
             ], 422);
         }
 
@@ -410,8 +832,8 @@ public function show(Request $request, $id)
             return response()->json([
                 'success' => false,
                 'message' => "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}",
-                'code' => 'AMOUNT_ABOVE_MAXIMUM',
-                'data' => null,
+                'code'    => 'AMOUNT_ABOVE_MAXIMUM',
+                'data'    => null,
             ], 422);
         }
     }
@@ -424,84 +846,109 @@ public function show(Request $request, $id)
     );
 
     $request->merge([
-        'balance_id' => $balance->id,
-        'transfer_fee' => $transferFee,
-        'total_amount' => $totalAmount,
-        'recipient_amount' => $recipientAmount,
-        'exchange_rate' => $exchangeRateText,
+        'balance_id'          => $balance->id,
+        'transfer_fee'        => $transferFee,
+        'total_amount'        => $totalAmount,
+        'recipient_amount'    => $recipientAmount,
+        'exchange_rate'       => $exchangeRateText,
         'exchange_rate_value' => (float) $rate->rate,
-        'account_number' => $recipient->account_number ?? $recipient->phone,
-        'account_name' => $recipient->account_name,
-        'bank' => $recipient->bank,
-        'bank_code' => $recipient->bank_code,
-        'transfer_method' => $recipient->transfer_method,
+        'account_number'      => $recipient->account_number ?? $recipient->phone,
+        'account_name'        => $recipient->account_name,
+        'bank'                => $recipient->bank,
+        'bank_code'           => $recipient->bank_code,
+        'transfer_method'     => $recipient->transfer_method,
+        'mode'                => $mode,
     ]);
 
     DB::beginTransaction();
 
     try {
-        $balance->amount -= $totalAmount;
-        $balance->save();
+        // ── Only deduct balance on live ──
+        if ($mode === 'live') {
+            $balance->amount -= $totalAmount;
+            $balance->save();
+        }
 
         $tx = TransactionHistory::create([
-            'amount' => $validated['amount'],
-            'total_amount' => $totalAmount,
-            'currency' => $sendingCurrency,
-            'balance_id' => $balance->id,
-            'status' => 'pending',
-            'method' => 'withdrawal',
-            'payment_provider' => 'wallect',
-            'order_id' => $validated['order_id'],
-            'reference' => $validated['reference'] ?? 'ref-' . Str::uuid(),
-            'user_id' => $ownerId,
-            'created_by_member_id' => $memberId,
-            'sender_id' => $ownerId,
-            'sender' => $actor->business_name ?? $actor->name,
+            'amount'                   => $validated['amount'],
+            'total_amount'             => $totalAmount,
+            'currency'                 => $sendingCurrency,
+            'balance_id'               => $balance->id,
+            'status'                   => 'pending',
+            'method'                   => 'withdrawal',
+            'mode'                     => $mode,
+            'payment_provider'         => 'wallect',
+            'order_id'                 => $validated['order_id'],
+            'reference'                => $validated['reference'] ?? 'ref-' . Str::uuid(),
+            'user_id'                  => $ownerId,
+            'created_by_member_id'     => $memberId,
+            'sender_id'                => $ownerId,
+            'sender'                   => $actor->business_name ?? $actor->name,
             'recipient_account_number' => $request->account_number,
-            'recipient_account_name' => $request->account_name,
-            'recipient_id' => $validated['recipient_id'],
-            'bank_code' => $request->bank_code,
-            'recipient_country' => strtoupper(substr($currency, 0, 2)),
-            'recipient_bank_currency' => $currency,
-            'to_currency' => $currency,
-            'fees' => $transferFee,
-            'exchange_rate' => (float) $rate->rate,
-            'recipient_amount' => $recipientAmount,
+            'recipient_account_name'   => $request->account_name,
+            'recipient_id'             => $validated['recipient_id'],
+            'bank_code'                => $request->bank_code,
+            'recipient_country'        => strtoupper(substr($currency, 0, 2)),
+            'recipient_bank_currency'  => $currency,
+            'to_currency'              => $currency,
+            'fees'                     => $transferFee,
+            'exchange_rate'            => (float) $rate->rate,
+            'recipient_amount'         => $recipientAmount,
         ]);
 
-        if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-        } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-        } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-        } else {
-            DB::rollBack();
+        if ($mode === 'live') {
+            // ── Real providers only on live ──
+            if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+            } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+            } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+            } else {
+                DB::rollBack();
 
-            return response()->json([
-                'success' => false,
-                'message' => 'No provider',
-                'code' => 'PROVIDER_NOT_AVAILABLE',
-                'data' => null,
-            ], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No provider available for this currency',
+                    'code'    => 'PROVIDER_NOT_AVAILABLE',
+                    'data'    => null,
+                ], 422);
+            }
+        } else {
+            // ── Test mode: skip providers, simulate success ──
+            TransactionHistory::where('id', $tx->id)->update(['status' => 'pending']);
+
+            $response = response()->json([
+                'success' => true,
+                'message' => 'Test transaction created successfully',
+                'code'    => 'TEST_SUCCESS',
+                'mode'    => 'test',
+                'data'    => $this->txData($tx->id),
+            ], 200);
         }
 
         DB::commit();
 
         return $response;
+
     } catch (\Exception $e) {
         DB::rollBack();
+
+        // ── Restore balance on exception only if live deducted it ──
+        if ($mode === 'live') {
+            $balance->refresh();
+            $balance->amount += $totalAmount;
+            $balance->save();
+        }
 
         return response()->json([
             'success' => false,
             'message' => 'Transaction failed',
-            'code' => 'TXN_FAILED',
-            'data' => $e->getMessage(),
+            'code'    => 'TXN_FAILED',
+            'data'    => $e->getMessage(),
         ], 500);
     }
 }
-
-
 
 
 
@@ -875,4 +1322,44 @@ public function show(Request $request, $id)
 
         return $webhookSetting ? User::find($webhookSetting->user_id) : null;
     }
+
+         private function resolveKeyOwner(Request $request): ?WebhookSetting
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (! $publicKey || ! $secretKey) {
+            return null;
+        }
+
+        return WebhookSetting::query()
+            ->where(function ($query) use ($publicKey, $secretKey) {
+                $query->where('live_public_key', $publicKey)
+                    ->where('live_secret_key', $secretKey);
+            })
+            ->orWhere(function ($query) use ($publicKey, $secretKey) {
+                $query->where('test_public_key', $publicKey)
+                    ->where('test_secret_key', $secretKey);
+            })
+            ->first();
+    }
+
+
+
+
+    private function resolveKeyMode(Request $request, WebhookSetting $setting): string
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (
+            $setting->test_public_key === $publicKey &&
+            $setting->test_secret_key === $secretKey
+        ) {
+            return 'test';
+        }
+
+        return 'live';
+    }
+
 }

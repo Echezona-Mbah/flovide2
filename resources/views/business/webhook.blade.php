@@ -1,6 +1,8 @@
 @include('business.head')
 
 <body class="min-h-screen bg-[linear-gradient(180deg,#f7f4ee_0%,#eef2f7_100%)] text-[#1E1E1E] flex flex-col md:flex-row">
+        @include('business.header')
+
     @include('business.sidebar')
 
     <div id="overlay" class="fixed inset-0 bg-slate-950/40 z-20 hidden md:hidden"></div>

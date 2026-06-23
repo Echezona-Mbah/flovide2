@@ -46,33 +46,74 @@ class BalanceController extends Controller
      *     @OA\Response(response=401, description="Invalid API keys")
      * )
      */
+    // public function index(Request $request)
+    // {
+    //     $webhookSetting = $this->resolveKeyOwner($request);
+
+    //     if (! $webhookSetting) {
+    //         return response()->json(['error' => 'Invalid public key or secret key'], 401);
+    //     }
+
+    //     $mode = $this->resolveKeyMode($request, $webhookSetting);
+    //     $isTestMode = $mode === 'test';
+
+    //     $balances = Balance::query()
+    //         ->where('user_id', $webhookSetting->user_id)
+    //         ->when($request->filled('currency'), function ($query) use ($request) {
+    //             $query->where('currency', strtoupper($request->currency));
+    //         })
+    //         ->latest()
+    //         ->get()
+    //         ->map(function ($balance) {
+    //             return [
+    //                 'id' => (string) $balance->id,
+    //                 'name' => $balance->name,
+    //                 'currency' => $balance->currency,
+    //                 'balance' => (int) $balance->amount,
+    //                 'created' => optional($balance->created_at)->toIso8601String(),
+    //             ];
+    //         });
+
+    //     return response()->json($balances);
+    // }
+
     public function index(Request $request)
-    {
-        $webhookSetting = $this->resolveKeyOwner($request);
+{
+    $webhookSetting = $this->resolveKeyOwner($request);
 
-        if (! $webhookSetting) {
-            return response()->json(['error' => 'Invalid public key or secret key'], 401);
-        }
-
-        $balances = Balance::query()
-            ->where('user_id', $webhookSetting->user_id)
-            ->when($request->filled('currency'), function ($query) use ($request) {
-                $query->where('currency', strtoupper($request->currency));
-            })
-            ->latest()
-            ->get()
-            ->map(function ($balance) {
-                return [
-                    'id' => (string) $balance->id,
-                    'name' => $balance->name,
-                    'currency' => $balance->currency,
-                    'balance' => (int) $balance->amount,
-                    'created' => optional($balance->created_at)->toIso8601String(),
-                ];
-            });
-
-        return response()->json($balances);
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $mode = $this->resolveKeyMode($request, $webhookSetting);
+
+    $balances = Balance::query()
+        ->where('user_id', $webhookSetting->user_id)
+        ->where('mode', $mode)
+        ->when($request->filled('currency'), function ($query) use ($request) {
+            $query->where('currency', strtoupper($request->currency));
+        })
+        ->latest()
+        ->get()
+        ->map(function ($balance) {
+            return [
+                'id' => (string) $balance->id,
+                'name' => $balance->name,
+                'currency' => $balance->currency,
+                'balance' => (int) $balance->amount,
+                'created' => optional($balance->created_at)->toIso8601String(),
+            ];
+        });
+
+    return response()->json([
+        'success' => true,
+        'mode' => $mode,
+        'data' => $balances,
+    ], 200);
+}
 
     /**
      * @OA\Post(
@@ -109,59 +150,145 @@ class BalanceController extends Controller
      * )
      */
 
-public function store(Request $request)
-{
-    $webhookSetting = $this->resolveKeyOwner($request);
+    // public function store(Request $request)
+    // {
+    //     $webhookSetting = $this->resolveKeyOwner($request);
 
-    if (! $webhookSetting) {
-        return response()->json(['error' => 'Invalid public key or secret key'], 401);
-    }
+    //     if (! $webhookSetting) {
+    //         return response()->json(['error' => 'Invalid public key or secret key'], 401);
+    //     }
 
-    $validated = $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'currency' => [
-            'required',
-            'string',
-            'size:3',
-            Rule::exists('currencies', 'code'),
-        ],
-        // 'amount' => ['nullable', 'numeric', 'min:0'],
-    ]);
+    //     $validated = $request->validate([
+    //         'name' => ['required', 'string', 'max:255'],
+    //         'currency' => [
+    //             'required',
+    //             'string',
+    //             'size:3',
+    //             Rule::exists('currencies', 'code'),
+    //         ],
+    //         // 'amount' => ['nullable', 'numeric', 'min:0'],
+    //     ]);
 
-    $currencyCode = strtoupper($validated['currency']);
+    //     $currencyCode = strtoupper($validated['currency']);
 
-      $exists = Balance::where('user_id', $webhookSetting->user_id)
-        ->where('currency', $currencyCode)
-        ->exists();
+    //     $exists = Balance::where('user_id', $webhookSetting->user_id)
+    //         ->where('currency', $currencyCode)
+    //         ->exists();
 
-    if ($exists) {
-        $errorMessage = "You already have a $currencyCode balance. Duplicates are not allowed.";
+    //     if ($exists) {
+    //         $errorMessage = "You already have a $currencyCode balance. Duplicates are not allowed.";
 
-        return $request->expectsJson()
-            ? response()->json([
+    //         return $request->expectsJson()
+    //             ? response()->json([
+    //                 'success' => false,
+    //                 'message' => $errorMessage,
+    //                 'code' => 'DUPLICATE_BALANCE',
+    //                 'data' => null
+    //             ], 400)
+    //             : redirect()->back()->withErrors(['message' => $errorMessage]);
+    //     }
+
+    //     $balance = Balance::create([
+    //         'user_id' => $webhookSetting->user_id,
+    //         'name' => $validated['name'],
+    //         'currency' => $currencyCode,
+    //         'amount' => $validated['amount'] ?? 0,
+    //     ]);
+
+    //     return response()->json([
+    //         'id' => (string) $balance->id,
+    //         'name' => $balance->name,
+    //         'currency' => $balance->currency,
+    //         'balance' => (float) $balance->amount,
+    //         'created' => $balance->created_at->toIso8601String(),
+    //     ], 201);
+    // }
+
+    public function store(Request $request)
+    {
+        $webhookSetting = $this->resolveKeyOwner($request);
+
+        if (! $webhookSetting) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid public key or secret key',
+            ], 401);
+        }
+
+        $isTestUrl = str_starts_with($request->path(), 'api/test/');
+        $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+        /*
+        * Force test URL to test mode.
+        */
+        $mode = $isTestUrl ? 'test' : $keyMode;
+
+        if ($isTestUrl && $keyMode !== 'test') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Test API requires test keys',
+            ], 403);
+        }
+
+        if (! $isTestUrl && $keyMode !== 'live') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Live API requires live keys',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'currency' => [
+                'required',
+                'string',
+                'size:3',
+                Rule::exists('currencies', 'code'),
+            ],
+        ]);
+
+        $currencyCode = strtoupper($validated['currency']);
+
+        $exists = Balance::where('user_id', $webhookSetting->user_id)
+            ->where('mode', $mode)
+            ->where('currency', $currencyCode)
+            ->exists();
+
+        if ($exists) {
+            $errorMessage = "You already have a {$currencyCode} balance in {$mode} mode. Duplicates are not allowed.";
+
+            return response()->json([
                 'success' => false,
                 'message' => $errorMessage,
                 'code' => 'DUPLICATE_BALANCE',
-                'data' => null
-            ], 400)
-            : redirect()->back()->withErrors(['message' => $errorMessage]);
+                'mode' => $mode,
+                'data' => null,
+            ], 400);
+        }
+
+        $balance = Balance::create([
+            'user_id' => $webhookSetting->user_id,
+            'mode' => $mode,
+            'name' => $validated['name'],
+            'currency' => $currencyCode,
+            'amount' => $mode === 'test'
+                ? ($validated['balance'] ?? 0)
+                : 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Balance created successfully',
+            'mode' => $mode,
+            'data' => [
+                'id' => (string) $balance->id,
+                'name' => $balance->name,
+                'currency' => $balance->currency,
+                'balance' => (float) $balance->amount,
+                'created' => $balance->created_at->toIso8601String(),
+            ],
+        ], 201);
     }
-
-    $balance = Balance::create([
-        'user_id' => $webhookSetting->user_id,
-        'name' => $validated['name'],
-        'currency' => $currencyCode,
-        'amount' => $validated['amount'] ?? 0,
-    ]);
-
-    return response()->json([
-        'id' => (string) $balance->id,
-        'name' => $balance->name,
-        'currency' => $balance->currency,
-        'balance' => (float) $balance->amount,
-        'created' => $balance->created_at->toIso8601String(),
-    ], 201);
-}
 
 
     private function resolveKeyOwner(Request $request): ?WebhookSetting
@@ -183,6 +310,24 @@ public function store(Request $request)
                     ->where('test_secret_key', $secretKey);
             })
             ->first();
+    }
+
+
+
+
+    private function resolveKeyMode(Request $request, WebhookSetting $setting): string
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (
+            $setting->test_public_key === $publicKey &&
+            $setting->test_secret_key === $secretKey
+        ) {
+            return 'test';
+        }
+
+        return 'live';
     }
 
 
@@ -228,35 +373,96 @@ public function store(Request $request)
  *     @OA\Response(response=404, description="Balance not found")
  * )
  */
+// public function show(Request $request, $id)
+// {
+//     $webhookSetting = $this->resolveKeyOwner($request);
+
+//     if (! $webhookSetting) {
+//         return response()->json(['error' => 'Invalid public key or secret key'], 401);
+//     }
+
+//     $balance = Balance::query()
+//         ->where('user_id', $webhookSetting->user_id)
+//         ->where('id', $id)
+//         ->first();
+
+//     if (! $balance) {
+//         return response()->json(['error' => 'Balance not found'], 404);
+//     }
+
+//     return response()->json([
+//         'id' => (string) $balance->id,
+//         'name' => $balance->name,
+//         'currency' => $balance->currency,
+//         'balance' => (int) $balance->amount,
+//         'created' => optional($balance->created_at)->toIso8601String(),
+//     ]);
+// }
+
+
+
 public function show(Request $request, $id)
 {
     $webhookSetting = $this->resolveKeyOwner($request);
 
     if (! $webhookSetting) {
-        return response()->json(['error' => 'Invalid public key or secret key'], 401);
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
 
     $balance = Balance::query()
         ->where('user_id', $webhookSetting->user_id)
+        ->where('mode', $mode)
         ->where('id', $id)
         ->first();
 
     if (! $balance) {
-        return response()->json(['error' => 'Balance not found'], 404);
+        return response()->json([
+            'success' => false,
+            'message' => 'Balance not found',
+            'mode' => $mode,
+            'data' => null,
+        ], 404);
     }
 
     return response()->json([
-        'id' => (string) $balance->id,
-        'name' => $balance->name,
-        'currency' => $balance->currency,
-        'balance' => (int) $balance->amount,
-        'created' => optional($balance->created_at)->toIso8601String(),
-    ]);
+        'success' => true,
+        'mode' => $mode,
+        'data' => [
+            'id' => (string) $balance->id,
+            'name' => $balance->name,
+            'currency' => $balance->currency,
+            'balance' => (float) $balance->amount,
+            'created' => optional($balance->created_at)->toIso8601String(),
+        ],
+    ], 200);
 }
-
-
-
-
 
 
 

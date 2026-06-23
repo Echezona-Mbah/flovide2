@@ -21,46 +21,47 @@ class AddMoneyController extends Controller
 {
   use CurrencyHelper;
 
-      public function index(Request $request)
-    {
+  public function index(Request $request)
+{
+    $countries = Countries::all();
 
+    $user    = auth()->user();
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+    $mode    = session('mode', 'live');
 
-          $countries = Countries::all();
+    $balances = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->get();
 
-        $user = auth()->user();
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $ownerId = $team ? $team->owner_id : $user->id;
-
-        $balances = Balance::where('user_id', $ownerId)->get();
-
-        foreach ($balances as $balance) {
-            $meta = $this->getCountryCodeFromCurrency($balance->currency);
-            $balance->currency_meta = $meta ?? [
-                'country' => strtolower(substr($balance->currency, 0, 2)),
-                'symbol'  => $balance->currency,
-                'name'    => $balance->currency,
-            ];
-        }
-
-        // ✅ currencies from currencies table
-        $allCurrencies = Currency::all()->map(function ($c) {
-            $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
-
-            return [
-                'country_name' => $c->name,
-                'code' => $c->code,
-                'symbol' => $c->symbol ?? '',
-                'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
-            ];
-        })->values()->all();
-        //dd($balance->currency_meta);
-
-        return view('business.add_money', compact(
-            'countries',
-            'balances',
-            'allCurrencies'
-        ));
+    foreach ($balances as $balance) {
+        $meta = $this->getCountryCodeFromCurrency($balance->currency);
+        $balance->currency_meta = $meta ?? [
+            'country' => strtolower(substr($balance->currency, 0, 2)),
+            'symbol'  => $balance->currency,
+            'name'    => $balance->currency,
+        ];
     }
+
+    // ✅ currencies from currencies table
+    $allCurrencies = Currency::all()->map(function ($c) {
+        $countryCode = strtolower($c->country_code ?? substr($c->code, 0, 2));
+
+        return [
+            'country_name' => $c->name,
+            'code' => $c->code,
+            'symbol' => $c->symbol ?? '',
+            'flag' => "https://flagcdn.com/w20/{$countryCode}.png",
+        ];
+    })->values()->all();
+
+    return view('business.add_money', compact(
+        'countries',
+        'balances',
+        'allCurrencies',
+        'mode'
+    ));
+}
 
 
     public function interacDetails(Request $request)
@@ -77,6 +78,15 @@ class AddMoneyController extends Controller
 public function topupWithInterac(Request $request, BlaaizService $blaaiz)
 {
     Log::info('[Interac Initiate] Request received', $request->all());
+
+      $isApi = $request->expectsJson();
+    $mode  = session('mode', 'live');
+
+    // ── Block web-based deletion while in Test mode ──────────────────────
+    if (!$isApi && $mode === 'test') {
+        $message = 'Collection in Test Mode is only available via the API.';
+        return redirect()->back()->withErrors(['message' => $message]);
+    }
 
     $user = Auth::user();
     if (!$user) {

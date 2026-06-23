@@ -102,6 +102,7 @@
           </div>
 
           <!-- Balances -->
+          <!-- Balances -->
           <section>
             <div class="flex justify-between items-center mb-5">
               <h2 class="font-semibold text-lg">{{ __('Your Balances') }}</h2>
@@ -111,27 +112,59 @@
               </a>
             </div>
 
-            <div class="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:overflow-visible">
-              @foreach($balances as $balance)
-              <a href="{{ route('balance.show', $balance->id) }}" class="min-w-[260px] sm:min-w-0 border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md hover:border-blue-300 transition cursor-pointer block">
-                <div class="flex items-center gap-2 mb-3">
-                  <img
-                    src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
-                    alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
-                    width="20" height="15" class="rounded-sm"
-                  />
-                  <span class="text-sm font-semibold uppercase tracking-wide">
-                    {{ $balance->currency }}
-                  </span>
-                  <i class="fas fa-chevron-right text-xs text-gray-300 ml-auto"></i>
-                </div>
-                <p class="text-xs text-gray-400 mb-1">{{ $balance->name }}</p>
-                <p class="text-xl font-bold text-gray-900">
-                  {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
-                </p>
-              </a>
-              @endforeach
-            </div>
+            @if($mode === 'test')
+  <div class="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:overflow-visible">
+    @foreach($balances as $balance)
+    <a href="{{ route('balance.show', $balance->id) }}"
+      class="min-w-[260px] sm:min-w-0 border border-amber-200 rounded-xl p-5 bg-amber-50 shadow-sm relative overflow-hidden hover:shadow-md transition cursor-pointer block">
+      <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-widest text-amber-500 bg-amber-100 px-2 py-0.5 rounded-full">Test</span>
+
+      <div class="flex items-center gap-2 mb-3">
+        <img
+          src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
+          alt="Flag"
+          width="20" height="15" class="rounded-sm"
+        />
+        <span class="text-sm font-semibold uppercase tracking-wide text-amber-700">
+          {{ $balance->currency }}
+        </span>
+      </div>
+      <p class="text-xs text-amber-500 mb-1">{{ $balance->name }}</p>
+      <p class="text-xl font-bold text-amber-700">
+        {{ $balance->currency_meta['symbol'] ?? '' }}{{ number_format($balance->amount, 2) }}
+      </p>
+    </a>
+    @endforeach
+  </div>
+  <p class="mt-3 text-xs text-amber-600 font-medium">
+    <i class="fas fa-flask text-xs mr-1"></i>
+    You're viewing sandbox test balances.
+  </p>
+
+@else
+  <div class="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-5 sm:overflow-visible">
+    @foreach($balances as $balance)
+    <a href="{{ route('balance.show', $balance->id) }}"
+      class="min-w-[260px] sm:min-w-0 border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md hover:border-blue-300 transition cursor-pointer block">
+      <div class="flex items-center gap-2 mb-3">
+        <img
+          src="https://flagcdn.com/w20/{{ strtolower($balance->currency_meta['country']) }}.png"
+          alt="Flag of {{ strtoupper($balance->currency_meta['country']) }}"
+          width="20" height="15" class="rounded-sm"
+        />
+        <span class="text-sm font-semibold uppercase tracking-wide">
+          {{ $balance->currency }}
+        </span>
+        <i class="fas fa-chevron-right text-xs text-gray-300 ml-auto"></i>
+      </div>
+      <p class="text-xs text-gray-400 mb-1">{{ $balance->name }}</p>
+      <p class="text-xl font-bold text-gray-900">
+        {{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }}
+      </p>
+    </a>
+    @endforeach
+  </div>
+@endif
           </section>
           <!-- Exchange + Transactions -->
           <section class="grid grid-cols-1 md:grid-cols-2 gap-8">

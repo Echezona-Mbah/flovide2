@@ -18,7 +18,6 @@
     </script>
     <script src='//fw-cdn.com/16096204/7073720.js' chat='true'></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <style>
         body {
             font-family: "Outfit", sans-serif;

@@ -19,36 +19,41 @@ class CreateBankController extends Controller
 
 
 
-    public function create(Request $request)
-    {
-        $user = auth()->user();
-        $balances = Balance::where('user_id', $user->id)->get();
+public function create(Request $request)
+{
+    $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
 
-        $existingCurrencies = $balances
-            ->pluck('currency')
-            ->map(fn ($currency) => strtoupper($currency))
-            ->toArray();
+    $balances = Balance::where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->get();
 
-        $currencies = Currency::whereNotIn('code', $existingCurrencies)->get();
+    $existingCurrencies = $balances
+        ->pluck('currency')
+        ->map(fn ($currency) => strtoupper($currency))
+        ->toArray();
 
-        foreach ($balances as $balance) {
-            $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-        }
+    $currencies = Currency::whereNotIn('code', $existingCurrencies)->get();
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Data for add bank form loaded successfully',
-                'code' => 'ADD_BANK_DATA_LOADED',
-                'data' => [
-                    'currencies' => $currencies,
-                    'balances' => $balances,
-                ]
-            ], 200);
-        }
-
-        return view('business.add_bank', compact('currencies', 'balances'));
+    foreach ($balances as $balance) {
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
     }
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Data for add bank form loaded successfully',
+            'code' => 'ADD_BANK_DATA_LOADED',
+            'data' => [
+                'mode' => $mode,
+                'currencies' => $currencies,
+                'balances' => $balances,
+            ]
+        ], 200);
+    }
+
+    return view('business.add_bank', compact('currencies', 'balances', 'mode'));
+}
 
 
     public function createBalance(Request $request)
@@ -119,11 +124,17 @@ class CreateBankController extends Controller
 
 
 
-    public function getUserTotalBalance(Request $request)
+public function getUserTotalBalance(Request $request)
 {
     $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
 
-    $total = Balance::where('user_id', $user->id)->sum('amount');
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+
+    $total = Balance::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->sum('amount');
 
     if ($request->expectsJson()) {
         return response()->json([
@@ -131,7 +142,8 @@ class CreateBankController extends Controller
             'message' => 'User total balance fetched successfully',
             'code' => 'TOTAL_BALANCE_FETCHED',
             'data' => [
-                'user_id' => $user->id,
+                'user_id' => $ownerId,
+                'mode' => $mode,
                 'total_balance' => $total
             ]
         ], 200);
@@ -140,11 +152,11 @@ class CreateBankController extends Controller
     return view('business.user_balance_total', [
         'total' => $total
     ]);
-}
+}   
 
 
 
- public function UpdateBalance(Request $request)
+public function UpdateBalance(Request $request)
 {
     $request->validate([
         'balance_id' => 'required',
@@ -153,8 +165,11 @@ class CreateBankController extends Controller
 
     $balanceId = $request->input('balance_id');
     $newName = $request->input('name');
+    $mode = $request->input('mode', session('mode', 'live'));
 
-    $balance = Balance::where('id', $balanceId)->first();
+    $balance = Balance::where('id', $balanceId)
+        ->where('mode', $mode)
+        ->first();
 
     if (!$balance) {
         return $request->expectsJson()
@@ -359,24 +374,26 @@ public function dashboardapi(Request $request)
 public function show(Request $request, $id)
 {
     $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
 
     $balance = Balance::where('id', $id)
         ->where('user_id', $user->id)
+        ->where('mode', $mode)
         ->firstOrFail();
 
     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
 
-    // Only select columns you actually use in the view
     $transactions = TransactionHistory::where('balance_id', $balance->id)
+        ->where('mode', $mode)
         ->select([
             'id', 'type', 'transaction_type', 'amount', 'currency',
             'status', 'reference', 'order_id', 'sender',
             'recipient_account_name', 'method', 'created_at'
         ])
         ->orderBy('created_at', 'desc')
-        ->paginate(15); // reduce from 20
+        ->paginate(15);
 
-    return view('business.balance-detail', compact('balance', 'transactions'));
+    return view('business.balance-detail', compact('balance', 'transactions', 'mode'));
 }
 
 

@@ -61,44 +61,123 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
+    // public function index(Request $request)
+    // {
+    //     $user = $this->resolveKeyUser($request);
+
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $beneficias = Beneficia::where('user_id', $user->id)->latest()->get();
+
+    //     $data = $beneficias->map(function ($b) {
+    //         return [
+    //             'id' => $b->id,
+    //             'country' => $b->country,
+    //             'default_reference' => $b->default_reference ?? 'Invoice',
+    //             'alias' => $b->alias,
+    //             'type' => $b->type,
+    //             'created' => optional($b->created_at)->toIso8601String(),
+    //             'bank_account' => [
+    //                 'account_name' => $b->account_name,
+    //                 'sort_code' => $b->sort_code ?? null,
+    //                 'bank_code' => $b->bank_code,
+    //                 'account_number' => $b->account_number,
+    //                 'bank_name' => $b->bank ?? null,
+    //                 'currency' => $b->currency,
+    //             ],
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'message' => 'Beneficiaries retrieved successfully',
+    //         'success' => true,
+    //         'data' => $data,
+    //     ], 200);
+    // }
+
+
+
+
     public function index(Request $request)
-    {
-        $user = $this->resolveKeyUser($request);
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
-
-        $beneficias = Beneficia::where('user_id', $user->id)->latest()->get();
-
-        $data = $beneficias->map(function ($b) {
-            return [
-                'id' => $b->id,
-                'country' => $b->country,
-                'default_reference' => $b->default_reference ?? 'Invoice',
-                'alias' => $b->alias,
-                'type' => $b->type,
-                'created' => optional($b->created_at)->toIso8601String(),
-                'bank_account' => [
-                    'account_name' => $b->account_name,
-                    'sort_code' => $b->sort_code ?? null,
-                    'bank_code' => $b->bank_code,
-                    'account_number' => $b->account_number,
-                    'bank_name' => $b->bank ?? null,
-                    'currency' => $b->currency,
-                ],
-            ];
-        });
-
+    if (! $user) {
         return response()->json([
-            'message' => 'Beneficiaries retrieved successfully',
-            'success' => true,
-            'data' => $data,
-        ], 200);
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+
+    $beneficias = Beneficia::where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->latest()
+        ->get();
+
+    $data = $beneficias->map(function ($b) {
+        return [
+            'id' => $b->id,
+            'country' => $b->country,
+            'default_reference' => $b->default_reference ?? 'Invoice',
+            'alias' => $b->alias,
+            'type' => $b->type,
+            'created' => optional($b->created_at)->toIso8601String(),
+            'bank_account' => [
+                'account_name' => $b->account_name,
+                'sort_code' => $b->sort_code ?? null,
+                'bank_code' => $b->bank_code,
+                'account_number' => $b->account_number,
+                'bank_name' => $b->bank ?? null,
+                'currency' => $b->currency,
+            ],
+        ];
+    });
+
+    return response()->json([
+        'message' => 'Beneficiaries retrieved successfully',
+        'success' => true,
+        'mode' => $mode,
+        'data' => $data,
+    ], 200);
+}
 
     /**
      * @OA\Post(
@@ -143,6 +222,111 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
+    // public function accountInquiry(Request $request)
+    // {
+    //     $user = $this->resolveKeyUser($request);
+
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $request->validate([
+    //         'currency' => 'required|string|size:3',
+    //         'bank_code' => 'required|string',
+    //         'account_number' => 'required|string',
+    //     ]);
+
+    //     $currency = strtoupper($request->currency);
+    //     $bankCode = strtoupper($request->bank_code);
+
+    //     if ($currency === 'UGX' && env('PIVOT_ENABLED', false)) {
+    //         $auth = $this->pivot->authenticate();
+
+    //         if (isset($auth['error'])) {
+    //             return response()->json($auth, 500);
+    //         }
+
+    //         $token = $auth['tokenResponse']['accessToken'];
+    //         $mobileCodes = ['MTN', 'AIRTEL'];
+
+    //         if (in_array($bankCode, $mobileCodes, true)) {
+    //             $payload = [
+    //                 'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE'),
+    //                 'accountNumber' => $request->account_number,
+    //                 'msisdn' => $request->account_number,
+    //                 'extraData' => [
+    //                     'amount' => '0',
+    //                 ],
+    //             ];
+    //         } else {
+    //             $payload = [
+    //                 'serviceCode' => env('PIVOT_UGX_BANK_SERVICE'),
+    //                 'accountNumber' => $request->account_number,
+    //                 'msisdn' => $request->account_number,
+    //                 'extraData' => [
+    //                     'bankSortCode' => $request->bank_code,
+    //                     'amount' => '0',
+    //                 ],
+    //             ];
+    //         }
+
+    //         $response = $this->pivot->accountValidation($token, $payload);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             // 'provider' => 'pivot',
+    //             'accountName' => $response['customerNames'] ?? null,
+    //             'data' => $response,
+    //         ]);
+    //     }
+
+    //     if ($currency === 'GHS' && env('APP_MOBILE', false)) {
+    //         $payload = [
+    //             'customer_number' => $request->account_number,
+    //             'exttrid' => uniqid('APPM_'),
+    //             'service_id' => env('ORCHARD_SERVICE_ID'),
+    //             'nw' => 'BNK',
+    //             'bank_code' => $request->bank_code,
+    //             'trans_type' => 'AII',
+    //             'ts' => now()->utc()->format('Y-m-d H:i:s'),
+    //         ];
+
+    //         $response = $this->orchard->accountInquiry($payload);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             // 'provider' => 'appmobile',
+    //             'data' => $response,
+    //         ]);
+    //     }
+
+    //     $payazaCurrencies = ['UGX', 'NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
+
+    //     if (in_array($currency, $payazaCurrencies, true) && env('PAYAZA_ENABLED', false)) {
+    //         $response = $this->payaza->accountEnquiry(
+    //             $currency,
+    //             $request->bank_code,
+    //             $request->account_number
+    //         );
+
+    //         return response()->json([
+    //             'success' => true,
+    //             // 'provider' => 'payaza',
+    //             'data' => $response,
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'No provider available for this currency.',
+    //         'currency' => $currency,
+    //     ], 422);
+    // }
+
+
     public function accountInquiry(Request $request)
     {
         $user = $this->resolveKeyUser($request);
@@ -154,6 +338,39 @@ class BeneficiaryController extends Controller
             ], 401);
         }
 
+        $webhookSetting = $this->resolveKeyOwner($request);
+
+        if (! $webhookSetting) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid public key or secret key',
+            ], 401);
+        }
+
+        $path = $request->path();
+        $isTestUrl = str_starts_with($path, 'api/test/');
+        $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+        if ($isTestUrl && $keyMode !== 'test') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Test API requires test keys',
+                'path' => $path,
+                'key_mode' => $keyMode,
+            ], 403);
+        }
+
+        if (! $isTestUrl && $keyMode !== 'live') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Live API requires live keys',
+                'path' => $path,
+                'key_mode' => $keyMode,
+            ], 403);
+        }
+
+        $mode = $isTestUrl ? 'test' : 'live';
+
         $request->validate([
             'currency' => 'required|string|size:3',
             'bank_code' => 'required|string',
@@ -162,6 +379,29 @@ class BeneficiaryController extends Controller
 
         $currency = strtoupper($request->currency);
         $bankCode = strtoupper($request->bank_code);
+
+        /*
+        * Test mode: do not call Payaza/Pivot/Orchard.
+        */
+        if ($mode === 'test') {
+            return response()->json([
+                'success' => true,
+                'mode' => 'test',
+                'accountName' => 'TEST ACCOUNT NAME',
+                'data' => [
+                    'response_code' => 200,
+                    'response_message' => 'Approved or completely successful',
+                    'response_content' => [
+                        'account_number' => $request->account_number,
+                        'bank_code' => $request->bank_code,
+                        'account_name' => 'TEST ACCOUNT NAME',
+                        'account_status' => 'ACTIVE',
+                        'currency' => $currency,
+                        'transaction_reference' => 'TEST_' . strtoupper(uniqid()),
+                    ],
+                ],
+            ], 200);
+        }
 
         if ($currency === 'UGX' && env('PIVOT_ENABLED', false)) {
             $auth = $this->pivot->authenticate();
@@ -198,7 +438,7 @@ class BeneficiaryController extends Controller
 
             return response()->json([
                 'success' => true,
-                // 'provider' => 'pivot',
+                'mode' => 'live',
                 'accountName' => $response['customerNames'] ?? null,
                 'data' => $response,
             ]);
@@ -219,7 +459,7 @@ class BeneficiaryController extends Controller
 
             return response()->json([
                 'success' => true,
-                // 'provider' => 'appmobile',
+                'mode' => 'live',
                 'data' => $response,
             ]);
         }
@@ -235,7 +475,7 @@ class BeneficiaryController extends Controller
 
             return response()->json([
                 'success' => true,
-                // 'provider' => 'payaza',
+                'mode' => 'live',
                 'data' => $response,
             ]);
         }
@@ -243,9 +483,12 @@ class BeneficiaryController extends Controller
         return response()->json([
             'success' => false,
             'message' => 'No provider available for this currency.',
+            'mode' => 'live',
             'currency' => $currency,
         ], 422);
     }
+
+
 
     /**
      * @OA\Post(
@@ -311,60 +554,263 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
+    // public function store(Request $request)
+    // {
+    //     $user = $this->resolveKeyUser($request);
+
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $team = TeamMembers::where('user_id', $user->id)->first();
+    //     $role = $team ? $team->role : 'Owner';
+
+    //     if (! in_array($role, ['Owner', 'Admin'])) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Only the business owner or an admin can add beneficiaries.',
+    //         ], 403);
+    //     }
+
+    //     $validator = Validator::make($request->all(), [
+    //         'type' => 'required|in:individual,corporate',
+    //         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+    //         'lastName' => 'nullable|required_if:type,individual|string|max:100',
+    //         'name' => 'nullable|required_if:type,corporate|string|max:200',
+    //         'transfer_method' => 'required|in:bank,mobile',
+    //         'bank.country' => 'required|string|min:2|max:3',
+    //         'bank.currency' => 'required|string|size:3',
+    //         'bank.accountHolder' => 'required|string|max:100',
+    //         'bank.accountNumber'  => 'nullable|string|max:34',
+    //         'bank.bankCode'       => 'nullable|string|max:20',
+    //         'bank.mobileNumber'   => 'nullable|string|max:30',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
+
+    //     $bank = $request->input('bank', []);
+    //     $countryIso = strtoupper($bank['country']);
+    //     $currency = strtoupper($bank['currency']);
+    //     $method = $request->transfer_method;
+
+    //     $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
+    //     $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    //     $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    //     $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+
+    //     $provider = null;
+
+    //     if ($currency === 'GHS') {
+    //         if ($appmobileEnabled) {
+    //             $provider = 'app_mobile';
+    //         } elseif ($payazaEnabled) {
+    //             $provider = 'payaza';
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'No provider enabled for GHS',
+    //             ], 403);
+    //         }
+    //     } elseif ($currency === 'UGX') {
+    //         if ($pivotEnabled) {
+    //             $provider = 'pivot';
+    //         } elseif ($payazaEnabled) {
+    //             $provider = 'payaza';
+    //             $method = 'mobile';
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'No provider enabled for UGX',
+    //             ], 403);
+    //         }
+    //     } elseif (in_array($currency, $payazaCurrencies)) {
+    //         if ($payazaEnabled) {
+    //             $provider = 'payaza';
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Flovide Payaza disabled',
+    //             ], 403);
+    //         }
+    //     } else {
+    //         if ($pivotEnabled) {
+    //             $provider = 'pivot';
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Pivot disabled',
+    //             ], 403);
+    //         }
+    //     }
+
+    //     $bankName = null;
+    //     $mobileNumber = null;
+
+    //     if ($method === 'bank') {
+    //         $bankRow = Bank::where(function ($query) use ($bank) {
+    //             $query->where('bank_code', $bank['bankCode'] ?? null)
+    //                 ->orWhere('sort_code', $bank['bankCode'] ?? null);
+    //         })->first();
+
+    //         $bankName = $bankRow?->name;
+    //     }
+
+    //     if ($method === 'mobile') {
+    //         $mobileNumber = $bank['mobileNumber'] ?? null;
+    //         $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+    //         $bankName = $bankRow?->name ?? 'mobile';
+    //     }
+
+    //     try {
+    //         $beneficia = Beneficia::create([
+    //             'country' => $countryIso,
+    //             'currency' => $currency,
+    //             'type' => $request->type,
+    //             'first_names' => $request->firstNames ?? null,
+    //             'last_name' => $request->lastName ?? null,
+    //             'beneficiary_name' => $request->name ?? null,
+    //             'account_number' => $bank['accountNumber'] ?? null,
+    //             'account_name' => $bank['accountHolder'] ?? null,
+    //             'phone' => $mobileNumber,
+    //             'bank' => $bankName,
+    //             'transfer_method' => $method,
+    //             'bank_code' => $bank['bankCode'] ?? null,
+    //             'provider' => $provider,
+    //             'unique_reference' => strtoupper(Str::random(7)),
+    //             'customer_reference' => strtoupper(Str::random(7)),
+    //             'recipient_id' => Str::uuid(),
+    //             'account_id' => Str::uuid(),
+    //             'user_id' => $user->id,
+    //         ]);
+
+    //          return response()->json([
+    //         'success' => true,
+    //         'message' => 'Beneficiary created successfully',
+    //         'data' => [
+    //             'id' => (string) ($beneficia->id),
+    //             'country' => $beneficia->country,
+    //             'default_reference' => $beneficia->default_reference,
+    //             'alias' => $beneficia->alias,
+    //             'type' => $beneficia->type,
+    //             'created' => optional($beneficia->created_at)->toIso8601String(),
+    //             'bank_account' => [
+    //                 'account_name' => $beneficia->account_name,
+    //                 'sort_code' => $beneficia->sort_code,
+    //                 'bank_code' => $beneficia->bank_code,
+    //                 'account_number' => $beneficia->account_number,
+    //                 'bank_name' => $beneficia->bank,
+    //                 'currency' => $beneficia->currency,
+    //             ],
+    //         ],
+    //     ], 201);
+    //     } catch (\Exception $e) {
+    //         logger('Beneficiary Store Error: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to create beneficiary',
+    //         ], 500);
+    //     }
+    // }
+
     public function store(Request $request)
-    {
-        $user = $this->resolveKeyUser($request);
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
+    if (! $user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
 
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $role = $team ? $team->role : 'Owner';
+    $webhookSetting = $this->resolveKeyOwner($request);
 
-        if (! in_array($role, ['Owner', 'Admin'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only the business owner or an admin can add beneficiaries.',
-            ], 403);
-        }
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
 
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:individual,corporate',
-            'firstNames' => 'nullable|required_if:type,individual|string|max:100',
-            'lastName' => 'nullable|required_if:type,individual|string|max:100',
-            'name' => 'nullable|required_if:type,corporate|string|max:200',
-            'transfer_method' => 'required|in:bank,mobile',
-            'bank.country' => 'required|string|min:2|max:3',
-            'bank.currency' => 'required|string|size:3',
-            'bank.accountHolder' => 'required|string|max:100',
-            'bank.accountNumber'  => 'nullable|string|max:34',
-            'bank.bankCode'       => 'nullable|string|max:20',
-            'bank.mobileNumber'   => 'nullable|string|max:30',
-        ]);
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
-        }
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
 
-        $bank = $request->input('bank', []);
-        $countryIso = strtoupper($bank['country']);
-        $currency = strtoupper($bank['currency']);
-        $method = $request->transfer_method;
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
 
-        $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
-        $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-        $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-        $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+    $mode = $isTestUrl ? 'test' : 'live';
 
-        $provider = null;
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $role = $team ? $team->role : 'Owner';
 
+    if (! in_array($role, ['Owner', 'Admin'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Only the business owner or an admin can add beneficiaries.',
+        ], 403);
+    }
+
+    $validator = Validator::make($request->all(), [
+        'type' => 'required|in:individual,corporate',
+        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+        'lastName' => 'nullable|required_if:type,individual|string|max:100',
+        'name' => 'nullable|required_if:type,corporate|string|max:200',
+        'transfer_method' => 'required|in:bank,mobile',
+        'bank.country' => 'required|string|min:2|max:3',
+        'bank.currency' => 'required|string|size:3',
+        'bank.accountHolder' => 'required|string|max:100',
+        'bank.accountNumber' => 'nullable|string|max:34',
+        'bank.bankCode' => 'nullable|string|max:20',
+        'bank.mobileNumber' => 'nullable|string|max:30',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    $bank = $request->input('bank', []);
+    $countryIso = strtoupper($bank['country']);
+    $currency = strtoupper($bank['currency']);
+    $method = $request->transfer_method;
+
+    $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
+    $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+
+    $provider = 'flovide_test';
+
+    if ($mode === 'test') {
+        $provider = 'flovide_test';
+    } else {
         if ($currency === 'GHS') {
             if ($appmobileEnabled) {
                 $provider = 'app_mobile';
@@ -388,7 +834,7 @@ class BeneficiaryController extends Controller
                     'message' => 'No provider enabled for UGX',
                 ], 403);
             }
-        } elseif (in_array($currency, $payazaCurrencies)) {
+        } elseif (in_array($currency, $payazaCurrencies, true)) {
             if ($payazaEnabled) {
                 $provider = 'payaza';
             } else {
@@ -407,52 +853,57 @@ class BeneficiaryController extends Controller
                 ], 403);
             }
         }
+    }
 
-        $bankName = null;
-        $mobileNumber = null;
+    $bankName = null;
+    $mobileNumber = null;
 
-        if ($method === 'bank') {
-            $bankRow = Bank::where(function ($query) use ($bank) {
-                $query->where('bank_code', $bank['bankCode'] ?? null)
-                    ->orWhere('sort_code', $bank['bankCode'] ?? null);
-            })->first();
+    if ($method === 'bank') {
+        $bankRow = Bank::where(function ($query) use ($bank) {
+            $query->where('bank_code', $bank['bankCode'] ?? null)
+                ->orWhere('sort_code', $bank['bankCode'] ?? null);
+        })->first();
 
-            $bankName = $bankRow?->name;
-        }
+        $bankName = $bankRow?->name;
+    }
 
-        if ($method === 'mobile') {
-            $mobileNumber = $bank['mobileNumber'] ?? null;
-            $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-            $bankName = $bankRow?->name ?? 'mobile';
-        }
+    if ($method === 'mobile') {
+        $mobileNumber = $bank['mobileNumber'] ?? null;
+        $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+        $bankName = $bankRow?->name ?? 'mobile';
+    }
 
-        try {
-            $beneficia = Beneficia::create([
-                'country' => $countryIso,
-                'currency' => $currency,
-                'type' => $request->type,
-                'first_names' => $request->firstNames ?? null,
-                'last_name' => $request->lastName ?? null,
-                'beneficiary_name' => $request->name ?? null,
-                'account_number' => $bank['accountNumber'] ?? null,
-                'account_name' => $bank['accountHolder'] ?? null,
-                'phone' => $mobileNumber,
-                'bank' => $bankName,
-                'transfer_method' => $method,
-                'bank_code' => $bank['bankCode'] ?? null,
-                'provider' => $provider,
-                'unique_reference' => strtoupper(Str::random(7)),
-                'customer_reference' => strtoupper(Str::random(7)),
-                'recipient_id' => Str::uuid(),
-                'account_id' => Str::uuid(),
-                'user_id' => $user->id,
-            ]);
+    try {
+        $beneficia = new Beneficia();
 
-             return response()->json([
+        $beneficia->forceFill([
+            'mode' => $mode,
+            'country' => $countryIso,
+            'currency' => $currency,
+            'type' => $request->type,
+            'first_names' => $request->firstNames ?? null,
+            'last_name' => $request->lastName ?? null,
+            'beneficiary_name' => $request->name ?? null,
+            'account_number' => $bank['accountNumber'] ?? null,
+            'account_name' => $bank['accountHolder'] ?? null,
+            'phone' => $mobileNumber,
+            'bank' => $bankName,
+            'transfer_method' => $method,
+            'bank_code' => $bank['bankCode'] ?? null,
+            // 'provider' => $provider,
+            'unique_reference' => strtoupper(Str::random(7)),
+            'customer_reference' => strtoupper(Str::random(7)),
+            'recipient_id' => (string) Str::uuid(),
+            'account_id' => (string) Str::uuid(),
+            'user_id' => $user->id,
+        ])->save();
+
+        return response()->json([
             'success' => true,
             'message' => 'Beneficiary created successfully',
+            'mode' => $mode,
             'data' => [
-                'id' => (string) ($beneficia->id),
+                'id' => (string) $beneficia->id,
                 'country' => $beneficia->country,
                 'default_reference' => $beneficia->default_reference,
                 'alias' => $beneficia->alias,
@@ -468,15 +919,15 @@ class BeneficiaryController extends Controller
                 ],
             ],
         ], 201);
-        } catch (\Exception $e) {
-            logger('Beneficiary Store Error: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create beneficiary',
-            ], 500);
-        }
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Beneficiary creation failed',
+            'data' => $e->getMessage(),
+        ], 500);
     }
+}
 
     private function resolveKeyUser(Request $request): ?User
     {
@@ -501,6 +952,45 @@ class BeneficiaryController extends Controller
         return $webhookSetting ? User::find($webhookSetting->user_id) : null;
     }
 
+
+        private function resolveKeyOwner(Request $request): ?WebhookSetting
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (! $publicKey || ! $secretKey) {
+            return null;
+        }
+
+        return WebhookSetting::query()
+            ->where(function ($query) use ($publicKey, $secretKey) {
+                $query->where('live_public_key', $publicKey)
+                    ->where('live_secret_key', $secretKey);
+            })
+            ->orWhere(function ($query) use ($publicKey, $secretKey) {
+                $query->where('test_public_key', $publicKey)
+                    ->where('test_secret_key', $secretKey);
+            })
+            ->first();
+    }
+
+
+
+
+    private function resolveKeyMode(Request $request, WebhookSetting $setting): string
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (
+            $setting->test_public_key === $publicKey &&
+            $setting->test_secret_key === $secretKey
+        ) {
+            return 'test';
+        }
+
+        return 'live';
+    }
 
 
         /**
@@ -544,6 +1034,50 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
+// public function show(Request $request, $id)
+// {
+//     $user = $this->resolveKeyUser($request);
+
+//     if (! $user) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid public key or secret key',
+//         ], 401);
+//     }
+
+//     $beneficia = Beneficia::where('user_id', $user->id)
+//         ->where('id', $id)
+//         ->first();
+
+//     if (! $beneficia) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Beneficiary not found',
+//         ], 404);
+//     }
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Beneficiary retrieved successfully',
+//         'data' => [
+//             'id' => (string) ($beneficia->recipient_id ?? $beneficia->id),
+//             'country' => $beneficia->country,
+//             'default_reference' => $beneficia->default_reference,
+//             'alias' => $beneficia->alias,
+//             'type' => $beneficia->type,
+//             'created' => optional($beneficia->created_at)->toIso8601String(),
+//             'bank_account' => [
+//                 'account_name' => $beneficia->account_name,
+//                 'sort_code' => $beneficia->sort_code,
+//                 'bank_code' => $beneficia->bank_code,
+//                 'account_number' => $beneficia->account_number,
+//                 'bank_name' => $beneficia->bank,
+//                 'currency' => $beneficia->currency,
+//             ],
+//         ],
+//     ], 200);
+// }
+
 public function show(Request $request, $id)
 {
     $user = $this->resolveKeyUser($request);
@@ -555,20 +1089,59 @@ public function show(Request $request, $id)
         ], 401);
     }
 
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+
     $beneficia = Beneficia::where('user_id', $user->id)
-        ->where('id', $id)
+        ->where('mode', $mode)
+        ->where(function ($query) use ($id) {
+            $query->where('id', $id)
+                ->orWhere('recipient_id', $id);
+        })
         ->first();
 
     if (! $beneficia) {
         return response()->json([
             'success' => false,
             'message' => 'Beneficiary not found',
+            'mode' => $mode,
         ], 404);
     }
 
     return response()->json([
         'success' => true,
         'message' => 'Beneficiary retrieved successfully',
+        'mode' => $mode,
         'data' => [
             'id' => (string) ($beneficia->recipient_id ?? $beneficia->id),
             'country' => $beneficia->country,
@@ -639,51 +1212,140 @@ public function show(Request $request, $id)
      *     )
      * )
      */
+    // public function destroy(Request $request, $id)
+    // {
+    //     $user = $this->resolveKeyUser($request);
+
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $team = TeamMembers::where('user_id', $user->id)->first();
+    //     $role = $team ? $team->role : 'Owner';
+
+    //     if (! in_array($role, ['Owner', 'Admin'])) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Only the business owner or an admin can delete beneficiaries.',
+    //         ], 403);
+    //     }
+
+    //     $beneficia = Beneficia::where('user_id', $user->id)->where('id', $id)->first();
+
+    //     if (! $beneficia) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Beneficiary not found',
+    //         ], 404);
+    //     }
+
+    //     try {
+    //         $beneficia->delete();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Beneficiary deleted successfully',
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         logger('Beneficiary Delete Error: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to delete beneficiary',
+    //         ], 500);
+    //     }
+    // }
+
     public function destroy(Request $request, $id)
-    {
-        $user = $this->resolveKeyUser($request);
+{
+    $user = $this->resolveKeyUser($request);
 
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
-        }
-
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $role = $team ? $team->role : 'Owner';
-
-        if (! in_array($role, ['Owner', 'Admin'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only the business owner or an admin can delete beneficiaries.',
-            ], 403);
-        }
-
-        $beneficia = Beneficia::where('user_id', $user->id)->where('id', $id)->first();
-
-        if (! $beneficia) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Beneficiary not found',
-            ], 404);
-        }
-
-        try {
-            $beneficia->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Beneficiary deleted successfully',
-            ], 200);
-        } catch (\Exception $e) {
-            logger('Beneficiary Delete Error: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete beneficiary',
-            ], 500);
-        }
+    if (! $user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
     }
+
+    $webhookSetting = $this->resolveKeyOwner($request);
+
+    if (! $webhookSetting) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid public key or secret key',
+        ], 401);
+    }
+
+    $path = $request->path();
+    $isTestUrl = str_starts_with($path, 'api/test/');
+    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    if ($isTestUrl && $keyMode !== 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Test API requires test keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    if (! $isTestUrl && $keyMode !== 'live') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Live API requires live keys',
+            'path' => $path,
+            'key_mode' => $keyMode,
+        ], 403);
+    }
+
+    $mode = $isTestUrl ? 'test' : 'live';
+
+    $team = TeamMembers::where('user_id', $user->id)->first();
+    $role = $team ? $team->role : 'Owner';
+
+    if (! in_array($role, ['Owner', 'Admin'])) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Only the business owner or an admin can delete beneficiaries.',
+        ], 403);
+    }
+
+    $beneficia = Beneficia::where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->where(function ($query) use ($id) {
+            $query->where('id', $id)
+                ->orWhere('recipient_id', $id);
+        })
+        ->first();
+
+    if (! $beneficia) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Beneficiary not found',
+            'mode' => $mode,
+        ], 404);
+    }
+
+    try {
+        $beneficia->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Beneficiary deleted successfully',
+            'mode' => $mode,
+        ], 200);
+    } catch (\Exception $e) {
+        logger('Beneficiary Delete Error: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete beneficiary',
+            'mode' => $mode,
+        ], 500);
+    }
+}
 
 }

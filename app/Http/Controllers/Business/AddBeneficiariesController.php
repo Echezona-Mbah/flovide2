@@ -22,59 +22,64 @@ class AddBeneficiariesController extends Controller
         protected $beneficiaryService;
 
     public function index(Request $request)
-    {
-        $user = auth()->user();
-        $team = TeamMembers::where('user_id', $user->id)->first();
-        $ownerId = $team ? $team->owner_id : $user->id;
-    
-        $beneficias = Beneficia::where('user_id', $ownerId)
+{
+    $user    = auth()->user();
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+    $mode    = session('mode', 'live');
+
+    $beneficias = Beneficia::where('user_id', $ownerId)
+        ->where('mode', $mode)
         ->paginate(25);
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Beneficia records retrieved successfully',
-                'success' => 'Beneficia records retrieved successfully',
-                'data' => $beneficias,
-                'method' => $request->method(),
-                'url' => $request->fullUrl()
-            ], 200);
-        }
-    
-        return view('business.beneficiaries', compact('beneficias'));
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'message' => 'Beneficia records retrieved successfully',
+            'success' => 'Beneficia records retrieved successfully',
+            'data'    => $beneficias,
+            'method'  => $request->method(),
+            'url'     => $request->fullUrl()
+        ], 200);
     }
+
+    return view('business.beneficiaries', compact('beneficias', 'mode'));
+}
  
 
-    public function create()
-    {
-        $countries = CountryRule::where('is_active', true)->get();
+public function create()
+{
+    $countries = CountryRule::where('is_active', true)->get();
 
-        $countryRules  = [];
-        $currencyRules = [];
+    $countryRules  = [];
+    $currencyRules = [];
 
-        foreach ($countries as $c) {
-            $countryRules[$c->country_iso] = [
-                'currency' => $c->currency_iso,
-                'rules'    => $c->rules,
-            ];
-
-            $currencyRules[$c->currency_iso] = [
-                'country' => $c->country_iso,
-                'rules'   => $c->rules,
-            ];
-        }
-
-        $pivotServices = [
-            'ugx_bank_service'   => env('PIVOT_UGX_BANK_SERVICE'),
-            'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE'),
+    foreach ($countries as $c) {
+        $countryRules[$c->country_iso] = [
+            'currency' => $c->currency_iso,
+            'rules'    => $c->rules,
         ];
-        // dd($countryRules);
-        return view('business.add_beneficia', compact(
-            'countries',
-            'countryRules',
-            'currencyRules',
-            'pivotServices'
-        ));
+
+        $currencyRules[$c->currency_iso] = [
+            'country' => $c->country_iso,
+            'rules'   => $c->rules,
+        ];
     }
 
+    $pivotServices = [
+        'ugx_bank_service'   => env('PIVOT_UGX_BANK_SERVICE'),
+        'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE'),
+    ];
+
+    $mode = session('mode', 'live');
+
+    return view('business.add_beneficia', compact(
+        'countries',
+        'countryRules',
+        'currencyRules',
+        'pivotServices',
+        'mode'
+    ));
+}
 
 
 
@@ -518,6 +523,18 @@ public function store(Request $request)
         ], 401);
     }
 
+      $mode = session('mode', 'live');
+
+    // ── Block web-based creation while in Test mode ──────────────────────
+    // Test mode beneficiaries must be created via the API only.
+    if (!$isApi && $mode === 'test') {
+        Log::warning('[Beneficiary Store] Blocked — web creation not allowed in test mode', [
+            'user_id' => $authUser->id,
+        ]);
+        $msg = 'Adding beneficiaries in Test Mode is only available via the API.';
+        return back()->with('error', $msg);
+    }
+
     $team = TeamMembers::where('user_id', $authUser->id)
         ->where('owner_id', '!=', $authUser->id)  // exclude self-referencing rows
         ->first();
@@ -797,6 +814,16 @@ public function store(Request $request)
 
 public function destroy(Request $request, $id)
 {
+
+    $isApi = $request->expectsJson();
+    $mode  = session('mode', 'live');
+
+    // ── Block web-based deletion while in Test mode ──────────────────────
+    if (!$isApi && $mode === 'test') {
+        $message = 'Deleting beneficiaries in Test Mode is only available via the API.';
+        return redirect()->back()->withErrors(['message' => $message]);
+    }
+
     $beneficia = Beneficia::findOrFail($id);
 
     // Only allow owner
