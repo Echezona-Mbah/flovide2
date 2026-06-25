@@ -254,7 +254,7 @@
                         <div class="row align-items-end g-4">
                             <div class="col-lg-8">
                                 <div class="hero-tag">
-                                    <i class="pe-7s-cash"></i>
+                                    <i class="fa-solid fa-money-bill"></i>
                                     Transfer Governance
                                 </div>
                                 <h1 class="hero-title">Currency Limits</h1>

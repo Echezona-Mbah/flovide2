@@ -359,7 +359,7 @@
 
                                             <div class="text-white">
                                                 <div class="hero-pill mb-2">
-                                                    <i class="pe-7s-user"></i>
+                                                    <i class="fa-solid fa-user"></i>
                                                     Personal Account Dashboard
                                                 </div>
                                                 <h2 class="mb-1 text-white">{{ $user->firstname }} {{ $user->lastname }}</h2>
@@ -422,7 +422,7 @@
                             <div class="stat-grid mb-4">
                                 <div class="stat-card">
                                     <div class="stat-icon icon-blue">
-                                        <i class="pe-7s-user"></i>
+                                        <i class="fa-solid fa-user"></i>
                                     </div>
                                     <div class="stat-label">Full Name</div>
                                     <div class="stat-value">{{ $user->firstname }} {{ $user->lastname }}</div>
@@ -430,7 +430,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-green">
-                                        <i class="pe-7s-check"></i>
+                                        <i class="fa-solid fa-check"></i>
                                     </div>
                                     <div class="stat-label">Email Verification</div>
                                     <div class="stat-value">{{ $user->email_verified_status == 'yes' ? 'Verified' : 'Pending' }}</div>
@@ -438,7 +438,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-orange">
-                                        <i class="pe-7s-cash"></i>
+                                        <i class="fa-solid fa-wallet"></i>
                                     </div>
                                     <div class="stat-label">Wallet Count</div>
                                     <div class="stat-value">{{ $balances->count() }}</div>
@@ -446,7 +446,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-red">
-                                        <i class="pe-7s-credit"></i>
+                                        <i class="fa-solid fa-credit-card"></i>
                                     </div>
                                     <div class="stat-label">Virtual Cards</div>
                                     <div class="stat-value">{{ $virtualCards->count() }}</div>
@@ -502,7 +502,7 @@
                                     <div class="stat-grid">
                                         <div class="stat-card">
                                             <div class="stat-icon icon-green">
-                                                <i class="pe-7s-check"></i>
+                                                <i class="fa-solid fa-check"></i>
                                             </div>
                                             <div class="stat-label">Verification Status</div>
                                             <div class="stat-value">{{ $user->email_verified_status == 'yes' ? 'Verified' : 'Pending' }}</div>
@@ -510,7 +510,7 @@
 
                                         <div class="stat-card">
                                             <div class="stat-icon icon-blue">
-                                                <i class="pe-7s-map-marker"></i>
+                                                <i class="fa-solid fa-map-marker"></i>
                                             </div>
                                             <div class="stat-label">Country</div>
                                             <div class="stat-value">{{ $user->country ?? 'N/A' }}</div>
@@ -518,7 +518,7 @@
 
                                         <div class="stat-card">
                                             <div class="stat-icon icon-orange">
-                                                <i class="pe-7s-wallet"></i>
+                                                <i class="fa-solid fa-wallet"></i>
                                             </div>
                                             <div class="stat-label">Currency</div>
                                             <div class="stat-value">{{ $user->currency ?? 'N/A' }}</div>

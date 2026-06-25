@@ -349,7 +349,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-badge">
-                                            <i class="lnr-apartment"></i>
+                                            <i class="fa-solid fa-chart-mixed"></i>
                                             Admin Overview
                                         </div>
                                         <h1 class="hero-title">Dashboard</h1>
@@ -397,7 +397,7 @@
                         <div class="metric-grid">
                             <div class="metric-card">
                                 <div class="metric-icon metric-blue">
-                                    <i class="pe-7s-users"></i>
+                                    <i class="fa-solid fa-users"></i>
                                 </div>
                                 <div class="metric-label">Total Users</div>
                                 <div class="metric-value">{{ $finalTotal }}</div>
@@ -406,7 +406,7 @@
 
                             <div class="metric-card">
                                 <div class="metric-icon metric-red">
-                                    <i class="pe-7s-portfolio"></i>
+                                    <i class="fa-solid fa-users-rectangle"></i>
                                 </div>
                                 <div class="metric-label">Business Accounts</div>
                                 <div class="metric-value">{{ $totalUsers }}</div>
@@ -415,7 +415,7 @@
 
                             <div class="metric-card">
                                 <div class="metric-icon metric-amber">
-                                    <i class="pe-7s-user"></i>
+                                    <i class="fa-solid fa-user-large"></i>
                                 </div>
                                 <div class="metric-label">Personal Accounts</div>
                                 <div class="metric-value">{{ $totalPersonals }}</div>
@@ -424,7 +424,7 @@
 
                             <div class="metric-card">
                                 <div class="metric-icon metric-green">
-                                    <i class="pe-7s-graph3"></i>
+                                    <i class="fa-solid fa-user-tie"></i>
                                 </div>
                                 <div class="metric-label">New Employees</div>
                                 <div class="metric-value">34</div>

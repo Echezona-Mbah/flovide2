@@ -79,7 +79,7 @@
                         <div class="row align-items-end g-4">
                             <div class="col-lg-8">
                                 <div class="hero-tag">
-                                    <i class="pe-7s-graph"></i>
+                                    <i class="fa-solid fa-exchange"></i>
                                     Exchange Directory
                                 </div>
                                 <h1 class="hero-title">Exchange Rates</h1>

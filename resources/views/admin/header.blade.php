@@ -302,7 +302,7 @@
             <ul class="header-megamenu nav ms-3">
                 <li class="nav-item">
                     <a href="javascript:void(0);" data-bs-placement="bottom" rel="popover-focus" data-offset="300" data-bs-toggle="popover-custom" class="nav-link">
-                        <i class="nav-link-icon pe-7s-gift"></i>
+                        <i class="nav-link-icon fa-solid fa-gift"></i>
                         Quick Setting
                         <i class="fa fa-angle-down ms-2 opacity-5"></i>
                     </a>
@@ -317,25 +317,25 @@
                                                 <li class="nav-item-header nav-item">Overview</li>
                                                 <li class="nav-item">
                                                     <a href="{{ route('admin.add_admin') }}" class="nav-link">
-                                                        <i class="nav-link-icon lnr-plus-circle"></i>
+                                                        <i class="nav-link-icon fa-solid fa-circle-plus"></i>
                                                         <span>Add Admin</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a href="{{ route('admin.all_admin') }}" class="nav-link">
-                                                        <i class="nav-link-icon lnr-users"></i>
+                                                        <i class="nav-link-icon fa-solid fa-users"></i>
                                                         <span>Admins</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a href="{{ route('admin.exchangerate') }}" class="nav-link">
-                                                        <i class="nav-link-icon lnr-sync"></i>
+                                                        <i class="nav-link-icon fa-solid fa-arrows-rotate"></i>
                                                         <span>Exchange Rate</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a href="{{ route('admin.career.index') }}" class="nav-link">
-                                                        <i class="nav-link-icon lnr-briefcase"></i>
+                                                        <i class="nav-link-icon fa-solid fa-briefcase"></i>
                                                         <span>Careers</span>
                                                     </a>
                                                 </li>
@@ -521,18 +521,18 @@
                                         <div class="g-0 row">
                                             <div class="col-sm-6">
                                                 <a href="{{ route('admin.profile') }}"
-                                                   class="btn-icon-vertical btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-warning"
-                                                   style="display: block; text-align: center;">
-                                                    <i class="pe-7s-user icon-gradient bg-amy-crisp btn-icon-wrapper mb-2"></i>
+                                                class="btn-icon-vertical btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-warning"
+                                                style="display: block; text-align: center;">
+                                                    <i class="fa-solid fa-user icon-gradient bg-amy-crisp btn-icon-wrapper mb-2"></i>
                                                     Account
                                                 </a>
                                             </div>
 
                                             <div class="col-sm-6">
                                                 <a href="{{ route('admin.reset.password') }}"
-                                                   class="btn-icon-vertical btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-danger"
-                                                   style="display: block; text-align: center;">
-                                                    <i class="pe-7s-refresh-2 icon-gradient bg-love-kiss btn-icon-wrapper mb-2"></i>
+                                                class="btn-icon-vertical btn-transition btn-transition-alt pt-2 pb-2 btn btn-outline-danger"
+                                                style="display: block; text-align: center;">
+                                                    <i class="fa-solid fa-rotate btn-icon-wrapper mb-2"></i>
                                                     <b>Reset Password</b>
                                                 </a>
                                             </div>

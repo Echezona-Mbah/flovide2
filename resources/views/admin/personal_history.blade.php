@@ -279,7 +279,7 @@
                         <div class="page-title-wrapper">
                             <div class="page-title-heading">
                                 <div class="page-title-icon">
-                                    <i class="pe-7s-note2 icon-gradient bg-happy-itmeo"></i>
+                                    <i class="fa-solid fa-note-sticky icon-gradient bg-happy-itmeo"></i>
                                 </div>
                                 <div>
                                     Transactions History
@@ -295,7 +295,7 @@
                         <div class="main-card mb-3 card">
                             <div class="card-header">
                                 <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
-                                    <i class="header-icon pe-7s-menu icon-gradient bg-ripe-malin"></i>
+                                    <i class="fa-solid fa-note-sticky icon-gradient bg-ripe-malin"></i>
                                     {{ $personal->name ?? ($personal->firstname . ' ' . $personal->lastname) }}'s Transactions
                                 </div>
                                 <div class="btn-actions-pane-right">
@@ -303,7 +303,9 @@
                                         <div class="input-group input-group-sm">
                                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search transactions..." class="form-control">
                                             <div class="input-group-append">
-                                                <button type="submit" class="btn btn-primary"><i class="pe-7s-search"></i></button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fa-solid fa-search"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </form>
@@ -373,7 +375,7 @@
                                         <tr>
                                             <td colspan="7" class="text-center py-4">
                                                 <div class="text-muted" style="font-size: 1.2rem;">
-                                                    <i class="pe-7s-info d-block mb-2" style="font-size: 2rem;"></i>
+                                                    <i class="fa-solid fa-circle-info d-block mb-2" style="font-size: 2rem;"></i>
                                                     No transactions found for this user.
                                                 </div>
                                             </td>

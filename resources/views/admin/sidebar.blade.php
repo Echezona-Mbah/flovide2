@@ -64,11 +64,13 @@
         list-style: none;
     }
 
-    /* Every menu link is a flex row */
+    
+
+    /* ── Nav list ── */
     .vertical-nav-menu li > a {
         display: flex;
         align-items: center;
-        gap: 0;                      /* spacing handled by icon width */
+        gap: 10px;                   /* ✅ consistent spacing */
         color: #475569;
         border-radius: 14px;
         margin-bottom: 4px;
@@ -77,8 +79,11 @@
         font-weight: 600;
         text-decoration: none;
         transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
-        overflow: hidden;            /* prevent any child overflow */
-        white-space: nowrap;         /* keep everything on one line */
+        overflow: hidden;
+        white-space: nowrap;
+        min-width: 0;                /* ✅ prevents flex overflow */
+        width: 100%;                 /* ✅ fill the sidebar width */
+        box-sizing: border-box;      /* ✅ padding included in width */
     }
 
     .vertical-nav-menu li > a:hover {
@@ -87,37 +92,38 @@
         transform: translateX(2px);
     }
 
-    /* ── Leading icon (fixed width, never shrinks) ── */
+    /* ── Leading icon ── */
     .vertical-nav-menu li > a > .metismenu-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;              /* never compress */
-        width: 28px;                 /* fixed column */
+        flex: 0 0 28px;              /* ✅ fixed size, never shrinks or grows */
+        width: 28px;
         height: 28px;
         font-size: 14px;
         color: #2563eb;
-        margin-right: 8px;          /* gap between icon and text */
+        margin-right: 0;             /* ✅ remove manual margin, gap handles it */
     }
 
-    /* ── Menu label (takes all remaining space) ── */
+    /* ── Menu label ── */
     .vertical-nav-menu li > a > .nav-label {
-        flex: 1;
-        min-width: 0;               /* allow text to be clipped if needed */
+        flex: 1 1 0;                 /* ✅ grow to fill, but can shrink */
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    /* ── Caret icon (pushed to far right, never shrinks) ── */
+    /* ── Caret icon ── */
     .vertical-nav-menu li > a > .metismenu-state-icon {
-        flex-shrink: 0;
+        flex: 0 0 auto;              /* ✅ never shrinks */
         margin-left: auto;
         padding-left: 6px;
         font-size: 11px;
         color: #94a3b8;
         transition: transform 0.22s ease;
     }
-
+ 
     /* Rotate caret when submenu is open */
     .vertical-nav-menu li.mm-active > a > .metismenu-state-icon {
         transform: rotate(180deg);
