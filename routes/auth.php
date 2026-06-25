@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AllSubscriptionController;
 use App\Http\Controllers\Admin\AllTeamMembersController;
 use App\Http\Controllers\Admin\BusinessAccountController;
 use App\Http\Controllers\Admin\UserTransactionHistoryController;
+use App\Http\Controllers\Admin\TestModeController;
 use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PersonalAccountController;
@@ -387,6 +388,9 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::middleware('admin.permission:view_users')->group(function () {
         Route::get('/admin/alltransactions/{id}', [UserTransactionHistoryController::class, 'history'])->name('admin.alltransactions.history');
         Route::get('/admin/personal-transactions/{id}', [UserTransactionHistoryController::class, 'personalHistory'])->name('admin.personal-transactions.history');
+
+        Route::get('/admin/testmode/{id}', [TestModeController::class, 'index'])->name('admin.testmode');
+        Route::get('/admin/personal-testmode/{id}', [TestModeController::class, 'personalTestMode'])->name('admin.personal-testmode');
 
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);

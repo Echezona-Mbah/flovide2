@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Beneficia extends Model
 {
-           use HasUuids;
+    use HasUuids;
 
     protected $fillable = [
         // Bank & account details
@@ -76,5 +76,15 @@ class Beneficia extends Model
     public function country()
     {
         return $this->belongsTo(Countries::class,'country_id');
+    }
+
+    public function scopeTestMode($query)
+    {
+        return $query->where('mode', 'test');
+    }
+
+    public function scopeLiveMode($query)
+    {
+        return $query->where('mode', 'live');
     }
 }

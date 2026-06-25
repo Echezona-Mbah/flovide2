@@ -573,6 +573,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.alltransactions.history', $user->id) }}">Transactions</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.testmode', $user->id) }}">Test Mode</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
