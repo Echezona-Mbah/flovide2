@@ -242,7 +242,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-tag">
-                                            <i class="pe-7s-credit"></i>
+                                            <i class="fa-solid fa-id-card-clip"></i>
                                             Beneficiary Directory
                                         </div>
                                         <h1 class="hero-title">Beneficia</h1>
@@ -280,7 +280,7 @@
                         <div class="summary-grid">
                             <div class="summary-card">
                                 <div class="summary-icon icon-blue">
-                                    <i class="pe-7s-id"></i>
+                                    <i class="fa-solid fa-id-card-clip"></i>
                                 </div>
                                 <div class="summary-label">All Beneficia</div>
                                 <div class="summary-value">{{ method_exists($allbeneficia, 'total') ? $allbeneficia->total() : $allbeneficia->count() }}</div>
@@ -288,7 +288,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-cyan">
-                                    <i class="pe-7s-culture"></i>
+                                    <i class="fa-solid fa-user-tie"></i>
                                 </div>
                                 <div class="summary-label">Visible Rows</div>
                                 <div class="summary-value" id="visibleCount">{{ $allbeneficia->count() }}</div>
@@ -296,7 +296,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-green">
-                                    <i class="pe-7s-wallet"></i>
+                                    <i class="fa-solid fa-wallet"></i>
                                 </div>
                                 <div class="summary-label">Currencies</div>
                                 <div class="summary-value">{{ collect($allbeneficia)->pluck('currency')->filter()->unique()->count() }}</div>
@@ -304,7 +304,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-amber">
-                                    <i class="pe-7s-search"></i>
+                                    <i class="fa-solid fa-earth-americas"></i>
                                 </div>
                                 <div class="summary-label">Countries</div>
                                 <div class="summary-value">{{ collect($allbeneficia)->pluck('country')->filter()->unique()->count() }}</div>

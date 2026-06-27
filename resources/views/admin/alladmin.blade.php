@@ -356,7 +356,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-tag">
-                                            <i class="pe-7s-users"></i>
+                                            <i class="fa-solid fa-users"></i>
                                             Team Directory
                                         </div>
                                         <h1 class="hero-title">All Admin</h1>
@@ -394,7 +394,7 @@
                         <div class="summary-grid">
                             <div class="summary-card">
                                 <div class="summary-icon icon-blue">
-                                    <i class="pe-7s-users"></i>
+                                    <i class="fa-solid fa-users"></i>
                                 </div>
                                 <div class="summary-label">All Admins</div>
                                 <div class="summary-value">{{ $admins->count() }}</div>
@@ -402,7 +402,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-green">
-                                    <i class="pe-7s-check"></i>
+                                    <i class="fa-solid fa-check"></i>
                                 </div>
                                 <div class="summary-label">Active Admins</div>
                                 <div class="summary-value">{{ $admins->filter(fn($a) => !($a->locked_until && $a->locked_until->isFuture()))->count() }}</div>
@@ -410,7 +410,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-red">
-                                    <i class="pe-7s-lock"></i>
+                                    <i class="fa-solid fa-lock"></i>
                                 </div>
                                 <div class="summary-label">Locked Admins</div>
                                 <div class="summary-value">{{ $admins->filter(fn($a) => $a->locked_until && $a->locked_until->isFuture())->count() }}</div>
@@ -418,7 +418,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-amber">
-                                    <i class="pe-7s-tools"></i>
+                                    <i class="fa-solid fa-tools"></i>
                                 </div>
                                 <div class="summary-label">Roles In Use</div>
                                 <div class="summary-value">{{ $admins->pluck('role')->filter()->unique()->count() }}</div>

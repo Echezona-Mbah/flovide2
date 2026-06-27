@@ -3,6 +3,7 @@
         background: #ffffff;
         border-right: 1px solid #e5e7eb;
         box-shadow: 8px 0 24px rgba(15, 23, 42, 0.04);
+        overflow-x: hidden;
     }
 
     .app-sidebar .app-header__logo {
@@ -53,54 +54,96 @@
     }
 
     .app-sidebar__inner {
-        padding: 18px 14px 28px;
+        padding: 18px 10px 28px;
     }
 
+    /* ── Nav list ───────────────────────────── */
     .vertical-nav-menu {
         margin: 0;
         padding: 0;
+        list-style: none;
     }
 
-    .vertical-nav-menu li a {
-        color: #475569;
-        border-radius: 16px;
-        margin-bottom: 6px;
-        padding: 12px 14px;
-        font-size: 14px;
-        font-weight: 600;
-        transition: all 0.22s ease;
+    
+
+    /* ── Nav list ── */
+    .vertical-nav-menu li > a {
         display: flex;
         align-items: center;
+        gap: 10px;                   /* ✅ consistent spacing */
+        color: #475569;
+        border-radius: 14px;
+        margin-bottom: 4px;
+        padding: 10px 12px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
+        overflow: hidden;
+        white-space: nowrap;
+        min-width: 0;                /* ✅ prevents flex overflow */
+        width: 100%;                 /* ✅ fill the sidebar width */
+        box-sizing: border-box;      /* ✅ padding included in width */
     }
 
-    .vertical-nav-menu li a:hover {
+    .vertical-nav-menu li > a:hover {
         background: #f8fafc;
         color: #0f172a;
         transform: translateX(2px);
     }
 
-    .vertical-nav-menu li a .metismenu-icon {
+    /* ── Leading icon ── */
+    .vertical-nav-menu li > a > .metismenu-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 28px;              /* ✅ fixed size, never shrinks or grows */
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
         color: #2563eb;
-        opacity: 1;
-        font-size: 18px;
-        min-width: 26px;
+        margin-right: 0;             /* ✅ remove manual margin, gap handles it */
     }
 
-    .vertical-nav-menu .metismenu-state-icon,
-    .vertical-nav-menu .caret-left {
+    /* ── Menu label ── */
+    .vertical-nav-menu li > a > .nav-label {
+        flex: 1 1 0;                 /* ✅ grow to fill, but can shrink */
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ── Caret icon ── */
+    .vertical-nav-menu li > a > .metismenu-state-icon {
+        flex: 0 0 auto;              /* ✅ never shrinks */
+        margin-left: auto;
+        padding-left: 6px;
+        font-size: 11px;
         color: #94a3b8;
+        transition: transform 0.22s ease;
+    }
+ 
+    /* Rotate caret when submenu is open */
+    .vertical-nav-menu li.mm-active > a > .metismenu-state-icon {
+        transform: rotate(180deg);
+        color: #2563eb;
     }
 
+    /* ── Section headings ── */
     .vertical-nav-menu .app-sidebar__heading {
         color: #94a3b8;
-        font-size: 11px;
+        font-size: 10.5px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        margin: 18px 10px 10px;
+        margin: 18px 8px 8px;
         padding: 0;
+        list-style: none;
+        white-space: nowrap;
     }
 
+    /* ── Active state ── */
     .vertical-nav-menu li.mm-active > a,
     .vertical-nav-menu li > a.mm-active {
         background: linear-gradient(135deg, #eff6ff, #f0f9ff);
@@ -113,33 +156,53 @@
         color: #1d4ed8;
     }
 
+    /* ── Sub-menu list ── */
     .vertical-nav-menu ul {
-        padding: 6px 0 8px 10px;
-        margin: 0 0 8px 8px;
-        border-left: 1px dashed #dbe3ee;
+        list-style: none;
+        padding: 4px 0 6px 14px;
+        margin: 0 0 4px 14px;
+        border-left: 2px solid #e2e8f0;
     }
 
-    .vertical-nav-menu ul li a {
-        padding: 10px 12px;
-        font-size: 13px;
+    .vertical-nav-menu ul li > a {
+        padding: 8px 10px;
+        font-size: 12.5px;
         color: #64748b;
-        border-radius: 14px;
+        border-radius: 12px;
+        font-weight: 500;
     }
 
-    .vertical-nav-menu ul li a:hover {
+    .vertical-nav-menu ul li > a:hover {
         color: #0f172a;
         background: #f8fafc;
     }
 
-    .vertical-nav-menu ul li a .metismenu-icon {
-        min-width: 14px;
-        width: 14px;
-        font-size: 8px;
-        color: #94a3b8;
+    /* Bullet dot for sub-items (replaces empty icon) */
+    .vertical-nav-menu ul li > a > .metismenu-icon {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        color: #cbd5e1;
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
+    /* Empty metismenu-icon → render as a small dot */
+    .vertical-nav-menu ul li > a > .metismenu-icon:empty::before {
+        content: "";
+        display: block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #cbd5e1;
+    }
+
+    /* ── Logout ── */
     .sidebar-logout a {
-        margin-top: 12px;
+        margin-top: 10px;
         background: #fff1f2;
         color: #dc2626 !important;
     }
@@ -153,15 +216,17 @@
         color: #dc2626 !important;
     }
 
+    /* ── Scroll note ── */
     .sidebar-scroll-note {
-        margin: 0 10px 16px;
-        padding: 12px 14px;
-        border-radius: 18px;
+        margin: 0 8px 14px;
+        padding: 10px 12px;
+        border-radius: 14px;
         background: linear-gradient(180deg, #f8fbff, #f1f5f9);
         border: 1px solid #e2e8f0;
         color: #64748b;
-        font-size: 12px;
+        font-size: 11.5px;
         line-height: 1.6;
+        white-space: normal;        /* allow wrapping inside the note */
     }
 </style>
 
@@ -202,6 +267,8 @@
 
     <div class="scrollbar-sidebar">
         <div class="app-sidebar__inner">
+
+            <br>
             <div class="sidebar-scroll-note">
                 Manage accounts, transactions, refunds, and platform operations from one place.
             </div>
@@ -211,8 +278,8 @@
 
                 <li>
                     <a href="{{ route('admin.dashboard') }}">
-                        <i class="metismenu-icon pe-7s-graph2"></i>
-                        Dashboard
+                        <i class="metismenu-icon fa-solid fa-chart-line"></i>
+                        <span class="nav-label">Dashboard</span>
                     </a>
                 </li>
 
@@ -220,21 +287,21 @@
 
                 <li class="mm-active">
                     <a href="#">
-                        <i class="metismenu-icon pe-7s-rocket"></i>
-                        Account Types
-                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                        <i class="metismenu-icon fa-solid fa-rocket"></i>
+                        <span class="nav-label">Account Types</span>
+                        <i class="metismenu-state-icon fa-solid fa-chevron-down caret-left"></i>
                     </a>
                     <ul class="mm-show">
                         <li>
                             <a href="{{ route('admin.business-account') }}">
                                 <i class="metismenu-icon"></i>
-                                Business Account
+                                <span class="nav-label">Business Account</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.personal-account') }}">
                                 <i class="metismenu-icon"></i>
-                                Personal Account
+                                <span class="nav-label">Personal Account</span>
                             </a>
                         </li>
                     </ul>
@@ -242,33 +309,33 @@
 
                 <li>
                     <a href="#">
-                        <i class="metismenu-icon pe-7s-light"></i>
-                        Account Management
-                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                        <i class="metismenu-icon fa-solid fa-sliders"></i>
+                        <span class="nav-label">Account Management</span>
+                        <i class="metismenu-state-icon fa-solid fa-chevron-down caret-left"></i>
                     </a>
                     <ul>
                         {{-- <li>
                             <a href="{{ route('admin.allaccount') }}">
                                 <i class="metismenu-icon"></i>
-                                Account
+                                <span class="nav-label">Account</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.allsubaccount') }}">
                                 <i class="metismenu-icon"></i>
-                                Sub Account
+                                <span class="nav-label">Sub Account</span>
                             </a>
                         </li> --}}
                         <li>
                             <a href="{{ route('admin.allbeneficias') }}">
                                 <i class="metismenu-icon"></i>
-                                Beneficias
+                                <span class="nav-label">Beneficias</span>
                             </a>
                         </li>
                         {{-- <li>
                             <a href="{{ route('admin.allcustomer') }}">
                                 <i class="metismenu-icon"></i>
-                                Customer
+                                <span class="nav-label">Customer</span>
                             </a>
                         </li> --}}
                     </ul>
@@ -278,8 +345,8 @@
 
                 <li>
                     <a href="{{ route('admin.transactionhistory') }}">
-                        <i class="metismenu-icon pe-7s-graph"></i>
-                        Transaction History
+                        <i class="metismenu-icon fa-solid fa-chart-bar"></i>
+                        <span class="nav-label">Transaction History</span>
                     </a>
                 </li>
 
@@ -287,21 +354,21 @@
 
                 <li>
                     <a href="#">
-                        <i class="metismenu-icon pe-7s-browser"></i>
-                        Chargeback / Refund
-                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                        <i class="metismenu-icon fa-solid fa-file-invoice"></i>
+                        <span class="nav-label">Chargeback / Refund</span>
+                        <i class="metismenu-state-icon fa-solid fa-chevron-down caret-left"></i>
                     </a>
                     <ul>
                         <li>
                             <a href="{{ route('admin.chargeback') }}">
                                 <i class="metismenu-icon"></i>
-                                Chargeback
+                                <span class="nav-label">Chargeback</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.refund') }}">
                                 <i class="metismenu-icon"></i>
-                                Refund
+                                <span class="nav-label">Refund</span>
                             </a>
                         </li>
                     </ul>
@@ -312,8 +379,8 @@
                 <li class="sidebar-logout">
                     <a href="#"
                        onclick="event.preventDefault(); document.getElementById('admin-logout-form').submit();">
-                        <i class="metismenu-icon pe-7s-power"></i>
-                        Logout
+                        <i class="metismenu-icon fa-solid fa-power-off"></i>
+                        <span class="nav-label">Logout</span>
                     </a>
 
                     <form id="admin-logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">

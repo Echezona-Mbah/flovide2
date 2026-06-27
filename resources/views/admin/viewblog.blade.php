@@ -18,7 +18,7 @@
                         <div class="page-title-wrapper">
                             <div class="page-title-heading">
                                 <div class="page-title-icon">
-                                    <i data-feather="file-text" style="width:20px; height:20px;"></i>
+                                    <i class="fa-solid fa-blog"></i>
                                 </div>
                                 <div>
                                     Blog posts

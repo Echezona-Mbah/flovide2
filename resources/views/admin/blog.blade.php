@@ -263,7 +263,7 @@
                         <div class="page-title-wrapper">
                             <div class="page-title-heading">
                                 <div class="page-title-icon">
-                                    <i class="pe-7s-note2 icon-gradient bg-happy-itmeo"></i>
+                                    <i class="fa-solid fa-blog icon-gradient bg-happy-itmeo"></i>
                                 </div>
                                 <div>
                                     Edit Blog Post
@@ -285,7 +285,7 @@
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <div class="d-flex align-items-center gap-3">
                                         <div style="width:40px; height:40px; border-radius:8px; background:#f8fafc; border:0.5px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
-                                            <i class="pe-7s-news-paper" style="font-size:20px; color:#64748b;"></i>
+                                            <i class="fa-solid fa-blog" style="font-size:20px; color:#64748b;"></i>
                                         </div>
                                         <div>
                                             <p class="mb-0 fw-500" style="font-size:15px; color:#1e293b;">Blog posts</p>
@@ -337,7 +337,7 @@
                                     style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; background:#1e293b; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; text-decoration:none; transition:opacity 0.15s;"
                                     onmouseover="this.style.opacity='0.85'"
                                     onmouseout="this.style.opacity='1'">
-                                        <i class="pe-7s-display2" style="font-size:15px;"></i> View all posts
+                                        <i class="fa-solid fa-blog" style="font-size:15px;"></i> View all posts
                                     </a>
                                 </div>
 
@@ -367,7 +367,7 @@
                                             <span class="input-group-text bg-light text-muted">https://flovide.com/blog/</span>
                                             <input type="text" id="post-slug" name="slug" class="form-control" placeholder="Slug" required>
                                             <button class="btn btn-outline-secondary" type="button" id="btn-regenerate-slug">
-                                                <i class="pe-7s-refresh-2"></i> Regenerate
+                                                <i class="fa-solid fa-refresh"></i> Regenerate
                                             </button>
                                         </div>
                                     </div>
@@ -447,7 +447,7 @@
                             <div class="main-card mb-4 card">
                                 <div class="card-header">
                                     <div class="card-header-title text-capitalize font-weight-bold">
-                                        <i class="pe-7s-paper-plane icon-gradient bg-happy-itmeo me-2"></i> Publish Settings
+                                        <i class="fa-solid fa-paper-plane icon-gradient bg-happy-itmeo me-2"></i> Publish Settings
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -490,11 +490,12 @@
 
                                     <div class="d-flex justify-content-between gap-2 mt-3">
                                         <button type="button" class="btn btn-gradient-secondary btn-sm" style="flex: 1;">
-                                            <i class="pe-7s-look me-1"></i> Preview
+                                            <i class="fa-solid fa-eye me-1"></i> Preview
                                         </button>
                                         <button type="submit" id="btn-submit-post" class="btn btn-gradient-primary btn-sm" style="flex: 1;">
                                             <span class="spinner-border spinner-border-sm me-1" id="submit-spinner" style="display: none;" role="status" aria-hidden="true"></span>
-                                            <i class="pe-7s-diskette me-1" id="submit-icon"></i> <span id="submit-text">Update Post</span>
+                                            <i class="fa-solid fa-save me-1" id="submit-icon"></i> 
+                                            <span id="submit-text">Update Post</span>
                                         </button>
                                     </div>
                                 </div>

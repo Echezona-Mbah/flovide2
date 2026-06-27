@@ -341,7 +341,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-tag">
-                                            <i class="pe-7s-graph"></i>
+                                            <i class="fa-solid fa-chart-line"></i>
                                             Transaction Monitor
                                         </div>
                                         <h1 class="hero-title">All Transaction History</h1>
@@ -379,7 +379,7 @@
                         <div class="summary-grid">
                             <div class="summary-card">
                                 <div class="summary-icon icon-blue">
-                                    <i class="pe-7s-graph1"></i>
+                                    <i class="fa-solid fa-chart-line"></i>
                                 </div>
                                 <div class="summary-label">All Transactions</div>
                                 <div class="summary-value">{{ method_exists($lastTransactions, 'total') ? $lastTransactions->total() : $lastTransactions->count() }}</div>
@@ -387,7 +387,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-green">
-                                    <i class="pe-7s-check"></i>
+                                    <i class="fa-solid fa-circle-check"></i>
                                 </div>
                                 <div class="summary-label">Successful</div>
                                 <div class="summary-value">{{ collect($lastTransactions)->where('status', 'success')->count() }}</div>
@@ -395,7 +395,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-red">
-                                    <i class="pe-7s-close-circle"></i>
+                                    <i class="fa-solid fa-circle-xmark"></i>
                                 </div>
                                 <div class="summary-label">Failed</div>
                                 <div class="summary-value">{{ collect($lastTransactions)->where('status', 'failed')->count() }}</div>
@@ -403,7 +403,7 @@
 
                             <div class="summary-card">
                                 <div class="summary-icon icon-amber">
-                                    <i class="pe-7s-search"></i>
+                                    <i class="fa-solid fa-magnifying-glass"></i>
                                 </div>
                                 <div class="summary-label">Visible Rows</div>
                                 <div class="summary-value" id="visibleCount">{{ $lastTransactions->count() }}</div>

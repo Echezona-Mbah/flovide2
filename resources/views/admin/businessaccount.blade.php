@@ -303,7 +303,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-tag">
-                                            <i class="pe-7s-portfolio"></i>
+                                            <i class="fa-solid fa-building"></i>
                                             Merchant Directory
                                         </div>
                                         <h1 class="hero-title">Business Accounts</h1>
@@ -338,10 +338,11 @@
                             </div>
                         </div>
 
+
                         <div class="stats-row">
                             <div class="stat-box">
                                 <div class="stat-icon stat-blue">
-                                    <i class="pe-7s-users"></i>
+                                    <i class="fa-solid fa-users"></i>
                                 </div>
                                 <div class="stat-label">All Business Users</div>
                                 <div class="stat-value">{{ $allUser->total() ?? $allUser->count() }}</div>
@@ -349,7 +350,7 @@
 
                             <div class="stat-box">
                                 <div class="stat-icon stat-green">
-                                    <i class="pe-7s-check"></i>
+                                    <i class="fa-solid fa-circle-check"></i>
                                 </div>
                                 <div class="stat-label">Active Users</div>
                                 <div class="stat-value">{{ $allUser->where('deletestatus', 'active')->count() }}</div>
@@ -357,7 +358,7 @@
 
                             <div class="stat-box">
                                 <div class="stat-icon stat-red">
-                                    <i class="pe-7s-close-circle"></i>
+                                    <i class="fa-solid fa-circle-xmark"></i>
                                 </div>
                                 <div class="stat-label">Inactive Users</div>
                                 <div class="stat-value">{{ $allUser->where('deletestatus', '!=', 'active')->count() }}</div>
@@ -365,7 +366,7 @@
 
                             <div class="stat-box">
                                 <div class="stat-icon stat-amber">
-                                    <i class="pe-7s-search"></i>
+                                    <i class="fa-solid fa-magnifying-glass"></i>
                                 </div>
                                 <div class="stat-label">Search Result</div>
                                 <div class="stat-value">{{ $allUser->count() }}</div>

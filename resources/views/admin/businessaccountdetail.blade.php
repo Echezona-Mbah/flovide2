@@ -516,7 +516,7 @@
 
                                             <div class="text-white">
                                                 <div class="hero-pill mb-2">
-                                                    <i class="pe-7s-portfolio"></i>
+                                                    <i class="fa-solid fa-building"></i>
                                                     Business Merchant Dashboard
                                                 </div>
                                                 <h2 class="mb-1 text-white">{{ $user->business_name ?? ($user->firstname.' '.$user->lastname) }}</h2>
@@ -573,13 +573,16 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.alltransactions.history', $user->id) }}">Transactions</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.testmode', $user->id) }}">Test Mode</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
                             <div class="stat-grid mb-4">
                                 <div class="stat-card">
                                     <div class="stat-icon icon-blue">
-                                        <i class="pe-7s-id"></i>
+                                        <i class="fa-solid fa-building"></i>
                                     </div>
                                     <div class="stat-label">Business Name</div>
                                     <div class="stat-value">{{ $user->business_name ?? 'N/A' }}</div>
@@ -587,7 +590,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-green">
-                                        <i class="pe-7s-check"></i>
+                                        <i class="fa-solid fa-check"></i>
                                     </div>
                                     <div class="stat-label">Email Verification</div>
                                     <div class="stat-value">{{ $user->email_verified_status == 'yes' ? 'Verified' : 'Pending' }}</div>
@@ -595,7 +598,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-orange">
-                                        <i class="pe-7s-cash"></i>
+                                        <i class="fa-solid fa-wallet"></i>
                                     </div>
                                     <div class="stat-label">Wallet Count</div>
                                     <div class="stat-value">{{ $balances->count() }}</div>
@@ -603,7 +606,7 @@
 
                                 <div class="stat-card">
                                     <div class="stat-icon icon-red">
-                                        <i class="pe-7s-users"></i>
+                                        <i class="fa-solid fa-users"></i>
                                     </div>
                                     <div class="stat-label">Team Members</div>
                                     <div class="stat-value">{{ $teamMembers->count() }}</div>
@@ -1065,7 +1068,7 @@
                                                 <form method="POST" action="{{ route('admin.business.submit-fidelity', $user->id) }}" class="confirm-submit-form" data-confirm="Submit this business's details to Fidelity Bank to generate a virtual account?">
                                                     @csrf
                                                     <button type="submit" class="btn btn-soft-primary btn-sm w-100">
-                                                        <i class="pe-7s-cloud-upload"></i> Submit to Fidelity Bank
+                                                        <i class="fa-solid fa-cloud-upload"></i> Submit to Fidelity Bank
                                                     </button>
                                                 </form>
                                             @endif

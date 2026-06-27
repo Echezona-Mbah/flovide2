@@ -80,7 +80,7 @@
                         <div class="page-title-wrapper">
                             <div class="page-title-heading">
                                 <div class="page-title-icon">
-                                    <i class="pe-7s-graph icon-gradient bg-ripe-malin"></i>
+                                    <i class="fa-solid fa-lock icon-gradient bg-ripe-malin"></i>
                                 </div>
                                   <div>
                                        Reset Password  

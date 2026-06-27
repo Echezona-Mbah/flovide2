@@ -36,4 +36,14 @@ class Balance extends Model
     {
         return $this->belongsTo(Personal::class);
     }
+
+    public function scopeTestMode($query)
+    {
+        return $query->where('mode', 'test');
+    }
+
+    public function scopeLiveMode($query)
+    {
+        return $query->where('mode', 'live');
+    }
 }

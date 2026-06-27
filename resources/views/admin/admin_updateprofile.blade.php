@@ -443,7 +443,7 @@
                                 <div class="row align-items-end g-4">
                                     <div class="col-lg-8">
                                         <div class="hero-tag">
-                                            <i class="pe-7s-user"></i>
+                                            <i class="fa-solid fa-user"></i>
                                             Personal Workspace
                                         </div>
                                         <h1 class="hero-title">Profile</h1>
@@ -481,7 +481,7 @@
                         <div class="profile-stats">
                             <div class="stat-card">
                                 <div class="stat-icon icon-blue">
-                                    <i class="pe-7s-id"></i>
+                                    <i class="fa-solid fa-user"></i>
                                 </div>
                                 <div class="stat-label">Full Name</div>
                                 <div class="stat-value">{{ $admin->name }}</div>
@@ -489,7 +489,7 @@
 
                             <div class="stat-card">
                                 <div class="stat-icon icon-cyan">
-                                    <i class="pe-7s-mail"></i>
+                                    <i class="fa-solid fa-envelope"></i>
                                 </div>
                                 <div class="stat-label">Email</div>
                                 <div class="stat-value" style="font-size:18px;">{{ $admin->email }}</div>
@@ -497,7 +497,7 @@
 
                             <div class="stat-card">
                                 <div class="stat-icon icon-green">
-                                    <i class="pe-7s-medal"></i>
+                                    <i class="fa-solid fa-medal"></i>
                                 </div>
                                 <div class="stat-label">Admin Role</div>
                                 <div class="stat-value">{{ $admin->role }}</div>
@@ -505,7 +505,7 @@
 
                             <div class="stat-card">
                                 <div class="stat-icon icon-amber">
-                                    <i class="pe-7s-graph3"></i>
+                                    <i class="fa-solid fa-user-large"></i>
                                 </div>
                                 <div class="stat-label">Completion</div>
                                 <div class="stat-value">{{ $completionPercent }}%</div>

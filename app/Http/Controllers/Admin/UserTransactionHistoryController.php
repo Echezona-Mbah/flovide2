@@ -15,7 +15,7 @@ class UserTransactionHistoryController extends Controller
         $user = User::findOrFail($id);
         $search = $request->input('search');
 
-        $query = TransactionHistory::where('user_id', $user->id);
+        $query = TransactionHistory::where('user_id', $user->id)->liveMode();
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -38,7 +38,7 @@ class UserTransactionHistoryController extends Controller
         $personal = Personal::findOrFail($id);
         $search = $request->input('search');
 
-        $query = TransactionHistory::where('personal_id', $personal->id);
+        $query = TransactionHistory::where('personal_id', $personal->id)->liveMode();
 
         if ($search) {
             $query->where(function ($q) use ($search) {

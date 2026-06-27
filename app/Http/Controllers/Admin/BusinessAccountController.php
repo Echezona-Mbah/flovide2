@@ -122,10 +122,14 @@ public function find($id)
 {
     $user = User::findOrFail($id);
 
-    $balances = Balance::where('user_id', $user->id)->get();
+    $balances = Balance::where('user_id', $user->id)
+        ->liveMode()
+        ->get();
     $virtualCards = VirtualCards::where('user_id', $user->id)->get();
     $teamMembers = TeamMembers::where('owner_id', $user->id)->get();
-    $beneficia = Beneficia::where('user_id', $user->id)->get();
+    $beneficia = Beneficia::where('user_id', $user->id)
+        ->liveMode()
+        ->get();
     $customer = Customer::where('user_id', $user->id)->get();
     $bankAccount = BankAccount::where('user_id', $user->id)->get();
     $Subaccount = Subaccount::where('user_id', $user->id)->get();
