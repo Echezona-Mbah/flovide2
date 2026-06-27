@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Personal\User; // your personal user model
+use App\Models\Personal;
 
 class ComplianceController extends Controller
 {
@@ -52,6 +53,73 @@ class ComplianceController extends Controller
 
 //     return json_decode($response->getBody(), true); // return array, not Response
 // }
+
+
+    public function store(Request $request)
+    {
+        $formType = $request->input('document_type');
+
+        switch ($formType) {
+            case 'nin':
+                return $this->handleNin($request);
+
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid document type.',
+                ], 422);
+        }
+    }
+
+    public function handleNin(Request $request)
+    {
+        $request->validate([
+            'nin' => 'required|digits:11'
+        ]);
+
+        $user = Auth::guard('personal-api')->user();
+
+        if ($user->nin && $user->nin_status === 'under review') {
+            return response()->json([
+                'success' => false,
+                'message' => 'NIN already submitted.',
+                'code' => 'NIN_ALREADY_SUBMITTED',
+                'data' => [
+                    'nin' => $user->nin,
+                    'nin_status' => $user->nin_status,
+                ]
+            ], 409);
+        }
+
+        $ninExists = Personal::where('nin', $request->nin)
+            ->where('id', '!=', $user->id)
+            ->exists();
+
+        if ($ninExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This NIN is already linked to another personal account.',
+                'code' => 'NIN_DUPLICATE',
+            ], 409);
+        }
+
+        $user->nin = $request->nin;
+        $user->nin_status = 'under review';
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'NIN submitted successfully.',
+            'code' => 'NIN_SUBMITTED',
+            'data' => [
+                'nin'        => $user->nin,
+                'nin_status' => $user->nin_status,
+            ]
+        ], 201);
+    }
+
+
+
 public function getSumsubToken($user = null)
 {
     if (!$user) {

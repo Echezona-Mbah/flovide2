@@ -371,6 +371,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/tax', [ComplianceController::class, 'handleTin']);
     Route::post('/utilitybill', [ComplianceController::class, 'handleUtilitybill']);
     Route::post('/bvn', [ComplianceController::class, 'handleBvn']);
+    Route::post('/nin', [ComplianceController::class, 'handleNin']);
     Route::post('/proof_of_identity', [ComplianceController::class, 'handleProofOfIdentity']);
     Route::post('/ownership', [ComplianceController::class, 'handleOwnership']);
     Route::post('/organisational_chart', [ComplianceController::class, 'handleOrganisationalChart']);
@@ -454,6 +455,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         
         // Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
         Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
+        Route::post('/nin', [PersonalComplianceController ::class,'handleNin']);
         Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
 
 

@@ -80,10 +80,69 @@ class ComplianceController extends Controller
 
             case 'formation_document':
                 return $this->handleFormationDocument($request);
+            
+            case 'nin':
+                return $this->handleNin($request);
 
             default:
                 return back()->with('error', 'Invalid document type.');
         }
+    }
+
+
+    public function handleNin(Request $request) {
+        $request->validate([
+            'nin' => 'required|digits:11'
+        ]);
+
+        $user = auth()->user();
+
+        if ($user->nin && $user->nin_status === 'under review') {
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'NIN already submitted.',
+                    'code' => 'NIN_ALREADY_SUBMITTED',
+                    'data' => [
+                        'nin' => $user->nin,
+                        'nin_status' => $user->nin_status,
+                    ]
+                ], 409);
+            }
+
+            return back()->with('error', 'NIN already submitted.');
+        }
+
+        $ninExists = User::where('nin', $request->nin)
+            ->where('id', '!=', $user->id)
+            ->exists();
+
+        if ($ninExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This NIN is already linked to another business account.',
+                'code' => 'NIN_DUPLICATE',
+            ], 409);
+        }
+
+        $user->nin = $request->nin;
+        $user->nin_status = 'under review';
+        $user->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'NIN submitted successfully.',
+                'code' => 'NIN_SUBMITTED',
+                'data' => [
+                    'nin' => $user->nin,
+                    'nin_status' => $user->nin_status,
+                ]
+            ], 201);
+        }
+
+        return back()->with('success', 'NIN submitted successfully.');
     }
 
 

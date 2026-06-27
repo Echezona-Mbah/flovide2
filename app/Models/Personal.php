@@ -46,7 +46,9 @@ class Personal extends Authenticatable
         'identity_verification_status',
         'selfie_verification_status',
         'profile_picture',
-        'device_token'
+        'device_token',
+        'nin',
+        'nin_status',
     ];
 
 
@@ -71,7 +73,8 @@ class Personal extends Authenticatable
 {
     return
         $this->identity_verification_status === 'confirmed' &&
-        $this->selfie_verification_status === 'confirmed';
+        $this->selfie_verification_status === 'confirmed' &&
+        $this->nin_status === 'confirmed';
         // $this->valid_id_status === 'confirmed' &&
         // $this->utility_bill_status === 'confirmed' &&
         // (
@@ -82,11 +85,12 @@ class Personal extends Authenticatable
 
 public function complianceStatus($tokenResponse = null)
 {
-        $user = auth('personal-api')->user();
+    $user = auth('personal-api')->user();
 
     return [
         'identity_verification' => $this->identity_verification_status,
         'selfie_verification' => $this->selfie_verification_status,
+        'nin_status' => $this->nin_status,
         'token' => $tokenResponse['token'] ?? null,
         'userId' => $tokenResponse['userId'] ?? null,
     ];
