@@ -13,6 +13,8 @@ use App\Models\VirtualCards;
 use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\FidelityService;
+
 
 class PersonalAccountController extends Controller
 {
@@ -195,6 +197,57 @@ private function updateBalanceAmount(Request $request, $personalId, $balanceId, 
 }
 
 
+
+public function submitToFidelity(Request $request, $id, FidelityService $fidelity)
+{
+    $personal = Personal::findOrFail($id);
+
+    $currency = $request->input('currency', 'NGN');
+
+    // ── Find (or create) the NGN balance wallet for this personal account ──
+    $balance = Balance::where('personal_id', $personal->id)
+        ->where('currency', $currency)
+        ->first();
+
+    // if (!$balance) {
+    //     $balance = Balance::create([
+    //         'personal_id' => $personal->id,
+    //         'currency'    => $currency,
+    //         'amount'      => 0,
+    //         'name'        => $currency . ' Wallet',
+    //     ]);
+    // }
+
+    if ($balance->virtual_account_number) {
+        return back()->with('error', 'This wallet already has a Fidelity virtual account.');
+    }
+
+    $response = $fidelity->generateStaticVirtualAccount([
+        'first_name'    => $personal->firstname,
+        'last_name'     => $personal->lastname,
+        'email'         => $personal->email,
+        'bvn'           => $personal->bvn,
+        'nin'           => $personal->nin,
+        'phone_number'  => $personal->person_phone,
+        'date_of_birth' => $personal->date_of_birth,
+    ]);
+
+    if (!$response['success']) {
+        $msg = $response['data']['messageCode'] ?? 'Failed to create Fidelity virtual account.';
+        return back()->with('error', $msg);
+    }
+
+    $accountInfo = $response['data']['data']['accountInformation'] ?? [];
+    $processId   = $response['data']['data']['processId'] ?? null;
+
+    $balance->virtual_account_number = $accountInfo['accountNumber'] ?? null;
+    $balance->virtual_account_name   = $accountInfo['accountName'] ?? null;
+    $balance->virtual_account_bank   = $accountInfo['bankName'] ?? null;
+    $balance->fidelty_process_id     = $processId;
+    $balance->save();
+
+    return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
+}
 
 
 

@@ -14,12 +14,23 @@ class Balance extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['user_id', 'personal_id', 'name', 'currency', 'amount','mode'];
+    protected $fillable = [
+        'user_id',
+        'personal_id',
+        'name',
+        'currency',
+        'amount',
+        'mode',
+        'virtual_account_number',
+        'virtual_account_name',
+        'virtual_account_bank',
+        'fidelty_process_id',
+    ];
 
-public function user()
-{
-    return $this->belongsTo(User::class);
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function personal()
     {

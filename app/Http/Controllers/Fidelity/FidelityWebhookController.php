@@ -22,17 +22,13 @@ class FidelityWebhookController extends Controller
         Log::info('[FidelityWebhook] Incoming webhook', $payload);
 
         $transactionId          = $payload['transactionId'] ?? null;
-        $merchantAccountNumber  = $payload['merchantAccountNumber'] ?? null;
-        $merchantAccountName    = $payload['merchantAccountName'] ?? null;
-        $settledAmount          = $payload['settledAmount'] ?? null;
+        $merchantAccountNumber  = $payload['receiverAccountNumber'] ?? $payload['merchantAccountNumber'] ?? null;
+        $merchantAccountName    = $payload['receiverAccountName']   ?? $payload['merchantAccountName']  ?? null;
         $transactionAmount      = $payload['transactionAmount'] ?? null;
         $feeAmount              = $payload['feeAmount'] ?? 0;
         $currency               = $payload['currency'] ?? 'NGN';
-        $narration              = $payload['narration'] ?? null;
-        $senderAccountNumber    = $payload['senderAccountNumber'] ?? null;
         $senderAccountName      = $payload['senderAccountName'] ?? null;
         $senderBankName         = $payload['senderBankName'] ?? null;
-        $tranDateTime           = $payload['tranDateTime'] ?? null;
 
         if (!$transactionId || !$merchantAccountNumber) {
             Log::warning('[FidelityWebhook] Missing transactionId or merchantAccountNumber');
@@ -51,58 +47,49 @@ class FidelityWebhookController extends Controller
             return response()->json(['message' => 'Already processed'], 200);
         }
 
-        // ── Find the owner of this virtual account number ─────────────────────
-        $user = User::where('virtual_account_number', $merchantAccountNumber)->first();
-        $personal = null;
-
-        if (!$user) {
-            $personal = Personal::where('virtual_account_number', $merchantAccountNumber)->first();
-        }
-
-        if (!$user && !$personal) {
-            Log::warning('[FidelityWebhook] No account owner found for merchant account number', [
-                'merchant_account_number' => $merchantAccountNumber,
-            ]);
-            return response()->json(['message' => 'Account owner not found'], 404);
-        }
-
-        $ownerId   = $user->id ?? null;
-        $personalId = $personal->id ?? null;
-
-        // ── Find the user's NGN balance to credit ──────────────────────────────
-        $balance = Balance::where('user_id', $ownerId ?? $personalId)
-            ->where('currency', $currency)
-            ->first();
+        // ── Find the wallet (Balance) that owns this virtual account ──────────
+        $balance = Balance::where('virtual_account_number', $merchantAccountNumber)->first();
 
         if (!$balance) {
-            Log::warning('[FidelityWebhook] No matching balance wallet found', [
-                'owner_id' => $ownerId ?? $personalId,
-                'currency' => $currency,
+            Log::warning('[FidelityWebhook] No wallet found for virtual account number', [
+                'merchant_account_number' => $merchantAccountNumber,
             ]);
-            return response()->json(['message' => 'Wallet not found for this currency'], 404);
+            return response()->json(['message' => 'Wallet not found'], 404);
         }
 
-        $creditAmount = (float) ($settledAmount ?? $transactionAmount ?? 0);
+        if ((string) $balance->currency !== (string) $currency) {
+            Log::warning('[FidelityWebhook] Currency mismatch on wallet', [
+                'balance_id'       => $balance->id,
+                'wallet_currency'  => $balance->currency,
+                'payload_currency' => $currency,
+            ]);
+            return response()->json(['message' => 'Currency mismatch for this wallet'], 422);
+        }
+
+        $ownerId    = $balance->user_id;
+        $personalId = $balance->personal_id;
+
+        $creditAmount = (float) $transactionAmount;
 
         // ── Create the transaction record ───────────────────────────────────────
         $tx = TransactionHistory::create([
-            'user_id'           => $ownerId,
-            'personal_id'       => $personalId,
-            'balance_id'        => $balance->id,
-            'payment_provider'  => 'fidelity',
-            'transaction_type'  => 'payment',
-            'method'            => 'credit',
-            'amount'            => $creditAmount,
-            'fees'              => $feeAmount,
-            'total_amount'      => $transactionAmount,
-            'currency'          => $currency,
-            'status'            => 'success',
-            'reference'         => $payload['settlementId'] ?? $transactionId,
-            'order_id'          => $transactionId,
-            'sender'            => $senderAccountName,
-            'recipient_account_number' => $merchantAccountNumber,
-            'recipient_account_name'   => $merchantAccountName,
-            'recipient_bank_name'      => $senderBankName,
+            'user_id'                  => $ownerId,
+            'personal_id'               => $personalId,
+            'balance_id'                => $balance->id,
+            'payment_provider'          => 'fidelity',
+            'transaction_type'          => 'payment',
+            'method'                    => 'credit',
+            'amount'                    => $creditAmount,
+            'fees'                      => $feeAmount,
+            'total_amount'              => $transactionAmount,
+            'currency'                  => $currency,
+            'status'                    => 'success',
+            'reference'                 => $payload['settlementId'] ?? $transactionId,
+            'order_id'                  => $transactionId,
+            'sender'                    => $senderAccountName,
+            'recipient_account_number'  => $merchantAccountNumber,
+            'recipient_account_name'    => $merchantAccountName,
+            'recipient_bank_name'       => $senderBankName,
         ]);
 
         Log::info('[FidelityWebhook] Transaction created', [
@@ -132,10 +119,10 @@ class FidelityWebhookController extends Controller
         try {
             $firebase = app(FirebaseNotificationService::class);
 
-            $user = $tx->user_id ? User::find($tx->user_id) : null;
-            $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+            $owner = $tx->user_id ? User::find($tx->user_id) : null;
+            $owner = $owner ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
 
-            if (!$user || empty($user->device_token)) {
+            if (!$owner || empty($owner->device_token)) {
                 return;
             }
 
@@ -143,7 +130,7 @@ class FidelityWebhookController extends Controller
             $amount   = number_format((float) $tx->amount, 2);
 
             $firebase->sendToToken(
-                $user->device_token,
+                $owner->device_token,
                 'Deposit Successful',
                 "Your deposit of {$currency} {$amount} was successful.",
                 [
@@ -166,17 +153,17 @@ class FidelityWebhookController extends Controller
     protected function sendEmail(TransactionHistory $tx): void
     {
         try {
-            $user = $tx->user_id ? User::find($tx->user_id) : null;
-            $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+            $owner = $tx->user_id ? User::find($tx->user_id) : null;
+            $owner = $owner ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
 
-            if (!$user || empty($user->email)) {
+            if (!$owner || empty($owner->email)) {
                 return;
             }
 
             $balance = Balance::find($tx->balance_id);
 
             $data = [
-                'name'               => $user->business_name ?? $user->name ?? $user->firstname ?? 'Customer',
+                'name'               => $owner->business_name ?? $owner->name ?? $owner->firstname ?? 'Customer',
                 'amount_sent'        => number_format((float) $tx->amount, 2),
                 'recipient_amount'   => number_format((float) $tx->amount, 2),
                 'fee'                => number_format((float) ($tx->fees ?? 0), 2),
@@ -191,7 +178,7 @@ class FidelityWebhookController extends Controller
                 'status_message'     => 'Your deposit was processed successfully. Here is a summary of your transaction.',
             ];
 
-            Mail::to($user->email)->send(new TransactionSentMail($data));
+            Mail::to($owner->email)->send(new TransactionSentMail($data));
 
             Log::info('[FidelityWebhook] Email sent', ['tx_id' => $tx->id]);
 

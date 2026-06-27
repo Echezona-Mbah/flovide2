@@ -96,6 +96,7 @@ class AddMoneyController extends Controller
         'balance_id'       => $balance->id,
         'payment_provider' => 'interac',
         'transaction_type' => 'payment',
+        'type'           => 'credit',
         'method'           => 'credit',
         'payment_method'   => 'auto',
         'sender'           => $request->email,

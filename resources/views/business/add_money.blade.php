@@ -137,11 +137,10 @@
                 <p class="text-sm font-medium text-gray-400">Debit card</p>
                 <p class="text-xs text-gray-400">Coming soon</p>
               </div>
-              <div class="relative border border-gray-200 bg-gray-100 rounded-xl p-3 opacity-50 cursor-not-allowed select-none">
-                <span class="absolute top-2 right-2 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">Soon</span>
-                <i class="fas fa-university text-gray-400 text-lg mb-1"></i>
-                <p class="text-sm font-medium text-gray-400">Bank transfer</p>
-                <p class="text-xs text-gray-400">Coming soon</p>
+              <div class="pm-option border border-gray-200 bg-white rounded-xl p-3 cursor-pointer transition" id="pm-bank" onclick="selectPm('bank')">
+                <i class="fas fa-university text-blue-600 text-lg mb-1"></i>
+                <p class="text-sm font-medium text-gray-900">Bank transfer</p>
+                <p class="text-xs text-blue-500 font-medium">Available</p>
               </div>
               <div class="relative border border-gray-200 bg-gray-100 rounded-xl p-3 opacity-50 cursor-not-allowed select-none">
                 <span class="absolute top-2 right-2 text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">Soon</span>
@@ -298,38 +297,34 @@
     }
 
     // ── Step 3: Payment method selection ──────────────────────────────────
-    function selectPm(type) {
-      selPm = type;
+   function selectPm(type) {
+    selPm = type;
 
-      // Highlight selected card briefly
-      document.querySelectorAll('.pm-option').forEach(opt => {
-        opt.classList.remove('border-2', 'border-blue-600', 'bg-blue-50', 'active');
-        opt.classList.add('border', 'border-gray-200', 'bg-white');
-      });
-      const selected = document.getElementById('pm-' + type);
-      if (selected) {
-        selected.classList.add('active', 'border-2', 'border-blue-600', 'bg-blue-50');
-        selected.classList.remove('border', 'border-gray-200', 'bg-white');
-      }
-
-      if (type === 'interac') {
-        // ── Navigate to the Interac details page, passing amount + currency as query params
-        const amt      = parseFloat(document.getElementById('amtInput').value) || 0;
-        const currency = selCur?.code   ?? '';
-        const symbol   = encodeURIComponent(selCur?.symbol ?? '');
-
-        // Determine type: CAD uses standard Interac e-Transfer; others can default to auto-deposit
-        const interacType = isCAD ? 'standard' : 'auto';
-
-      const url = `{{ url('/add-money/interac') }}?type=${interacType}&amount=${amt}&currency=${currency}&symbol=${symbol}&balance_id=${selCur.id}`;        window.location.href = url;
-
-      } else {
-        // Coming-soon methods — mark done and update CTA
-        const labels = { card: 'Debit card', bank: 'Bank transfer', crypto: 'Crypto' };
-        markDone(3, (labels[type] ?? type) + ' selected');
-        updateCta();
-      }
+    document.querySelectorAll('.pm-option').forEach(opt => {
+      opt.classList.remove('border-2', 'border-blue-600', 'bg-blue-50', 'active');
+      opt.classList.add('border', 'border-gray-200', 'bg-white');
+    });
+    const selected = document.getElementById('pm-' + type);
+    if (selected) {
+      selected.classList.add('active', 'border-2', 'border-blue-600', 'bg-blue-50');
+      selected.classList.remove('border', 'border-gray-200', 'bg-white');
     }
+
+    if (type === 'interac' || type === 'bank') {
+      const amt      = parseFloat(document.getElementById('amtInput').value) || 0;
+      const currency = selCur?.code   ?? '';
+      const symbol   = encodeURIComponent(selCur?.symbol ?? '');
+      const interacType = isCAD ? 'standard' : 'auto';
+
+      const url = `{{ url('/add-money/interac') }}?type=${interacType}&method=${type}&amount=${amt}&currency=${currency}&symbol=${symbol}&balance_id=${selCur.id}`;
+      window.location.href = url;
+
+    } else {
+      const labels = { card: 'Debit card', crypto: 'Crypto' };
+      markDone(3, (labels[type] ?? type) + ' selected');
+      updateCta();
+    }
+  }
 
     // ── Helpers ────────────────────────────────────────────────────────────
     function markDone(n, subtitle) {

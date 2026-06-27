@@ -789,6 +789,8 @@ public function store(Request $request)
 
     $sendingCurrency = strtoupper($balance->currency);
     $currency        = strtoupper($recipient->currency);
+    $amount          = (float) $validated['amount'];
+
 
     $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $sendingCurrency))
         ->whereHas('toCurrency',   fn($q) => $q->where('code', $currency))
@@ -803,9 +805,38 @@ public function store(Request $request)
         ], 400);
     }
 
-    $transferFee     = (float) ($rate->transfer_fee ?? 0);
-    $totalAmount     = (float) $validated['amount'] + $transferFee;
-    $recipientAmount = round((float) $validated['amount'] * (float) $rate->rate, 2);
+        $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)->where('currency', $currency)->first();
+        $platformFee = 0;
+        $transferFee = 0;
+
+
+    if ($userFee && $userFee->payout_enabled) {
+
+        if ($userFee->payout_min > 0 && $amount < $userFee->payout_min) {
+            return response()->json([
+                'success' => false,
+                'message' => "Minimum payout for {$sendingCurrency} is " . number_format($userFee->payout_min, 2),
+                'code'    => 'BELOW_PAYOUT_MIN',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($userFee->payout_max > 0 && $amount > $userFee->payout_max) {
+            return response()->json([
+                'success' => false,
+                'message' => "Maximum payout for {$sendingCurrency} is " . number_format($userFee->payout_max, 2),
+                'code'    => 'ABOVE_PAYOUT_MAX',
+                'data'    => null,
+            ], 422);
+        }
+
+        $platformFee = round(($amount * $userFee->payout_percent / 100) + $userFee->payout_fixed,2);
+
+        $transferFee = $platformFee;
+    }
+
+    $totalAmount     = $amount; // fee no longer bundled into total — taken from payout balance separately
+    $recipientAmount = $amount; // same amount, no conversion
 
     if ($balance->amount < $totalAmount) {
         return response()->json([
@@ -814,28 +845,6 @@ public function store(Request $request)
             'code'    => 'INSUFFICIENT_FUNDS',
             'data'    => null,
         ], 422);
-    }
-
-    $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
-
-    if ($limit) {
-        if (! is_null($limit->min_amount) && $validated['amount'] < $limit->min_amount) {
-            return response()->json([
-                'success' => false,
-                'message' => "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}",
-                'code'    => 'AMOUNT_BELOW_MINIMUM',
-                'data'    => null,
-            ], 422);
-        }
-
-        if (! is_null($limit->max_amount) && $validated['amount'] > $limit->max_amount) {
-            return response()->json([
-                'success' => false,
-                'message' => "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}",
-                'code'    => 'AMOUNT_ABOVE_MAXIMUM',
-                'data'    => null,
-            ], 422);
-        }
     }
 
     $exchangeRateText = sprintf(
@@ -863,10 +872,50 @@ public function store(Request $request)
     DB::beginTransaction();
 
     try {
+        $feeDeductedFrom = null;
+
         // ── Only deduct balance on live ──
         if ($mode === 'live') {
             $balance->amount -= $totalAmount;
             $balance->save();
+
+            // ── Deduct platform fee from the payout-currency balance ───────────
+            if ($transferFee > 0) {
+                $payoutBalance = Balance::where('user_id', $ownerId)
+                    ->where('currency', $currency) // payout/recipient currency
+                    ->first();
+
+                if ($payoutBalance) {
+                    if ($payoutBalance->amount < $transferFee) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Insufficient {$currency} balance to cover transfer fee",
+                            'code'    => 'INSUFFICIENT_FEE_BALANCE',
+                            'data'    => null,
+                        ], 422);
+                    }
+
+                    $payoutBalance->amount -= $transferFee;
+                    $payoutBalance->save();
+                    $feeDeductedFrom = $payoutBalance->id;
+                } else {
+                    // No payout-currency wallet — fall back to the sending balance
+                    if ($balance->amount < $transferFee) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Insufficient funds to cover transfer fee',
+                            'code'    => 'INSUFFICIENT_FEE_BALANCE',
+                            'data'    => null,
+                        ], 422);
+                    }
+
+                    $balance->amount -= $transferFee;
+                    $balance->save();
+                    $feeDeductedFrom = $balance->id;
+                }
+            }
         }
 
         $tx = TransactionHistory::create([
@@ -874,6 +923,7 @@ public function store(Request $request)
             'total_amount'             => $totalAmount,
             'currency'                 => $sendingCurrency,
             'balance_id'               => $balance->id,
+            'fee_balance_id'           => $feeDeductedFrom,
             'status'                   => 'pending',
             'method'                   => 'withdrawal',
             'mode'                     => $mode,
@@ -892,6 +942,7 @@ public function store(Request $request)
             'recipient_bank_currency'  => $currency,
             'to_currency'              => $currency,
             'fees'                     => $transferFee,
+            'platform_fee'             => $transferFee,
             'exchange_rate'            => (float) $rate->rate,
             'recipient_amount'         => $recipientAmount,
         ]);
@@ -899,11 +950,11 @@ public function store(Request $request)
         if ($mode === 'live') {
             // ── Real providers only on live ──
             if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-                $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+                $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-                $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+                $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-                $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
+                $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } else {
                 DB::rollBack();
 
@@ -939,6 +990,14 @@ public function store(Request $request)
             $balance->refresh();
             $balance->amount += $totalAmount;
             $balance->save();
+
+            if (isset($feeDeductedFrom) && $feeDeductedFrom) {
+                $feeBalance = Balance::find($feeDeductedFrom);
+                if ($feeBalance) {
+                    $feeBalance->amount += $transferFee;
+                    $feeBalance->save();
+                }
+            }
         }
 
         return response()->json([

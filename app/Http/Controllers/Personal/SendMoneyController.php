@@ -285,6 +285,7 @@ public function sendTransaction(Request $request)
             'currency' => $sendingCurrency,
             'balance_id' => $balance->id,
             'status' => 'pending',
+            'type'  => 'withdrawal',
             'method' => 'withdrawal',
             'payment_provider' => 'wallect', // will update later
             'reference' => 'ref-' . Str::uuid(),
@@ -681,6 +682,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'order_id' => $tx->order_id,
             'status' => $tx->status,
             'method' => $tx->method,
+            'type'  => $tx->type,
             'amount' => (float) $tx->amount,
             'total_amount' => (float) $tx->total_amount,
             'fees' => (float) ($tx->fees ?? 0),
@@ -777,6 +779,7 @@ public function exchangeSubmit(Request $request)
         'balance_id' => $fromBalance->id,
         'status' => 'success',
         // 'method' => 'exchange',
+        'type'  => 'Swap',
         'method' => 'Swap ' . $from . ' to ' . $to,
         'reference' => 'ref-' . Str::uuid(),
         'personal_id' => $user->id,

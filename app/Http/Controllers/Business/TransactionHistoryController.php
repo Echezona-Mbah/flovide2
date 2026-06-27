@@ -39,56 +39,142 @@ class TransactionHistoryController extends Controller
     //     }
     // }
 
-public function transaction()
-    {
-        $user    = auth()->user();
-        $team    = TeamMembers::where('user_id', $user->id)->first();
-        $ownerId = $team ? $team->owner_id : $user->id;
-        $mode    = session('mode', 'live');
+// public function transaction(Request $request)
+// {
+//     $user    = auth()->user();
+//     $team    = TeamMembers::where('user_id', $user->id)->first();
+//     $ownerId = $team ? $team->owner_id : $user->id;
+//     $mode    = session('mode', 'live');
 
-        $transactions = TransactionHistory::where('user_id', $ownerId)
-            ->where('mode', $mode)
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+//     $search = $request->input('search');
+//     $filter = $request->input('filter'); // credit, withdrawal, success, failed, pending
 
-        if (request()->wantsJson()) {
-            $transactions = $transactions->map(function ($t) {
+//     $transactions = TransactionHistory::where('user_id', $ownerId)
+//         ->where('mode', $mode)
+//         ->when($search, function ($q) use ($search) {
+//             $q->where(function ($q2) use ($search) {
+//                 $q2->where('reference', 'like', "%{$search}%")
+//                    ->orWhere('sender', 'like', "%{$search}%")
+//                    ->orWhere('recipient_account_name', 'like', "%{$search}%")
+//                    ->orWhere('amount', 'like', "%{$search}%")
+//                    ->orWhere('currency', 'like', "%{$search}%");
+//             });
+//         })
+//         ->when($filter, function ($q) use ($filter) {
+//             if (in_array($filter, ['credit', 'withdrawal','swap'])) {
+//                 $q->where('type', $filter);
+//             } elseif (in_array($filter, ['success', 'failed', 'pending'])) {
+//                 $q->where('status', $filter);
+//             }
+//         })
+//         ->orderBy('created_at', 'desc')
+//         ->paginate(12)
+//         ->withQueryString();
+
+//     if ($request->wantsJson()) {
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Transactions retrieved successfully.',
+//             'code'    => 'TRANSACTIONS_FETCHED',
+//             'data'    => $transactions->map(function ($t) {
+//                 return [
+//                     'type'      => $t->type,
+//                     'date'      => $t->created_at->format('Y-m-d H:i:s'),
+//                     'sender'    => $t->sender ?? 'N/A',
+//                     'recipient' => $t->recipient_account_name ?? 'N/A',
+//                     'amount'    => number_format($t->amount, 2),
+//                     'currency'  => $t->currency,
+//                     'status'    => $t->status,
+//                     'reference' => $t->reference,
+//                     'method'    => $t->method,
+//                     'mode'      => $t->mode,
+//                     'fees'      => $t->fees,
+//                     'recipient_details' => [
+//                         'account_name'   => $t->recipient_account_name,
+//                         'account_number' => $t->recipient_account_number,
+//                         'bank_name'      => $t->recipient_bank_name,
+//                         'bank_currency'  => $t->recipient_bank_currency,
+//                         'recipient_amount' => $t->recipient_amount,
+//                         'fees'           => $t->fees,
+//                     ],
+//                 ];
+//             }),
+//         ], 200);
+//     }
+
+//     return view('business.transactionHistory', compact('transactions', 'mode'));
+// }
+
+public function transaction(Request $request)
+{
+    $user    = auth()->user();
+    $team    = TeamMembers::where('user_id', $user->id)->first();
+    $ownerId = $team ? $team->owner_id : $user->id;
+    $mode    = session('mode', 'live');
+
+    $search = $request->input('search');
+    $filter = $request->input('filter');
+
+    $transactions = TransactionHistory::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($q2) use ($search) {
+                $q2->where('reference', 'like', "%{$search}%")
+                   ->orWhere('sender', 'like', "%{$search}%")
+                   ->orWhere('recipient_account_name', 'like', "%{$search}%")
+                   ->orWhere('amount', 'like', "%{$search}%")
+                   ->orWhere('currency', 'like', "%{$search}%");
+            });
+        })
+        ->when($filter, function ($q) use ($filter) {
+            if (in_array($filter, ['credit', 'withdrawal', 'swap'])) {
+                $q->where('type', $filter);
+            } elseif (in_array($filter, ['success', 'failed', 'pending'])) {
+                $q->where('status', $filter);
+            }
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(12)
+        ->withQueryString();
+
+    if ($request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Transactions retrieved successfully.',
+            'code'    => 'TRANSACTIONS_FETCHED',
+            'data'    => $transactions->map(function ($t) {
                 return [
-                    'type'      => $t->type,
-                    'date'      => $t->created_at->format('Y-m-d H:i:s'),
-                    'sender'    => $t->sender ?? 'N/A',
-                    'recipient' => $t->recipient ?? 'N/A',
-                    'amount'    => $t->currency_symbol . number_format($t->amount, 2),
-                    'currency'  => $t->currency,
-                    'status'    => $t->status,
-                    'reference' => $t->reference,
-                    'method'    => $t->method,
-                    'mode'      => $t->mode,
+                    'type'             => $t->type,
+                    'date'             => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'           => $t->sender ?? 'N/A',
+                    'recipient'        => $t->recipient_account_name ?? 'N/A',
+                    'amount'           => number_format($t->amount, 2),
+                    'currency'         => $t->currency,
+                    'status'           => $t->status,
+                    'reference'        => $t->reference,
+                    'method'           => $t->method,
+                    'mode'             => $t->mode,
+                    'fees'             => $t->fees,
+                    'swap_from_currency' => $t->swap_from_currency,
+                    'swap_to_currency'   => $t->swap_to_currency,
+                    'swap_from_amount'   => $t->swap_from_amount,
+                    'swap_to_amount'     => $t->swap_to_amount,
+                    'swap_rate'          => $t->swap_rate,
                     'recipient_details' => [
-                        'alias'            => $t->recipient_alias,
                         'account_name'     => $t->recipient_account_name,
                         'account_number'   => $t->recipient_account_number,
                         'bank_name'        => $t->recipient_bank_name,
                         'bank_currency'    => $t->recipient_bank_currency,
                         'recipient_amount' => $t->recipient_amount,
                         'fees'             => $t->fees,
-                    ]
+                    ],
                 ];
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Transactions retrieved successfully.',
-                'code'    => 'TRANSACTIONS_FETCHED',
-                'data'    => $transactions
-            ], 200);
-        }
-
-        $latestTransaction = $transactions->first();
-        return view('business.transactionHistory', compact('transactions', 'latestTransaction', 'mode'));
+            }),
+        ], 200);
     }
 
-
+    return view('business.transactionHistory', compact('transactions', 'mode'));
+}
 
 
 public function showAllTransactions()

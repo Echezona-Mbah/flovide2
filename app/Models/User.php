@@ -180,4 +180,44 @@ public function complianceStatus($tokenResponse = null)
     ];
 }
 
+
+
+// All currency fee rows
+public function currencyFees()
+{
+    return $this->hasMany(UserCurrencyFee::class);
+}
+
+// Single currency fee row
+public function currencyFee(string $currency): ?UserCurrencyFee
+{
+    return $this->currencyFees()
+                ->where('currency', strtoupper($currency))
+                ->first();
+}
+
+// Get or create a currency row
+public function currencyFeeOrCreate(string $currency): UserCurrencyFee
+{
+    return UserCurrencyFee::firstOrCreate(
+        ['user_id' => $this->id, 'currency' => strtoupper($currency)],
+        [
+            'collection_enabled' => false,
+            'collection_balance' => 0,
+            'collection_percent' => 0,
+            'collection_fixed'   => 0,
+            'payout_enabled'     => false,
+            'payout_balance'     => 0,
+            'payout_percent'     => 0,
+            'payout_fixed'       => 0,
+        ]
+    );
+}
+
+
+
+
+
+
+
 }
