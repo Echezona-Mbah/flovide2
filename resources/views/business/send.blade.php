@@ -1,805 +1,640 @@
 @include('business.head')
-<body class="bg-[#E9E9E9]  text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<body class="bg-[#EEF2F7] text-[#1E1E1E] min-h-screen flex flex-col md:flex-row">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Mobile menu button -->
   @include('business.header')
+  @include('business.sidebar')
+  <div id="overlay" class="fixed inset-0 bg-black/40 z-20 hidden md:hidden"></div>
 
-    <!-- Sidebar -->
-   @include('business.sidebar')
-    <!-- Overlay -->
- <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
+  <main class="flex-1 p-2 md:p-8 overflow-auto">
 
-  <main class="flex-1 p-2 md:p-8 overflow-auto ml-0 md:ml-0">
+    <!-- Page Header -->
     <header class="hidden md:flex items-center justify-between mb-8 gap-4">
-      <h1 class="text-2xl font-extrabold leading-tight flex-1 min-w-[200px]">
-        {{ __('Send to a beneficiary') }}
-      </h1>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#9a7b4f]">Payments</p>
+        <h1 class="mt-2 text-3xl font-black tracking-tight text-[#162033]">Send Money</h1>
+        <p class="mt-1 text-sm text-slate-500">Choose a saved beneficiary and send funds instantly.</p>
+      </div>
       @include('business.header_notifical')
     </header>
 
-    <section class="mx-auto max-w-6xl">
-      <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
+    @if ($errors->any())
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json($errors->first()), showConfirmButton:false, timer:4000, timerProgressBar:true });
+        });
+      </script>
+    @endif
+    @if (session('error'))
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json(session('error')), showConfirmButton:false, timer:4000, timerProgressBar:true });
+        });
+      </script>
+    @endif
+    @if (session('success'))
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          Swal.fire({ toast:true, position:'top-end', icon:'success', title:@json(session('success')), showConfirmButton:false, timer:4000, timerProgressBar:true });
+        });
+      </script>
+    @endif
 
-        <!-- Header -->
-        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
-          <div class="flex items-center justify-between flex-wrap gap-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="rounded-[28px] bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.3)] border border-slate-100 overflow-hidden">
+
+        <!-- Card Header -->
+        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 border-b border-sky-200/70">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Beneficiaries</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">
-                {{ __('My Beneficiaries') }}
-              </h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
-                {{ __('Send money to your saved beneficiaries.') }}
-              </p>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Beneficiaries</p>
+              <h2 class="mt-1 text-2xl md:text-3xl font-black tracking-tight text-slate-900">My Beneficiaries</h2>
+              <p class="mt-1 text-sm text-slate-500">Select a recipient to send money.</p>
             </div>
-            <!-- <div class="rounded-2xl bg-white/70 border border-sky-200/60 px-4 py-3 text-sm text-slate-700">
-              Environment: <span class="font-semibold">Live/Test</span>
-            </div> -->
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-2 bg-white/80 border border-sky-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-full">
+                <span class="w-2 h-2 rounded-full {{ $mode === 'live' ? 'bg-emerald-500' : 'bg-amber-400' }}"></span>
+                {{ ucfirst($mode) }} Mode
+              </span>
+              <a href="{{ route('add_beneficias.create') }}"
+                class="inline-flex items-center gap-2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-slate-700 transition">
+                <i class="fas fa-plus"></i> Add Beneficiary
+              </a>
+            </div>
           </div>
         </div>
 
-        <!-- Body -->
-        <section class="p-6 md:p-10">
-          <!-- Search -->
-          <form class="flex flex-col sm:flex-row gap-4 mb-8">
-            <input 
-              id="search" 
-              type="search" 
-              placeholder="{{ __('Search by name, account number or email') }}"
-              class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" 
+        <!-- Search -->
+        <div class="px-6 md:px-10 py-5 border-b border-slate-100 bg-slate-50/50">
+          <div class="relative max-w-md">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input
+              id="beneficiarySearch"
+              type="search"
+              placeholder="Search by name, account or bank..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 bg-white"
             />
-            <button type="submit" class="bg-slate-900 text-white px-6 py-2 rounded-full text-sm hover:bg-slate-800 transition">
-              {{ __('Search') }}
-            </button>
-          </form>
-
-          <!-- Beneficiaries Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            @forelse($beneficiaries as $beneficiary)
-              @php
-                $destination = strtolower($beneficiary->bank) === 'mobile'
-                  ? $beneficiary->phone
-                  : $beneficiary->account_number;
-              @endphp
-              <div 
-                class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 cursor-pointer"
-                data-id="{{ $beneficiary->recipient_id }}"
-                data-account-name="{{ $beneficiary->account_name }}"
-                data-account-number="{{ $beneficiary->account_number }}"
-                data-bank="{{ $beneficiary->bank }}"
-                data-currency="{{ $beneficiary->currency }}"
-                data-country="{{ $beneficiary->country }}"
-                data-phone="{{ $beneficiary->phone }}"
-                data-sortcode="{{ $beneficiary->bank_code }}"
-                data-transfermethod="{{ $beneficiary->transfer_method }}"
-                data-interac-email="{{ $beneficiary->email }}"
-                data-interac-first-name="{{ $beneficiary->interac_first_name }}"
-                data-interac-last-name="{{ $beneficiary->interac_last_name }}"
-                data-amount="100"
-                data-gets="0.06"
-                onclick="openModalFromElement(this)">
-
-                <div class="flex items-center gap-4 mb-4">
-                  <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                    {{ Str::substr($beneficiary->account_name ?? 'N/A', 0, 1) }}
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-semibold text-gray-800 truncate w-40">{{ $beneficiary->account_name }}</h3>
-                    <p class="text-xs text-gray-400">{{ __('Saved Beneficiary') }}</p>
-                  </div>
-                </div>
-
-                <div class="mb-3 space-y-1 text-sm text-gray-700">
-                  <p>
-                    <strong>{{ __('Account:') }}</strong>
-                    @if(strtolower($beneficiary->bank) === 'mobile')
-                      {{ $beneficiary->phone }}
-                    @else
-                      {{ $beneficiary->account_number }}
-                    @endif
-                  </p>
-                  <p><strong>{{ __('Bank:') }}</strong> {{ $beneficiary->bank }}</p>
-                </div>
-              </div>
-            @empty
-              <div class="col-span-full text-center text-gray-500">
-                {{ __("You haven't added any beneficiaries yet.") }}
-              </div>
-            @endforelse
           </div>
+        </div>
 
-          <!-- Transaction Modal -->
-          <div id="transactionModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
-            <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative border border-slate-100">
-              <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
+        <!-- Beneficiaries Grid -->
+        <div class="p-6 md:p-10">
+          @if($beneficiaries->isEmpty())
+            <div class="text-center py-20">
+              <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-slate-400 text-2xl"></i>
+              </div>
+              <p class="text-slate-500 font-medium">No beneficiaries yet.</p>
+              <p class="text-sm text-slate-400 mt-1">Add a beneficiary to start sending money.</p>
+            </div>
+          @else
+            <div id="beneficiaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              @foreach($beneficiaries as $beneficiary)
+                @php
+                  $initials  = strtoupper(substr($beneficiary->account_name ?? 'N', 0, 2));
+                  $isMobile  = strtolower($beneficiary->transfer_method ?? '') === 'mobile';
+                  $isInterac = !empty($beneficiary->interac_email);
+                  $dest      = $isMobile ? $beneficiary->phone : $beneficiary->account_number;
+                  $colors    = ['bg-blue-100 text-blue-700','bg-purple-100 text-purple-700','bg-emerald-100 text-emerald-700','bg-rose-100 text-rose-700','bg-amber-100 text-amber-700','bg-sky-100 text-sky-700'];
+                  $color     = $colors[$loop->index % count($colors)];
+                @endphp
 
-              <h2 class="text-lg font-bold mb-4">{{ __('Send Money') }}</h2>
+                <div
+                  class="beneficiary-card group relative bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:border-sky-300 hover:shadow-lg transition-all duration-200"
+                  data-id="{{ $beneficiary->recipient_id }}"
+                  data-account-name="{{ $beneficiary->account_name }}"
+                  data-account-number="{{ $beneficiary->account_number }}"
+                  data-bank="{{ $beneficiary->bank }}"
+                  data-currency="{{ $beneficiary->currency }}"
+                  data-country="{{ $beneficiary->country }}"
+                  data-phone="{{ $beneficiary->phone }}"
+                  data-sortcode="{{ $beneficiary->bank_code }}"
+                  data-transfermethod="{{ $beneficiary->transfer_method }}"
+                  data-interac-email="{{ $beneficiary->email ?? '' }}"
+                  data-interac-first-name="{{ $beneficiary->interac_first_name ?? '' }}"
+                  data-interac-last-name="{{ $beneficiary->interac_last_name ?? '' }}"
+                  onclick="openSendModal(this)">
 
-              <div class="flex flex-col gap-6 w-full max-w-md">
-                <div class="flex items-center border rounded-lg overflow-hidden">
-                  <span id="sendCurrencySymbol" class="px-3 text-sm text-gray-600 bg-gray-50 border-r">₦</span>
-                  <input 
-                    type="text" 
-                    id="sendAmount"
-                    inputmode="decimal"
-                    class="w-full px-3 py-2 text-sm focus:outline-none"
-                    value="100.00" 
-                    placeholder="{{ __('You Send') }}"
-                  />
+                  <div class="selected-ring hidden absolute inset-0 rounded-2xl border-2 border-sky-500 pointer-events-none"></div>
 
-                  @if (!empty($balanceList))
-                  <div class="flex items-center gap-2 px-3 py-2 bg-gray-50">
-                    <img 
-                      id="currencyFlag"
-                      src="https://flagcdn.com/24x18/{{ strtolower($balanceList[0]->currency_meta['country'] ?? 'us') }}.png"
-                      alt="Flag"
-                      class="w-5 h-auto rounded shadow"
-                    />
-                    <span id="currencySymbol" class="text-sm font-medium">
-                      {{ $balanceList[0]->currency_meta['symbol'] ?? '₦' }}
-                    </span>
-
-                    <select id="currency" class="bg-transparent text-sm focus:outline-none">
-                      @foreach ($balanceList as $balance)
-                        <option 
-                          value="{{ $balance->currency }}"
-                          data-id="{{ $balance->id }}"
-                          data-symbol="{{ $balance->currency_meta['symbol'] }}"
-                          data-country="{{ $balance->currency_meta['country'] }}"
-                          data-balance="{{ $balance->balance }}">
-                          {{ $balance->currency }} ({{ $balance->currency_meta['symbol'] }}{{ number_format($balance->amount, 2) }})
-                        </option>
-                      @endforeach
-                    </select>
-                  </div>
-                  @endif
-                </div>
-
-                <div class="flex items-center gap-2 mt-2">
-  <input id="walletToggle" type="checkbox" class="h-4 w-4">
-  <label for="walletToggle" class="text-sm text-gray-700">
-    Transfer from wallet
-  </label>
-</div>
-
-                <div id="beneficiaryInfo" class="mb-3 hidden">
-                  <p><strong>Name:</strong> <span id="beneficiaryName">...</span></p>
-                  <p><strong>Account:</strong> <span id="beneficiaryAccount">...</span></p>
-                  <p><strong>Bank:</strong> <span id="beneficiaryBank">...</span></p>
-                </div>
-
-                <div class="space-y-2 mb-6 text-sm text-gray-700">
-                  <div class="flex justify-between">
-                    <span class="font-medium">{{ __('Exchange rate:') }}</span>
-                    <span id="exchangeRateText">--</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">{{ __('Transfer fee:') }}</span>
-                    <span id="transferFeeText">--</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="font-medium">{{ __('Delivery:') }}</span>
-                    <span>{{ __('Usually within 15 minutes(Can take up to 2 hours)') }}</span>
-                  </div>
-                </div>
-
-                <div id="rateLoader" class="flex items-center justify-center gap-2 text-sm text-gray-500 mb-2 hidden">
-                  <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  <span>{{ __('Refreshing exchange rate...') }}</span>
-                </div>
-
-                <h5 class="text-sm font-semibold text-gray-800 mb-2">{{ __('Beneficiary gets') }}</h5>
-                <div class="space-y-2 mb-6 text-sm text-gray-700">
-                  <div class="flex justify-between">
-                    <div class="font-medium flex items-center gap-1">
-                      <span id="recipientSymbol"></span>
-                      <span id="recipientAmount">0.00</span>
+                  <div class="flex items-start gap-3">
+                    <div class="w-11 h-11 rounded-xl {{ $color }} flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {{ $initials }}
                     </div>
-                    <span class="font-medium flex items-center gap-1">
-                      <img id="recipientFlag" src="https://flagcdn.com/24x18/us.png" alt="Recipient Flag" class="w-5 h-auto rounded shadow" />
-                      <span id="recipientGets">USD</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-bold text-slate-800 truncate">{{ $beneficiary->account_name }}</p>
+                      <p class="text-xs text-slate-500 truncate mt-0.5">{{ $dest ?? 'N/A' }}</p>
+                      <p class="text-xs text-slate-400 truncate">{{ $beneficiary->bank }}</p>
+                    </div>
+                    <span class="text-[11px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-lg flex-shrink-0">
+                      {{ $beneficiary->currency }}
+                    </span>
+                  </div>
+
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    @if($isMobile)
+                      <span class="text-[10px] font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                        <i class="fas fa-mobile-alt mr-1"></i>Mobile
+                      </span>
+                    @endif
+                    @if($isInterac)
+                      <span class="text-[10px] font-semibold bg-red-50 text-red-500 px-2 py-0.5 rounded-full">
+                        <i class="fas fa-bolt mr-1"></i>Interac
+                      </span>
+                    @endif
+                    <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
+                      <i class="fas fa-check-circle mr-1"></i>Saved
+                    </span>
+                  </div>
+
+                  <div class="mt-4 flex justify-end">
+                    <span class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-sky-500 flex items-center justify-center transition-all">
+                      <i class="fas fa-arrow-right text-xs text-slate-500 group-hover:text-white"></i>
                     </span>
                   </div>
                 </div>
-              </div>
+              @endforeach
+            </div>
+          @endif
+        </div>
+      </div>
+    </div>
 
-              <button id="sendBtn" class="w-full bg-green-600 text-white py-2 rounded-lg text-center hover:bg-green-700 transition">
-                {{ __('Send') }}
-              </button>
+    <!-- ── Send Modal ──────────────────────────────────────────────────────── -->
+    <div id="sendModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+
+        <div class="px-6 pt-6 pb-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-slate-100">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div id="modalAvatar" class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm"></div>
+              <div>
+                <p id="modalName" class="font-bold text-slate-800 text-sm"></p>
+                <p id="modalBank" class="text-xs text-slate-500"></p>
+              </div>
+            </div>
+            <button onclick="closeSendModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 space-y-5">
+
+          <!-- Amount input -->
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">You Send</label>
+
+            <div class="flex items-center border-2 border-slate-200 rounded-2xl overflow-hidden focus-within:border-sky-400 transition">
+              <span id="modalCurrencySymbol" class="px-4 text-lg font-bold text-slate-600 bg-slate-50 border-r border-slate-200 py-3 flex-shrink-0">₦</span>
+              <input
+                type="number"
+                id="modalAmount"
+                class="flex-1 px-4 py-3 text-xl font-bold focus:outline-none w-full"
+                value="100"
+                min="1"
+                placeholder="0.00"
+              />
+            </div>
+
+            @if(!empty($balanceList))
+            <div class="mt-2 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+              <img id="modalCurrencyFlag" src="https://flagcdn.com/24x18/ng.png" class="w-5 h-auto rounded shadow flex-shrink-0" alt="flag"/>
+              <select id="modalCurrency" class="flex-1 bg-transparent text-sm font-semibold focus:outline-none cursor-pointer">
+                @foreach($balanceList as $bal)
+                  <option
+                    value="{{ $bal->currency }}"
+                    data-id="{{ $bal->id }}"
+                    data-symbol="{{ $bal->currency_meta['symbol'] ?? '' }}"
+                    data-country="{{ $bal->currency_meta['country'] ?? 'us' }}"
+                    data-amount="{{ $bal->amount }}">
+                    {{ $bal->currency }} — {{ $bal->currency_meta['symbol'] ?? '' }}{{ number_format($bal->amount, 2) }} available
+                  </option>
+                @endforeach
+              </select>
+              <i class="fas fa-chevron-down text-slate-400 text-xs flex-shrink-0"></i>
+            </div>
+            @endif
+
+            <p id="balanceHint" class="text-xs text-slate-400 mt-1.5 ml-1"></p>
+          </div>
+
+          <!-- Rate card -->
+          <div class="bg-slate-50 rounded-2xl p-4 space-y-2.5 text-sm">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500 flex items-center gap-2">
+                <i class="fas fa-exchange-alt text-xs text-sky-500"></i> Exchange Rate
+              </span>
+              <span id="modalRate" class="font-semibold text-slate-700">--</span>
+            </div>
+            {{-- Transfer fee hidden for now --}}
+            {{-- <div class="flex justify-between items-center">
+              <span class="text-slate-500 flex items-center gap-2">
+                <i class="fas fa-receipt text-xs text-amber-500"></i> Transfer Fee
+              </span>
+              <span id="modalFee" class="font-semibold text-slate-700">--</span>
+            </div> --}}
+            <div class="border-t border-slate-200 pt-2.5 flex justify-between items-center">
+              <span class="text-slate-500 flex items-center gap-2">
+                <i class="fas fa-clock text-xs text-slate-400"></i> Delivery
+              </span>
+              <span class="text-slate-600 text-xs">~15 min (up to 2 hrs)</span>
             </div>
           </div>
 
-          <!-- Summary Modal -->
-          <form method="POST" action="{{ route('send') }}">
-            @csrf
-            @if ($errors->any())
-              <script>
-                Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json($errors->first()), showConfirmButton:false, timer:4000, timerProgressBar:true });
-              </script>
-            @endif
-            @if (session('error'))
-              <script>
-                Swal.fire({ toast:true, position:'top-end', icon:'error', title:@json(session('error')), showConfirmButton:false, timer:4000, timerProgressBar:true });
-              </script>
-            @endif
-            @if (session('success'))
-              <script>
-                Swal.fire({ toast:true, position:'top-end', icon:'success', title:@json(session('success')), showConfirmButton:false, timer:4000, timerProgressBar:true });
-              </script>
-            @endif
-
-            <div id="summaryModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden">
-              <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 relative space-y-6 border border-slate-100">
-                <button type="button" id="closeSummaryModalBtn" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-lg">&times;</button>
-
-                <h2 class="text-xl font-bold text-center text-gray-800">{{ __('Confirm Transaction') }}</h2>
-
-                <div class="bg-gray-100 rounded-lg p-4">
-                  <h3 class="text-sm font-semibold text-gray-600 mb-2">{{ __('Beneficiary Info') }}</h3>
-                  <div class="flex justify-between text-sm text-gray-800">
-                    <span>{{ __('Name:') }}</span>
-                    <span id="summaryName">...</span>
-                  </div>
-                  <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryAccountRow">
-                    <span>Account No:</span>
-                    <span id="summaryAccount">...</span>
-                  </div>
-                  <div class="flex justify-between text-sm text-gray-800 mt-1 hidden" id="summaryPhoneRow">
-                    <span>Phone:</span>
-                    <span id="summaryPhone">...</span>
-                  </div>
-                  <div class="flex justify-between text-sm text-gray-800 mt-1" id="summaryInteracRow">
-                    <span>Interac Email:</span>
-                    <span id="summaryInteracEmail">...</span>
-                </div>
-                </div>
-
-                <div class="bg-white border rounded-lg p-4 shadow-sm space-y-2 text-sm text-gray-700">
-                  <input type="hidden" name="bank_code" id="sort_codeInput">
-                  <input type="hidden" name="transfer_method" id="transfermethodInput">
-                  <input type="hidden" name="bank" id="bankInput">
-                  <input type="hidden" name="recipient_id" id="recipientIdInput">
-                  <input type="hidden" name="balance_id" id="balanceIdInput" value="{{ $balanceList[0]['id'] ?? '' }}">
-                  <input type="hidden" name="amount" id="amountInput">
-                  <input type="hidden" name="reference" value="For invoice">
-                  <input type="hidden" name="transfer_fee" id="transferFeeInput">
-                  <input type="hidden" name="total_amount" id="totalAmountInput">
-                  <input type="hidden" name="exchange_rate" id="exchangeRateInput">
-                  <input type="hidden" name="recipient_amount" id="recipientAmountInput">
-                  <input type="hidden" name="account_number" id="accountNumberInput">
-                  <input type="hidden" name="account_name" id="accountNameInput">
-                  <input type="hidden" name="interac_email" id="interacEmailInput">
-                  <input type="hidden" name="interac_first_name" id="interacFirstNameInput">
-                  <input type="hidden" name="interac_last_name" id="interacLastNameInput">
-
-                  <div class="flex justify-between"><span>{{ __('Bank:') }}</span><span id="summaryBank">...</span></div>
-                  <div class="flex justify-between"><span>{{ __('Amount Sent:') }}</span><span id="summaryAmountSent">₦0.00</span></div>
-                  <div class="flex justify-between"><span>{{ __('Transfer Fee:') }}</span><span id="summaryFee">₦0.00</span></div>
-                  <div class="flex justify-between"><span>{{ __('Total:') }}</span><span id="summaryTotal">₦0.00</span></div>
-                  <div class="flex justify-between"><span>{{ __('Exchange Rate:') }}</span><span id="summaryRate">...</span></div>
-                  <div class="flex justify-between"><span>{{ __('They\'ll Receive:') }}</span><span id="summaryReceive">...</span></div>
-                </div>
-
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-center hover:bg-blue-700 transition">
-                  {{ __('Process Transaction') }}
-                </button>
+          <!-- Recipient gets -->
+          <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Beneficiary Receives</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4 text-emerald-500 hidden" id="spinnerIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                <span id="modalRecipientAmount" class="text-2xl font-black text-emerald-700">0.00</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <img id="modalRecipientFlag" src="https://flagcdn.com/24x18/us.png" class="w-5 h-auto rounded shadow" alt="flag"/>
+                <span id="modalRecipientCurrency" class="font-bold text-slate-700"></span>
               </div>
             </div>
-          </form>
+          </div>
 
-        </section>
+          <!-- Interac info -->
+          <div id="interacInfo" class="hidden bg-red-50 border border-red-100 rounded-2xl p-3 text-xs text-red-600">
+            <i class="fas fa-bolt mr-1"></i>
+            Interac e-Transfer to: <strong id="interacEmailDisplay"></strong>
+          </div>
+
+          <!-- Send button -->
+          <button id="proceedBtn"
+            class="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold py-3.5 rounded-2xl hover:opacity-90 transition flex items-center justify-center gap-2">
+            <i class="fas fa-paper-plane"></i> Review & Send
+          </button>
+        </div>
       </div>
-    </section>
+    </div>
+
+    <!-- ── Confirm Modal ───────────────────────────────────────────────────── -->
+    <form method="POST" action="{{ route('send') }}">
+      @csrf
+      <input type="hidden" name="bank_code"          id="sort_codeInput">
+      <input type="hidden" name="transfer_method"    id="transfermethodInput">
+      <input type="hidden" name="bank"               id="bankInput">
+      <input type="hidden" name="recipient_id"       id="recipientIdInput">
+      <input type="hidden" name="balance_id"         id="balanceIdInput">
+      <input type="hidden" name="amount"             id="amountInput">
+      <input type="hidden" name="reference"          value="For invoice">
+      <input type="hidden" name="transfer_fee"       id="transferFeeInput">
+      <input type="hidden" name="total_amount"       id="totalAmountInput">
+      <input type="hidden" name="exchange_rate"      id="exchangeRateInput">
+      <input type="hidden" name="recipient_amount"   id="recipientAmountInput">
+      <input type="hidden" name="account_number"     id="accountNumberInput">
+      <input type="hidden" name="account_name"       id="accountNameInput">
+      <input type="hidden" name="interac_email"      id="interacEmailInput">
+      <input type="hidden" name="interac_first_name" id="interacFirstNameInput">
+      <input type="hidden" name="interac_last_name"  id="interacLastNameInput">
+
+      <div id="confirmModal" class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative">
+
+          <div class="px-6 pt-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-lg font-black text-slate-800">Confirm Transfer</h2>
+            <button type="button" onclick="closeConfirmModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+
+          <div class="p-6 space-y-4">
+
+            <!-- Recipient -->
+            <div class="bg-slate-50 rounded-2xl p-4 space-y-2 text-sm">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Recipient</p>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Name</span>
+                <span id="cfmName" class="font-semibold text-slate-800"></span>
+              </div>
+              <div class="flex justify-between" id="cfmAccountRow">
+                <span class="text-slate-500">Account</span>
+                <span id="cfmAccount" class="font-semibold text-slate-800"></span>
+              </div>
+              <div class="flex justify-between hidden" id="cfmInteracRow">
+                <span class="text-slate-500">Interac Email</span>
+                <span id="cfmInteracEmail" class="font-semibold text-slate-800"></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Bank</span>
+                <span id="cfmBank" class="font-semibold text-slate-800"></span>
+              </div>
+            </div>
+
+            <!-- Transaction -->
+            <div class="bg-slate-50 rounded-2xl p-4 space-y-2 text-sm">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Transaction</p>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Amount Sent</span>
+                <span id="cfmAmount" class="font-semibold text-slate-800"></span>
+              </div>
+              {{-- Transfer fee hidden for now --}}
+              {{-- <div class="flex justify-between">
+                <span class="text-slate-500">Transfer Fee</span>
+                <span id="cfmFee" class="font-semibold text-amber-600"></span>
+              </div>
+              <div class="flex justify-between border-t border-slate-200 pt-2">
+                <span class="text-slate-600 font-semibold">Total Deducted</span>
+                <span id="cfmTotal" class="font-bold text-slate-900"></span>
+              </div> --}}
+              <div class="flex justify-between">
+                <span class="text-slate-500">Exchange Rate</span>
+                <span id="cfmRate" class="font-semibold text-slate-800 text-xs"></span>
+              </div>
+            </div>
+
+            <!-- They receive -->
+            <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex justify-between items-center">
+              <span class="text-emerald-600 font-semibold text-sm">They Receive</span>
+              <span id="cfmReceive" class="font-black text-emerald-700 text-lg"></span>
+            </div>
+
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-3.5 rounded-2xl hover:opacity-90 transition flex items-center justify-center gap-2">
+              <i class="fas fa-check-circle"></i> Confirm & Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
   </main>
 
-
-
-<!-- JavaScript -->
- <!-- JavaScript -->
-
-
-
-{{-- IMPORTANT: in your <option> change data-balance to amount --}}
-{{-- from: data-balance="{{ $balance->balance }}" --}}
-{{-- to:   data-balance="{{ $balance->amount }}" --}}
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const currencySelect = document.getElementById("currency");
-  const amountInput = document.getElementById("sendAmount");
-  const flagImg = document.getElementById("currencyFlag");
-  const symbolSpan = document.getElementById("currencySymbol");
-  const exchangeRateText = document.getElementById("exchangeRateText");
-  const transferFeeText = document.getElementById("transferFeeText");
-  const recipientAmountText = document.getElementById("recipientAmount");
-  const recipientGetsText = document.getElementById("recipientGets");
-  const recipientSymbol = document.getElementById("recipientSymbol");
-  const recipientFlag = document.getElementById("recipientFlag");
-  const sendCurrencySymbol = document.getElementById("sendCurrencySymbol");
-  const walletToggle = document.getElementById("walletToggle");
-
-  const currencySymbols = {
-    USD: "$", NGN: "₦", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R",
-    XOF: "CFA", XAF: "FCFA", BWP: "P", TZS: "TSh", UGX: "USh", MWK: "MK",
-    CAD: "C$", AUD: "A$", INR: "₹", CNY: "¥", JPY: "¥", RUB: "₽", BRL: "R$",
-    MXN: "Mex$", AED: "د.إ", SAR: "﷼", QAR: "ر.ق", EGP: "£", LKR: "Rs", PKR: "₨",
-    THB: "฿", MYR: "RM", IDR: "Rp", PHP: "₱", KRW: "₩", CHF: "Fr", SEK: "kr",
-    NOK: "kr", DKK: "kr", CZK: "Kč", PLN: "zł", HUF: "Ft", TRY: "₺", ARS: "$",
-    CLP: "$", COP: "$", PEN: "S/"
-  };
-
-  function getRecipientCurrency() {
-    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
-    return selectedBeneficiary?.dataset.currency || null;
-  }
-
-  function formatRate(amount, from, converted, to) {
-    return `${amount.toFixed(2)} ${from} = ${converted.toFixed(2)} ${to}`;
-  }
-
-  async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
-    const url = `/dashboard/exchange-rate?from_currency=${encodeURIComponent(fromCurrency)}&to_currency=${encodeURIComponent(toCurrency)}&amount=${encodeURIComponent(amount)}`;
-
-    try {
-      const response = await fetch(url, { headers: { "Accept": "application/json" } });
-      const contentType = response.headers.get("content-type") || "";
-
-      if (!response.ok || !contentType.includes("application/json")) {
-        throw new Error("Invalid response");
-      }
-
-      return await response.json();
-    } catch (err) {
-      console.error("Rate fetch error:", err);
-      return null;
-    }
-  }
-
-  async function updateRateDisplay() {
-    const selectedOption = currencySelect?.selectedOptions[0];
-    if (!selectedOption) return;
-
-    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
-    const fromCurrency = selectedOption.value;
-    const symbol = selectedOption.dataset.symbol || "₦";
-    const country = selectedOption.dataset.country || "us";
-    const amount = parseFloat((amountInput?.value || "0").replace(/,/g, ""));
-    const recipientCurrency = getRecipientCurrency();
-
-    flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-    symbolSpan.textContent = symbol;
-    sendCurrencySymbol.textContent = symbol;
-
-    if (!selectedBeneficiary || !recipientCurrency) {
-      exchangeRateText.textContent = "--";
-      transferFeeText.textContent = "--";
-      recipientAmountText.textContent = "0.00";
-      recipientGetsText.textContent = "--";
-      return;
-    }
-
-    const recipientCountry = selectedBeneficiary.dataset.country || "us";
-    recipientFlag.src = `https://flagcdn.com/24x18/${recipientCountry.toLowerCase()}.png`;
-    recipientGetsText.textContent = recipientCurrency;
-    recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
-
-    document.getElementById("rateLoader")?.classList.remove("hidden");
-
-    if (!amount || amount <= 0) {
-      recipientAmountText.textContent = "0.00";
-      exchangeRateText.textContent = "Rate unavailable";
-      transferFeeText.textContent = `${symbol}0.00`;
-      document.getElementById("rateLoader")?.classList.add("hidden");
-      return;
-    }
-
-    if (fromCurrency === recipientCurrency) {
-      exchangeRateText.textContent = `1.00 ${fromCurrency} = 1.00 ${recipientCurrency}`;
-      recipientAmountText.textContent = amount.toFixed(2);
-      transferFeeText.textContent = `${symbol}0.00`;
-      document.getElementById("rateLoader")?.classList.add("hidden");
-      return;
-    }
-
-    const rateData = await fetchExchangeRate(fromCurrency, recipientCurrency, amount);
-
-    if (rateData?.success && rateData?.data) {
-      const converted = parseFloat(rateData.data.converted || 0);
-      const fee = parseFloat(rateData.data.transfer_fee || 0);
-
-      exchangeRateText.textContent = formatRate(amount, fromCurrency, converted, recipientCurrency);
-      transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
-      recipientAmountText.textContent = converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    } else {
-      exchangeRateText.textContent = "Rate unavailable";
-      transferFeeText.textContent = `${symbol}0.00`;
-      recipientAmountText.textContent = "0.00";
-    }
-
-    document.getElementById("rateLoader")?.classList.add("hidden");
-  }
-
-  walletToggle?.addEventListener("change", () => {
-    const isOn = walletToggle.checked;
-    currencySelect.disabled = isOn;
-
-    if (isOn) currencySelect.classList.add("opacity-50", "cursor-not-allowed");
-    else currencySelect.classList.remove("opacity-50", "cursor-not-allowed");
-  });
-
-  window.openModalFromElement = function (el) {
-    document.querySelectorAll(".selected-beneficiary").forEach(x => x.classList.remove("selected-beneficiary"));
-    el.classList.add("selected-beneficiary");
-
-    const name = el.dataset.accountName || "N/A";
-    const account = el.dataset.accountNumber || "";
-    const bank = el.dataset.bank || "";
-    const phone = el.dataset.phone || "";
-    const currency = el.dataset.currency || "USD";
-    const country = el.dataset.country || "us";
-
-    const isMobile = bank.toLowerCase().includes("mobile");
-    const destination = isMobile ? phone : account;
-
-    const modal = document.getElementById("transactionModal");
-    modal.querySelector("#beneficiaryName").textContent = name;
-    modal.querySelector("#beneficiaryAccount").textContent = destination;
-    modal.querySelector("#beneficiaryBank").textContent = bank;
-
-    recipientFlag.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-    recipientGetsText.textContent = currency;
-
-    amountInput.value = "100.00";
-
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-
-    updateRateDisplay();
-  };
-
-  currencySelect?.addEventListener("change", updateRateDisplay);
-  amountInput?.addEventListener("input", updateRateDisplay);
-
-  document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-    document.getElementById("transactionModal").classList.add("hidden");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target.id === "transactionModal") {
-      document.getElementById("transactionModal").classList.add("hidden");
-    }
-  });
-
-  document.getElementById("sendBtn")?.addEventListener("click", () => {
-    const isWallet = walletToggle?.checked;
-    if (isWallet) {
-      window.location.href = "/wallet-transfer";
-      return;
-    }
-
-    const selectedBeneficiary = document.querySelector(".selected-beneficiary");
-    if (!selectedBeneficiary) {
-      Swal.fire({ icon: "error", title: "Select beneficiary first" });
-      return;
-    }
-
-    const rate = (exchangeRateText.textContent || "").trim();
-    const receiveRaw = (recipientAmountText.textContent || "0").replace(/,/g, "");
-    const receiveAmount = parseFloat(receiveRaw || "0");
-    const amount = parseFloat((amountInput.value || "0").replace(/,/g, ""));
-
-    if (!amount || amount <= 0) {
-      Swal.fire({ icon: "error", title: "Enter valid amount" });
-      return;
-    }
-
-    if (!rate || rate.toLowerCase().includes("unavailable") || !receiveAmount || receiveAmount <= 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Exchange rate not available",
-        text: "Please wait for a valid rate before sending."
-      });
-      return;
-    }
-
-    const name = document.getElementById("beneficiaryName").textContent || "N/A";
-    const account = document.getElementById("beneficiaryAccount").textContent || "N/A";
-    const bank = document.getElementById("beneficiaryBank").textContent || "N/A";
-    const sortCode = selectedBeneficiary.dataset.sortcode || "";
-    const transfermethod = selectedBeneficiary.dataset.transfermethod || "";
-    const fee = parseFloat((transferFeeText.textContent || "0").replace(/[^\d.]/g, "")) || 0;
-    const total = amount + fee;
-    const currency = recipientGetsText.textContent || "USD";
-    const recipientId = selectedBeneficiary.dataset.id || "";
-    const symbol = sendCurrencySymbol.textContent || "₦";
-    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || "";
-    const interacEmail     = selectedBeneficiary.dataset.interacEmail     || "";
-    const interacFirstName = selectedBeneficiary.dataset.interacFirstName || "";
-    const interacLastName  = selectedBeneficiary.dataset.interacLastName  || "";
-
-    document.getElementById("summaryName").textContent = name;
-    document.getElementById("summaryAccount").textContent = account;
-    document.getElementById("summaryBank").textContent = bank;
-    document.getElementById("summaryAmountSent").textContent = `${symbol}${amount.toFixed(2)}`;
-    document.getElementById("summaryFee").textContent = `${symbol}${fee.toFixed(2)}`;
-    document.getElementById("summaryTotal").textContent = `${symbol}${total.toFixed(2)}`;
-    document.getElementById("summaryRate").textContent = rate;
-    document.getElementById("summaryReceive").textContent = `${currency} ${receiveAmount.toFixed(2)}`;
-
-    document.getElementById("recipientIdInput").value = recipientId;
-    document.getElementById("amountInput").value = amount.toFixed(2);
-    document.getElementById("transferFeeInput").value = fee.toFixed(2);
-    document.getElementById("totalAmountInput").value = total.toFixed(2);
-    document.getElementById("exchangeRateInput").value = rate;
-    document.getElementById("recipientAmountInput").value = receiveAmount.toFixed(2);
-    document.getElementById("accountNumberInput").value = account;
-    document.getElementById("accountNameInput").value = name;
-    document.getElementById("balanceIdInput").value = balanceId;
-    document.getElementById("bankInput").value = bank;
-    document.getElementById("sort_codeInput").value = sortCode;
-    document.getElementById("transfermethodInput").value = transfermethod;
-
-    document.getElementById("interacEmailInput").value     = interacEmail;
-    document.getElementById("interacFirstNameInput").value = interacFirstName;
-    document.getElementById("interacLastNameInput").value  = interacLastName;
-
-    const summaryInteracRow = document.getElementById("summaryInteracRow");
-    document.getElementById("summaryInteracEmail").textContent = interacEmail;
-    if (interacEmail) {
-        summaryInteracRow.classList.remove("hidden");
-    } else {
-        summaryInteracRow.classList.add("hidden");
-    }
-
-    document.getElementById("summaryModal").classList.remove("hidden");
-  });
-
-  document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
-    document.getElementById("summaryModal").classList.add("hidden");
-  });
-
-  
-
-  updateRateDisplay();
-});
-</script>
-
-
-
-
-
-
-    
-
-    
-   
-    {{-- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const currencySelect = document.getElementById("currency");
-        const amountInput = document.getElementById("sendAmount");
-        const flagImg = document.getElementById("currencyFlag");
-        const symbolSpan = document.getElementById("currencySymbol");
-        const exchangeRateText = document.getElementById("exchangeRateText");
-        const transferFeeText = document.getElementById("transferFeeText");
-        const recipientAmountText = document.getElementById("recipientAmount");
-        const recipientGetsText = document.getElementById("recipientGets");
-        const sendCurrencySymbol = document.getElementById("sendCurrencySymbol");
-
-        function formatNumberInput(input) {
-            const cleaned = input.replace(/,/g, '');
-            const number = parseFloat(cleaned);
-            if (isNaN(number)) return '';
-            return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function getRecipientCurrency() {
-            const selectedBeneficiary = document.querySelector('.selected-beneficiary');
-            return selectedBeneficiary?.dataset.currency || "USD";
-        }
-
-        async function fetchExchangeRate(fromCurrency, toCurrency, amount) {
-            const url = `${window.location.origin}/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`;
-            try {
-                const response = await fetch(url);
-                const contentType = response.headers.get("content-type") || "";
-                if (!response.ok || !contentType.includes("application/json")) throw new Error("Invalid response");
-                return await response.json();
-            } catch (err) {
-                console.error("Exchange rate fetch error:", err);
-                return null;
-            }
-        }
-
-        async function updateRateDisplay() {
-            const selectedOption = currencySelect?.selectedOptions[0];
-            if (!selectedOption) return;
-
-            const fromCurrency = selectedOption.value;
-            const symbol = selectedOption.dataset.symbol || "₦";
-            const country = selectedOption.dataset.country || "us";
-            const amount = parseFloat(amountInput.value || 0);
-            const recipientCurrency = getRecipientCurrency();
-
-            document.getElementById('rateLoader')?.classList.remove('hidden');
-
-            flagImg.src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-            symbolSpan.textContent = symbol;
-            sendCurrencySymbol.textContent = symbol;
-
-            if (fromCurrency === recipientCurrency) {
-                exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} 1.00`;
-                recipientAmountText.textContent = amount.toFixed(2);
-                transferFeeText.textContent = `${symbol}55.00`;
-                document.getElementById('rateLoader')?.classList.add('hidden');
-                return;
-            }
-
-            const rateData = await fetchExchangeRate(fromCurrency, recipientCurrency, amount);
-
-            if (rateData && rateData.rate) {
-                const rate = parseFloat(rateData.rate);
-                const recipientAmount = parseFloat(rateData.converted_amount);
-                const fee = parseFloat(rateData.transfer_fee || 0);
-
-                exchangeRateText.textContent = `${fromCurrency} 1.00 = ${recipientCurrency} ${rate}`;
-                transferFeeText.textContent = `${symbol}${fee.toFixed(2)}`;
-                recipientAmountText.textContent = recipientAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-                const recipientSymbol = document.getElementById("recipientSymbol");
-                const currencySymbols = {
-                    USD: "$", NGN: "₦", EUR: "€", GBP: "£", GHS: "₵", KES: "KSh", ZAR: "R",
-                    XOF: "CFA", XAF: "FCFA", BWP: "P", TZS: "TSh", UGX: "USh", MWK: "MK",
-                    CAD: "C$", AUD: "A$", INR: "₹", CNY: "¥", JPY: "¥", RUB: "₽", BRL: "R$",
-                    MXN: "Mex$", AED: "د.إ", SAR: "﷼", QAR: "ر.ق", EGP: "£", LKR: "Rs", PKR: "₨",
-                    THB: "฿", MYR: "RM", IDR: "Rp", PHP: "₱", KRW: "₩", CHF: "Fr", SEK: "kr",
-                    NOK: "kr", DKK: "kr", CZK: "Kč", PLN: "zł", HUF: "Ft", TRY: "₺", ARS: "$",
-                    CLP: "$", COP: "$", PEN: "S/"
-                };
-                recipientSymbol.textContent = currencySymbols[recipientCurrency] || recipientCurrency;
-            } else {
-                exchangeRateText.textContent = "Rate unavailable";
-                transferFeeText.textContent = `${symbol}0.00`;
-                recipientAmountText.textContent = "0.00";
-            }
-
-            document.getElementById('rateLoader')?.classList.add('hidden');
-        }
-
-    window.openModalFromElement = function(el) {
-        document.querySelectorAll('.selected-beneficiary').forEach(x => x.classList.remove('selected-beneficiary'));
-        el.classList.add('selected-beneficiary');
-
-        const name = el.dataset.accountName || "N/A";
-        const account = el.dataset.accountNumber || "";
-        const bank = el.dataset.bank || "";
-        const phone = el.dataset.phone || "";
-        const currency = el.dataset.currency || "USD";
-        const country = el.dataset.country || "us";
-
-        const isMobile = bank.toLowerCase().includes("mobile");
-        const destination = isMobile ? phone : account;
-
-        // Fill modal fields
-        const modal = document.getElementById("transactionModal");
-        modal.querySelector("#beneficiaryName").textContent = name;
-        modal.querySelector("#beneficiaryAccount").textContent = destination;
-        modal.querySelector("#beneficiaryBank").textContent = bank;
-        modal.querySelector("#recipientFlag").src = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-        document.getElementById("recipientGets").textContent = currency;
-        document.getElementById("sendAmount").value = parseFloat(el.dataset.amount || 100);
-
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-
-        // Update exchange rate
-        if (currencySelect && amountInput) updateRateDisplay();
+  <style>
+    .beneficiary-card.selected { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.2); }
+  </style>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const symbols = {
+      USD:"$",NGN:"₦",EUR:"€",GBP:"£",GHS:"₵",KES:"KSh",ZAR:"R",
+      XOF:"CFA",XAF:"FCFA",UGX:"USh",TZS:"TSh",CAD:"C$",AUD:"A$",
+      INR:"₹",CNY:"¥",JPY:"¥",BRL:"R$",MXN:"Mex$",AED:"د.إ",
+      SAR:"﷼",THB:"฿",MYR:"RM",IDR:"Rp",PHP:"₱",KRW:"₩",CHF:"Fr",
     };
 
-    currencySelect?.addEventListener("change", updateRateDisplay);
-    amountInput?.addEventListener("input", updateRateDisplay);
+    let selectedBeneficiary = null;
+    let rateDebounce        = null;
 
-    document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-        document.getElementById("transactionModal").classList.add("hidden");
+    const modalAmount   = document.getElementById("modalAmount");
+    const modalCurrency = document.getElementById("modalCurrency");
+
+    // ── Search ──────────────────────────────────────────────────────────────
+    document.getElementById("beneficiarySearch")?.addEventListener("input", function () {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll(".beneficiary-card").forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(q) ? "" : "none";
+      });
     });
 
-    window.addEventListener("click", (e) => {
-        if (e.target.id === "transactionModal") {
-            document.getElementById("transactionModal").classList.add("hidden");
+    // ── Open modal ──────────────────────────────────────────────────────────
+    window.openSendModal = function (el) {
+      document.querySelectorAll(".beneficiary-card").forEach(c => {
+        c.classList.remove("selected");
+        c.querySelector(".selected-ring")?.classList.add("hidden");
+      });
+
+      el.classList.add("selected");
+      el.querySelector(".selected-ring")?.classList.remove("hidden");
+      selectedBeneficiary = el;
+
+      const name     = el.dataset.accountName  || "N/A";
+      const bank     = el.dataset.bank         || "";
+      const currency = el.dataset.currency     || "USD";
+      const country  = el.dataset.country      || "us";
+      const iEmail   = el.dataset.interacEmail || "";
+
+      document.getElementById("modalAvatar").textContent             = name.substring(0, 2).toUpperCase();
+      document.getElementById("modalName").textContent               = name;
+      document.getElementById("modalBank").textContent               = bank;
+      document.getElementById("modalRecipientCurrency").textContent  = currency;
+      document.getElementById("modalRecipientFlag").src              = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+
+      const interacBox = document.getElementById("interacInfo");
+      if (iEmail) {
+        document.getElementById("interacEmailDisplay").textContent = iEmail;
+        interacBox.classList.remove("hidden");
+      } else {
+        interacBox.classList.add("hidden");
+      }
+
+      // Reset amount
+      modalAmount.value = "100";
+
+      updateBalanceHint();
+      updateRate();
+
+      document.getElementById("sendModal").classList.remove("hidden");
+      document.getElementById("sendModal").classList.add("flex");
+    };
+
+    window.closeSendModal = function () {
+      document.getElementById("sendModal").classList.add("hidden");
+      document.getElementById("sendModal").classList.remove("flex");
+    };
+
+    window.closeConfirmModal = function () {
+      document.getElementById("confirmModal").classList.add("hidden");
+      document.getElementById("confirmModal").classList.remove("flex");
+    };
+
+    // ── Balance hint ────────────────────────────────────────────────────────
+    function updateBalanceHint() {
+      const opt = modalCurrency?.selectedOptions[0];
+      if (!opt) return;
+
+      const bal  = parseFloat(opt.dataset.amount || 0);
+      const sym  = opt.dataset.symbol || "";
+      const hint = document.getElementById("balanceHint");
+
+      hint.textContent = `Available: ${sym}${bal.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+
+      const country = opt.dataset.country || "us";
+      document.getElementById("modalCurrencyFlag").src        = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+      document.getElementById("modalCurrencySymbol").textContent = opt.dataset.symbol || "₦";
+    }
+
+    // ── Fetch rate ──────────────────────────────────────────────────────────
+    async function updateRate() {
+      if (!selectedBeneficiary) return;
+
+      const opt          = modalCurrency?.selectedOptions[0];
+      const fromCurrency = opt?.value || "NGN";
+      const symbol       = opt?.dataset.symbol || "₦";
+      const country      = opt?.dataset.country || "ng";
+      const amount       = parseFloat(modalAmount?.value || 0);
+      const toCurrency   = selectedBeneficiary.dataset.currency || "USD";
+
+      document.getElementById("modalCurrencySymbol").textContent = symbol;
+      document.getElementById("modalCurrencyFlag").src           = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+
+      if (!amount || amount <= 0) {
+        document.getElementById("modalRate").textContent            = "--";
+        document.getElementById("modalRecipientAmount").textContent = "0.00";
+        return;
+      }
+
+      document.getElementById("spinnerIcon").classList.remove("hidden");
+
+      if (fromCurrency === toCurrency) {
+        document.getElementById("modalRate").textContent            = `1.00 ${fromCurrency} = 1.00 ${toCurrency}`;
+        document.getElementById("modalRecipientAmount").textContent = amount.toFixed(2);
+        document.getElementById("spinnerIcon").classList.add("hidden");
+        return;
+      }
+
+      try {
+        const res  = await fetch(
+          `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`,
+          { headers: { Accept: "application/json" } }
+        );
+        const data = await res.json();
+
+        if (data?.success && data?.data) {
+          const converted = parseFloat(data.data.converted || 0);
+          // const fee = parseFloat(data.data.transfer_fee || 0); // fee disabled for now
+
+          document.getElementById("modalRate").textContent =
+            `${amount.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${toCurrency}`;
+
+          document.getElementById("modalRecipientAmount").textContent =
+            converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        } else {
+          document.getElementById("modalRate").textContent            = data?.message || "Rate unavailable";
+          document.getElementById("modalRecipientAmount").textContent = "0.00";
         }
+
+      } catch (e) {
+        document.getElementById("modalRate").textContent            = "Error fetching rate";
+        document.getElementById("modalRecipientAmount").textContent = "0.00";
+      }
+
+      document.getElementById("spinnerIcon").classList.add("hidden");
+    }
+
+    modalAmount?.addEventListener("input", () => {
+      clearTimeout(rateDebounce);
+      rateDebounce = setTimeout(updateRate, 500);
     });
 
-document.getElementById('sendBtn')?.addEventListener('click', () => {
-    const selectedBeneficiary = document.querySelector('.selected-beneficiary');
-    const name = document.getElementById('beneficiaryName').textContent || "N/A";
-    const account = document.getElementById('beneficiaryAccount').textContent || "N/A";
-    const bank = document.getElementById('beneficiaryBank').textContent || "N/A";
-    const sortCode = selectedBeneficiary?.dataset.sortcode || ""; // ✅ get sort code
-    const transfermethod = selectedBeneficiary?.dataset.transfermethod || ""; // ✅ get sort code
-    const amount = parseFloat(document.getElementById('sendAmount').value || 0);
-    const fee = parseFloat(document.getElementById('transferFeeText').textContent.replace(/[^\d.]/g, '') || 0);
-    const total = amount + fee;
-    const rate = document.getElementById('exchangeRateText').textContent || '';
-    const receive = document.getElementById('recipientAmount').textContent || '0.00';
-    const currency = document.getElementById('recipientGets').textContent || 'USD';
-    const recipientId = selectedBeneficiary?.dataset.id || '';
-    const symbol = document.getElementById('sendCurrencySymbol').textContent || '₦';
-    const balanceId = currencySelect?.selectedOptions[0]?.dataset.id || '';
-
-    // Update summary modal
-    document.getElementById('summaryName').textContent = name;
-    document.getElementById('summaryAccount').textContent = account;
-    document.getElementById('summaryBank').textContent = bank;
-    document.getElementById('summaryAmountSent').textContent = `${symbol}${amount.toFixed(2)}`;
-    document.getElementById('summaryFee').textContent = `${symbol}${fee.toFixed(2)}`;
-    document.getElementById('summaryTotal').textContent = `${symbol}${total.toFixed(2)}`;
-    document.getElementById('summaryRate').textContent = rate;
-    document.getElementById('summaryReceive').textContent = `${currency} ${receive}`;
-
-    // Hidden inputs
-    document.getElementById('recipientIdInput').value = recipientId;
-    document.getElementById('amountInput').value = amount.toFixed(2);
-    document.getElementById('transferFeeInput').value = fee.toFixed(2);
-    document.getElementById('totalAmountInput').value = total.toFixed(2);
-    document.getElementById('exchangeRateInput').value = rate;
-    document.getElementById('recipientAmountInput').value = receive.replace(/,/g, '');
-    document.getElementById('accountNumberInput').value = account;
-    document.getElementById('accountNameInput').value = name;
-    document.getElementById('balanceIdInput').value = balanceId;
-    document.getElementById('bankInput').value = bank;
-    document.getElementById('sort_codeInput').value = sortCode; // ✅ now works 
-    document.getElementById('transfermethodInput').value = transfermethod;
-
-    // Show summary modal
-    document.getElementById('summaryModal').classList.remove('hidden');
-});
-
-    document.getElementById("closeSummaryModalBtn")?.addEventListener("click", () => {
-        document.getElementById("summaryModal").classList.add("hidden");
+    modalCurrency?.addEventListener("change", () => {
+      updateBalanceHint();
+      updateRate();
     });
 
-    updateRateDisplay();
-});
-</script> --}}
-    
+    // ── Proceed to confirm ──────────────────────────────────────────────────
+    document.getElementById("proceedBtn")?.addEventListener("click", () => {
+      if (!selectedBeneficiary) {
+        Swal.fire({ icon: "error", title: "Select a beneficiary first" });
+        return;
+      }
 
-    <script>
+      const opt        = modalCurrency?.selectedOptions[0];
+      const symbol     = opt?.dataset.symbol || "₦";
+      const amount     = parseFloat(modalAmount?.value || 0);
+      const rateText   = document.getElementById("modalRate").textContent;
+      const receive    = document.getElementById("modalRecipientAmount").textContent.replace(/,/g, "");
+      const currency   = selectedBeneficiary.dataset.currency;
 
-        const sidebar = document.getElementById('sidebar');
-        const openBtn = document.getElementById('openSidebarBtn');
-        const closeBtn = document.getElementById('closeSidebarBtn');
-        const overlay = document.getElementById('overlay');
+      if (!amount || amount <= 0) {
+        Swal.fire({ icon: "error", title: "Enter a valid amount" });
+        return;
+      }
 
-        function openSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+      if (rateText.toLowerCase().includes("unavailable") || rateText === "--") {
+        Swal.fire({ icon: "error", title: "Rate not available", text: "Please wait for a valid exchange rate." });
+        return;
+      }
 
-        function closeSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
+      const fee   = 0; // fee temporarily disabled
+      const total = amount + fee;
 
-        openBtn.addEventListener('click', openSidebar);
-        closeBtn.addEventListener('click', closeSidebar);
-        overlay.addEventListener('click', closeSidebar);
+      const name    = selectedBeneficiary.dataset.accountName    || "";
+      const account = selectedBeneficiary.dataset.accountNumber  || selectedBeneficiary.dataset.phone || "";
+      const bank    = selectedBeneficiary.dataset.bank           || "";
+      const iEmail  = selectedBeneficiary.dataset.interacEmail   || "";
 
-        // Close sidebar on window resize if desktop
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = '';
-            } else {
-                sidebar.classList.add('-translate-x-full');
-            }
-        });
-    </script>
+      // Fill confirm modal display
+      document.getElementById("cfmName").textContent    = name;
+      document.getElementById("cfmAccount").textContent = account;
+      document.getElementById("cfmBank").textContent    = bank;
+      document.getElementById("cfmAmount").textContent  = `${symbol}${amount.toFixed(2)}`;
+      document.getElementById("cfmRate").textContent    = rateText;
+      document.getElementById("cfmReceive").textContent = `${currency} ${parseFloat(receive).toFixed(2)}`;
+
+      if (iEmail) {
+        document.getElementById("cfmInteracEmail").textContent = iEmail;
+        document.getElementById("cfmInteracRow").classList.remove("hidden");
+        document.getElementById("cfmAccountRow").classList.add("hidden");
+      } else {
+        document.getElementById("cfmInteracRow").classList.add("hidden");
+        document.getElementById("cfmAccountRow").classList.remove("hidden");
+      }
+
+      // Fill hidden form inputs
+      document.getElementById("amountInput").value           = amount.toFixed(2);
+      document.getElementById("transferFeeInput").value      = fee.toFixed(2);      // 0.00
+      document.getElementById("totalAmountInput").value      = total.toFixed(2);    // same as amount
+      document.getElementById("exchangeRateInput").value     = rateText;
+      document.getElementById("recipientAmountInput").value  = parseFloat(receive).toFixed(2);
+      document.getElementById("accountNumberInput").value    = account;
+      document.getElementById("accountNameInput").value      = name;
+      document.getElementById("bankInput").value             = bank;
+      document.getElementById("sort_codeInput").value        = selectedBeneficiary.dataset.sortcode      || "";
+      document.getElementById("transfermethodInput").value   = selectedBeneficiary.dataset.transfermethod || "";
+      document.getElementById("recipientIdInput").value      = selectedBeneficiary.dataset.id            || "";
+      document.getElementById("balanceIdInput").value        = opt?.dataset.id                           || "";
+      document.getElementById("interacEmailInput").value     = iEmail;
+      document.getElementById("interacFirstNameInput").value = selectedBeneficiary.dataset.interacFirstName || "";
+      document.getElementById("interacLastNameInput").value  = selectedBeneficiary.dataset.interacLastName  || "";
+
+      document.getElementById("confirmModal").classList.remove("hidden");
+      document.getElementById("confirmModal").classList.add("flex");
+    });
+
+    // ── Sidebar ─────────────────────────────────────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('openSidebarBtn');
+    const closeBtn = document.getElementById('closeSidebarBtn');
+    const overlay  = document.getElementById('overlay');
+
+    openBtn?.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+    closeBtn?.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+    overlay?.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+    });
+
+  });
+  </script>
 </body>
-
 </html>

@@ -160,15 +160,15 @@
       <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
         <h3 class="section-title text-base mb-5">Account Details</h3>
 
-        @if($balance->currency === 'NGN' && auth()->user()->virtual_account_number)
+        @if($balance->currency === 'NGN' && $balance->virtual_account_number)
           <div class="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
             <span class="text-3xl">🇳🇬</span>
             <div class="flex-1">
               <p class="font-bold text-sm text-gray-800 mb-3">Fidelity Bank — NGN</p>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-y-3 gap-x-6 text-sm">
-                <div><p class="text-gray-400 text-xs mb-0.5">Account Number</p><p class="font-semibold">{{ auth()->user()->virtual_account_number }}</p></div>
-                <div><p class="text-gray-400 text-xs mb-0.5">Account Name</p><p class="font-semibold">{{ auth()->user()->virtual_account_name ?? 'N/A' }}</p></div>
-                <div><p class="text-gray-400 text-xs mb-0.5">Bank</p><p class="font-semibold">{{ auth()->user()->virtual_account_bank ?? 'N/A' }}</p></div>
+                <div><p class="text-gray-400 text-xs mb-0.5">Account Number</p><p class="font-semibold">{{ $balance->virtual_account_number }}</p></div>
+                <div><p class="text-gray-400 text-xs mb-0.5">Account Name</p><p class="font-semibold">{{ $balance->virtual_account_name ?? 'N/A' }}</p></div>
+                <div><p class="text-gray-400 text-xs mb-0.5">Bank</p><p class="font-semibold">{{ $balance->virtual_account_bank ?? 'N/A' }}</p></div>
               </div>
             </div>
           </div>

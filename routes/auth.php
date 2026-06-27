@@ -407,6 +407,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/business-account/edit/{id}', [BusinessAccountController::class,'edit']);
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
         Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
+        Route::put('/admin/business-account/{id}/currency-fee/{currency}',[BusinessAccountController::class, 'updateCurrencyFee'])->name('admin.business.currency-fee.update');
 
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
@@ -480,6 +481,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::middleware('admin.permission:manage_settings_exchange')->group(function () {
             Route::get('/admin/exchangerate', [SettingController::class, 'index'])->name('admin.exchangerate');
             Route::get('/currency-limits', [AdminCurrencyLimitController::class, 'index'])->name('admin.currency.limits');
+            Route::post('/admin/personal-account/{id}/submit-fidelity', [PersonalAccountController::class, 'submitToFidelity'])->name('admin.personal.submit-fidelity');
             Route::post('/admin/business-account/{id}/submit-fidelity', [BusinessAccountController::class, 'submitToFidelity'])->name('admin.business.submit-fidelity');
             Route::post('/admin/business-account/{id}/submit-blaaiz', [BusinessAccountController::class, 'submitToBlaaiz'])->name('admin.business.submit-blaaiz');
 

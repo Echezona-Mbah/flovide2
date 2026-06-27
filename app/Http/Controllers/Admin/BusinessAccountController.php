@@ -16,6 +16,7 @@ use App\Traits\CurrencyHelper;
 use App\Services\FidelityService;
 use App\Services\BlaaizService;
 use Illuminate\Support\Facades\DB;
+use App\Models\UserCurrencyFee;
 
 class BusinessAccountController extends Controller
 {
@@ -129,6 +130,11 @@ public function find($id)
     $bankAccount = BankAccount::where('user_id', $user->id)->get();
     $Subaccount = Subaccount::where('user_id', $user->id)->get();
 
+    // Currency fees
+    $currencyFees = UserCurrencyFee::where('user_id', $user->id)
+        ->get()
+        ->keyBy('currency');
+
     foreach ($balances as $bal) {
         $bal->currency_info = $this->getCountryCodeFromCurrency($bal->currency);
     }
@@ -141,7 +147,8 @@ public function find($id)
         'beneficia',
         'customer',
         'bankAccount',
-        'Subaccount'
+        'Subaccount',
+        'currencyFees'
     ));
 }
 
@@ -259,14 +266,60 @@ public function downloadDocument(Request $request, $id)
 
 
 
+// public function submitToFidelity(Request $request, $id, FidelityService $fidelity)
+// {
+//     $user = User::findOrFail($id);
+
+//     // dd($user);
+
+//     if ($user->virtual_account_number) {
+//         return back()->with('error', 'This business already has a Fidelity virtual account.');
+//     }
+
+//     $response = $fidelity->generateStaticVirtualAccount([
+//         'first_name'    => $user->firstname ?? $user->business_name,
+//         'last_name'     => $user->lastname,
+//         'email'         => $user->email,
+//         'bvn'           => $user->bvn,
+//         'nin'           => $user->nin,
+//         'phone_number'  => $user->business_phone ?? $user->person_phone,
+//         'date_of_birth' => $user->date_of_birth,
+//     ]);
+
+//     if (!$response['success']) {
+//         $msg = $response['data']['messageCode'] ?? 'Failed to create Fidelity virtual account.';
+//         return back()->with('error', $msg);
+//     }
+
+//     $accountInfo = $response['data']['data']['accountInformation'] ?? [];
+//     $processId   = $response['data']['data']['processId'] ?? null;
+
+//     $user->virtual_account_number = $accountInfo['accountNumber'] ?? null;
+//     $user->virtual_account_name   = $accountInfo['accountName'] ?? null;
+//     $user->virtual_account_bank   = $accountInfo['bankName'] ?? null;
+//     $user->fidelty_process_id     = $processId;
+//     $user->save();
+
+//     return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
+// }
+
+
+
 public function submitToFidelity(Request $request, $id, FidelityService $fidelity)
 {
     $user = User::findOrFail($id);
 
-    // dd($user);
+    $currency = $request->input('currency', 'NGN');
 
-    if ($user->virtual_account_number) {
-        return back()->with('error', 'This business already has a Fidelity virtual account.');
+    //dd($currency);
+
+    // ── Find (or create) the NGN balance wallet for this user ──────────────
+    $balance = Balance::where('user_id', $user->id)
+        ->where('currency', $currency)
+        ->first();
+
+    if ($balance->virtual_account_number) {
+        return back()->with('error', 'This wallet already has a Fidelity virtual account.');
     }
 
     $response = $fidelity->generateStaticVirtualAccount([
@@ -287,11 +340,11 @@ public function submitToFidelity(Request $request, $id, FidelityService $fidelit
     $accountInfo = $response['data']['data']['accountInformation'] ?? [];
     $processId   = $response['data']['data']['processId'] ?? null;
 
-    $user->virtual_account_number = $accountInfo['accountNumber'] ?? null;
-    $user->virtual_account_name   = $accountInfo['accountName'] ?? null;
-    $user->virtual_account_bank   = $accountInfo['bankName'] ?? null;
-    $user->fidelty_process_id     = $processId;
-    $user->save();
+    $balance->virtual_account_number = $accountInfo['accountNumber'] ?? null;
+    $balance->virtual_account_name   = $accountInfo['accountName'] ?? null;
+    $balance->virtual_account_bank   = $accountInfo['bankName'] ?? null;
+    $balance->fidelty_process_id     = $processId;
+    $balance->save();
 
     return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
 }
@@ -333,6 +386,62 @@ public function submitToBlaaiz(Request $request, $id, BlaaizService $blaaiz)
     $user->save();
 
     return back()->with('success', 'Business registered with Blaaiz successfully: ' . ($responseData['id'] ?? ''));
+}
+
+
+
+
+
+
+
+
+public function getCurrencyFees(User $user)
+{
+    $fees = UserCurrencyFee::where('user_id', $user->id)
+        ->get()
+        ->keyBy('currency');
+
+    return $fees;
+}
+
+public function updateCurrencyFee(Request $request, $id, $currency)
+{
+    abort_unless(in_array(strtoupper($currency), UserCurrencyFee::CURRENCIES), 404);
+
+    $request->validate([
+        'collection_enabled'  => 'boolean',
+        'collection_percent'  => 'numeric|min:0|max:100',
+        'collection_fixed'    => 'numeric|min:0',
+        'collection_min'      => 'numeric|min:0',
+        'collection_max'      => 'numeric|min:0',
+        'payout_enabled'      => 'boolean',
+        'payout_percent'      => 'numeric|min:0|max:100',
+        'payout_fixed'        => 'numeric|min:0',
+        'payout_min'          => 'numeric|min:0',
+        'payout_max'          => 'numeric|min:0',
+    ]);
+
+    $fee = UserCurrencyFee::updateOrCreate(
+        ['user_id' => $id, 'currency' => strtoupper($currency)],
+        [
+            'collection_enabled'  => $request->boolean('collection_enabled'),
+            'collection_percent'  => $request->input('collection_percent', 0),
+            'collection_fixed'    => $request->input('collection_fixed', 0),
+            'collection_min'      => $request->input('collection_min', 0),
+            'collection_max'      => $request->input('collection_max', 0),
+            'payout_enabled'      => $request->boolean('payout_enabled'),
+            'payout_percent'      => $request->input('payout_percent', 0),
+            'payout_fixed'        => $request->input('payout_fixed', 0),
+            'payout_min'          => $request->input('payout_min', 0),
+            'payout_max'          => $request->input('payout_max', 0),
+        ]
+    );
+
+    return response()->json([
+        'success' => true,
+        'message' => strtoupper($currency) . ' fees updated successfully.',
+        'data'    => $fee,
+    ]);
 }
 
 

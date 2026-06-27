@@ -63,10 +63,16 @@ class AddMoneyController extends Controller
     ));
 }
 
-
-    public function interacDetails(Request $request)
+public function interacDetails(Request $request)
 {
-    return view('business.interac_details');
+    $user = Auth::user();
+    $balanceId = $request->query('balance_id');
+
+    $balance = Balance::where('user_id', $user->id)
+        ->where('id', $balanceId)
+        ->first();
+
+    return view('business.interac_details', compact('balance'));
 }
 
 
@@ -159,6 +165,7 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
         'payment_provider' => 'interac',
         'transaction_type' => 'payment',
         'method'           => 'credit',
+        'type'              => 'credit',
         'payment_method'   => 'auto',
         'sender'           => $request->email,
         'amount'           => $request->amount,
