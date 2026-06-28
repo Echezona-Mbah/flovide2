@@ -36,11 +36,12 @@ class User extends Authenticatable
         'trading_street_address',
         'trading_city',
         'state',
+        'date_of_birth',
         'email',
         'password',
         'email_verification_otp',
         'email_verification_otp_expires_at',
-        'bvn', 
+        'bvn',
         'typeofuser',
         'referral_code',
         'referral_link',
@@ -90,6 +91,8 @@ class User extends Authenticatable
         'ip_whitelist',
         'callback_url',
         'webhook_url',
+        'nin',
+        'nin_status',
         'device_token',
         'blaaiz_id'
 
@@ -133,11 +136,9 @@ public function webhookSetting()
     return $this->hasOne(WebhookSetting::class);
 }
 
-
-
 public function isFullyVerified(): bool
 {
-    return
+    $baseChecks =
         $this->cac_status === 'confirmed' &&
         $this->valid_id_status === 'confirmed' &&
         $this->tin_status === 'confirmed' &&
@@ -148,18 +149,20 @@ public function isFullyVerified(): bool
         $this->register_of_directors_status === 'confirmed' &&
         $this->formation_document_status === 'confirmed' &&
         $this->identity_verification_status === 'confirmed' &&
-        $this->selfie_verification_status === 'confirmed';
-        (
-            $this->countries_id !== 'Nigeria' ||
-            $this->bvn_status === 'confirmed'
-        );
+        $this->selfie_verification_status === 'confirmed' &&
+        $this->nin_status === 'confirmed';  // NIN added
+
+    $nigeriaCheck = (
+        $this->countries_id !== 'Nigeria' ||
+        $this->bvn_status === 'confirmed'
+    );
+
+    return $baseChecks && $nigeriaCheck;
 }
 
 
-public function complianceStatus($tokenResponse = null)
+public function complianceStatus($tokenResponse = null): array
 {
-    $user = auth()->user();
-
     return [
         'cac' => $this->cac_status,
         'valid_id' => $this->valid_id_status,
@@ -172,15 +175,14 @@ public function complianceStatus($tokenResponse = null)
         'formation_document' => $this->formation_document_status,
         'identity_verification' => $this->identity_verification_status,
         'selfie_verification' => $this->selfie_verification_status,
+        'nin' => $this->nin_status,
         'bvn_required' => $this->countries_id === 'Nigeria' ? 'yes' : 'no',
         'bvn_verified' => $this->bvn_status,
         // 'fully_verified' => $this->isFullyVerified() ? 'yes' : 'no',
         'token' => $tokenResponse['token'] ?? null,
-        'userId' => $this->id
+        'userId' => $this->id,
     ];
 }
-
-
 
 // All currency fee rows
 public function currencyFees()

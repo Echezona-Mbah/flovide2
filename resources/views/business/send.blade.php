@@ -44,12 +44,12 @@
       <div class="rounded-[28px] bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.3)] border border-slate-100 overflow-hidden">
 
         <!-- Card Header -->
-        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-sky-200/70">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Beneficiaries</p>
-              <h2 class="mt-1 text-2xl md:text-3xl font-black tracking-tight text-slate-900">My Beneficiaries</h2>
-              <p class="mt-1 text-sm text-slate-500">Select a recipient to send money.</p>
+              <p class="text-xs uppercase tracking-[0.3em]">Beneficiaries</p>
+              <h2 class="mt-1 text-2xl md:text-3xl font-black tracking-tight text-white">My Beneficiaries</h2>
+              <p class="mt-1 text-sm text-white">Select a recipient to send money.</p>
             </div>
             <div class="flex items-center gap-3">
               <span class="inline-flex items-center gap-2 bg-white/80 border border-sky-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-full">

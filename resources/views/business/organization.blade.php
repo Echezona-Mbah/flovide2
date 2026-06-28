@@ -20,12 +20,12 @@
     <section class="w-full">
       <div class="rounded-[28px] bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
         <!-- Top bar -->
-        <div class="px-6 md:px-10 py-6 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-6 bg-[#215F9C] text-white border-b border-sky-200/70">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Workspace</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Team Members</h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">Invite, update roles, and keep your org secure.</p>
+              <p class="text-xs uppercase tracking-[0.3em]">Workspace</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Team Members</h2>
+              <p class="mt-2 text-sm text-white max-w-2xl">Invite, update roles, and keep your org secure.</p>
             </div>
             <button
               class="inline-flex items-center justify-center rounded-full border border-sky-300 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-white"

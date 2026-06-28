@@ -18,23 +18,29 @@
 
         <section class="relative w-full">
             @if (!auth()->user()->isFullyVerified())
-            <div class="relative overflow-hidden rounded-xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
-                <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
+            <div class="relative overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full opacity-30"></div>
+
                 <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div class="flex items-start gap-3">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700">
                             <i class="fas fa-shield-alt text-lg"></i>
                         </div>
+
                         <div>
-                            <h4 class="text-sm font-semibold text-yellow-900">Account verification required</h4>
-                            <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
+                            <h4 class="text-sm font-semibold text-blue-900">
+                                Account verification required
+                            </h4>
+
+                            <p class="text-sm text-blue-800 mt-1 leading-relaxed">
                                 For your safety and compliance, some features are temporarily unavailable.
                                 Please complete your verification to unlock full access.
                             </p>
                         </div>
                     </div>
+
                     <a href="{{ url('/compliance') }}"
-                        class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
+                    class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
                         <i class="fas fa-arrow-right"></i>
                         Complete Verification
                     </a>

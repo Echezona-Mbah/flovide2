@@ -250,12 +250,12 @@
 
 <section class="mx-auto max-w-5xl">
   <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
-    <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+    <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-sky-200/70">
     <div class="flex items-center justify-between flex-wrap gap-4">
         <div>
-        <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Payout Accounts</p>
-        <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Add Beneficiary</h2>
-        <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+        <p class="text-xs uppercase tracking-[0.3em]">Payout Accounts</p>
+        <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Add Beneficiary</h2>
+        <p class="mt-2 text-sm text-white max-w-2xl">
             Create a new beneficiary with validated bank details. If validation fails, you can still enter the name manually.
         </p>
         </div>
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <!-- Actions -->
       <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-        <button type="submit" class="flex-1 bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition">
+        <button type="submit" class="flex-1 bg-[#215F9C] text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition">
           Create Beneficiary
         </button>
         <a href="{{ route('beneficias') }}" class="flex-1 border py-3 rounded-xl text-center hover:bg-slate-50 transition">

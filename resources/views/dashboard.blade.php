@@ -20,39 +20,43 @@
     <section class="w-full">
 
       @if (!auth()->user()->isFullyVerified())
-      <div class="relative overflow-hidden rounded-2xl border border-yellow-300 bg-yellow-50 p-5 mb-6">
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-yellow-200 rounded-full opacity-30"></div>
+      <div class="relative overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-5 mb-6">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full opacity-30"></div>
+
         <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex items-start gap-3">
-            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-700">
-              <i class="fas fa-shield-alt text-lg"></i>
+            <div class="flex items-start gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700">
+                    <i class="fas fa-shield-alt text-lg"></i>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-blue-900">
+                        Account verification required
+                    </h4>
+
+                    <p class="text-sm text-blue-800 mt-1 leading-relaxed">
+                        For your safety and compliance, some features are temporarily unavailable.
+                        Please complete your verification to unlock full access.
+                    </p>
+                </div>
             </div>
-            <div>
-              <h4 class="text-sm font-semibold text-yellow-900">
-                Account verification required
-              </h4>
-              <p class="text-sm text-yellow-800 mt-1 leading-relaxed">
-                For your safety and compliance, some features are temporarily unavailable.
-                Please complete your verification to unlock full access.
-              </p>
-            </div>
-          </div>
-          <a href="{{ url('/compliance') }}"
-             class="inline-flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition shadow-sm">
-            <i class="fas fa-arrow-right"></i>
-            Complete Verification
-          </a>
+
+            <a href="{{ url('/compliance') }}"
+              class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                <i class="fas fa-arrow-right"></i>
+                Complete Verification
+            </a>
         </div>
       </div>
       @endif
 
       <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
-        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-[#215F9C]/20">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Wallet</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Balances & Activity</h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-100">Wallet</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Balances & Activity</h2>
+              <p class="mt-2 text-sm text-slate-200 max-w-2xl">
                 Overview of balances, live exchange rates, and recent transactions.
               </p>
             </div>

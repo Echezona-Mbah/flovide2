@@ -13,12 +13,12 @@
 
     <section class="mx-auto max-w-6xl">
       <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
-        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-sky-200/70">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Exchange</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Wallet Exchange</h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+              <p class="text-xs uppercase tracking-[0.3em]">Exchange</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Wallet Exchange</h2>
+              <p class="mt-2 text-sm text-white max-w-2xl">
                 Convert balances instantly with live rates.
               </p>
             </div>
@@ -134,7 +134,7 @@
                 </div>
               </div>
 
-              <button class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 transition">
+              <button class="w-full bg-[#215F9C] text-white py-3 rounded-xl hover:bg-slate-800 transition">
                 Exchange Now
               </button>
             </form>

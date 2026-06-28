@@ -59,7 +59,7 @@
 
         <section class="w-full">
             <div class="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-                <section class="overflow-hidden rounded-[28px] bg-[#162033] text-white shadow-[0_30px_80px_-35px_rgba(15,23,42,0.5)]">
+                <section class="overflow-hidden rounded-[28px] bg-[#215F9C] text-white shadow-[0_30px_80px_-35px_rgba(15,23,42,0.5)]">
                     <div class="p-6 md:p-8">
                         <span class="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#e2c494]">
                             Security Overview
@@ -106,10 +106,10 @@
                         @csrf
 
                         <div class="inline-flex rounded-full bg-slate-100 p-1">
-                            <button type="button" class="mode-tab rounded-full px-4 py-2 text-sm font-semibold {{ $activeMode === 'live' ? 'bg-[#162033] text-white' : 'text-slate-600' }}" data-mode="live">
+                            <button type="button" class="mode-tab rounded-full px-4 py-2 text-sm font-semibold {{ $activeMode === 'live' ? 'bg-[#215F9C] text-white' : 'text-slate-600' }}" data-mode="live">
                                 Live
                             </button>
-                            <button type="button" class="mode-tab rounded-full px-4 py-2 text-sm font-semibold {{ $activeMode === 'test' ? 'bg-[#162033] text-white' : 'text-slate-600' }}" data-mode="test">
+                            <button type="button" class="mode-tab rounded-full px-4 py-2 text-sm font-semibold {{ $activeMode === 'test' ? 'bg-[#215F9C] text-white' : 'text-slate-600' }}" data-mode="test">
                                 Test
                             </button>
                         </div>
@@ -126,7 +126,7 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    <button type="button" class="generate-secret mt-3 inline-flex items-center gap-2 rounded-full bg-[#162033] px-4 py-2 text-sm font-semibold text-white" data-mode="live">
+                                    <button type="button" class="generate-secret mt-3 inline-flex items-center gap-2 rounded-full bg-[#215F9C] px-4 py-2 text-sm font-semibold text-white" data-mode="live">
                                         <i class="fas fa-rotate"></i>
                                         Generate live secret
                                     </button>
@@ -169,7 +169,7 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    <button type="button" class="generate-secret mt-3 inline-flex items-center gap-2 rounded-full bg-[#162033] px-4 py-2 text-sm font-semibold text-white" data-mode="test">
+                                    <button type="button" class="generate-secret mt-3 inline-flex items-center gap-2 rounded-full bg-[#215F9C] px-4 py-2 text-sm font-semibold text-white" data-mode="test">
                                         <i class="fas fa-rotate"></i>
                                         Generate test secret
                                     </button>
@@ -302,11 +302,11 @@
                 modeInput.value = mode;
 
                 tabs.forEach(t => {
-                    t.classList.remove('bg-[#162033]', 'text-white');
+                    t.classList.remove('bg-[#215F9C]', 'text-white');
                     t.classList.add('text-slate-600');
                 });
 
-                tab.classList.add('bg-[#162033]', 'text-white');
+                tab.classList.add('bg-[#215F9C]', 'text-white');
                 tab.classList.remove('text-slate-600');
 
                 panels.forEach(panel => {

@@ -1,6 +1,5 @@
 <!-- Sidebar -->
-<aside aria-label="Sidebar" id="sidebar"
-  class="fixed inset-y-0 left-0 z-30 w-72 bg-gradient-to-b from-sky-100 via-sky-50 to-white flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex-shrink-0 border-r border-sky-100">
+<aside aria-label="Sidebar" id="sidebar" class="fixed inset-y-0 left-0 z-30 w-72 bg-[#215F9C] flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex-shrink-0 border-r border-sky-100">
 
 
   <!-- Brand -->
@@ -19,7 +18,7 @@
 
     <!-- Dashboard -->
     <a href="{{ route('dashboard') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('dashboard') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-tachometer-alt text-base"></i>
       {{ __('Dashboard') }}
@@ -27,7 +26,7 @@
 
     <!-- Transaction History -->
     <a href="{{ route('transactionHistory') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('transactionHistory') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-history text-base"></i>
       {{ __('Transaction History') }}
@@ -35,7 +34,7 @@
 
     <!-- Beneficiaries -->
     <a href="{{ route('beneficias') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('beneficias.*') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-file-invoice text-base"></i>
       {{ __('Beneficiaries') }}
@@ -43,7 +42,7 @@
 
     <!-- Refunds -->
     {{-- <a href="{{ route('refunds.index') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('refunds.*') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-undo text-base"></i>
       {{ __('Refunds') }}
@@ -51,7 +50,7 @@
 
     <!-- Compliance -->
     <a href="{{ route('compliance') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('compliance') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-balance-scale text-base"></i>
       {{ __('Compliance') }}
@@ -59,7 +58,7 @@
 
     <!-- Referral -->
     <a href="{{ route('referral') }}"
-      class="flex items-center gap-3 py-2.5 px-3 rounded-full
+      class="flex items-center gap-3 py-2.5 px-3 rounded-full text-white
         {{ request()->routeIs('referral') ? 'bg-white shadow-sm font-semibold text-slate-900' : 'hover:bg-white/80' }}">
       <i class="fas fa-gift text-base"></i>
       {{ __('Referral') }}
@@ -68,7 +67,7 @@
     <!-- Settings Dropdown -->
     <div class="space-y-1">
       <button id="settingsDropdownBtn"
-        class="flex items-center justify-between w-full py-2.5 px-3 hover:bg-white/80 rounded-full cursor-pointer focus:outline-none">
+        class="flex items-center justify-between w-full text-white py-2.5 px-3 hover:bg-white/80 rounded-full cursor-pointer focus:outline-none">
         <div class="flex items-center gap-3">
           <i class="fas fa-cog text-base"></i>
           Settings
@@ -76,7 +75,7 @@
         <i id="settingsChevron" class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
       </button>
 
-      <div id="settingsDropdownMenu" class="hidden flex-col pl-8 space-y-1">
+      <div id="settingsDropdownMenu" class="hidden  text-white flex-col pl-8 space-y-1">
         <a href="{{ route('business.webhooks') }}" class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white/80">
           <i class="fas fa-code-branch text-base"></i>
           {{ __('Webhooks') }}
