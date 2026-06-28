@@ -135,7 +135,7 @@ class RegisteredUserController extends Controller
         $user->nature_of_business = $validated['message'] ?? null;
         $user->email = $validated['email'] ?? null;
         $user->state = $validated['state'] ?? null;
-        $user->date_of_birth = $validated['date_of_birth'] ?? null;
+        $user->date_of_birth = \Carbon\Carbon::parse($validated['date_of_birth'])->format('d/m/Y') ?? null;
         $user->business_phone = $validated['business_number'] ?? null;
         $user->firstname = $validated['first_name'] ?? null;
         $user->lastname = $validated['last_name'] ?? null;
