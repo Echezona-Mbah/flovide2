@@ -18,12 +18,12 @@
       <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
 
         <!-- Header -->
-        <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 text-slate-900 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-sky-200/70">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Referrals</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Make Referrals, Get Rewards</h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+              <p class="text-xs uppercase tracking-[0.3em] text-white">Referrals</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Make Referrals, Get Rewards</h2>
+              <p class="mt-2 text-sm text-white max-w-2xl">
                 Invite users and earn cash rewards when they deposit successfully.
               </p>
             </div>
@@ -64,7 +64,7 @@
                   class="bg-transparent w-full outline-none text-slate-700 text-sm" />
               </div>
               <button id="copyReferralBtn"
-                class="bg-slate-900 hover:bg-slate-800 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
+                class="bg-[#215F9C] hover:bg-slate-800 text-white font-medium px-6 py-3 rounded-full flex items-center justify-center gap-2 transition">
                 Share
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v.01M4 6v.01M4 18v.01M12 6l6 6-6 6" />

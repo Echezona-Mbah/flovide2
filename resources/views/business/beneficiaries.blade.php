@@ -21,17 +21,17 @@
       <div class="rounded-[28px] bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
 
         <!-- Header -->
-        <div class="px-6 md:px-10 py-7 bg-gradient-to-r from-sky-200 via-sky-100 to-blue-50 border-b border-sky-200/70">
+        <div class="px-6 md:px-10 py-7 bg-[#215F9C] text-white border-b border-sky-200/70">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-600">Directory</p>
-              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-slate-900">Beneficiaries</h2>
-              <p class="mt-2 text-sm text-slate-600 max-w-2xl">
+              <p class="text-xs uppercase tracking-[0.3em]">Directory</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight text-white">Beneficiaries</h2>
+              <p class="mt-2 text-sm text-white max-w-2xl">
                 Search, review, and manage payout accounts.
               </p>
             </div>
             <a href="{{ route('add_beneficias.create') }}"
-              class="flex items-center justify-center gap-2 bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-800 transition w-full md:w-auto">
+              class="flex items-center justify-center gap-2 bg-[#215F9C] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-slate-800 transition w-full md:w-auto">
               <i class="fas fa-plus"></i>
               Add Beneficiary
             </a>
