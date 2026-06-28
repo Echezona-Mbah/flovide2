@@ -36,6 +36,7 @@ class User extends Authenticatable
         'trading_street_address',
         'trading_city',
         'state',
+        'date_of_birth',
         'email',
         'password',
         'email_verification_otp',

@@ -363,29 +363,29 @@
                                         <!-- Business Name -->
                                         <div>
                                             <label for="business-name" data-error-id="businessNameError" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Name') }}</label>
-                                            <input type="text" id="business-name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter business name') }}">
+                                            <input type="text" id="business-name" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Enter business name') }}">
                                             <div id="businessNameError" ></div>
     
                                         </div>
                                         <!-- Registration Number -->
                                         <div>
                                             <label for="helper-text" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Registration Number') }}</label>
-                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your company reg no') }}">
+                                            <input type="text" data-error-id="error-registration_number" id="registration-number" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Enter your company reg no') }}">
                                             <div id="error-registration_number"></div>
                                         </div>
 
                                         <!-- Business Number -->
                                         <div>
                                             <label for="business_number" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Number') }}</label>
-                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your business no') }}">
+                                            <input type="text" data-error-id="error-business_number" id="business_number" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Enter your business no') }}">
                                             <div id="error-business_number"></div>
                                         </div>
                                         <!-- Incorporation Date -->
                                         <div>
                                             <label for="incorporation-date" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Incorporation Date') }}</label>
                                             <section class="flex flex-col md:flex-row md:justify-between md:items-center md:gap-2 gap-10">
-                                                <input type="text" id="day" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Day') }}">
-                                                <select id="month" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                <input type="text" id="day" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Day') }}">
+                                                <select id="month" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5" >
                                                     <option value="" disabled selected>{{ __('Select a month') }}</option>
                                                     <option value="1">{{ __('January') }}</option>
                                                     <option value="2">{{ __('February') }}</option>
@@ -400,7 +400,7 @@
                                                     <option value="11">{{ __('November') }}</option>
                                                     <option value="12">{{ __('December') }}</option>
                                                 </select>
-                                                <input type="text" id="year" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Year') }}">
+                                                <input type="text" id="year" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Year') }}">
                                             </section>
                                             <div id="error-incorporation_date" class="text-red-500 mt-2"></div>
                                         </div>
@@ -408,7 +408,7 @@
                                         <!-- Business Type -->
                                         <div>
                                             <label for="business-type" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Business Type') }}</label>
-                                            <input type="text" id="business-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600  " placeholder="{{ __('Enter your business type') }}">
+                                            <input type="text" id="business-type" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg w-full p-2.5" placeholder="{{ __('Enter your business type') }}">
                                             <div id="error-business_type" ></div>
     
                                         </div>
@@ -420,7 +420,7 @@
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                     <p>https://</p>
                                                 </div>
-                                                <input type="text" id="company-url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-20 p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="{{ __('Enter your URL') }}">
+                                                <input type="text" id="company-url" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full ps-20 p-2.5" placeholder="{{ __('Enter your URL') }}">
                                             </div>
                                             <div id="error-company_url"></div>
     
@@ -428,7 +428,7 @@
                                         <!-- Industry -->
                                         <div>
                                             <label for="industry" class="block mb-2 text-sm font-bold text-[#828282]  ">{{ __('Industry') }}</label>
-                                            <select id="industry" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            <select id="industry" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5">
                                                 <option selected>{{ __('Select an option') }}</option>
                                                 @foreach ($industries as $industry)
                                                 <option value="{{ $industry->id }}">{{ $industry->name }}</option>
@@ -569,7 +569,7 @@
                                             <label for="street_address"
                                                 class="block mb-2 text-sm font-bold text-[#828282]  ">Street Address</label>
                                             <input type="text" id="street_address"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5"
                                                 placeholder="Enter street address">
                                             <div id="error-street-address" class="text-red-500 text-sm"></div>
                                         </div>
@@ -579,7 +579,7 @@
                                             <label for="city"
                                                 class="block mb-2 text-sm font-bold text-[#828282]  ">City</label>
                                             <input type="text" id="city"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                                class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5"
                                                 placeholder="Enter city">
                                             <div id="error-city" class="text-red-500 text-sm"></div>
                                         </div>
@@ -781,60 +781,66 @@
                                             <div id="error-city" class="text-red-500 text-sm"></div>
                                         </div> --}}
     
-                                               <!-- select state -->
-                                    <!-- Select State -->
-                                    <!-- Nigerian State Select (visible only if country is NG) -->
-                                    
-                                    {{-- <div id="ng-state-select" class="hidden">
-                                        <div class="custom-select">
-                                            <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                                <option value="" disabled selected>Select a state</option>
-                                                @foreach ($states as $state)
-                                                <option value="{{ $state->id }}">{{ $state->name }}</option>
-                                                @endforeach
-                                            </select>
+                                        <!-- select state -->
+                                        <!-- Select State -->
+                                        <!-- Nigerian State Select (visible only if country is NG) -->
+                                        
+                                        {{-- <div id="ng-state-select" class="hidden">
+                                            <div class="custom-select">
+                                                <select id="state" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600   dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    <option value="" disabled selected>Select a state</option>
+                                                    @foreach ($states as $state)
+                                                    <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div id="error-state" class="text-red-500 text-sm"></div>
+                                        </div> --}}
+
+                                        <!-- Generic State Input (visible for all non-NG countries) -->
+                                        <div id="generic-state-input">
+                                            <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282]  ">First Name</label>
+                                            <input type="text" id="first_name" placeholder="Enter Your First Name" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5">
+                                            <div id="error-first_name" class="text-red-500 text-sm"></div>
                                         </div>
-                                        <div id="error-state" class="text-red-500 text-sm"></div>
-                                    </div> --}}
+                                        
+                                        <div id="generic-state-input">
+                                            <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282]  ">Last Name</label>
+                                            <input type="text" id="last_name" placeholder="Enter Your Fast_Name" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5">
+                                            <div id="error-last_name" class="text-red-500 text-sm"></div>
+                                        </div>
 
-                                    <!-- Generic State Input (visible for all non-NG countries) -->
-                                    <div id="generic-state-input">
-                                        <label for="first_name" class="block mb-2 text-sm font-bold text-[#828282]  ">First Name</label>
-                                        <input type="text" id="first_name" placeholder="Enter Your First Name"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                        <div id="error-first_name" class="text-red-500 text-sm"></div>
-                                    </div>
-                                    
-                                    <div id="generic-state-input">
-                                        <label for="last_name" class="block mb-2 text-sm font-bold text-[#828282]  ">Last Name</label>
-                                        <input type="text" id="last_name" placeholder="Enter Your Fast_Name"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                        <div id="error-last_name" class="text-red-500 text-sm"></div>
-                                    </div>
+                                        <div id="generic-state-input">
+                                            <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282]  ">Phone Number</label>
+                                            <input type="text" id="person_number" placeholder="Enter Your Phone Number" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5">
+                                            <div id="error-person_number" class="text-red-500 text-sm"></div>
+                                        </div>
 
-                                    <div id="generic-state-input">
-                                        <label for="person_number" class="block mb-2 text-sm font-bold text-[#828282]  ">Phone Number</label>
-                                        <input type="text" id="person_number" placeholder="Enter Your Phone Number"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                        <div id="error-person_number" class="text-red-500 text-sm"></div>
-                                    </div>
+                                        <div id="generic-state-input">
+                                            <label for="state" class="block mb-2 text-sm font-bold text-[#828282]  ">State</label>
+                                            <input type="text" id="state" placeholder="Enter Your State" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5">
+                                            <div id="error-state" class="text-red-500 text-sm"></div>
+                                        </div>
 
-                                    <div id="generic-state-input">
-                                        <label for="state" class="block mb-2 text-sm font-bold text-[#828282]  ">State</label>
-                                        <input type="text" id="state" placeholder="Enter Your State"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                        <div id="error-state" class="text-red-500 text-sm"></div>
-                                    </div>
-    
-                            
+
+                                        <!-- Date of Birth -->
+                                        <div id="generic-state-input">
+                                            <label for="date_of_birth" class="block mb-2 text-sm font-bold text-[#828282]">
+                                                Date of Birth
+                                            </label>
+                                            <input type="date" id="date_of_birth" class="bg-gray-900 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">  
+                                            <div id="error-date_of_birth" class="text-red-500 text-sm"></div>
+                                        </div>
+        
+                                
                                         <!-- Email -->
                                         <div>
                                             <label for="email" class="block mb-2 text-sm font-bold text-[#828282]  ">Email</label>
-                                            <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="johndoe@gmail.com">
+                                            <input type="email" id="email" class="bg-gray-900 border border-gray-600 text-white placeholder-gray-400 text-sm rounded-lg block w-full p-2.5" placeholder="johndoe@gmail.com">
                                             <div id="error-email" class="text-red-500 text-sm"></div>
                                             <small id="email-error" class="text-danger" style="display: none;"></small>
                                         </div>
-                                            
+                                                
     
                             
                                         <!-- Password -->

@@ -49,6 +49,7 @@ class Personal extends Authenticatable
         'device_token',
         'nin',
         'nin_status',
+        'date_of_birth',
     ];
 
 

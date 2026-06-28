@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { id: 'person_number', errorId: 'error-person_number', message: 'Please enter your Person Number!' },
                     { id: 'email', errorId: 'error-email', message: 'Please enter your email!' },
                     { id: 'state', errorId: 'error-state', message: 'Please enter your state!' },
+                    { id: 'date_of_birth', errorId: 'error-date_of_birth', message: 'Please enter your Date of Birth!' },
                     { id: 'password', errorId: 'error-password', message: 'Please enter your password!' },
                     { id: 'confirm_password', errorId: 'error-confirm-password', message: 'Please confirm your password!' }
                 ];

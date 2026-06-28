@@ -83,6 +83,7 @@ class RegisteredUserController extends Controller
             'last_name' => 'nullable|string|max:255',
             'person_number' => 'nullable|string|max:20',
             'state' => 'nullable|string|max:255',
+            'date_of_birth' => 'nullable|date',
             'email' => 'nullable|email|max:255',
             'password' => 'nullable|string|max:255',
         ]);
@@ -134,6 +135,7 @@ class RegisteredUserController extends Controller
         $user->nature_of_business = $validated['message'] ?? null;
         $user->email = $validated['email'] ?? null;
         $user->state = $validated['state'] ?? null;
+        $user->date_of_birth = $validated['date_of_birth'] ?? null;
         $user->business_phone = $validated['business_number'] ?? null;
         $user->firstname = $validated['first_name'] ?? null;
         $user->lastname = $validated['last_name'] ?? null;
