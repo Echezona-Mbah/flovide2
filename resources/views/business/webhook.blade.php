@@ -147,7 +147,7 @@
                                     <textarea name="live_ip_whitelist" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">{{ old('live_ip_whitelist', $live['ip_whitelist'] ?? '') }}</textarea>
                                 </div>
 
-                                <div>
+                                {{-- <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Live callback URL</label>
                                     <input type="text" name="live_callback_url" value="{{ old('live_callback_url', $live['callback_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
                                 </div>
@@ -155,7 +155,7 @@
                                 <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Live webhook URL</label>
                                     <input type="text" name="live_webhook_url" value="{{ old('live_webhook_url', $live['webhook_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
 

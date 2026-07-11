@@ -218,7 +218,7 @@ public function sendTransaction(Request $request)
         'amount' => 'required|numeric|min:1',
         'recipient_id' => 'required|uuid',
         'balance_id' => 'required',
-        'reference' => 'nullable|string',
+        'payment_reference' => 'nullable|string',
         'transfer_fee' => 'nullable',
         'total_amount' => 'required|numeric',
         'exchange_rate' => 'required|string',
@@ -235,7 +235,7 @@ public function sendTransaction(Request $request)
 
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
     $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
-
+    $recipientAmount = (int) round((float) $request->recipient_amount, 0);
 
      // Currency limits (configured from admin on currencies table)
     $limit = \App\Models\Currency::where('code', $sendingCurrency)
@@ -268,6 +268,10 @@ public function sendTransaction(Request $request)
         return response()->json(['success'=>false,'message'=>'Invalid balance','code'=>'INVALID_BALANCE','data'=>null],422);
     }
 
+    if ($balance->is_locked) {
+        return response()->json(['success'=>false,'message'=>'This balance is locked and cannot be used for payouts.','code'=>'BALANCE_LOCKED','data'=>null],422);
+    }
+
     if ($balance->amount < $request->total_amount) {
         return response()->json(['success'=>false,'message'=>'Insufficient funds','code'=>'INSUFFICIENT_FUNDS','data'=>null],422);
     }
@@ -288,7 +292,9 @@ public function sendTransaction(Request $request)
             'type'  => 'withdrawal',
             'method' => 'withdrawal',
             'payment_provider' => 'wallect', // will update later
+            'transfer_method'         => $request->transfer_method,
             'reference' => 'ref-' . Str::uuid(),
+            'payment_reference'    => $request->payment_reference,
             'personal_id' => $personal->id,
             'sender_id' => $personal->id,
             'sender' => $personal->firstname,
@@ -303,7 +309,7 @@ public function sendTransaction(Request $request)
             'to_currency' => $currency,
             'fees' => $request->transfer_fee,
             'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
-            'recipient_amount' => $request->recipient_amount,
+            'recipient_amount' => $recipientAmount,
             'interac_email'      => $request->interac_email      ?? null,
             'interac_first_name' => $request->interac_first_name ?? null,
             'interac_last_name'  => $request->interac_last_name  ?? null,
@@ -312,13 +318,13 @@ public function sendTransaction(Request $request)
         ]);
 
         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $personal, $tx->id);
+            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $personal, $tx->id,$recipientAmount);
         } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $personal, $tx->id);
+            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $personal, $tx->id,$recipientAmount);
         } elseif (in_array($currency, ['NGN','TZS','XOF','XAF','ZAR','KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $personal, $tx->id);
+            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $personal, $tx->id,$recipientAmount);
         } elseif ($currency === 'CAD') {                                              // ← ADD THIS
-                $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $personal);
+                $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $personal,$recipientAmount);
         }else {
             DB::rollBack();
             return response()->json(['success'=>false,'message'=>'No provider','code'=>'PROVIDER_NOT_AVAILABLE','data'=>null],422);
@@ -336,7 +342,7 @@ public function sendTransaction(Request $request)
 
 
 // -------------------- Pivot Payment --------------------
-protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $balance, $personal,$txId)
+protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $balance, $personal,$txId,$recipientAmount)
 {
     $auth = $this->pivot->authenticate();
     if (isset($auth['error'])) {
@@ -363,7 +369,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',
         "accountNumber" => $request->account_number,
         "merchantTransactionId" => $merchantTransactionId,
-        "amount" => $request->recipient_amount,
+        "amount" =>$recipientAmount,
         "chargeAmount" => $request->transfer_fee ?? 0,
         "narration" => $request->reference ?? "Payment",
         "currencyCode" => $currency,
@@ -371,7 +377,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
         "customerName" => $request->account_name,
         "extraData" => [
             "bankSortCode" => $sortCode,
-            "amount" => $request->recipient_amount
+            "amount" => $recipientAmount
         ]
     ];
 
@@ -422,7 +428,7 @@ protected function sendViaPivot(Request $request, $currency ,$sendingCurrency, $
 
 
 // -------------------- Payaza Payment --------------------
-protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, $balance, $personal,$txId)
+protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, $balance, $personal,$txId,$recipientAmount)
 {
     $transactionReference = "TXN_" . time();
     $accountReference = $this->payaza->getAccountReference($currency);
@@ -452,13 +458,13 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
     $payload = [
         "transaction_type" => $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban'),
         "service_payload" => [
-            "payout_amount" => $request->recipient_amount,
+            "payout_amount" => $recipientAmount,
             "transaction_pin" => env('PAYAZA_MERCHANT_PIN'),
             "account_reference" => $accountReference,
             "currency" => $currency,
             "country" => strtoupper(substr($currency,0,2)),
             "payout_beneficiaries" => [[
-                "credit_amount" => $request->recipient_amount,
+                "credit_amount" => $recipientAmount,
                 "account_number" => $request->account_number,
                 "account_name" => $request->account_name,
                 "bank_code" => $request->bank_code ?? null,
@@ -504,7 +510,7 @@ protected function sendViaPayaza(Request $request, $currency, $sendingCurrency, 
 
 
 // -------------------- AppMobile Payment --------------------
-protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency, $balance, $personal,$txId)
+protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency, $balance, $personal,$txId,$recipientAmount)
 {
     $exttrid = uniqid('APPM_');
     $bankCode = $request->bank_code;
@@ -512,7 +518,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
 
     $payload = [
         "customer_number" => $request->account_number,
-        "amount" => number_format($request->recipient_amount, 2, '.', ''),
+        "amount" => number_format($recipientAmount, 2, '.', ''),
         "exttrid" => $exttrid,
         "reference" => $request->reference ?? "Wallet Payment",
         "nw" => $network,
@@ -526,25 +532,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
     $response = $this->orchard->sendPayment($payload);
 
     if (($response['status'] ?? null) === 'SUCCESS' || ($response['success'] ?? false)) {
-        // $balance->amount -= $request->total_amount;
-        // $balance->save();
-
-        // TransactionHistory::create([
-        //     'amount' => $request->total_amount,
-        //     'currency' => $sendingCurrency,
-        //     'balance_id' => $balance->id,
-        //     'order_id' => $exttrid,
-        //     'sender_id' => $personal->id,
-        //     'sender' => $personal->name,
-        //     'recipient_account_number' => $request->account_number,
-        //     'recipient_account_name' => $request->account_name,
-        //     'recipient_country' => 'GH',
-        //     'status' => 'pending', 
-        //     'method' => 'withdrawal',
-        //     'payment_provider' => 'appmobile',
-        //     'reference' => 'ref-' . Str::uuid(),
-        //     'personal_id' => $personal->id,
-        // ]);
+       
             TransactionHistory::where('id', $txId)->update([
                 'status' => 'pending',
                 'payment_provider' => 'appmobile'
@@ -567,12 +555,12 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
 }
 
 
-    protected function sendViaBlaaizInterac(Request $request, $currency, $sendingCurrency, $balance, $txId, $personal)
+    protected function sendViaBlaaizInterac(Request $request, $currency, $sendingCurrency, $balance, $txId, $personal,$recipientAmount)
 {
     $isApi = $request->expectsJson();
 
     Log::info('[Blaaiz Interac] Initiating payout', [
-        'amount'       => $request->recipient_amount,
+        'amount'       => $recipientAmount,
         'email'        => $request->interac_email,
         'first_name'   => $request->interac_first_name,
         'last_name'    => $request->interac_last_name,
@@ -591,7 +579,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
         'method'             => 'interac',
         'from_currency_id'   => 'CAD',
         'to_currency_id'     => 'CAD',
-        'from_amount'        => $request->recipient_amount,
+        'from_amount'        => $recipientAmount,
         'email'              => $request->interac_email,
         'interac_first_name' => $request->interac_first_name,
         'interac_last_name'  => $request->interac_last_name,
@@ -614,7 +602,7 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
             'status'            => 'pending',
             'payment_provider'  => 'blaaiz_interac',
             'order_id'          => $transaction['id']        ?? null,
-            'payment_reference' => $transaction['reference'] ?? null,
+            'reference' => $transaction['reference'] ?? null,
         ]);
 
         Log::info('[Blaaiz Interac] Transaction updated', ['tx_id' => $txId]);

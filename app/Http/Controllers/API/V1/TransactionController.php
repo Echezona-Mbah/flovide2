@@ -809,6 +809,14 @@ public function store(Request $request)
         $platformFee = 0;
         $transferFee = 0;
 
+                if ($userFee->payout_enabled == 0) {
+            $msg = "Contact your marketer to enable payout pricing for {$currency}.";
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
+
 
     if ($userFee && $userFee->payout_enabled) {
 

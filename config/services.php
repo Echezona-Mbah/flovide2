@@ -51,13 +51,16 @@ return [
     ],
 
     'blaaiz' => [
-        'base_url' => env('BLAAIZ_BASE_URL', 'https://api-prod.blaaiz.com'),
+        'base_url' => env('BLAAIZ_BASE_URL', env('BLAAIZ_API_URL', 'https://api-dev.blaaiz.com')),
         'client_id' => env('BLAAIZ_CLIENT_ID'),
         'client_secret' => env('BLAAIZ_CLIENT_SECRET'),
-        'scopes' => env('BLAAIZ_SCOPES'),
+        'oauth_scope' => env('BLAAIZ_OAUTH_SCOPE', env('BLAAIZ_SCOPES', '')),
         'webhook_secret' => env('BLAAIZ_WEBHOOK_SECRET'),
+        'timeout' => env('BLAAIZ_TIMEOUT', 30),
     ],
-    'latest_version' => env('APP_LATEST_VERSION', '1.0.0+1'),
+
+    
+    'latest_version' => env('APP_LATEST_VERSION', '1.0.0+19'),
     'force_update'   => env('APP_FORCE_UPDATE', false),
     
     'fidelity' => [

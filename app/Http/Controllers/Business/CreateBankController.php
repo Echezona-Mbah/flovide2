@@ -344,7 +344,7 @@ public function dashboardapi(Request $request)
             'message' => 'Dashboard data fetched successfully',
             'data' => [
                 'app_update' => [                                              // ← ADD HERE
-                    'latest_version' => config('app.latest_version', '1.0.0+8'),
+                    'latest_version' => config('app.latest_version', '1.0.0+19'),
                     'force_update'   => config('app.force_update', true),
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
@@ -371,30 +371,93 @@ public function dashboardapi(Request $request)
     
     
     
-public function show(Request $request, $id)
-{
-    $user = auth()->user();
-    $mode = $request->input('mode', session('mode', 'live'));
+    public function show(Request $request, $id)
+    {
+        $user = auth()->user();
+        $mode = $request->input('mode', session('mode', 'live'));
 
-    $balance = Balance::where('id', $id)
-        ->where('user_id', $user->id)
-        ->where('mode', $mode)
-        ->firstOrFail();
+        $balance = Balance::where('id', $id)
+            ->where('user_id', $user->id)
+            ->where('mode', $mode)
+            ->firstOrFail();
 
-    $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
 
-    $transactions = TransactionHistory::where('balance_id', $balance->id)
-        ->where('mode', $mode)
-        ->select([
-            'id', 'type', 'transaction_type', 'amount', 'currency',
-            'status', 'reference', 'order_id', 'sender',
-            'recipient_account_name', 'method', 'created_at'
-        ])
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
+        // Attach virtual account info from user
+        $balance->virtual_account_number = $user->virtual_account_number ?? null;
+        $balance->virtual_account_name   = $user->virtual_account_name   ?? null;
+        $balance->virtual_account_bank   = $user->virtual_account_bank   ?? null;
 
-    return view('business.balance-detail', compact('balance', 'transactions', 'mode'));
-}
+        $transactions = TransactionHistory::where('balance_id', $balance->id)
+            ->where('mode', $mode)
+            ->select([
+                'id', 'type', 'transaction_type','amount', 'currency',
+                'fees', 'status', 'reference', 'order_id', 'sender',
+                'recipient_account_name', 'method', 'created_at'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        
+
+        return view('business.balance-detail', compact('balance', 'transactions', 'mode'));
+    }
+
+    // ── Statement PDF ──────────────────────────────────────────────────────────
+    public function statement(Request $request, $id)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $user = auth()->user();
+        $mode = session('mode', 'live');
+
+        $balance = Balance::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+        $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+        $transactions = TransactionHistory::where('balance_id', $balance->id)
+            ->where('mode', $mode)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+
+            // ── Helper: determine if a tx is credit ──────────────────────────────
+        $isCredit = function ($tx) {
+            $type = strtolower($tx->type ?? '');
+            return in_array($type, ['credit']) ||
+                str_contains($type, 'credit');
+            // withdrawal, swap, debit, payment = not credit
+        };
+
+        // ── Opening balance ───────────────────────────────────────────────────
+        $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+            ->where('created_at', '<', $startDate)
+            ->get()
+            ->reduce(function ($carry, $tx) use ($isCredit) {
+                return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+            }, 0);
+
+        $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
+        $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
+        $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+        //dd( $openingBalance);
+
+
+        return view('business.statement', compact(
+            'balance', 'transactions', 'user',
+            'startDate', 'endDate',
+            'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+        ));
+    }
 
 
 

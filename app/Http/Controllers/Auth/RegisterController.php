@@ -74,6 +74,10 @@ public function registerUser(Request $request)
 
     $validator = Validator::make($request->all(), [
         'email' => 'required|string|email|max:255',
+        // 'password' => [
+        //     'required','string','min:8','confirmed'
+        // ],
+
         'password' => [
             'required','string','min:8','confirmed',
             'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]+$/'
@@ -493,6 +497,10 @@ public function registerUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
+            // 'password' => [
+            //     'required','string','min:8','confirmed'
+            // ],
+
             'password' => [
                 'required','string','min:8','confirmed',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]+$/'

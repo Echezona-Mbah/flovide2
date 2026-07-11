@@ -185,38 +185,55 @@
           <div>
             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">You Send</label>
 
-            <div class="flex items-center border-2 border-slate-200 rounded-2xl overflow-hidden focus-within:border-sky-400 transition">
-              <span id="modalCurrencySymbol" class="px-4 text-lg font-bold text-slate-600 bg-slate-50 border-r border-slate-200 py-3 flex-shrink-0">₦</span>
-              <input
-                type="number"
-                id="modalAmount"
-                class="flex-1 px-4 py-3 text-xl font-bold focus:outline-none w-full"
-                value="100"
-                min="1"
-                placeholder="0.00"
-              />
-            </div>
+            <div class="flex items-center justify-between gap-3 border-2 border-slate-200 rounded-2xl px-4 py-3 focus-within:border-sky-400 transition bg-white">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span id="modalCurrencySymbol" class="text-lg font-bold text-slate-600 flex-shrink-0">₦</span>
+                <input
+                  type="number"
+                  id="modalAmount"
+                  class="flex-1 text-xl font-bold focus:outline-none w-full min-w-0 bg-transparent"
+                  value="100"
+                  min="1"
+                  placeholder="0.00"
+                />
+              </div>
 
-            @if(!empty($balanceList))
-            <div class="mt-2 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
-              <img id="modalCurrencyFlag" src="https://flagcdn.com/24x18/ng.png" class="w-5 h-auto rounded shadow flex-shrink-0" alt="flag"/>
-              <select id="modalCurrency" class="flex-1 bg-transparent text-sm font-semibold focus:outline-none cursor-pointer">
-                @foreach($balanceList as $bal)
-                  <option
-                    value="{{ $bal->currency }}"
-                    data-id="{{ $bal->id }}"
-                    data-symbol="{{ $bal->currency_meta['symbol'] ?? '' }}"
-                    data-country="{{ $bal->currency_meta['country'] ?? 'us' }}"
-                    data-amount="{{ $bal->amount }}">
-                    {{ $bal->currency }} — {{ $bal->currency_meta['symbol'] ?? '' }}{{ number_format($bal->amount, 2) }} available
-                  </option>
-                @endforeach
-              </select>
-              <i class="fas fa-chevron-down text-slate-400 text-xs flex-shrink-0"></i>
+              @if(!empty($balanceList))
+              <div class="flex flex-col items-end flex-shrink-0 max-w-[160px]">
+                <div class="flex items-center gap-1.5 w-full justify-end">
+                  <img id="modalCurrencyFlag" src="https://flagcdn.com/24x18/ng.png" class="w-5 h-auto rounded shadow flex-shrink-0" alt="flag"/>
+                  <select id="modalCurrency" class="bg-transparent text-sm font-bold text-slate-700 focus:outline-none cursor-pointer max-w-full">
+                    @foreach($balanceList as $bal)
+                      <option
+                        value="{{ $bal->currency }}"
+                        data-id="{{ $bal->id }}"
+                        data-symbol="{{ $bal->currency_meta['symbol'] ?? '' }}"
+                        data-country="{{ $bal->currency_meta['country'] ?? 'us' }}"
+                        data-amount="{{ $bal->amount }}">
+                        {{ $bal->currency }} — {{ $bal->currency_meta['symbol'] ?? '' }}{{ number_format($bal->amount, 2) }}
+                      </option>
+                    @endforeach
+                  </select>
+                  <i class="fas fa-chevron-down text-slate-400 text-[10px] flex-shrink-0"></i>
+                </div>
+                <p id="balanceHint" class="text-[11px] text-slate-400 mt-0.5"></p>
+              </div>
+              @endif
             </div>
-            @endif
+          </div>
 
-            <p id="balanceHint" class="text-xs text-slate-400 mt-1.5 ml-1"></p>
+          <!-- Reference / Purpose -->
+          <div>
+            <label for="modalReference" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
+              What's this for? <span class="text-slate-400 font-normal normal-case">(optional)</span>
+            </label>
+            <input
+              type="text"
+              id="modalReference"
+              maxlength="140"
+              class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition"
+              placeholder="e.g. Rent, Invoice #123, School fees..."
+            />
           </div>
 
           <!-- Rate card -->
@@ -244,16 +261,29 @@
 
           <!-- Recipient gets -->
           <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
-            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">Beneficiary Receives</p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <svg class="animate-spin h-4 w-4 text-emerald-500 hidden" id="spinnerIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-2">
+              Beneficiary Receives
+              <span class="text-[10px] font-normal text-emerald-400 ml-1">✏️ type to reverse calculate</span>
+            </p>
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2 flex-1">
+                <svg class="animate-spin h-4 w-4 text-emerald-500 hidden flex-shrink-0" id="spinnerIcon"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                 </svg>
-                <span id="modalRecipientAmount" class="text-2xl font-black text-emerald-700">0.00</span>
+                {{-- Permanent input — always editable --}}
+                <input
+                  type="number"
+                  id="modalRecipientAmount"
+                  class="text-2xl font-black text-emerald-700 bg-transparent border-none outline-none w-full min-w-0"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  value="0.00"
+                />
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-shrink-0">
                 <img id="modalRecipientFlag" src="https://flagcdn.com/24x18/us.png" class="w-5 h-auto rounded shadow" alt="flag"/>
                 <span id="modalRecipientCurrency" class="font-bold text-slate-700"></span>
               </div>
@@ -284,7 +314,7 @@
       <input type="hidden" name="recipient_id"       id="recipientIdInput">
       <input type="hidden" name="balance_id"         id="balanceIdInput">
       <input type="hidden" name="amount"             id="amountInput">
-      <input type="hidden" name="reference"          value="For invoice">
+      <input type="hidden" name="payment_reference"       id="referenceInput" value="">
       <input type="hidden" name="transfer_fee"       id="transferFeeInput">
       <input type="hidden" name="total_amount"       id="totalAmountInput">
       <input type="hidden" name="exchange_rate"      id="exchangeRateInput">
@@ -348,6 +378,10 @@
                 <span class="text-slate-500">Exchange Rate</span>
                 <span id="cfmRate" class="font-semibold text-slate-800 text-xs"></span>
               </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">payment Reference</span>
+                <span id="cfmReference" class="font-semibold text-slate-800"></span>
+              </div>
             </div>
 
             <!-- They receive -->
@@ -371,270 +405,354 @@
     .beneficiary-card.selected { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.2); }
   </style>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    const symbols = {
-      USD:"$",NGN:"₦",EUR:"€",GBP:"£",GHS:"₵",KES:"KSh",ZAR:"R",
-      XOF:"CFA",XAF:"FCFA",UGX:"USh",TZS:"TSh",CAD:"C$",AUD:"A$",
-      INR:"₹",CNY:"¥",JPY:"¥",BRL:"R$",MXN:"Mex$",AED:"د.إ",
-      SAR:"﷼",THB:"฿",MYR:"RM",IDR:"Rp",PHP:"₱",KRW:"₩",CHF:"Fr",
-    };
+  const symbols = {
+    USD:"$",NGN:"₦",EUR:"€",GBP:"£",GHS:"₵",KES:"KSh",ZAR:"R",
+    XOF:"CFA",XAF:"FCFA",UGX:"USh",TZS:"TSh",CAD:"C$",AUD:"A$",
+    INR:"₹",CNY:"¥",JPY:"¥",BRL:"R$",MXN:"Mex$",AED:"د.إ",
+    SAR:"﷼",THB:"฿",MYR:"RM",IDR:"Rp",PHP:"₱",KRW:"₩",CHF:"Fr",
+  };
 
-    let selectedBeneficiary = null;
-    let rateDebounce        = null;
+  let selectedBeneficiary = null;
+  let sendDebounce        = null;
+  let receiveDebounce     = null;
+  let lastRate            = null;
+  let activeInput         = null; // 'send' or 'receive'
+  let requestSeq          = 0;    // tracks the latest fetch request, prevents stale overwrites
 
-    const modalAmount   = document.getElementById("modalAmount");
-    const modalCurrency = document.getElementById("modalCurrency");
+  const modalAmount          = document.getElementById("modalAmount");
+  const modalCurrency        = document.getElementById("modalCurrency");
+  const modalRecipientAmount = document.getElementById("modalRecipientAmount");
+  const modalReference       = document.getElementById("modalReference");
 
-    // ── Search ──────────────────────────────────────────────────────────────
-    document.getElementById("beneficiarySearch")?.addEventListener("input", function () {
-      const q = this.value.toLowerCase();
-      document.querySelectorAll(".beneficiary-card").forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(q) ? "" : "none";
-      });
+  // ── Search ────────────────────────────────────────────────────────────────
+  document.getElementById("beneficiarySearch")?.addEventListener("input", function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll(".beneficiary-card").forEach(card => {
+      card.style.display = card.innerText.toLowerCase().includes(q) ? "" : "none";
     });
-
-    // ── Open modal ──────────────────────────────────────────────────────────
-    window.openSendModal = function (el) {
-      document.querySelectorAll(".beneficiary-card").forEach(c => {
-        c.classList.remove("selected");
-        c.querySelector(".selected-ring")?.classList.add("hidden");
-      });
-
-      el.classList.add("selected");
-      el.querySelector(".selected-ring")?.classList.remove("hidden");
-      selectedBeneficiary = el;
-
-      const name     = el.dataset.accountName  || "N/A";
-      const bank     = el.dataset.bank         || "";
-      const currency = el.dataset.currency     || "USD";
-      const country  = el.dataset.country      || "us";
-      const iEmail   = el.dataset.interacEmail || "";
-
-      document.getElementById("modalAvatar").textContent             = name.substring(0, 2).toUpperCase();
-      document.getElementById("modalName").textContent               = name;
-      document.getElementById("modalBank").textContent               = bank;
-      document.getElementById("modalRecipientCurrency").textContent  = currency;
-      document.getElementById("modalRecipientFlag").src              = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-
-      const interacBox = document.getElementById("interacInfo");
-      if (iEmail) {
-        document.getElementById("interacEmailDisplay").textContent = iEmail;
-        interacBox.classList.remove("hidden");
-      } else {
-        interacBox.classList.add("hidden");
-      }
-
-      // Reset amount
-      modalAmount.value = "100";
-
-      updateBalanceHint();
-      updateRate();
-
-      document.getElementById("sendModal").classList.remove("hidden");
-      document.getElementById("sendModal").classList.add("flex");
-    };
-
-    window.closeSendModal = function () {
-      document.getElementById("sendModal").classList.add("hidden");
-      document.getElementById("sendModal").classList.remove("flex");
-    };
-
-    window.closeConfirmModal = function () {
-      document.getElementById("confirmModal").classList.add("hidden");
-      document.getElementById("confirmModal").classList.remove("flex");
-    };
-
-    // ── Balance hint ────────────────────────────────────────────────────────
-    function updateBalanceHint() {
-      const opt = modalCurrency?.selectedOptions[0];
-      if (!opt) return;
-
-      const bal  = parseFloat(opt.dataset.amount || 0);
-      const sym  = opt.dataset.symbol || "";
-      const hint = document.getElementById("balanceHint");
-
-      hint.textContent = `Available: ${sym}${bal.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`;
-
-      const country = opt.dataset.country || "us";
-      document.getElementById("modalCurrencyFlag").src        = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-      document.getElementById("modalCurrencySymbol").textContent = opt.dataset.symbol || "₦";
-    }
-
-    // ── Fetch rate ──────────────────────────────────────────────────────────
-    async function updateRate() {
-      if (!selectedBeneficiary) return;
-
-      const opt          = modalCurrency?.selectedOptions[0];
-      const fromCurrency = opt?.value || "NGN";
-      const symbol       = opt?.dataset.symbol || "₦";
-      const country      = opt?.dataset.country || "ng";
-      const amount       = parseFloat(modalAmount?.value || 0);
-      const toCurrency   = selectedBeneficiary.dataset.currency || "USD";
-
-      document.getElementById("modalCurrencySymbol").textContent = symbol;
-      document.getElementById("modalCurrencyFlag").src           = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
-
-      if (!amount || amount <= 0) {
-        document.getElementById("modalRate").textContent            = "--";
-        document.getElementById("modalRecipientAmount").textContent = "0.00";
-        return;
-      }
-
-      document.getElementById("spinnerIcon").classList.remove("hidden");
-
-      if (fromCurrency === toCurrency) {
-        document.getElementById("modalRate").textContent            = `1.00 ${fromCurrency} = 1.00 ${toCurrency}`;
-        document.getElementById("modalRecipientAmount").textContent = amount.toFixed(2);
-        document.getElementById("spinnerIcon").classList.add("hidden");
-        return;
-      }
-
-      try {
-        const res  = await fetch(
-          `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${amount}`,
-          { headers: { Accept: "application/json" } }
-        );
-        const data = await res.json();
-
-        if (data?.success && data?.data) {
-          const converted = parseFloat(data.data.converted || 0);
-          // const fee = parseFloat(data.data.transfer_fee || 0); // fee disabled for now
-
-          document.getElementById("modalRate").textContent =
-            `${amount.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${toCurrency}`;
-
-          document.getElementById("modalRecipientAmount").textContent =
-            converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-        } else {
-          document.getElementById("modalRate").textContent            = data?.message || "Rate unavailable";
-          document.getElementById("modalRecipientAmount").textContent = "0.00";
-        }
-
-      } catch (e) {
-        document.getElementById("modalRate").textContent            = "Error fetching rate";
-        document.getElementById("modalRecipientAmount").textContent = "0.00";
-      }
-
-      document.getElementById("spinnerIcon").classList.add("hidden");
-    }
-
-    modalAmount?.addEventListener("input", () => {
-      clearTimeout(rateDebounce);
-      rateDebounce = setTimeout(updateRate, 500);
-    });
-
-    modalCurrency?.addEventListener("change", () => {
-      updateBalanceHint();
-      updateRate();
-    });
-
-    // ── Proceed to confirm ──────────────────────────────────────────────────
-    document.getElementById("proceedBtn")?.addEventListener("click", () => {
-      if (!selectedBeneficiary) {
-        Swal.fire({ icon: "error", title: "Select a beneficiary first" });
-        return;
-      }
-
-      const opt        = modalCurrency?.selectedOptions[0];
-      const symbol     = opt?.dataset.symbol || "₦";
-      const amount     = parseFloat(modalAmount?.value || 0);
-      const rateText   = document.getElementById("modalRate").textContent;
-      const receive    = document.getElementById("modalRecipientAmount").textContent.replace(/,/g, "");
-      const currency   = selectedBeneficiary.dataset.currency;
-
-      if (!amount || amount <= 0) {
-        Swal.fire({ icon: "error", title: "Enter a valid amount" });
-        return;
-      }
-
-      if (rateText.toLowerCase().includes("unavailable") || rateText === "--") {
-        Swal.fire({ icon: "error", title: "Rate not available", text: "Please wait for a valid exchange rate." });
-        return;
-      }
-
-      const fee   = 0; // fee temporarily disabled
-      const total = amount + fee;
-
-      const name    = selectedBeneficiary.dataset.accountName    || "";
-      const account = selectedBeneficiary.dataset.accountNumber  || selectedBeneficiary.dataset.phone || "";
-      const bank    = selectedBeneficiary.dataset.bank           || "";
-      const iEmail  = selectedBeneficiary.dataset.interacEmail   || "";
-
-      // Fill confirm modal display
-      document.getElementById("cfmName").textContent    = name;
-      document.getElementById("cfmAccount").textContent = account;
-      document.getElementById("cfmBank").textContent    = bank;
-      document.getElementById("cfmAmount").textContent  = `${symbol}${amount.toFixed(2)}`;
-      document.getElementById("cfmRate").textContent    = rateText;
-      document.getElementById("cfmReceive").textContent = `${currency} ${parseFloat(receive).toFixed(2)}`;
-
-      if (iEmail) {
-        document.getElementById("cfmInteracEmail").textContent = iEmail;
-        document.getElementById("cfmInteracRow").classList.remove("hidden");
-        document.getElementById("cfmAccountRow").classList.add("hidden");
-      } else {
-        document.getElementById("cfmInteracRow").classList.add("hidden");
-        document.getElementById("cfmAccountRow").classList.remove("hidden");
-      }
-
-      // Fill hidden form inputs
-      document.getElementById("amountInput").value           = amount.toFixed(2);
-      document.getElementById("transferFeeInput").value      = fee.toFixed(2);      // 0.00
-      document.getElementById("totalAmountInput").value      = total.toFixed(2);    // same as amount
-      document.getElementById("exchangeRateInput").value     = rateText;
-      document.getElementById("recipientAmountInput").value  = parseFloat(receive).toFixed(2);
-      document.getElementById("accountNumberInput").value    = account;
-      document.getElementById("accountNameInput").value      = name;
-      document.getElementById("bankInput").value             = bank;
-      document.getElementById("sort_codeInput").value        = selectedBeneficiary.dataset.sortcode      || "";
-      document.getElementById("transfermethodInput").value   = selectedBeneficiary.dataset.transfermethod || "";
-      document.getElementById("recipientIdInput").value      = selectedBeneficiary.dataset.id            || "";
-      document.getElementById("balanceIdInput").value        = opt?.dataset.id                           || "";
-      document.getElementById("interacEmailInput").value     = iEmail;
-      document.getElementById("interacFirstNameInput").value = selectedBeneficiary.dataset.interacFirstName || "";
-      document.getElementById("interacLastNameInput").value  = selectedBeneficiary.dataset.interacLastName  || "";
-
-      document.getElementById("confirmModal").classList.remove("hidden");
-      document.getElementById("confirmModal").classList.add("flex");
-    });
-
-    // ── Sidebar ─────────────────────────────────────────────────────────────
-    const sidebar = document.getElementById('sidebar');
-    const openBtn = document.getElementById('openSidebarBtn');
-    const closeBtn = document.getElementById('closeSidebarBtn');
-    const overlay  = document.getElementById('overlay');
-
-    openBtn?.addEventListener('click', () => {
-      sidebar.classList.remove('-translate-x-full');
-      overlay.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    });
-    closeBtn?.addEventListener('click', () => {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-      document.body.style.overflow = '';
-    });
-    overlay?.addEventListener('click', () => {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-      document.body.style.overflow = '';
-    });
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.add('hidden');
-      } else {
-        sidebar.classList.add('-translate-x-full');
-      }
-    });
-
   });
-  </script>
+
+  // ── Open modal ────────────────────────────────────────────────────────────
+  window.openSendModal = function (el) {
+    document.querySelectorAll(".beneficiary-card").forEach(c => {
+      c.classList.remove("selected");
+      c.querySelector(".selected-ring")?.classList.add("hidden");
+    });
+
+    el.classList.add("selected");
+    el.querySelector(".selected-ring")?.classList.remove("hidden");
+    selectedBeneficiary = el;
+
+    const name     = el.dataset.accountName  || "N/A";
+    const bank     = el.dataset.bank         || "";
+    const currency = el.dataset.currency     || "USD";
+    const country  = el.dataset.country      || "us";
+    const iEmail   = el.dataset.interacEmail || "";
+
+    document.getElementById("modalAvatar").textContent            = name.substring(0, 2).toUpperCase();
+    document.getElementById("modalName").textContent              = name;
+    document.getElementById("modalBank").textContent              = bank;
+    document.getElementById("modalRecipientCurrency").textContent = currency;
+    document.getElementById("modalRecipientFlag").src             = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+
+    const interacBox = document.getElementById("interacInfo");
+    if (iEmail) {
+      document.getElementById("interacEmailDisplay").textContent = iEmail;
+      interacBox.classList.remove("hidden");
+    } else {
+      interacBox.classList.add("hidden");
+    }
+
+    // Reset inputs and invalidate any in-flight requests from a previous open
+    requestSeq++;
+    lastRate                       = null;
+    activeInput                    = 'send';
+    modalAmount.value              = "100";
+    modalRecipientAmount.value     = "";
+    if (modalReference) modalReference.value = "";
+
+    updateBalanceHint();
+    fetchRate(); // fetch from send side on open
+
+    document.getElementById("sendModal").classList.remove("hidden");
+    document.getElementById("sendModal").classList.add("flex");
+  };
+
+  window.closeSendModal = function () {
+    requestSeq++; // invalidate any pending fetch so it can't write into a closed/reopened modal
+    document.getElementById("sendModal").classList.add("hidden");
+    document.getElementById("sendModal").classList.remove("flex");
+  };
+
+  window.closeConfirmModal = function () {
+    document.getElementById("confirmModal").classList.add("hidden");
+    document.getElementById("confirmModal").classList.remove("flex");
+  };
+
+  // ── Balance hint ──────────────────────────────────────────────────────────
+  function updateBalanceHint() {
+    const opt = modalCurrency?.selectedOptions[0];
+    if (!opt) return;
+
+    const bal  = parseFloat(opt.dataset.amount || 0);
+    const sym  = opt.dataset.symbol || "";
+
+    document.getElementById("balanceHint").textContent =
+      `Available: ${sym}${bal.toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+
+    const country = opt.dataset.country || "us";
+    document.getElementById("modalCurrencyFlag").src          = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+    document.getElementById("modalCurrencySymbol").textContent = opt.dataset.symbol || "₦";
+  }
+
+  // ── Core: fetch rate and update the OTHER field ───────────────────────────
+// ── Core: fetch rate and update the OTHER field ───────────────────────────
+async function fetchRate() {
+  if (!selectedBeneficiary) return;
+
+  const mySeq = ++requestSeq; // stamp this call as the latest
+
+  const opt          = modalCurrency?.selectedOptions[0];
+  const fromCurrency = opt?.value || "NGN";
+  const symbol       = opt?.dataset.symbol || "₦";
+  const country      = opt?.dataset.country || "ng";
+  const toCurrency   = selectedBeneficiary.dataset.currency || "USD";
+
+  document.getElementById("modalCurrencySymbol").textContent = symbol;
+  document.getElementById("modalCurrencyFlag").src           = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+
+  const sendAmt    = parseFloat(modalAmount.value || 0);
+  const receiveAmt = parseFloat(modalRecipientAmount.value || 0);
+
+  const amount = activeInput === 'send' ? sendAmt : receiveAmt;
+
+  if (!amount || amount <= 0) {
+    if (mySeq !== requestSeq) return;
+    document.getElementById("modalRate").textContent = "--";
+    if (activeInput === 'send')    modalRecipientAmount.value = "";
+    if (activeInput === 'receive') modalAmount.value          = "";
+    return;
+  }
+
+  document.getElementById("spinnerIcon").classList.remove("hidden");
+
+  // Same currency — 1:1
+  if (fromCurrency === toCurrency) {
+    if (mySeq !== requestSeq) return;
+    lastRate = 1;
+    document.getElementById("modalRate").textContent = `1.00 ${fromCurrency} = 1.00 ${toCurrency}`;
+    if (activeInput === 'send')    modalRecipientAmount.value = sendAmt.toFixed(2);
+    if (activeInput === 'receive') modalAmount.value          = receiveAmt.toFixed(2);
+    document.getElementById("spinnerIcon").classList.add("hidden");
+    return;
+  }
+
+  try {
+    let url;
+
+    if (activeInput === 'send') {
+      // Forward: fromCurrency -> toCurrency, using the real send amount
+      url = `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${sendAmt}`;
+    } else {
+      // Reverse: query the API in the OPPOSITE direction using the real receive amount,
+      // instead of extrapolating from a distorted amount=1 rate.
+      url = `/dashboard/exchange-rate?from_currency=${toCurrency}&to_currency=${fromCurrency}&amount=${receiveAmt}`;
+    }
+
+    const res  = await fetch(url, { headers: { Accept: "application/json" } });
+    const data = await res.json();
+
+    if (mySeq !== requestSeq) return; // stale, drop it
+
+    if (data?.success && data?.data) {
+      const converted = parseFloat(data.data.converted || 0);
+
+      if (activeInput === 'send') {
+        // You Send → calculate They Receive
+        lastRate = sendAmt > 0 ? converted / sendAmt : null;
+        modalRecipientAmount.value = converted.toFixed(2);
+
+        document.getElementById("modalRate").textContent =
+          `${sendAmt.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${toCurrency}`;
+
+      } else {
+        // They Receive → API already gave us the send amount directly (real conversion, not extrapolated)
+        lastRate = converted > 0 ? receiveAmt / converted : null;
+        modalAmount.value = converted.toFixed(2);
+
+        document.getElementById("modalRate").textContent =
+          `${converted.toFixed(2)} ${fromCurrency} = ${receiveAmt.toFixed(2)} ${toCurrency}`;
+      }
+
+    } else {
+      lastRate = null;
+      document.getElementById("modalRate").textContent = data?.message || "Rate unavailable";
+    }
+
+  } catch (e) {
+    if (mySeq !== requestSeq) return;
+    lastRate = null;
+    document.getElementById("modalRate").textContent = "Error fetching rate";
+  }
+
+  if (mySeq === requestSeq) {
+    document.getElementById("spinnerIcon").classList.add("hidden");
+  }
+}
+
+  // ── You Send input ────────────────────────────────────────────────────────
+  modalAmount?.addEventListener("focus", () => { activeInput = 'send'; });
+  modalAmount?.addEventListener("input", () => {
+    activeInput = 'send';
+    clearTimeout(sendDebounce);
+    sendDebounce = setTimeout(fetchRate, 500);
+  });
+
+  // ── They Receive input ────────────────────────────────────────────────────
+  modalRecipientAmount?.addEventListener("focus", () => { activeInput = 'receive'; });
+  modalRecipientAmount?.addEventListener("input", () => {
+    activeInput = 'receive';
+    clearTimeout(receiveDebounce);
+
+    // If we already have a rate, do it instantly from stored rate (no API call)
+    if (lastRate && lastRate > 0) {
+      requestSeq++; // invalidate any pending debounced/in-flight fetch, this instant calc wins
+      const receiveAmt = parseFloat(modalRecipientAmount.value || 0);
+      if (receiveAmt > 0) {
+        const sendResult   = receiveAmt / lastRate;
+        const fromCurrency = modalCurrency?.selectedOptions[0]?.value || "NGN";
+        const toCurrency   = selectedBeneficiary?.dataset.currency || "USD";
+
+        modalAmount.value = sendResult.toFixed(2);
+        document.getElementById("modalRate").textContent =
+          `${sendResult.toFixed(2)} ${fromCurrency} = ${receiveAmt.toFixed(2)} ${toCurrency}`;
+        return;
+      }
+    }
+
+    // No rate yet — fetch
+    receiveDebounce = setTimeout(fetchRate, 500);
+  });
+
+  // ── Currency change ───────────────────────────────────────────────────────
+  modalCurrency?.addEventListener("change", () => {
+    requestSeq++; // invalidate anything in-flight for the old currency
+    lastRate    = null;
+    activeInput = 'send';
+    updateBalanceHint();
+    fetchRate();
+  });
+
+  // ── Proceed to confirm ────────────────────────────────────────────────────
+  document.getElementById("proceedBtn")?.addEventListener("click", () => {
+    if (!selectedBeneficiary) {
+      Swal.fire({ icon: "error", title: "Select a beneficiary first" });
+      return;
+    }
+
+    const opt       = modalCurrency?.selectedOptions[0];
+    const symbol    = opt?.dataset.symbol || "₦";
+    const amount    = parseFloat(modalAmount?.value || 0);
+    const rateText  = document.getElementById("modalRate").textContent;
+    const receive   = parseFloat(modalRecipientAmount?.value || 0);
+    const currency  = selectedBeneficiary.dataset.currency;
+    const reference = modalReference?.value.trim() || "For invoice";
+
+    if (!amount || amount <= 0) {
+      Swal.fire({ icon: "error", title: "Enter a valid amount" });
+      return;
+    }
+
+    if (rateText.toLowerCase().includes("unavailable") || rateText === "--") {
+      Swal.fire({ icon: "error", title: "Rate not available", text: "Please wait for a valid exchange rate." });
+      return;
+    }
+
+    if (!receive || receive <= 0) {
+      Swal.fire({ icon: "error", title: "Recipient amount is 0", text: "Please enter a valid amount." });
+      return;
+    }
+
+    const fee   = 0;
+    const total = amount + fee;
+
+    const name    = selectedBeneficiary.dataset.accountName   || "";
+    const account = selectedBeneficiary.dataset.accountNumber || selectedBeneficiary.dataset.phone || "";
+    const bank    = selectedBeneficiary.dataset.bank          || "";
+    const iEmail  = selectedBeneficiary.dataset.interacEmail  || "";
+
+    document.getElementById("cfmName").textContent      = name;
+    document.getElementById("cfmAccount").textContent   = account;
+    document.getElementById("cfmBank").textContent      = bank;
+    document.getElementById("cfmAmount").textContent    = `${symbol}${amount.toFixed(2)}`;
+    document.getElementById("cfmRate").textContent      = rateText;
+    document.getElementById("cfmReceive").textContent   = `${currency} ${receive.toFixed(2)}`;
+    document.getElementById("cfmReference").textContent = reference;
+
+    if (iEmail) {
+      document.getElementById("cfmInteracEmail").textContent = iEmail;
+      document.getElementById("cfmInteracRow").classList.remove("hidden");
+      document.getElementById("cfmAccountRow").classList.add("hidden");
+    } else {
+      document.getElementById("cfmInteracRow").classList.add("hidden");
+      document.getElementById("cfmAccountRow").classList.remove("hidden");
+    }
+
+    document.getElementById("amountInput").value           = amount.toFixed(2);
+    document.getElementById("referenceInput").value        = reference;
+    document.getElementById("transferFeeInput").value      = fee.toFixed(2);
+    document.getElementById("totalAmountInput").value      = total.toFixed(2);
+    document.getElementById("exchangeRateInput").value     = rateText;
+    document.getElementById("recipientAmountInput").value  = receive.toFixed(2);
+    document.getElementById("accountNumberInput").value    = account;
+    document.getElementById("accountNameInput").value      = name;
+    document.getElementById("bankInput").value             = bank;
+    document.getElementById("sort_codeInput").value        = selectedBeneficiary.dataset.sortcode       || "";
+    document.getElementById("transfermethodInput").value   = selectedBeneficiary.dataset.transfermethod  || "";
+    document.getElementById("recipientIdInput").value      = selectedBeneficiary.dataset.id              || "";
+    document.getElementById("balanceIdInput").value        = opt?.dataset.id                             || "";
+    document.getElementById("interacEmailInput").value     = iEmail;
+    document.getElementById("interacFirstNameInput").value = selectedBeneficiary.dataset.interacFirstName || "";
+    document.getElementById("interacLastNameInput").value  = selectedBeneficiary.dataset.interacLastName  || "";
+
+    document.getElementById("confirmModal").classList.remove("hidden");
+    document.getElementById("confirmModal").classList.add("flex");
+  });
+
+  // ── Sidebar ───────────────────────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const openBtn = document.getElementById('openSidebarBtn');
+  const closeBtn = document.getElementById('closeSidebarBtn');
+  const overlay  = document.getElementById('overlay');
+
+  openBtn?.addEventListener('click', () => {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+  closeBtn?.addEventListener('click', () => {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  });
+  overlay?.addEventListener('click', () => {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.add('hidden');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+    }
+  });
+
+});
+</script>
 </body>
 </html>

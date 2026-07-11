@@ -750,7 +750,7 @@
                                                                 $status = $doc['status'] ?? 'not submitted';
                                                                 $badgeClass = 'status-muted';
                                                                 if ($status === 'confirmed') $badgeClass = 'status-success';
-                                                                elseif ($status === 'under_review') $badgeClass = 'status-warning';
+                                                                elseif ($status === 'under review') $badgeClass = 'status-warning';
                                                                 elseif ($status === 'rejected') $badgeClass = 'status-danger';
                                                             @endphp
                                                             <span class="custom-status status-badge {{ $badgeClass }}">
@@ -765,7 +765,7 @@
                                                                 </button>
 
                                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                                    <a href="#" class="dropdown-item change-status" data-status="under_review" data-field="{{ $doc['field'] }}" data-id="{{ $user->id }}">Under Review</a>
+                                                                    <a href="#" class="dropdown-item change-status" data-status="under review" data-field="{{ $doc['field'] }}" data-id="{{ $user->id }}">Under Review</a>
                                                                     <a href="#" class="dropdown-item change-status" data-status="confirmed" data-field="{{ $doc['field'] }}" data-id="{{ $user->id }}">Confirmed</a>
                                                                     <a href="#" class="dropdown-item change-status text-danger" data-status="rejected" data-field="{{ $doc['field'] }}" data-id="{{ $user->id }}">Rejected</a>
                                                                 </div>
@@ -832,9 +832,21 @@
 
                                            <div class="col-md-6 col-xl-3 mb-4">
                                                 <div class="currency-card d-flex flex-column" style="{{ $bg }}">
-                                                    <div class="small text-white-50 mb-2">Wallet</div>
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="small text-white-50 mb-2">Wallet</div>
+                                                        @if($bal->is_locked)
+                                                            <span class="custom-status status-danger" style="background: rgba(255,255,255,0.2); color:#fff;">
+                                                                <i class="fa-solid fa-lock"></i> Locked
+                                                            </span>
+                                                        @endif
+                                                    </div>
+
                                                     <h5 class="mb-2">{{ $bal->name }}</h5>
                                                     <div class="h4 mb-0">{{ $bal->currency }} {{ number_format($bal->amount, 2) }}</div>
+
+                                                    @if($bal->is_locked && $bal->locked_reason)
+                                                        <div class="small text-white-50 mt-1">Reason: {{ $bal->locked_reason }}</div>
+                                                    @endif
 
                                                     <div class="mt-3 d-flex flex-row gap-2 balance-actions">
                                                         <button
@@ -846,7 +858,8 @@
                                                             data-balance-name="{{ $bal->name }}"
                                                             data-currency="{{ $bal->currency }}"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#balanceActionModal">
+                                                            data-bs-target="#balanceActionModal"
+                                                            {{ $bal->is_locked ? 'disabled' : '' }}>
                                                             Add Money
                                                         </button>
 
@@ -859,9 +872,18 @@
                                                             data-balance-name="{{ $bal->name }}"
                                                             data-currency="{{ $bal->currency }}"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#balanceActionModal">
+                                                            data-bs-target="#balanceActionModal"
+                                                            {{ $bal->is_locked ? 'disabled' : '' }}>
                                                             Remove Money
                                                         </button>
+
+                                                        <form method="POST" action="{{ route('admin.business.balance.toggle-lock', [$user->id, $bal->id]) }}" class="lock-toggle-form">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm {{ $bal->is_locked ? 'btn-soft-primary' : 'btn-soft-dark' }}">
+                                                                <i class="fa-solid {{ $bal->is_locked ? 'fa-lock-open' : 'fa-lock' }}"></i>
+                                                                {{ $bal->is_locked ? 'Unlock' : 'Lock' }}
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
