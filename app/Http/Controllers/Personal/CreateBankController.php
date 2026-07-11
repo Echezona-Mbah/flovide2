@@ -324,7 +324,7 @@ public function index(Request $request)
             'message' => 'Dashboard data fetched successfully',
             'data' => [
                 'app_update' => [                                              // ← ADD HERE
-                    'latest_version' => config('app.latest_version', '1.0.0+8'),
+                    'latest_version' => config('app.latest_version', '1.0.0+19'),
                     'force_update'   => config('app.force_update', true),
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),

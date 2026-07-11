@@ -9,6 +9,7 @@ use App\Models\Beneficia;
 use App\Models\Customer;
 use App\Models\Personal;
 use App\Models\Subaccount;
+use App\Models\TransactionHistory;
 use App\Models\VirtualCards;
 use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
@@ -171,6 +172,9 @@ private function updateBalanceAmount(Request $request, $personalId, $balanceId, 
     $balance = Balance::where('id', $balanceId)
         ->where('personal_id', $personal->id)
         ->firstOrFail();
+    if ($balance->is_locked) {
+        return back()->withErrors(['error' => 'This balance is locked and cannot be modified. Unlock it first.']);
+    }
 
     $amount = (float) $request->amount;
 
@@ -186,6 +190,29 @@ private function updateBalanceAmount(Request $request, $personalId, $balanceId, 
         }
 
         $balance->save();
+
+          // ── Record in transaction history ──────────────────────────────────
+            TransactionHistory::create([
+                'personal_id'          => $personal->id,
+                'balance_id'       => $balance->id,
+                'type'             => $mode === 'add' ? 'credit' : 'withdrawal',
+                'method'           => $mode === 'add' ? 'credit'  : 'withdrawal',
+                'amount'           => $amount,
+                'currency'         => $balance->currency,
+                'status'           => 'success',
+                'reference'        => 'admin-' . \Illuminate\Support\Str::uuid(),
+                'payment_provider' => 'admin',
+                'mode'             => $balance->mode ?? 'live',
+                'sender'           => 'Admin',
+                'sender_id'        => auth()->id(),
+                'recipient_account_name' => $personal->firstname ?? ($personal->firstname . ' ' . $personal->lastname),
+                'total_amount'     => $amount,
+                'fees'             => 0,
+                // Store the note in failure_reason field (or add a note column)
+                'payment_reference'   => $request->note ?? null,
+            ]);
+
+
         DB::commit();
 
         $action = $mode === 'remove' ? 'removed from' : 'added to';
@@ -249,6 +276,27 @@ public function submitToFidelity(Request $request, $id, FidelityService $fidelit
     return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
 }
 
+public function toggleBalanceLock(Request $request, $personalId, $balanceId)
+{
+    $request->validate([
+        'reason' => 'nullable|string|max:255',
+    ]);
 
+    $personal = Personal::findOrFail($personalId);
+
+    $balance = Balance::where('id', $balanceId)
+        ->where('personal_id', $personal->id)
+        ->firstOrFail();
+
+    $balance->is_locked = !$balance->is_locked;
+    $balance->locked_reason = $balance->is_locked ? ($request->reason ?? 'Locked by admin') : null;
+    $balance->locked_at = $balance->is_locked ? now() : null;
+    $balance->locked_by = $balance->is_locked ? auth()->id() : null;
+    $balance->save();
+
+    $state = $balance->is_locked ? 'locked' : 'unlocked';
+
+    return back()->with('success', "{$balance->name} ({$balance->currency}) has been {$state}.");
+}
 
 }

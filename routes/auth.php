@@ -189,6 +189,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::post('/update-balance', [CreateBankController::class, 'UpdateBalance'])->name('update.balance');
     Route::post('/update-main-balance', [CreateBankController::class, 'updateMainBalance'])->name('main.balance.update');
     Route::get('/balance/{id}', [CreateBankController::class, 'show'])->name('balance.show');
+    Route::get('/balance/{id}/statement', [CreateBankController::class, 'statement'])->name('balance.statement');
 
 
 
@@ -426,6 +427,11 @@ Route::middleware(['auth','business.verified'])->group(function () {
 
         Route::post('/admin/personal-account/{personal}/balance/{balance}/add-money', [PersonalAccountController::class, 'addMoney'])->name('admin.personal.balance.add');
         Route::post('/admin/personal-account/{personal}/balance/{balance}/remove-money', [PersonalAccountController::class, 'removeMoney'])->name('admin.personal.balance.remove');
+
+        Route::post('/admin/business-account/{userId}/balance/{balanceId}/toggle-lock', [BusinessAccountController::class, 'toggleBalanceLock'])
+        ->name('admin.business.balance.toggle-lock');
+        Route::post('/admin/personal-account/{personalId}/balance/{balanceId}/toggle-lock', [PersonalAccountController::class, 'toggleBalanceLock'])
+        ->name('admin.personal.balance.toggle-lock');
     });
 
 

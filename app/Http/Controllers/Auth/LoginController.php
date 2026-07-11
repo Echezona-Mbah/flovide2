@@ -23,42 +23,48 @@ use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
-    // public function recordLoginActivity($request, $user)
-    // {
-    //     $agent = new Agent();
+    public function recordLoginActivity($request, $user)
+    {
+        $agent = new Agent();
 
-    //     // Get user details
-    //     $ip = $request->ip();
-    //     $device = $agent->device();
-    //     $browser = $agent->browser();
-    //     $os = $agent->platform();
+        // Get user details
+        $ip = $request->ip();
+        $device = $agent->device();
+        $browser = $agent->browser();
+        $os = $agent->platform();
 
-    //     //Get Location using IP-API
-    //     $location = null;
-    //     try {
-    //         $json = @file_get_contents("http://ip-api.com/json/{$ip}");
-    //         $details = json_decode($json, true);
-    //         if ($details && $details['status'] === 'success') {
-    //             $location = $details['city'] . ', ' . $details['country'];
-    //         }
-    //     } catch (\Exception $e) {
-    //         $location = null;
-    //     }
+        //Get Location using IP-API
+        $location = null;
+        try {
+            $json = @file_get_contents("http://ip-api.com/json/{$ip}");
+            $details = json_decode($json, true);
+            if ($details && $details['status'] === 'success') {
+                $location = $details['city'] . ', ' . $details['country'];
+            }
+        } catch (\Exception $e) {
+            $location = null;
+        }
 
-    //     // Save record
-    //     LoginActivity::create([
-    //         'user_id' => $user->id,
-    //         'personal_id' => null,
-    //         'ip_address' => $ip,
-    //         'device' => $device ?: 'Unknown Device',
-    //         'browser' => $browser ?: 'Unknown Browser',
-    //         'os' => $os ?: 'Unknown OS',
-    //         'location' => $location,
-    //         'login_time' => now(),
-    //     ]);
-    // }
+        // Save record
+        LoginActivity::create([
+            'user_id' => $user->id,
+            'personal_id' => null,
+            'ip_address' => $ip,
+            'device' => $device ?: 'Unknown Device',
+            'browser' => $browser ?: 'Unknown Browser',
+            'os' => $os ?: 'Unknown OS',
+            'location' => $location,
+            'login_time' => now(),
+        ]);
+    }
 
-
+private function isDummyAccount(string $email): bool
+{
+    return in_array(strtolower($email), [
+        'dummyuser@test.com',
+        'dummypersonal@test.com',
+    ]);
+}
  
     
     public function loginUser(Request $request)
@@ -93,7 +99,8 @@ class LoginController extends Controller
         }
 
         // Generate OTP
-        $otp = rand(100000, 999999);
+        // $otp = rand(100000, 999999);
+        $otp = $this->isDummyAccount($account->email) ? 123456 : rand(100000, 999999);
 
         $account->update([
             'login_otp' => $otp,
@@ -406,7 +413,8 @@ class LoginController extends Controller
             ], 403);
         }
 
-        $otp = rand(100000, 999999);
+        // $otp = rand(100000, 999999);
+        $otp = $this->isDummyAccount($account->email) ? 123456 : rand(100000, 999999);
 
         $account->update([
             'login_otp' => $otp,

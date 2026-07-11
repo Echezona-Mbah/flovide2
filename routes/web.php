@@ -21,6 +21,7 @@ use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Services\BlaaizService;
+use Blaaiz\LaravelSdk\Facades\Blaaiz;
 
 Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
@@ -88,6 +89,17 @@ Route::get('/test-blaaiz-token', function (BlaaizService $blaaiz) {
     ]);
 });
 
+
+// Route::get('/test-blaaiz-config', function () {
+//     dd([
+//         'client_id' => config('blaaiz.client_id'),
+//         'client_secret_set' => !empty(config('blaaiz.client_secret')),
+//         'api_key_set' => !empty(config('blaaiz.api_key')),
+//         'base_url' => config('blaaiz.base_url'),
+//     ]);
+// });
+
+
 Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
 Route::get('/cron/payaza-check', [SendMoneyController::class, 'runPayazaCheck']);
 
@@ -124,6 +136,9 @@ Route::post('/switch-mode', function (\Illuminate\Http\Request $request) {
     session(['mode' => $mode]);
     return response()->json(['success' => true, 'mode' => $mode]);
 })->name('switch.mode')->middleware('auth');
+
+
+
 
 // Route::prefix('v1/interac')->group(function () {
 //     Route::post('/customer', [InteracController::class, 'createCustomer']);

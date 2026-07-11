@@ -35,6 +35,7 @@ class TransactionHistory extends Model
         'virtual_account_id',
         'order_id',
         'payment_reference',
+        'transfer_method',
         'failure_reason',
         'transaction_type',
         'payment_method',

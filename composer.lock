@@ -4,8 +4,85 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ca69d27fb82cad7ea988a7f792285ab",
+    "content-hash": "faef92132ee1fb0ab254ef7eb976349a",
     "packages": [
+        {
+            "name": "blaaiz/blaaiz-laravel-sdk",
+            "version": "v1.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Blaaiz/blaaiz-laravel-sdk.git",
+                "reference": "4bacf37afbc6eeaeb4f357a34cfd4462260963dc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Blaaiz/blaaiz-laravel-sdk/zipball/4bacf37afbc6eeaeb4f357a34cfd4462260963dc",
+                "reference": "4bacf37afbc6eeaeb4f357a34cfd4462260963dc",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^3.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Blaaiz": "Blaaiz\\LaravelSdk\\Facades\\Blaaiz"
+                    },
+                    "providers": [
+                        "Blaaiz\\LaravelSdk\\BlaaizServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Blaaiz\\LaravelSdk\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Blaaiz",
+                    "email": "onboarding@blaaiz.com",
+                    "homepage": "https://business.blaaiz.com"
+                }
+            ],
+            "description": "Official Laravel SDK for Blaaiz RaaS (Remittance as a Service) API",
+            "homepage": "https://docs.business.blaaiz.com",
+            "keywords": [
+                "api",
+                "bank-transfer",
+                "blaaiz",
+                "collection",
+                "cryptocurrency",
+                "fintech",
+                "interac",
+                "laravel",
+                "open-banking",
+                "payments",
+                "payout",
+                "raas",
+                "remittance",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/blaaiz/laravel-sdk/issues",
+                "source": "https://github.com/blaaiz/laravel-sdk"
+            },
+            "time": "2026-05-25T13:40:05+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.0",

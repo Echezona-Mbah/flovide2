@@ -264,7 +264,7 @@ class SendMoneyController extends Controller
         'amount'             => 'required|numeric|min:1',
         'recipient_id'       => 'required|uuid',
         'balance_id'         => 'required',
-        'reference'          => 'nullable|string',
+        'payment_reference'          => 'nullable|string',
         'transfer_fee'       => 'nullable|numeric',
         'total_amount'       => 'required|numeric',
         'exchange_rate'      => 'required|string',
@@ -278,6 +278,9 @@ class SendMoneyController extends Controller
         'interac_first_name' => 'nullable|string',
         'interac_last_name'  => 'nullable|string',
     ]);
+
+
+    // dd( $request->all());
 
     $actor = $this->resolveKeyUser($request) ?? auth()->user();
     if (!$actor) {
@@ -301,6 +304,8 @@ class SendMoneyController extends Controller
     $amount          = (float) $request->amount;
     $recipientAmount = (float) $request->recipient_amount;
 
+    //dd($recipientAmount);
+
     // ── Currency limits (on sending amount) ───────────────────────────────
     $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
     if ($limit) {
@@ -323,9 +328,15 @@ class SendMoneyController extends Controller
     $transferFee = 0;
 
     $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
-        ->where('currency', $currency) // ← fee on recipient currency
+        ->where('currency', $currency)
         ->first();
 
+    if (!$userFee || !$userFee->payout_enabled) {
+        $msg = "Contact your marketer to enable payout pricing for {$currency}.";
+        return $isApi
+            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
+            : back()->withInput()->with('error', $msg);
+        }
     if ($userFee && $userFee->payout_enabled) {
 
         if ($userFee->payout_min > 0 && $recipientAmount < $userFee->payout_min) {
@@ -352,7 +363,9 @@ class SendMoneyController extends Controller
     }
 
     // ── What recipient actually receives after fee ─────────────────────────
-    $netRecipientAmount = $recipientAmount ;
+    // $netRecipientAmount = $recipientAmount ;
+        $netRecipientAmount = (int) round($recipientAmount, 0);
+    //dd($netRecipientAmount);
 
     // ── Balance check — deduct sender's full amount ───────────────────────
     $balance = Balance::where('id', $request->balance_id)
@@ -366,6 +379,13 @@ class SendMoneyController extends Controller
             : back()->withInput()->with('error', $msg);
     }
 
+    if ($balance->is_locked) {
+    $msg = 'This balance is locked and cannot be used for payouts. Please contact support.';
+    return $isApi
+        ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BALANCE_LOCKED', 'data' => null], 422)
+        : back()->withInput()->with('error', $msg);
+    }
+
     if ($balance->amount < $amount) {
         $msg = 'Insufficient funds';
         return $isApi
@@ -373,6 +393,7 @@ class SendMoneyController extends Controller
             : back()->withInput()->with('error', $msg);
     }
 
+    
     DB::beginTransaction();
     try {
         // Deduct full sending amount from sender's balance
@@ -434,8 +455,10 @@ class SendMoneyController extends Controller
             'method'                   => 'withdrawal',
             'type'                     => 'withdrawal',
             'payment_provider'         => 'wallect',
+            'transfer_method'         => $request->transfer_method,
             'order_id'                 => $request->order_id  ?? null,
             'reference'                => 'ref-' . Str::uuid(),
+            'payment_reference'                => $request->payment_reference,
             'recipient_id'             => $request->recipient_id,
             'recipient_account_number' => $request->account_number,
             'recipient_account_name'   => $request->account_name
@@ -795,7 +818,7 @@ class SendMoneyController extends Controller
                 'status'            => 'pending',
                 'payment_provider'  => 'interac',
                 'order_id'          => $transaction['id']        ?? null,
-                'payment_reference' => $transaction['reference'] ?? null,
+                'reference' => $transaction['reference'] ?? null,
             ]);
 
             Log::info('[Blaaiz Interac] Transaction updated', ['tx_id' => $txId]);
@@ -984,54 +1007,133 @@ public function getUserTotalBalance(Request $request)
 
 
 
-    public function getExchangeRates(Request $request)
-    {
-        $from = strtoupper($request->input('from_currency'));
-        $to   = strtoupper($request->input('to_currency'));
-        $amount = (float) $request->input('amount', 1);
+   public function getExchangeRates(Request $request)
+{
+    $from = strtoupper($request->input('from_currency'));
+    $to   = strtoupper($request->input('to_currency'));
+    $amount = (float) $request->input('amount', 1);
 
-        try {
-            $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
-                    $q->where('code', $from);
-                })
-                ->whereHas('toCurrency', function ($q) use ($to) {
-                    $q->where('code', $to);
-                })
-                ->first();
+    try {
+        $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+                $q->where('code', $from);
+            })
+            ->whereHas('toCurrency', function ($q) use ($to) {
+                $q->where('code', $to);
+            })
+            ->orderByDesc('updated_at')   // NEW: always pick the most recently updated rate row
+            ->orderByDesc('id')           // NEW: tiebreaker if updated_at is identical
+            ->first();
 
-            if (!$rate) {
-                throw new \Exception("Rate not found");
-            }
-
-            $converted = $amount * $rate->rate;
-
-            $rateText = sprintf(
-                "%s 1.00 = %s %s",
-                $from,
-                $to,
-                number_format($rate->rate, 6, '.', '')
-            );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Exchange rate fetched',
-                'code' => 'EXCHANGE_RATE_FETCHED',
-                'data' => [
-                    'converted' => $converted,
-                    'transfer_fee' => $rate->transfer_fee,
-                    'exchange_rate' => $rateText,
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code' => 'RATE_NOT_FOUND',
-                'data' => null
-            ], 400);
+        if (!$rate) {
+            throw new \Exception("Rate not found");
         }
+
+        $converted = $amount * $rate->rate;
+
+        $rateText = sprintf(
+            "%s 1.00 = %s %s",
+            $from,
+            $to,
+            number_format($rate->rate, 6, '.', '')
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Exchange rate fetched',
+            'code' => 'EXCHANGE_RATE_FETCHED',
+            'data' => [
+                'converted' => $converted,
+                'transfer_fee' => $rate->transfer_fee,
+                'exchange_rate' => $rateText,
+            ]
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+            'code' => 'RATE_NOT_FOUND',
+            'data' => null
+        ], 400);
     }
+}
+
+
+
+// public function getExchangeRates(Request $request)
+// {
+//     $from   = strtoupper($request->input('from_currency'));
+//     $to     = strtoupper($request->input('to_currency'));
+//     $amount = (float) $request->input('amount', 1);
+
+//     try {
+//         $actor = $this->resolveKeyUser($request) ?? auth()->user();
+//         if (! $actor) {
+//             throw new \Exception("Unauthorized");
+//         }
+
+//         [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
+//         if (! $ownerId) {
+//             throw new \Exception("Owner account not found");
+//         }
+
+//         $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+//                 $q->where('code', $from);
+//             })
+//             ->whereHas('toCurrency', function ($q) use ($to) {
+//                 $q->where('code', $to);
+//             })
+//             ->first();
+
+//         if (!$rate) {
+//             throw new \Exception("Rate not found");
+//         }
+
+//         $converted = $amount * $rate->rate;
+
+//         // ── Platform fee on recipient (TO) currency, per-user override ──
+//         $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
+//             ->where('currency', $to)
+//             ->first();
+
+//         $transferFee = (float) $rate->transfer_fee;
+
+//         if ($userFee && $userFee->payout_enabled) {
+//             $transferFee = round(
+//                 ($converted * $userFee->payout_percent / 100) + $userFee->payout_fixed,
+//                 2
+//             );
+//         }
+
+//         $rateText = sprintf(
+//             "%s 1.00 = %s %s",
+//             $from,
+//             $to,
+//             number_format($rate->rate, 6, '.', '')
+//         );
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Exchange rate fetched',
+//             'code' => 'EXCHANGE_RATE_FETCHED',
+//             'data' => [
+//                 'converted' => $converted,
+//                 'transfer_fee' => $transferFee,
+//                 'exchange_rate' => $rateText,
+//             ]
+//         ], 200);
+
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => $e->getMessage(),
+//             'code' => 'RATE_NOT_FOUND',
+//             'data' => null
+//         ], 400);
+//     }
+// }
+
+
 
     public function refreshExchangeRates(Request $request)
     {

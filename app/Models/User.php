@@ -152,10 +152,10 @@ public function isFullyVerified(): bool
         $this->selfie_verification_status === 'confirmed' &&
         $this->nin_status === 'confirmed';  // NIN added
 
-    $nigeriaCheck = (
-        $this->countries_id !== 'Nigeria' ||
-        $this->bvn_status === 'confirmed'
-    );
+        $nigeriaCheck = (
+            $this->countries_id !== 'Nigeria' ||
+            $this->bvn_status === 'confirmed'
+        );
 
     return $baseChecks && $nigeriaCheck;
 }
@@ -178,7 +178,7 @@ public function complianceStatus($tokenResponse = null): array
         'nin' => $this->nin_status,
         'bvn_required' => $this->countries_id === 'Nigeria' ? 'yes' : 'no',
         'bvn_verified' => $this->bvn_status,
-        // 'fully_verified' => $this->isFullyVerified() ? 'yes' : 'no',
+        'fully_verified' => $this->isFullyVerified() ? 'yes' : 'no',
         'token' => $tokenResponse['token'] ?? null,
         'userId' => $this->id,
     ];

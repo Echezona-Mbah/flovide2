@@ -118,6 +118,11 @@
                  class="action-btn-primary inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition shadow-lg shadow-indigo-900/40">
                 <i class="fas fa-paper-plane text-xs"></i> Send
               </a>
+              {{-- Statement button --}}
+              <button onclick="openStatementModal()"
+                class="action-btn-ghost inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition no-print">
+                <i class="fas fa-file-alt text-xs"></i> Statement
+              </button>
             </div>
           </div>
 
@@ -132,8 +137,8 @@
           {{-- Stats pills --}}
           <div class="flex flex-wrap gap-3 text-xs font-semibold">
             @php
-              $credits   = $transactions->where('transaction_type','!=','payment')->sum('amount');
-              $debits    = $transactions->where('transaction_type','payment')->sum('amount');
+              $credits   = $transactions->where('type','Credit')->sum('amount');
+              $debits    = $transactions->where('type','withdrawal')->sum('amount');
               $swaps     = $transactions->whereIn('type',['swap','Swap'])->count();
             @endphp
             <span class="stat-pill px-4 py-2 flex items-center gap-2">
@@ -278,124 +283,215 @@
       </div>
 
     </div>{{-- /max-w --}}
+
+
+
+    {{-- ── Statement Modal ──────────────────────────────────────────────────── --}}
+    <div id="statementModal" class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+
+        {{-- Header --}}
+        <div class="px-6 pt-6 pb-5 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                <i class="fas fa-file-invoice text-indigo-600 text-sm"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-gray-800">Account Statement</h2>
+                <p class="text-xs text-gray-400">{{ $balance->currency }} · {{ $balance->name }}</p>
+              </div>
+            </div>
+            <button onclick="closeStatementModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        {{-- Body --}}
+        <form method="GET" action="{{ route('balance.statement', $balance->id) }}" target="_blank">
+          <div class="p-6 space-y-5">
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Start Date</label>
+              <input type="date" name="start_date" id="stmtStart"
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
+                value="{{ now()->startOfMonth()->toDateString() }}" required>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">End Date</label>
+              <input type="date" name="end_date" id="stmtEnd"
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
+                value="{{ now()->toDateString() }}" required>
+            </div>
+
+            {{-- Quick range pills --}}
+            <div>
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Range</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="setRange(7)"
+                  class="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 transition">Last 7 days</button>
+                <button type="button" onclick="setRange(30)"
+                  class="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 transition">Last 30 days</button>
+                <button type="button" onclick="setRange(90)"
+                  class="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 transition">Last 90 days</button>
+                <button type="button" onclick="setThisMonth()"
+                  class="px-3 py-1.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-700 transition">This Month</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="px-6 pb-6">
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold py-3.5 rounded-2xl hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
+              <i class="fas fa-download text-sm"></i> Generate Statement
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
   </main>
 
   <script>
-    async function downloadReceipt(btn) {
-      const { jsPDF } = window.jspdf;
-      const d = btn.dataset;
-      const doc = new jsPDF({ unit: 'mm', format: 'a6' });
-      const W = doc.internal.pageSize.getWidth(); // 105mm
-      const H = 148;
+  // Flovide logo, embedded as base64 so the receipt never depends on a
+  // network fetch / CORS-safe canvas read.
+  const FLOVIDE_LOGO_PNG = 'data:image/png;base64,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';
 
-      // ── Background ──
-      doc.setFillColor(26, 29, 46);
-      doc.rect(0, 0, W, H, 'F');
+  async function downloadReceipt(btn) {
+    const { jsPDF } = window.jspdf;
+    const d = btn.dataset;
+    const doc = new jsPDF({ unit: 'mm', format: 'a6' });
+    const W = doc.internal.pageSize.getWidth(); // 105mm
+    const H = 148;
 
-      // ── Subtle top accent strip ──
-      doc.setFillColor(99, 102, 241);
-      doc.rect(0, 0, W, 1.2, 'F');
+    // ── Background ──
+    doc.setFillColor(26, 29, 46);
+    doc.rect(0, 0, W, H, 'F');
 
-      // ── LOGO: circular orbit + "Flovide" text ──
-      const cx = W / 2, cy = 20;
+    // ── Subtle top accent strip ──
+    doc.setFillColor(99, 102, 241);
+    doc.rect(0, 0, W, 1.2, 'F');
 
-      // Outer orbit ring
-      doc.setDrawColor(99, 102, 241);
-      doc.setLineWidth(0.6);
-      doc.circle(cx, cy, 9);
+    // ── LOGO: real Flovide logo, no background panel ──
+    // Source PNG is 209x80 (aspect ratio ~2.6:1)
+    const logoW = 32, logoH = logoW * (80 / 209);
+    const logoX = W / 2 - logoW / 2;
+    const logoY = 10;
 
-      // Tilted inner orbit ellipse (simulated with arc points)
-      doc.setDrawColor(139, 92, 246);
-      doc.setLineWidth(0.4);
-      doc.ellipse(cx, cy, 9, 3.5, 'S');
+    doc.addImage(FLOVIDE_LOGO_PNG, 'PNG', logoX, logoY, logoW, logoH);
 
-      // Centre dot
-      doc.setFillColor(99, 102, 241);
-      doc.circle(cx, cy, 1.8, 'F');
+    // Tagline
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(130, 135, 165);
+    doc.text('Transaction Receipt', W / 2, logoY + logoH + 6, { align: 'center' });
 
-      // Orbit dot (top-right of ring)
-      doc.setFillColor(139, 92, 246);
-      doc.circle(cx + 6.5, cy - 6, 1.2, 'F');
+    // ── Success badge ──
+    const isSuccess = d.status.toLowerCase() === 'success';
+    const isPending = d.status.toLowerCase() === 'pending';
+    const badgeColor = isSuccess ? [5,150,105] : isPending ? [217,119,6] : [220,38,38];
+    doc.setFillColor(...badgeColor);
+    doc.roundedRect(W/2 - 14, 43, 28, 7, 3.5, 3.5, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255,255,255);
+    doc.text(d.status.toUpperCase(), W/2, 47.8, { align: 'center' });
 
-      // "Flovide" wordmark
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Flovide', W / 2, 35, { align: 'center' });
+    // ── Amount ──
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    const amtColor = d.amount.startsWith('+') ? [5,150,105] : [220,38,38];
+    doc.setTextColor(...amtColor);
+    doc.text(d.amount, W / 2, 60, { align: 'center' });
 
-      // Tagline
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(130, 135, 165);
-      doc.text('Transaction Receipt', W / 2, 40, { align: 'center' });
+    // Date
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(130, 135, 165);
+    doc.text(d.date, W / 2, 66, { align: 'center' });
 
-      // ── Success badge ──
-      const isSuccess = d.status.toLowerCase() === 'success';
-      const isPending = d.status.toLowerCase() === 'pending';
-      const badgeColor = isSuccess ? [5,150,105] : isPending ? [217,119,6] : [220,38,38];
-      doc.setFillColor(...badgeColor);
-      doc.roundedRect(W/2 - 14, 43, 28, 7, 3.5, 3.5, 'F');
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255,255,255);
-      doc.text(d.status.toUpperCase(), W/2, 47.8, { align: 'center' });
+    // ── Divider ──
+    doc.setDrawColor(45, 53, 97);
+    doc.setLineWidth(0.4);
+    doc.line(12, 70, W - 12, 70);
 
-      // ── Amount ──
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      const amtColor = d.amount.startsWith('+') ? [5,150,105] : [220,38,38];
-      doc.setTextColor(...amtColor);
-      doc.text(d.amount, W / 2, 60, { align: 'center' });
+    // ── Detail rows ──
+    const rows = [
+      ['Transaction Type', d.type],
+      ['Sender',           d.sender],
+      ['Recipient',        d.recipient],
+      ['Method',           d.method],
+      ['Reference',        d.ref],
+    ];
 
-      // Date
+    let y = 78;
+    rows.forEach(([label, value]) => {
       doc.setFontSize(7.5);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(130, 135, 165);
-      doc.text(d.date, W / 2, 66, { align: 'center' });
+      doc.setTextColor(110, 115, 150);
+      doc.text(label, 14, y);
 
-      // ── Divider ──
-      doc.setDrawColor(45, 53, 97);
-      doc.setLineWidth(0.4);
-      doc.line(12, 70, W - 12, 70);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(220, 225, 245);
+      const v = String(value ?? 'N/A');
+      const wrapped = doc.splitTextToSize(v, 58);
+      doc.text(wrapped, W - 14, y, { align: 'right' });
+      y += wrapped.length > 1 ? wrapped.length * 5.5 : 10;
+    });
 
-      // ── Detail rows ──
-      const rows = [
-        ['Transaction Type', d.type],
-        ['Sender',           d.sender],
-        ['Recipient',        d.recipient],
-        ['Method',           d.method],
-        ['Reference',        d.ref],
-      ];
+    // ── Bottom divider ──
+    doc.setDrawColor(45, 53, 97);
+    doc.line(12, H - 14, W - 12, H - 14);
 
-      let y = 78;
-      rows.forEach(([label, value]) => {
-        // Row bg pill for alternating rows
-        doc.setFontSize(7.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(110, 115, 150);
-        doc.text(label, 14, y);
+    // ── Footer ──
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 85, 115);
+    doc.text('Flovide Financial Services  ·  support@flovide.com', W / 2, H - 9, { align: 'center' });
+    doc.text('Keep this receipt for your records', W / 2, H - 5, { align: 'center' });
 
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(220, 225, 245);
-        const v = String(value ?? 'N/A');
-        const wrapped = doc.splitTextToSize(v, 52);
-        doc.text(wrapped, W - 14, y, { align: 'right' });
-        y += wrapped.length > 1 ? wrapped.length * 5.5 : 10;
-      });
+    doc.save(`Flovide-receipt-${d.ref}.pdf`);
+  }
 
-      // ── Bottom divider ──
-      doc.setDrawColor(45, 53, 97);
-      doc.line(12, H - 14, W - 12, H - 14);
+    function openStatementModal() {
+  const m = document.getElementById('statementModal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
 
-      // ── Footer ──
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(80, 85, 115);
-      doc.text('Flovide Financial Services  ·  support@flovide.com', W / 2, H - 9, { align: 'center' });
-      doc.text('Keep this receipt for your records', W / 2, H - 5, { align: 'center' });
+function closeStatementModal() {
+  const m = document.getElementById('statementModal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
 
-      doc.save(`Flovide-receipt-${d.ref}.pdf`);
-    }
+// Quick range helpers
+function setRange(days) {
+  const end   = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - days);
+  document.getElementById('stmtStart').value = start.toISOString().split('T')[0];
+  document.getElementById('stmtEnd').value   = end.toISOString().split('T')[0];
+}
+
+function setThisMonth() {
+  const now   = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  document.getElementById('stmtStart').value = start.toISOString().split('T')[0];
+  document.getElementById('stmtEnd').value   = now.toISOString().split('T')[0];
+}
+
+// Close on backdrop click
+document.getElementById('statementModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeStatementModal();
+});
   </script>
+
+
+
 </body>
 </html>

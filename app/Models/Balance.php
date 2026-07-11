@@ -25,6 +25,10 @@ class Balance extends Model
         'virtual_account_name',
         'virtual_account_bank',
         'fidelty_process_id',
+        'is_locked',
+        'locked_reason',
+        'locked_at',
+        'locked_by',
     ];
 
     public function user()
@@ -45,5 +49,20 @@ class Balance extends Model
     public function scopeLiveMode($query)
     {
         return $query->where('mode', 'live');
+    }
+
+    protected $casts = [
+    'is_locked' => 'boolean',
+    'locked_at' => 'datetime',
+    ];
+
+    public function scopeUnlocked($query)
+    {
+        return $query->where('is_locked', false);
+    }
+
+    public function scopeLocked($query)
+    {
+        return $query->where('is_locked', true);
     }
 }

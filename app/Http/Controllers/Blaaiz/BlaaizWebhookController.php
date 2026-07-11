@@ -9,6 +9,8 @@ use App\Models\Personal;
 use App\Models\TransactionHistory;
 use App\Models\User;
 use App\Services\FirebaseNotificationService;
+use Blaaiz\LaravelSdk\Exceptions\BlaaizException;
+use Blaaiz\LaravelSdk\Facades\Blaaiz;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -21,31 +23,39 @@ class BlaaizWebhookController extends Controller
             'headers'      => $request->headers->all(),
             'content_type' => $request->header('Content-Type'),
             'raw_body'     => $request->getContent(),
-            'all'          => $request->all(),
-            'json'         => $request->json()->all(),
         ]);
-    
-        $payload = $request->all();
+
+        // ── Signature verification (via SDK — handles timestamp + body signing) ──
+        try {
+            $verified = Blaaiz::webhooks()->constructEvent(
+                $request->getContent(),
+                $request->header('X-Blaaiz-Signature', ''),
+                $request->header('X-Blaaiz-Timestamp', ''),
+                config('services.blaaiz.webhook_secret')
+            );
+        } catch (BlaaizException $e) {
+            Log::warning('[BlaaizWebhook] Signature verification failed', [
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
+
+        // constructEvent may return an object, stdClass, or array depending on
+        // SDK version — normalize to array. Fall back to the raw decoded body
+        // if the SDK returns something unexpected, so we don't hard-fail on
+        // a shape mismatch after signature verification already succeeded.
+        $payload = match (true) {
+            is_array($verified) => $verified,
+            is_object($verified) => json_decode(json_encode($verified), true),
+            default => json_decode($request->getContent(), true) ?? [],
+        };
 
         Log::info('[BlaaizWebhook] Incoming webhook', $payload);
 
-        // ── Signature verification ────────────────────────────────────────────
-        $secret    = config('services.blaaiz.webhook_secret');
-        $signature = $request->header('X-Blaaiz-Signature') ?? $request->header('X-Webhook-Signature');
-
-        if ($secret && $signature) {
-            $expected = hash_hmac('sha256', $request->getContent(), $secret);
-            if (!hash_equals($expected, $signature)) {
-                Log::warning('[BlaaizWebhook] Invalid signature', [
-                    'expected'  => $expected,
-                    'received'  => $signature,
-                ]);
-                return response()->json(['message' => 'Invalid signature'], 401);
-            }
-        }
-
         // ── Route by event type ───────────────────────────────────────────────
-        $event = $payload['event'] ?? $payload['type'] ?? null;
+        // Observed payloads use "type" (e.g. "collection"); keep "event" as a
+        // fallback in case other event categories use a different key.
+        $event = $payload['type'] ?? $payload['event'] ?? null;
 
         Log::info('[BlaaizWebhook] Event type', ['event' => $event]);
 
@@ -58,16 +68,32 @@ class BlaaizWebhookController extends Controller
         };
     }
 
+    /**
+     * Pull the transaction id / reference / raw status out of a Blaaiz
+     * webhook payload. Observed real payloads are flat (no "data" wrapper)
+     * and use "transaction_id", "transaction_reference", and
+     * "transaction_status" — but we keep the old key names as fallbacks in
+     * case other event types (or future payload versions) nest under
+     * "data" or use the shorter field names.
+     */
+    protected function extractTransactionFields(array $payload): array
+    {
+        $data = $payload['data'] ?? $payload;
+
+        $transactionId = $data['transaction_id'] ?? $data['id'] ?? null;
+        $reference     = $data['transaction_reference'] ?? $data['reference'] ?? null;
+        $rawStatus     = strtolower($data['transaction_status'] ?? $data['status'] ?? '');
+
+        return [$data, $transactionId, $reference, $rawStatus];
+    }
+
     // ── Interac ───────────────────────────────────────────────────────────────
 
     protected function handleInterac(array $payload): \Illuminate\Http\JsonResponse
     {
         Log::info('[BlaaizWebhook] Handling Interac event', $payload);
 
-        $data          = $payload['data'] ?? $payload;
-        $transactionId = $data['transaction_id'] ?? $data['id'] ?? null;
-        $reference     = $data['reference'] ?? null;
-        $rawStatus     = strtolower($data['status'] ?? '');
+        [$data, $transactionId, $reference, $rawStatus] = $this->extractTransactionFields($payload);
 
         $mapped = match ($rawStatus) {
             'success', 'completed', 'successful' => 'success',
@@ -144,8 +170,72 @@ class BlaaizWebhookController extends Controller
     {
         Log::info('[BlaaizWebhook] Handling Collection event', $payload);
 
-        // Reuse same logic as interac — collections also update transaction status
-        return $this->handleInterac($payload);
+        [$data, $transactionId, $reference, $rawStatus] = $this->extractTransactionFields($payload);
+
+        $mapped = match ($rawStatus) {
+            'success', 'completed', 'successful' => 'success',
+            'failed', 'declined', 'rejected'     => 'failed',
+            default                               => 'pending',
+        };
+
+        Log::info('[BlaaizWebhook] Collection status mapped', [
+            'transaction_id' => $transactionId,
+            'reference'      => $reference,
+            'raw_status'     => $rawStatus,
+            'mapped_status'  => $mapped,
+        ]);
+
+        // Collections aren't restricted to payment_provider = interac,
+        // unlike handleInterac() — match on id/reference only.
+        $tx = TransactionHistory::where(function ($q) use ($transactionId, $reference) {
+                $q->where('order_id', $transactionId)
+                  ->orWhere('reference', $reference)
+                  ->orWhere('payment_reference', $reference);
+            })
+            ->first();
+
+        if (!$tx) {
+            Log::warning('[BlaaizWebhook] No matching collection transaction found', [
+                'transaction_id' => $transactionId,
+                'reference'      => $reference,
+            ]);
+            return response()->json(['message' => 'Transaction not found'], 404);
+        }
+
+        if ($tx->status === $mapped) {
+            Log::info('[BlaaizWebhook] Status unchanged, skipping', ['tx_id' => $tx->id]);
+            return response()->json(['message' => 'No change'], 200);
+        }
+
+        $tx->status = $mapped;
+        $tx->save();
+
+        Log::info('[BlaaizWebhook] Collection transaction status updated', [
+            'tx_id'      => $tx->id,
+            'new_status' => $mapped,
+        ]);
+
+        if ($mapped === 'success' && $tx->balance_id) {
+            $balance = Balance::find($tx->balance_id);
+            if ($balance) {
+                $balance->amount += $tx->amount;
+                $balance->save();
+
+                Log::info('[BlaaizWebhook] Balance credited', [
+                    'balance_id'  => $balance->id,
+                    'amount'      => $tx->amount,
+                    'new_balance' => $balance->amount,
+                ]);
+            }
+        }
+
+        $this->sendPushNotification($tx);
+
+        if (in_array($mapped, ['success', 'failed'])) {
+            $this->sendEmail($tx);
+        }
+
+        return response()->json(['message' => 'Webhook processed'], 200);
     }
 
     // ── Payout ────────────────────────────────────────────────────────────────
@@ -154,10 +244,7 @@ class BlaaizWebhookController extends Controller
     {
         Log::info('[BlaaizWebhook] Handling Payout event', $payload);
 
-        $data          = $payload['data'] ?? $payload;
-        $transactionId = $data['transaction_id'] ?? $data['id'] ?? null;
-        $reference     = $data['reference'] ?? null;
-        $rawStatus     = strtolower($data['status'] ?? '');
+        [$data, $transactionId, $reference, $rawStatus] = $this->extractTransactionFields($payload);
 
         $mapped = match ($rawStatus) {
             'success', 'completed', 'successful' => 'success',

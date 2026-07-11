@@ -9,6 +9,7 @@ use App\Models\Beneficia;
 use App\Models\Customer;
 use App\Models\Subaccount;
 use App\Models\TeamMembers;
+use App\Models\TransactionHistory;
 use App\Models\User;
 use App\Models\VirtualCards;
 use Illuminate\Http\Request;
@@ -17,10 +18,60 @@ use App\Services\FidelityService;
 use App\Services\BlaaizService;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserCurrencyFee;
+use App\Services\FirebaseNotificationService;
 
 class BusinessAccountController extends Controller
 {
         use CurrencyHelper;
+
+
+        protected FirebaseNotificationService $firebase;
+
+    public function __construct(FirebaseNotificationService $firebase)
+    {
+        $this->firebase = $firebase;
+    }
+
+
+     // ── Shared notification helper ──────────────────────────────────────────
+    protected function sendComplianceNotification(User $user, string $title, string $body, array $data = []): void
+    {
+        if (empty($user->device_token)) {
+            return;
+        }
+
+        $sent = $this->firebase->sendToToken($user->device_token, $title, $body, array_merge([
+            'type' => 'compliance',
+        ], $data));
+
+        if (!$sent) {
+            Log::warning('Compliance push notification failed', [
+                'user_id' => $user->id,
+                'title' => $title,
+            ]);
+        }
+    }
+
+    // ── Human-readable labels for each status field ─────────────────────────
+    protected function complianceFieldLabel(string $field): string
+    {
+        return match ($field) {
+            'cac_status'                    => 'CAC Document',
+            'bvn_status'                     => 'BVN',
+            'valid_id_status'               => 'Valid ID',
+            'tin_status'                     => 'TIN Document',
+            'utility_bill_status'           => 'Utility Bill',
+            'proof_of_identity_status'      => 'Proof of Identity',
+            'ownership_status'              => 'Ownership Document',
+            'organisational_chart_status'   => 'Organisational Chart',
+            'register_of_directors_status'  => 'Register of Directors',
+            'formation_document_status'     => 'Formation Document',
+            'nin_status'                     => 'NIN',
+            'identity_verification_status'  => 'Identity Verification',
+            'selfie_verification_status'    => 'Selfie Verification',
+            default => str_replace('_', ' ', ucfirst(str_replace('_status', '', $field))),
+        };
+    }
 
 
 public function index(Request $request)
@@ -159,25 +210,53 @@ public function find($id)
 
 
 
-    public function updateStatus(Request $request, $id)
-{
-    $user = User::findOrFail($id);
 
-    $field = $request->field;
-    $status = $request->status;
+public function updateStatus(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
 
-    $user->$field = $status;
-    $user->save();
+        $field = $request->field;
+        $status = $request->status;
 
-    return response()->json([
-        'success' => true,
-        'label' => ucfirst(str_replace('_', ' ', $status)),
-        'class' => $status === 'confirmed' ? 'bg-success' :
-                   ($status === 'under_review' ? 'bg-warning' :
-                   ($status === 'rejected' ? 'bg-danger' : 'bg-secondary'))
-    ]);
-}
+        $user->$field = $status;
+        $user->save();
 
+        // ── Push notification on compliance status change ──────────────────
+        // Only notify for actual document/verification status fields (fields
+        // ending in "_status"), and only for meaningful outcomes.
+        if (str_ends_with($field, '_status')) {
+            $label = $this->complianceFieldLabel($field);
+
+            $normalizedStatus = strtolower(str_replace('_', ' ', $status));
+
+            if (in_array($status, ['confirmed', 'approved', 'yes'])) {
+                $this->sendComplianceNotification(
+                    $user,
+                    "{$label} Approved",
+                    "Your {$label} has been reviewed and approved.",
+                    ['document' => $field, 'status' => $status]
+                );
+            } elseif ($status === 'rejected') {
+                $this->sendComplianceNotification(
+                    $user,
+                    "{$label} Rejected",
+                    "Your {$label} was reviewed and could not be approved. Please check your account for details.",
+                    ['document' => $field, 'status' => $status]
+                );
+            }
+            // Intentionally not notifying for 'under_review' or other
+            // in-progress states here, since the compliance controller
+            // already notifies the user at upload time.
+        }
+
+        return response()->json([
+            'success' => true,
+            'label' => ucfirst(str_replace('_', ' ', $status)),
+            'class' => $status === 'confirmed' ? 'bg-success' :
+                       ($status === 'under review' ? 'bg-warning' :
+                       ($status === 'rejected' ? 'bg-danger' : 'bg-secondary'))
+        ]);
+    }
 
 
  public function addMoney(Request $request, $userId, $balanceId)
@@ -194,7 +273,7 @@ public function find($id)
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'note' => 'nullable|string|max:255',
+            'note'   => 'nullable|string|max:255',
         ]);
 
         $user = User::findOrFail($userId);
@@ -202,6 +281,9 @@ public function find($id)
         $balance = Balance::where('id', $balanceId)
             ->where('user_id', $user->id)
             ->firstOrFail();
+        if ($balance->is_locked) {
+            return back()->withErrors(['error' => 'This balance is locked and cannot be modified. Unlock it first.']);
+        }
 
         $amount = (float) $request->amount;
 
@@ -218,10 +300,32 @@ public function find($id)
 
             $balance->save();
 
+            // ── Record in transaction history ──────────────────────────────────
+            TransactionHistory::create([
+                'user_id'          => $user->id,
+                'balance_id'       => $balance->id,
+                'type'             => $mode === 'add' ? 'credit' : 'withdrawal',
+                'method'           => $mode === 'add' ? 'credit'  : 'withdrawal',
+                'amount'           => $amount,
+                'currency'         => $balance->currency,
+                'status'           => 'success',
+                'reference'        => 'admin-' . \Illuminate\Support\Str::uuid(),
+                'payment_provider' => 'admin',
+                'mode'             => $balance->mode ?? 'live',
+                'sender'           => 'Admin',
+                'sender_id'        => auth()->id(),
+                'recipient_account_name' => $user->business_name ?? ($user->firstname . ' ' . $user->lastname),
+                'total_amount'     => $amount,
+                'fees'             => 0,
+                // Store the note in failure_reason field (or add a note column)
+                'payment_reference'   => $request->note ?? null,
+            ]);
+
             DB::commit();
 
             $action = $mode === 'remove' ? 'removed from' : 'added to';
             return back()->with('success', number_format($amount, 2) . " {$balance->currency} {$action} {$balance->name} successfully.");
+
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Balance update failed: ' . $e->getMessage()]);
@@ -229,43 +333,43 @@ public function find($id)
     }
 
 
-public function downloadDocument(Request $request, $id)
-{
-    $user = User::findOrFail($id);
+    public function downloadDocument(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
 
-    $field = $request->query('field');
+        $field = $request->query('field');
 
-    $allowedFields = [
-        'cac_certificate', 'valid_id', 'tin', 'utility_bill',
-        'proof_of_identity', 'ownership_document',
-        'organisational_chart', 'register_of_directors', 'formation_document',
-    ];
+        $allowedFields = [
+            'cac_certificate', 'valid_id', 'tin', 'utility_bill',
+            'proof_of_identity', 'ownership_document',
+            'organisational_chart', 'register_of_directors', 'formation_document',
+        ];
 
-    if (!in_array($field, $allowedFields)) {
-        abort(403, 'Invalid document field.');
+        if (!in_array($field, $allowedFields)) {
+            abort(403, 'Invalid document field.');
+        }
+
+        $relativePath = $user->$field;
+
+        if (!$relativePath) {
+            abort(404, 'Document not found.');
+        }
+
+        $fullPath = storage_path('app/public/' . $relativePath);
+
+        if (!file_exists($fullPath)) {
+            // try public path as fallback
+            $fullPath = public_path('storage/' . $relativePath);
+        }
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'File does not exist on disk.');
+        }
+
+        $filename = basename($fullPath);
+
+        return response()->download($fullPath, $filename);
     }
-
-    $relativePath = $user->$field;
-
-    if (!$relativePath) {
-        abort(404, 'Document not found.');
-    }
-
-    $fullPath = storage_path('app/public/' . $relativePath);
-
-    if (!file_exists($fullPath)) {
-        // try public path as fallback
-        $fullPath = public_path('storage/' . $relativePath);
-    }
-
-    if (!file_exists($fullPath)) {
-        abort(404, 'File does not exist on disk.');
-    }
-
-    $filename = basename($fullPath);
-
-    return response()->download($fullPath, $filename);
-}
 
 
 
@@ -448,6 +552,29 @@ public function updateCurrencyFee(Request $request, $id, $currency)
     ]);
 }
 
+
+public function toggleBalanceLock(Request $request, $userId, $balanceId)
+{
+    $request->validate([
+        'reason' => 'nullable|string|max:255',
+    ]);
+
+    $user = User::findOrFail($userId);
+
+    $balance = Balance::where('id', $balanceId)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    $balance->is_locked = !$balance->is_locked;
+    $balance->locked_reason = $balance->is_locked ? ($request->reason ?? 'Locked by admin') : null;
+    $balance->locked_at = $balance->is_locked ? now() : null;
+    $balance->locked_by = $balance->is_locked ? auth()->id() : null;
+    $balance->save();
+
+    $state = $balance->is_locked ? 'locked' : 'unlocked';
+
+    return back()->with('success', "{$balance->name} ({$balance->currency}) has been {$state}.");
+}
 
 
 }
