@@ -7,9 +7,9 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Language" content="en">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Minimal Dashboard - Examples of just how powerful ArchitectUI really is!</title>
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
     <meta name="description" content="Examples of just how powerful ArchitectUI really is!">
 
     <!-- Page loader disabled - ensure content is visible immediately -->

@@ -761,7 +761,7 @@
                                                 <div class="row g-3">
                                                     <div class="col-sm-6">
                                                         <div class="channel-card active" data-channel="inapp">
-                                                            <input type="checkbox" id="channelInApp" checked style="pointer-events: none;">
+                                                            <input type="checkbox" id="channelInApp" checked>
                                                             <div class="ms-2">
                                                                 <div class="channel-name"><i class="fa-solid fa-bell text-primary me-1"></i> In-App Notification</div>
                                                                 <div class="channel-desc">Appears in user dashboard and alerts feed</div>
@@ -770,7 +770,7 @@
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="channel-card" data-channel="email">
-                                                            <input type="checkbox" id="channelEmail" style="pointer-events: none;">
+                                                            <input type="checkbox" id="channelEmail">
                                                             <div class="ms-2">
                                                                 <div class="channel-name"><i class="fa-solid fa-envelope text-primary me-1"></i> Email Broadcast</div>
                                                                 <div class="channel-desc">Sends direct email to registered address</div>
@@ -1202,15 +1202,11 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
             document.getElementById('tab-' + target).classList.remove('d-none');
         });
     });
-</script>
 
-<script>
     document.getElementById("toggleProfileBtn").onclick = function () {
         document.getElementById("profileDetails").classList.toggle("d-none");
     };
-</script>
 
-<script>
     document.querySelectorAll('.confirm-submit-form').forEach(form => {
         form.addEventListener('submit', function (e) {
             const message = this.dataset.confirm || 'Are you sure you want to submit this?';
@@ -1219,4 +1215,170 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
             }
         });
     });
+
+
+
+    // Channel Card Toggling
+    document.querySelectorAll('.channel-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            if (checkbox.checked) {
+                this.classList.add('active');
+            } else {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // Handle Broadcast Submit
+    const broadcastForm = document.getElementById('broadcastForm');
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('broadcastSubject').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const inApp = document.getElementById('channelInApp').checked;
+            const email = document.getElementById('channelEmail').checked;
+
+            // Validate Subject
+            if (subject === "") {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Notification title is required.',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                return;
+            }
+
+            // Validate Message
+            if (message === "") {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Notification message is required.',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                return;
+            }
+
+            if (!inApp && !email) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Please choose at least one delivery channel (In-App or Email).',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                return;
+            }
+
+            // Build Channels Array
+            const channels = [];
+
+            if (inApp) channels.push('inapp');
+            if (email) channels.push('email');
+
+            Swal.fire({
+                title: 'Confirm Broadcast',
+                html: `Are you sure you want to send this notification?<br><br>` +
+                        `<div class="text-start small" style="background: #f1f5f9; padding: 12px; border-radius: 8px;">` +
+                        `<strong>Target:</strong> All Business Users<br>` +
+                        `<strong>Subject:</strong> ${subject}<br>` +
+                        `<strong>Channels:</strong> ${channels.join(', ')}` +
+                        `</div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Send',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#1d4ed8'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Sending Notification...',
+                        text: 'Broadcasting messages to recipients.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+
+                    fetch(`/admin/personal-pushnotification/${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        body: JSON.stringify({
+                            subject: subject,
+                            message: message,
+                            channels: channels
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok || data.success === false) {
+                            throw data;
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: data.message,
+                            confirmButtonColor: "#1d4ed8"
+                        });
+                        // Reset Form
+                        broadcastForm.reset();
+                        
+                        // Default InApp Selected
+                        document.querySelectorAll(".channel-card").forEach(card => {
+                            const checkbox = card.querySelector("input");
+                            if (checkbox.id === "channelInApp") {
+                                checkbox.checked = true;
+                                card.classList.add("active");
+                            } else {
+                                checkbox.checked = false;
+                                card.classList.remove("active");
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        let message = "Something went wrong.";
+                        if (error.message) {
+                            message = error.message;
+                        }
+                        if (error.errors) {
+                            message = Object.values(error.errors)
+                                .flat()
+                                .join("\n");
+                        }
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Failed",
+                            text: message
+                        });
+                    });
+                }
+            });
+        });
+    }
 </script>

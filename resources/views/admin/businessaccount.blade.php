@@ -469,7 +469,7 @@
                                             <div class="row g-3">
                                                 <div class="col-sm-6">
                                                     <div class="channel-card active" data-channel="inapp">
-                                                        <input type="checkbox" id="channelInApp" checked style="pointer-events: none;">
+                                                        <input type="checkbox" id="channelInApp" checked>
                                                         <div class="ms-2">
                                                             <div class="channel-name"><i class="fa-solid fa-bell text-primary me-1"></i> In-App Notification</div>
                                                             <div class="channel-desc">Appears in user dashboard and alerts feed</div>
@@ -478,7 +478,7 @@
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="channel-card" data-channel="email">
-                                                        <input type="checkbox" id="channelEmail" style="pointer-events: none;">
+                                                        <input type="checkbox" id="channelEmail">
                                                         <div class="ms-2">
                                                             <div class="channel-name"><i class="fa-solid fa-envelope text-primary me-1"></i> Email Broadcast</div>
                                                             <div class="channel-desc">Sends direct email to registered address</div>
@@ -718,19 +718,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Channel Card Toggling
-    document.querySelectorAll('.channel-card').forEach(card => {
-        card.addEventListener('click', function () {
-            const checkbox = this.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
-            if (checkbox.checked) {
-                this.classList.add('active');
-            } else {
-                this.classList.remove('active');
-            }
-        });
-    });
-
     // Target Audience Count Dynamic Update
     const targetSelect = document.getElementById('broadcastTarget');
     if (targetSelect) {
@@ -747,6 +734,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Channel Card Toggling
+    document.querySelectorAll('.channel-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            if (checkbox.checked) {
+                this.classList.add('active');
+            } else {
+                this.classList.remove('active');
+            }
+        });
+    });
+
     // Handle Broadcast Submit
     const broadcastForm = document.getElementById('broadcastForm');
     if (broadcastForm) {
@@ -754,32 +756,69 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             
             const subject = document.getElementById('broadcastSubject').value;
-            const targetText = targetSelect.options[targetSelect.selectedIndex].text;
             const message = document.getElementById('broadcastMessage').value;
             const inApp = document.getElementById('channelInApp').checked;
             const email = document.getElementById('channelEmail').checked;
 
-            if (!inApp && !email) {
+            // Validate Subject
+            if (subject === "") {
                 Swal.fire({
+                    toast: true,
+                    position: 'top-end',
                     icon: 'error',
-                    title: 'No Channel Selected',
-                    text: 'Please choose at least one delivery channel (In-App or Email).',
-                    confirmButtonColor: '#dc2626'
+                    title: 'Notification title is required.',
+                    showConfirmButton: false,
+                    timer: 3000
                 });
+
                 return;
             }
+
+            // Validate Message
+            if (message === "") {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Notification message is required.',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                return;
+            }
+
+            if (!inApp && !email) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Please choose at least one delivery channel (In-App or Email).',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                return;
+            }
+
+            // Build Channels Array
+            const channels = [];
+
+            if (inApp) channels.push('inapp');
+            if (email) channels.push('email');
 
             Swal.fire({
                 title: 'Confirm Broadcast',
                 html: `Are you sure you want to send this notification?<br><br>` +
-                      `<div class="text-start small" style="background: #f1f5f9; padding: 12px; border-radius: 8px;">` +
-                      `<strong>Target:</strong> ${targetText}<br>` +
-                      `<strong>Subject:</strong> ${subject}<br>` +
-                      `<strong>Channels:</strong> ${inApp ? 'In-App' : ''} ${inApp && email ? '&' : ''} ${email ? 'Email' : ''}` +
-                      `</div>`,
+                        `<div class="text-start small" style="background: #f1f5f9; padding: 12px; border-radius: 8px;">` +
+                        `<strong>Target:</strong> All Business Users<br>` +
+                        `<strong>Subject:</strong> ${subject}<br>` +
+                        `<strong>Channels:</strong> ${channels.join(', ')}` +
+                        `</div>`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, Send Broadcast',
+                confirmButtonText: 'Yes, Send',
                 cancelButtonText: 'Cancel',
                 confirmButtonColor: '#1d4ed8'
             }).then((result) => {
@@ -793,35 +832,69 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
 
-                    // Simulate sending delay
-                    setTimeout(() => {
+                    fetch("/admin/business-pushnotification", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        body: JSON.stringify({
+                            subject: subject,
+                            message: message,
+                            channels: channels
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok || data.success === false) {
+                            throw data;
+                        }
+                        return data;
+                    })
+                    .then(data => {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Broadcast Sent Successfully',
-                            text: 'Your notification has been dispatched to all selected recipients.',
-                            confirmButtonColor: '#1d4ed8'
+                            icon: "success",
+                            title: "Success",
+                            text: data.message,
+                            confirmButtonColor: "#1d4ed8"
                         });
-                        // Reset form
+                        // Reset Form
                         broadcastForm.reset();
-                        // Reset active state for channel email (since inApp is default checked and email is default unchecked)
-                        document.querySelectorAll('.channel-card').forEach(card => {
-                            const cb = card.querySelector('input[type="checkbox"]');
-                            if (cb.id === 'channelInApp') {
-                                cb.checked = true;
-                                card.classList.add('active');
+                        
+                        // Default InApp Selected
+                        document.querySelectorAll(".channel-card").forEach(card => {
+                            const checkbox = card.querySelector("input");
+                            if (checkbox.id === "channelInApp") {
+                                checkbox.checked = true;
+                                card.classList.add("active");
                             } else {
-                                cb.checked = false;
-                                card.classList.remove('active');
+                                checkbox.checked = false;
+                                card.classList.remove("active");
                             }
                         });
-                        // Reset target count badge text
-                        const targetCountShow = document.getElementById('targetCountShow');
-                        targetCountShow.innerText = "{{ $allUser->total() ?? $allUser->count() }} recipients";
-                    }, 1800);
+                    })
+                    .catch(error => {
+                        let message = "Something went wrong.";
+                        if (error.message) {
+                            message = error.message;
+                        }
+                        if (error.errors) {
+                            message = Object.values(error.errors)
+                                .flat()
+                                .join("\n");
+                        }
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Failed",
+                            text: message
+                        });
+                    });
                 }
             });
         });
     }
-});
 });
 </script>
