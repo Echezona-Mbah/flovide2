@@ -879,7 +879,7 @@
                                         </div>
                                     </div>
                                     <div class="card-body p-4">
-                                        <form id="broadcastForm">
+                                        <form id="broadcastForm" data-user-id="{{ $user->id }}">
                                             <div class="row">
                                                 <!-- Subject -->
                                                 <div class="col mb-3">
@@ -1940,6 +1940,7 @@ document.querySelectorAll('.save-fee-btn').forEach(btn => {
                         }
                     });
 
+                    const id = document.getElementById('broadcastForm').dataset.userId;
 
                     fetch(`/admin/business-pushnotification/${id}`, {
                         method: "POST",

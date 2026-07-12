@@ -743,7 +743,7 @@
                                         </div>
                                     </div>
                                     <div class="card-body p-4">
-                                        <form id="broadcastForm">
+                                        <form id="broadcastForm" data-user-id="{{ $user->id }}">
                                             <div class="row">
                                                 <!-- Subject -->
                                                 <div class="col mb-3">
@@ -1316,6 +1316,7 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
                         }
                     });
 
+                    const id = document.getElementById('broadcastForm').dataset.userId;
 
                     fetch(`/admin/personal-pushnotification/${id}`, {
                         method: "POST",

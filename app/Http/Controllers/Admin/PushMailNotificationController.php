@@ -110,12 +110,69 @@ class PushMailNotificationController extends Controller
     }
 
 
+    //business single user
+    public function businessPushNotificationSingleUser(Request $request, $id) {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:500',
+            'channels' => 'required|array',
+        ]);
 
+        $delivery_channel = $validated["channels"];
 
+        if (!is_array($delivery_channel) || empty($delivery_channel)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select at least one delivery channel.',
+            ]);
+        }
 
+        try {
+            // All Business Users
+            $businessUser = User::find($id);
 
+            if (!$businessUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Business user not found.',
+                ], 404);
+            }
 
+            // Send In-App Notification
+            if(in_array('inapp', $delivery_channel)){
+                $this->sendNotification(
+                    $businessUser,
+                    $validated['subject'],
+                    $validated['message'],
+                    [
+                        'type' => 'broadcast',
+                        'user_id' => $businessUser->id,
+                        'redirect_to' => '/',
+                    ]
+                );
+            
+            } 
 
+            // Send Email
+            if (in_array('email', $delivery_channel)) {
+                $subjectTitle = $validated['subject'];
+                $message = $validated['message'];
+                Mail::to($businessUser->email)->send(new AdminPushNotification($businessUser->business_name, $subjectTitle, $message));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully',
+            ]);
+
+        } catch (\Throwable $th) {
+            Log::error('Notification failed: ' . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification failed',
+            ]);
+        }
+    }
 
 
     //for personal section
@@ -182,4 +239,72 @@ class PushMailNotificationController extends Controller
             ]);
         }
     }
+
+
+    //personal single user
+    public function personalPushNotificationSingleUser(Request $request, $id) {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:500',
+            'channels' => 'required|array',
+        ]);
+
+        $delivery_channel = $validated["channels"];
+
+        if (!is_array($delivery_channel) || empty($delivery_channel)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select at least one delivery channel.',
+            ]);
+        }
+
+        try {
+            // All Personal Users
+            $personalUser = Personal::find($id);
+
+            if (!$personalUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Personal user not found.',
+                ], 404);
+            }
+
+            // Send In-App Notification
+            if(in_array('inapp', $delivery_channel)){
+                $this->sendNotification(
+                    $personalUser,
+                    $validated['subject'],
+                    $validated['message'],
+                    [
+                        'type' => 'broadcast',
+                        'user_id' => $personalUser->id,
+                        'redirect_to' => '/',
+                    ]
+                );
+            
+            } 
+
+            // Send Email
+            if (in_array('email', $delivery_channel)) {
+                $subjectTitle = $validated['subject'];
+                $message = $validated['message'];
+                $personal_name = $personalUser->firstname . ' ' . $personalUser->lastname;
+                Mail::to($personalUser->email)->send(new AdminPushNotification($personal_name, $subjectTitle, $message));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent successfully',
+            ]);
+
+        } catch (\Throwable $th) {
+            Log::error('Notification failed: ' . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification failed',
+            ]);
+        }
+    }
+
+
 }
