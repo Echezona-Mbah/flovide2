@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AllSubscriptionController;
 use App\Http\Controllers\Admin\AllTeamMembersController;
 use App\Http\Controllers\Admin\BusinessAccountController;
 use App\Http\Controllers\Admin\UserTransactionHistoryController;
+use App\Http\Controllers\Admin\PushMailNotificationController;
 use App\Http\Controllers\Admin\TestModeController;
 use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -403,6 +404,15 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
         Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
         Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
+
+
+        //push notification for business
+        Route::post('/admin/business-pushnotification', [PushMailNotificationController::class, 'businessPushNotificationAllUsers']);
+        Route::post('/admin/business-pushnotification/{id}', [PushMailNotificationController::class, 'businessPushNotificationSingleUser']);
+
+        //push notification for personal
+        Route::post('/admin/personal-pushnotification', [PushMailNotificationController::class, 'personalPushNotificationAllUsers']);
+        Route::post('/admin/personal-pushnotification/{id}', [PushMailNotificationController::class, 'personalPushNotificationSingleUser']);
     });
 
     Route::middleware('admin.permission:manage_users')->group(function () {

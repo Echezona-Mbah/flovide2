@@ -5,6 +5,10 @@
         --brand-dark: #0f172a;
         --brand-deep: #1d4ed8;
         --brand-sky: #0ea5e9;
+        --blue: #1d4ed8;
+        --blue-deep: #0f2c73;
+        --paper: #ffffff;
+        --paper-soft: #f6f8fc;
         --surface: #ffffff;
         --surface-soft: #f8fafc;
         --text-main: #1e293b;
@@ -14,6 +18,10 @@
         --success-soft: rgba(22, 163, 74, 0.12);
         --warning-soft: rgba(245, 158, 11, 0.14);
         --danger-soft: rgba(220, 38, 38, 0.12);
+        --ink: #0f172a;
+        --ink-soft: #475569;
+        --line: #e2e8f0;
+        --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
     }
 
     .dashboard-shell {
@@ -491,6 +499,89 @@
 .banking-integrations-card .card-header .custom-status i {
     margin-right: 4px;
 }
+
+.btn-brand,
+.btn-soft,
+.btn-action {
+    border: 0;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.btn-brand {
+    background: linear-gradient(135deg, var(--blue), var(--blue-deep));
+    color: #fff;
+    padding: 11px 16px;
+}
+
+/* Broadcast Notification Styles */
+.notification-card {
+    border: 0;
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+}
+
+.notification-head {
+    padding: 24px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+}
+
+.notification-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 4px;
+}
+
+.notification-subtitle {
+    color: var(--ink-soft);
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.channel-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fbfdff;
+}
+
+.channel-card:hover {
+    border-color: var(--blue);
+    background: rgba(29, 78, 216, 0.02);
+}
+
+.channel-card.active {
+    border-color: var(--blue);
+    background: rgba(29, 78, 216, 0.05);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.08);
+}
+
+.channel-card input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    accent-color: var(--blue);
+    cursor: pointer;
+}
+
+.channel-name {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 14px;
+}
+
+.channel-desc {
+    font-size: 11px;
+    color: var(--ink-soft);
+}
 </style>
 
 <body>
@@ -778,6 +869,77 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <section class="mb-4">
+                                <div class="card notification-card">
+                                    <div class="notification-head d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <h5 class="notification-title"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Send Broadcast Notification</h5>
+                                            <p class="notification-subtitle">Broadcast system alerts, updates, or email promotions to all registered business users.</p>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <form id="broadcastForm" data-user-id="{{ $user->id }}">
+                                            <div class="row">
+                                                <!-- Subject -->
+                                                <div class="col mb-3">
+                                                    <label for="broadcastSubject" class="form-label font-weight-bold" style="color: var(--ink); font-weight: 700;">Notification Title / Subject</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white" style="border-radius: 15px 0 0 15px; border-right: 0; border-color: #dbe3ee;"><i class="fa-solid fa-heading text-muted"></i></span>
+                                                        <input type="text" id="broadcastSubject" class="form-control" placeholder="e.g., Scheduled Maintenance Update" style="border-radius: 0 15px 15px 0; border-left: 0; border-color: #dbe3ee; height: 46px;" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delivery Channels -->
+                                            <div class="mb-4">
+                                                <label class="form-label font-weight-bold" style="color: var(--ink); font-weight: 700;">Delivery Channels</label>
+                                                <div class="row g-3">
+                                                    <div class="col-sm-6">
+                                                        <div class="channel-card active" data-channel="inapp">
+                                                            <input type="checkbox" id="channelInApp" checked>
+                                                            <div class="ms-2">
+                                                                <div class="channel-name"><i class="fa-solid fa-bell text-primary me-1"></i> In-App Notification</div>
+                                                                <div class="channel-desc">Appears in user dashboard and alerts feed</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="channel-card" data-channel="email">
+                                                            <input type="checkbox" id="channelEmail">
+                                                            <div class="ms-2">
+                                                                <div class="channel-name"><i class="fa-solid fa-envelope text-primary me-1"></i> Email Broadcast</div>
+                                                                <div class="channel-desc">Sends direct email to registered address</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Message Content -->
+                                            <div class="mb-3">
+                                                <label for="broadcastMessage" class="form-label font-weight-bold" style="color: var(--ink); font-weight: 700;">Message Content</label>
+                                                <textarea id="broadcastMessage" class="form-control" rows="4" placeholder="Type your broadcast message here..." style="border-radius: 15px; border-color: #dbe3ee;" required></textarea>
+                                            </div>
+
+                                            <!-- Submit button and stats -->
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                <div class="text-muted small"></div>
+                                                <button type="submit" class="btn btn-brand px-4 py-2" style="font-size: 15px; border-radius: 15px;">
+                                                    <i class="fa-solid fa-paper-plane me-2"></i>Send Broadcast Now
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </section>
+
+
+
+
+
+
+
                         </div>
 
                         <div class="tab-content-section d-none" id="tab-activity">
@@ -1677,4 +1839,171 @@ document.querySelectorAll('.save-fee-btn').forEach(btn => {
         });
     });
 });
+</script>
+
+<script>
+    // Channel Card Toggling
+    document.querySelectorAll('.channel-card').forEach(card => {
+        card.addEventListener('click', function (e) {
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            if (checkbox.checked) {
+                this.classList.add('active');
+            } else {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // Handle Broadcast Submit
+    const broadcastForm = document.getElementById('broadcastForm');
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('broadcastSubject').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const inApp = document.getElementById('channelInApp').checked;
+            const email = document.getElementById('channelEmail').checked;
+
+            // Validate Subject
+            if (subject === "") {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Notification title is required.',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                return;
+            }
+
+            // Validate Message
+            if (message === "") {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Notification message is required.',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
+                return;
+            }
+
+            if (!inApp && !email) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Please choose at least one delivery channel (In-App or Email).',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                return;
+            }
+
+            // Build Channels Array
+            const channels = [];
+
+            if (inApp) channels.push('inapp');
+            if (email) channels.push('email');
+
+            Swal.fire({
+                title: 'Confirm Broadcast',
+                html: `Are you sure you want to send this notification?<br><br>` +
+                        `<div class="text-start small" style="background: #f1f5f9; padding: 12px; border-radius: 8px;">` +
+                        `<strong>Target:</strong> All Business Users<br>` +
+                        `<strong>Subject:</strong> ${subject}<br>` +
+                        `<strong>Channels:</strong> ${channels.join(', ')}` +
+                        `</div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Send',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#1d4ed8'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Sending Notification...',
+                        text: 'Broadcasting messages to recipients.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    const id = document.getElementById('broadcastForm').dataset.userId;
+
+                    fetch(`/admin/business-pushnotification/${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        body: JSON.stringify({
+                            subject: subject,
+                            message: message,
+                            channels: channels
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok || data.success === false) {
+                            throw data;
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: data.message,
+                            confirmButtonColor: "#1d4ed8"
+                        });
+                        // Reset Form
+                        broadcastForm.reset();
+                        
+                        // Default InApp Selected
+                        document.querySelectorAll(".channel-card").forEach(card => {
+                            const checkbox = card.querySelector("input");
+                            if (checkbox.id === "channelInApp") {
+                                checkbox.checked = true;
+                                card.classList.add("active");
+                            } else {
+                                checkbox.checked = false;
+                                card.classList.remove("active");
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        let message = "Something went wrong.";
+                        if (error.message) {
+                            message = error.message;
+                        }
+                        if (error.errors) {
+                            message = Object.values(error.errors)
+                                .flat()
+                                .join("\n");
+                        }
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Failed",
+                            text: message
+                        });
+                    });
+                }
+            });
+        });
+    }
 </script>
