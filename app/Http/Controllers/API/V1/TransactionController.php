@@ -23,6 +23,8 @@ use App\Models\ExchangeRate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+
 
 
 class TransactionController extends Controller
@@ -809,7 +811,7 @@ public function store(Request $request)
         $platformFee = 0;
         $transferFee = 0;
 
-                if ($userFee->payout_enabled == 0) {
+        if ($userFee->payout_enabled == 0) {
             $msg = "Contact your marketer to enable payout pricing for {$currency}.";
             return $isApi
                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
@@ -875,6 +877,11 @@ public function store(Request $request)
         'bank_code'           => $recipient->bank_code,
         'transfer_method'     => $recipient->transfer_method,
         'mode'                => $mode,
+
+         // CAD / Interac
+        'interac_email'       => $recipient->email ?? null,
+        'interac_first_name'  => $recipient->interac_first_name ?? null,
+        'interac_last_name'   => $recipient->interac_last_name ?? null,
     ]);
 
     DB::beginTransaction();
@@ -953,9 +960,12 @@ public function store(Request $request)
             'platform_fee'             => $transferFee,
             'exchange_rate'            => (float) $rate->rate,
             'recipient_amount'         => $recipientAmount,
+            'interac_email'            => $request->interac_email      ?? null,
+            'interac_first_name'       => $request->interac_first_name ?? null,
+            'interac_last_name'        => $request->interac_last_name  ?? null,
         ]);
 
-        if ($mode === 'live') {
+       if ($mode === 'live') {
             // ── Real providers only on live ──
             if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
                 $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
@@ -963,6 +973,8 @@ public function store(Request $request)
                 $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
                 $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
+            } elseif ($currency === 'CAD') {
+                $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } else {
                 DB::rollBack();
 
@@ -1300,6 +1312,88 @@ public function store(Request $request)
                 'data' => $this->txData($txId),
             ], 422)
             : back()->with('error', $errorMessage);
+    }
+
+
+    protected function sendViaBlaaizInterac(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor, User $owner, $recipientAmount, $transferFee)
+    {
+        $isApi = $request->expectsJson();
+
+        Log::info('[Blaaiz Interac] Initiating payout', [
+            'amount'     => $recipientAmount,
+            'email'      => $request->interac_email,
+            'first_name' => $request->interac_first_name,
+            'last_name'  => $request->interac_last_name,
+            'currency'   => $currency,
+            'tx_id'      => $txId,
+            'actor_id'   => $actor->id,
+        ]);
+
+        $blaaiz     = app(\App\Services\BlaaizService::class);
+        $customerId = "019ec763-8348-73d5-9bdb-c85b22c6333b";
+        $cadWallet  = "61c1135d-b5ce-49c8-add9-0717af84e392";
+
+        $payload = [
+            'wallet_id'          => $cadWallet,
+            'customer_id'        => $customerId,
+            'method'             => 'interac',
+            'from_currency_id'   => 'CAD',
+            'to_currency_id'     => 'CAD',
+            'from_amount'        => $recipientAmount,
+            'email'              => $request->interac_email,
+            'interac_first_name' => $request->interac_first_name,
+            'interac_last_name'  => $request->interac_last_name,
+        ];
+
+        Log::info('[Blaaiz Interac] Sending payout payload', $payload);
+
+        $response = $blaaiz->payout($payload);
+
+        Log::info('[Blaaiz Interac] Payout response', [
+            'success' => $response['success'],
+            'status'  => $response['status'],
+            'data'    => $response['data'],
+        ]);
+
+        if ($response['success']) {
+            $transaction = $response['data']['transaction'] ?? [];
+
+            TransactionHistory::where('id', $txId)->update([
+                'status'           => 'pending',
+                'payment_provider' => 'interac',
+                'order_id'         => $transaction['id']        ?? null,
+                'reference'        => $transaction['reference'] ?? null,
+            ]);
+
+            Log::info('[Blaaiz Interac] Transaction updated', ['tx_id' => $txId]);
+
+            return $isApi
+                ? response()->json([
+                    'success' => true,
+                    'message' => 'Interac payout initiated successfully.',
+                    'code'    => 'BLAAIZ_INTERAC_SUCCESS',
+                    'data'    => $this->txData($txId),
+                ], 200)
+                : redirect()->route('transactionHistory')->with('success', 'Interac payout sent successfully!');
+        }
+
+        $errorMsg = $response['data']['message']
+            ?? $response['data']['error_description']
+            ?? 'Blaaiz Interac payout failed.';
+
+        Log::warning('[Blaaiz Interac] Payout failed', [
+            'error' => $errorMsg,
+            'tx_id' => $txId,
+        ]);
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMsg,
+                'code'    => 'BLAAIZ_INTERAC_FAILED',
+                'data'    => $this->txData($txId),
+            ], 422)
+            : back()->with('error', $errorMsg);
     }
 
 

@@ -220,6 +220,23 @@
 
       selCur = {id: el.dataset.id, code: el.dataset.code, symbol: el.dataset.symbol };
       isCAD  = selCur.code === 'CAD';
+
+      const interacTile = document.getElementById('pm-interac');
+      if (isCAD) {
+        interacTile.classList.remove('opacity-50', 'cursor-not-allowed');
+        interacTile.querySelector('p.text-xs')?.classList.remove('text-gray-400');
+        interacTile.querySelector('p.text-xs').textContent = 'Available';
+        interacTile.querySelector('p.text-xs').className = 'text-xs text-blue-500 font-medium';
+      } else {
+        interacTile.classList.add('opacity-50', 'cursor-not-allowed');
+        const label = interacTile.querySelector('p.text-xs.font-medium.text-blue-500') || interacTile.querySelector('p.text-xs');
+        if (label) {
+          label.textContent = 'CAD only';
+          label.className = 'text-xs text-gray-400';
+        }
+      }
+
+
       selPm  = null; // reset
 
       // Update amount panel labels
@@ -298,6 +315,19 @@
 
     // ── Step 3: Payment method selection ──────────────────────────────────
    function selectPm(type) {
+
+     // ── Block Interac for non-CAD wallets ──────────────────────────────
+    if (type === 'interac' && !isCAD) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Interac is CAD only',
+        text: 'Interac is only available for the CAD wallet. Please choose Bank transfer, or switch to your CAD wallet to use Interac.',
+        confirmButtonColor: '#2563eb',
+      });
+      return; // don't select, don't redirect
+    }
+
+
     selPm = type;
 
     document.querySelectorAll('.pm-option').forEach(opt => {

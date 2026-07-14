@@ -5,9 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Careers</title>
+    <title>privacy-policy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
     <script>
         window.fcWidgetMessengerConfig = {
             open: false,
@@ -17,6 +19,53 @@
     <style>
         body {
             color: #252525;
+            font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+        }
+        .legal-serif {
+            font-family: 'Source Serif 4', Georgia, serif;
+        }
+        .policy-content h1 { font-family: 'Source Serif 4', Georgia, serif; }
+        .policy-content h2 { scroll-margin-top: 6rem; }
+        .policy-content h3 { scroll-margin-top: 6rem; }
+
+        .accordion-header i { transition: transform .25s ease; }
+
+        .nav-link {
+            position: relative;
+        }
+        .nav-link.is-active {
+            background: #0F243D;
+            color: #fff;
+        }
+        .nav-link.is-active::before {
+            content: "";
+            position: absolute;
+            left: -1px;
+            top: 8px;
+            bottom: 8px;
+            width: 3px;
+            border-radius: 2px;
+            background: #3B82F6;
+        }
+
+        .data-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+        }
+        .chip-biometric { background: #FEF3E8; color: #B4530A; }
+        .chip-partner { background: #EAF1FB; color: #0F243D; }
+
+        .partner-card {
+            border: 1px solid #E3E8EF;
+            border-radius: .85rem;
+            background: linear-gradient(180deg, #FBFCFE 0%, #F5F8FC 100%);
         }
     </style>
 </head>
@@ -63,16 +112,16 @@
 
 
         <!-- Sidebar -->
-        <aside class="col-span-1 space-y-4">
-            <h3 class="text-xl font-bold text-[#0F243D] mb-4">Legal Documents</h3>
+        <aside class="col-span-1 space-y-4 md:sticky md:top-24 md:self-start">
+            <h3 class="legal-serif text-xl font-semibold text-[#0F243D] mb-4">Legal Documents</h3>
 
-            <div class="border rounded-lg">
-                <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold">
+            <div class="border border-[#E3E8EF] rounded-xl overflow-hidden">
+                <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold text-[#0F243D] hover:bg-[#F5F8FC]">
                     General Agreements
-                    <i class="fas fa-chevron-down transition-transform"></i>
+                    <i class="fas fa-chevron-down transition-transform text-[#1E5186]"></i>
                 </button>
-                <div class="accordion-content hidden px-3 pb-3 space-y-2 text-sm">
-                    <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="privacy-policy">Privacy Policy</a>
+                <div class="accordion-content hidden px-2 pb-2 space-y-1 text-sm">
+                    <a class="policy-link nav-link is-active block px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100" data-target="privacy-policy">Privacy Policy</a>
                     {{-- <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="referral-terms">Referral Terms & Conditions</a> --}}
                 </div>
             </div>
@@ -99,13 +148,13 @@
             </div> --}}
 
 
-            <div class="border rounded-lg">
-                <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold">
+            <div class="border border-[#E3E8EF] rounded-xl overflow-hidden">
+                <button class="accordion-header w-full flex justify-between items-center px-4 py-3 font-semibold text-[#0F243D] hover:bg-[#F5F8FC]">
                     Agreements — Canada
-                    <i class="fas fa-chevron-down transition-transform"></i>
+                    <i class="fas fa-chevron-down transition-transform text-[#1E5186]"></i>
                 </button>
-                <div class="accordion-content hidden px-3 pb-3 space-y-2 text-sm">
-                    <a class="policy-link block px-3 py-2 hover:bg-gray-100 rounded cursor-pointer" data-target="ca-agreement">Canada Privacy Policy</a>
+                <div class="accordion-content hidden px-2 pb-2 space-y-1 text-sm">
+                    <a class="policy-link nav-link block px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100" data-target="ca-agreement">Canada Privacy Policy</a>
                 </div>
             </div>
 
@@ -155,10 +204,53 @@
 
                 <h3 class="mt-6 font-semibold">2. Know Your Customer (KYC) Data</h3>
                 <ul>
-                    <li>Proof of identity (passport, driver’s licence, national ID card, residence permit)</li>
-                    <li>Proof of address (utility bill, bank statement)</li>
-                    <li>Source of funds documentation</li>
+
+                    <li>
+                        <span class="data-chip chip-biometric"><i class="fas fa-camera-retro"></i>Biometric</span>
+                        A live selfie/facial photo (and, where required, a short liveness video) captured during identity verification
+                    </li>
                 </ul>
+
+                <div class="partner-card p-5 my-6 not-prose">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 h-9 w-9 shrink-0 rounded-full bg-[#0F243D] text-white flex items-center justify-center">
+                            <i class="fas fa-id-badge"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-[#0F243D]">Facial / selfie data and identity verification</p>
+                            <p class="text-sm text-gray-600 mt-1 leading-relaxed">
+                                When you open or verify an account, we ask you to take a live selfie and, in some cases, a short
+                                video, and to photograph a government-issued ID. This biometric and document data is used solely
+                                to confirm that you are who you say you are, to match your face against your ID, to detect
+                                impersonation and document fraud, and to meet our Know Your Customer (KYC) and Anti-Money
+                                Laundering (AML) obligations.
+                            </p>
+                                               <li class="font-semibold text-[#0F243D]"> <b>Personal  (KYC) </b> </li>
+<li>Selfie/Liveness</li>
+<li>Identity Document</li>
+<li class="font-semibold text-[#0F243D]"><b>Business Address  (KYB)</b></li>
+<li>Proof of Address (optional depending on country)</li>
+<li>BVN (country-specific)</li>
+<li>Business KYC</li>
+<li>Business Registration (CAC/Formation Documents)</li>
+<li>Directors & Owners</li>
+<li>Tax Information (TIN)</li>
+<li>Ownership & Organizational Structure</li>
+<li>Identity Verification for authorized persons</li>
+<li>Selfie/Liveness for authorized representative (if required)</li>
+                            <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                                <span class="data-chip chip-partner"><i class="fas fa-shield-alt"></i>Verification Partner</span>
+                                <span class="ml-1">
+                                    This process is carried out through our identity verification partner,
+                                    <strong>Sumsub</strong>, which processes your selfie, ID document, and related liveness data
+                                    on our behalf under contractual data protection and confidentiality obligations. Sumsub does
+                                    not use your biometric data for any purpose other than performing identity verification for
+                                    Flovide, and does not sell it to third parties.
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
                 <h3 class="mt-6 font-semibold">3. Recipient Data</h3>
                 <ul>
@@ -173,6 +265,7 @@
                     <li>Banks and payment providers</li>
                     <li>Credit reference agencies</li>
                     <li>Advertising and analytics partners</li>
+                    <li>Identity verification providers (Sumsub) for biometric and document checks</li>
                 </ul>
 
                 <h3 class="mt-6 font-semibold">5. Technical Data</h3>
@@ -188,7 +281,10 @@
                 <p>To process and complete transactions and account operations.</p>
 
                 <h3 class="mt-4 font-semibold">Regulatory & Legal Compliance</h3>
-                <p>To comply with AML, CTF, KYC, and financial regulations.</p>
+                <p>
+                    To comply with AML, CTF, KYC, and financial regulations, including verifying your identity through facial
+                    matching and document checks performed by our verification partner Sumsub.
+                </p>
 
                 <h3 class="mt-4 font-semibold">Marketing & Communication</h3>
                 <p>To send relevant service updates and promotional communications (opt-out anytime).</p>
@@ -198,20 +294,22 @@
 
                 <h2 class="mt-10 font-bold text-2xl">How Do We Keep Your Data Safe?</h2>
                 <p>
-                    All personal data is encrypted and stored on secure servers. Access is limited to authorised Flovide staff only.
-                    All communications are protected using TLS encryption.
+                    All personal data, including biometric and identity verification data, is encrypted and stored on secure
+                    servers. Access is limited to authorised Flovide staff and our verification partner Sumsub, only for the
+                    purposes described above. All communications are protected using TLS encryption.
                 </p>
 
                 <h2 class="mt-10 font-bold text-2xl">How Long Do We Keep Your Data?</h2>
                 <p>
-                    KYC and transaction records are retained for a minimum of five (5) years in line with regulatory requirements.
-                    Data may be retained longer where legally required.
+                    KYC and transaction records, including selfie and identity verification data, are retained for a minimum of
+                    five (5) years in line with regulatory requirements. Data may be retained longer where legally required.
                 </p>
 
                 <h2 class="mt-10 font-bold text-2xl">Who Do We Share Your Data With?</h2>
                 <p>
-                    We do not sell personal data. Data is shared only with regulators, financial partners, and service providers
-                    where required by law and protected by appropriate safeguards.
+                    We do not sell personal data. Data is shared only with regulators, financial partners, and service
+                    providers where required by law and protected by appropriate safeguards. This includes sharing your selfie
+                    and identity documents with Sumsub strictly for the purpose of verifying your identity.
                 </p>
 
                 <h2 class="mt-10 font-bold text-2xl">Your Rights</h2>
@@ -280,12 +378,15 @@
                     <li>Login credentials and security details</li>
                     <li>Government-issued identification</li>
                     <li>Bank and payment information</li>
+                    <li>Facial biometric data (live selfie / liveness video) captured for identity verification</li>
                 </ul>
 
                 <h4>3.2 KYC & Compliance Data</h4>
                 <p>
                     Identity documents, proof of address, source of funds, and transaction monitoring data in line with 
-                    AML and Counter-Terrorism Financing regulations.
+                    AML and Counter-Terrorism Financing regulations. Identity documents and facial biometric data are
+                    verified through our identity verification partner, <strong>Sumsub</strong>, which processes this
+                    data on our behalf solely to confirm your identity and detect fraud.
                 </p>
 
                 <h4>3.3 Automatically Collected Data</h4>
@@ -298,7 +399,7 @@
                 <h3>4. How We Use Your Information</h3>
                 <ul>
                     <li>Account creation and transaction processing</li>
-                    <li>Regulatory compliance and fraud prevention</li>
+                    <li>Regulatory compliance and fraud prevention, including facial matching against your ID via Sumsub</li>
                     <li>Customer support and communications</li>
                     <li>Service improvement and analytics</li>
                 </ul>
@@ -313,8 +414,8 @@
 
                 <h3>6. Data Sharing</h3>
                 <p>
-                    We do not sell personal data. We may share data with licensed banks, payment processors, identity 
-                    verification providers, regulators, and law enforcement where required by law.
+                    We do not sell personal data. We may share data with licensed banks, payment processors, our identity 
+                    verification provider Sumsub, regulators, and law enforcement where required by law.
                 </p>
 
                 <h3>7. International Transfers</h3>
@@ -325,8 +426,8 @@
 
                 <h3>8. Data Retention</h3>
                 <p>
-                    KYC and transaction records are retained for a minimum of five (5) years in line with financial 
-                    regulatory requirements.
+                    KYC and transaction records, including biometric verification data, are retained for a minimum of five (5)
+                    years in line with financial regulatory requirements.
                 </p>
 
                 <h3>9. Data Security</h3>
@@ -396,16 +497,17 @@
                 <ul>
                     <li>Personal info: name, date of birth, nationality, contact info, government ID</li>
                     <li>Account info: login credentials, security info, bank/debit card details</li>
-                    <li>KYC/Compliance info: identity verification, proof of address, source of funds</li>
+                    <li>KYC/Compliance info: identity verification, proof of address, source of funds, and facial
+                        biometric data (live selfie / liveness check) collected during onboarding</li>
                     <li>Recipient info: name, contact, bank/wallet info, ID where required</li>
                     <li>Automatic data: IP address, device info, browser/OS, usage logs, cookies</li>
-                    <li>Third-party data: identity verification, banks/payment processors, fraud prevention, marketing/analytics</li>
+                    <li>Third-party data: our identity verification partner Sumsub (facial and document verification), banks/payment processors, fraud prevention, marketing/analytics</li>
                 </ul>
 
                 <h3>4. How We Use Your Information</h3>
                 <ul>
                     <li>Create/manage accounts and process transactions</li>
-                    <li>Verify identity, comply with AML, KYC, FinCEN, BSA, and CTF obligations</li>
+                    <li>Verify identity (including facial matching against government ID via Sumsub), comply with AML, KYC, FinCEN, BSA, and CTF obligations</li>
                     <li>Prevent fraud and secure Services</li>
                     <li>Respond to customer inquiries and resolve disputes</li>
                     <li>Marketing, promotions, and internal analytics where permitted</li>
@@ -421,8 +523,9 @@
 
                 <h3>6. Data Sharing</h3>
                 <p>
-                    We do not sell personal information. We may share it with partner banks, payment processors, identity verification, 
-                    cloud/IT vendors, and regulators or law enforcement when legally required.
+                    We do not sell personal information. We may share it with partner banks, payment processors, our
+                    identity verification provider Sumsub, cloud/IT vendors, and regulators or law enforcement when
+                    legally required.
                 </p>
 
                 <h3>7. Cross-Border Transfers</h3>
@@ -432,7 +535,7 @@
 
                 <h3>8. Data Retention</h3>
                 <ul>
-                    <li>KYC and transaction records: minimum 5 years after last transaction or account closure</li>
+                    <li>KYC and transaction records, including biometric verification data: minimum 5 years after last transaction or account closure</li>
                     <li>Other data retained as needed for legal, business, or dispute resolution purposes</li>
                 </ul>
 
@@ -447,14 +550,15 @@
                 <ul>
                     <li>Access, correct, or delete personal information</li>
                     <li>Object to processing</li>
-                    <li>Limit use of sensitive info (where applicable)</li>
+                    <li>Limit use of sensitive info, including biometric information (where applicable)</li>
                     <li>Opt-out of certain processing activities</li>
                 </ul>
 
                 <h3>11. California Privacy Rights</h3>
                 <p>
-                    California residents may request information on data collected, correct inaccuracies, request deletion, and 
-                    are protected under CCPA/CPRA. Flovide does not sell personal information.
+                    California residents may request information on data collected — including biometric data collected
+                    for identity verification — correct inaccuracies, request deletion, and are protected under
+                    CCPA/CPRA. Flovide does not sell personal information.
                 </p>
 
                 <h3>12. Cookies & Tracking</h3>
@@ -508,16 +612,20 @@
     <h3>3. Personal Information We Collect</h3>
     <ul>
         <li><strong>Provided directly:</strong> identity, contact, account credentials, government ID, financial info, communications</li>
-        <li><strong>KYC/Compliance:</strong> identity verification, proof of address, source of funds/wealth, transaction monitoring</li>
+        <li><strong>KYC/Compliance:</strong> identity verification, proof of address, source of funds/wealth, transaction
+            monitoring, and facial biometric data (live selfie and, where required, a short liveness video) collected to
+            confirm your identity</li>
         <li><strong>Recipient info:</strong> name, contact, bank/wallet info, ID where required</li>
         <li><strong>Automatically collected:</strong> IP address, device info, browser/OS, app usage, cookies</li>
-        <li><strong>Third-party info:</strong> identity verification, banks/payment processors, fraud prevention, analytics providers</li>
+        <li><strong>Third-party info:</strong> our identity verification partner Sumsub (facial and document
+            verification), banks/payment processors, fraud prevention, analytics providers</li>
     </ul>
 
     <h3>4. Purposes for Collecting Personal Information</h3>
     <ul>
         <li>Create/manage accounts and process domestic/international transfers</li>
-        <li>Verify identity, conduct KYC/Customer Due Diligence, comply with FINTRAC</li>
+        <li>Verify identity, conduct KYC/Customer Due Diligence — including matching your selfie against your government
+            ID through Sumsub — and comply with FINTRAC</li>
         <li>Detect and prevent fraud, money laundering, and other financial crimes</li>
         <li>Respond to customer inquiries and disputes</li>
         <li>Analyze usage, improve services, and develop new features (with consent where required)</li>
@@ -525,8 +633,9 @@
 
     <h3>5. Consent</h3>
     <p>
-        Consent is obtained under PIPEDA and provincial laws. It may be express or implied. 
-        You may withdraw consent subject to legal/contractual limitations and reasonable notice.
+        Consent is obtained under PIPEDA and provincial laws, including express consent before we collect your
+        biometric data for identity verification. Consent may be express or implied. You may withdraw consent
+        subject to legal/contractual limitations and reasonable notice.
     </p>
 
     <h3>6. Limiting Use, Disclosure, and Retention</h3>
@@ -537,7 +646,7 @@
 
     <h3>7. Data Retention</h3>
     <ul>
-        <li><strong>Regulatory:</strong> KYC and transaction records retained ≥5 years post-account closure or transaction</li>
+        <li><strong>Regulatory:</strong> KYC and transaction records, including biometric verification data, retained ≥5 years post-account closure or transaction</li>
         <li><strong>Business/Legal:</strong> retained longer if needed for disputes, agreements, or legal obligations; securely deleted/anonymized afterward</li>
     </ul>
 
@@ -550,8 +659,8 @@
 
     <h3>9. Disclosure of Personal Information</h3>
     <p>
-        We do not sell personal information. We may disclose it to banks, payment processors, identity verification, 
-        fraud prevention partners, regulators, courts, or law enforcement as required.
+        We do not sell personal information. We may disclose it to banks, payment processors, our identity
+        verification partner Sumsub, fraud prevention partners, regulators, courts, or law enforcement as required.
     </p>
 
     <h3>10. Cross-Border Data Transfers</h3>
@@ -637,6 +746,8 @@
                     <li>International passport, driver’s licence, or voter’s card</li>
                     <li>Utility bill or bank statement</li>
                     <li>Source of funds documentation</li>
+                    <li>A live selfie/facial photo (and, where required, a short liveness video), used to verify your
+                        identity against your ID document</li>
                 </ul>
 
                 <h3 class="mt-4 font-semibold">2.3 Recipient Information</h3>
@@ -657,7 +768,7 @@
                 <ul>
                     <li>Account creation and management</li>
                     <li>Processing local and international transfers</li>
-                    <li>AML, CTF, and CBN compliance</li>
+                    <li>AML, CTF, and CBN compliance, including facial verification against your ID</li>
                     <li>Fraud prevention and security monitoring</li>
                     <li>Service communication and improvement</li>
                 </ul>
@@ -677,13 +788,15 @@
 
                 <h2 class="mt-6 font-bold text-2xl">6. Data Retention</h2>
                 <p>
-                    KYC and transaction records are retained for a minimum of five (5) years in accordance with Nigerian regulations.
+                    KYC and transaction records, including selfie and identity verification data, are retained for a
+                    minimum of five (5) years in accordance with Nigerian regulations.
                 </p>
 
                 <h2 class="mt-6 font-bold text-2xl">7. Data Sharing</h2>
                 <p>
-                    We do not sell personal data. Information may be shared with banks, regulators, compliance providers, and law
-                    enforcement where legally required.
+                    We do not sell personal data. Information, including your selfie and identity documents for
+                    verification purposes, may be shared with our identity verification partner <strong>Sumsub</strong>,
+                    banks, regulators, compliance providers, and law enforcement where legally required.
                 </p>
 
                 <h2 class="mt-6 font-bold text-2xl">8. Your Rights Under NDPR</h2>
@@ -818,6 +931,19 @@ document.querySelectorAll('.accordion-header').forEach(header => {
     });
 });
 
+// Open the section containing the active link by default
+document.addEventListener('DOMContentLoaded', () => {
+    const activeLink = document.querySelector('.policy-link.is-active');
+    if (activeLink) {
+        const content = activeLink.closest('.accordion-content');
+        if (content) {
+            content.classList.remove('hidden');
+            const header = content.previousElementSibling;
+            if (header) header.querySelector('i')?.classList.add('rotate-180');
+        }
+    }
+});
+
 document.querySelectorAll('.policy-link').forEach(link => {
     link.addEventListener('click', () => {
         let target = link.dataset.target;
@@ -827,6 +953,11 @@ document.querySelectorAll('.policy-link').forEach(link => {
         });
 
         document.getElementById(target).classList.remove('hidden');
+
+        document.querySelectorAll('.policy-link').forEach(l => l.classList.remove('is-active'));
+        link.classList.add('is-active');
+
+        window.scrollTo({ top: document.getElementById('privacy-policy').offsetParent ? document.querySelector('main').offsetTop - 20 : 0, behavior: 'smooth' });
     });
 });
 </script>

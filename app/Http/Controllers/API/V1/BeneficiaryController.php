@@ -14,6 +14,8 @@ use App\Services\PivotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+
 
 class BeneficiaryController extends Controller
 {
@@ -554,174 +556,237 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
-    // public function store(Request $request)
-    // {
-    //     $user = $this->resolveKeyUser($request);
+ 
+//     public function store(Request $request)
+// {
+//     $user = $this->resolveKeyUser($request);
 
-    //     if (! $user) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid public key or secret key',
-    //         ], 401);
-    //     }
+//     if (! $user) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid public key or secret key',
+//         ], 401);
+//     }
 
-    //     $team = TeamMembers::where('user_id', $user->id)->first();
-    //     $role = $team ? $team->role : 'Owner';
+//     $webhookSetting = $this->resolveKeyOwner($request);
 
-    //     if (! in_array($role, ['Owner', 'Admin'])) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Only the business owner or an admin can add beneficiaries.',
-    //         ], 403);
-    //     }
+//     if (! $webhookSetting) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Invalid public key or secret key',
+//         ], 401);
+//     }
 
-    //     $validator = Validator::make($request->all(), [
-    //         'type' => 'required|in:individual,corporate',
-    //         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
-    //         'lastName' => 'nullable|required_if:type,individual|string|max:100',
-    //         'name' => 'nullable|required_if:type,corporate|string|max:200',
-    //         'transfer_method' => 'required|in:bank,mobile',
-    //         'bank.country' => 'required|string|min:2|max:3',
-    //         'bank.currency' => 'required|string|size:3',
-    //         'bank.accountHolder' => 'required|string|max:100',
-    //         'bank.accountNumber'  => 'nullable|string|max:34',
-    //         'bank.bankCode'       => 'nullable|string|max:20',
-    //         'bank.mobileNumber'   => 'nullable|string|max:30',
-    //     ]);
+//     $path = $request->path();
+//     $isTestUrl = str_starts_with($path, 'api/test/');
+//     $keyMode = $this->resolveKeyMode($request, $webhookSetting);
 
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'errors' => $validator->errors(),
-    //         ], 422);
-    //     }
+//     if ($isTestUrl && $keyMode !== 'test') {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Test API requires test keys',
+//             'path' => $path,
+//             'key_mode' => $keyMode,
+//         ], 403);
+//     }
 
-    //     $bank = $request->input('bank', []);
-    //     $countryIso = strtoupper($bank['country']);
-    //     $currency = strtoupper($bank['currency']);
-    //     $method = $request->transfer_method;
+//     if (! $isTestUrl && $keyMode !== 'live') {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Live API requires live keys',
+//             'path' => $path,
+//             'key_mode' => $keyMode,
+//         ], 403);
+//     }
 
-    //     $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
-    //     $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    //     $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    //     $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+//     $mode = $isTestUrl ? 'test' : 'live';
 
-    //     $provider = null;
+//     $team = TeamMembers::where('user_id', $user->id)->first();
+//     $role = $team ? $team->role : 'Owner';
 
-    //     if ($currency === 'GHS') {
-    //         if ($appmobileEnabled) {
-    //             $provider = 'app_mobile';
-    //         } elseif ($payazaEnabled) {
-    //             $provider = 'payaza';
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'No provider enabled for GHS',
-    //             ], 403);
-    //         }
-    //     } elseif ($currency === 'UGX') {
-    //         if ($pivotEnabled) {
-    //             $provider = 'pivot';
-    //         } elseif ($payazaEnabled) {
-    //             $provider = 'payaza';
-    //             $method = 'mobile';
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'No provider enabled for UGX',
-    //             ], 403);
-    //         }
-    //     } elseif (in_array($currency, $payazaCurrencies)) {
-    //         if ($payazaEnabled) {
-    //             $provider = 'payaza';
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Flovide Payaza disabled',
-    //             ], 403);
-    //         }
-    //     } else {
-    //         if ($pivotEnabled) {
-    //             $provider = 'pivot';
-    //         } else {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Pivot disabled',
-    //             ], 403);
-    //         }
-    //     }
+//     if (! in_array($role, ['Owner', 'Admin'])) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Only the business owner or an admin can add beneficiaries.',
+//         ], 403);
+//     }
 
-    //     $bankName = null;
-    //     $mobileNumber = null;
+//     $validator = Validator::make($request->all(), [
+//         'type' => 'required|in:individual,corporate',
+//         'firstNames' => 'nullable|required_if:type,individual|string|max:100',
+//         'lastName' => 'nullable|required_if:type,individual|string|max:100',
+//         'name' => 'nullable|required_if:type,corporate|string|max:200',
+//         'transfer_method' => 'required|in:bank,mobile',
+//         'bank.country' => 'required|string|min:2|max:3',
+//         'bank.currency' => 'required|string|size:3',
+//         'bank.accountHolder' => 'required|string|max:100',
+//         'bank.accountNumber' => 'nullable|string|max:34',
+//         'bank.bankCode' => 'nullable|string|max:20',
+//         'bank.mobileNumber' => 'nullable|string|max:30',
 
-    //     if ($method === 'bank') {
-    //         $bankRow = Bank::where(function ($query) use ($bank) {
-    //             $query->where('bank_code', $bank['bankCode'] ?? null)
-    //                 ->orWhere('sort_code', $bank['bankCode'] ?? null);
-    //         })->first();
+//         //CAD
+//         'bank.interac_first_name'  => 'nullable|string|max:30',
+//         'bank.interac_last_name'  => 'nullable|string|max:30',
+//         'bank.interac_email'  => 'nullable|string|max:30',
+//     ]);
 
-    //         $bankName = $bankRow?->name;
-    //     }
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'success' => false,
+//             'errors' => $validator->errors(),
+//         ], 422);
+//     }
 
-    //     if ($method === 'mobile') {
-    //         $mobileNumber = $bank['mobileNumber'] ?? null;
-    //         $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-    //         $bankName = $bankRow?->name ?? 'mobile';
-    //     }
+//     $bank = $request->input('bank', []);
+//     $countryIso = strtoupper($bank['country']);
+//     $currency = strtoupper($bank['currency']);
+//     $method = $request->transfer_method;
 
-    //     try {
-    //         $beneficia = Beneficia::create([
-    //             'country' => $countryIso,
-    //             'currency' => $currency,
-    //             'type' => $request->type,
-    //             'first_names' => $request->firstNames ?? null,
-    //             'last_name' => $request->lastName ?? null,
-    //             'beneficiary_name' => $request->name ?? null,
-    //             'account_number' => $bank['accountNumber'] ?? null,
-    //             'account_name' => $bank['accountHolder'] ?? null,
-    //             'phone' => $mobileNumber,
-    //             'bank' => $bankName,
-    //             'transfer_method' => $method,
-    //             'bank_code' => $bank['bankCode'] ?? null,
-    //             'provider' => $provider,
-    //             'unique_reference' => strtoupper(Str::random(7)),
-    //             'customer_reference' => strtoupper(Str::random(7)),
-    //             'recipient_id' => Str::uuid(),
-    //             'account_id' => Str::uuid(),
-    //             'user_id' => $user->id,
-    //         ]);
+//     $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
+//     $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+//     $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+//     $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
 
-    //          return response()->json([
-    //         'success' => true,
-    //         'message' => 'Beneficiary created successfully',
-    //         'data' => [
-    //             'id' => (string) ($beneficia->id),
-    //             'country' => $beneficia->country,
-    //             'default_reference' => $beneficia->default_reference,
-    //             'alias' => $beneficia->alias,
-    //             'type' => $beneficia->type,
-    //             'created' => optional($beneficia->created_at)->toIso8601String(),
-    //             'bank_account' => [
-    //                 'account_name' => $beneficia->account_name,
-    //                 'sort_code' => $beneficia->sort_code,
-    //                 'bank_code' => $beneficia->bank_code,
-    //                 'account_number' => $beneficia->account_number,
-    //                 'bank_name' => $beneficia->bank,
-    //                 'currency' => $beneficia->currency,
-    //             ],
-    //         ],
-    //     ], 201);
-    //     } catch (\Exception $e) {
-    //         logger('Beneficiary Store Error: ' . $e->getMessage());
+//     $provider = 'flovide_test';
 
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to create beneficiary',
-    //         ], 500);
-    //     }
-    // }
+//     if ($mode === 'test') {
+//         $provider = 'flovide_test';
+//     } else {
+//         if ($currency === 'GHS') {
+//             if ($appmobileEnabled) {
+//                 $provider = 'app_mobile';
+//             } elseif ($payazaEnabled) {
+//                 $provider = 'payaza';
+//             } else {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'No provider enabled for GHS',
+//                 ], 403);
+//             }
+//         } elseif ($currency === 'UGX') {
+//             if ($pivotEnabled) {
+//                 $provider = 'pivot';
+//             } elseif ($payazaEnabled) {
+//                 $provider = 'payaza';
+//                 $method = 'mobile';
+//             } else {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'No provider enabled for UGX',
+//                 ], 403);
+//             }
+//         } elseif (in_array($currency, $payazaCurrencies, true)) {
+//             if ($payazaEnabled) {
+//                 $provider = 'payaza';
+//             } else {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'Flovide Payaza disabled',
+//                 ], 403);
+//             }
 
-    public function store(Request $request)
+//          } elseif ($currency === 'CAD') {
+//         $provider = 'interac';
+//         $method   = 'bank';
+
+//         // Validate CAD-specific fields
+//         if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
+//             return response()->json([
+//                     'success' => false,
+//                     'message' => 'First name, last name, and email are required for CAD Interac.',
+//                     'code'    => 'CAD_INTERAC_FIELDS_REQUIRED',
+//                     'data'    => null,
+//                 ], 422);
+//              }
+
+//         } else {
+//             if ($pivotEnabled) {
+//                 $provider = 'pivot';
+//             } else {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'Pivot disabled',
+//                 ], 403);
+//             }
+//         }
+//     }
+
+//     $bankName = null;
+//     $mobileNumber = null;
+
+//     if ($method === 'bank') {
+//         $bankRow = Bank::where(function ($query) use ($bank) {
+//             $query->where('bank_code', $bank['bankCode'] ?? null)
+//                 ->orWhere('sort_code', $bank['bankCode'] ?? null);
+//         })->first();
+
+//         $bankName = $bankRow?->name;
+//     }
+
+//     if ($method === 'mobile') {
+//         $mobileNumber = $bank['mobileNumber'] ?? null;
+//         $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+//         $bankName = $bankRow?->name ?? 'mobile';
+//     }
+
+//     try {
+//         $beneficia = new Beneficia();
+
+//         $beneficia->forceFill([
+//             'mode' => $mode,
+//             'country' => $countryIso,
+//             'currency' => $currency,
+//             'type' => $request->type,
+//             'first_names' => $request->firstNames ?? null,
+//             'last_name' => $request->lastName ?? null,
+//             'beneficiary_name' => $request->name ?? null,
+//             'account_number' => $bank['accountNumber'] ?? null,
+//             'account_name' => $bank['accountHolder'] ?? null,
+//             'phone' => $mobileNumber,
+//             'bank' => $bankName,
+//             'transfer_method' => $method,
+//             'bank_code' => $bank['bankCode'] ?? null,
+//             // 'provider' => $provider,
+//             'unique_reference' => strtoupper(Str::random(7)),
+//             'customer_reference' => strtoupper(Str::random(7)),
+//             'recipient_id' => (string) Str::uuid(),
+//             'account_id' => (string) Str::uuid(),
+//             'user_id' => $user->id,
+//         ])->save();
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Beneficiary created successfully',
+//             'mode' => $mode,
+//             'data' => [
+//                 'id' => (string) $beneficia->id,
+//                 'country' => $beneficia->country,
+//                 'default_reference' => $beneficia->default_reference,
+//                 'alias' => $beneficia->alias,
+//                 'type' => $beneficia->type,
+//                 'created' => optional($beneficia->created_at)->toIso8601String(),
+//                 'bank_account' => [
+//                     'account_name' => $beneficia->account_name,
+//                     'sort_code' => $beneficia->sort_code,
+//                     'bank_code' => $beneficia->bank_code,
+//                     'account_number' => $beneficia->account_number,
+//                     'bank_name' => $beneficia->bank,
+//                     'currency' => $beneficia->currency,
+//                 ],
+//             ],
+//         ], 201);
+
+//     } catch (\Throwable $e) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Beneficiary creation failed',
+//             'data' => $e->getMessage(),
+//         ], 500);
+//     }
+// }
+
+
+public function store(Request $request)
 {
     $user = $this->resolveKeyUser($request);
 
@@ -765,13 +830,32 @@ class BeneficiaryController extends Controller
 
     $mode = $isTestUrl ? 'test' : 'live';
 
-    $team = TeamMembers::where('user_id', $user->id)->first();
-    $role = $team ? $team->role : 'Owner';
+    Log::info('[Beneficiary Store API] Request received', $request->all());
+
+    $team = TeamMembers::where('user_id', $user->id)
+        ->where('owner_id', '!=', $user->id) // exclude self-referencing rows
+        ->first();
+
+    $ownerId  = $team ? $team->owner_id : $user->id;
+    $memberId = $team ? $user->id : null;
+    $role     = $team ? $team->role : 'Owner';
+
+    Log::info('[Beneficiary Store API] Auth resolved', [
+        'user_id'   => $user->id,
+        'owner_id'  => $ownerId,
+        'member_id' => $memberId,
+        'role'      => $role,
+    ]);
 
     if (! in_array($role, ['Owner', 'Admin'])) {
+        Log::warning('[Beneficiary Store API] Forbidden — insufficient role', [
+            'user_id' => $user->id,
+            'role'    => $role,
+        ]);
         return response()->json([
             'success' => false,
             'message' => 'Only the business owner or an admin can add beneficiaries.',
+            'code' => 'FORBIDDEN',
         ], 403);
     }
 
@@ -783,15 +867,26 @@ class BeneficiaryController extends Controller
         'transfer_method' => 'required|in:bank,mobile',
         'bank.country' => 'required|string|min:2|max:3',
         'bank.currency' => 'required|string|size:3',
-        'bank.accountHolder' => 'required|string|max:100',
+        'bank.accountHolder' => 'nullable|string|max:100',
         'bank.accountNumber' => 'nullable|string|max:34',
         'bank.bankCode' => 'nullable|string|max:20',
         'bank.mobileNumber' => 'nullable|string|max:30',
+
+        // CAD
+        'bank.interac_first_name' => 'nullable|string|max:30',
+        'bank.interac_last_name'  => 'nullable|string|max:30',
+        'bank.interac_email'      => 'nullable|string|max:30',
     ]);
 
     if ($validator->fails()) {
+        Log::warning('[Beneficiary Store API] Validation failed', [
+            'errors'  => $validator->errors()->toArray(),
+            'user_id' => $user->id,
+        ]);
         return response()->json([
             'success' => false,
+            'message' => 'Validation error',
+            'code' => 'VALIDATION_ERROR',
             'errors' => $validator->errors(),
         ], 422);
     }
@@ -801,25 +896,49 @@ class BeneficiaryController extends Controller
     $currency = strtoupper($bank['currency']);
     $method = $request->transfer_method;
 
+    Log::info('[Beneficiary Store API] Extracted data', [
+        'country'  => $countryIso,
+        'currency' => $currency,
+        'method'   => $method,
+        'type'     => $request->type,
+        'mode'     => $mode,
+    ]);
+
     $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
     $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
     $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
     $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
 
-    $provider = 'flovide_test';
+    $provider = null;
 
     if ($mode === 'test') {
         $provider = 'flovide_test';
     } else {
-        if ($currency === 'GHS') {
+        // ── CAD → Interac ────────────────────────────────────────────
+        if ($currency === 'CAD') {
+            $provider = 'interac';
+            $method   = 'bank';
+
+            if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'First name, last name, and email are required for CAD Interac.',
+                    'code'    => 'CAD_INTERAC_FIELDS_REQUIRED',
+                    'data'    => null,
+                ], 422);
+            }
+
+        } elseif ($currency === 'GHS') {
             if ($appmobileEnabled) {
                 $provider = 'app_mobile';
             } elseif ($payazaEnabled) {
                 $provider = 'payaza';
             } else {
+                Log::warning('[Beneficiary Store API] No provider for GHS');
                 return response()->json([
                     'success' => false,
                     'message' => 'No provider enabled for GHS',
+                    'code' => 'PROVIDER_DISABLED',
                 ], 403);
             }
         } elseif ($currency === 'UGX') {
@@ -827,50 +946,88 @@ class BeneficiaryController extends Controller
                 $provider = 'pivot';
             } elseif ($payazaEnabled) {
                 $provider = 'payaza';
-                $method = 'mobile';
+                $method   = 'mobile';
             } else {
+                Log::warning('[Beneficiary Store API] No provider for UGX');
                 return response()->json([
                     'success' => false,
                     'message' => 'No provider enabled for UGX',
+                    'code' => 'PROVIDER_DISABLED',
                 ], 403);
             }
         } elseif (in_array($currency, $payazaCurrencies, true)) {
             if ($payazaEnabled) {
                 $provider = 'payaza';
             } else {
+                Log::warning('[Beneficiary Store API] Payaza disabled', ['currency' => $currency]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Flovide Payaza disabled',
+                    'code' => 'PROVIDER_DISABLED',
                 ], 403);
             }
         } else {
             if ($pivotEnabled) {
                 $provider = 'pivot';
             } else {
+                Log::warning('[Beneficiary Store API] Pivot disabled', ['currency' => $currency]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Pivot disabled',
+                    'code' => 'PROVIDER_DISABLED',
                 ], 403);
             }
         }
     }
 
+    Log::info('[Beneficiary Store API] Provider resolved', [
+        'provider' => $provider,
+        'method'   => $method,
+        'currency' => $currency,
+        'mode'     => $mode,
+    ]);
+
     $bankName = null;
     $mobileNumber = null;
 
-    if ($method === 'bank') {
+    // ── CAD: skip bank/mobile lookup, use interac fields ───────────────
+    if ($currency === 'CAD') {
+        $bankName = 'Interac';
+        Log::info('[Beneficiary Store API] CAD Interac fields', [
+            'interac_first_name' => $bank['interac_first_name'] ?? null,
+            'interac_last_name'  => $bank['interac_last_name']  ?? null,
+            'interac_email'      => $bank['interac_email']       ?? null,
+        ]);
+    } elseif ($method === 'bank') {
         $bankRow = Bank::where(function ($query) use ($bank) {
             $query->where('bank_code', $bank['bankCode'] ?? null)
                 ->orWhere('sort_code', $bank['bankCode'] ?? null);
         })->first();
 
         $bankName = $bankRow?->name;
-    }
 
-    if ($method === 'mobile') {
+        Log::info('[Beneficiary Store API] Bank lookup', [
+            'bank_code' => $bank['bankCode'] ?? null,
+            'bank_name' => $bankName,
+        ]);
+    } elseif ($method === 'mobile') {
         $mobileNumber = $bank['mobileNumber'] ?? null;
+
+        if ($mobileNumber !== null) {
+            $mobileNumber = trim($mobileNumber);
+            if (str_starts_with($mobileNumber, '+')) {
+                $mobileNumber = substr($mobileNumber, 1);
+            }
+        }
+
         $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
         $bankName = $bankRow?->name ?? 'mobile';
+
+        Log::info('[Beneficiary Store API] Mobile lookup', [
+            'mobile_number' => $mobileNumber,
+            'bank_code'     => $bank['bankCode'] ?? null,
+            'bank_name'     => $bankName,
+        ]);
     }
 
     try {
@@ -884,8 +1041,11 @@ class BeneficiaryController extends Controller
             'first_names' => $request->firstNames ?? null,
             'last_name' => $request->lastName ?? null,
             'beneficiary_name' => $request->name ?? null,
-            'account_number' => $bank['accountNumber'] ?? null,
-            'account_name' => $bank['accountHolder'] ?? null,
+            'account_number' => $bank['accountNumber'] ?? $mobileNumber ?? $bank['interac_email'] ?? null,
+            'account_name' => $bank['accountHolder'] ?? trim(($bank['interac_first_name'] ?? '') . ' ' . ($bank['interac_last_name'] ?? '')) ?? null,
+            'interac_first_name' => $bank['interac_first_name'] ?? null,
+            'interac_last_name' => $bank['interac_last_name'] ?? null,
+            'email' => $bank['interac_email'] ?? null,
             'phone' => $mobileNumber,
             'bank' => $bankName,
             'transfer_method' => $method,
@@ -895,8 +1055,18 @@ class BeneficiaryController extends Controller
             'customer_reference' => strtoupper(Str::random(7)),
             'recipient_id' => (string) Str::uuid(),
             'account_id' => (string) Str::uuid(),
-            'user_id' => $user->id,
+            'user_id' => $ownerId,
+            'created_by_member_id' => $memberId,
         ])->save();
+
+        Log::info('[Beneficiary Store API] Beneficiary created', [
+            'beneficiary_id' => $beneficia->id,
+            'currency'       => $currency,
+            'provider'       => $provider,
+            'method'         => $method,
+            'mode'           => $mode,
+            'user_id'        => $ownerId,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -921,13 +1091,27 @@ class BeneficiaryController extends Controller
         ], 201);
 
     } catch (\Throwable $e) {
+        Log::error('[Beneficiary Store API] Failed to create beneficiary', [
+            'error'   => $e->getMessage(),
+            'user_id' => $ownerId,
+            'payload' => [
+                'currency' => $currency,
+                'provider' => $provider,
+                'method'   => $method,
+            ],
+        ]);
+
         return response()->json([
             'success' => false,
             'message' => 'Beneficiary creation failed',
+            'code' => 'BENEFICIARY_CREATE_FAILED',
             'data' => $e->getMessage(),
         ], 500);
     }
 }
+
+
+
 
     private function resolveKeyUser(Request $request): ?User
     {

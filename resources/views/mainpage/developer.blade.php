@@ -356,17 +356,20 @@
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
                                     <div class="mt-4 space-y-3">
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">type</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">type</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required (Individual or Corporate)</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">firstNames</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Individual</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">lastName</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Individual</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">name</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Corporate</span></div>
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">transfer_method</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">transfer_method</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required (bank or mobile)</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.country</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.currency</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.accountHolder</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.accountHolder</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (non-CAD)</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.accountNumber</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Bank)</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.bankCode</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Bank)</span></div>
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.mobileNumber</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Mobile)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.mobileNumber</span></div><span class="text-xs text-slate-400 font-semibold uppercase">Required (Mobile, alt. to accountNumber)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.interac_first_name</span></div><span class="text-xs text-amber-600 font-semibold uppercase">Required (CAD)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.interac_last_name</span></div><span class="text-xs text-amber-600 font-semibold uppercase">Required (CAD)</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank.interac_email</span></div><span class="text-xs text-amber-600 font-semibold uppercase">Required (CAD)</span></div>
                                     </div>
                                 </details>
 
@@ -1113,13 +1116,33 @@ Console.WriteLine(body);`,
   }
 }`
             },
-     'beneficiary-create': {
-  curl: `curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
+'beneficiary-create': {
+  curl: `# NGN (bank) example
+curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
   -H "Accept: application/json" ^
   -H "Content-Type: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
-  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
-  javascript: `fetch('https://flovide.com/api/v1/beneficiaries', {
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
+  -d "{\\"type\\":\\"individual\\",\\"firstNames\\":\\"ECHEZONA\\",\\"lastName\\":\\"MBAH\\",\\"transfer_method\\":\\"bank\\",\\"bank\\":{\\"country\\":\\"NG\\",\\"currency\\":\\"NGN\\",\\"accountHolder\\":\\"ECHEZONA ERNEST MBAH\\",\\"accountNumber\\":\\"6322069407\\",\\"bankCode\\":\\"000007\\"}}"
+
+# CAD (Interac) example
+curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
+  -H "Accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
+  -d "{\\"type\\":\\"individual\\",\\"firstNames\\":\\"John\\",\\"lastName\\":\\"Doe\\",\\"transfer_method\\":\\"bank\\",\\"bank\\":{\\"country\\":\\"CA\\",\\"currency\\":\\"CAD\\",\\"interac_first_name\\":\\"John\\",\\"interac_last_name\\":\\"Doe\\",\\"interac_email\\":\\"john.doe@example.com\\"}}"
+
+# KES (mobile) example
+curl -X POST "https://flovide.com/api/v1/beneficiaries" ^
+  -H "Accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
+  -d "{\\"type\\":\\"individual\\",\\"firstNames\\":\\"John\\",\\"lastName\\":\\"Doe\\",\\"transfer_method\\":\\"mobile\\",\\"bank\\":{\\"country\\":\\"KE\\",\\"currency\\":\\"KES\\",\\"accountHolder\\":\\"Taramay tumwa\\",\\"accountNumber\\":\\"254720636762\\",\\"bankCode\\":\\"SAFKEN\\"}}"`,
+
+  javascript: `// NGN (bank) example
+fetch('https://flovide.com/api/v1/beneficiaries', {
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -1137,13 +1160,65 @@ Console.WriteLine(body);`,
       currency: 'NGN',
       accountHolder: 'ECHEZONA ERNEST MBAH',
       accountNumber: '6322069407',
-      bankCode: '000007',
-      mobileNumber: 'bank'
+      bankCode: '000007'
+    }
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));
+
+// CAD (Interac) example
+fetch('https://flovide.com/api/v1/beneficiaries', {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
+  },
+  body: JSON.stringify({
+    type: 'individual',
+    firstNames: 'John',
+    lastName: 'Doe',
+    transfer_method: 'bank',
+    bank: {
+      country: 'CA',
+      currency: 'CAD',
+      interac_first_name: 'John',
+      interac_last_name: 'Doe',
+      interac_email: 'john.doe@example.com'
+    }
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));
+
+// KES (mobile) example
+fetch('https://flovide.com/api/v1/beneficiaries', {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
+  },
+  body: JSON.stringify({
+    type: 'individual',
+    firstNames: 'John',
+    lastName: 'Doe',
+    transfer_method: 'mobile',
+    bank: {
+      country: 'KE',
+      currency: 'KES',
+      accountHolder: 'Taramay tumwa',
+      accountNumber: '254720636762',
+      bankCode: 'SAFKEN'
     }
   })
 })
   .then(res => res.json())
   .then(data => console.log(data));`,
+
   go: `package main
 
 import (
@@ -1154,7 +1229,10 @@ import (
 )
 
 func main() {
-  jsonData := []byte(\`{
+  client := &http.Client{}
+
+  // NGN (bank) example
+  ngnData := []byte(\`{
     "type":"individual",
     "firstNames":"ECHEZONA",
     "lastName":"MBAH",
@@ -1164,34 +1242,87 @@ func main() {
       "currency":"NGN",
       "accountHolder":"ECHEZONA ERNEST MBAH",
       "accountNumber":"6322069407",
-      "bankCode":"000007",
-      "mobileNumber":"bank"
+      "bankCode":"000007"
     }
   }\`)
 
-  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries", bytes.NewBuffer(jsonData))
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries", bytes.NewBuffer(ngnData))
   req.Header.Set("Accept", "application/json")
   req.Header.Set("Content-Type", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
 
-  client := &http.Client{}
   resp, _ := client.Do(req)
   defer resp.Body.Close()
-
   body, _ := io.ReadAll(resp.Body)
   fmt.Println(string(body))
+
+  // CAD (Interac) example
+  cadData := []byte(\`{
+    "type":"individual",
+    "firstNames":"John",
+    "lastName":"Doe",
+    "transfer_method":"bank",
+    "bank":{
+      "country":"CA",
+      "currency":"CAD",
+      "interac_first_name":"John",
+      "interac_last_name":"Doe",
+      "interac_email":"john.doe@example.com"
+    }
+  }\`)
+
+  req2, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries", bytes.NewBuffer(cadData))
+  req2.Header.Set("Accept", "application/json")
+  req2.Header.Set("Content-Type", "application/json")
+  req2.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req2.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+
+  resp2, _ := client.Do(req2)
+  defer resp2.Body.Close()
+  body2, _ := io.ReadAll(resp2.Body)
+  fmt.Println(string(body2))
+
+  // KES (mobile) example
+  kesData := []byte(\`{
+    "type":"individual",
+    "firstNames":"John",
+    "lastName":"Doe",
+    "transfer_method":"mobile",
+    "bank":{
+      "country":"KE",
+      "currency":"KES",
+      "accountHolder":"Taramay tumwa",
+      "accountNumber":"254720636762",
+      "bankCode":"SAFKEN"
+    }
+  }\`)
+
+  req3, _ := http.NewRequest("POST", "https://flovide.com/api/v1/beneficiaries", bytes.NewBuffer(kesData))
+  req3.Header.Set("Accept", "application/json")
+  req3.Header.Set("Content-Type", "application/json")
+  req3.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req3.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+
+  resp3, _ := client.Do(req3)
+  defer resp3.Body.Close()
+  body3, _ := io.ReadAll(resp3.Body)
+  fmt.Println(string(body3))
 }`,
+
   python: `import requests
 
-response = requests.post(
+headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+    "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+    "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
+}
+
+# NGN (bank) example
+ngn_response = requests.post(
     "https://flovide.com/api/v1/beneficiaries",
-    headers={
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
-        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
-    },
+    headers=headers,
     json={
         "type": "individual",
         "firstNames": "ECHEZONA",
@@ -1202,14 +1333,57 @@ response = requests.post(
             "currency": "NGN",
             "accountHolder": "ECHEZONA ERNEST MBAH",
             "accountNumber": "6322069407",
-            "bankCode": "000007",
-            "mobileNumber": "bank"
+            "bankCode": "000007"
         }
     },
 )
 
-print(response.json())`,
-  java: `String json = """
+print(ngn_response.json())
+
+# CAD (Interac) example
+cad_response = requests.post(
+    "https://flovide.com/api/v1/beneficiaries",
+    headers=headers,
+    json={
+        "type": "individual",
+        "firstNames": "John",
+        "lastName": "Doe",
+        "transfer_method": "bank",
+        "bank": {
+            "country": "CA",
+            "currency": "CAD",
+            "interac_first_name": "John",
+            "interac_last_name": "Doe",
+            "interac_email": "john.doe@example.com"
+        }
+    },
+)
+
+print(cad_response.json())
+
+# KES (mobile) example
+kes_response = requests.post(
+    "https://flovide.com/api/v1/beneficiaries",
+    headers=headers,
+    json={
+        "type": "individual",
+        "firstNames": "John",
+        "lastName": "Doe",
+        "transfer_method": "mobile",
+        "bank": {
+            "country": "KE",
+            "currency": "KES",
+            "accountHolder": "Taramay tumwa",
+            "accountNumber": "254720636762",
+            "bankCode": "SAFKEN"
+        }
+    },
+)
+
+print(kes_response.json())`,
+
+  java: `// NGN (bank) example
+String ngnJson = """
 {
   "type": "individual",
   "firstNames": "ECHEZONA",
@@ -1220,25 +1394,87 @@ print(response.json())`,
     "currency": "NGN",
     "accountHolder": "ECHEZONA ERNEST MBAH",
     "accountNumber": "6322069407",
-    "bankCode": "000007",
-    "mobileNumber": "bank"
+    "bankCode": "000007"
   }
 }
 """;
 
-HttpRequest request = HttpRequest.newBuilder()
+HttpRequest ngnRequest = HttpRequest.newBuilder()
     .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
     .header("Accept", "application/json")
     .header("Content-Type", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
-    .POST(HttpRequest.BodyPublishers.ofString(json))
+    .POST(HttpRequest.BodyPublishers.ofString(ngnJson))
     .build();
 
-HttpResponse<String> response = HttpClient.newHttpClient()
-    .send(request, HttpResponse.BodyHandlers.ofString());
+HttpResponse<String> ngnResponse = HttpClient.newHttpClient()
+    .send(ngnRequest, HttpResponse.BodyHandlers.ofString());
 
-System.out.println(response.body());`,
+System.out.println(ngnResponse.body());
+
+// CAD (Interac) example
+String cadJson = """
+{
+  "type": "individual",
+  "firstNames": "John",
+  "lastName": "Doe",
+  "transfer_method": "bank",
+  "bank": {
+    "country": "CA",
+    "currency": "CAD",
+    "interac_first_name": "John",
+    "interac_last_name": "Doe",
+    "interac_email": "john.doe@example.com"
+  }
+}
+""";
+
+HttpRequest cadRequest = HttpRequest.newBuilder()
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
+    .header("Accept", "application/json")
+    .header("Content-Type", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+    .POST(HttpRequest.BodyPublishers.ofString(cadJson))
+    .build();
+
+HttpResponse<String> cadResponse = HttpClient.newHttpClient()
+    .send(cadRequest, HttpResponse.BodyHandlers.ofString());
+
+System.out.println(cadResponse.body());
+
+// KES (mobile) example
+String kesJson = """
+{
+  "type": "individual",
+  "firstNames": "John",
+  "lastName": "Doe",
+  "transfer_method": "mobile",
+  "bank": {
+    "country": "KE",
+    "currency": "KES",
+    "accountHolder": "Taramay tumwa",
+    "accountNumber": "254720636762",
+    "bankCode": "SAFKEN"
+  }
+}
+""";
+
+HttpRequest kesRequest = HttpRequest.newBuilder()
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries"))
+    .header("Accept", "application/json")
+    .header("Content-Type", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+    .POST(HttpRequest.BodyPublishers.ofString(kesJson))
+    .build();
+
+HttpResponse<String> kesResponse = HttpClient.newHttpClient()
+    .send(kesRequest, HttpResponse.BodyHandlers.ofString());
+
+System.out.println(kesResponse.body());`,
+
   csharp: `using System.Text;
 
 using var client = new HttpClient();
@@ -1247,7 +1483,8 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
-var json = """
+// NGN (bank) example
+var ngnJson = """
 {
   "type": "individual",
   "firstNames": "ECHEZONA",
@@ -1258,18 +1495,59 @@ var json = """
     "currency": "NGN",
     "accountHolder": "ECHEZONA ERNEST MBAH",
     "accountNumber": "6322069407",
-    "bankCode": "000007",
-    "mobileNumber": "bank"
+    "bankCode": "000007"
   }
 }
 """;
 
-var content = new StringContent(json, Encoding.UTF8, "application/json");
-var response = await client.PostAsync("https://flovide.com/api/v1/beneficiaries", content);
-var body = await response.Content.ReadAsStringAsync();
+var ngnContent = new StringContent(ngnJson, Encoding.UTF8, "application/json");
+var ngnResponse = await client.PostAsync("https://flovide.com/api/v1/beneficiaries", ngnContent);
+Console.WriteLine(await ngnResponse.Content.ReadAsStringAsync());
 
-Console.WriteLine(body);`,
-  response: `{
+// CAD (Interac) example
+var cadJson = """
+{
+  "type": "individual",
+  "firstNames": "John",
+  "lastName": "Doe",
+  "transfer_method": "bank",
+  "bank": {
+    "country": "CA",
+    "currency": "CAD",
+    "interac_first_name": "John",
+    "interac_last_name": "Doe",
+    "interac_email": "john.doe@example.com"
+  }
+}
+""";
+
+var cadContent = new StringContent(cadJson, Encoding.UTF8, "application/json");
+var cadResponse = await client.PostAsync("https://flovide.com/api/v1/beneficiaries", cadContent);
+Console.WriteLine(await cadResponse.Content.ReadAsStringAsync());
+
+// KES (mobile) example
+var kesJson = """
+{
+  "type": "individual",
+  "firstNames": "John",
+  "lastName": "Doe",
+  "transfer_method": "mobile",
+  "bank": {
+    "country": "KE",
+    "currency": "KES",
+    "accountHolder": "Taramay tumwa",
+    "accountNumber": "254720636762",
+    "bankCode": "SAFKEN"
+  }
+}
+""";
+
+var kesContent = new StringContent(kesJson, Encoding.UTF8, "application/json");
+var kesResponse = await client.PostAsync("https://flovide.com/api/v1/beneficiaries", kesContent);
+Console.WriteLine(await kesResponse.Content.ReadAsStringAsync());`,
+
+  response: `// NGN (bank) response
+{
   "success": true,
   "message": "Beneficiary created successfully",
   "data": {
@@ -1288,8 +1566,60 @@ Console.WriteLine(body);`,
       "currency": "NGN"
     }
   }
+}
+
+// CAD (Interac) response
+{
+  "success": true,
+  "message": "Beneficiary created successfully",
+  "data": {
+    "id": "019f5d4f-103a-7033-9dbf-ddcb643e3147",
+    "country": "CA",
+    "default_reference": null,
+    "alias": null,
+    "type": "individual",
+    "created": "2026-07-13T21:08:10+00:00",
+    "bank_account": {
+      "account_name": "John Doe",
+      "sort_code": null,
+      "bank_code": null,
+      "account_number": "john.doe@example.com",
+      "bank_name": "Interac",
+      "currency": "CAD"
+    }
+  }
+}
+
+// KES (mobile) response
+{
+  "success": true,
+  "message": "Beneficiary created successfully",
+  "mode": "test",
+  "data": {
+    "id": "019f5d62-ab08-73cf-beaa-f663b2d4f63c",
+    "country": "KE",
+    "default_reference": null,
+    "alias": null,
+    "type": "individual",
+    "created": "2026-07-13T21:29:35+00:00",
+    "bank_account": {
+      "account_name": "Taramay tumwa",
+      "sort_code": null,
+      "bank_code": "SAFKEN",
+      "account_number": "254720636762",
+      "bank_name": "MPESA",
+      "currency": "KES"
+    }
+  }
 }`
 },
+
+
+
+
+
+
+
 
         'beneficiary-list': {
   curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries" ^

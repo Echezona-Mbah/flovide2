@@ -33,6 +33,11 @@ class FirebaseNotificationService
         return $tokenArr['access_token'] ?? null;
     }
 
+    public function sendNotification(?string $deviceToken, string $title, string $body, ?string $imageUrl = null, array $data = []): bool
+    {
+        return $this->sendToToken($deviceToken, $title, $body, $data);
+    }
+
     public function sendToToken(?string $deviceToken, string $title, string $body, array $data = []): bool
     {
         if (!$deviceToken) {
@@ -143,21 +148,23 @@ class FirebaseNotificationService
     }
 
     protected function sendComplianceNotification(User $user, string $title, string $body, array $data = []): void
-{
-    if (empty($user->device_token)) {
-        return;
+    {
+        if (empty($user->device_token)) {
+            return;
+        }
+
+        $sent = $this->firebase->sendToToken($user->device_token, $title, $body, array_merge([
+            'type' => 'compliance',
+        ], $data));
+
+        if (!$sent) {
+            Log::warning('Compliance push notification failed', [
+                'user_id' => $user->id,
+                'title' => $title,
+            ]);
+        }
     }
 
-    $sent = $this->firebase->sendToToken($user->device_token, $title, $body, array_merge([
-        'type' => 'compliance',
-    ], $data));
 
-    if (!$sent) {
-        Log::warning('Compliance push notification failed', [
-            'user_id' => $user->id,
-            'title' => $title,
-        ]);
-    }
-}
 
 }

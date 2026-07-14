@@ -508,7 +508,7 @@ public function create()
 public function store(Request $request)
 {
     $isApi = $request->expectsJson();
-
+    //dd($request->all());
     Log::info('[Beneficiary Store] Request received', $request->all());
 
     $authUser = auth('api')->user() ?? auth()->user();
@@ -581,6 +581,7 @@ public function store(Request $request)
         'bank.interac_email'  => 'nullable|string|max:30',
 
     ]);
+
 
     if ($validator->fails()) {
         Log::warning('[Beneficiary Store] Validation failed', [
