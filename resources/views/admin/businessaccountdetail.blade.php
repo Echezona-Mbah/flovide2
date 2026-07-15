@@ -767,6 +767,8 @@
                                     @endphp --}}
                                     @php
                                         $documents = [
+                                            ['label' => 'NIN', 'file' => $user->nin, 'file_field' => 'nin', 'status' => $user->nin_status, 'field' => 'nin_status'],
+                                            ['label' => 'BVN', 'file' => $user->bvn, 'file_field' => 'bvn', 'status' => $user->bvn_status, 'field' => 'bvn_status'],
                                             ['label' => 'CAC Certificate',       'file' => $user->cac_certificate,       'file_field' => 'cac_certificate',       'status' => $user->cac_status,                   'field' => 'cac_status'],
                                             ['label' => 'Valid ID',               'file' => $user->valid_id,               'file_field' => 'valid_id',               'status' => $user->valid_id_status,              'field' => 'valid_id_status'],
                                             ['label' => 'TIN Document',           'file' => $user->tin,                    'file_field' => 'tin',                    'status' => $user->tin_status,                   'field' => 'tin_status'],
