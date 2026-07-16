@@ -23,6 +23,7 @@ use App\Models\TeamMembers;
 use Illuminate\Support\Facades\DB;
 use App\Models\WebhookSetting;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 
@@ -277,6 +278,7 @@ class SendMoneyController extends Controller
         'interac_email'      => 'nullable|email',
         'interac_first_name' => 'nullable|string',
         'interac_last_name'  => 'nullable|string',
+
     ]);
 
 
@@ -923,27 +925,7 @@ class SendMoneyController extends Controller
 
 
 
-    
-//  public function index() 
-// {
 
-
-//     $user = auth()->user();
-
-//     $beneficiaries = Beneficia::where('user_id', $user->id)->get();
-
-//     $balances = Balance::where('user_id', $user->id)->get();
-//     foreach ($balances as $balance) {
-//         $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-//     }
-
-//     $balanceList = $balances;
-
-//     // ✅ add currencies list
-//     $currencies = Currency::all();
-
-//     return view('business.send', compact('beneficiaries', 'balanceList', 'currencies'));
-// }
 
     public function index(Request $request)
 {
@@ -1162,26 +1144,6 @@ public function getUserTotalBalance(Request $request)
     }
 
     
-
-
-    
-
-
-    
-
-
-//         public function indexexc() 
-//     {
-//         $user = auth()->user();
-//         $beneficiaries = Beneficia::where('user_id', $user->id)->get();
-
-//         $balances = Balance::where('user_id', $user->id)->get(); 
-//         foreach ($balances as $balance) {
-//             $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-//         }
-//         $balanceList = $balances;
-//         return view('business.exchange_rate', compact('beneficiaries', 'balances'));
-//     }
 
 
 
@@ -1438,5 +1400,169 @@ public function exchangeSubmit(Request $request)
 
         return $webhookSetting ? User::find($webhookSetting->user_id) : null;
     }
+
+
+
+
+
+
+    // ── Currency Fee Lookup ─────────────────────────────────────────────────
+
+public function getCurrencyFee(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated',
+            'code'    => 'UNAUTHENTICATED',
+            'data'    => null,
+        ], 401);
+    }
+
+    $request->validate([
+        'currency' => 'required|string|in:' . implode(',', \App\Models\UserCurrencyFee::CURRENCIES),
+        'type'     => 'nullable|string|in:collection,payout',
+        'amount'   => 'nullable|numeric|min:0',
+    ]);
+
+    $currency = strtoupper($request->currency);
+    $type     = $request->type;
+    $amount   = $request->filled('amount') ? (float) $request->amount : null;
+
+    $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
+        ->where('currency', $currency)
+        ->first();
+
+    Log::info('[CurrencyFee Lookup]', [
+        'user_id'  => $user->id,
+        'currency' => $currency,
+        'type'     => $type,
+        'amount'   => $amount,
+        'found'    => (bool) $userFee,
+    ]);
+
+    if (!$userFee) {
+        $msg = "No fee settings found for {$currency}. Contact your marketer.";
+        return response()->json([
+            'success' => false,
+            'message' => $msg,
+            'code'    => 'FEE_SETTINGS_NOT_FOUND',
+            'data'    => null,
+        ], 404);
+    }
+
+    $build = function (string $side) use ($userFee, $currency, $amount) {
+        $enabled = (bool) $userFee->{"{$side}_enabled"};
+        $min     = $userFee->{"{$side}_min"};
+        $max     = $userFee->{"{$side}_max"};
+
+        $out = [
+            'enabled'      => $enabled,
+            'min'          => $min,
+            'max'          => $max,
+            'fee_label'    => $this->describeFee($userFee, $side, $currency), // e.g. "2.5 CAD" or "1.5%"
+        ];
+
+        if ($amount !== null) {
+            $calc = $side === 'collection'
+                ? $userFee->calcCollectionFee($amount)
+                : $userFee->calcPayoutFee($amount);
+
+            $out['amount']     = $amount;
+            $out['fee']        = $calc;
+            $out['net_amount'] = round($amount - $calc, 2);
+        }
+
+        return $out;
+    };
+
+    $data = ['currency' => $currency];
+
+    if ($type === 'collection') {
+        $data['collection'] = $build('collection');
+    } elseif ($type === 'payout') {
+        $data['payout'] = $build('payout');
+    } else {
+        $data['collection'] = $build('collection');
+        $data['payout']     = $build('payout');
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fee settings retrieved successfully.',
+        'code'    => 'FEE_SETTINGS_FOUND',
+        'data'    => $data,
+    ], 200);
+}
+
+// ── Helper: human-readable fee, no percent/fixed leaked ─────────────────
+
+private function describeFee(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+{
+    $percent = $userFee->{"{$side}_percent"};
+    $fixed   = $userFee->{"{$side}_fixed"};
+
+    if ($percent > 0 && $fixed > 0) {
+        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    }
+    if ($percent > 0) {
+        return "{$percent}%";
+    }
+    if ($fixed > 0) {
+        return number_format($fixed, 2) . " {$currency} flat";
+    }
+    return "No fee";
+}
+
+
+// ── Currency Fee Lookup (Payout only) ────────────────────────────────────
+
+public function getPayoutFees(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated',
+            'code'    => 'UNAUTHENTICATED',
+            'data'    => null,
+        ], 401);
+    }
+
+    $userFees = \App\Models\UserCurrencyFee::where('user_id', $user->id)->get();
+
+    Log::info('[PayoutFee Lookup]', [
+        'user_id' => $user->id,
+        'count'   => $userFees->count(),
+    ]);
+
+    if ($userFees->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No fee settings found. Contact your marketer.',
+            'code'    => 'FEE_SETTINGS_NOT_FOUND',
+            'data'    => null,
+        ], 404);
+    }
+
+    $data = $userFees->map(function ($userFee) {
+        return [
+            'currency'  => $userFee->currency,
+            'enabled'   => (bool) $userFee->payout_enabled,
+            'min'       => $userFee->payout_min,
+            'max'       => $userFee->payout_max,
+            'fee_label' => $this->describeFee($userFee, 'payout', $userFee->currency),
+        ];
+    })->values();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Payout fee settings retrieved successfully.',
+        'code'    => 'FEE_SETTINGS_FOUND',
+        'data'    => $data,
+    ], 200);
+}
+
 
 }

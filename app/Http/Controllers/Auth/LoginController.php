@@ -181,6 +181,9 @@ private function isDummyAccount(string $email): bool
             "Hello {$account->firstname}, you just logged in to your Flovide account at " . now()->format('Y-m-d H:i:s')
         ));
 
+        $teamMembership = \App\Models\TeamMembers::where('user_id', $account->id)->first();
+        $feeOwnerId = $teamMembership ? ($teamMembership->userOwner->id ?? $account->id) : $account->id;
+
         $balances = \App\Models\Balance::where('user_id', $account->id)
         ->orderBy('created_at', 'asc')
         ->get();
@@ -268,16 +271,16 @@ private function isDummyAccount(string $email): bool
         $subaccounts = Subaccount::where('user_id', $account->id)->get();
         $tokenResponse = app(\App\Http\Controllers\Business\ComplianceController::class)->getSumsubToken()->getData(true);
         $countryrule = CountryRule::where('is_active', 1)->select('country_iso', 'country_name', 'currency_iso')->get();
-              $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
-        ->get()
-        ->map(function ($c) {
-            return [
-                'code' => $c->code,
-                'currency_code' =>$c->currency_code,
-                'name' => $c->name,
-                'symbol' => $c->symbol,
-                'country_code' => strtolower($c->country_code ?? ''),
-            ];
+        $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'code' => $c->code,
+                    'currency_code' =>$c->currency_code,
+                    'name' => $c->name,
+                    'symbol' => $c->symbol,
+                    'country_code' => strtolower($c->country_code ?? ''),
+                ];
         })
         ->values()
         ->toArray();
@@ -293,7 +296,28 @@ private function isDummyAccount(string $email): bool
             });
 
         // $exchangeRatesLastUpdated = \App\Models\ExchangeRate::max('updated_at');
-
+        $currencyFees = \App\Models\UserCurrencyFee::where('user_id', $feeOwnerId)
+            ->get()
+            ->map(function ($f) {
+                return [
+                    'currency' => $f->currency,
+                    'collection' => [
+                        'enabled' => $f->collection_enabled,
+                        'percent' => $f->collection_percent,
+                        'fixed'   => $f->collection_fixed,
+                        'min'     => $f->collection_min,
+                        'max'     => $f->collection_max,
+                    ],
+                    'payout' => [
+                        'enabled' => $f->payout_enabled,
+                        'percent' => $f->payout_percent,
+                        'fixed'   => $f->payout_fixed,
+                        'min'     => $f->payout_min,
+                        'max'     => $f->payout_max,
+                    ],
+                ];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
@@ -335,6 +359,7 @@ private function isDummyAccount(string $email): bool
                 'payout_accounts' => $payoutAccounts,
                 'virtual_cards' => $virtualCards,
                 'subaccounts' => $subaccounts,
+                'currency_fees' => $currencyFees,
                 'owner_id' => $teamMembership ? ($teamMembership->userOwner->id ?? null) : $account->id,
                 'role' => $teamMembership ? ($teamMembership->role ?? 'member') : 'Owner',
             ]
@@ -599,6 +624,18 @@ private function isDummyAccount(string $email): bool
                 ];
             });
 
+            $currencyFees = \App\Models\Currency::where('is_active', true)
+            ->get(['code', 'min_amount', 'max_amount', 'collection_fee'])
+            ->map(function ($c) {
+                return [
+                    'currency' => $c->code,
+                    'collection_min' => $c->min_amount,
+                    'collection_max' => $c->max_amount,
+                    'collection_fee' => $c->collection_fee,
+                ];
+            })
+            ->values();
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -635,6 +672,7 @@ private function isDummyAccount(string $email): bool
                 'beneficiaries' => $beneficiaries,
                 'payout_accounts' => $payoutAccounts,
                 'virtual_cards' => $virtualCards,
+                'currency_fees' => $currencyFees,
                 'subaccounts' => $subaccounts,
             ]
         ], 200);

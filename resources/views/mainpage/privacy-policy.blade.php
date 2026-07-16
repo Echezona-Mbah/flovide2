@@ -202,7 +202,13 @@
                     <li>Email address</li>
                 </ul>
 
-                <h3 class="mt-6 font-semibold">2. Know Your Customer (KYC) Data</h3>
+                <h3 class="mt-6 font-semibold">2. Identity Verification Information (Know Your Customer / KYC)</h3>
+                <p>
+                    As part of our Know Your Customer (KYC) and Anti-Money Laundering (AML) obligations, we collect identity
+                    verification information, including government-issued identification documents, selfie photographs, and
+                    biometric facial information used solely to verify that the individual presenting the identity document
+                    is its legitimate owner.
+                </p>
                 <ul>
 
                     <li>
@@ -225,7 +231,12 @@
                                 impersonation and document fraud, and to meet our Know Your Customer (KYC) and Anti-Money
                                 Laundering (AML) obligations.
                             </p>
-                                               <li class="font-semibold text-[#0F243D]"> <b>Personal  (KYC) </b> </li>
+                            <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                                Biometric facial information is used exclusively for identity verification and fraud
+                                prevention. It is never used for advertising, profiling, marketing, or any unrelated
+                                purpose.
+                            </p>
+                               <li class="font-semibold text-[#0F243D]"> <b>Personal  (KYC) </b> </li>
 <li>Selfie/Liveness</li>
 <li>Identity Document</li>
 <li class="font-semibold text-[#0F243D]"><b>Business Address  (KYB)</b></li>
@@ -241,11 +252,15 @@
                             <p class="text-sm text-gray-600 mt-3 leading-relaxed">
                                 <span class="data-chip chip-partner"><i class="fas fa-shield-alt"></i>Verification Partner</span>
                                 <span class="ml-1">
-                                    This process is carried out through our identity verification partner,
-                                    <strong>Sumsub</strong>, which processes your selfie, ID document, and related liveness data
-                                    on our behalf under contractual data protection and confidentiality obligations. Sumsub does
-                                    not use your biometric data for any purpose other than performing identity verification for
-                                    Flovide, and does not sell it to third parties.
+                                    Identity verification information may be processed by trusted third-party identity
+                                    verification service providers acting on our behalf. This processing is carried out
+                                    through our identity verification partner, <strong>Sumsub</strong>, which processes
+                                    your selfie, ID document, and related liveness data on our behalf under contractual
+                                    data protection and confidentiality obligations. These providers process the
+                                    information solely to perform identity verification services and are contractually
+                                    required to protect the confidentiality and security of the information. Sumsub does
+                                    not use your biometric data for any purpose other than performing identity verification
+                                    for Flovide, and does not sell it to third parties.
                                 </span>
                             </p>
                         </div>
@@ -283,33 +298,44 @@
                 <h3 class="mt-4 font-semibold">Regulatory & Legal Compliance</h3>
                 <p>
                     To comply with AML, CTF, KYC, and financial regulations, including verifying your identity through facial
-                    matching and document checks performed by our verification partner Sumsub.
+                    matching and document checks performed by our verification partner Sumsub. Biometric facial data is used
+                    exclusively for identity verification and fraud prevention and is never used for advertising, profiling,
+                    marketing, or any unrelated purpose.
                 </p>
 
                 <h3 class="mt-4 font-semibold">Marketing & Communication</h3>
-                <p>To send relevant service updates and promotional communications (opt-out anytime).</p>
+                <p>To send relevant service updates and promotional communications (opt-out anytime). Face data is never used
+                    for this purpose.</p>
 
                 <h3 class="mt-4 font-semibold">Analytics & Improvement</h3>
-                <p>To improve service quality, performance, and user experience.</p>
+                <p>To improve service quality, performance, and user experience. Face data is never used for this purpose.</p>
 
-                <h2 class="mt-10 font-bold text-2xl">How Do We Keep Your Data Safe?</h2>
+                <h2 class="mt-10 font-bold text-2xl">Data Storage and Security</h2>
                 <p>
                     All personal data, including biometric and identity verification data, is encrypted and stored on secure
                     servers. Access is limited to authorised Flovide staff and our verification partner Sumsub, only for the
                     purposes described above. All communications are protected using TLS encryption.
                 </p>
+                <p>
+                    Identity verification data, including your selfie, liveness video, and identity document, is securely
+                    transmitted to and stored on Sumsub's secure infrastructure, in accordance with applicable privacy and
+                    security regulations and only for the purposes described in this Policy.
+                </p>
 
                 <h2 class="mt-10 font-bold text-2xl">How Long Do We Keep Your Data?</h2>
                 <p>
                     KYC and transaction records, including selfie and identity verification data, are retained for a minimum of
-                    five (5) years in line with regulatory requirements. Data may be retained longer where legally required.
+                    five (5) years in line with regulatory requirements. Identity verification records, including face data,
+                    are retained only for as long as required to comply with applicable legal and regulatory obligations,
+                    after which they are securely deleted. Data may be retained longer where legally required.
                 </p>
 
-                <h2 class="mt-10 font-bold text-2xl">Who Do We Share Your Data With?</h2>
+                <h2 class="mt-10 font-bold text-2xl">Sharing of Information</h2>
                 <p>
                     We do not sell personal data. Data is shared only with regulators, financial partners, and service
                     providers where required by law and protected by appropriate safeguards. This includes sharing your selfie
-                    and identity documents with Sumsub strictly for the purpose of verifying your identity.
+                    and identity documents with Sumsub strictly for the purpose of verifying your identity. Flovide does not
+                    sell, rent, or share users' face data with advertisers or other unrelated third parties.
                 </p>
 
                 <h2 class="mt-10 font-bold text-2xl">Your Rights</h2>
@@ -334,7 +360,7 @@
                 </p>
 
                 <p class="mt-12 text-sm text-gray-500">
-                    Last Updated: January 2026
+                    Last Updated: July 2026
                 </p>
             </div>
 
@@ -386,7 +412,9 @@
                     Identity documents, proof of address, source of funds, and transaction monitoring data in line with 
                     AML and Counter-Terrorism Financing regulations. Identity documents and facial biometric data are
                     verified through our identity verification partner, <strong>Sumsub</strong>, which processes this
-                    data on our behalf solely to confirm your identity and detect fraud.
+                    data on our behalf solely to confirm your identity and detect fraud. Biometric facial information is
+                    used exclusively for identity verification and fraud prevention and is never used for advertising,
+                    profiling, marketing, or any unrelated purpose.
                 </p>
 
                 <h4>3.3 Automatically Collected Data</h4>
@@ -415,7 +443,10 @@
                 <h3>6. Data Sharing</h3>
                 <p>
                     We do not sell personal data. We may share data with licensed banks, payment processors, our identity 
-                    verification provider Sumsub, regulators, and law enforcement where required by law.
+                    verification provider Sumsub, regulators, and law enforcement where required by law. Identity verification
+                    information, including face data, may be processed by trusted third-party identity verification service
+                    providers acting on our behalf, solely to perform identity verification services; these providers are
+                    contractually required to protect the confidentiality and security of the information.
                 </p>
 
                 <h3>7. International Transfers</h3>
@@ -427,7 +458,9 @@
                 <h3>8. Data Retention</h3>
                 <p>
                     KYC and transaction records, including biometric verification data, are retained for a minimum of five (5)
-                    years in line with financial regulatory requirements.
+                    years in line with financial regulatory requirements. Identity verification records, including face data,
+                    are retained only for as long as required to comply with applicable legal and regulatory obligations,
+                    after which they are securely deleted.
                 </p>
 
                 <h3>9. Data Security</h3>
@@ -498,7 +531,9 @@
                     <li>Personal info: name, date of birth, nationality, contact info, government ID</li>
                     <li>Account info: login credentials, security info, bank/debit card details</li>
                     <li>KYC/Compliance info: identity verification, proof of address, source of funds, and facial
-                        biometric data (live selfie / liveness check) collected during onboarding</li>
+                        biometric data (live selfie / liveness check) collected during onboarding. Biometric facial
+                        information is used exclusively for identity verification and fraud prevention and is never
+                        used for advertising, profiling, marketing, or any unrelated purpose.</li>
                     <li>Recipient info: name, contact, bank/wallet info, ID where required</li>
                     <li>Automatic data: IP address, device info, browser/OS, usage logs, cookies</li>
                     <li>Third-party data: our identity verification partner Sumsub (facial and document verification), banks/payment processors, fraud prevention, marketing/analytics</li>
@@ -525,7 +560,10 @@
                 <p>
                     We do not sell personal information. We may share it with partner banks, payment processors, our
                     identity verification provider Sumsub, cloud/IT vendors, and regulators or law enforcement when
-                    legally required.
+                    legally required. Identity verification information, including face data, may be processed by
+                    trusted third-party identity verification service providers acting on our behalf, solely to
+                    perform identity verification services; these providers are contractually required to protect the
+                    confidentiality and security of the information.
                 </p>
 
                 <h3>7. Cross-Border Transfers</h3>
@@ -536,6 +574,7 @@
                 <h3>8. Data Retention</h3>
                 <ul>
                     <li>KYC and transaction records, including biometric verification data: minimum 5 years after last transaction or account closure</li>
+                    <li>Identity verification records, including face data, are retained only for as long as required to comply with applicable legal and regulatory obligations, after which they are securely deleted</li>
                     <li>Other data retained as needed for legal, business, or dispute resolution purposes</li>
                 </ul>
 
@@ -614,7 +653,8 @@
         <li><strong>Provided directly:</strong> identity, contact, account credentials, government ID, financial info, communications</li>
         <li><strong>KYC/Compliance:</strong> identity verification, proof of address, source of funds/wealth, transaction
             monitoring, and facial biometric data (live selfie and, where required, a short liveness video) collected to
-            confirm your identity</li>
+            confirm your identity. Biometric facial information is used exclusively for identity verification and
+            fraud prevention and is never used for advertising, profiling, marketing, or any unrelated purpose.</li>
         <li><strong>Recipient info:</strong> name, contact, bank/wallet info, ID where required</li>
         <li><strong>Automatically collected:</strong> IP address, device info, browser/OS, app usage, cookies</li>
         <li><strong>Third-party info:</strong> our identity verification partner Sumsub (facial and document
@@ -647,6 +687,7 @@
     <h3>7. Data Retention</h3>
     <ul>
         <li><strong>Regulatory:</strong> KYC and transaction records, including biometric verification data, retained ≥5 years post-account closure or transaction</li>
+        <li><strong>Identity verification records:</strong> including face data, are retained only for as long as required to comply with applicable legal and regulatory obligations, after which they are securely deleted</li>
         <li><strong>Business/Legal:</strong> retained longer if needed for disputes, agreements, or legal obligations; securely deleted/anonymized afterward</li>
     </ul>
 
@@ -661,6 +702,9 @@
     <p>
         We do not sell personal information. We may disclose it to banks, payment processors, our identity
         verification partner Sumsub, fraud prevention partners, regulators, courts, or law enforcement as required.
+        Identity verification information, including face data, may be processed by trusted third-party identity
+        verification service providers acting on our behalf, solely to perform identity verification services; these
+        providers are contractually required to protect the confidentiality and security of the information.
     </p>
 
     <h3>10. Cross-Border Data Transfers</h3>
@@ -747,7 +791,9 @@
                     <li>Utility bill or bank statement</li>
                     <li>Source of funds documentation</li>
                     <li>A live selfie/facial photo (and, where required, a short liveness video), used to verify your
-                        identity against your ID document</li>
+                        identity against your ID document. Biometric facial information is used exclusively for
+                        identity verification and fraud prevention and is never used for advertising, profiling,
+                        marketing, or any unrelated purpose.</li>
                 </ul>
 
                 <h3 class="mt-4 font-semibold">2.3 Recipient Information</h3>
@@ -789,14 +835,20 @@
                 <h2 class="mt-6 font-bold text-2xl">6. Data Retention</h2>
                 <p>
                     KYC and transaction records, including selfie and identity verification data, are retained for a
-                    minimum of five (5) years in accordance with Nigerian regulations.
+                    minimum of five (5) years in accordance with Nigerian regulations. Identity verification records,
+                    including face data, are retained only for as long as required to comply with applicable legal and
+                    regulatory obligations, after which they are securely deleted.
                 </p>
 
                 <h2 class="mt-6 font-bold text-2xl">7. Data Sharing</h2>
                 <p>
                     We do not sell personal data. Information, including your selfie and identity documents for
                     verification purposes, may be shared with our identity verification partner <strong>Sumsub</strong>,
-                    banks, regulators, compliance providers, and law enforcement where legally required.
+                    banks, regulators, compliance providers, and law enforcement where legally required. Identity
+                    verification information, including face data, may be processed by trusted third-party identity
+                    verification service providers acting on our behalf, solely to perform identity verification
+                    services; these providers are contractually required to protect the confidentiality and security of
+                    the information.
                 </p>
 
                 <h2 class="mt-6 font-bold text-2xl">8. Your Rights Under NDPR</h2>

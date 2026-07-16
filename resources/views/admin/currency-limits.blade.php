@@ -309,6 +309,7 @@
                                     <th style="min-width:190px;">Currency</th>
                                     <th style="min-width:170px;">Min Amount</th>
                                     <th style="min-width:170px;">Max Amount</th>
+                                    <th style="min-width:170px;">Collection Fee</th>
                                     <th style="min-width:180px;">Status</th>
                                     <th class="text-end" style="min-width:120px;">Action</th>
                                 </tr>
@@ -350,6 +351,17 @@
                                             </td>
 
                                             <td>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    name="collection_fee"
+                                                    class="form-control money-input"
+                                                    value="{{ old('collection_fee', $currency->collection_fee) }}"
+                                                >
+                                            </td>
+
+                                            <td>
                                                 <select name="is_active" class="form-select select-modern mb-2">
                                                     <option value="1" {{ $currency->is_active ? 'selected' : '' }}>Active</option>
                                                     <option value="0" {{ !$currency->is_active ? 'selected' : '' }}>Inactive</option>
@@ -369,7 +381,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="empty-state">No currencies available.</td>
+                                        <td colspan="6" class="empty-state">No currencies available.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

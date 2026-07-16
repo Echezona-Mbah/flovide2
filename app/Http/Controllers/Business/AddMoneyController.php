@@ -67,12 +67,45 @@ public function interacDetails(Request $request)
 {
     $user = Auth::user();
     $balanceId = $request->query('balance_id');
+    $amount    = (float) $request->query('amount', 0);
 
     $balance = Balance::where('user_id', $user->id)
         ->where('id', $balanceId)
         ->first();
 
-    return view('business.interac_details', compact('balance'));
+    if (!$balance) {
+        return redirect()->route('add_money')->with('error', 'Balance account not found.');
+    }
+
+    $currency = strtoupper($balance->currency);
+
+    $fee       = 0;
+    $netAmount = $amount;
+    $feeLabel  = null;
+
+    if ($currency === 'CAD') {
+        $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
+            ->where('currency', $currency)
+            ->first();
+
+        if ($userFee && $userFee->collection_enabled) {
+            $fee       = $userFee->calcCollectionFee($amount);
+            $netAmount = round($amount - $fee, 2);
+            $feeLabel  = $this->describeFee($userFee, 'collection', $currency);
+        }
+    }
+
+    Log::info('[Interac Details] Fee computed', [
+        'user_id'  => $user->id,
+        'currency' => $currency,
+        'amount'   => $amount,
+        'fee'      => $fee,
+        'net'      => $netAmount,
+    ]);
+
+    return view('business.interac_details', compact(
+        'balance', 'amount', 'fee', 'netAmount', 'feeLabel'
+    ));
 }
 
 
@@ -82,8 +115,7 @@ public function interacDetails(Request $request)
 public function topupWithInterac(Request $request, BlaaizService $blaaiz)
 {
     Log::info('[Interac Initiate] Request received', $request->all());
-    dd("user");
-
+   
     $isApi = $request->expectsJson();
     $mode  = session('mode', 'live');
 
@@ -103,13 +135,13 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
         ], 401);
     }
 
-
     Log::info('[Interac Initiate] Authenticated user', ['user_id' => $user->id, 'email' => $user->email]);
 
     $request->validate([
         'balance' => 'required|string',   // ← UUID, not integer
         'amount'  => 'required|numeric|min:1',
         'email'   => 'required|email',
+        'transfer_fee'  => 'nullable|numeric',
     ]);
 
     $balance = Balance::where('user_id', $user->id)
@@ -186,6 +218,19 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
 
     $platformFee = $collectionFee;
     $netAmount   = round($amount - $platformFee, 2); // what actually lands in the wallet
+
+        if ($amount <= $platformFee) {
+            $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'AMOUNT_BELOW_FEE',
+                'data'    => [
+                    'amount'       => $amount,
+                    'platform_fee' => $platformFee,
+                ],
+            ], 422);
+        }
 
     Log::info('[Interac Initiate] Fee computed', [
         'amount'         => $amount,
@@ -432,5 +477,182 @@ public function topupWithCard(Request $request)
     ], 200);
 }
 
+
+// // ── Currency Fee Lookup ─────────────────────────────────────────────────
+
+public function getCurrencyFee(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated',
+            'code'    => 'UNAUTHENTICATED',
+            'data'    => null,
+        ], 401);
+    }
+
+    $request->validate([
+        'currency' => 'required|string|in:' . implode(',', \App\Models\UserCurrencyFee::CURRENCIES),
+        'type'     => 'nullable|string|in:collection,payout',
+        'amount'   => 'nullable|numeric|min:0',
+    ]);
+
+    $currency = strtoupper($request->currency);
+    $type     = $request->type;
+    $amount   = $request->filled('amount') ? (float) $request->amount : null;
+
+    $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
+        ->where('currency', $currency)
+        ->first();
+
+    Log::info('[CurrencyFee Lookup]', [
+        'user_id'  => $user->id,
+        'currency' => $currency,
+        'type'     => $type,
+        'amount'   => $amount,
+        'found'    => (bool) $userFee,
+    ]);
+
+    if (!$userFee) {
+        $msg = "No fee settings found for {$currency}. Contact your marketer.";
+        return response()->json([
+            'success' => false,
+            'message' => $msg,
+            'code'    => 'FEE_SETTINGS_NOT_FOUND',
+            'data'    => null,
+        ], 404);
+    }
+
+    $build = function (string $side) use ($userFee, $currency, $amount) {
+        $enabled = (bool) $userFee->{"{$side}_enabled"};
+        $min     = $userFee->{"{$side}_min"};
+        $max     = $userFee->{"{$side}_max"};
+
+        $out = [
+            'enabled'      => $enabled,
+            'min'          => $min,
+            'max'          => $max,
+            'fee_label'    => $this->describeFee($userFee, $side, $currency), // e.g. "2.5 CAD" or "1.5%"
+        ];
+
+        if ($amount !== null) {
+            $calc = $side === 'collection'
+                ? $userFee->calcCollectionFee($amount)
+                : $userFee->calcPayoutFee($amount);
+
+            $out['amount']     = $amount;
+            $out['fee']        = $calc;
+            $out['net_amount'] = round($amount - $calc, 2);
+        }
+
+        return $out;
+    };
+
+    $data = ['currency' => $currency];
+
+    if ($type === 'collection') {
+        $data['collection'] = $build('collection');
+    } elseif ($type === 'payout') {
+        $data['payout'] = $build('payout');
+    } else {
+        $data['collection'] = $build('collection');
+        $data['payout']     = $build('payout');
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fee settings retrieved successfully.',
+        'code'    => 'FEE_SETTINGS_FOUND',
+        'data'    => $data,
+    ], 200);
+}
+
+// ── Helper: human-readable fee, no percent/fixed leaked ─────────────────
+
+private function describeFee(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+{
+    $percent = $userFee->{"{$side}_percent"};
+    $fixed   = $userFee->{"{$side}_fixed"};
+
+    if ($percent > 0 && $fixed > 0) {
+        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    }
+    if ($percent > 0) {
+        return "{$percent}%";
+    }
+    if ($fixed > 0) {
+        return number_format($fixed, 2) . " {$currency} flat";
+    }
+    return "No fee";
+}
+
+
+// ── Currency Fee Lookup (Collection only) ────────────────────────────────
+
+public function getCurrencyFees(Request $request)
+{
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated',
+            'code'    => 'UNAUTHENTICATED',
+            'data'    => null,
+        ], 401);
+    }
+
+    $userFees = \App\Models\UserCurrencyFee::where('user_id', $user->id)->get();
+
+    Log::info('[CurrencyFee Lookup]', [
+        'user_id' => $user->id,
+        'count'   => $userFees->count(),
+    ]);
+
+    if ($userFees->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No fee settings found. Contact your marketer.',
+            'code'    => 'FEE_SETTINGS_NOT_FOUND',
+            'data'    => null,
+        ], 404);
+    }
+
+    $data = $userFees->map(function ($userFee) {
+        return [
+            'currency'  => $userFee->currency,
+            'enabled'   => (bool) $userFee->collection_enabled,
+            'min'       => $userFee->collection_min,
+            'max'       => $userFee->collection_max,
+            'fee_label' => $this->describeFees($userFee, 'collection', $userFee->currency),
+        ];
+    })->values();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Collection fee settings retrieved successfully.',
+        'code'    => 'FEE_SETTINGS_FOUND',
+        'data'    => $data,
+    ], 200);
+}
+
+// ── Helper: human-readable fee, no percent/fixed leaked ─────────────────
+
+private function describeFees(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+{
+    $percent = $userFee->{"{$side}_percent"};
+    $fixed   = $userFee->{"{$side}_fixed"};
+
+    if ($percent > 0 && $fixed > 0) {
+        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    }
+    if ($percent > 0) {
+        return "{$percent}%";
+    }
+    if ($fixed > 0) {
+        return number_format($fixed, 2) . " {$currency} flat";
+    }
+    return "No fee";
+}
 
 }

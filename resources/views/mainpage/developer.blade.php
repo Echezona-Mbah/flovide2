@@ -77,6 +77,7 @@
             <a href="#balances" class="text-lg font-semibold text-black">Balances</a>
             <a href="#beneficiaries" class="text-lg font-semibold text-black">Beneficiaries</a>
             <a href="#transactions" class="text-lg font-semibold text-black">Transactions</a>
+            <a href="#collections" class="text-lg font-semibold text-black">Collections</a>
             <a href="#rates" class="text-lg font-semibold text-black">Rates</a>
             <a href="#reference-data" class="text-lg font-semibold text-black">Reference Data</a>
             <a href="#webhooks" class="text-lg font-semibold text-black">Webhooks</a>
@@ -194,6 +195,7 @@
           <a href="#balances" class="sidebar-active px-3 py-2 text-sm font-medium rounded-md transition-all">Balances</a>
           <a href="#beneficiaries" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Beneficiaries</a>
           <a href="#transactions" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Transactions</a>
+          <a href="#collections" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Collections</a>
           <a href="#rates" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Rates</a>
           <a href="#reference-data" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Reference Data</a>
 
@@ -514,6 +516,37 @@
 
                             <div class="api-block" data-group="transactions-post"></div>
                         </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <section id="collections" class="mb-20">
+                    <div class="flex items-center gap-4 mb-8">
+                        <h2 class="text-3xl font-bold text-slate-900">Collections API</h2>
+                        <span class="px-2 py-1 bg-slate-200 text-slate-600 rounded text-[10px] font-bold uppercase tracking-wider">Reference</span>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div class="p-6 md:p-8">
+                                <div class="flex flex-wrap items-center gap-3 mb-4">
+                                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs">POST</span>
+                                    <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/collections/interac</code>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3">Interac collection (top-up)</h3>
+                                <p class="text-slate-600 mb-6">Sends an Interac Auto Deposit money request to the payer's email. Your CAD wallet is credited automatically once the payer approves. The collection fee (configured per account) is deducted from the amount before crediting.</p>
+
+                                <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
+                                    <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
+                                    <div class="mt-4 space-y-3">
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">amount</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">email</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required (payer's email)</span></div>
+                                    </div>
+                                </details>
+
+                                <div class="api-block" data-group="collection-interac"></div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -2287,20 +2320,135 @@ Console.WriteLine(body);`,
   "message": "Transaction transaction successful",
   "code": "FLOVIDE_SUCCESS",
   "data": {
-    "id": "019e83bc-87a5-7067-82b6-fd4a0f9b1c95",
-    "reference": "019e83ba-f543-7359-9a07-81685f147ba5",
-    "order_id": "TXN_1780326631",
-    "status": "pending",
-    "amount": 1,
-    "total_amount": 1,
-    "fees": 0,
-    "currency": "KES",
-    "to_currency": "NGN",
-    "recipient_amount": 100,
-    "payment_provider": "Flovide",
-    "recipient_account_name": "ECHEZONA ERNEST MBAH",
-    "recipient_account_number": "8172653823",
-    "created_at": "2026-06-01T15:10:31+00:00"
+    "id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+    "reference": "CAyAHe1XxpDs",
+    "order_id": "TEST_ae8cda30-f4a8-4c0f-a873-40e3d9436d70",
+    "created_at": "2026-07-16T16:14:44+00:00"
+  }
+}`
+},
+
+
+'collection-interac': {
+  curl: `curl -X POST "https://flovide.com/api/v1/collections/interac" ^
+  -H "Accept: application/json" ^
+  -H "Content-Type: application/json" ^
+  -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+  -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
+  -d "{\"amount\":100,\"email\":\"payer@example.com\"}"`,
+
+  javascript: `fetch('https://flovide.com/api/v1/collections/interac', {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+    'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
+  },
+  body: JSON.stringify({
+    amount: 100,
+    email: 'payer@example.com'
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`,
+
+  go: `package main
+
+import (
+  "bytes"
+  "fmt"
+  "io"
+  "net/http"
+)
+
+func main() {
+  jsonData := []byte(\`{"amount":100,"email":"payer@example.com"}\`)
+
+  req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/collections/interac", bytes.NewBuffer(jsonData))
+  req.Header.Set("Accept", "application/json")
+  req.Header.Set("Content-Type", "application/json")
+  req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+
+  client := &http.Client{}
+  resp, _ := client.Do(req)
+  defer resp.Body.Close()
+
+  body, _ := io.ReadAll(resp.Body)
+  fmt.Println(string(body))
+}`,
+
+  python: `import requests
+
+response = requests.post(
+    "https://flovide.com/api/v1/collections/interac",
+    headers={
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+        "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
+    },
+    json={
+        "amount": 100,
+        "email": "payer@example.com"
+    },
+)
+
+print(response.json())`,
+
+  java: `String json = """
+{
+  "amount": 100,
+  "email": "payer@example.com"
+}
+""";
+
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("https://flovide.com/api/v1/collections/interac"))
+    .header("Accept", "application/json")
+    .header("Content-Type", "application/json")
+    .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+    .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+    .POST(HttpRequest.BodyPublishers.ofString(json))
+    .build();
+
+HttpResponse<String> response = HttpClient.newHttpClient()
+    .send(request, HttpResponse.BodyHandlers.ofString());
+
+System.out.println(response.body());`,
+
+  csharp: `using System.Text;
+
+using var client = new HttpClient();
+
+client.DefaultRequestHeaders.Add("Accept", "application/json");
+client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
+
+var json = """
+{
+  "amount": 100,
+  "email": "payer@example.com"
+}
+""";
+
+var content = new StringContent(json, Encoding.UTF8, "application/json");
+var response = await client.PostAsync("https://flovide.com/api/v1/collections/interac", content);
+var body = await response.Content.ReadAsStringAsync();
+
+Console.WriteLine(body);`,
+
+  response: `{
+  "success": true,
+  "message": "Interac money request sent successfully.",
+  "code": "INTERAC_COLLECTION_INITIATED",
+  "mode": "live",
+  "data": {
+    "id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+    "reference": "CAyAHe1XxpDs",
+    "order_id": "TEST_ae8cda30-f4a8-4c0f-a873-40e3d9436d70",
+    "created_at": "2026-07-16T16:14:44+00:00"
   }
 }`
 },

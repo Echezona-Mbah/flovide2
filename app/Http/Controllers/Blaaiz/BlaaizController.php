@@ -16,7 +16,7 @@ class BlaaizController extends Controller
     public function acceptInteracMoneyRequest(Request $request, BlaaizService $blaaiz)
         {
                 // Log::info('[Interac] Request received', $request->all());
-
+            // dd('ffffff');
             $validated = $request->validate([
                 'security_answer' => 'nullable|string|max:255',
                 'email'           => 'nullable|email',
@@ -90,8 +90,7 @@ class BlaaizController extends Controller
 
      public function initiateInteracMoneyRequest(Request $request, BlaaizService $blaaiz)
     {
-        Log::info('[Interac Initiate] Request received', $request->all());
-       // dd($request->all());
+        // Log::info('[Interac Initiate] Request received', $request->all());
         $validated = $request->validate([
             'amount'   => 'required|numeric|min:0.1',
             'email'    => 'required|email',
@@ -105,6 +104,8 @@ class BlaaizController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
+        
+
         if (!$balance) {
             return response()->json([
                 'success' => false,
@@ -112,7 +113,78 @@ class BlaaizController extends Controller
                 'code'    => 'INVALID_WALLET',
             ], 422);
         }
- 
+
+        $currency = strtoupper($validated['currency'] ?? $balance->currency ?? 'CAD');
+        $amount   = (float) $validated['amount'];
+
+        $platformFee = 0;
+
+        $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
+            ->where('currency', $currency)
+            ->first();
+
+        Log::info('[Interac Initiate] Fee lookup', [
+            'user_id'  => $user->id,
+            'currency' => $currency,
+            'found'    => (bool) $userFee,
+            'enabled'  => $userFee->collection_enabled ?? null,
+        ]);
+
+        if (!$userFee || !$userFee->collection_enabled) {
+            $msg = "Contact your marketer to enable collection pricing for {$currency}.";
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'COLLECTION_DISABLED',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($userFee->collection_min > 0 && $amount < $userFee->collection_min) {
+            $msg = "Minimum top-up for {$currency} is " . number_format($userFee->collection_min, 2);
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'BELOW_COLLECTION_MIN',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($userFee->collection_max > 0 && $amount > $userFee->collection_max) {
+            $msg = "Maximum top-up for {$currency} is " . number_format($userFee->collection_max, 2);
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'ABOVE_COLLECTION_MAX',
+                'data'    => null,
+            ], 422);
+        }
+
+        // Use the model's own calculator instead of re-deriving the formula here
+      $platformFee = $userFee->calcCollectionFee($amount);
+        $netAmount   = $userFee->collectionAmountAfterFee($amount);
+
+        Log::info('[Interac Initiate] Fee calculated', [
+            'platform_fee' => $platformFee,
+            'net_amount'   => $netAmount,
+        ]);
+
+
+        if ($amount <= $platformFee) {
+            $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'AMOUNT_BELOW_FEE',
+                'data'    => [
+                    'amount'       => $amount,
+                    'platform_fee' => $platformFee,
+                ],
+            ], 422);
+        }
+
+
+    
         $payload = [
             'amount' => $validated['amount'],
             'email'  => $validated['email'],
@@ -159,6 +231,9 @@ class BlaaizController extends Controller
             'payment_method'   => 'auto',
             'sender'           => $validated['email'],
             'amount'           => $validated['amount'],
+            'fees'              => $platformFee,
+            'platform_fee'      => $platformFee,
+            'recipient_amount'  => $netAmount,
             'currency'         => $validated['currency'] ?? 'CAD',
             'status'           => 'pending',
             'reference'        => $responseData['reference'],        // e.g. CA1MRYdVQK2h

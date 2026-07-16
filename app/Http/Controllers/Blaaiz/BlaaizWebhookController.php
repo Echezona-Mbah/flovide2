@@ -143,12 +143,12 @@ class BlaaizWebhookController extends Controller
         if ($mapped === 'success' && $tx->balance_id) {
             $balance = Balance::find($tx->balance_id);
             if ($balance) {
-                $balance->amount += $tx->amount;
+                $balance->amount += $tx->recipient_amount;
                 $balance->save();
 
                 Log::info('[BlaaizWebhook] Balance credited', [
                     'balance_id'  => $balance->id,
-                    'amount'      => $tx->amount,
+                    'amount'      => $tx->recipient_amount,
                     'new_balance' => $balance->amount,
                 ]);
             }
@@ -218,12 +218,12 @@ class BlaaizWebhookController extends Controller
         if ($mapped === 'success' && $tx->balance_id) {
             $balance = Balance::find($tx->balance_id);
             if ($balance) {
-                $balance->amount += $tx->amount;
+                $balance->amount += $tx->recipient_amount;
                 $balance->save();
 
                 Log::info('[BlaaizWebhook] Balance credited', [
                     'balance_id'  => $balance->id,
-                    'amount'      => $tx->amount,
+                    'amount'      => $tx->recipient_amount,
                     'new_balance' => $balance->amount,
                 ]);
             }

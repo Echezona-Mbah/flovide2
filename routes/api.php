@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountInquiryController;
 use App\Http\Controllers\API\V1\BalanceController;
 use App\Http\Controllers\API\V1\BeneficiaryController;
+use App\Http\Controllers\API\V1\CollectionController;
 use App\Http\Controllers\API\V1\RateController;
 use App\Http\Controllers\API\V1\ReferenceDataController;
 use App\Http\Controllers\API\V1\TransactionController;
@@ -312,6 +313,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/exchange-rate/refresh', [SendMoneyController::class, 'refreshExchangeRates']);
     Route::post('/send', [SendMoneyController::class, 'sendTransaction'])->name('transactions.send');
     Route::post('/exchange-send', [SendMoneyController::class, 'exchangeSubmit']);
+    Route::get('/send/currency-fee', [SendMoneyController::class, 'getCurrencyFee']);
+    Route::get('/send/currency-fees', [SendMoneyController::class, 'getPayoutFees']);
+
+
+
 
     // api routes for Balance details
     Route::get('balances', [CreateBankController::class, 'index']);
@@ -389,6 +395,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::post('/addMoney/interac/initiate', [BusinessAddMoneyController::class, 'topupWithInterac']);
     Route::post('/topup', [BusinessAddMoneyController::class, 'topupWithCard']);
+    Route::get('/addMoney/currency-fee', [BusinessAddMoneyController::class, 'getCurrencyFee']);
+    Route::get('/addMoney/currency-fees', [BusinessAddMoneyController::class, 'getCurrencyFees']);
+
 
     //notifications
     Route::get('/notifications', [BusinessNotificationController::class, 'index']);
@@ -424,6 +433,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 });
 
+
+
+    Route::get('/personal-addMoney/currency-fee', [AddMoneyController::class, 'getCurrencyFee']);
 
     // Route::get('/personal', [RegisterController::class, 'getAllPersonal']);
     // Route::get('/getLoggedInPersonal', [RegisterController::class, 'getLoggedInPersonal']);
@@ -566,6 +578,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
         Route::post('/personal-addMoney/interac/initiate', [AddMoneyController::class, 'topupWithInteracc']);
+        // Route::get('/personal-addMoney/currency-fee', [AddMoneyController::class, 'getCurrencyFee']);
+
         Route::post('/personal-topup', [AddMoneyController::class, 'topupWithCard']);
 
 
@@ -618,6 +632,8 @@ Route::prefix('v1')
         Route::get('/reference-data', [ReferenceDataController::class, 'index']);
         Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
         Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+
+        Route::post('/collections/interac', [CollectionController::class, 'collectInterac']);
     });
 
 
@@ -647,6 +663,9 @@ Route::prefix('test/v1')
         Route::get('/reference-data', [ReferenceDataController::class, 'index']);
         Route::get('/reference-data/currencies', [ReferenceDataController::class, 'currencies']);
         Route::get('/reference-data/banks', [ReferenceDataController::class, 'banks']);
+
+        Route::post('/collections/interac', [CollectionController::class, 'collectInterac']);
+
     });
 // git filter-branch --force --index-filter "git rm --cached --ignore-unmatch routes/api.php" --prune-empty --tag-name-filter cat -- --all
 

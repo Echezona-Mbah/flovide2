@@ -56,72 +56,122 @@ public function create(Request $request)
 }
 
 
-    public function createBalance(Request $request)
+//     public function createBalance(Request $request)
+// {
+//     $request->validate([
+//         'name' => 'required|string',
+//         'currency' => 'required|string',
+//     ]);
+
+//     $userId = Auth::id() ?? $request->user_id;
+//     $currency = strtoupper($request->currency);
+
+//     // 🔎 Check if user already has money in any balance
+//     // $hasMoney = Balance::where('user_id', $userId)
+//     //     ->where('amount', '>', 0)
+//     //     ->exists();
+
+//     // if (!$hasMoney) {
+//     //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
+
+//     //     return $request->expectsJson()
+//     //         ? response()->json([
+//     //             'success' => false,
+//     //             'message' => $errorMessage,
+//     //             'code' => 'NO_FUNDS',
+//     //             'data' => null
+//     //         ], 400)
+//     //         : redirect()->back()->withErrors(['message' => $errorMessage]);
+//     // }
+
+//     // 🔎 Check if user already has this currency
+//     $exists = Balance::where('user_id', $userId)
+//         ->where('currency', $currency)
+//         ->exists();
+
+//     if ($exists) {
+//         $errorMessage = "You already have a $currency balance. Duplicates are not allowed.";
+
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => $errorMessage,
+//                 'code' => 'DUPLICATE_BALANCE',
+//                 'data' => null
+//             ], 400)
+//             : redirect()->back()->withErrors(['message' => $errorMessage]);
+//     }
+
+//     $balance = Balance::create([
+//         'user_id' => $userId,
+//         'name' => $request->name,
+//         'currency' => $request->currency,
+//         'balance' => 0,
+//     ]);
+
+//     if ($request->expectsJson()) {
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Balance created successfully.',
+//             'code' => 'BALANCE_CREATED',
+//             'data' => $balance
+//         ], 201);
+//     }
+
+//     return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
+// }
+
+public function createBalance(Request $request)
 {
     $request->validate([
-        'name' => 'required|string',
+        'name'     => 'required|string',
         'currency' => 'required|string',
+        'mode'     => 'nullable|in:live,test',
     ]);
 
-    $userId = Auth::id() ?? $request->user_id;
+    $userId   = Auth::id() ?? $request->user_id;
     $currency = strtoupper($request->currency);
+    $mode     = $request->input('mode', session('mode', 'live'));
 
-    // 🔎 Check if user already has money in any balance
-    // $hasMoney = Balance::where('user_id', $userId)
-    //     ->where('amount', '>', 0)
-    //     ->exists();
-
-    // if (!$hasMoney) {
-    //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
-
-    //     return $request->expectsJson()
-    //         ? response()->json([
-    //             'success' => false,
-    //             'message' => $errorMessage,
-    //             'code' => 'NO_FUNDS',
-    //             'data' => null
-    //         ], 400)
-    //         : redirect()->back()->withErrors(['message' => $errorMessage]);
-    // }
-
-    // 🔎 Check if user already has this currency
+    // 🔎 Check if user already has this currency IN THIS MODE
     $exists = Balance::where('user_id', $userId)
         ->where('currency', $currency)
+        ->where('mode', $mode)
         ->exists();
 
     if ($exists) {
-        $errorMessage = "You already have a $currency balance. Duplicates are not allowed.";
+        $errorMessage = "You already have a {$currency} balance in " . ucfirst($mode) . " mode. Duplicates are not allowed.";
 
         return $request->expectsJson()
             ? response()->json([
                 'success' => false,
                 'message' => $errorMessage,
-                'code' => 'DUPLICATE_BALANCE',
-                'data' => null
+                'code'    => 'DUPLICATE_BALANCE',
+                'data'    => null,
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
     $balance = Balance::create([
-        'user_id' => $userId,
-        'name' => $request->name,
-        'currency' => $request->currency,
-        'balance' => 0,
+        'user_id'  => $userId,
+        'name'     => $request->name,
+        'currency' => $currency,
+        'mode'     => $mode,
+        'amount'   => 0,
     ]);
 
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Balance created successfully.',
-            'code' => 'BALANCE_CREATED',
-            'data' => $balance
+            'code'    => 'BALANCE_CREATED',
+            'mode'    => $mode,
+            'data'    => $balance,
         ], 201);
     }
 
-    return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
+    return redirect()->route('add_account.create')->with('success', ucfirst($mode) . ' account created successfully.');
 }
-
-
 
 
 public function getUserTotalBalance(Request $request)

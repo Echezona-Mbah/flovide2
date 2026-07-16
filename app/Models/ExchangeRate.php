@@ -16,6 +16,7 @@ class ExchangeRate extends Model
 
         'rate',
         'transfer_fee',
+        'collection_fee',
         'from_currency_id',
         'to_currency_id',
     ];

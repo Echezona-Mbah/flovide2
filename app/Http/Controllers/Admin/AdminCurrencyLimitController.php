@@ -19,12 +19,14 @@ class AdminCurrencyLimitController extends Controller
         $request->validate([
             'min_amount' => 'required|numeric|min:0',
             'max_amount' => 'required|numeric|gt:min_amount',
+            'collection_fee' => 'nullable|numeric|min:0',
             'is_active' => 'nullable|boolean',
         ]);
 
         $currency->update([
             'min_amount' => $request->min_amount,
             'max_amount' => $request->max_amount,
+            'collection_fee' => $request->collection_fee ?? 0,
             'is_active' => $request->boolean('is_active', true),
         ]);
 

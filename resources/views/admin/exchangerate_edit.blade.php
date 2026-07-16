@@ -64,6 +64,13 @@
                                     @error('transfer_fee') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="collection_fee" class="form-label">Collection Fee</label>
+                                    <input type="number" step="0.01" name="collection_fee" id="collection_fee" class="form-control"
+                                        value="{{ old('collection_fee', $rate->collection_fee) }}">
+                                    @error('collection_fee') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+
                                 <button type="submit" class="btn btn-primary">Update Rate</button>
                                 <a href="{{ route('admin.exchangerate') }}" class="btn btn-secondary">Cancel</a>
                             </form>

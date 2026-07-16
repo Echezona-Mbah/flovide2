@@ -160,6 +160,7 @@
                                                 <th>To</th>
                                                 <th>Rate</th>
                                                 <th>Transfer Fee</th>
+                                                <th>Collection Fee</th>
                                                 <th class="text-end">Actions</th>
                                             </tr>
                                         </thead>
@@ -170,6 +171,7 @@
                                                     <td>{{ $item->toCurrency->code ?? 'N/A' }}</td>
                                                     <td>{{ $item->rate ?? 'N/A' }}</td>
                                                     <td>{{ $item->transfer_fee ?? 'N/A' }}</td>
+                                                    <td>{{ $item->collection_fee ?? 'N/A' }}</td>
                                                     <td class="text-end">
                                                         <div class="actions">
                                                             <a href="{{ route('admin.exchangerate.edit', $item->id) }}" class="btn btn-action btn-edit">
@@ -252,6 +254,7 @@
         </select>
         <input class="form-control mb-3" name="rate" placeholder="Rate" required>
         <input class="form-control mb-3" name="transfer_fee" placeholder="Transfer Fee (optional)">
+        <input class="form-control mb-3" name="collection_fee" placeholder="Collection Fee (optional)">
       </div>
       <div class="modal-footer">
         <button class="btn btn-brand">Save</button>

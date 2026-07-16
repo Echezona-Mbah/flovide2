@@ -53,6 +53,30 @@
           </div>
         </div>
 
+        {{-- Fee breakdown card (Interac only, CAD) --}}
+        @if($amount > 0)
+        <div id="feeBreakdownCard" class="bg-white border border-gray-200 rounded-2xl p-4 mb-4">
+          <div class="flex justify-between items-center mb-2 text-sm">
+            <span class="text-gray-400">Amount</span>
+            <span class="font-semibold text-gray-900">{{ number_format($amount, 2) }} {{ $balance->currency }}</span>
+          </div>
+          <div class="flex justify-between items-center mb-2 text-sm">
+            <span class="text-gray-400 flex items-center gap-1.5">
+              Collection fee
+              @if($feeLabel)
+                <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">{{ $feeLabel }}</span>
+              @endif
+            </span>
+            <span class="font-semibold text-red-500">− {{ number_format($fee, 2) }} {{ $balance->currency }}</span>
+          </div>
+          <div class="border-t border-dashed border-gray-200 my-2"></div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-gray-700 font-bold">You'll receive</span>
+            <span class="font-extrabold text-green-600 text-base">{{ number_format($netAmount, 2) }} {{ $balance->currency }}</span>
+          </div>
+        </div>
+        @endif
+
         {{-- How it works strip (Interac only) --}}
         <div id="howItWorksCard" class="bg-white border border-gray-200 rounded-2xl p-4 mb-4">
           <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">How it works</p>
@@ -214,6 +238,9 @@
     const symbol   = decodeURIComponent(params.get('symbol') || '');
     const method   = params.get('method')   || 'interac';
 
+        const serverFee       = {{ $fee ?? 0 }};
+    const serverNetAmount = {{ $netAmount ?? $amount ?? 0 }};
+
     const fmt = v => parseFloat(v).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('amountDisplay').textContent = symbol + fmt(amount) + ' ' + currency;
 
@@ -258,6 +285,14 @@
         btn.disabled    = true;
         lbl.textContent = 'Enter payer email to continue';
       }
+    }
+
+        if (method === 'interac' && parseFloat(amount) > 0 && parseFloat(amount) <= serverFee) {
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitLabel').textContent = 'Amount too low to cover fee';
+      document.getElementById('emailHint').innerHTML =
+        '<i class="fas fa-exclamation-triangle text-red-500"></i> <span class="text-red-500">Amount must exceed the ' +
+        fmt(serverFee) + ' ' + currency + ' fee.</span>';
     }
 
     // ── Submit (Interac) ────────────────────────────────────────────────────

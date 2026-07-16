@@ -16,11 +16,14 @@ class Currency extends Model
         'min_amount',
         'max_amount',
         'is_active',
+        'collection_fee',
+
     ];
 
     protected $casts = [
         'min_amount' => 'decimal:2',
         'max_amount' => 'decimal:2',
+        'collection_fee' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
