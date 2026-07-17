@@ -22,18 +22,16 @@
               <p class="text-sm sm:text-base max-w-md mb-10">
                 {{ __('Unlock a powerful suite of financial solutions, including digital payments, seamless transactions, wealth management, and cutting-edge applications.') }}
               </p>
-              <div class="flex flex-wrap gap-4">
-                <button
-                  class="flex items-center gap-2 bg-[#50A920] text-white font-semibold rounded-full px-5 py-3 transition"
-                >
-                  <i class="fab fa-apple text-lg"></i> {{ __('Download for IOS') }}
-                </button>
+            <div class="flex flex-wrap gap-4">
+                <a href="{{ env('APP_APPSTORE_LINK') }}" target="_blank"
+                  class="flex items-center gap-2 bg-[#50A920] text-white font-semibold rounded-full px-5 py-3 transition">
+                    <i class="fab fa-apple text-lg"></i> {{ __('Download for IOS') }}
+                </a>
                 <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
                   class="flex items-center gap-2 bg-white text-gray-900 font-semibold rounded-full px-5 py-3 hover:bg-gray-100 transition">
                     <i class="fab fa-google-play text-lg"></i> {{ __('Download for Android') }}
                 </a>
-
-              </div>
+            </div>
             </div>
             <div
               class="flex-1 flex md:w-[50%] justify-center md:justify-end md:pr-16 md:pt-0 md:bg-[#13263E]"

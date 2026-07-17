@@ -296,28 +296,30 @@ private function isDummyAccount(string $email): bool
             });
 
         // $exchangeRatesLastUpdated = \App\Models\ExchangeRate::max('updated_at');
-        $currencyFees = \App\Models\UserCurrencyFee::where('user_id', $feeOwnerId)
-            ->get()
-            ->map(function ($f) {
-                return [
-                    'currency' => $f->currency,
-                    'collection' => [
-                        'enabled' => $f->collection_enabled,
-                        'percent' => $f->collection_percent,
-                        'fixed'   => $f->collection_fixed,
-                        'min'     => $f->collection_min,
-                        'max'     => $f->collection_max,
-                    ],
-                    'payout' => [
-                        'enabled' => $f->payout_enabled,
-                        'percent' => $f->payout_percent,
-                        'fixed'   => $f->payout_fixed,
-                        'min'     => $f->payout_min,
-                        'max'     => $f->payout_max,
-                    ],
-                ];
-            })
-            ->values();
+       $currencyFees = \App\Models\UserCurrencyFee::where('user_id', $feeOwnerId)
+        ->get()
+        ->map(function ($f) {
+            return [
+                'currency' => $f->currency,
+                'collection' => [
+                    'enabled'   => $f->collection_enabled,
+                    'percent'   => $f->collection_percent,
+                    'fixed'     => $f->collection_fixed,
+                    'min'       => $f->collection_min,
+                    'max'       => $f->collection_max,
+                    'fee_label' => $this->describeFees($f, 'collection', $f->currency),
+                ],
+                'payout' => [
+                    'enabled'   => $f->payout_enabled,
+                    'percent'   => $f->payout_percent,
+                    'fixed'     => $f->payout_fixed,
+                    'min'       => $f->payout_min,
+                    'max'       => $f->payout_max,
+                    'fee_label' => $this->describeFees($f, 'payout', $f->currency),
+                ],
+            ];
+        })
+        ->values();
 
         return response()->json([
             'success' => true,
@@ -746,4 +748,22 @@ private function isDummyAccount(string $email): bool
             'details' => $response->json()
         ], $response->status());
     }
+
+
+    private function describeFees(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+{
+    $percent = $userFee->{"{$side}_percent"};
+    $fixed   = $userFee->{"{$side}_fixed"};
+
+    if ($percent > 0 && $fixed > 0) {
+        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    }
+    if ($percent > 0) {
+        return "{$percent}%";
+    }
+    if ($fixed > 0) {
+        return number_format($fixed, 2) . " {$currency} flat";
+    }
+    return "No fee";
+}
 }
