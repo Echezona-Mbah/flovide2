@@ -367,7 +367,7 @@
                                                     <a href="{{ route('admin.currency.limits') }}" class="nav-link">Currency Limits</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a href="javascript:void(0);" class="nav-link">Resource Groups</a>
+                                                    <a href="{{ route('admin.contact-requests') }}" class="nav-link">Contact Requests</a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a href="javascript:void(0);" class="nav-link">
