@@ -66,36 +66,61 @@
             <div class="order-2 md:order-1">
                 <h2 class="text-3xl font-bold mb-6">Contact Us</h2>
 
-                <form class="space-y-4">
+                @if(session('success'))
+                    <div class="bg-green-100 text-green-700 border border-green-300 rounded-lg p-4 mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('contact.store') }}" method="POST" class="space-y-4">
+                    @csrf
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-medium">First Name</label>
-                            <input type="text" class="w-full mt-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" name="first_name" value="{{ old('first_name') }}" class="w-full mt-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('first_name')
+                                <p class="text-red-500 text-sm">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label class="text-sm font-medium">Last Name</label>
-                            <input type="text" class="w-full mt-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" name="last_name" value="{{ old('last_name') }}" class="w-full mt-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('last_name')
+                                <p class="text-red-500 text-sm">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
                     <div>
                         <label class="text-sm font-medium">Company Name (optional)</label>
-                        <input type="text" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        <input type="text" name="company_name" value="{{ old('company_name') }}" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        @error('company_name')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="text-sm font-medium">Email</label>
-                        <input type="email" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        <input type="email" name="email" value="{{ old('email') }}" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        @error('email')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="text-sm font-medium">Phone number (optional)</label>
-                        <input type="text" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        <input type="text" name="phone" value="{{ old('phone') }}" class="w-full mt-1 border rounded-lg px-3 py-2">
+                        @error('phone')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="text-sm font-medium">How can we help you?</label>
-                        <textarea rows="4" class="w-full mt-1 border rounded-lg px-3 py-2 resize-none"></textarea>
+                        <textarea name="message" rows="4" class="w-full mt-1 border rounded-lg px-3 py-2 resize-none">{{ old('message') }}</textarea>
+                        @error('message')
+                            <p class="text-red-500 text-sm">{{ $message }}</p>
+                        @enderror
                         <p class="text-xs text-gray-400 text-right mt-1">Max. 500 characters</p>
                     </div>
 
