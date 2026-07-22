@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ContactUs;
-use App\Mail\ContactReceivedMail;
+use App\Mail\ContactReplyMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -34,8 +34,40 @@ class ContactRequestController extends Controller
         ]);
     }
 
-    public function reply($id) {
-        //
+    public function reply(Request $request, $id) {
+        try {
+            $request->validate([
+                'subject' => 'required|min:5|max:105',
+                'message' => 'required'
+            ]);
+
+            $contact = ContactUs::findOrFail($id);
+
+            Mail::to($contact->email)->send(new ContactReplyMail(
+                    $contact->first_name,
+                    $request->subject,
+                    $request->message
+                ));
+
+            $contact->status = 'in_progress';
+            $contact->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reply sent successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send reply email.', [
+                'contact_request_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send reply. Please try again later.'
+            ], 500);
+        }
     }
 
     public function destroy($id)

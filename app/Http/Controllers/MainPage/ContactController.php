@@ -45,6 +45,7 @@ class ContactController extends Controller
         $validated['last_name'] = strip_tags($validated['last_name']);
         $validated['company_name'] = strip_tags($validated['company_name'] ?? '');
         $validated['message'] = strip_tags($validated['message']);
+        $validated['status'] = 'pending';
         
         try {
             DB::transaction(function () use ($validated) {
