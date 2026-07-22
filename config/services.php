@@ -14,6 +14,8 @@ return [
     |
     */
 
+    
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -60,7 +62,7 @@ return [
     ],
 
     
-    'latest_version' => env('APP_LATEST_VERSION', '1.0.0+19'),
+    'latest_version' => env('APP_LATEST_VERSION'),
     'force_update'   => env('APP_FORCE_UPDATE', false),
     
     'fidelity' => [

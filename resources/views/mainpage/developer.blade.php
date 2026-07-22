@@ -826,11 +826,11 @@ Console.WriteLine(body);`,
 ]`
             },
             'balances-single': {
-                curl: `curl -X GET "https://flovide.com/api/v1/balances/70" ^
+                curl: `curl -X GET "https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
-                javascript: `fetch('https://flovide.com/api/v1/balances/70', {
+                javascript: `fetch('https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -849,7 +849,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances/70", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -864,7 +864,7 @@ func main() {
                 python: `import requests
 
 response = requests.get(
-    "https://flovide.com/api/v1/balances/70",
+    "https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -874,7 +874,7 @@ response = requests.get(
 
 print(response.json())`,
                 java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("https://flovide.com/api/v1/balances/70"))
+    .uri(URI.create("https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -891,7 +891,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
-var response = await client.GetAsync("https://flovide.com/api/v1/balances/70");
+var response = await client.GetAsync("https://flovide.com/api/v1/balances/019f8060-f9e1-71a5-a15d-beb4880cd5ca");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,
@@ -1585,6 +1585,7 @@ Console.WriteLine(await kesResponse.Content.ReadAsStringAsync());`,
   "message": "Beneficiary created successfully",
   "data": {
     "id": "019e5ef7-0f62-72eb-8202-bfdf33e4c9fc",
+    "recipient_id": "a1c02694-2ef8-4b2b-84cb-63bb4312b6c7",
     "country": "NG",
     "default_reference": null,
     "alias": null,
@@ -1607,6 +1608,7 @@ Console.WriteLine(await kesResponse.Content.ReadAsStringAsync());`,
   "message": "Beneficiary created successfully",
   "data": {
     "id": "019f5d4f-103a-7033-9dbf-ddcb643e3147",
+    "recipient_id": "4bc01583-1de7-4c1a-93ba-52aa3201a5b6",
     "country": "CA",
     "default_reference": null,
     "alias": null,
@@ -1630,6 +1632,7 @@ Console.WriteLine(await kesResponse.Content.ReadAsStringAsync());`,
   "mode": "test",
   "data": {
     "id": "019f5d62-ab08-73cf-beaa-f663b2d4f63c",
+    "recipient_id": "7e2f9a10-6c3d-4f8b-9a1e-2d5c8b0f4e91",
     "country": "KE",
     "default_reference": null,
     "alias": null,
@@ -1755,6 +1758,7 @@ class Program
   "data": [
     {
       "id": "88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
+      "recipient_id": "7e2f9a10-6c3d-4f8b-9a1e-2d5c8b0f4e91",
       "country": "GB",
       "default_reference": "Invoice",
       "alias": "John's Savings",
@@ -1774,12 +1778,12 @@ class Program
 },
 
            'beneficiary-single': {
-  curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries/114" ^
+  curl: `curl -X GET "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
 
-  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a', {
   method: 'GET',
   headers: {
     'Accept': 'application/json',
@@ -1799,7 +1803,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries/114", nil)
+  req, _ := http.NewRequest("GET", "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -1815,7 +1819,7 @@ func main() {
   python: `import requests
 
 response = requests.get(
-    "https://flovide.com/api/v1/beneficiaries/114",
+    "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1833,7 +1837,7 @@ import java.net.http.HttpResponse;
 public class Main {
   public static void main(String[] args) throws Exception {
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
+        .uri(URI.create("https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a"))
         .header("Accept", "application/json")
         .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
         .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -1861,7 +1865,7 @@ class Program
     client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
     client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
-    var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries/114");
+    var response = await client.GetAsync("https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a");
     var body = await response.Content.ReadAsStringAsync();
 
     Console.WriteLine(body);
@@ -1873,6 +1877,7 @@ class Program
   "message": "Beneficiary retrieved successfully",
   "data": {
     "id": "88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
+    "recipient_id": "7e2f9a10-6c3d-4f8b-9a1e-2d5c8b0f4e91",
     "country": "GB",
     "default_reference": "Invoice",
     "alias": "John's Savings",
@@ -1891,11 +1896,11 @@ class Program
 },
 
             'beneficiary-delete': {
-  curl: `curl -X DELETE "https://flovide.com/api/v1/beneficiaries/114" ^
+  curl: `curl -X DELETE "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a" ^
   -H "Accept: application/json" ^
   -H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
   -H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx"`,
-  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/114', {
+  javascript: `fetch('https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a', {
   method: 'DELETE',
   headers: {
     'Accept': 'application/json',
@@ -1914,7 +1919,7 @@ import (
 )
 
 func main() {
-  req, _ := http.NewRequest("DELETE", "https://flovide.com/api/v1/beneficiaries/114", nil)
+  req, _ := http.NewRequest("DELETE", "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a", nil)
   req.Header.Set("Accept", "application/json")
   req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
   req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -1929,7 +1934,7 @@ func main() {
   python: `import requests
 
 response = requests.delete(
-    "https://flovide.com/api/v1/beneficiaries/114",
+    "https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a",
     headers={
         "Accept": "application/json",
         "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
@@ -1939,7 +1944,7 @@ response = requests.delete(
 
 print(response.json())`,
   java: `HttpRequest request = HttpRequest.newBuilder()
-    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/114"))
+    .uri(URI.create("https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a"))
     .header("Accept", "application/json")
     .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
     .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
@@ -1956,7 +1961,7 @@ client.DefaultRequestHeaders.Add("Accept", "application/json");
 client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
 client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 
-var response = await client.DeleteAsync("https://flovide.com/api/v1/beneficiaries/114");
+var response = await client.DeleteAsync("https://flovide.com/api/v1/beneficiaries/88fe6e8a-cd7b-11e9-821e-4180c1a9232a");
 var body = await response.Content.ReadAsStringAsync();
 
 Console.WriteLine(body);`,

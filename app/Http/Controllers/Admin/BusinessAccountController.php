@@ -19,6 +19,8 @@ use App\Services\BlaaizService;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserCurrencyFee;
 use App\Services\FirebaseNotificationService;
+use Illuminate\Support\Facades\Log;
+
 
 class BusinessAccountController extends Controller
 {
@@ -512,6 +514,47 @@ public function getCurrencyFees(User $user)
     return $fees;
 }
 
+// public function updateCurrencyFee(Request $request, $id, $currency)
+// {
+//     abort_unless(in_array(strtoupper($currency), UserCurrencyFee::CURRENCIES), 404);
+
+//     $request->validate([
+//         'collection_enabled'  => 'boolean',
+//         'collection_percent'  => 'numeric|min:0|max:100',
+//         'collection_fixed'    => 'numeric|min:0',
+//         'collection_min'      => 'numeric|min:0',
+//         'collection_max'      => 'numeric|min:0',
+//         'payout_enabled'      => 'boolean',
+//         'payout_percent'      => 'numeric|min:0|max:100',
+//         'payout_fixed'        => 'numeric|min:0',
+//         'payout_min'          => 'numeric|min:0',
+//         'payout_max'          => 'numeric|min:0',
+//     ]);
+
+//     $fee = UserCurrencyFee::updateOrCreate(
+//         ['user_id' => $id, 'currency' => strtoupper($currency)],
+//         [
+//             'collection_enabled'  => $request->boolean('collection_enabled'),
+//             'collection_percent'  => $request->input('collection_percent', 0),
+//             'collection_fixed'    => $request->input('collection_fixed', 0),
+//             'collection_min'      => $request->input('collection_min', 0),
+//             'collection_max'      => $request->input('collection_max', 0),
+//             'payout_enabled'      => $request->boolean('payout_enabled'),
+//             'payout_percent'      => $request->input('payout_percent', 0),
+//             'payout_fixed'        => $request->input('payout_fixed', 0),
+//             'payout_min'          => $request->input('payout_min', 0),
+//             'payout_max'          => $request->input('payout_max', 0),
+//         ]
+//     );
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => strtoupper($currency) . ' fees updated successfully.',
+//         'data'    => $fee,
+//     ]);
+// }
+
+
 public function updateCurrencyFee(Request $request, $id, $currency)
 {
     abort_unless(in_array(strtoupper($currency), UserCurrencyFee::CURRENCIES), 404);
@@ -529,29 +572,90 @@ public function updateCurrencyFee(Request $request, $id, $currency)
         'payout_max'          => 'numeric|min:0',
     ]);
 
+    $user = User::findOrFail($id);
+    $currencyCode = strtoupper($currency);
+
+    // ── Snapshot the previous state so we can tell what actually changed ──
+    $existing = UserCurrencyFee::where('user_id', $id)
+        ->where('currency', $currencyCode)
+        ->first();
+
+    $newCollection = [
+        'collection_enabled' => $request->boolean('collection_enabled'),
+        'collection_percent' => (float) $request->input('collection_percent', 0),
+        'collection_fixed'   => (float) $request->input('collection_fixed', 0),
+        'collection_min'     => (float) $request->input('collection_min', 0),
+        'collection_max'     => (float) $request->input('collection_max', 0),
+    ];
+
+    $newPayout = [
+        'payout_enabled' => $request->boolean('payout_enabled'),
+        'payout_percent' => (float) $request->input('payout_percent', 0),
+        'payout_fixed'   => (float) $request->input('payout_fixed', 0),
+        'payout_min'     => (float) $request->input('payout_min', 0),
+        'payout_max'     => (float) $request->input('payout_max', 0),
+    ];
+
+    $collectionChanged = !$existing || collect($newCollection)->some(
+        fn ($val, $key) => (float) $existing->$key !== (float) $val
+            && !is_bool($existing->$key)
+    ) || (!$existing || (bool) $existing->collection_enabled !== $newCollection['collection_enabled']);
+
+    $payoutChanged = !$existing || collect($newPayout)->some(
+        fn ($val, $key) => (float) $existing->$key !== (float) $val
+            && !is_bool($existing->$key)
+    ) || (!$existing || (bool) $existing->payout_enabled !== $newPayout['payout_enabled']);
+
     $fee = UserCurrencyFee::updateOrCreate(
-        ['user_id' => $id, 'currency' => strtoupper($currency)],
-        [
-            'collection_enabled'  => $request->boolean('collection_enabled'),
-            'collection_percent'  => $request->input('collection_percent', 0),
-            'collection_fixed'    => $request->input('collection_fixed', 0),
-            'collection_min'      => $request->input('collection_min', 0),
-            'collection_max'      => $request->input('collection_max', 0),
-            'payout_enabled'      => $request->boolean('payout_enabled'),
-            'payout_percent'      => $request->input('payout_percent', 0),
-            'payout_fixed'        => $request->input('payout_fixed', 0),
-            'payout_min'          => $request->input('payout_min', 0),
-            'payout_max'          => $request->input('payout_max', 0),
-        ]
+        ['user_id' => $id, 'currency' => $currencyCode],
+        array_merge($newCollection, $newPayout)
     );
+
+    // ── Notify the business owner about the change ──────────────────────
+    if ($collectionChanged) {
+        $this->sendFeeUpdateNotification($user, $currencyCode, 'collection', $newCollection['collection_enabled']);
+    }
+    if ($payoutChanged) {
+        $this->sendFeeUpdateNotification($user, $currencyCode, 'payout', $newPayout['payout_enabled']);
+    }
 
     return response()->json([
         'success' => true,
-        'message' => strtoupper($currency) . ' fees updated successfully.',
+        'message' => $currencyCode . ' fees updated successfully.',
         'data'    => $fee,
     ]);
 }
 
+// ── Shared: notify user their fee settings changed ──────────────────────
+protected function sendFeeUpdateNotification(User $user, string $currency, string $side, bool $enabled): void
+{
+    if (empty($user->device_token)) {
+        return;
+    }
+
+    $label = ucfirst($side); // "Collection" or "Payout"
+    $status = $enabled ? 'updated' : 'disabled';
+
+    $sent = $this->firebase->sendToToken(
+        $user->device_token,
+        "{$currency} {$label} Fees {$status}",
+        "Your {$currency} {$side} fee settings have been {$status} by the admin.",
+        [
+            'type'     => 'fee_update',
+            'currency' => $currency,
+            'side'     => $side,
+            'enabled'  => $enabled ? '1' : '0',
+        ]
+    );
+
+    if (!$sent) {
+        Log::warning('Fee update push notification failed', [
+            'user_id'  => $user->id,
+            'currency' => $currency,
+            'side'     => $side,
+        ]);
+    }
+}
 
 public function toggleBalanceLock(Request $request, $userId, $balanceId)
 {

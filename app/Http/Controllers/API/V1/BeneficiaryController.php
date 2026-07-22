@@ -157,6 +157,7 @@ class BeneficiaryController extends Controller
     $data = $beneficias->map(function ($b) {
         return [
             'id' => $b->id,
+            'recipient_id' => $b->recipient_id,
             'country' => $b->country,
             'default_reference' => $b->default_reference ?? 'Invoice',
             'alias' => $b->alias,
@@ -1074,6 +1075,7 @@ public function store(Request $request)
             'mode' => $mode,
             'data' => [
                 'id' => (string) $beneficia->id,
+                'recipient_id' => (string) $beneficia->recipient_id,
                 'country' => $beneficia->country,
                 'default_reference' => $beneficia->default_reference,
                 'alias' => $beneficia->alias,
@@ -1327,7 +1329,8 @@ public function show(Request $request, $id)
         'message' => 'Beneficiary retrieved successfully',
         'mode' => $mode,
         'data' => [
-            'id' => (string) ($beneficia->recipient_id ?? $beneficia->id),
+            'id' => (string) ($beneficia->id),
+            'recipient_id' => (string) ($beneficia->recipient_id),
             'country' => $beneficia->country,
             'default_reference' => $beneficia->default_reference,
             'alias' => $beneficia->alias,

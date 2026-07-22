@@ -324,8 +324,8 @@ public function index(Request $request)
             'message' => 'Dashboard data fetched successfully',
             'data' => [
                 'app_update' => [                                              // ← ADD HERE
-                    'latest_version' => config('app.latest_version', '1.0.0+19'),
-                    'force_update'   => config('app.force_update', true),
+                    'latest_version' => config('services.latest_version'),
+                    'force_update'   => config('services.force_update', true),
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,

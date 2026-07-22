@@ -375,18 +375,45 @@ public function dashboardapi(Request $request)
         });
 
       $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
-    ->get()
-    ->map(function ($c) {
-        return [
-            'code' => $c->code,
-            'currency_code' =>$c->currency_code,
-            'name' => $c->name,
-            'symbol' => $c->symbol,
-            'country_code' => strtolower($c->country_code ?? ''),
-        ];
-    })
-    ->values()
-    ->toArray();
+        ->get()
+        ->map(function ($c) {
+            return [
+                'code' => $c->code,
+                'currency_code' =>$c->currency_code,
+                'name' => $c->name,
+                'symbol' => $c->symbol,
+                'country_code' => strtolower($c->country_code ?? ''),
+            ];
+        })
+        ->values()
+        ->toArray();
+
+
+        $currencyFees = \App\Models\UserCurrencyFee::where('user_id', $account->id)
+        ->get()
+        ->map(function ($f) {
+            return [
+                'currency' => $f->currency,
+                'collection' => [
+                    'enabled'   => $f->collection_enabled,
+                    'percent'   => $f->collection_percent,
+                    'fixed'     => $f->collection_fixed,
+                    'min'       => $f->collection_min,
+                    'max'       => $f->collection_max,
+                    'fee_label' => $this->describeFees($f, 'collection', $f->currency),
+                ],
+                'payout' => [
+                    'enabled'   => $f->payout_enabled,
+                    'percent'   => $f->payout_percent,
+                    'fixed'     => $f->payout_fixed,
+                    'min'       => $f->payout_min,
+                    'max'       => $f->payout_max,
+                    'fee_label' => $this->describeFees($f, 'payout', $f->currency),
+                ],
+            ];
+        })
+        ->values();
+
 
     if ($request->expectsJson()) {
         return response()->json([
@@ -394,8 +421,8 @@ public function dashboardapi(Request $request)
             'message' => 'Dashboard data fetched successfully',
             'data' => [
                 'app_update' => [                                              // ← ADD HERE
-                    'latest_version' => config('app.latest_version', '1.0.0+19'),
-                    'force_update'   => config('app.force_update', true),
+                    'latest_version' => config('services.latest_version'),
+                    'force_update'   => config('services.force_update', true),
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
@@ -404,6 +431,7 @@ public function dashboardapi(Request $request)
                 'recent_history' => $transactions,
                 'exchange_rates' => $exchangeRates, // ✅ added
                 'currencies' => $currencies,
+                'currency_fees' => $currencyFees,
 
             ]
         ], 200);
@@ -509,6 +537,24 @@ public function dashboardapi(Request $request)
         ));
     }
 
+
+
+        private function describeFees(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+{
+    $percent = $userFee->{"{$side}_percent"};
+    $fixed   = $userFee->{"{$side}_fixed"};
+
+    if ($percent > 0 && $fixed > 0) {
+        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    }
+    if ($percent > 0) {
+        return "{$percent}%";
+    }
+    if ($fixed > 0) {
+        return number_format($fixed, 2) . " {$currency} flat";
+    }
+    return "No fee";
+}
 
 
 

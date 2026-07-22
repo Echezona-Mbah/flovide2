@@ -244,13 +244,12 @@
               </span>
               <span id="modalRate" class="font-semibold text-slate-700">--</span>
             </div>
-            {{-- Transfer fee hidden for now --}}
-            {{-- <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center">
               <span class="text-slate-500 flex items-center gap-2">
                 <i class="fas fa-receipt text-xs text-amber-500"></i> Transfer Fee
               </span>
               <span id="modalFee" class="font-semibold text-slate-700">--</span>
-            </div> --}}
+            </div>
             <div class="border-t border-slate-200 pt-2.5 flex justify-between items-center">
               <span class="text-slate-500 flex items-center gap-2">
                 <i class="fas fa-clock text-xs text-slate-400"></i> Delivery
@@ -365,15 +364,14 @@
                 <span class="text-slate-500">Amount Sent</span>
                 <span id="cfmAmount" class="font-semibold text-slate-800"></span>
               </div>
-              {{-- Transfer fee hidden for now --}}
-              {{-- <div class="flex justify-between">
+              <div class="flex justify-between">
                 <span class="text-slate-500">Transfer Fee</span>
                 <span id="cfmFee" class="font-semibold text-amber-600"></span>
               </div>
               <div class="flex justify-between border-t border-slate-200 pt-2">
                 <span class="text-slate-600 font-semibold">Total Deducted</span>
                 <span id="cfmTotal" class="font-bold text-slate-900"></span>
-              </div> --}}
+              </div>
               <div class="flex justify-between">
                 <span class="text-slate-500">Exchange Rate</span>
                 <span id="cfmRate" class="font-semibold text-slate-800 text-xs"></span>
@@ -419,6 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let sendDebounce        = null;
   let receiveDebounce     = null;
   let lastRate            = null;
+  let lastFee              = 0;   // transfer fee from the latest rate lookup
   let activeInput         = null; // 'send' or 'receive'
   let requestSeq          = 0;    // tracks the latest fetch request, prevents stale overwrites
 
@@ -469,10 +468,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset inputs and invalidate any in-flight requests from a previous open
     requestSeq++;
     lastRate                       = null;
+    lastFee                          = 0;
     activeInput                    = 'send';
     modalAmount.value              = "100";
     modalRecipientAmount.value     = "";
     if (modalReference) modalReference.value = "";
+    document.getElementById("modalFee").textContent = "--";
 
     updateBalanceHint();
     fetchRate(); // fetch from send side on open
@@ -509,99 +510,111 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ── Core: fetch rate and update the OTHER field ───────────────────────────
-// ── Core: fetch rate and update the OTHER field ───────────────────────────
-async function fetchRate() {
-  if (!selectedBeneficiary) return;
+  async function fetchRate() {
+    if (!selectedBeneficiary) return;
 
-  const mySeq = ++requestSeq; // stamp this call as the latest
+    const mySeq = ++requestSeq; // stamp this call as the latest
 
-  const opt          = modalCurrency?.selectedOptions[0];
-  const fromCurrency = opt?.value || "NGN";
-  const symbol       = opt?.dataset.symbol || "₦";
-  const country      = opt?.dataset.country || "ng";
-  const toCurrency   = selectedBeneficiary.dataset.currency || "USD";
+    const opt          = modalCurrency?.selectedOptions[0];
+    const fromCurrency = opt?.value || "NGN";
+    const symbol       = opt?.dataset.symbol || "₦";
+    const country      = opt?.dataset.country || "ng";
+    const toCurrency   = selectedBeneficiary.dataset.currency || "USD";
 
-  document.getElementById("modalCurrencySymbol").textContent = symbol;
-  document.getElementById("modalCurrencyFlag").src           = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
+    document.getElementById("modalCurrencySymbol").textContent = symbol;
+    document.getElementById("modalCurrencyFlag").src           = `https://flagcdn.com/24x18/${country.toLowerCase()}.png`;
 
-  const sendAmt    = parseFloat(modalAmount.value || 0);
-  const receiveAmt = parseFloat(modalRecipientAmount.value || 0);
+    const sendAmt    = parseFloat(modalAmount.value || 0);
+    const receiveAmt = parseFloat(modalRecipientAmount.value || 0);
 
-  const amount = activeInput === 'send' ? sendAmt : receiveAmt;
+    const amount = activeInput === 'send' ? sendAmt : receiveAmt;
 
-  if (!amount || amount <= 0) {
-    if (mySeq !== requestSeq) return;
-    document.getElementById("modalRate").textContent = "--";
-    if (activeInput === 'send')    modalRecipientAmount.value = "";
-    if (activeInput === 'receive') modalAmount.value          = "";
-    return;
-  }
-
-  document.getElementById("spinnerIcon").classList.remove("hidden");
-
-  // Same currency — 1:1
-  if (fromCurrency === toCurrency) {
-    if (mySeq !== requestSeq) return;
-    lastRate = 1;
-    document.getElementById("modalRate").textContent = `1.00 ${fromCurrency} = 1.00 ${toCurrency}`;
-    if (activeInput === 'send')    modalRecipientAmount.value = sendAmt.toFixed(2);
-    if (activeInput === 'receive') modalAmount.value          = receiveAmt.toFixed(2);
-    document.getElementById("spinnerIcon").classList.add("hidden");
-    return;
-  }
-
-  try {
-    let url;
-
-    if (activeInput === 'send') {
-      // Forward: fromCurrency -> toCurrency, using the real send amount
-      url = `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${sendAmt}`;
-    } else {
-      // Reverse: query the API in the OPPOSITE direction using the real receive amount,
-      // instead of extrapolating from a distorted amount=1 rate.
-      url = `/dashboard/exchange-rate?from_currency=${toCurrency}&to_currency=${fromCurrency}&amount=${receiveAmt}`;
+    if (!amount || amount <= 0) {
+      if (mySeq !== requestSeq) return;
+      lastFee = 0;
+      document.getElementById("modalRate").textContent = "--";
+      document.getElementById("modalFee").textContent  = "--";
+      if (activeInput === 'send')    modalRecipientAmount.value = "";
+      if (activeInput === 'receive') modalAmount.value          = "";
+      return;
     }
 
-    const res  = await fetch(url, { headers: { Accept: "application/json" } });
-    const data = await res.json();
+    document.getElementById("spinnerIcon").classList.remove("hidden");
 
-    if (mySeq !== requestSeq) return; // stale, drop it
+    // Same currency — 1:1, no fee assumed
+    if (fromCurrency === toCurrency) {
+      if (mySeq !== requestSeq) return;
+      lastRate = 1;
+      lastFee  = 0;
+      document.getElementById("modalRate").textContent = `1.00 ${fromCurrency} = 1.00 ${toCurrency}`;
+      document.getElementById("modalFee").textContent  = `${symbol}0.00`;
+      if (activeInput === 'send')    modalRecipientAmount.value = sendAmt.toFixed(2);
+      if (activeInput === 'receive') modalAmount.value          = receiveAmt.toFixed(2);
+      document.getElementById("spinnerIcon").classList.add("hidden");
+      return;
+    }
 
-    if (data?.success && data?.data) {
-      const converted = parseFloat(data.data.converted || 0);
+    try {
+      let url;
 
       if (activeInput === 'send') {
-        // You Send → calculate They Receive
-        lastRate = sendAmt > 0 ? converted / sendAmt : null;
-        modalRecipientAmount.value = converted.toFixed(2);
-
-        document.getElementById("modalRate").textContent =
-          `${sendAmt.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${toCurrency}`;
-
+        // Forward: fromCurrency -> toCurrency, using the real send amount
+        url = `/dashboard/exchange-rate?from_currency=${fromCurrency}&to_currency=${toCurrency}&amount=${sendAmt}`;
       } else {
-        // They Receive → API already gave us the send amount directly (real conversion, not extrapolated)
-        lastRate = converted > 0 ? receiveAmt / converted : null;
-        modalAmount.value = converted.toFixed(2);
-
-        document.getElementById("modalRate").textContent =
-          `${converted.toFixed(2)} ${fromCurrency} = ${receiveAmt.toFixed(2)} ${toCurrency}`;
+        // Reverse: query the API in the OPPOSITE direction using the real receive amount,
+        // instead of extrapolating from a distorted amount=1 rate.
+        url = `/dashboard/exchange-rate?from_currency=${toCurrency}&to_currency=${fromCurrency}&amount=${receiveAmt}`;
       }
 
-    } else {
+      const res  = await fetch(url, { headers: { Accept: "application/json" } });
+      const data = await res.json();
+
+      if (mySeq !== requestSeq) return; // stale, drop it
+
+      if (data?.success && data?.data) {
+        const converted = parseFloat(data.data.converted || 0);
+        const fee        = parseFloat(data.data.transfer_fee || 0);
+        lastFee = fee;
+
+        document.getElementById("modalFee").textContent =
+          `${symbol}${fee.toFixed(2)}`;
+
+        if (activeInput === 'send') {
+          // You Send → calculate They Receive
+          lastRate = sendAmt > 0 ? converted / sendAmt : null;
+          modalRecipientAmount.value = converted.toFixed(2);
+
+          document.getElementById("modalRate").textContent =
+            `${sendAmt.toFixed(2)} ${fromCurrency} = ${converted.toFixed(2)} ${toCurrency}`;
+
+        } else {
+          // They Receive → API already gave us the send amount directly (real conversion, not extrapolated)
+          lastRate = converted > 0 ? receiveAmt / converted : null;
+          modalAmount.value = converted.toFixed(2);
+
+          document.getElementById("modalRate").textContent =
+            `${converted.toFixed(2)} ${fromCurrency} = ${receiveAmt.toFixed(2)} ${toCurrency}`;
+        }
+
+      } else {
+        lastRate = null;
+        lastFee  = 0;
+        document.getElementById("modalFee").textContent  = "--";
+        document.getElementById("modalRate").textContent = data?.message || "Rate unavailable";
+      }
+
+    } catch (e) {
+      if (mySeq !== requestSeq) return;
       lastRate = null;
-      document.getElementById("modalRate").textContent = data?.message || "Rate unavailable";
+      lastFee  = 0;
+      document.getElementById("modalFee").textContent  = "--";
+      document.getElementById("modalRate").textContent = "Error fetching rate";
     }
 
-  } catch (e) {
-    if (mySeq !== requestSeq) return;
-    lastRate = null;
-    document.getElementById("modalRate").textContent = "Error fetching rate";
+    if (mySeq === requestSeq) {
+      document.getElementById("spinnerIcon").classList.add("hidden");
+    }
   }
-
-  if (mySeq === requestSeq) {
-    document.getElementById("spinnerIcon").classList.add("hidden");
-  }
-}
 
   // ── You Send input ────────────────────────────────────────────────────────
   modalAmount?.addEventListener("focus", () => { activeInput = 'send'; });
@@ -641,7 +654,9 @@ async function fetchRate() {
   modalCurrency?.addEventListener("change", () => {
     requestSeq++; // invalidate anything in-flight for the old currency
     lastRate    = null;
+    lastFee      = 0;
     activeInput = 'send';
+    document.getElementById("modalFee").textContent = "--";
     updateBalanceHint();
     fetchRate();
   });
@@ -676,7 +691,7 @@ async function fetchRate() {
       return;
     }
 
-    const fee   = 0;
+    const fee   = lastFee || 0;
     const total = amount + fee;
 
     const name    = selectedBeneficiary.dataset.accountName   || "";
@@ -688,6 +703,8 @@ async function fetchRate() {
     document.getElementById("cfmAccount").textContent   = account;
     document.getElementById("cfmBank").textContent      = bank;
     document.getElementById("cfmAmount").textContent    = `${symbol}${amount.toFixed(2)}`;
+    document.getElementById("cfmFee").textContent       = `${symbol}${fee.toFixed(2)}`;
+    document.getElementById("cfmTotal").textContent     = `${symbol}${total.toFixed(2)}`;
     document.getElementById("cfmRate").textContent      = rateText;
     document.getElementById("cfmReceive").textContent   = `${currency} ${receive.toFixed(2)}`;
     document.getElementById("cfmReference").textContent = reference;

@@ -281,8 +281,7 @@ class SendMoneyController extends Controller
 
     ]);
 
-
-    // dd( $request->all());
+    //dd($request->all());
 
     $actor = $this->resolveKeyUser($request) ?? auth()->user();
     if (!$actor) {
@@ -303,10 +302,10 @@ class SendMoneyController extends Controller
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
     $currency        = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
 
+    $transferFee          = (float) $request->transfer_fee;
     $amount          = (float) $request->amount;
+    $totalAmount          = (float) $request->total_amount;
     $recipientAmount = (float) $request->recipient_amount;
-
-    //dd($recipientAmount);
 
     // ── Currency limits (on sending amount) ───────────────────────────────
     $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
@@ -326,53 +325,51 @@ class SendMoneyController extends Controller
     }
 
     // ── Platform fee — based on recipient (TO) currency ───────────────────
-    $platformFee = 0;
-    $transferFee = 0;
 
-    $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
-        ->where('currency', $currency)
-        ->first();
+    // $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
+    //     ->where('currency', $currency)
+    //     ->first();
 
-    if (!$userFee || !$userFee->payout_enabled) {
-        $msg = "Contact your marketer to enable payout pricing for {$currency}.";
-        return $isApi
-            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
-            : back()->withInput()->with('error', $msg);
-        }
-    if ($userFee && $userFee->payout_enabled) {
 
-        if ($userFee->payout_min > 0 && $recipientAmount < $userFee->payout_min) {
-            $msg = "Minimum payout for {$currency} is " . number_format($userFee->payout_min, 2);
-            return $isApi
-                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BELOW_PAYOUT_MIN', 'data' => null], 422)
-                : back()->withInput()->with('error', $msg);
-        }
+    // if (!$userFee || !$userFee->payout_enabled) {
+    //     $msg = "Contact your marketer to enable payout pricing for {$currency}.";
+    //     return $isApi
+    //         ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
+    //         : back()->withInput()->with('error', $msg);
+    //     }
+    // if ($userFee && $userFee->payout_enabled) {
 
-        if ($userFee->payout_max > 0 && $recipientAmount > $userFee->payout_max) {
-            $msg = "Maximum payout for {$currency} is " . number_format($userFee->payout_max, 2);
-            return $isApi
-                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'ABOVE_PAYOUT_MAX', 'data' => null], 422)
-                : back()->withInput()->with('error', $msg);
-        }
+    //     if ($userFee->payout_min > 0 && $recipientAmount < $userFee->payout_min) {
+    //         $msg = "Minimum payout for {$currency} is " . number_format($userFee->payout_min, 2);
+    //         return $isApi
+    //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BELOW_PAYOUT_MIN', 'data' => null], 422)
+    //             : back()->withInput()->with('error', $msg);
+    //     }
 
-        // Fee calculated on recipient amount (in recipient currency)
-        $platformFee = round(
-            ($recipientAmount * $userFee->payout_percent / 100) + $userFee->payout_fixed,
-            2
-        );
+    //     if ($userFee->payout_max > 0 && $recipientAmount > $userFee->payout_max) {
+    //         $msg = "Maximum payout for {$currency} is " . number_format($userFee->payout_max, 2);
+    //         return $isApi
+    //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'ABOVE_PAYOUT_MAX', 'data' => null], 422)
+    //             : back()->withInput()->with('error', $msg);
+    //     }
 
-        $transferFee = $platformFee;
-    }
+    //     // Fee calculated on recipient amount (in recipient currency)
+    //     $platformFee = round(
+    //         ($recipientAmount * $userFee->payout_percent / 100) + $userFee->payout_fixed,
+    //         2
+    //     );
 
-    // ── What recipient actually receives after fee ─────────────────────────
-    // $netRecipientAmount = $recipientAmount ;
+    //     $transferFee = $platformFee;
+    // }
+
         $netRecipientAmount = (int) round($recipientAmount, 0);
-    //dd($netRecipientAmount);
+   // dd($netRecipientAmount);
 
     // ── Balance check — deduct sender's full amount ───────────────────────
     $balance = Balance::where('id', $request->balance_id)
         ->where('user_id', $ownerId)
         ->first();
+    
 
     if (!$balance) {
         $msg = 'Invalid balance';
@@ -388,7 +385,7 @@ class SendMoneyController extends Controller
         : back()->withInput()->with('error', $msg);
     }
 
-    if ($balance->amount < $amount) {
+    if ($balance->amount < $totalAmount) {
         $msg = 'Insufficient funds';
         return $isApi
             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FUNDS', 'data' => null], 422)
@@ -399,44 +396,45 @@ class SendMoneyController extends Controller
     DB::beginTransaction();
     try {
         // Deduct full sending amount from sender's balance
-        $balance->amount -= $amount;
+        $balance->amount -= $totalAmount;
         $balance->save();
 
         // ── Deduct platform fee from the payout-currency balance ───────────────
         $feeDeductedFrom = null;
 
-        if ($platformFee > 0) {
-            $payoutBalance = Balance::where('user_id', $ownerId)
-                ->where('currency', $currency) // payout/recipient currency
-                ->first();
+        // if ($platformFee > 0) {
+        //     $payoutBalance = Balance::where('user_id', $ownerId)
+        //         ->where('currency', $currency) // payout/recipient currency
+        //         ->first();
+        //     dd($payoutBalance);
 
-            if ($payoutBalance) {
-                if ($payoutBalance->amount < $platformFee) {
-                    DB::rollBack();
-                    $msg = "Insufficient {$currency} balance to cover transfer fee";
-                    return $isApi
-                        ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
-                        : back()->withInput()->with('error', $msg);
-                }
+        //     if ($payoutBalance) {
+        //         if ($payoutBalance->amount < $platformFee) {
+        //             DB::rollBack();
+        //             $msg = "Insufficient {$currency} balance to cover transfer fee";
+        //             return $isApi
+        //                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
+        //                 : back()->withInput()->with('error', $msg);
+        //         }
 
-                $payoutBalance->amount -= $platformFee;
-                $payoutBalance->save();
-                $feeDeductedFrom = $payoutBalance->id;
-            } else {
-                // No payout-currency wallet — fall back to the sending balance
-                if ($balance->amount < $platformFee) {
-                    DB::rollBack();
-                    $msg = 'Insufficient funds to cover transfer fee';
-                    return $isApi
-                        ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
-                        : back()->withInput()->with('error', $msg);
-                }
+        //         $payoutBalance->amount -= $platformFee;
+        //         $payoutBalance->save();
+        //         $feeDeductedFrom = $payoutBalance->id;
+        //     } else {
+        //         // No payout-currency wallet — fall back to the sending balance
+        //         if ($balance->amount < $platformFee) {
+        //             DB::rollBack();
+        //             $msg = 'Insufficient funds to cover transfer fee';
+        //             return $isApi
+        //                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
+        //                 : back()->withInput()->with('error', $msg);
+        //         }
 
-                $balance->amount -= $platformFee;
-                $balance->save();
-                $feeDeductedFrom = $balance->id;
-            }
-        }
+        //         $balance->amount -= $platformFee;
+        //         $balance->save();
+        //         $feeDeductedFrom = $balance->id;
+        //     }
+        // }
 
         $tx = TransactionHistory::create([
             'user_id'                  => $ownerId,
@@ -447,7 +445,7 @@ class SendMoneyController extends Controller
             'currency'                 => $sendingCurrency,
             'amount'                   => $amount,
             'fees'                     => $transferFee,
-            'total_amount'             => $amount,
+            'total_amount'             => $totalAmount,
             'recipient_amount'         => $netRecipientAmount,
             'to_currency'              => $currency,
             'recipient_bank_currency'  => $currency,
@@ -989,56 +987,56 @@ public function getUserTotalBalance(Request $request)
 
 
 
-   public function getExchangeRates(Request $request)
-{
-    $from = strtoupper($request->input('from_currency'));
-    $to   = strtoupper($request->input('to_currency'));
-    $amount = (float) $request->input('amount', 1);
+//    public function getExchangeRates(Request $request)
+// {
+//     $from = strtoupper($request->input('from_currency'));
+//     $to   = strtoupper($request->input('to_currency'));
+//     $amount = (float) $request->input('amount', 1);
 
-    try {
-        $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
-                $q->where('code', $from);
-            })
-            ->whereHas('toCurrency', function ($q) use ($to) {
-                $q->where('code', $to);
-            })
-            ->orderByDesc('updated_at')   // NEW: always pick the most recently updated rate row
-            ->orderByDesc('id')           // NEW: tiebreaker if updated_at is identical
-            ->first();
+//     try {
+//         $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+//                 $q->where('code', $from);
+//             })
+//             ->whereHas('toCurrency', function ($q) use ($to) {
+//                 $q->where('code', $to);
+//             })
+//             ->orderByDesc('updated_at')   // NEW: always pick the most recently updated rate row
+//             ->orderByDesc('id')           // NEW: tiebreaker if updated_at is identical
+//             ->first();
 
-        if (!$rate) {
-            throw new \Exception("Rate not found");
-        }
+//         if (!$rate) {
+//             throw new \Exception("Rate not found");
+//         }
 
-        $converted = $amount * $rate->rate;
+//         $converted = $amount * $rate->rate;
 
-        $rateText = sprintf(
-            "%s 1.00 = %s %s",
-            $from,
-            $to,
-            number_format($rate->rate, 6, '.', '')
-        );
+//         $rateText = sprintf(
+//             "%s 1.00 = %s %s",
+//             $from,
+//             $to,
+//             number_format($rate->rate, 6, '.', '')
+//         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Exchange rate fetched',
-            'code' => 'EXCHANGE_RATE_FETCHED',
-            'data' => [
-                'converted' => $converted,
-                'transfer_fee' => $rate->transfer_fee,
-                'exchange_rate' => $rateText,
-            ]
-        ], 200);
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Exchange rate fetched',
+//             'code' => 'EXCHANGE_RATE_FETCHED',
+//             'data' => [
+//                 'converted' => $converted,
+//                 'transfer_fee' => $rate->transfer_fee,
+//                 'exchange_rate' => $rateText,
+//             ]
+//         ], 200);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-            'code' => 'RATE_NOT_FOUND',
-            'data' => null
-        ], 400);
-    }
-}
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => $e->getMessage(),
+//             'code' => 'RATE_NOT_FOUND',
+//             'data' => null
+//         ], 400);
+//     }
+// }
 
 
 

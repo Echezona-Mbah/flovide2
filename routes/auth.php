@@ -226,7 +226,7 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::get('/add_money', [AddMoneyController::class, 'index'])->name('add_money');
     Route::post('/add-money', [AddMoneyController::class, 'addMoneyStore'])->name('add_money.store');
     Route::get('/add-money/interac', [AddMoneyController::class, 'interacDetails'])->name('add_money.interac');
-        Route::get('/addMoney/currency-fee', [AddMoneyController::class, 'getCurrencyFee']);
+    Route::get('/addMoney/currency-fee', [AddMoneyController::class, 'getCurrencyFee']);
 
     Route::post('/blaaiz/interac/accept', [BlaaizController::class, 'acceptInteracMoneyRequest'])->name('blaaiz.interac.accept');
     Route::post('/blaaiz/interac/initiate', [BlaaizController::class, 'initiateInteracMoneyRequest'])

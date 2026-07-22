@@ -102,46 +102,48 @@ public function create()
     ));
 }
 
-    // public function getExchangeRates(Request $request)
-    // {
-    //     $from = strtoupper($request->input('from_currency'));
-    //     $to   = strtoupper($request->input('to_currency'));
-    //     $amount = (float) $request->input('amount', 1);
+    public function getExchangeRates(Request $request)
+    {
+        $from = strtoupper($request->input('from_currency'));
+        $to   = strtoupper($request->input('to_currency'));
+        $amount = (float) $request->input('amount', 1);
 
-    //     try {
-    //         $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
-    //                 $q->where('code', $from);
-    //             })
-    //             ->whereHas('toCurrency', function ($q) use ($to) {
-    //                 $q->where('code', $to);
-    //             })
-    //             ->first();
+        try {
+            $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+                    $q->where('code', $from);
+                })
+                ->whereHas('toCurrency', function ($q) use ($to) {
+                    $q->where('code', $to);
+                })
+                ->first();
 
-    //         if (!$rate) {
-    //             throw new \Exception("Rate not found");
-    //         }
+            if (!$rate) {
+                throw new \Exception("Rate not found");
+            }
 
-    //         $converted = $amount * $rate->rate;
+            $converted = $amount * $rate->rate;
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Exchange rate fetched',
-    //             'code' => 'EXCHANGE_RATE_FETCHED',
-    //             'data' => [
-    //                 'converted' => $converted,
-    //                 'transfer_fee' => $rate->transfer_fee,
-    //             ]
-    //         ], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Exchange rate fetched',
+                'code' => 'EXCHANGE_RATE_FETCHED',
+                'data' => [
+                    'converted' => $converted,
+                    'transfer_fee' => $rate->transfer_fee,
+                ]
+            ], 200);
 
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage(),
-    //             'code' => 'RATE_NOT_FOUND',
-    //             'data' => null
-    //         ], 400);
-    //     }
-    // }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null
+            ], 400);
+        }
+    }
+
+
 
 
 
@@ -152,58 +154,75 @@ public function create()
 //     $amount = (float) $request->input('amount', 1);
 
 //     try {
+//         $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+//                 $q->where('code', $from);
+//             })
+//             ->whereHas('toCurrency', function ($q) use ($to) {
+//                 $q->where('code', $to);
+//             })
+//             ->first();
+
+//         if (!$rate) {
+//             throw new \Exception("Rate not found for {$from} → {$to}");
+//         }
+
+//         $converted = $amount * $rate->rate;
+//         $baseFee   = (float) ($rate->transfer_fee ?? 0);
+
 //         $actor   = auth()->user();
 //         $ownerId = $actor?->id;
-
 //         if ($actor && isset($actor->owner_id)) {
 //             $ownerId = $actor->owner_id ?? $ownerId;
 //         }
 
+//         $platformFee = 0;
+
+//         // ── Fee based on TO currency (recipient currency) ──────────────────
 //         $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
-//             ->where('currency', $from)
+//             ->where('currency', $to) // ← TO currency not FROM
 //             ->first();
 
-//         if (!$userFee) {
-//             throw new \Exception("No fee configuration found for {$from}");
-//         }
+//         if ($userFee && $userFee->payout_enabled) {
 
-//         if ($userFee->payout_min > 0 && $amount < $userFee->payout_min) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => "Minimum payout for {$from} is " . number_format($userFee->payout_min, 2),
-//                 'code'    => 'BELOW_PAYOUT_MIN',
-//                 'data'    => null,
-//             ], 422);
-//         }
+//             // if ($userFee->payout_min > 0 && $amount < $userFee->payout_min) {
+//             //     return response()->json([
+//             //         'success' => false,
+//             //         'message' => "Minimum payout for {$to} is " . number_format($userFee->payout_min, 2),
+//             //         'code'    => 'BELOW_PAYOUT_MIN',
+//             //         'data'    => null,
+//             //     ], 422);
+//             // }
 
-//         if ($userFee->payout_max > 0 && $amount > $userFee->payout_max) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => "Maximum payout for {$from} is " . number_format($userFee->payout_max, 2),
-//                 'code'    => 'ABOVE_PAYOUT_MAX',
-//                 'data'    => null,
-//             ], 422);
-//         }
+//             // if ($userFee->payout_max > 0 && $amount > $userFee->payout_max) {
+//             //     return response()->json([
+//             //         'success' => false,
+//             //         'message' => "Maximum payout for {$to} is " . number_format($userFee->payout_max, 2),
+//             //         'code'    => 'ABOVE_PAYOUT_MAX',
+//             //         'data'    => null,
+//             //     ], 422);
+//             // }
 
-//         $platformFee = 0;
-//         if ($userFee->payout_enabled) {
+//             // ── Fee calculated on converted amount (recipient gets) ─────────
 //             $platformFee = round(
-//                 ($amount * $userFee->payout_percent / 100) + $userFee->payout_fixed,
+//                 ($converted * $userFee->payout_percent / 100) + $userFee->payout_fixed,
 //                 2
 //             );
 //         }
 
-//         $converted = $amount; // same currency, no conversion needed
-//         $totalFee  = $platformFee;
+//         $totalFee          = $baseFee + $platformFee;
+//         $recipientReceives = $converted - $platformFee; // what they actually get after fee
 
 //         return response()->json([
 //             'success' => true,
 //             'message' => 'Exchange rate fetched',
 //             'code'    => 'EXCHANGE_RATE_FETCHED',
 //             'data'    => [
-//                 'converted'    => $converted,
-//                 'transfer_fee' => $totalFee,
-//                 'platform_fee' => $platformFee,
+//                 'converted'         => $recipientReceives, // net amount recipient gets
+//                 'gross_converted'   => $converted,         // before fee
+//                 'transfer_fee'      => $totalFee,          // fee in TO currency
+//                 'base_fee'          => $baseFee,
+//                 'platform_fee'      => $platformFee,
+//                 'fee_currency'      => $to,                // so frontend knows which symbol
 //             ],
 //         ], 200);
 
@@ -216,95 +235,6 @@ public function create()
 //         ], 400);
 //     }
 // }
-
-public function getExchangeRates(Request $request)
-{
-    $from   = strtoupper($request->input('from_currency'));
-    $to     = strtoupper($request->input('to_currency'));
-    $amount = (float) $request->input('amount', 1);
-
-    try {
-        $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
-                $q->where('code', $from);
-            })
-            ->whereHas('toCurrency', function ($q) use ($to) {
-                $q->where('code', $to);
-            })
-            ->first();
-
-        if (!$rate) {
-            throw new \Exception("Rate not found for {$from} → {$to}");
-        }
-
-        $converted = $amount * $rate->rate;
-        $baseFee   = (float) ($rate->transfer_fee ?? 0);
-
-        $actor   = auth()->user();
-        $ownerId = $actor?->id;
-        if ($actor && isset($actor->owner_id)) {
-            $ownerId = $actor->owner_id ?? $ownerId;
-        }
-
-        $platformFee = 0;
-
-        // ── Fee based on TO currency (recipient currency) ──────────────────
-        $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
-            ->where('currency', $to) // ← TO currency not FROM
-            ->first();
-
-        if ($userFee && $userFee->payout_enabled) {
-
-            // if ($userFee->payout_min > 0 && $amount < $userFee->payout_min) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => "Minimum payout for {$to} is " . number_format($userFee->payout_min, 2),
-            //         'code'    => 'BELOW_PAYOUT_MIN',
-            //         'data'    => null,
-            //     ], 422);
-            // }
-
-            // if ($userFee->payout_max > 0 && $amount > $userFee->payout_max) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => "Maximum payout for {$to} is " . number_format($userFee->payout_max, 2),
-            //         'code'    => 'ABOVE_PAYOUT_MAX',
-            //         'data'    => null,
-            //     ], 422);
-            // }
-
-            // ── Fee calculated on converted amount (recipient gets) ─────────
-            $platformFee = round(
-                ($converted * $userFee->payout_percent / 100) + $userFee->payout_fixed,
-                2
-            );
-        }
-
-        $totalFee          = $baseFee + $platformFee;
-        $recipientReceives = $converted - $platformFee; // what they actually get after fee
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Exchange rate fetched',
-            'code'    => 'EXCHANGE_RATE_FETCHED',
-            'data'    => [
-                'converted'         => $recipientReceives, // net amount recipient gets
-                'gross_converted'   => $converted,         // before fee
-                'transfer_fee'      => $totalFee,          // fee in TO currency
-                'base_fee'          => $baseFee,
-                'platform_fee'      => $platformFee,
-                'fee_currency'      => $to,                // so frontend knows which symbol
-            ],
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-            'code'    => 'RATE_NOT_FOUND',
-            'data'    => null,
-        ], 400);
-    }
-}
 
 
 

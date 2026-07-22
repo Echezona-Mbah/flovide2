@@ -253,8 +253,8 @@ public function submitToFidelity(Request $request, $id, FidelityService $fidelit
         'first_name'    => $personal->firstname,
         'last_name'     => $personal->lastname,
         'email'         => $personal->email,
-        'bvn'           => $personal->bvn,
-        'nin'           => $personal->nin,
+        'bvn'           => null,
+        'nin'           => null,
         'phone_number'  => $personal->person_phone,
         'date_of_birth' => $personal->date_of_birth,
     ]);
@@ -275,6 +275,46 @@ public function submitToFidelity(Request $request, $id, FidelityService $fidelit
 
     return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
 }
+
+
+// public function submitToFidelity(Request $request, $id, FidelityService $fidelity)
+// {
+//     $personal = Personal::findOrFail($id);
+
+//     $currency = $request->input('currency', 'NGN');
+
+//     // ── Find the NGN balance wallet for this personal account ──
+//     $balance = Balance::where('personal_id', $personal->id)
+//         ->where('currency', $currency)
+//         ->first();
+
+//     if (!$balance) {
+//         return back()->with('error', 'No wallet found for this currency. Please create one first.');
+//     }
+
+//     if ($balance->virtual_account_number) {
+//         return back()->with('error', 'This wallet already has a Fidelity virtual account.');
+//     }
+
+//     $response = $fidelity->generateDynamicVirtualAccount(10000, 30);
+
+//     if (!$response['success']) {
+//         $msg = $response['data']['messageCode'] ?? 'Failed to create Fidelity virtual account.';
+//         return back()->with('error', $msg);
+//     }
+
+//     $accountInfo = $response['data']['data']['accountInformation'] ?? [];
+//     $processId   = $response['data']['data']['processId'] ?? null;
+
+//     $balance->virtual_account_number = $accountInfo['accountNumber'] ?? null;
+//     $balance->virtual_account_name   = $accountInfo['accountName'] ?? null;
+//     $balance->virtual_account_bank   = $accountInfo['bankName'] ?? null;
+//     $balance->fidelty_process_id     = $processId;
+//     $balance->save();
+
+//     return back()->with('success', 'Fidelity virtual account created successfully: ' . ($accountInfo['accountNumber'] ?? ''));
+// }
+
 
 public function toggleBalanceLock(Request $request, $personalId, $balanceId)
 {

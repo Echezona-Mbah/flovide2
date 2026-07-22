@@ -161,7 +161,7 @@
                   </td>
 
                   <td class="px-4 py-4 text-slate-500">
-                    {{ number_format($transaction->fees ?? 0, 2) }} {{ $transaction->to_currency }}
+                    {{ number_format($transaction->fees ?? 0, 2) }} {{ $transaction->currency }}
                   </td>
 
                   <td class="px-4 py-4">
