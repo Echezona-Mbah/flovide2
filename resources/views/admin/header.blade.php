@@ -536,26 +536,25 @@
                                                 </ul>
                                             </div>
 
-                                            <div class="col-sm-6 col-xl-4">
-                                                <ul class="nav flex-column">
-                                                    <li class="nav-item-header nav-item">Workspace</li>
-                                                    <li class="nav-item">
-                                                        <a href="{{ route('admin.currency.limits') }}" class="nav-link">Currency Limits</a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a href="javascript:void(0);" class="nav-link">Resource Groups</a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a href="javascript:void(0);" class="nav-link">
-                                                            Goal Metrics
-                                                            <div class="ms-auto badge bg-warning">3</div>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a href="javascript:void(0);" class="nav-link">Campaigns</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
+                                        <div class="col-sm-6 col-xl-4">
+                                            <ul class="nav flex-column">
+                                                <li class="nav-item-header nav-item">Workspace</li>
+                                                <li class="nav-item">
+                                                    <a href="{{ route('admin.currency.limits') }}" class="nav-link">Currency Limits</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a href="{{ route('admin.contact-requests') }}" class="nav-link">Contact Requests</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a href="javascript:void(0);" class="nav-link">
+                                                        Goal Metrics
+                                                        <div class="ms-auto badge bg-warning">3</div>
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <a href="javascript:void(0);" class="nav-link">Campaigns</a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>

@@ -53,6 +53,7 @@ use App\Http\Controllers\Business\VirtualAccountController;
 use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\ContactRequestController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
@@ -535,6 +536,12 @@ Route::middleware(['auth','business.verified'])->group(function () {
             Route::delete('/admin/career-view/{id}', [CareerController::class, 'destroy'])->name('admin.career-view.destroy');
             Route::get('/admin/career-view/{id}', [CareerController::class, 'edit'])->name('admin.career-view.edit');
             Route::put('/admin/career-view/{id}', [CareerController::class, 'update'])->name('admin.career-view.update');
+
+            //contant request routes
+            Route::get('/admin/contact-requests', [ContactRequestController::class, 'index'])->name('admin.contact-requests');
+            Route::delete('/admin/contact-requests/{id}', [ContactRequestController::class, 'destroy']);
+            Route::patch('/admin/contact-requests/{id}/update-status', [ContactRequestController::class, 'updateStatus']);
+            Route::post('/admin/contact-requests/{id}/reply', [ContactRequestController::class, 'reply'])->name('admin.contact-requests.reply');
 
 
             Route::get('/admin/blog', [BlogController::class, 'index'])->name('admin.blog');

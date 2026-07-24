@@ -15,6 +15,7 @@ use App\Http\Controllers\MainPage\SendMoneyHomePageController;
 use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
 use App\Http\Controllers\MainPage\DeveloperController;
+use App\Http\Controllers\MainPage\ContactController;
 use App\Http\Controllers\Pivot\PivotController as PivotPivotController;
 use App\Http\Controllers\PivotController;
 use App\Models\Career;
@@ -53,9 +54,11 @@ Route::get('/careers', function () {
 })->name('careers');
 
 //contact_us route
-Route::get('/contactUs', function () {
-    return view('mainpage.contactUs');
-})->name('contactUs');
+// Route::get('/contactUs', function () {
+//     return view('mainpage.contactUs');
+// })->name('contactUs');
+Route::get('/contactUs', [ContactController::class, 'index'])->name('contactUs');
+Route::post('/contactUs', [ContactController::class, 'store'])->middleware('throttle:5,10')->name('contact.store');
 
 Route::get('/privacy-policy', function () {
     return view('mainpage.privacy-policy');
