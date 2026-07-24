@@ -40,12 +40,17 @@ public function index(Request $request)
         $q->whereHas('fromCurrency', fn($sub) => $sub->where('code', $selectedCode));
     })
     ->get();
+      $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+    ->where('type', 'referral_bonus')
+    ->latest()
+    ->get();
 
 
     return view('admin.exchangerate', [
         'currencies' => $currencies,
         'exchangerates' => $exchangeRates,
         'selectedCode' => $selectedCode,
+        'unreadReferralAlerts' => $unreadReferralAlerts,
     ]);
 }
 
@@ -97,8 +102,12 @@ public function storeExchangeRate(Request $request)
 {
     $rate = ExchangeRate::findOrFail($id);
     $currencies = Currency::orderBy('name')->get();
+         $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+    ->where('type', 'referral_bonus')
+    ->latest()
+    ->get();
 
-    return view('admin.exchangerate_edit', compact('rate', 'currencies'));
+    return view('admin.exchangerate_edit', compact('rate', 'currencies','unreadReferralAlerts'));
 }
 
 

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
 use App\Models\GeneralNotification;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\View;
+use App\Models\AdminNotification;
 
 use Illuminate\Http\Response as HttpResponse;
 
@@ -27,12 +29,6 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    // protected function mapWebRoutes()
-    // {
-    //     Route::middleware('web') // Apply the 'web' middleware group
-    //         ->namespace($this->namespace)
-    //         ->group(base_path('routes/web.php')); // Path to the web.php routes file
-    // }
 
  protected function mapWebRoutes()
 {
@@ -74,15 +70,7 @@ class AppServiceProvider extends ServiceProvider
                 URL::forceScheme('http');
             }
     
-            // Add global security headers to all responses
-            // app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
-
-                // Register security headers middleware only in production (optional)
-            // if (App::environment('production')) {
-            //     app('router')->pushMiddlewareToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
-            // }
-
-
+      
 
 
         // Only minify in production, optional
@@ -115,6 +103,14 @@ class AppServiceProvider extends ServiceProvider
             // Tell Laravel to use our GeneralNotification model
     DatabaseNotification::resolveRelationUsing('morph', function () {
         return GeneralNotification::class;
+    });
+
+
+     View::composer('admin.header', function ($view) {
+        $view->with('unreadReferralAlerts', AdminNotification::whereNull('read_at')
+            ->where('type', 'referral_bonus')
+            ->latest()
+            ->get());
     });
 
     }

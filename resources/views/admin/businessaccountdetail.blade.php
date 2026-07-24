@@ -1194,6 +1194,7 @@
                         </div>
 
                         <div class="tab-content-section d-none" id="tab-accounts">
+                            
 
 
                             @php
@@ -1597,6 +1598,9 @@
                                     </div>
                                 </div>
                             @endforeach
+
+
+                            @include('admin.referrals-list')
                         </div>
 
                     </div>

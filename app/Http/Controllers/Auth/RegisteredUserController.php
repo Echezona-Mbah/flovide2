@@ -28,12 +28,13 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(?string $referral_code = null): View
     {
-         $countries = Currency::orderBy('name', 'asc')->get(); 
+        $countries = Currency::orderBy('name', 'asc')->get();
         $industries = Industry::all();
         $states = State::all();
-        return view('auth.register', compact('countries','industries','states'));
+
+        return view('auth.register', compact('countries', 'industries', 'states', 'referral_code'));
     }
 
     /**
@@ -86,6 +87,7 @@ class RegisteredUserController extends Controller
             'date_of_birth' => 'nullable|date',
             'email' => 'nullable|email|max:255',
             'password' => 'nullable|string|max:255',
+            'referral_code' => 'nullable|string|max:255',
         ]);
 
         $email = $request->input('email');
@@ -154,6 +156,13 @@ class RegisteredUserController extends Controller
         $user->email_verification_otp_expires_at = now()->addMinutes(5);
         
         // REFERRAL CODE & LINK
+        if (!empty($validated['referral_code'])) {
+            $referrer = User::where('referral_code', $validated['referral_code'])->first();
+
+            if ($referrer) {
+                $user->referred_by = $referrer->id; // adjust to your actual column name
+            }
+        }
         $user->referral_code = $this->generateReferralCode();
         $user->referral_link = url('/register/' . $user->referral_code);
         

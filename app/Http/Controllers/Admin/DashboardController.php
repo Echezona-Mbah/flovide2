@@ -37,6 +37,11 @@ class DashboardController extends Controller
         $loginLocations = AdminLoginLog::whereNotNull('latitude')
     ->get(['latitude','longitude','ip_address','country','city']);
 
+    $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+    ->where('type', 'referral_bonus')
+    ->latest()
+    ->get();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalPersonals',
@@ -45,7 +50,8 @@ class DashboardController extends Controller
             'totalIncome',
             'incomePercent',
             'lastTransactions',
-            'loginLocations'
+            'loginLocations',
+            'unreadReferralAlerts',
         ));
 }
 

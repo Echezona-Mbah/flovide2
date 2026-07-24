@@ -220,6 +220,11 @@
                             <section>
                                 <form class="max-w-sm mt-10" action="" method="POST" id="countryForm">
                                     @csrf
+
+                                    <input type="hidden" name="referral_code" value="{{ $referral_code }}">
+
+
+
                                     <label for="countries" class="block mb-2 text-sm font-bold text-gray-900  ">{{ __('Country') }}</label>
                             
                                     <div class="custom-dropdown">

@@ -37,20 +37,31 @@
         <div class="p-6 md:p-10 space-y-8">
 
           <!-- Reward Cards -->
+          <!-- Reward Cards -->
           <div class="grid md:grid-cols-2 gap-6">
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Personal</p>
-              <h3 class="mt-2 text-xl font-semibold text-slate-900">Earn £10</h3>
+              <h3 class="mt-2 text-xl font-semibold text-slate-900">
+                Earn {{ config('referral.bonus_trigger_currency') }} {{ number_format(config('referral.bonus_trigger_amount_personal'), 2) }}
+              </h3>
               <p class="mt-2 text-sm text-slate-600">
-                When your invitee deposits a total of <span class="font-semibold text-slate-900">£1,000</span> within 15 days.
+                When your invitee deposits a total of
+                <span class="font-semibold text-slate-900">
+                  {{ config('referral.bonus_trigger_currency') }} {{ number_format(config('referral.bonus_trigger_amount_personal'), 2) }}
+                </span>.
               </p>
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <p class="text-xs uppercase tracking-[0.25em] text-slate-500">Business</p>
-              <h3 class="mt-2 text-xl font-semibold text-slate-900">Earn £50</h3>
+              <h3 class="mt-2 text-xl font-semibold text-slate-900">
+                Earn {{ config('referral.bonus_trigger_currency') }} {{ number_format(config('referral.bonus_trigger_amount_business'), 2) }}
+              </h3>
               <p class="mt-2 text-sm text-slate-600">
-                When your invitee deposits a total of <span class="font-semibold text-slate-900">£2,000</span> within 15 days.
+                When your invitee deposits a total of
+                <span class="font-semibold text-slate-900">
+                  {{ config('referral.bonus_trigger_currency') }} {{ number_format(config('referral.bonus_trigger_amount_business'), 2) }}
+                </span>.
               </p>
             </div>
           </div>
@@ -71,7 +82,77 @@
                 </svg>
               </button>
             </div>
+
+
+
+            <!-- Referrals & Progress -->
+          <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Your Referrals</p>
+                <p class="text-xs text-slate-500 mt-1">People you've invited, and their progress toward your reward.</p>
+              </div>
+              <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+                {{ $referrals->count() }} total ·
+                {{ $referrals->filter(fn($r) => $r['progress']['completed'])->count() }} completed
+              </span>
+            </div>
+
+            <div class="p-6">
+              @if($referrals->count() > 0)
+                <div class="space-y-4">
+                  @foreach($referrals as $r)
+                    @php
+                      $ref = $r['model'];
+                      $p = $r['progress'];
+                      $name = $ref->business_name ?? trim(($ref->firstname ?? '') . ' ' . ($ref->lastname ?? ''));
+                    @endphp
+                    <div class="rounded-xl border border-slate-200 p-4">
+                      <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                        <div>
+                          <p class="font-semibold text-slate-900">{{ $name ?: 'N/A' }}</p>
+                          <p class="text-xs text-slate-500">{{ $ref->email }} · Joined {{ optional($ref->created_at)->format('M d, Y') }}</p>
+                        </div>
+                        @if($p['completed'])
+                          <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700">
+                            ✓ Reward Earned
+                          </span>
+                        @else
+                          <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">
+                            {{ $p['percent'] }}% there
+                          </span>
+                        @endif
+                      </div>
+
+                      <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+                        <span>{{ $p['currency'] }} {{ number_format($p['total'], 2) }} deposited</span>
+                        <span>Goal: {{ $p['currency'] }} {{ number_format($p['threshold'], 2) }}</span>
+                      </div>
+
+                      <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div class="h-full rounded-full {{ $p['completed'] ? 'bg-emerald-500' : 'bg-[#215F9C]' }}"
+                             style="width: {{ $p['percent'] }}%;"></div>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              @else
+                <div class="text-center py-10 text-sm text-slate-500">
+                  You haven't referred anyone yet. Share your link above to start earning.
+                </div>
+              @endif
+            </div>
           </div>
+
+
+
+
+
+
+          </div>
+
+
+
 
         </div>
       </div>
