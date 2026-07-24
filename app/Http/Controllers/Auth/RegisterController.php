@@ -72,6 +72,8 @@ class RegisterController extends Controller
 public function registerUser(Request $request)
 {
 
+
+
     $validator = Validator::make($request->all(), [
         'email' => 'required|string|email|max:255',
         // 'password' => [
@@ -105,6 +107,7 @@ public function registerUser(Request $request)
         'nature_of_business' => 'required|string|max:255',
         'trading_street_address' => 'required|string|max:255',
         'trading_city' => 'required|string|max:255',
+        'referral_code' => 'nullable|string|max:255',
     ]);
 
     // return response()->json([
@@ -151,6 +154,14 @@ public function registerUser(Request $request)
     $existingcountry = Countries::where('name', $request->country)->first();
     $currency_code = $existingcountry->currency_code;
 
+    $referredBy = null;
+    if ($request->filled('referral_code')) {
+        $referrer = User::where('referral_code', $request->referral_code)->first();
+
+        if ($referrer) {
+            $referredBy = $referrer->id;
+        }
+    }
     $referral_code = $this->generateReferralCode();
     $referral_link = url('/register/' . $referral_code);
 
@@ -167,6 +178,7 @@ public function registerUser(Request $request)
         'typeofuser' => 'business',
         'referral_code' => $referral_code,
         'referral_link' => $referral_link,
+        'referred_by' => $referredBy, 
         'currency' => $currency_code,
         'firstname' => $request->firstname,
         'lastname' => $request->lastname,
@@ -514,6 +526,7 @@ public function registerUser(Request $request)
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'person_phone' => 'required|string|max:20',
+            'referral_code' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -556,6 +569,14 @@ public function registerUser(Request $request)
         $currency_code = $existingcountry->currency_code;
 
 
+        $referredBy = null;
+        if ($request->filled('referral_code')) {
+            $referrer = Personal::where('referral_code', $request->referral_code)->first();
+
+            if ($referrer) {
+                $referredBy = $referrer->id;
+            }
+        }
         // REFERRAL CODE & LINK
         $referral_code = $this->generateReferralCode();
         $referral_link = url('/register/' . $referral_code);
@@ -574,6 +595,7 @@ public function registerUser(Request $request)
             'currency' => $currency_code,
             'referral_code' => $referral_code,
             'referral_link' => $referral_link,
+            'referred_by' => $referredBy, 
             'email_verification_otp' => $otp,
             'email_verification_otp_expires_at' => now()->addMinutes(10),
         ]);

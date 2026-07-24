@@ -94,14 +94,33 @@ public function index(Request $request)
         ->orderBy('created_at', 'desc')
         ->paginate(10)
         ->withQueryString(); // keeps search during pagination
+        $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+        ->where('type', 'referral_bonus')
+        ->latest()
+        ->get();
 
-    return view('admin.businessaccount', compact('allUser','search'));
+        
+
+        
+
+    return view('admin.businessaccount', compact('allUser','search','unreadReferralAlerts'));
 }
 
 public function edit($id)
 {
     $user = User::findOrFail($id);
-    return view('admin.businessaccountedit', compact('user'));
+            $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+        ->where('type', 'referral_bonus')
+        ->latest()
+        ->get();
+        $referrals = User::where('referred_by', $user->id)->get()->map(function ($ref) {
+        $progress = app(\App\Services\ReferralBonusService::class)->getProgress($ref);
+            return [
+                'model'    => $ref,
+                'progress' => $progress,
+            ];
+        });
+    return view('admin.businessaccountedit', compact('user','unreadReferralAlerts','referrals'));
 }
 
 
@@ -195,7 +214,18 @@ public function find($id)
     foreach ($balances as $bal) {
         $bal->currency_info = $this->getCountryCodeFromCurrency($bal->currency);
     }
+            $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+        ->where('type', 'referral_bonus')
+        ->latest()
+        ->get();
 
+            $referrals = User::where('referred_by', $user->id)->get()->map(function ($ref) {
+        $progress = app(\App\Services\ReferralBonusService::class)->getProgress($ref);
+            return [
+                'model'    => $ref,
+                'progress' => $progress,
+            ];
+        });
     return view('admin.businessaccountdetail', compact(
         'user',
         'balances',
@@ -205,7 +235,9 @@ public function find($id)
         'customer',
         'bankAccount',
         'Subaccount',
-        'currencyFees'
+        'currencyFees',
+        'unreadReferralAlerts',
+        'referrals'
     ));
 }
 

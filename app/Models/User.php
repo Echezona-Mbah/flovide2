@@ -45,6 +45,8 @@ class User extends Authenticatable
         'typeofuser',
         'referral_code',
         'referral_link',
+        'referred_by',
+        'referral_bonus_notified_at',
         'email_verified_status',
         'email_verification_attempts',
         'forget_verification_otp',

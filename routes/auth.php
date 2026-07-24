@@ -71,7 +71,8 @@ use App\Http\Middleware\SecurityHeaders;
 
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
+    // Route::get('register', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
+    Route::get('register/{referral_code?}', [RegisteredUserController::class, 'create'])->name('register.saveStepData');
 
     Route::post('register', [RegisteredUserController::class, 'saveStepData']);
 
@@ -376,7 +377,11 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'index'])
     ->middleware('admin.permission:view_dashboard')
     ->name('admin.dashboard');
+    Route::post('/admin/referral-alerts/{id}/resolve', [\App\Http\Controllers\Admin\ReferralAlertController::class, 'resolve'])
+        ->name('admin.referral-alerts.resolve');
 
+        // Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
+        // Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
 
 
     Route::middleware('admin.permission:view_transactions')->group(function () {
@@ -398,10 +403,10 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/personal-testmode/{id}', [TestModeController::class, 'personalTestMode'])->name('admin.personal-testmode');
 
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
-        Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find']);
+        Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
 
         Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
-        Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find']);
+        Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
 
         Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
         Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');

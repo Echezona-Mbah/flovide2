@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveStepDataUrl = window.saveStepDataUrl;
 
+        // ── Capture referral code from hidden input, if present ──────────────
+    const referralInput = document.querySelector('input[name="referral_code"]');
+    if (referralInput && referralInput.value) {
+        formData.referral_code = referralInput.value;
+    }
+
     const countryCurrencyMap = {
         'AE': 'د.إ', // United Arab Emirates
         'AU': '$',   // Australia

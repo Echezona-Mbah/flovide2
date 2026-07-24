@@ -136,6 +136,14 @@ public function destroy($id)
         $bal->currency_info = $this->getCountryCodeFromCurrency($bal->currency);
     }
 
+      $referrals = Personal::where('referred_by', $user->id)->get()->map(function ($ref) {
+    $progress = app(\App\Services\ReferralBonusService::class)->getProgress($ref);
+        return [
+            'model'    => $ref,
+            'progress' => $progress,
+        ];
+    });
+
     return view('admin.personalaccountdetail', compact(
         'user',
         'balances',
@@ -143,7 +151,8 @@ public function destroy($id)
         'beneficia',
         'customer',
         'bankAccount',
-        'Subaccount'
+        'Subaccount',
+        'referrals',
     ));
 }
 

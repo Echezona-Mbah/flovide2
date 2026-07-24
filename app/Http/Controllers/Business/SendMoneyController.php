@@ -451,7 +451,7 @@ class SendMoneyController extends Controller
             'recipient_bank_currency'  => $currency,
             'recipient_country'        => strtoupper(substr($currency, 0, 2)),
             'exchange_rate'            => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
-            'status'                   => 'pending',
+            'status'                   => 'success',
             'method'                   => 'withdrawal',
             'type'                     => 'withdrawal',
             'payment_provider'         => 'wallect',
@@ -470,7 +470,8 @@ class SendMoneyController extends Controller
             'interac_first_name'       => $request->interac_first_name ?? null,
             'interac_last_name'        => $request->interac_last_name  ?? null,
         ]);
-
+            // app(\App\Services\ReferralBonusService::class)->checkAndNotify($personal, $transaction);
+        app(\App\Services\ReferralBonusService::class)->checkAndNotify($owner->fresh(), $tx->fresh());
         // ── Route to provider ─────────────────────────────────────────────
         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
             $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);

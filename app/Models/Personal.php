@@ -29,6 +29,8 @@ class Personal extends Authenticatable
         'currency',
         'referral_code',
         'referral_link',
+        'referred_by',
+        'referral_bonus_notified_at',
         'balance',
         'default_currency',
         'default_currency_balance',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Models\TeamMembers;
 use App\Models\User;
+use App\Services\ReferralBonusService;
 use Illuminate\Http\Request;
 
 class referralLinkController extends Controller
@@ -43,6 +44,19 @@ class referralLinkController extends Controller
 
         $referralLink = $owner->referral_link;
 
+        // ── People this account has referred, with bonus progress ──────────
+        $referralService = app(ReferralBonusService::class);
+
+        $referrals = User::where('referred_by', $owner->id)
+            ->latest()
+            ->get()
+            ->map(function ($ref) use ($referralService) {
+                return [
+                    'model'    => $ref,
+                    'progress' => $referralService->getProgress($ref),
+                ];
+            });
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -51,10 +65,19 @@ class referralLinkController extends Controller
                 'data' => [
                     'owner_id' => $owner->id,
                     'referral_link' => $referralLink,
+                    'referrals' => $referrals->map(function ($r) {
+                        return [
+                            'id'        => $r['model']->id,
+                            'name'      => $r['model']->business_name ?? trim(($r['model']->firstname ?? '') . ' ' . ($r['model']->lastname ?? '')),
+                            'email'     => $r['model']->email,
+                            'joined_at' => $r['model']->created_at,
+                            'progress'  => $r['progress'],
+                        ];
+                    }),
                 ],
             ], 200);
         }
 
-        return view('business.referral', compact('referralLink'));
+        return view('business.referral', compact('referralLink', 'referrals'));
     }
 }
