@@ -1,5 +1,5 @@
 <header class="relative">
-  <section class="bg-[#0F243D] md:h-[750px] md:mx-10 md:rounded-2xl" id="mobileMenuButton">
+  <section class="business-hero-bg md:h-[750px] md:mx-10 md:rounded-2xl" id="mobileMenuButton">
     <!-- mobile menu -->
     <section class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
       <section class="flex justify-between items-center w-full">
@@ -76,9 +76,12 @@
       </div>
     </section>
 
-    <div class="md:max-w-7xl w-full flex flex-col lg:flex-row justify-between pt-16 pb-20 md:pb-0 px-4 md:px-10 gap-8">
+    <div class="md:max-w-7xl w-full flex flex-col lg:flex-row justify-between pt-16 pb-20 md:pb-0 px-4 md:px-10 gap-8 mx-auto">
       <div class="md:max-w-xl text-white">
-        <h1 class="font-semibold md:text-[3.5rem] text-4xl w-[87vw] md:full flex flex-wrap text-center md:text-left leading-[1.1] mb-6">
+        <div class="business-hero-panel inline-flex items-center rounded-full px-4 py-2 mb-5 text-xs font-semibold text-[#b7f0cf]">
+          {{ __('Business banking built for borderless teams') }}
+        </div>
+        <h1 class="font-semibold md:text-[3.5rem] text-4xl w-[87vw] md:w-full flex flex-wrap text-center md:text-left leading-[1.1] mb-6">
           {{ __('Do business like a local in 190+ countries') }}
         </h1>
         <p class="md:text-[0.875rem] text-xl text-center md:text-left font-normal mb-8 max-w-md">
@@ -89,7 +92,7 @@
 
           <a href="{{ route('login') }}">
             <button
-              class="bg-[#2D6BCF] text-white text-lg md:w-[15vw] font-medium rounded-full px-6 py-2.5 hover:bg-[#1f4e9e] transition">
+              class="bg-[#2D6BCF] text-white text-lg md:w-[15vw] font-medium rounded-full px-6 py-2.5 shadow-lg shadow-[#10233c]/30 hover:bg-[#1f4e9e] transition">
               {{ __('Sign In') }}
             </button>
           </a>
@@ -108,12 +111,12 @@
       </div>
 
       <div class="flex flex-col gap-4 max-w-md w-full justify-center items-center">
-        <div>
-          <img src="{{asset('../asserts/homepage/header_img1.png')}}" alt="" width="350px" height="100px" />
+        <div class="business-screen-card rounded-3xl p-3 rotate-[-2deg]">
+          <img src="{{asset('../asserts/homepage/header_img1.png')}}" alt="" width="350px" height="100px" class="rounded-2xl" />
         </div>
 
-        <div>
-          <img src="{{asset('../asserts/homepage/header_img2.png')}}" alt="" width="350px" height="100px" />
+        <div class="business-screen-card rounded-3xl p-3 rotate-[2deg]">
+          <img src="{{asset('../asserts/homepage/header_img2.png')}}" alt="" width="350px" height="100px" class="rounded-2xl" />
         </div>
       </div>
     </div>

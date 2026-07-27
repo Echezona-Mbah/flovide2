@@ -104,6 +104,7 @@ Route::get('/test-blaaiz-token', function (BlaaizService $blaaiz) {
 
 
 Route::get('/send-money/{slug}', [SendMoneyHomePageController::class, 'index'])->name('send-money');
+Route::get('/exchange-rate/public', [SendMoneyHomePageController::class, 'getExchangeRate']);
 Route::get('/cron/payaza-check', [SendMoneyController::class, 'runPayazaCheck']);
 
 

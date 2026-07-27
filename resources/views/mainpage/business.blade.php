@@ -16,6 +16,64 @@
   <style>
     body {
       color: #252525;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        linear-gradient(180deg, #f7fbff 0%, #ffffff 44%, #f4f7fb 100%);
+    }
+    .business-hero-bg {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(8, 29, 53, 0.98), rgba(14, 66, 100, 0.94) 52%, rgba(9, 35, 58, 0.98)),
+        url("{{ asset('../asserts/homepage/Dashboard.png') }}");
+      background-size: cover;
+      background-position: center;
+      isolation: isolate;
+    }
+    .business-hero-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent 86%);
+    }
+    .business-hero-bg::after {
+      content: "";
+      position: absolute;
+      inset: auto 8% -24% auto;
+      width: min(520px, 70vw);
+      height: min(520px, 70vw);
+      z-index: -1;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(123, 207, 158, 0.28), transparent 68%);
+      filter: blur(8px);
+    }
+    .business-hero-panel {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 26px 70px rgba(2, 14, 27, 0.28);
+      backdrop-filter: blur(16px);
+    }
+    .business-screen-card {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 22px 48px rgba(2, 14, 27, 0.24);
+      backdrop-filter: blur(14px);
+    }
+    .business-feature-card {
+      border: 1px solid rgba(33, 95, 156, 0.12);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 251, 255, 0.94));
+      box-shadow: 0 24px 60px rgba(15, 36, 61, 0.12);
+    }
+    .business-icon-tile {
+      background: linear-gradient(135deg, #10233c, #215f9c);
+      box-shadow: 0 14px 28px rgba(33, 95, 156, 0.22);
     }
   </style>
 </head>
@@ -38,7 +96,7 @@
         <h1 class="text-center text-3xl sm:text-4xl font-medium text-gray-900 md:max-w-[35vw] mx-auto leading-tight">
           {{ __('Robust business accounts designed for growth') }}
         </h1>
-        <div class="mt-12 rounded-3xl md:border border-gray-400 p-4 md:p-10 flex flex-col gap-8 sm:gap-0 bg-white">
+        <div class="business-feature-card mt-12 rounded-3xl p-4 md:p-10 flex flex-col gap-8 sm:gap-0">
           <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full justify-between">
             {{-- <button class="bg-gray-900 text-white rounded-xl md:px-10 py-2 font-semibold text-sm" type="button">
               {{ __('Global Payments') }}
@@ -56,7 +114,7 @@
 
           <section class="flex flex-col md:flex-row gap-y-8 w-full">
             <div class="flex flex-col sm:w-1/2">
-              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-900 mb-6">
+              <div class="business-icon-tile flex items-center justify-center w-12 h-12 rounded-xl mb-6">
                 <img src="{{asset('../asserts/mingcute_world-line.svg')}}" alt="" class="h-6 w-6" />
               </div>
               <h2 class="text-gray-900 font-bold text-xl mb-2">

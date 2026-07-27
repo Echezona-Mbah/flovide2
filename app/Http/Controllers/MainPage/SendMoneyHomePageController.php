@@ -55,4 +55,51 @@ class SendMoneyHomePageController extends Controller
 
         return view('mainpage.send-money', compact('currencies', 'countryCurrency'));
     }
+
+
+
+    public function getExchangeRate(Request $request)
+    {
+        $from = strtoupper($request->input('from_currency'));
+        $to   = strtoupper($request->input('to_currency'));
+        $amount = (float) $request->input('amount', 1);
+
+        try {
+            $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($from) {
+                    $q->where('code', $from);
+                })
+                ->whereHas('toCurrency', function ($q) use ($to) {
+                    $q->where('code', $to);
+                })
+                ->first();
+
+            if (!$rate) {
+                throw new \Exception("Rate not found");
+            }
+
+            $converted = $amount * $rate->rate;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Exchange rate fetched',
+                'code' => 'EXCHANGE_RATE_FETCHED',
+                'data' => [
+                    'converted' => $converted,
+                    'rate' => (float) $rate->rate,
+                    'transfer_fee' => $rate->transfer_fee,
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => 'RATE_NOT_FOUND',
+                'data' => null
+            ], 400);
+        }
+    }
+
+
+
 }

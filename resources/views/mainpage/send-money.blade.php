@@ -545,44 +545,29 @@ console.log("🚀 Exchange script loaded");
 
 let selected = { sender: null, receiver: null };
 
-
 // =====================
 // Toggle dropdown
 // =====================
 function toggleDropdown(type) {
-    console.log("📂 Toggle dropdown:", type);
-
-    document.querySelectorAll('.dropdown')
-        .forEach(d => d.classList.add('hidden'));
-
-    document.getElementById(type + 'Dropdown')
-        .classList.toggle('hidden');
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.add('hidden'));
+    document.getElementById(type + 'Dropdown').classList.toggle('hidden');
 }
-
 
 // =====================
 // Close dropdown outside click
 // =====================
 document.addEventListener('click', e => {
     if (!e.target.closest('.relative')) {
-        console.log("🖱 Click outside — closing dropdowns");
-
-        document.querySelectorAll('.dropdown')
-            .forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.add('hidden'));
     }
 });
-
 
 // =====================
 // Select currency
 // =====================
 document.querySelectorAll('.currency-item').forEach(item => {
-
     item.addEventListener('click', () => {
-
         const t = item.dataset.target;
-
-        console.log("✅ Currency clicked:", item.dataset);
 
         selected[t] = {
             code: item.dataset.code,
@@ -593,167 +578,138 @@ document.querySelectorAll('.currency-item').forEach(item => {
 
         console.log(`📌 Selected ${t}:`, selected[t]);
 
-        document.getElementById(t + 'Flag').src =
-            `https://flagcdn.com/w20/${selected[t].flag}.png`;
-
-        document.getElementById(t + 'Symbol').textContent =
-            selected[t].symbol;
-
-        document.getElementById(t + 'Code').textContent =
-            selected[t].code;
+        document.getElementById(t + 'Flag').src = `https://flagcdn.com/w20/${selected[t].flag}.png`;
+        document.getElementById(t + 'Symbol').textContent = selected[t].symbol;
+        document.getElementById(t + 'Code').textContent = selected[t].code;
 
         updateAll();
         toggleDropdown(t);
     });
-
 });
-
 
 // =====================
 // Search filter
 // =====================
 document.querySelectorAll('.dropdown-search').forEach(input => {
-
     input.addEventListener('input', e => {
-
         const search = e.target.value.toLowerCase();
-        console.log("🔍 Search:", search);
-
         const list = e.target.nextElementSibling;
-
         list.querySelectorAll('.currency-item').forEach(item => {
-            item.style.display =
-                item.textContent.toLowerCase().includes(search)
-                    ? 'flex' : 'none';
+            item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
         });
-
     });
-
 });
 
+// =====================
+// Calculate conversion (via server, pairwise rate)
+// =====================
+let calculateTimeout = null;
 
-// =====================
-// Calculate conversion
-// =====================
 function calculate() {
-
-    console.log("🧮 Running calculation...");
-
     if (!selected.sender || !selected.receiver) {
         console.warn("⚠ Sender or receiver not selected", selected);
         return;
     }
 
-    const send =
-        parseFloat(document.getElementById('sendAmount').value) || 0;
+    const send = parseFloat(document.getElementById('sendAmount').value) || 0;
 
-    const senderRate = parseFloat(selected.sender.rate);
-    const receiverRate = parseFloat(selected.receiver.rate);
-
-    console.log("💰 Send amount:", send);
-    console.log("📊 Sender rate:", senderRate);
-    console.log("📊 Receiver rate:", receiverRate);
-
-    if (!senderRate || !receiverRate) {
-        console.error("❌ Invalid rate detected!");
-        return;
-    }
-
-    const result = (send / senderRate) * receiverRate;
-
-    console.log("✅ Final result:", result);
-
-    document.getElementById('receiveAmount')
-        .textContent = result.toFixed(2);
+    // Debounce so we don't fire a request on every keystroke
+    clearTimeout(calculateTimeout);
+    calculateTimeout = setTimeout(() => {
+        fetchRate(selected.sender.code, selected.receiver.code, send);
+    }, 300);
 }
 
+function fetchRate(from, to, amount) {
+    const url = `/exchange-rate/public?from_currency=${encodeURIComponent(from)}&to_currency=${encodeURIComponent(to)}&amount=${encodeURIComponent(amount)}`;
 
-// =====================
-// Exchange rate text
-// =====================
-function updateExchange() {
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                console.error("❌ Rate fetch failed:", data.message);
+                document.getElementById('receiveAmount').textContent = "Rate unavailable";
+                document.getElementById('exchangeText').textContent = "—";
+                return;
+            }
 
-    console.log("🔄 Updating exchange text");
+            const converted = data.data.converted;
+            const rate = data.data.rate;
 
-    if (!selected.sender || !selected.receiver) return;
+            console.log("✅ Server rate result:", data.data);
 
-    const rate =
-        selected.receiver.rate / selected.sender.rate;
-
-    console.log("📈 Exchange rate:", rate);
-
-    document.getElementById('exchangeText').textContent =
-        `1 ${selected.sender.code} = ${rate.toFixed(4)} ${selected.receiver.code}`;
+            document.getElementById('receiveAmount').textContent = converted.toFixed(2);
+            document.getElementById('exchangeText').textContent =
+                `1 ${from} = ${rate.toFixed(4)} ${to}`;
+        })
+        .catch(err => {
+            console.error("❌ Rate fetch error:", err);
+            document.getElementById('receiveAmount').textContent = "Rate unavailable";
+        });
 }
-
 
 // =====================
 // Update all
 // =====================
 function updateAll() {
-    console.log("🔁 updateAll triggered");
     calculate();
-    updateExchange();
 }
-
 
 // =====================
 // Input listener
 // =====================
-document.getElementById('sendAmount')
-.addEventListener('input', () => {
-    console.log("⌨ Input changed");
-    calculate();
-});
-
+document.getElementById('sendAmount').addEventListener('input', calculate);
 
 // =====================
 // Country grid click
 // =====================
-// ✅ allow navigation to the same page with slug
 document.querySelectorAll('.country-link').forEach(link => {
     link.addEventListener('click', function() {
-        // no preventDefault → link navigates normally
         console.log("🌍 Country clicked, navigating to:", this.href);
     });
 });
 
+// =====================
+// Helper: case-insensitive currency lookup
+// =====================
+function findCurrencyItem(dropdownId, code) {
+    if (!code) return null;
+    const items = document.querySelectorAll(`#${dropdownId} .currency-item`);
+    for (const item of items) {
+        if ((item.dataset.code || '').toUpperCase() === code.toUpperCase()) {
+            return item;
+        }
+    }
+    return null;
+}
 
 // =====================
 // Default setup
 // =====================
 console.log("⚙ Setting default currencies");
 
-// Default sender GBP
-const defaultSenderItem =
-    document.querySelector('#senderDropdown .currency-item[data-code="GBP"]');
-
+// Default sender: try GBP first, fall back to first available currency
+let defaultSenderItem = findCurrencyItem('senderDropdown', 'GBP');
+if (!defaultSenderItem) {
+    console.warn("⚠ GBP not found as sender option — using first available currency instead");
+    defaultSenderItem = document.querySelector('#senderDropdown .currency-item');
+}
 if (defaultSenderItem) {
-    console.log("🇬🇧 Default sender GBP found");
+    console.log("✅ Default sender selected:", defaultSenderItem.dataset.code);
     defaultSenderItem.click();
 } else {
-    console.warn("⚠ Default sender GBP NOT found");
+    console.error("❌ No sender currencies available at all!");
 }
 
-
-// Default receiver
-const slugCurrencyCode =
-    "{{ $countryCurrency['currency_code'] ?? array_key_first($currencies->toArray()) }}";
-
+// Default receiver: match slug currency, fall back to first available
+const slugCurrencyCode = "{{ $countryCurrency['currency_code'] ?? array_key_first($currencies->toArray()) }}";
 console.log("🎯 Slug receiver currency:", slugCurrencyCode);
 
-let receiverItem =
-    document.querySelector(
-        `#receiverDropdown .currency-item[data-code="${slugCurrencyCode}"]`
-    );
-
+let receiverItem = findCurrencyItem('receiverDropdown', slugCurrencyCode);
 if (!receiverItem) {
     console.warn("⚠ Slug receiver not found — using first currency");
-
-    receiverItem =
-        document.querySelector('#receiverDropdown .currency-item');
+    receiverItem = document.querySelector('#receiverDropdown .currency-item');
 }
-
 if (receiverItem) {
     console.log("✅ Default receiver selected:", receiverItem.dataset.code);
     receiverItem.click();
@@ -761,7 +717,6 @@ if (receiverItem) {
     console.error("❌ No receiver currency found!");
 }
 </script>
-
 
 
     </body>

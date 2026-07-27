@@ -36,11 +36,17 @@
             <div
               class="flex-1 flex md:w-[50%] justify-center md:justify-end md:pr-16 md:pt-0 md:bg-[#13263E]"
             >
-              <img
-                src="{{asset('../asserts/ClipIphone.png')}}"
+              {{-- <img
+                src="{{asset('../asserts/def.png')}}"
                 alt="Phone"
                 class="md:max-w-[590px] w-full object-contain rounded-3xl shadow-lg md:absolute top-[-4.5em] right-[-2em]"
-              />
+              /> --}}
+
+                         <img
+  src="{{asset('../asserts/def.png')}}"
+  alt="Phone"
+  class="md:max-w-[470px] md:max-h-[520px] w-full object-contain rounded-3xl shadow-lg md:absolute top-[-2em] right-[-1em]"
+/>
             </div>
           </div>
         </section>

@@ -25,6 +25,97 @@
       padding: 0;
       margin: 0;
       overflow-x: hidden !important;
+      background:
+        linear-gradient(180deg, #f7fbff 0%, #ffffff 42%, #f4f7fb 100%);
+    }
+    html {
+  scroll-behavior: smooth;
+}
+    .personal-hero-bg {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(8, 29, 53, 0.98), rgba(13, 61, 96, 0.94) 52%, rgba(10, 37, 62, 0.98)),
+        url("../asserts/homepage/globalPayments.png");
+      background-size: cover;
+      background-position: center;
+      isolation: isolate;
+    }
+    .personal-hero-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent 85%);
+    }
+    .hero-calculator-card {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(246, 251, 255, 0.93));
+      box-shadow: 0 28px 70px rgba(2, 14, 27, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(18px);
+    }
+    .hero-calculator-card::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border-radius: 24px;
+      pointer-events: none;
+      border: 1px solid rgba(33, 95, 156, 0.08);
+    }
+    .hero-card-kicker {
+      color: #215f9c;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .hero-money-panel {
+      border: 1px solid rgba(33, 95, 156, 0.12);
+      background: linear-gradient(180deg, #ffffff, #f2f7fb);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+    .hero-rate-pill {
+      border: 1px solid rgba(123, 207, 158, 0.28);
+      background: rgba(232, 248, 239, 0.86);
+    }
+    .hero-amount-input {
+      background: transparent;
+      color: #10233c;
+      outline: none;
+    }
+    .hero-amount-input:focus {
+      box-shadow: none;
+    }
+    .hero-currency-button {
+      border: 1px solid rgba(33, 95, 156, 0.18);
+      background: #ffffff;
+      color: #10233c;
+      box-shadow: 0 8px 20px rgba(15, 36, 61, 0.08);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+    .hero-currency-button:hover,
+    .hero-currency-button:focus {
+      border-color: rgba(33, 95, 156, 0.48);
+      box-shadow: 0 12px 24px rgba(15, 36, 61, 0.12);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .hero-dropdown {
+      border: 1px solid rgba(33, 95, 156, 0.14);
+      box-shadow: 0 24px 48px rgba(15, 36, 61, 0.2);
+    }
+    .hero-dropdown-search:focus {
+      box-shadow: inset 0 -1px 0 rgba(33, 95, 156, 0.35);
+    }
+    .hero-currency-item {
+      transition: background-color 160ms ease, color 160ms ease;
+    }
+    .hero-currency-item:hover {
+      background: #eef7ff;
+      color: #0f4f86;
     }
   </style>
 </head>
@@ -37,7 +128,7 @@
   <!-- hero section -->
 
   <header class="">
-    <section class="bg-[#0F243D] md:h-[750px] md:mx-10 md:rounded-2xl text-white" id="mobileMenuButton">
+    <section class="personal-hero-bg md:h-[750px] md:mx-10 md:rounded-2xl text-white" id="mobileMenuButton">
       <!-- mobile menu -->
       <section class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
         <section class="flex justify-between items-center w-full">
@@ -128,27 +219,100 @@
             {{ __('Send money to over 190+ countries around the world in different currencies like GBP, USD, EUR, CHF, CAD, NGN etc.') }}
           </p>
           <div class="flex flex-col md:flex-row justify-center gap-4 flex-wrap">
-            <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank">
+            <a href="#get-app">
                 <button
                     class="bg-[#215F9C] hover:bg-[#1f4a7a] transition-colors rounded-full px-6 py-2 text-[14px] font-semibold">
-                    {{ __('Get Started With Personal') }}
+                    {{ __('Register Personal Account') }}
                 </button>
             </a>
 
             <a href="{{ route('register.saveStepData') }}">
               <button
                 class="border border-[#2a5ea8] hover:border-[#1f4a7a] transition-colors rounded-full px-6 py-2 text-[14px] font-semibold">
-                {{ __('Get Started With Business') }}
+                {{ __('Register Business Account') }}
               </button>
             </a>
 
           </div>
         </div>
         <div class="mt-12 flex flex-col md:flex-row md:justify-center md:gap-8 gap-8 items-center">
-          <!-- First card -->
-          <div class="relative rounded-3xl overflow-hidden md:max-w-[320px] mx-auto md:mx-0">
-            <img src="../asserts/Personal/headerImage1.svg" alt="" />
+         <!-- First card - Exchange Rate Calculator -->
+<div class="hero-calculator-card relative rounded-3xl md:max-w-[340px] mx-auto md:mx-0 text-[#252525] p-6 w-full">
+    <div class="flex items-center justify-between mb-5">
+        <p class="hero-card-kicker text-[11px] font-bold">{{ __('Calculate your transfer') }}</p>
+        <span class="rounded-full bg-[#e8f8ef] px-3 py-1 text-[11px] font-semibold text-[#217a4c]">{{ __('Live rate') }}</span>
+    </div>
+
+    <!-- YOU SEND -->
+    <div class="hero-money-panel rounded-2xl p-4 mb-3 relative">
+        <p class="text-xs text-gray-500 mb-1">{{ __('You send') }}</p>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center text-xl font-semibold gap-1">
+                <span id="heroSenderSymbol">£</span>
+                <input id="heroSendAmount" type="number" value="100" class="hero-amount-input w-20 border-0 focus:ring-0 p-0 text-xl font-semibold">
+            </div>
+            <button onclick="heroToggleDropdown('sender')" class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm">
+                <img id="heroSenderFlag" src="https://flagcdn.com/w20/gb.png" class="w-4 h-4 rounded-full">
+                <span id="heroSenderCode">GBP</span>
+                <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+            </button>
+        </div>
+
+        <div id="heroSenderDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
+            <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
+            <div class="max-h-52 overflow-y-auto">
+                @foreach($currencies as $code => $currency)
+                    <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                        data-target="sender"
+                        data-code="{{ $code }}"
+                        data-symbol="{{ $currency['symbol'] }}"
+                        data-flag="{{ $currency['countrycode'] }}">
+                        <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
+                        <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- EXCHANGE -->
+    <div class="hero-rate-pill rounded-2xl p-3 mb-3 flex justify-between text-xs">
+        <span class="text-gray-500">{{ __('Exchange rate') }}</span>
+        <span id="heroExchangeText" class="font-semibold text-[#174f31]">—</span>
+    </div>
+
+    <!-- YOU RECEIVE -->
+    <div class="hero-money-panel rounded-2xl p-4 relative">
+      <p class="text-xs text-gray-500 mb-1">{{ __('Recipient gets') }}</p>
+      <div class="flex items-center justify-between">
+          <div class="flex items-center text-xl font-semibold gap-1">
+              <span id="heroReceiverSymbol">€</span>
+              <input id="heroReceiveAmount" type="number" value="0.00" class="hero-amount-input w-20 border-0 focus:ring-0 p-0 text-xl font-semibold">
           </div>
+          <button onclick="heroToggleDropdown('receiver')" class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm">
+              <img id="heroReceiverFlag" src="https://flagcdn.com/w20/ng.png" class="w-4 h-4 rounded-full">
+              <span id="heroReceiverCode">NGN</span>
+              <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+          </button>
+      </div>
+
+        <div id="heroReceiverDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
+            <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
+            <div class="max-h-52 overflow-y-auto">
+                @foreach($currencies as $code => $currency)
+                    <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                        data-target="receiver"
+                        data-code="{{ $code }}"
+                        data-symbol="{{ $currency['symbol'] }}"
+                        data-flag="{{ $currency['countrycode'] }}">
+                        <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
+                        <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
           <!-- Second card -->
           <div class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block">
             <img src="../asserts/image 2 (1).png" alt="" />
@@ -975,9 +1139,10 @@
     </section>
     <!-- Accordion end-->
 
-    <!-- get app on store -->
+<!-- get app on store -->
+<div id="get-app">
     @include('mainpage.getapp')
-
+</div>
 
     <!-- footer -->
     @include('mainpage.footer')
@@ -987,5 +1152,137 @@
   @include('mainpage.script')
 
 </body>
+<script>
+let heroSelected = { sender: null, receiver: null };
+let heroCalcTimeout = null;
+let heroIsUpdatingProgrammatically = false;
+let heroLastEdited = 'send'; // 'send' or 'receive'
 
+// Opens/closes a dropdown when its toggle button is clicked
+function heroToggleDropdown(type) {
+    const targetId = 'hero' + type.charAt(0).toUpperCase() + type.slice(1) + 'Dropdown';
+    const target = document.getElementById(targetId);
+    const wasHidden = target.classList.contains('hidden');
+
+    document.querySelectorAll('.hero-dropdown').forEach(d => d.classList.add('hidden'));
+
+    if (wasHidden) {
+        target.classList.remove('hidden');
+    }
+}
+
+// Close any open dropdown when clicking outside of it
+document.addEventListener('click', e => {
+    if (!e.target.closest('.relative')) {
+        document.querySelectorAll('.hero-dropdown').forEach(d => d.classList.add('hidden'));
+    }
+});
+
+// Sets the selected currency for sender/receiver.
+// closeDropdown = false is used for silent/default initialization so it
+// doesn't visually pop the dropdown open on page load.
+function heroSelectCurrency(item, { closeDropdown = true } = {}) {
+    const t = item.dataset.target;
+    const label = t.charAt(0).toUpperCase() + t.slice(1);
+
+    heroSelected[t] = {
+        code: item.dataset.code,
+        symbol: item.dataset.symbol,
+        flag: item.dataset.flag
+    };
+
+    document.getElementById('hero' + label + 'Flag').src = `https://flagcdn.com/w20/${heroSelected[t].flag}.png`;
+    document.getElementById('hero' + label + 'Symbol').textContent = heroSelected[t].symbol;
+    document.getElementById('hero' + label + 'Code').textContent = heroSelected[t].code;
+
+    if (closeDropdown) {
+        document.getElementById('hero' + label + 'Dropdown').classList.add('hidden');
+    }
+}
+
+// Real user clicks on a currency in the dropdown list
+document.querySelectorAll('.hero-currency-item').forEach(item => {
+    item.addEventListener('click', () => {
+        heroSelectCurrency(item); // select + close dropdown
+        heroCalculate(heroLastEdited || 'send');
+    });
+});
+
+// Currency search filter inside each dropdown
+document.querySelectorAll('.hero-dropdown-search').forEach(input => {
+    input.addEventListener('input', e => {
+        const search = e.target.value.toLowerCase();
+        const list = e.target.nextElementSibling;
+        list.querySelectorAll('.hero-currency-item').forEach(item => {
+            item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
+        });
+    });
+});
+
+// Runs the exchange calculation in either direction:
+// 'send'    -> user typed in "You send", calculates "Recipient gets"
+// 'receive' -> user typed in "Recipient gets", calculates "You send"
+function heroCalculate(direction) {
+    if (!heroSelected.sender || !heroSelected.receiver) return;
+    if (heroIsUpdatingProgrammatically) return;
+
+    heroLastEdited = direction;
+
+    const fromCode = direction === 'send' ? heroSelected.sender.code : heroSelected.receiver.code;
+    const toCode = direction === 'send' ? heroSelected.receiver.code : heroSelected.sender.code;
+    const amountFieldId = direction === 'send' ? 'heroSendAmount' : 'heroReceiveAmount';
+    const targetFieldId = direction === 'send' ? 'heroReceiveAmount' : 'heroSendAmount';
+
+    const amount = parseFloat(document.getElementById(amountFieldId).value) || 0;
+
+    clearTimeout(heroCalcTimeout);
+    heroCalcTimeout = setTimeout(() => {
+        fetch(`/exchange-rate/public?from_currency=${fromCode}&to_currency=${toCode}&amount=${amount}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    document.getElementById(targetFieldId).value = 'N/A';
+                    document.getElementById('heroExchangeText').textContent = '—';
+                    return;
+                }
+
+                heroIsUpdatingProgrammatically = true;
+                document.getElementById(targetFieldId).value = data.data.converted.toFixed(2);
+                heroIsUpdatingProgrammatically = false;
+
+                // Always display the rate as sender -> receiver, regardless of direction typed
+                const rateText = direction === 'send'
+                    ? `1 ${heroSelected.sender.code} = ${data.data.rate.toFixed(4)} ${heroSelected.receiver.code}`
+                    : `1 ${heroSelected.receiver.code} = ${data.data.rate.toFixed(4)} ${heroSelected.sender.code}`;
+                document.getElementById('heroExchangeText').textContent = rateText;
+            })
+            .catch(() => {
+                document.getElementById(targetFieldId).value = 'N/A';
+            });
+    }, 300);
+}
+
+document.getElementById('heroSendAmount').addEventListener('input', () => {
+    if (heroIsUpdatingProgrammatically) return;
+    heroCalculate('send');
+});
+
+document.getElementById('heroReceiveAmount').addEventListener('input', () => {
+    if (heroIsUpdatingProgrammatically) return;
+    heroCalculate('receive');
+});
+
+// --- Default initialization: GBP -> NGN ---
+// Selected silently (closeDropdown: false) so dropdowns never appear open on page load.
+const heroDefaultSender = document.querySelector('#heroSenderDropdown .hero-currency-item[data-code="CAD"]')
+    || document.querySelector('#heroSenderDropdown .hero-currency-item');
+if (heroDefaultSender) heroSelectCurrency(heroDefaultSender, { closeDropdown: false });
+
+const heroDefaultReceiver = document.querySelector('#heroReceiverDropdown .hero-currency-item[data-code="NGN"]')
+    || document.querySelectorAll('#heroReceiverDropdown .hero-currency-item')[1];
+if (heroDefaultReceiver) heroSelectCurrency(heroDefaultReceiver, { closeDropdown: false });
+
+// Run the initial calculation once both defaults are set
+heroCalculate('send');
+</script>
 </html>

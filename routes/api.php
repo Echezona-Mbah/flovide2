@@ -172,14 +172,10 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 
 
 
-// Route::post('/sumsub/webhook-test', function (Request $request) {
-//     \Log::info('Webhook test hit!', $request->all());
-//     return response('OK', 200);
-// });
 
-    Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
-    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
-    Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
+    // Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
+    // Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+    // Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
 
 
 
@@ -466,9 +462,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         
         // Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
-        Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
-        Route::post('/nin', [PersonalComplianceController ::class,'handleNin']);
-        Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
+        // Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
+        // Route::post('/nin', [PersonalComplianceController ::class,'handleNin']);
+        // Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
 
 
         Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
