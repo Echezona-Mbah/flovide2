@@ -117,6 +117,22 @@
       background: #eef7ff;
       color: #0f4f86;
     }
+
+    .personal-hero-bg {
+  overflow: visible;
+}
+
+.personal-hero-bg::before {
+  border-radius: inherit;
+}
+
+.hero-calculator-card {
+  z-index: 30;
+}
+
+.hero-dropdown {
+  z-index: 9999;
+}
   </style>
 </head>
 
@@ -128,8 +144,7 @@
   <!-- hero section -->
 
   <header class="">
-    <section class="personal-hero-bg md:h-[750px] md:mx-10 md:rounded-2xl text-white" id="mobileMenuButton">
-      <!-- mobile menu -->
+    <section class="personal-hero-bg md:h-[750px] md:mx-10 md:rounded-2xl text-white">      <!-- mobile menu -->
       <section class="text-white relative top-10 md:hidden border border-[#1E5186] shadow-2xl mx-2 rounded-2xl p-2">
         <section class="flex justify-between items-center w-full">
           <div>
@@ -222,7 +237,7 @@
             <a href="#get-app">
                 <button
                     class="bg-[#215F9C] hover:bg-[#1f4a7a] transition-colors rounded-full px-6 py-2 text-[14px] font-semibold">
-                    {{ __('Register Personal Account') }}
+                    {{ __('Download The App Now') }}
                 </button>
             </a>
 
@@ -237,85 +252,102 @@
         </div>
         <div class="mt-12 flex flex-col md:flex-row md:justify-center md:gap-8 gap-8 items-center">
          <!-- First card - Exchange Rate Calculator -->
-<div class="hero-calculator-card relative rounded-3xl md:max-w-[340px] mx-auto md:mx-0 text-[#252525] p-6 w-full">
-    <div class="flex items-center justify-between mb-5">
-        <p class="hero-card-kicker text-[11px] font-bold">{{ __('Calculate your transfer') }}</p>
-        <span class="rounded-full bg-[#e8f8ef] px-3 py-1 text-[11px] font-semibold text-[#217a4c]">{{ __('Live rate') }}</span>
-    </div>
+          <div class="hero-calculator-card relative rounded-3xl md:max-w-[340px] mx-auto md:mx-0 text-[#252525] p-6 w-full">
+              <div class="flex items-center justify-between mb-5">
+                  <p class="hero-card-kicker text-[11px] font-bold">{{ __('Calculate your transfer') }}</p>
+                  <span class="rounded-full bg-[#e8f8ef] px-3 py-1 text-[11px] font-semibold text-[#217a4c]">{{ __('Live rate') }}</span>
+              </div>
 
-    <!-- YOU SEND -->
-    <div class="hero-money-panel rounded-2xl p-4 mb-3 relative">
-        <p class="text-xs text-gray-500 mb-1">{{ __('You send') }}</p>
-        <div class="flex items-center justify-between">
-            <div class="flex items-center text-xl font-semibold gap-1">
-                <span id="heroSenderSymbol">£</span>
-                <input id="heroSendAmount" type="number" value="100" class="hero-amount-input w-20 border-0 focus:ring-0 p-0 text-xl font-semibold">
-            </div>
-            <button onclick="heroToggleDropdown('sender')" class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm">
-                <img id="heroSenderFlag" src="https://flagcdn.com/w20/gb.png" class="w-4 h-4 rounded-full">
-                <span id="heroSenderCode">GBP</span>
-                <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
-            </button>
-        </div>
+              <!-- YOU SEND -->
+              <div class="hero-money-panel rounded-2xl p-4 mb-3 relative">
+                  <p class="text-xs text-gray-500 mb-1">{{ __('You send') }}</p>
+                  <div class="flex items-center justify-between gap-2 flex-nowrap">
+                      <div class="flex items-center text-xl font-semibold gap-1 min-w-0 flex-1">
+                          <span id="heroSenderSymbol" class="shrink-0">£</span>
+                          <input id="heroSendAmount" type="number" value="100"
+                              class="hero-amount-input min-w-0 flex-1 border-0 focus:ring-0 p-0 text-xl font-semibold">
+                      </div>
+                      <button onclick="heroToggleDropdown('sender')"
+                          class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm shrink-0 whitespace-nowrap">
+                          <img id="heroSenderFlag" src="https://flagcdn.com/w20/gb.png" class="w-4 h-4 rounded-full shrink-0">
+                          <span id="heroSenderCode">GBP</span>
+                          <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                      </button>
+                  </div>
 
-        <div id="heroSenderDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
-            <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
-            <div class="max-h-52 overflow-y-auto">
-                @foreach($currencies as $code => $currency)
-                    <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
-                        data-target="sender"
-                        data-code="{{ $code }}"
-                        data-symbol="{{ $currency['symbol'] }}"
-                        data-flag="{{ $currency['countrycode'] }}">
-                        <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
-                        <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
+                  <div id="heroSenderDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
+                      <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
+                      <div class="max-h-52 overflow-y-auto">
+                          @foreach($currencies as $code => $currency)
+                              <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                                  data-target="sender"
+                                  data-code="{{ $code }}"
+                                  data-symbol="{{ $currency['symbol'] }}"
+                                  data-flag="{{ $currency['countrycode'] }}">
+                                  <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
+                                  <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
+                              </div>
+                          @endforeach
+                      </div>
+                  </div>
+              </div>
+
+                <!-- EXCHANGE -->
+                <div class="hero-rate-pill rounded-2xl p-3 mb-3 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{{ __('Exchange rate') }}</span>
+                        <span id="heroExchangeText" class="font-semibold text-[#174f31]">—</span>
                     </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
+                    <div class="flex justify-between mt-1">
+                        <span class="text-gray-500">{{ __('Transfer fee') }}</span>
+                        <span id="heroFeeText" class="font-semibold text-[#174f31]">—</span>
+                    </div>
+                    <div class="flex justify-between mt-1 pt-1 border-t border-[#bfe4cd]">
+                        <span class="text-gray-500">{{ __('Total to pay') }}</span>
+                        <span id="heroTotalText" class="font-semibold text-[#174f31]">—</span>
+                    </div>
+                </div>
 
-    <!-- EXCHANGE -->
-    <div class="hero-rate-pill rounded-2xl p-3 mb-3 flex justify-between text-xs">
-        <span class="text-gray-500">{{ __('Exchange rate') }}</span>
-        <span id="heroExchangeText" class="font-semibold text-[#174f31]">—</span>
-    </div>
+              <!-- YOU RECEIVE -->
+              <div class="hero-money-panel rounded-2xl p-4 relative">
+                    <p class="text-xs text-gray-500 mb-1">{{ __('Recipient gets') }}</p>
+                  <div class="flex items-center justify-between gap-2 flex-nowrap">
+                      <div class="flex items-center text-xl font-semibold gap-1 min-w-0 flex-1">
+                          <span id="heroReceiverSymbol" class="shrink-0">€</span>
+                          <input id="heroReceiveAmount" type="number" value="0.00"
+                              class="hero-amount-input min-w-0 flex-1 border-0 focus:ring-0 p-0 text-xl font-semibold">
+                      </div>
+                      <button onclick="heroToggleDropdown('receiver')"
+                          class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm shrink-0 whitespace-nowrap">
+                          <img id="heroReceiverFlag" src="https://flagcdn.com/w20/ng.png" class="w-4 h-4 rounded-full shrink-0">
+                          <span id="heroReceiverCode">NGN</span>
+                          <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                      </button>
+                  </div>
 
-    <!-- YOU RECEIVE -->
-    <div class="hero-money-panel rounded-2xl p-4 relative">
-      <p class="text-xs text-gray-500 mb-1">{{ __('Recipient gets') }}</p>
-      <div class="flex items-center justify-between">
-          <div class="flex items-center text-xl font-semibold gap-1">
-              <span id="heroReceiverSymbol">€</span>
-              <input id="heroReceiveAmount" type="number" value="0.00" class="hero-amount-input w-20 border-0 focus:ring-0 p-0 text-xl font-semibold">
+                  <div id="heroReceiverDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
+                      <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
+                      <div class="max-h-52 overflow-y-auto">
+                          @foreach($currencies as $code => $currency)
+                              <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
+                                  data-target="receiver"
+                                  data-code="{{ $code }}"
+                                  data-symbol="{{ $currency['symbol'] }}"
+                                  data-flag="{{ $currency['countrycode'] }}">
+                                  <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
+                                  <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
+                              </div>
+                          @endforeach
+                      </div>
+                  </div>
+              </div>
           </div>
-          <button onclick="heroToggleDropdown('receiver')" class="hero-currency-button flex items-center gap-2 px-3 py-2 rounded-full text-sm">
-              <img id="heroReceiverFlag" src="https://flagcdn.com/w20/ng.png" class="w-4 h-4 rounded-full">
-              <span id="heroReceiverCode">NGN</span>
-              <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
-          </button>
-      </div>
-
-        <div id="heroReceiverDropdown" class="hero-dropdown hidden absolute left-0 mt-3 w-full bg-white rounded-2xl z-50 overflow-hidden">
-            <input type="text" placeholder="{{ __('Search currency...') }}" class="w-full p-3 border-b outline-none hero-dropdown-search">
-            <div class="max-h-52 overflow-y-auto">
-                @foreach($currencies as $code => $currency)
-                    <div class="hero-currency-item flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
-                        data-target="receiver"
-                        data-code="{{ $code }}"
-                        data-symbol="{{ $currency['symbol'] }}"
-                        data-flag="{{ $currency['countrycode'] }}">
-                        <img src="https://flagcdn.com/w20/{{ $currency['countrycode'] }}.png" class="w-5 h-5 rounded-full">
-                        <span class="text-sm">{{ ucfirst($currency['country'] ?? $code) }} ({{ $code }})</span>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</div>
           <!-- Second card -->
-          <div class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block">
+          {{-- <div class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block">
             <img src="../asserts/image 2 (1).png" alt="" />
+          </div> --}}
+          <div class="relative rounded-3xl overflow-hidden max-w-[360px] w-full mx-auto md:mx-0 block md:inline-block">
+            <img src="../asserts/image 2 (1).png" alt="" class="w-full h-auto" />
           </div>
           <!-- Third card -->
           <div class="relative rounded-3xl overflow-hidden max-w-[320px] mx-auto md:mx-0 hidden md:inline-block">
@@ -442,7 +474,7 @@
                 <button
                     class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
                     type="button">
-                    {{ __('Get Started Now') }}
+                    {{ __('Download The App Now') }}
                     <span>
                         <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                     </span>
@@ -466,7 +498,7 @@
                 onclick="window.location.href='{{ env('APP_PLAYSTORE_LINK') }}'"
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
                 type="button">
-                {{ __('Get Started Now') }}
+                {{ __('Download The App Now') }}
                 <span>
                     <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                 </span>
@@ -492,7 +524,7 @@
                 <button
                     class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
                     type="button">
-                    {{ __('Get Started Now') }}
+                    {{ __('Download The App Now') }}
                     <span>
                         <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                     </span>
@@ -517,7 +549,7 @@
             </p>
               <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
                 class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4">
-                  {{ __('Get Started Now') }}
+                  {{ __('Download The App Now') }}
                   <span>
                       <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                   </span>
@@ -570,7 +602,7 @@
                 <button
                   class="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  {{ __('Get Started Now') }}
+                  {{ __('Download The App Now') }}
                   <span>
                     <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                   </span>
@@ -615,7 +647,7 @@
                 <button
                   class="inline-flex items-center gap-2 bg-[#7fc02a] text-white text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  {{ __('Get Started Now') }}
+                  {{ __('Download The App Now') }}
                   <span>
                     <img src="../asserts/homepage/arrow-up.svg" alt="" width="20px" />
                   </span>
@@ -660,7 +692,7 @@
                 <button
                   class="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold rounded-full px-5 py-2"
                   type="button">
-                  {{ __('Get Started Now') }}
+                  {{ __('Download The App Now') }}
                   <span>
                     <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                   </span>
@@ -702,7 +734,7 @@
             </h2>
             <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
               class="flex items-center justify-center gap-2 rounded-full border border-gray-800 px-2 py-2 text-sm font-medium hover:bg-gray-100 transition w-[45vw] md:w-[15vw]">
-                {{ __('Get Started Now') }}
+                {{ __('Download The App Now') }}
                 <span>
                     <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
                 </span>
@@ -845,7 +877,7 @@
         <button
           class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4"
           type="button">
-          Get Started Now
+          Download The App Now
           <span>
             <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
           </span>
@@ -870,7 +902,7 @@
 
         <a href="{{ env('APP_PLAYSTORE_LINK') }}" target="_blank"
           class="inline-flex items-center justify-center border border-gray-400 rounded-full px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 w-max mb-4">
-            Get Started Now
+            Download The App Now
             <span>
                 <img src="../asserts/arrow-up-black.svg" alt="" width="20px" />
             </span>
@@ -1243,6 +1275,7 @@ function heroCalculate(direction) {
                 if (!data.success) {
                     document.getElementById(targetFieldId).value = 'N/A';
                     document.getElementById('heroExchangeText').textContent = '—';
+                    document.getElementById('heroFeeText').textContent = '—';
                     return;
                 }
 
@@ -1255,9 +1288,33 @@ function heroCalculate(direction) {
                     ? `1 ${heroSelected.sender.code} = ${data.data.rate.toFixed(4)} ${heroSelected.receiver.code}`
                     : `1 ${heroSelected.receiver.code} = ${data.data.rate.toFixed(4)} ${heroSelected.sender.code}`;
                 document.getElementById('heroExchangeText').textContent = rateText;
+
+                        // Transfer fee — shown in the sending currency
+                // Transfer fee — shown in the sending currency
+                const fee = parseFloat(data.data.transfer_fee) || 0;
+                const feeCurrency = direction === 'send' ? heroSelected.sender.code : heroSelected.receiver.code;
+                document.getElementById('heroFeeText').textContent = fee > 0
+                    ? `${fee.toFixed(2)} ${feeCurrency}`
+                    : '0';
+
+              // Total to pay — the amount the sender is charged, in the sending currency
+              const sendCurrency = heroSelected.sender.code;
+              const totalCurrency = direction === 'send' ? sendCurrency : sendCurrency; // always sender's currency
+              const sentAmount = direction === 'send'
+                  ? amount
+                  : parseFloat(document.getElementById('heroSendAmount').value) || 0;
+
+              const total = direction === 'send'
+                  ? amount + fee
+                  : sentAmount + fee;
+
+              document.getElementById('heroTotalText').textContent = `${total.toFixed(2)} ${sendCurrency}`;
+
+
             })
             .catch(() => {
                 document.getElementById(targetFieldId).value = 'N/A';
+                document.getElementById('heroFeeText').textContent = '—';
             });
     }, 300);
 }
@@ -1284,5 +1341,24 @@ if (heroDefaultReceiver) heroSelectCurrency(heroDefaultReceiver, { closeDropdown
 
 // Run the initial calculation once both defaults are set
 heroCalculate('send');
+</script>
+
+<script>
+const openSidebarBtn = document.getElementById('openSidebarBtn');
+const mobileMenuContent = document.getElementById('mobileMenuContent');
+
+openSidebarBtn.addEventListener('click', function (e) {
+  e.stopPropagation();
+  mobileMenuContent.classList.toggle('hidden');
+});
+
+document.addEventListener('click', function (e) {
+  if (
+    !mobileMenuContent.contains(e.target) &&
+    !openSidebarBtn.contains(e.target)
+  ) {
+    mobileMenuContent.classList.add('hidden');
+  }
+});
 </script>
 </html>

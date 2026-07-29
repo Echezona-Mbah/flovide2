@@ -86,4 +86,8 @@
     });
 
     buildSlider();
+
+    
   </script>
+
+  
