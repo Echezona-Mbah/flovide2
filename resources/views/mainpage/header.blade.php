@@ -112,7 +112,7 @@
 
       <div class="flex flex-col gap-4 max-w-md w-full justify-center items-center">
         <div class="business-screen-card rounded-3xl p-3 rotate-[-2deg]">
-          <img src="{{asset('../asserts/homepage/header_img1.png')}}" alt="" width="350px" height="100px" class="rounded-2xl" />
+          <img src="{{asset('../asserts/homepage/home_sub_one.png')}}" alt="" width="350px" height="100px" class="rounded-2xl" />
         </div>
 
         <div class="business-screen-card rounded-3xl p-3 rotate-[2deg]">
@@ -123,7 +123,7 @@
   </section>
 
   <section class="hidden md:flex items-center justify-center p-8 min-h-screen relative top-[-30vh] right-0 left-0 mx-auto">
-    <img src="{{asset('../asserts/homepage/Dashboard.png')}}" alt="" class="w-[70vw] h-auto" />
+    <img src="{{asset('../asserts/homepage/home_sub_two.png')}}" alt="" class="w-[70vw] h-auto" />
   </section>
 </header>
 
