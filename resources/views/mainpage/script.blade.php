@@ -1,93 +1,101 @@
-  <script>
-   
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
 
-    const mobileMenuButton = document.getElementById("mobileMenuButton");
-    const mobileMenuContent = document.getElementById("mobileMenuContent");
-    const mobileMenuIcon = document.getElementById("mobileMenuIcon");
+    // ---------- Mobile nav toggle (hamburger) ----------
+    const menuBtn = document.getElementById('openSidebarBtn');
+    const menuContent = document.getElementById('mobileMenuContent');
 
-    mobileMenuButton.addEventListener("click", () => {
-      mobileMenuContent.classList.toggle("hidden");
-      mobileMenuIcon.classList.toggle("rotate-180");
-    });
+    if (menuBtn && menuContent) {
+      menuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menuContent.classList.toggle('hidden');
+      });
 
-    // accordions function
-    const accordions = document.querySelectorAll(".accordion");
-    accordions.forEach((accordion) => {
-      const header = accordion.querySelector("header");
-      const content = accordion.querySelector(".accordion-content");
-      const plusIcon = accordion.querySelector(".plus-icon");
-      const closeIcon = accordion.querySelector(".close-icon");
-
-      header.addEventListener("click", () => {
-        const isOpen = !content.classList.contains("hidden");
-
-        // Close all other accordions
-        accordions.forEach((item) => {
-          item.querySelector(".accordion-content").classList.add("hidden");
-          item.querySelector(".plus-icon").classList.remove("hidden");
-          item.querySelector(".close-icon").classList.add("hidden");
-        });
-
-        // Toggle current accordion
-        if (!isOpen) {
-          content.classList.remove("hidden");
-          plusIcon.classList.add("hidden");
-          closeIcon.classList.remove("hidden");
+      document.addEventListener('click', function (e) {
+        if (!menuContent.contains(e.target) && !menuBtn.contains(e.target)) {
+          menuContent.classList.add('hidden');
         }
       });
-    });
-
-    // testmonies sliders fuction
-    const track = document.getElementById("slider-track");
-    const prevBtn = document.getElementById("prev-btn");
-    const nextBtn = document.getElementById("next-btn");
-    const cardTemplate = document.getElementById("testimonial-card");
-    const totalCards = 6;
-    const visibleCards = 3;
-    let currentIndex = visibleCards;
-
-    function buildSlider() {
-      for (let i = 0; i < totalCards + visibleCards * 2; i++) {
-        const clone = cardTemplate.content.cloneNode(true);
-        track.appendChild(clone);
-      }
-      updateSlider();
     }
 
-    function updateSlider() {
-      track.style.transform = `translateX(-${(100 / visibleCards) * currentIndex
-        }%)`;
+    // ---------- Accordions ----------
+    const accordions = document.querySelectorAll('.accordion');
+    if (accordions.length) {
+      accordions.forEach((accordion) => {
+        const header = accordion.querySelector('header');
+        const content = accordion.querySelector('.accordion-content');
+        const plusIcon = accordion.querySelector('.plus-icon');
+        const closeIcon = accordion.querySelector('.close-icon');
+        if (!header || !content) return;
+
+        header.addEventListener('click', () => {
+          const isOpen = !content.classList.contains('hidden');
+
+          accordions.forEach((item) => {
+            item.querySelector('.accordion-content')?.classList.add('hidden');
+            item.querySelector('.plus-icon')?.classList.remove('hidden');
+            item.querySelector('.close-icon')?.classList.add('hidden');
+          });
+
+          if (!isOpen) {
+            content.classList.remove('hidden');
+            plusIcon?.classList.add('hidden');
+            closeIcon?.classList.remove('hidden');
+          }
+        });
+      });
     }
 
-    nextBtn.addEventListener("click", () => {
-      currentIndex++;
-      track.style.transition = "transform 0.5s ease-in-out";
-      updateSlider();
-      if (currentIndex === totalCards + visibleCards) {
-        setTimeout(() => {
-          track.style.transition = "none";
-          currentIndex = visibleCards;
-          updateSlider();
-        }, 500);
+    // ---------- Testimonial slider ----------
+    const track = document.getElementById('slider-track');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const cardTemplate = document.getElementById('testimonial-card');
+
+    if (track && prevBtn && nextBtn && cardTemplate) {
+      const totalCards = 6;
+      const visibleCards = 3;
+      let currentIndex = visibleCards;
+
+      function buildSlider() {
+        for (let i = 0; i < totalCards + visibleCards * 2; i++) {
+          track.appendChild(cardTemplate.content.cloneNode(true));
+        }
+        updateSlider();
       }
-    });
 
-    prevBtn.addEventListener("click", () => {
-      currentIndex--;
-      track.style.transition = "transform 0.5s ease-in-out";
-      updateSlider();
-      if (currentIndex === 0) {
-        setTimeout(() => {
-          track.style.transition = "none";
-          currentIndex = totalCards;
-          updateSlider();
-        }, 500);
+      function updateSlider() {
+        track.style.transform = `translateX(-${(100 / visibleCards) * currentIndex}%)`;
       }
-    });
 
-    buildSlider();
+      nextBtn.addEventListener('click', () => {
+        currentIndex++;
+        track.style.transition = 'transform 0.5s ease-in-out';
+        updateSlider();
+        if (currentIndex === totalCards + visibleCards) {
+          setTimeout(() => {
+            track.style.transition = 'none';
+            currentIndex = visibleCards;
+            updateSlider();
+          }, 500);
+        }
+      });
 
-    
-  </script>
+      prevBtn.addEventListener('click', () => {
+        currentIndex--;
+        track.style.transition = 'transform 0.5s ease-in-out';
+        updateSlider();
+        if (currentIndex === 0) {
+          setTimeout(() => {
+            track.style.transition = 'none';
+            currentIndex = totalCards;
+            updateSlider();
+          }, 500);
+        }
+      });
 
-  
+      buildSlider();
+    }
+
+  });
+</script>

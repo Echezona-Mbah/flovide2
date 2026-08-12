@@ -427,7 +427,7 @@ class BeneficiaryController extends Controller
                 ];
             } else {
                 $payload = [
-                    'serviceCode' => env('PIVOT_UGX_BANK_SERVICE'),
+                    'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
                     'accountNumber' => $request->account_number,
                     'msisdn' => $request->account_number,
                     'extraData' => [

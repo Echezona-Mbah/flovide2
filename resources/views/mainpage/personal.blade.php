@@ -226,12 +226,12 @@
             {{ __('Welcome To Flovide') }}
           </p>
           <h1 class="font-extrabold text-[40px] leading-[48px] mb-4">
-            {{ __('Take Total Control Of') }}
-            <br />
-            {{ __('Your Money') }}
+            {{ __('BRIDGE THE DISTANCE IN SECONDS') }}
+            {{-- <br />
+            {{ __('Your Money') }} --}}
           </h1>
           <p class="text-[14px] max-w-[520px] mx-auto mb-8">
-            {{ __('Send money to over 190+ countries around the world in different currencies like GBP, USD, EUR, CHF, CAD, NGN etc.') }}
+            {{ __('Whether youre supporting family, paying school fees, or helping loved ones back home, Flovide makes every transfer fast, secure, and affordable.') }}
           </p>
           <div class="flex flex-col md:flex-row justify-center gap-4 flex-wrap">
             <a href="#get-app">
@@ -1343,22 +1343,5 @@ if (heroDefaultReceiver) heroSelectCurrency(heroDefaultReceiver, { closeDropdown
 heroCalculate('send');
 </script>
 
-<script>
-const openSidebarBtn = document.getElementById('openSidebarBtn');
-const mobileMenuContent = document.getElementById('mobileMenuContent');
 
-openSidebarBtn.addEventListener('click', function (e) {
-  e.stopPropagation();
-  mobileMenuContent.classList.toggle('hidden');
-});
-
-document.addEventListener('click', function (e) {
-  if (
-    !mobileMenuContent.contains(e.target) &&
-    !openSidebarBtn.contains(e.target)
-  ) {
-    mobileMenuContent.classList.add('hidden');
-  }
-});
-</script>
 </html>

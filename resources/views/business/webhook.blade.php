@@ -142,10 +142,10 @@
                                     </div>
                                 </div>
 
-                                <div>
+                                {{-- <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Live IP whitelist</label>
                                     <textarea name="live_ip_whitelist" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">{{ old('live_ip_whitelist', $live['ip_whitelist'] ?? '') }}</textarea>
-                                </div>
+                                </div> --}}
 
                                 {{-- <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Live callback URL</label>
@@ -190,7 +190,7 @@
                                     <textarea name="test_ip_whitelist" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">{{ old('test_ip_whitelist', $test['ip_whitelist'] ?? '') }}</textarea>
                                 </div>
 
-                                <div>
+                                {{-- <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Test callback URL</label>
                                     <input type="text" name="test_callback_url" value="{{ old('test_callback_url', $test['callback_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
                                 </div>
@@ -198,7 +198,7 @@
                                 <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-700">Test webhook URL</label>
                                     <input type="text" name="test_webhook_url" value="{{ old('test_webhook_url', $test['webhook_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
 

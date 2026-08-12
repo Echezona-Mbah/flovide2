@@ -217,6 +217,9 @@ public function registerUser(Request $request)
     $token = $user->createToken('api-token')->plainTextToken;
     event(new UserRegistered($user));
 
+    Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
+    $this->notifyAdmins($user, 'business'); 
+
 
     return response()->json([
         'success' => true,
@@ -613,6 +616,9 @@ public function registerUser(Request $request)
         $token = $user->createToken('personal-api-token')->plainTextToken;
         event(new UserRegistered($user));
 
+        Mail::to($user->email)->send(new RegisterOtpMail($otp, $user));
+        $this->notifyAdmins($user, 'personal');   // <-- add this
+
         return response()->json([
             'success' => true,
             'message' => 'Personal registration successful. Please check your email for verification',
@@ -829,6 +835,18 @@ public function registerUser(Request $request)
         ], 200);
 
     }
+
+
+
+    private function notifyAdmins($account, string $type)
+{
+    $adminEmails = [
+        'flovidelimited@gmail.com',
+        'echezonaernest6@gmail.com',
+    ];
+
+    Mail::to($adminEmails)->send(new \App\Mail\AdminNewRegistrationMail($account, $type));
+}
 
 
 }

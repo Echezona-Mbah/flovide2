@@ -173,9 +173,9 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
 
 
 
-    // Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
-    // Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
-    // Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
+    Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
+    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+    Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
 
 
 
@@ -322,6 +322,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/update_balance', [CreateBankController::class, 'UpdateBalance']);
     Route::get('/total-balance', [CreateBankController::class, 'getUserTotalBalance']);
     Route::get('/dashboardapi', [CreateBankController::class, 'dashboardapi']);
+    Route::get('/business-balances/{id}/statement', [CreateBankController::class, 'statement']);
+
 
 
     // api routes for Customers details
@@ -461,10 +463,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
         
-        // Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
-        // Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
-        // Route::post('/nin', [PersonalComplianceController ::class,'handleNin']);
-        // Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
+        Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
+        Route::post('/kyc/webhook', [PersonalComplianceController ::class,'handle']);
+        Route::post('/nin', [PersonalComplianceController ::class,'handleNin']);
+        Route::get('/compliance/status', [PersonalComplianceController::class, 'status']);
+        Route::post('/bvn', [PersonalComplianceController::class, 'handleBvn']);
+        // Route::post('/personal-complianceNin', [ComplianceController::class, 'handleNin']);
 
 
         Route::get('/personal-beneficias', [PersonalAddBeneficiariesController::class, 'index']);
@@ -509,6 +513,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-update_balance', [PersonalCreateBankController::class, 'UpdateBalance']);
         Route::get('/personal-total-balance', [PersonalCreateBankController::class, 'getUserTotalBalance']);
         Route::get('/personal-dashboardapi', [PersonalCreateBankController::class, 'dashboardapi']);
+        Route::get('/personal-balances/{id}/statement', [PersonalCreateBankController::class, 'statement']);
 
 
         //payouts 
@@ -588,6 +593,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/personal-notifications', [NotificationController::class, 'index']);
         Route::get('/personal-notifications/unread', [NotificationController::class, 'unread']);
         Route::put('/personal-notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+
+
+
 
 
 

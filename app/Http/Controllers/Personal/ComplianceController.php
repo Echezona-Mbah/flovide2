@@ -118,47 +118,100 @@ class ComplianceController extends Controller
         ], 201);
     }
 
-
-
-public function getSumsubToken($user = null)
+ public function handleBvn(Request $request)
 {
-    if (!$user) {
-        $user = Auth::guard('personal-api')->user();
-    }
-
-    if (!$user) {
-        throw new \Exception("Invalid user passed to getSumsubToken");
-    }
-
-    $ts = time();
-    $uri = '/resources/accessTokens/sdk';
-
-    $body = json_encode([
-        'userId' => $user->id,
-        'levelName' => 'id-and-liveness',
-        'ttlInSecs' => 600
+    $request->validate([
+        'bvn' => 'required|digits:11'
     ]);
 
-    $signature = hash_hmac(
-        'sha256',
-        $ts.'POST'.$uri.$body,
-        env('SUMSUB_SECRET_KEY')
-    );
+    $user = auth('personal-api')->user();
 
-    $client = new \GuzzleHttp\Client();
-    $response = $client->post('https://api.sumsub.com'.$uri, [
-        'headers' => [
-            'X-App-Token' => env('SUMSUB_APP_TOKEN'),
-            'X-App-Access-Ts' => $ts,
-            'X-App-Access-Sig' => $signature,
-            'Content-Type' => 'application/json'
-        ],
-        'body' => $body
-    ]);
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated.',
+            'code' => 'UNAUTHENTICATED',
+            'data' => null
+        ], 401);
+    }
 
-    // ✅ Return decoded array instead of response
-    return json_decode($response->getBody(), true);
+    if ($user->bvn && $user->bvn_status === 'confirmed') {
+        return response()->json([
+            'success' => false,
+            'message' => 'BVN already verified.',
+            'code' => 'BVN_ALREADY_VERIFIED',
+            'data' => null
+        ], 409);
+    }
+
+    $bvnExists = Personal::where('bvn', $request->bvn)
+        ->where('id', '!=', $user->id)
+        ->exists();
+
+    if ($bvnExists) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This BVN is already linked to another personal account.',
+            'code' => 'BVN_DUPLICATE',
+            'data' => null
+        ], 409);
+    }
+
+    $user->bvn = $request->bvn;
+    $user->bvn_status = 'under review';
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'BVN submitted successfully.',
+        'code' => 'BVN_SUBMITTED',
+        'data' => [
+            'bvn' => $user->bvn,
+            'bvn_status' => $user->bvn_status,
+        ]
+    ], 201);
 }
+
+
+    public function getSumsubToken($user = null)
+    {
+        if (!$user) {
+            $user = Auth::guard('personal-api')->user();
+        }
+
+        if (!$user) {
+            throw new \Exception("Invalid user passed to getSumsubToken");
+        }
+
+        $ts = time();
+        $uri = '/resources/accessTokens/sdk';
+
+        $body = json_encode([
+            'userId' => $user->id,
+            'levelName' => 'id-and-liveness',
+            'ttlInSecs' => 600
+        ]);
+
+        $signature = hash_hmac(
+            'sha256',
+            $ts.'POST'.$uri.$body,
+            env('SUMSUB_SECRET_KEY')
+        );
+
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post('https://api.sumsub.com'.$uri, [
+            'headers' => [
+                'X-App-Token' => env('SUMSUB_APP_TOKEN'),
+                'X-App-Access-Ts' => $ts,
+                'X-App-Access-Sig' => $signature,
+                'Content-Type' => 'application/json'
+            ],
+            'body' => $body
+        ]);
+
+        // ✅ Return decoded array instead of response
+        return json_decode($response->getBody(), true);
+    }
 
     // Webhook from Sumsub
     public function handle(Request $request)
@@ -197,26 +250,26 @@ public function getSumsubToken($user = null)
     }
 
 
-public function status(Request $request)
-{
-    $user = auth('personal-api')->user();
+    public function status(Request $request)
+    {
+        $user = auth('personal-api')->user();
 
-    if (!$user) {
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
+        // Pass the Personal model, NOT the id
+        $tokenResponse = $this->getSumsubToken($user); 
+
         return response()->json([
-            'status' => false,
-            'message' => 'User not authenticated'
-        ], 401);
+            'status' => true,
+            'message' => 'Compliance status fetched successfully',
+            'data' => $user->complianceStatus($tokenResponse)
+        ]);
     }
-
-    // Pass the Personal model, NOT the id
-    $tokenResponse = $this->getSumsubToken($user); 
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Compliance status fetched successfully',
-        'data' => $user->complianceStatus($tokenResponse)
-    ]);
-}
 
 
 }

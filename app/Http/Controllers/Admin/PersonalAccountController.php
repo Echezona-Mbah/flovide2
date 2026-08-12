@@ -262,8 +262,8 @@ public function submitToFidelity(Request $request, $id, FidelityService $fidelit
         'first_name'    => $personal->firstname,
         'last_name'     => $personal->lastname,
         'email'         => $personal->email,
-        'bvn'           => null,
-        'nin'           => null,
+        'bvn'           => $personal->bvn,
+        'nin'           => $personal->nin,
         'phone_number'  => $personal->person_phone,
         'date_of_birth' => $personal->date_of_birth,
     ]);

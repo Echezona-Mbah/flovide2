@@ -87,7 +87,7 @@ public function getExchangeRate(Request $request)
     $to = $request->input('to_currency');
     $amount = $request->input('amount', 1);
 
-    $result = $this->getExchangeRateFromMap($from, $to);
+    $result = $this->getExchangeRateFromMap($amount,$from, $to);
 
     if (!$result) {
         return response()->json([

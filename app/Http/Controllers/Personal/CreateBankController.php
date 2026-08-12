@@ -10,6 +10,11 @@ use App\Models\Balance;
 use App\Models\Currency;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
+use App\Models\TransactionHistory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+
+
 
 class CreateBankController extends Controller
 {
@@ -64,23 +69,23 @@ public function createBalance(Request $request)
     $personalId = auth('personal-api')->id();
     $currency   = strtoupper($request->currency);
 
-    // $hasMoney = Balance::where('personal_id', $personalId)
-    //     ->where('amount', '>', 0)
-    //     ->exists();
+       // 🔎 Check the currency exists and is active
+    $currencyRecord = Currency::where('code', $currency)
+        ->where('is_active', true)
+        ->first();
 
-    // if (!$hasMoney) {
-    //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
+    if (!$currencyRecord) {
+        $errorMessage = "{$currency} is not currently available for new balances.";
 
-    //     return $request->expectsJson()
-    //         ? response()->json([
-    //             'success' => false,
-    //             'message' => $errorMessage,
-    //             'code' => 'NO_FUNDS',
-    //             'data' => null
-    //         ], 400)
-    //         : redirect()->back()->withErrors(['message' => $errorMessage]);
-    // }
-
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code'    => 'CURRENCY_NOT_ACTIVE',
+                'data'    => null,
+            ], 422)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
     $exists = Balance::where('personal_id', $personalId)
         ->where('currency', $currency)
         ->exists();
@@ -304,15 +309,16 @@ public function index(Request $request)
                 'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
             ];
         });
-             $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
+        $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code', 'is_active')
             ->get()
             ->map(function ($c) {
                 return [
                     'code' => $c->code,
-                    'currency_code' =>$c->currency_code,
+                    'currency_code' => $c->currency_code,
                     'name' => $c->name,
                     'symbol' => $c->symbol,
                     'country_code' => strtolower($c->country_code ?? ''),
+                    'is_active' => $c->is_active ? 'true' : 'false',
                 ];
             })
             ->values()
@@ -349,5 +355,187 @@ public function index(Request $request)
 }
     
 
+
+public function statement(Request $request, $id)
+{
+    Log::info('Statement: request received', [
+        'balance_id' => $id,
+        'query' => $request->query(),
+        'expects_json' => $request->expectsJson(),
+        'accept_header' => $request->header('Accept'),
+    ]);
+
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+        'start_date' => 'required|date',
+        'end_date'   => 'required|date|after_or_equal:start_date',
+    ]);
+
+    if ($validator->fails()) {
+        Log::warning('Statement: validation failed', [
+            'errors' => $validator->errors()->toArray(),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
+            ], 422);
+        }
+
+        return back()->withErrors($validator)->withInput();
+    }
+
+    $user = auth()->guard('personal-api')->user() ?? auth()->user();
+
+    Log::info('Statement: auth resolved', [
+        'user_id' => $user?->id,
+        'guard_used' => auth()->guard('personal-api')->check() ? 'personal-api' : 'default',
+    ]);
+
+    if (!$user) {
+        Log::error('Statement: no authenticated user found');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.',
+                'code' => 'UNAUTHENTICATED',
+                'data' => null
+            ], 401);
+        }
+
+        abort(401);
+    }
+
+    $balance = Balance::where('id', $id)
+        ->where('personal_id', $user->id)
+        ->first();
+
+    Log::info('Statement: balance lookup', [
+        'balance_id' => $id,
+        'personal_id' => $user->id,
+        'found' => $balance ? true : false,
+        'balance_currency' => $balance->currency ?? null,
+    ]);
+
+    if (!$balance) {
+        Log::warning('Statement: balance not found or not owned by user', [
+            'balance_id' => $id,
+            'personal_id' => $user->id,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Balance not found',
+                'code' => 'BALANCE_NOT_FOUND',
+                'data' => null
+            ], 404);
+        }
+
+        abort(404);
+    }
+
+    $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    Log::debug('Statement: currency meta resolved', [
+        'currency' => $balance->currency,
+        'meta' => $balance->currency_meta,
+    ]);
+
+    $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+    Log::info('Statement: date range parsed', [
+        'start_date' => $startDate->toDateTimeString(),
+        'end_date' => $endDate->toDateTimeString(),
+    ]);
+
+    $transactions = TransactionHistory::where('balance_id', $balance->id)
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    Log::info('Statement: transactions fetched', [
+        'balance_id' => $balance->id,
+        'count' => $transactions->count(),
+    ]);
+
+    $isCredit = function ($tx) {
+        $type = strtolower($tx->type ?? '');
+        return in_array($type, ['credit']) || str_contains($type, 'credit');
+    };
+
+    $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+        ->where('created_at', '<', $startDate)
+        ->get()
+        ->reduce(function ($carry, $tx) use ($isCredit) {
+            return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+        }, 0);
+
+    $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
+    $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
+    $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+
+    Log::info('Statement: totals calculated', [
+        'opening_balance' => $openingBalance,
+        'total_debit' => $totalDebit,
+        'total_credit' => $totalCredit,
+        'closing_balance' => $closingBalance,
+    ]);
+
+    // ── API request: generate and return the PDF directly ──────────────────
+    if ($request->expectsJson()) {
+        Log::info('Statement: generating PDF for API response', [
+            'balance_id' => $balance->id,
+        ]);
+
+        try {
+            $pdf = Pdf::loadView('personal.statement_pdf', compact(
+                'balance', 'transactions', 'startDate', 'endDate',
+                'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+            ))->setPaper('a4');
+
+            $filename = sprintf(
+                'Flovide-Statement-%s-%s-to-%s.pdf',
+                $balance->currency,
+                $startDate->format('Ymd'),
+                $endDate->format('Ymd')
+            );
+
+            Log::info('Statement: PDF generated successfully', [
+                'filename' => $filename,
+            ]);
+
+            return $pdf->download($filename);
+
+        } catch (\Throwable $e) {
+            Log::error('Statement: PDF generation failed', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate statement PDF',
+                'code' => 'PDF_GENERATION_FAILED',
+                'data' => null
+            ], 500);
+        }
+    }
+
+    // ── Web request: render the Blade view as before ───────────────────────
+    Log::info('Statement: rendering web view (non-JSON request)');
+
+    return view('personal.statement_pdf', compact(
+        'balance', 'transactions', 'user',
+        'startDate', 'endDate',
+        'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+    ));
+}
 
 }

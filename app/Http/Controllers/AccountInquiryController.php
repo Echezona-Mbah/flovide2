@@ -257,7 +257,7 @@ public function unifiedAccountInquiry(Request $request)
 
         if (in_array($bankCode, $mobileCodes, true)) {
             $payload = [
-                'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE'),
+                'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
                 'accountNumber' => $request->account_number,
                 'msisdn' => $request->account_number,
                 'extraData' => [

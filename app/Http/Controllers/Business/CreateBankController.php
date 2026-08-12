@@ -56,73 +56,12 @@ public function create(Request $request)
 }
 
 
-//     public function createBalance(Request $request)
-// {
-//     $request->validate([
-//         'name' => 'required|string',
-//         'currency' => 'required|string',
-//     ]);
 
-//     $userId = Auth::id() ?? $request->user_id;
-//     $currency = strtoupper($request->currency);
-
-//     // 🔎 Check if user already has money in any balance
-//     // $hasMoney = Balance::where('user_id', $userId)
-//     //     ->where('amount', '>', 0)
-//     //     ->exists();
-
-//     // if (!$hasMoney) {
-//     //     $errorMessage = 'You must have funds in at least one balance before creating a new one';
-
-//     //     return $request->expectsJson()
-//     //         ? response()->json([
-//     //             'success' => false,
-//     //             'message' => $errorMessage,
-//     //             'code' => 'NO_FUNDS',
-//     //             'data' => null
-//     //         ], 400)
-//     //         : redirect()->back()->withErrors(['message' => $errorMessage]);
-//     // }
-
-//     // 🔎 Check if user already has this currency
-//     $exists = Balance::where('user_id', $userId)
-//         ->where('currency', $currency)
-//         ->exists();
-
-//     if ($exists) {
-//         $errorMessage = "You already have a $currency balance. Duplicates are not allowed.";
-
-//         return $request->expectsJson()
-//             ? response()->json([
-//                 'success' => false,
-//                 'message' => $errorMessage,
-//                 'code' => 'DUPLICATE_BALANCE',
-//                 'data' => null
-//             ], 400)
-//             : redirect()->back()->withErrors(['message' => $errorMessage]);
-//     }
-
-//     $balance = Balance::create([
-//         'user_id' => $userId,
-//         'name' => $request->name,
-//         'currency' => $request->currency,
-//         'balance' => 0,
-//     ]);
-
-//     if ($request->expectsJson()) {
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Balance created successfully.',
-//             'code' => 'BALANCE_CREATED',
-//             'data' => $balance
-//         ], 201);
-//     }
-
-//     return redirect()->route('add_account.create')->with('success', 'Account created successfully.');
-// }
 
 public function createBalance(Request $request)
 {
+
+
     $request->validate([
         'name'     => 'required|string',
         'currency' => 'required|string',
@@ -132,6 +71,24 @@ public function createBalance(Request $request)
     $userId   = Auth::id() ?? $request->user_id;
     $currency = strtoupper($request->currency);
     $mode     = $request->input('mode', session('mode', 'live'));
+
+       // 🔎 Check the currency exists and is active
+    $currencyRecord = Currency::where('code', $currency)
+        ->where('is_active', true)
+        ->first();
+
+    if (!$currencyRecord) {
+        $errorMessage = "{$currency} is not currently available for new balances.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code'    => 'CURRENCY_NOT_ACTIVE',
+                'data'    => null,
+            ], 422)
+            : redirect()->back()->withErrors(['message' => $errorMessage]);
+    }
 
     // 🔎 Check if user already has this currency IN THIS MODE
     $exists = Balance::where('user_id', $userId)
@@ -151,6 +108,10 @@ public function createBalance(Request $request)
             ], 400)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
+
+
+     dd('lllll');
+
 
     $balance = Balance::create([
         'user_id'  => $userId,
@@ -374,19 +335,20 @@ public function dashboardapi(Request $request)
             ];
         });
 
-      $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code')
-        ->get()
-        ->map(function ($c) {
-            return [
-                'code' => $c->code,
-                'currency_code' =>$c->currency_code,
-                'name' => $c->name,
-                'symbol' => $c->symbol,
-                'country_code' => strtolower($c->country_code ?? ''),
-            ];
-        })
-        ->values()
-        ->toArray();
+        $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code', 'is_active')
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'code' => $c->code,
+                    'currency_code' => $c->currency_code,
+                    'name' => $c->name,
+                    'symbol' => $c->symbol,
+                    'country_code' => strtolower($c->country_code ?? ''),
+                    'is_active' => $c->is_active ? 'true' : 'false',
+                ];
+            })
+            ->values()
+            ->toArray();
 
 
         $currencyFees = \App\Models\UserCurrencyFee::where('user_id', $account->id)
@@ -481,61 +443,157 @@ public function dashboardapi(Request $request)
     }
 
     // ── Statement PDF ──────────────────────────────────────────────────────────
+    // public function statement(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date',
+    //         'end_date'   => 'required|date|after_or_equal:start_date',
+    //     ]);
+
+    //     $user = auth()->user();
+    //     $mode = session('mode', 'live');
+
+    //     $balance = Balance::where('id', $id)
+    //         ->where('user_id', $user->id)
+    //         ->firstOrFail();
+
+
+    //     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    //     $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    //     $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+    //     $transactions = TransactionHistory::where('balance_id', $balance->id)
+    //         ->where('mode', $mode)
+    //         ->whereBetween('created_at', [$startDate, $endDate])
+    //         ->orderBy('created_at', 'asc')
+    //         ->get();
+
+
+    //         // ── Helper: determine if a tx is credit ──────────────────────────────
+    //     $isCredit = function ($tx) {
+    //         $type = strtolower($tx->type ?? '');
+    //         return in_array($type, ['credit']) ||
+    //             str_contains($type, 'credit');
+    //         // withdrawal, swap, debit, payment = not credit
+    //     };
+
+    //     // ── Opening balance ───────────────────────────────────────────────────
+    //     $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+    //         ->where('created_at', '<', $startDate)
+    //         ->get()
+    //         ->reduce(function ($carry, $tx) use ($isCredit) {
+    //             return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+    //         }, 0);
+
+    //     $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
+    //     $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
+    //     $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+    //     //dd( $openingBalance);
+
+
+    //     return view('business.statement', compact(
+    //         'balance', 'transactions', 'user',
+    //         'startDate', 'endDate',
+    //         'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+    //     ));
+    // }
+
     public function statement(Request $request, $id)
-    {
-        $request->validate([
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
-        ]);
+{
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+        'start_date' => 'required|date',
+        'end_date'   => 'required|date|after_or_equal:start_date',
+    ]);
 
-        $user = auth()->user();
-        $mode = session('mode', 'live');
+    if ($validator->fails()) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'code' => 'VALIDATION_ERROR',
+                'data' => $validator->errors()
+            ], 422);
+        }
 
-        $balance = Balance::where('id', $id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-
-        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
-
-        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
-        $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
-
-        $transactions = TransactionHistory::where('balance_id', $balance->id)
-            ->where('mode', $mode)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-
-            // ── Helper: determine if a tx is credit ──────────────────────────────
-        $isCredit = function ($tx) {
-            $type = strtolower($tx->type ?? '');
-            return in_array($type, ['credit']) ||
-                str_contains($type, 'credit');
-            // withdrawal, swap, debit, payment = not credit
-        };
-
-        // ── Opening balance ───────────────────────────────────────────────────
-        $openingBalance = TransactionHistory::where('balance_id', $balance->id)
-            ->where('created_at', '<', $startDate)
-            ->get()
-            ->reduce(function ($carry, $tx) use ($isCredit) {
-                return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
-            }, 0);
-
-        $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
-        $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
-        $closingBalance = $openingBalance + $totalCredit - $totalDebit;
-        //dd( $openingBalance);
-
-
-        return view('business.statement', compact(
-            'balance', 'transactions', 'user',
-            'startDate', 'endDate',
-            'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
-        ));
+        return back()->withErrors($validator)->withInput();
     }
+
+    $user = auth()->user();
+    $mode = session('mode', 'live');
+
+    $balance = Balance::where('id', $id)
+        ->where('user_id', $user->id)
+        ->first();
+
+    if (!$balance) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Balance not found',
+                'code' => 'BALANCE_NOT_FOUND',
+                'data' => null
+            ], 404);
+        }
+
+        abort(404);
+    }
+
+    $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+    $transactions = TransactionHistory::where('balance_id', $balance->id)
+        ->where('mode', $mode)
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    // ── Helper: determine if a tx is credit ──────────────────────────────
+    $isCredit = function ($tx) {
+        $type = strtolower($tx->type ?? '');
+        return in_array($type, ['credit']) ||
+            str_contains($type, 'credit');
+        // withdrawal, swap, debit, payment = not credit
+    };
+
+    // ── Opening balance ───────────────────────────────────────────────────
+    $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+        ->where('created_at', '<', $startDate)
+        ->get()
+        ->reduce(function ($carry, $tx) use ($isCredit) {
+            return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+        }, 0);
+
+    $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
+    $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
+    $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Statement fetched successfully',
+            'code' => 'STATEMENT_FETCHED',
+            'data' => [
+                'balance' => $balance,
+                'transactions' => $transactions,
+                'start_date' => $startDate->format('Y-m-d'),
+                'end_date' => $endDate->format('Y-m-d'),
+                'opening_balance' => number_format($openingBalance, 2, '.', ''),
+                'total_debit' => number_format($totalDebit, 2, '.', ''),
+                'total_credit' => number_format($totalCredit, 2, '.', ''),
+                'closing_balance' => number_format($closingBalance, 2, '.', ''),
+            ]
+        ], 200);
+    }
+
+    return view('business.statement', compact(
+        'balance', 'transactions', 'user',
+        'startDate', 'endDate',
+        'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+    ));
+}
 
 
 
