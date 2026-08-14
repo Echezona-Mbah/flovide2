@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use App\Services\FirebaseNotificationService;
 use App\Models\User;
 use App\Models\Personal;
+use App\Models\AdminBroadcastEmail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminPushNotification;
+use Throwable;
 
 class PushMailNotificationController extends Controller
 {
@@ -91,7 +93,39 @@ class PushMailNotificationController extends Controller
                 $message = $validated['message'];
 
                 foreach ($businessUsers as $user) {
-                    Mail::to($user->email)->send(new AdminPushNotification($user->business_name, $subjectTitle, $message));
+                    $broadcastEmail = AdminBroadcastEmail::create([
+                        'user_id' => $user->id,
+                        'recipient_email' => $user->email,
+                        'subject' => $subjectTitle,
+                        'message' => $message,
+                        'status' => 'pending',
+                    ]);
+
+                    try {
+                        Mail::to($user->email)->send(
+                            new AdminPushNotification(
+                                $user->business_name, 
+                                $subjectTitle, 
+                                $message
+                            )
+                        );
+
+                        $broadcastEmail->update([
+                            'status' => 'sent',
+                            'sent_at' => now(),
+                        ]);
+                    } catch (Throwable $th) {
+                        $broadcastEmail->update([
+                            'status' => 'failed',
+                            'error_message' => $th->getMessage(),
+                        ]);
+
+                        Log::error('Broadcast email failed', [
+                            'user_id' => $user->id,
+                            'email' => $user->email,
+                            'error' => $th->getMessage(),
+                        ]);
+                    }
                 }
             }
 
@@ -157,7 +191,43 @@ class PushMailNotificationController extends Controller
             if (in_array('email', $delivery_channel)) {
                 $subjectTitle = $validated['subject'];
                 $message = $validated['message'];
-                Mail::to($businessUser->email)->send(new AdminPushNotification($businessUser->business_name, $subjectTitle, $message));
+
+                $broadcastEmail = AdminBroadcastEmail::create([
+                    'user_id' => $businessUser->id,
+                    'recipient_email' => $businessUser->email,
+                    'subject' => $subjectTitle,
+                    'message' => $message,
+                    'status' => 'pending',
+                ]);
+
+                try {
+                
+                    Mail::to($businessUser->email)->send(
+                        new AdminPushNotification(
+                            $businessUser->business_name, 
+                            $subjectTitle, 
+                            $message
+                        )
+                    );
+
+
+                    $broadcastEmail->update([
+                        'status' => 'sent',
+                        'sent_at' => now(),
+                    ]);
+
+                } catch (Throwable $th) {
+                    $broadcastEmail->update([
+                        'status' => 'failed',
+                        'error_message' => $th->getMessage(),
+                    ]);
+
+                    Log::error('Broadcast email failed', [
+                        'user_id' => $businessUser->id,
+                        'email' => $businessUser->email,
+                        'error' => $th->getMessage(),
+                    ]);
+                }
             }
 
             return response()->json([
@@ -165,7 +235,7 @@ class PushMailNotificationController extends Controller
                 'message' => 'Notification sent successfully',
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Log::error('Notification failed: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
@@ -221,8 +291,34 @@ class PushMailNotificationController extends Controller
                 $message = $validated['message'];
 
                 foreach ($personalUsers as $personaluser) {
-                    $personal_name = $personaluser->firstname . ' ' . $personaluser->lastname;
-                    Mail::to($personaluser->email)->send(new AdminPushNotification($personal_name, $subjectTitle, $message));
+                    $broadcastEmail = AdminBroadcastEmail::create([
+                        'personal_id' => $personaluser->id,
+                        'recipient_email' => $personaluser->email,
+                        'subject' => $subjectTitle,
+                        'message' => $message,
+                        'status' => 'pending',
+                    ]);
+
+                    try {
+                        $personal_name = $personaluser->firstname . ' ' . $personaluser->lastname;
+                        Mail::to($personaluser->email)->send(new AdminPushNotification($personal_name, $subjectTitle, $message));
+
+                        $broadcastEmail->update([
+                            'status' => 'sent',
+                            'sent_at' => now(),
+                        ]);
+                    } catch (Throwable $th) {
+                        $broadcastEmail->update([
+                            'status' => 'failed',
+                            'error_message' => $th->getMessage(),
+                        ]);
+
+                        Log::error('Personal broadcast email failed', [
+                            'personal_id' => $personaluser->id,
+                            'email' => $personaluser->email,
+                            'error' => $th->getMessage(),
+                        ]);
+                    }
                 }
             }
 
@@ -289,7 +385,34 @@ class PushMailNotificationController extends Controller
                 $subjectTitle = $validated['subject'];
                 $message = $validated['message'];
                 $personal_name = $personalUser->firstname . ' ' . $personalUser->lastname;
-                Mail::to($personalUser->email)->send(new AdminPushNotification($personal_name, $subjectTitle, $message));
+
+                $broadcastEmail = AdminBroadcastEmail::create([
+                    'personal_id' => $personalUser->id,
+                    'recipient_email' => $personalUser->email,
+                    'subject' => $subjectTitle,
+                    'message' => $message,
+                    'status' => 'pending',
+                ]);
+
+                try {
+                    Mail::to($personalUser->email)->send(new AdminPushNotification($personal_name, $subjectTitle, $message));
+
+                    $broadcastEmail->update([
+                        'status' => 'sent',
+                        'sent_at' => now(),
+                    ]);
+                } catch (Throwable $th) {
+                    $broadcastEmail->update([
+                        'status' => 'failed',
+                        'error_message' => $th->getMessage(),
+                    ]);
+
+                    Log::error('Personal broadcast email failed', [
+                        'personal_id' => $personalUser->id,
+                        'email' => $personalUser->email,
+                        'error' => $th->getMessage(),
+                    ]);
+                }
             }
 
             return response()->json([

@@ -36,6 +36,7 @@ use App\Http\Controllers\Business\AddMoneyController;
 use App\Http\Controllers\Business\BillPaymentController;
 use App\Http\Controllers\Business\ChargebackController;
 use App\Http\Controllers\Business\ComplianceController;
+use App\Http\Controllers\Admin\BroadcastController;
 use App\Http\Controllers\Business\SubAccountController;
 use App\Http\Controllers\Blaaiz\BlaaizController;
 use App\Http\Controllers\Business\SubscriptionController;
@@ -413,6 +414,11 @@ Route::middleware(['auth','business.verified'])->group(function () {
         Route::get('/admin/allsubaccount', [AllSubaccountController::class, 'index'])->name('admin.allsubaccount');
         Route::get('/admin/allteammembers', [AllTeamMembersController::class, 'index'])->name('admin.allteammembers');
 
+        //broadcast mail for business
+        Route::get('/admin/broadcast/all', [BroadcastController::class, 'broadcastAllIndex'])->name('admin.broadcast.all');
+        Route::get('/admin/broadcast/personal', [BroadcastController::class, 'broadcastAllPersonalIndex'])->name('admin.broadcast.personal');
+        Route::get('/admin/broadcast/personal/{id}', [BroadcastController::class, 'broadcastPersonalIndex'])->name('admin.broadcast.personal.index');
+        Route::get('/admin/broadcast/{id}', [BroadcastController::class, 'broadcastIndex'])->name('admin.broadcast.index');
 
         //push notification for business
         Route::post('/admin/business-pushnotification', [PushMailNotificationController::class, 'businessPushNotificationAllUsers']);

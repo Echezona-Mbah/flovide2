@@ -667,6 +667,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.testmode', $user->id) }}">Test Mode</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.broadcast.index', $user->id) }}">Broadcast</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
