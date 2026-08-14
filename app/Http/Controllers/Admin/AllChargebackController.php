@@ -13,7 +13,7 @@ class AllChargebackController extends Controller
 
         $Chargebacks = ChargeBacks::orderBy('created_at', 'desc')->paginate(4);
 
-        return view('admin.Chargeback', compact('Chargebacks'));
+        return view('admin.chargeback', compact('Chargebacks'));
 
     }
 
