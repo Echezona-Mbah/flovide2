@@ -623,6 +623,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.personal-testmode', $user->id) }}">Test Mode</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.broadcast.personal.index', $user->id) }}">Broadcast</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
@@ -739,8 +742,11 @@
                                     <div class="notification-head d-flex justify-content-between align-items-center flex-wrap gap-3">
                                         <div>
                                             <h5 class="notification-title"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Send Broadcast Notification</h5>
-                                            <p class="notification-subtitle">Broadcast system alerts, updates, or email promotions to all registered personal users.</p>
+                                            <p class="notification-subtitle">Broadcast system alerts, updates, or email promotions to this personal user.</p>
                                         </div>
+                                        <a href="{{ route('admin.broadcast.personal.index', $user->id) }}" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 13px;">
+                                            <i class="fa-solid fa-list-check me-1"></i> View Broadcast Records
+                                        </a>
                                     </div>
                                     <div class="card-body p-4">
                                         <form id="broadcastForm" data-user-id="{{ $user->id }}">

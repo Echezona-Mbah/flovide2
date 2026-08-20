@@ -442,6 +442,13 @@
                             </div>
                         </div>
 
+                        <section class="mb-3 d-flex justify-content-end align-items-center flex-wrap gap-2">
+                            <a href="{{ route('admin.broadcast.all') }}" class="btn btn-primary rounded-pill px-4 py-2 font-weight-bold d-inline-flex align-items-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 0; font-size: 13.5px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+                                <i class="fa-solid fa-tower-broadcast"></i> View All Broadcast Records
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
+                        </section>
+
                         <section class="mb-4">
                             <div class="card notification-card">
                                 <div class="notification-head d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -449,6 +456,9 @@
                                         <h5 class="notification-title"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Send Broadcast Notification</h5>
                                         <p class="notification-subtitle">Broadcast system alerts, updates, or email promotions to all registered business users.</p>
                                     </div>
+                                    <a href="{{ route('admin.broadcast.all') }}" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold d-inline-flex align-items-center gap-2" style="font-size: 13px;">
+                                        <i class="fa-solid fa-clock-rotate-left"></i> Broadcast Logs
+                                    </a>
                                 </div>
                                 <div class="card-body p-4">
                                     <form id="broadcastForm">

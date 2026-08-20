@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\UserCurrencyFee;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Support\Facades\Log;
+use App\Models\AdminBroadcastEmail;
 
 
 class BusinessAccountController extends Controller

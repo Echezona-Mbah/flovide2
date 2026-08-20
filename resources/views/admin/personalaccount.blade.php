@@ -448,6 +448,9 @@
                                         <h5 class="notification-title"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Send Broadcast Notification</h5>
                                         <p class="notification-subtitle">Broadcast system alerts, updates, or email promotions to all registered personal users.</p>
                                     </div>
+                                    <a href="{{ route('admin.broadcast.personal') }}" class="btn btn-outline-primary rounded-pill px-3 py-1.5 font-weight-bold" style="font-size: 13px;">
+                                        <i class="fa-solid fa-list-check me-1"></i> View All Personal Broadcast Records
+                                    </a>
                                 </div>
                                 <div class="card-body p-4">
                                     <form id="broadcastForm">
@@ -812,7 +815,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 title: 'Confirm Broadcast',
                 html: `Are you sure you want to send this notification?<br><br>` +
                         `<div class="text-start small" style="background: #f1f5f9; padding: 12px; border-radius: 8px;">` +
-                        `<strong>Target:</strong> All Business Users<br>` +
+                        `<strong>Target:</strong> All Personal Users<br>` +
                         `<strong>Subject:</strong> ${subject}<br>` +
                         `<strong>Channels:</strong> ${channels.join(', ')}` +
                         `</div>`,
