@@ -683,4 +683,160 @@ public function registerWebhookUrls(Request $request, BlaaizService $blaaiz)
 }
 
 
+
+
+
+
+
+
+public function initiateAutoDeposit(Request $request)
+{
+    $validated = $request->validate([
+        'amount'     => 'required|numeric|min:0.1',
+        'currency'   => 'nullable|string|max:10',
+        'balance_id' => 'required|string',
+    ]);
+
+    $user = auth()->user();
+    $balance = \App\Models\Balance::where('id', $validated['balance_id'])
+        ->where('user_id', $user->id)
+        ->first();
+
+    if (!$balance) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Wallet not found or does not belong to your account.',
+            'code'    => 'INVALID_WALLET',
+        ], 422);
+    }
+
+    $currency = strtoupper($validated['currency'] ?? $balance->currency ?? 'CAD');
+
+    if ($currency !== 'CAD') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Auto Deposit is only available for the CAD wallet.',
+            'code'    => 'AUTODEPOSIT_CAD_ONLY',
+        ], 422);
+    }
+
+    $amount = (float) $validated['amount'];
+
+    $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
+        ->where('currency', $currency)
+        ->first();
+
+    Log::info('[Interac AutoDeposit] Fee lookup', [
+        'user_id'  => $user->id,
+        'currency' => $currency,
+        'found'    => (bool) $userFee,
+        'enabled'  => $userFee->collection_enabled ?? null,
+    ]);
+
+    if (!$userFee || !$userFee->collection_enabled) {
+        return response()->json([
+            'success' => false,
+            'message' => "Contact your marketer to enable collection pricing for {$currency}.",
+            'code'    => 'COLLECTION_DISABLED',
+        ], 422);
+    }
+
+    if ($userFee->collection_min > 0 && $amount < $userFee->collection_min) {
+        return response()->json([
+            'success' => false,
+            'message' => "Minimum top-up for {$currency} is " . number_format($userFee->collection_min, 2),
+            'code'    => 'BELOW_COLLECTION_MIN',
+        ], 422);
+    }
+
+    if ($userFee->collection_max > 0 && $amount > $userFee->collection_max) {
+        return response()->json([
+            'success' => false,
+            'message' => "Maximum top-up for {$currency} is " . number_format($userFee->collection_max, 2),
+            'code'    => 'ABOVE_COLLECTION_MAX',
+        ], 422);
+    }
+
+    $platformFee = $userFee->calcCollectionFee($amount);
+    $netAmount   = $userFee->collectionAmountAfterFee($amount);
+
+    if ($amount <= $platformFee) {
+        return response()->json([
+            'success' => false,
+            'message' => "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.",
+            'code'    => 'AMOUNT_BELOW_FEE',
+        ], 422);
+    }
+
+    $reference = 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
+
+    $transaction = TransactionHistory::create([
+        'user_id'           => $user->id,
+        'balance_id'        => $balance->id,
+        'personal_id'       => null,
+        'payment_provider'  => 'interac',
+        'transaction_type'  => 'payment',
+        'method'            => 'credit',
+        'payment_method'    => 'wallet_autodeposit', // distinct from 'standard'/'auto' request flows
+        'sender'            => null,
+        'amount'            => $amount,
+        'fees'              => $platformFee,
+        'platform_fee'      => $platformFee,
+        'recipient_amount'  => $netAmount,
+        'currency'          => $currency,
+        'status'            => 'pending',
+        'reference'         => $reference,
+        'payment_reference' => $reference,
+        'order_id'          => null,
+    ]);
+
+    Log::info('[Interac AutoDeposit] Pending transaction created', [
+        'tx_id'     => $transaction->id,
+        'reference' => $reference,
+        'amount'    => $amount,
+        'currency'  => $currency,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'We are watching for your Interac e-Transfer.',
+        'code'    => 'AUTODEPOSIT_PENDING',
+        'data'    => [
+            'reference'     => $reference,
+            'deposit_email' => 'payment@flovide.com',
+            'amount'        => $amount,
+            'currency'      => $currency,
+        ],
+    ], 200);
+}
+
+public function checkInteracStatus(Request $request, string $reference)
+{
+    $user = auth()->user();
+
+    $tx = TransactionHistory::where('reference', $reference)
+        ->where('user_id', $user->id)
+        ->first();
+
+    if (!$tx) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction not found.',
+            'code'    => 'TX_NOT_FOUND',
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'code'    => 'TX_STATUS',
+        'data'    => [
+            'reference' => $tx->reference,
+            'status'    => $tx->status, // pending | success | failed
+            'amount'    => $tx->amount,
+            'currency'  => $tx->currency,
+        ],
+    ], 200);
+}
+
+
 }

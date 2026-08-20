@@ -198,6 +198,8 @@
           </div>
         </div>
 
+        
+
         {{-- Submit button (shown only when method=interac) --}}
         <button type="button" id="submitBtn" onclick="submitInterac()" disabled
           class="w-full py-4 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
@@ -208,6 +210,47 @@
         <p class="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1">
           <i class="fas fa-shield-alt"></i> 256-bit encrypted · SSL secured
         </p>
+
+
+        {{-- Auto Deposit card (shown only when method=interac & mode=autodeposit) --}}
+<div id="autoDepositCard" class="hidden bg-white border border-gray-200 rounded-2xl overflow-hidden mb-4">
+  <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+      <i class="fas fa-bolt text-blue-600 text-sm"></i>
+    </div>
+    <div>
+      <p class="text-sm font-bold text-gray-900">Send Interac e-Transfer To</p>
+      <p class="text-xs text-gray-400">Use your own banking app to send the funds</p>
+    </div>
+  </div>
+
+  <div class="px-5 py-5">
+    <div class="flex items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3.5">
+      <span class="text-sm font-bold text-gray-900" id="depositEmailText">payment@flovide.com</span>
+      <button type="button" onclick="copyDepositEmail()" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0">
+        <i class="fas fa-copy"></i> <span id="copyLabel">Copy</span>
+      </button>
+    </div>
+    <p class="text-xs text-gray-400 mt-3 flex items-center gap-1">
+      <i class="fas fa-info-circle"></i>
+      No security question is required — the transfer is deposited automatically.
+    </p>
+  </div>
+</div>
+
+{{-- Confirming card (shown while polling for webhook confirmation) --}}
+<div id="confirmingCard" class="hidden bg-white border border-gray-200 rounded-2xl p-8 mb-4 text-center">
+  <div class="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin mx-auto mb-4"></div>
+  <p class="text-sm font-bold text-gray-900 mb-1">Confirming your payment…</p>
+  <p class="text-xs text-gray-400" id="confirmingSub">This usually takes a few moments once your bank sends the transfer.</p>
+</div>
+
+{{-- Auto Deposit submit button --}}
+<button type="button" id="autoDepositBtn" onclick="markPaymentMade()"
+  class="hidden w-full py-4 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
+  <i class="fas fa-check"></i>
+  <span>I've Made Payment</span>
+</button>
 
       </div>
     </section>
@@ -391,6 +434,118 @@
         Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
       }
     }
+
+
+    const mode = params.get('mode') || 'request';
+
+if (method === 'interac' && mode === 'autodeposit') {
+  document.getElementById('interacFormCard').classList.add('hidden');
+  document.getElementById('submitBtn').classList.add('hidden');
+  document.getElementById('autoDepositCard').classList.remove('hidden');
+  document.getElementById('autoDepositBtn').classList.remove('hidden');
+
+  document.getElementById('heroBadgeText').textContent = 'Auto Deposit · Send it yourself';
+}
+
+function copyDepositEmail() {
+  navigator.clipboard.writeText('payment@flovide.com').then(() => {
+    const lbl = document.getElementById('copyLabel');
+    lbl.textContent = 'Copied!';
+    setTimeout(() => (lbl.textContent = 'Copy'), 1500);
+  });
+}
+
+let pollTimer = null;
+let pollAttempts = 0;
+const MAX_POLL_ATTEMPTS = 60; // ~3 minutes at 3s interval
+
+async function markPaymentMade() {
+  const btn = document.getElementById('autoDepositBtn');
+  btn.disabled = true;
+  btn.querySelector('span').textContent = 'Registering…';
+
+  try {
+    const res = await fetch('{{ route("blaaiz.interac.autodeposit.initiate") }}', {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept':       'application/json',
+      },
+      body: JSON.stringify({ amount: parseFloat(amount), currency, balance_id: params.get('balance_id') }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      Swal.fire({ icon: 'error', title: 'Could not start', text: data.message ?? 'Please try again.', confirmButtonColor: '#2563eb' });
+      btn.disabled = false;
+      btn.querySelector('span').textContent = "I've Made Payment";
+      return;
+    }
+
+    const reference = data.data.reference;
+
+    document.getElementById('autoDepositCard').classList.add('hidden');
+    document.getElementById('autoDepositBtn').classList.add('hidden');
+    document.getElementById('howItWorksCard')?.classList.add('hidden');
+    document.getElementById('confirmingCard').classList.remove('hidden');
+
+    pollAttempts = 0;
+    pollTimer = setInterval(() => pollStatus(reference), 3000);
+    pollStatus(reference); // fire immediately too
+
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.', confirmButtonColor: '#2563eb' });
+    btn.disabled = false;
+    btn.querySelector('span').textContent = "I've Made Payment";
+  }
+}
+
+async function pollStatus(reference) {
+  pollAttempts++;
+
+  try {
+    const res  = await fetch(`{{ url('/add-money/interac/status') }}/${reference}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (data.data.status === 'success') {
+        clearInterval(pollTimer);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Payment Confirmed!',
+          text: 'Your wallet has been credited.',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Go to Dashboard',
+        });
+        window.location.href = '{{ route("dashboard") }}';
+        return;
+      }
+
+      if (data.data.status === 'failed') {
+        clearInterval(pollTimer);
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Not Confirmed',
+          text: "We couldn't confirm this deposit. If you already sent it, please contact support with your reference.",
+          confirmButtonColor: '#2563eb',
+        });
+        return;
+      }
+    }
+  } catch (err) {
+    // silently retry on network hiccups
+  }
+
+  if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+    clearInterval(pollTimer);
+    document.getElementById('confirmingSub').innerHTML =
+      'Still waiting on confirmation — this can take a little longer. We\'ll notify you once it\'s done. <a href="{{ route("dashboard") }}" class="text-blue-600 font-semibold">Return to Dashboard</a>';
+  }
+}
   </script>
 
 </body>

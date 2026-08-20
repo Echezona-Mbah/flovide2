@@ -548,6 +548,46 @@
                                 <div class="api-block" data-group="collection-interac"></div>
                             </div>
                         </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                          <div class="p-6 md:p-8">
+                              <div class="flex flex-wrap items-center gap-3 mb-4">
+                                  <span class="px-3 py-1 bg-slate-200 text-slate-600 rounded-md font-bold text-xs">DASHBOARD</span>
+                                  <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">Interac Auto Deposit (CAD)</code>
+                              </div>
+                              <h3 class="text-xl font-bold mb-3">Setting up Auto Deposit</h3>
+                              <p class="text-slate-600 mb-6 leading-relaxed">
+                                  Auto Deposit is a standing setup, not an API call. Once you register an email address for a CAD wallet, anyone who sends an Interac e-Transfer to that email is credited to your wallet automatically — no request needs to be sent first, and no <code>collections/interac</code> call is required for each payment.
+                              </p>
+
+                              <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6">
+                                  <div class="flex">
+                                      <div class="flex-shrink-0">
+                                          <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                          </svg>
+                                      </div>
+                                      <div class="ml-3">
+                                          <p class="text-sm text-amber-700">
+                                              There is no API endpoint for this — Auto Deposit emails are registered from your dashboard, since they're a wallet-level setting rather than a per-transaction request.
+                                          </p>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <h4 class="font-bold text-slate-900 mb-3">Where to set it up</h4>
+                              <ol class="list-decimal list-inside space-y-2 text-slate-600 mb-6">
+                                  <li>Go to <strong>Wallets</strong> in your dashboard and open your <strong>CAD</strong> wallet.</li>
+                                  <li>Under <strong>Account Details</strong>, find the <strong>Interac Auto Deposit</strong> panel and click <strong>Manage Auto Deposit Emails</strong>.</li>
+                                  <li>Click <strong>Add Email</strong> and enter the email address you want customers to send e-Transfers to. Auto Deposit emails must end with <strong>@flovide.com</strong>, for example <code>payment@flovide.com</code>.</li>
+                                  <li>You can register more than one email per wallet — useful if you route different products or channels to different addresses.</li>
+                              </ol>
+
+                              <p class="text-slate-600 mb-2">
+                                  Once an email is active, any e-Transfer sent to it is matched to your wallet and credited automatically, and you'll receive a <code>transaction.success</code> webhook just like any other collection — see the <a href="#webhooks" class="text-indigo-600 font-semibold hover:underline">Webhooks</a> section for the payload shape.
+                              </p>
+                          </div>
+                      </div>
                     </div>
                 </section>
 
@@ -635,19 +675,200 @@
 
                 <section id="webhooks" class="mb-20">
                     <h2 class="text-3xl font-bold text-slate-900 mb-6">Webhooks</h2>
-                    <p class="text-slate-600 mb-8 leading-relaxed">
-                        Flovide uses webhooks to notify your application when an event happens in your account.
+                    <p class="text-slate-600 mb-6 leading-relaxed">
+                        Flovide sends a webhook to your <code>webhook_url</code> whenever a transaction changes status.
+                        Configure your endpoint from the <a href="#" class="text-indigo-600 font-semibold hover:underline">Webhooks settings</a> panel — this also generates your webhook <code>secret_key</code>, used to sign every payload.
                     </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
-                            <h4 class="font-bold text-slate-900 mb-2">payment.success</h4>
-                            <p class="text-sm text-slate-500">Sent when a charge is successfully captured.</p>
-                        </div>
-                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
-                            <h4 class="font-bold text-slate-900 mb-2">payout.failed</h4>
-                            <p class="text-sm text-slate-500">Sent when a transfer to a bank account fails.</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-amber-700">
+                                    Always verify the <code>X-Flovide-Signature</code> header before trusting a webhook payload. Never process a webhook you haven't verified.
+                                </p>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Event types -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Event Types</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.success</h4>
+                            <p class="text-sm text-slate-500">Sent when a transaction's status resolves to <code>success</code> — a deposit is credited, a payout clears, or a collection completes.</p>
+                        </div>
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.failed</h4>
+                            <p class="text-sm text-slate-500">Sent when a transaction's status resolves to <code>failed</code> — a payout is declined or a collection is rejected.</p>
+                        </div>
+                    </div>
+
+                    <!-- Payload shape -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Payload</h3>
+                    <p class="text-slate-600 mb-4">Every webhook request is a <code>POST</code> with a JSON body in this shape:</p>
+
+                    <div class="mb-10 bg-slate-900 rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Example Payload</div>
+                        <div class="p-6 overflow-x-auto hide-scrollbar">
+                <pre class="text-slate-300 text-sm leading-6">{
+                  "event": "transaction.success",
+                  "data": {
+                    "id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+                    "reference": "CAyAHe1XxpDs",
+                    "order_id": "TEST_ae8cda30-f4a8-4c0f-a873-40e3d9436d70",
+                    "transaction_type": "payout",
+                    "status": "success",
+                    "amount": 100.00,
+                    "currency": "NGN",
+                    "balance_id": "b6820b8a-2434-11f1-a9fd-84a93e49c6d5",
+                    "created_at": "2026-07-16T16:14:44+00:00",
+                    "updated_at": "2026-07-16T16:15:02+00:00"
+                  },
+                  "created_at": "2026-07-16T16:15:02+00:00"
+                }</pre>
+                        </div>
+                    </div>
+
+                    <!-- Headers -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Headers</h3>
+                    <div class="overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-sm mb-10">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Header</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr>
+                                    <td class="px-6 py-4 font-mono text-sm text-indigo-600">X-Flovide-Signature</td>
+                                    <td class="px-6 py-4 text-sm text-slate-600">HMAC-SHA256 hex digest of the raw request body, signed with your webhook <code>secret_key</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-mono text-sm text-indigo-600">X-Flovide-Event</td>
+                                    <td class="px-6 py-4 text-sm text-slate-600">The event type, matching the <code>event</code> field in the body (e.g. <code>transaction.success</code>).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Signature verification -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Verifying the Signature</h3>
+                    <p class="text-slate-600 mb-4">
+                        Compute an HMAC-SHA256 digest of the raw request body using your secret key, then compare it to the <code>X-Flovide-Signature</code> header using a constant-time comparison.
+                    </p>
+
+                    <div class="bg-slate-900 rounded-xl overflow-hidden mb-10">
+                        <div class="flex flex-wrap border-b border-slate-800">
+                            <button class="webhook-verify-tab px-4 py-3 text-xs font-bold text-white border-b-2 border-indigo-500 bg-slate-800/50" data-target="php">PHP</button>
+                            <button class="webhook-verify-tab px-4 py-3 text-xs font-bold text-slate-400 hover:text-white" data-target="node">Node.js</button>
+                            <button class="webhook-verify-tab px-4 py-3 text-xs font-bold text-slate-400 hover:text-white" data-target="python">Python</button>
+                        </div>
+                        <div class="relative">
+                            <button class="copy-single absolute right-4 top-4 z-10 text-slate-400 hover:text-white transition" data-target="webhook-verify-php">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                            </button>
+                            <div class="webhook-verify-panel p-6 overflow-x-auto hide-scrollbar" data-panel="php">
+                <pre id="webhook-verify-php" class="text-slate-300 text-sm leading-6">$payload = file_get_contents('php://input');
+                $signature = $_SERVER['HTTP_X_FLOVIDE_SIGNATURE'] ?? '';
+                $secret = 'your_webhook_secret_key';
+
+                $expected = hash_hmac('sha256', $payload, $secret);
+
+                if (!hash_equals($expected, $signature)) {
+                    http_response_code(401);
+                    exit('Invalid signature');
+                }
+
+                $event = json_decode($payload, true);
+                // process $event['event'] / $event['data'] ...</pre>
+                            </div>
+                            <div class="webhook-verify-panel hidden p-6 overflow-x-auto hide-scrollbar" data-panel="node">
+                <pre id="webhook-verify-node" class="text-slate-300 text-sm leading-6">const crypto = require('crypto');
+
+                function verifyWebhook(rawBody, signature, secret) {
+                  const expected = crypto
+                    .createHmac('sha256', secret)
+                    .update(rawBody)
+                    .digest('hex');
+
+                  return crypto.timingSafeEqual(
+                    Buffer.from(expected),
+                    Buffer.from(signature)
+                  );
+                }
+
+                // Express example
+                app.post('/webhooks/flovide', express.raw({ type: 'application/json' }), (req, res) => {
+                  const signature = req.headers['x-flovide-signature'];
+                  const valid = verifyWebhook(req.body, signature, process.env.FLOVIDE_WEBHOOK_SECRET);
+
+                  if (!valid) return res.status(401).send('Invalid signature');
+
+                  const event = JSON.parse(req.body);
+                  // process event.event / event.data ...
+                  res.sendStatus(200);
+                });</pre>
+                            </div>
+                            <div class="webhook-verify-panel hidden p-6 overflow-x-auto hide-scrollbar" data-panel="python">
+                <pre id="webhook-verify-python" class="text-slate-300 text-sm leading-6">import hmac
+                import hashlib
+                import json
+
+                def verify_webhook(raw_body: bytes, signature: str, secret: str) -> bool:
+                    expected = hmac.new(
+                        secret.encode(),
+                        raw_body,
+                        hashlib.sha256
+                    ).hexdigest()
+                    return hmac.compare_digest(expected, signature)
+
+                # Flask example
+                @app.route('/webhooks/flovide', methods=['POST'])
+                def flovide_webhook():
+                    signature = request.headers.get('X-Flovide-Signature', '')
+                    if not verify_webhook(request.data, signature, WEBHOOK_SECRET):
+                        return 'Invalid signature', 401
+
+                    event = request.get_json()
+                    # process event['event'] / event['data'] ...
+                    return '', 200</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Retry policy -->
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Retry Policy</h3>
+                    <p class="text-slate-600 mb-4">
+                        If your endpoint doesn't respond with a <code>2xx</code> status, Flovide retries delivery up to 5 times with increasing backoff:
+                    </p>
+                    <div class="overflow-x-auto bg-white border border-slate-200 rounded-xl shadow-sm mb-6">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Attempt</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Delay After Previous Failure</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">1</td><td class="px-6 py-4 text-sm text-slate-600">10 seconds</td></tr>
+                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">2</td><td class="px-6 py-4 text-sm text-slate-600">30 seconds</td></tr>
+                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">3</td><td class="px-6 py-4 text-sm text-slate-600">2 minutes</td></tr>
+                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">4</td><td class="px-6 py-4 text-sm text-slate-600">10 minutes</td></tr>
+                                <tr><td class="px-6 py-4 font-mono text-sm text-indigo-600">5</td><td class="px-6 py-4 text-sm text-slate-600">30 minutes</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-slate-600">
+                        Respond quickly — return a <code>200</code> immediately, then process the event asynchronously if it requires heavier work. Your endpoint should be idempotent, since the same event may be delivered more than once.
+                    </p>
                 </section>
 
                 <section id="errors" class="mb-20">

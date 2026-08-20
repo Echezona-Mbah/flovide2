@@ -35,7 +35,7 @@ public function handle($request, Closure $next)
             ->with('error','You must log in as admin.');
     }
 
-    $timeout = 300;
+    $timeout = 600;
 
     if (session()->has('lastActivityTime')) {
 

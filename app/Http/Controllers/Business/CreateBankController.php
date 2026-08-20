@@ -11,6 +11,8 @@ use App\Models\Currency;
 use App\Models\TransactionHistory;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 
 class CreateBankController extends Controller
@@ -411,36 +413,70 @@ public function dashboardapi(Request $request)
     
     
     
-    public function show(Request $request, $id)
-    {
-        $user = auth()->user();
-        $mode = $request->input('mode', session('mode', 'live'));
+    // public function show(Request $request, $id)
+    // {
+    //     $user = auth()->user();
+    //     $mode = $request->input('mode', session('mode', 'live'));
 
-        $balance = Balance::where('id', $id)
-            ->where('user_id', $user->id)
-            ->where('mode', $mode)
-            ->firstOrFail();
+    //     $balance = Balance::where('id', $id)
+    //         ->where('user_id', $user->id)
+    //         ->where('mode', $mode)
+    //         ->firstOrFail();
 
-        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+    //     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
 
-        // Attach virtual account info from user
-        $balance->virtual_account_number = $user->virtual_account_number ?? null;
-        $balance->virtual_account_name   = $user->virtual_account_name   ?? null;
-        $balance->virtual_account_bank   = $user->virtual_account_bank   ?? null;
+    //     // Attach virtual account info from user
+    //     $balance->virtual_account_number = $user->virtual_account_number ?? null;
+    //     $balance->virtual_account_name   = $user->virtual_account_name   ?? null;
+    //     $balance->virtual_account_bank   = $user->virtual_account_bank   ?? null;
 
-        $transactions = TransactionHistory::where('balance_id', $balance->id)
-            ->where('mode', $mode)
-            ->select([
-                'id', 'type', 'transaction_type','amount', 'currency',
-                'fees', 'status', 'reference', 'order_id', 'sender',
-                'recipient_account_name', 'method', 'created_at'
-            ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+    //     $transactions = TransactionHistory::where('balance_id', $balance->id)
+    //         ->where('mode', $mode)
+    //         ->select([
+    //             'id', 'type', 'transaction_type','amount', 'currency',
+    //             'fees', 'status', 'reference', 'order_id', 'sender',
+    //             'recipient_account_name', 'method', 'created_at'
+    //         ])
+    //         ->orderBy('created_at', 'desc')
+    //         ->paginate(15);
         
 
-        return view('business.balance-detail', compact('balance', 'transactions', 'mode'));
-    }
+    //     return view('business.balance-detail', compact('balance', 'transactions', 'mode'));
+    // }
+
+    public function show(Request $request, $id)
+{
+    $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
+
+    $balance = Balance::where('id', $id)
+        ->where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->firstOrFail();
+
+    $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    $balance->virtual_account_number = $user->virtual_account_number ?? null;
+    $balance->virtual_account_name   = $user->virtual_account_name   ?? null;
+    $balance->virtual_account_bank   = $user->virtual_account_bank   ?? null;
+
+    $autoDeposits = strtoupper($balance->currency) === 'CAD'
+    ? \App\Models\InteracAutoDeposit::where('balance_id', $balance->id)->orderBy('created_at', 'desc')->get()
+    : collect();
+        
+
+    $transactions = TransactionHistory::where('balance_id', $balance->id)
+        ->where('mode', $mode)
+        ->select([
+            'id', 'type', 'transaction_type', 'amount', 'currency',
+            'fees', 'status', 'reference', 'order_id', 'sender',
+            'recipient_account_name', 'method', 'created_at'
+        ])
+        ->orderBy('created_at', 'desc')
+        ->paginate(15);
+
+    return view('business.balance-detail', compact('balance', 'transactions', 'mode', 'autoDeposits'));
+}
 
     // ── Statement PDF ──────────────────────────────────────────────────────────
     // public function statement(Request $request, $id)
@@ -499,122 +535,377 @@ public function dashboardapi(Request $request)
     //     ));
     // }
 
-    public function statement(Request $request, $id)
-{
-    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-        'start_date' => 'required|date',
-        'end_date'   => 'required|date|after_or_equal:start_date',
-    ]);
+    // public function statement(Request $request, $id)
+    // {
+    //     $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+    //         'start_date' => 'required|date',
+    //         'end_date'   => 'required|date|after_or_equal:start_date',
+    //     ]);
 
-    if ($validator->fails()) {
-        if ($request->expectsJson()) {
+    //     if ($validator->fails()) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Validation error',
+    //                 'code' => 'VALIDATION_ERROR',
+    //                 'data' => $validator->errors()
+    //             ], 422);
+    //         }
+
+    //         return back()->withErrors($validator)->withInput();
+    //     }
+
+    //     $user = auth()->user();
+    //     $mode = session('mode', 'live');
+
+    //     $balance = Balance::where('id', $id)
+    //         ->where('user_id', $user->id)
+    //         ->first();
+
+    //     if (!$balance) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Balance not found',
+    //                 'code' => 'BALANCE_NOT_FOUND',
+    //                 'data' => null
+    //             ], 404);
+    //         }
+
+    //         abort(404);
+    //     }
+
+    //     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+    //     $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    //     $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+    //     $transactions = TransactionHistory::where('balance_id', $balance->id)
+    //         ->where('mode', $mode)
+    //         ->whereBetween('created_at', [$startDate, $endDate])
+    //         ->orderBy('created_at', 'asc')
+    //         ->get();
+
+    //     // ── Helper: determine if a tx is credit ──────────────────────────────
+    //     $isCredit = function ($tx) {
+    //         $type = strtolower($tx->type ?? '');
+    //         return in_array($type, ['credit']) ||
+    //             str_contains($type, 'credit');
+    //         // withdrawal, swap, debit, payment = not credit
+    //     };
+
+    //     // ── Opening balance ───────────────────────────────────────────────────
+    //     $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+    //         ->where('created_at', '<', $startDate)
+    //         ->get()
+    //         ->reduce(function ($carry, $tx) use ($isCredit) {
+    //             return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+    //         }, 0);
+
+    //     $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
+    //     $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
+    //     $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+
+    //     if ($request->expectsJson()) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Statement fetched successfully',
+    //             'code' => 'STATEMENT_FETCHED',
+    //             'data' => [
+    //                 'balance' => $balance,
+    //                 'transactions' => $transactions,
+    //                 'start_date' => $startDate->format('Y-m-d'),
+    //                 'end_date' => $endDate->format('Y-m-d'),
+    //                 'opening_balance' => number_format($openingBalance, 2, '.', ''),
+    //                 'total_debit' => number_format($totalDebit, 2, '.', ''),
+    //                 'total_credit' => number_format($totalCredit, 2, '.', ''),
+    //                 'closing_balance' => number_format($closingBalance, 2, '.', ''),
+    //             ]
+    //         ], 200);
+    //     }
+
+    //     return view('business.statement', compact(
+    //         'balance', 'transactions', 'user',
+    //         'startDate', 'endDate',
+    //         'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
+    //     ));
+    // }
+
+    public function statement(Request $request, $id)
+    {
+        Log::info('Business statement: request received', [
+            'balance_id' => $id,
+            'query' => $request->query(),
+            'expects_json' => $request->expectsJson(),
+            'accept_header' => $request->header('Accept'),
+            'path' => $request->path(),
+        ]);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'mode'       => 'nullable|in:live,test',
+        ]);
+
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
                 'code' => 'VALIDATION_ERROR',
-                'data' => $validator->errors()
+                'data' => $validator->errors(),
             ], 422);
         }
 
-        return back()->withErrors($validator)->withInput();
-    }
+        $user = auth()->user();
 
-    $user = auth()->user();
-    $mode = session('mode', 'live');
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.',
+                'code' => 'UNAUTHENTICATED',
+                'data' => null,
+            ], 401);
+        }
 
-    $balance = Balance::where('id', $id)
-        ->where('user_id', $user->id)
-        ->first();
+        $mode = $request->input('mode', session('mode', 'live'));
 
-    if (!$balance) {
-        if ($request->expectsJson()) {
+        $balance = Balance::where('id', $id)
+            ->where('user_id', $user->id)
+            ->where('mode', $mode)
+            ->first();
+
+        if (!$balance) {
             return response()->json([
                 'success' => false,
                 'message' => 'Balance not found',
                 'code' => 'BALANCE_NOT_FOUND',
-                'data' => null
+                'data' => null,
             ], 404);
         }
 
-        abort(404);
+        $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
+
+        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+        $transactions = TransactionHistory::where('balance_id', $balance->id)
+            ->where('mode', $mode)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $isCredit = function ($tx) {
+            $type = strtolower($tx->type ?? '');
+            return in_array($type, ['credit']) || str_contains($type, 'credit');
+        };
+
+        $openingBalance = TransactionHistory::where('balance_id', $balance->id)
+            ->where('mode', $mode)
+            ->where('created_at', '<', $startDate)
+            ->get()
+            ->reduce(function ($carry, $tx) use ($isCredit) {
+                return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
+            }, 0);
+
+        $totalDebit = $transactions->filter(fn ($tx) => !$isCredit($tx))->sum('amount');
+        $totalCredit = $transactions->filter(fn ($tx) => $isCredit($tx))->sum('amount');
+        $closingBalance = $openingBalance + $totalCredit - $totalDebit;
+
+        if ($request->is('api/*') || $request->expectsJson()) {
+            try {
+                $pdf = Pdf::loadView('business.statement', compact(
+                    'balance',
+                    'transactions',
+                    'user',
+                    'startDate',
+                    'endDate',
+                    'openingBalance',
+                    'totalDebit',
+                    'totalCredit',
+                    'closingBalance',
+                    'mode'
+                ))->setPaper('a4');
+
+                $filename = sprintf(
+                    'Flovide-Business-Statement-%s-%s-to-%s.pdf',
+                    $balance->currency,
+                    $startDate->format('Ymd'),
+                    $endDate->format('Ymd')
+                );
+
+                return response($pdf->output(), 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]);
+
+            } catch (\Throwable $e) {
+                Log::error('Business statement PDF generation failed', [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'code' => 'PDF_GENERATION_FAILED',
+                    'data' => null,
+                ], 500);
+            }
+        }
+
+        return view('business.statement', compact(
+            'balance',
+            'transactions',
+            'user',
+            'startDate',
+            'endDate',
+            'openingBalance',
+            'totalDebit',
+            'totalCredit',
+            'closingBalance',
+            'mode'
+        ));
+    }
+
+        private function describeFees(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+    {
+        $percent = $userFee->{"{$side}_percent"};
+        $fixed   = $userFee->{"{$side}_fixed"};
+
+        if ($percent > 0 && $fixed > 0) {
+            return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+        }
+        if ($percent > 0) {
+            return "{$percent}%";
+        }
+        if ($fixed > 0) {
+            return number_format($fixed, 2) . " {$currency} flat";
+        }
+        return "No fee";
+    }
+
+
+
+   public function interacAutoDepositSettings(Request $request, $id)
+{
+    $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
+
+    $balance = Balance::where('id', $id)
+        ->where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->firstOrFail();
+
+    if (strtoupper($balance->currency) !== 'CAD') {
+        return redirect()->route('balance.show', $balance->id)
+            ->with('error', 'Interac Auto Deposit is only available for CAD wallets.');
     }
 
     $balance->currency_meta = $this->getCountryCodeFromCurrency($balance->currency);
 
-    $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
-    $endDate   = \Carbon\Carbon::parse($request->end_date)->endOfDay();
-
-    $transactions = TransactionHistory::where('balance_id', $balance->id)
-        ->where('mode', $mode)
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->orderBy('created_at', 'asc')
+    $autoDeposits = \App\Models\InteracAutoDeposit::where('balance_id', $balance->id)
+        ->orderBy('created_at', 'desc')
         ->get();
 
-    // ── Helper: determine if a tx is credit ──────────────────────────────
-    $isCredit = function ($tx) {
-        $type = strtolower($tx->type ?? '');
-        return in_array($type, ['credit']) ||
-            str_contains($type, 'credit');
-        // withdrawal, swap, debit, payment = not credit
-    };
-
-    // ── Opening balance ───────────────────────────────────────────────────
-    $openingBalance = TransactionHistory::where('balance_id', $balance->id)
-        ->where('created_at', '<', $startDate)
-        ->get()
-        ->reduce(function ($carry, $tx) use ($isCredit) {
-            return $carry + ($isCredit($tx) ? $tx->amount : -$tx->amount);
-        }, 0);
-
-    $totalDebit  = $transactions->filter(fn($tx) => !$isCredit($tx))->sum('amount');
-    $totalCredit = $transactions->filter(fn($tx) =>  $isCredit($tx))->sum('amount');
-    $closingBalance = $openingBalance + $totalCredit - $totalDebit;
-
-    if ($request->expectsJson()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Statement fetched successfully',
-            'code' => 'STATEMENT_FETCHED',
-            'data' => [
-                'balance' => $balance,
-                'transactions' => $transactions,
-                'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d'),
-                'opening_balance' => number_format($openingBalance, 2, '.', ''),
-                'total_debit' => number_format($totalDebit, 2, '.', ''),
-                'total_credit' => number_format($totalCredit, 2, '.', ''),
-                'closing_balance' => number_format($closingBalance, 2, '.', ''),
-            ]
-        ], 200);
-    }
-
-    return view('business.statement', compact(
-        'balance', 'transactions', 'user',
-        'startDate', 'endDate',
-        'openingBalance', 'totalDebit', 'totalCredit', 'closingBalance'
-    ));
+    return view('business.interac_autodeposit_settings', compact('balance', 'autoDeposits'));
 }
 
-
-
-        private function describeFees(\App\Models\UserCurrencyFee $userFee, string $side, string $currency): string
+public function saveInteracAutoDepositEmail(Request $request, $id)
 {
-    $percent = $userFee->{"{$side}_percent"};
-    $fixed   = $userFee->{"{$side}_fixed"};
+    $user = auth()->user();
+    $mode = $request->input('mode', session('mode', 'live'));
 
-    if ($percent > 0 && $fixed > 0) {
-        return "{$percent}% + " . number_format($fixed, 2) . " {$currency}";
+    $validated = $request->validate([
+        'email' => 'required|email|max:255',
+    ]);
+
+    $balance = Balance::where('id', $id)
+        ->where('user_id', $user->id)
+        ->where('mode', $mode)
+        ->first();
+
+    if (!$balance) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Balance not found.',
+            'code'    => 'BALANCE_NOT_FOUND',
+        ], 404);
     }
-    if ($percent > 0) {
-        return "{$percent}%";
+
+    if (strtoupper($balance->currency) !== 'CAD') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Interac Auto Deposit is only available for CAD wallets.',
+            'code'    => 'CAD_ONLY',
+        ], 422);
     }
-    if ($fixed > 0) {
-        return number_format($fixed, 2) . " {$currency} flat";
+
+    $exists = \App\Models\InteracAutoDeposit::where('balance_id', $balance->id)
+        ->where('email', $validated['email'])
+        ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This email is already registered for this wallet.',
+            'code'    => 'DUPLICATE_EMAIL',
+        ], 422);
     }
-    return "No fee";
+
+    $autoDeposit = \App\Models\InteracAutoDeposit::create([
+        'user_id'    => $user->id,
+        'balance_id' => $balance->id,
+        'email'      => $validated['email'],
+        'status'     => 'pending',
+        'added_at'   => now(),
+    ]);
+
+    Log::info('[Interac AutoDeposit] Email added', [
+        'balance_id' => $balance->id,
+        'user_id'    => $user->id,
+        'email'      => $validated['email'],
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Interac Auto Deposit email added successfully.',
+        'code'    => 'AUTODEPOSIT_EMAIL_ADDED',
+        'data'    => [
+            'id'       => $autoDeposit->id,
+            'email'    => $autoDeposit->email,
+            'status'   => $autoDeposit->status,
+            'added_at' => $autoDeposit->added_at->toDateTimeString(),
+        ],
+    ], 200);
 }
 
+public function deleteInteracAutoDepositEmail(Request $request, $id, $emailId)
+{
+    $user = auth()->user();
 
+    $entry = \App\Models\InteracAutoDeposit::where('id', $emailId)
+        ->where('balance_id', $id)
+        ->where('user_id', $user->id)
+        ->first();
+
+    if (!$entry) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Entry not found.',
+            'code'    => 'NOT_FOUND',
+        ], 404);
+    }
+
+    $entry->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Removed successfully.',
+        'code'    => 'AUTODEPOSIT_EMAIL_DELETED',
+    ], 200);
+}
 
     
 }

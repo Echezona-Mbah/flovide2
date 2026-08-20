@@ -67,7 +67,7 @@ public function create()
 
     $pivotServices = [
         'ugx_bank_service'   => env('PIVOT_UGX_BANK_SERVICE'),
-        'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE'),
+        'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
     ];
 
     $mode = session('mode', 'live');

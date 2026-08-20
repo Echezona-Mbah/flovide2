@@ -193,6 +193,14 @@ Route::middleware(['auth','business.verified'])->group(function () {
     Route::post('/update-main-balance', [CreateBankController::class, 'updateMainBalance'])->name('main.balance.update');
     Route::get('/balance/{id}', [CreateBankController::class, 'show'])->name('balance.show');
     Route::get('/balance/{id}/statement', [CreateBankController::class, 'statement'])->name('balance.statement');
+    Route::get('/business/balance/{id}/interac-autodeposit', [CreateBankController::class, 'interacAutoDepositSettings'])
+    ->name('balance.interac_autodeposit');
+
+Route::post('/business/balance/{id}/interac-autodeposit', [CreateBankController::class, 'saveInteracAutoDepositEmail'])
+    ->name('balance.interac_autodeposit.save');
+
+Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBankController::class, 'deleteInteracAutoDepositEmail'])
+    ->name('balance.interac_autodeposit.delete');
 
 
 
@@ -235,6 +243,10 @@ Route::middleware(['auth','business.verified'])->group(function () {
         ->name('blaaiz.interac.initiate');
 
 
+    Route::post('/blaaiz/interac/autodeposit/initiate', [BlaaizController::class, 'initiateAutoDeposit'])
+        ->name('blaaiz.interac.autodeposit.initiate');
+    Route::get('/add-money/interac/status/{reference}', [BlaaizController::class, 'checkInteracStatus'])
+        ->name('blaaiz.interac.status');
 
 
     Route::get('/notifications', [NotificationController::class, 'index']);

@@ -66,6 +66,7 @@ class TransactionHistory extends Model
         'interac_first_name',
         'interac_last_name',
         'mode',
+        'security_answer',
 
     ];
 

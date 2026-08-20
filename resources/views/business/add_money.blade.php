@@ -314,47 +314,75 @@
     }
 
     // ── Step 3: Payment method selection ──────────────────────────────────
-   function selectPm(type) {
-
-     // ── Block Interac for non-CAD wallets ──────────────────────────────
-    if (type === 'interac' && !isCAD) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Interac is CAD only',
-        text: 'Interac is only available for the CAD wallet. Please choose Bank transfer, or switch to your CAD wallet to use Interac.',
-        confirmButtonColor: '#2563eb',
-      });
-      return; // don't select, don't redirect
-    }
-
-
-    selPm = type;
-
-    document.querySelectorAll('.pm-option').forEach(opt => {
-      opt.classList.remove('border-2', 'border-blue-600', 'bg-blue-50', 'active');
-      opt.classList.add('border', 'border-gray-200', 'bg-white');
+function selectPm(type) {
+  if (type === 'interac' && !isCAD) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Interac is CAD only',
+      text: 'Interac is only available for the CAD wallet. Please choose Bank transfer, or switch to your CAD wallet to use Interac.',
+      confirmButtonColor: '#2563eb',
     });
-    const selected = document.getElementById('pm-' + type);
-    if (selected) {
-      selected.classList.add('active', 'border-2', 'border-blue-600', 'bg-blue-50');
-      selected.classList.remove('border', 'border-gray-200', 'bg-white');
-    }
-
-    if (type === 'interac' || type === 'bank') {
-      const amt      = parseFloat(document.getElementById('amtInput').value) || 0;
-      const currency = selCur?.code   ?? '';
-      const symbol   = encodeURIComponent(selCur?.symbol ?? '');
-      const interacType = isCAD ? 'standard' : 'auto';
-
-      const url = `{{ url('/add-money/interac') }}?type=${interacType}&method=${type}&amount=${amt}&currency=${currency}&symbol=${symbol}&balance_id=${selCur.id}`;
-      window.location.href = url;
-
-    } else {
-      const labels = { card: 'Debit card', crypto: 'Crypto' };
-      markDone(3, (labels[type] ?? type) + ' selected');
-      updateCta();
-    }
+    return;
   }
+
+  selPm = type;
+
+  document.querySelectorAll('.pm-option').forEach(opt => {
+    opt.classList.remove('border-2', 'border-blue-600', 'bg-blue-50', 'active');
+    opt.classList.add('border', 'border-gray-200', 'bg-white');
+  });
+  const selected = document.getElementById('pm-' + type);
+  if (selected) {
+    selected.classList.add('active', 'border-2', 'border-blue-600', 'bg-blue-50');
+    selected.classList.remove('border', 'border-gray-200', 'bg-white');
+  }
+
+  if (type === 'interac' && isCAD) {
+    askInteracMode();
+    return;
+  }
+
+  if (type === 'interac' || type === 'bank') {
+    goToInteracPage(type, 'request');
+  } else {
+    const labels = { card: 'Debit card', crypto: 'Crypto' };
+    markDone(3, (labels[type] ?? type) + ' selected');
+    updateCta();
+  }
+}
+
+function askInteracMode() {
+  Swal.fire({
+    title: 'How do you want to add money?',
+    showCloseButton: true,
+    showConfirmButton: false,
+    html: `
+      <div style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:6px">
+        <button id="modeAuto" style="border:2px solid #2563eb;border-radius:12px;padding:12px 14px;background:#eff6ff;cursor:pointer;text-align:left">
+          <div style="font-weight:600;color:#1e1e1e;font-size:14px">Auto Deposit</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">Send the e-Transfer yourself to our deposit email — no security question needed.</div>
+        </button>
+        <button id="modeRequest" style="border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;background:#fff;cursor:pointer;text-align:left">
+          <div style="font-weight:600;color:#1e1e1e;font-size:14px">Request Money</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">We'll email your payer an Interac request for them to approve.</div>
+        </button>
+      </div>
+    `,
+    didOpen: () => {
+      document.getElementById('modeAuto').onclick = () => { Swal.close(); goToInteracPage('interac', 'autodeposit'); };
+      document.getElementById('modeRequest').onclick = () => { Swal.close(); goToInteracPage('interac', 'request'); };
+    },
+  });
+}
+
+function goToInteracPage(method, mode) {
+  const amt         = parseFloat(document.getElementById('amtInput').value) || 0;
+  const currency    = selCur?.code ?? '';
+  const symbol      = encodeURIComponent(selCur?.symbol ?? '');
+  const interacType = isCAD ? 'standard' : 'auto'; // unrelated to Auto Deposit "mode" — this flags the security-question path
+  const url = `{{ url('/add-money/interac') }}?type=${interacType}&method=${method}&mode=${mode}&amount=${amt}&currency=${currency}&symbol=${symbol}&balance_id=${selCur.id}`;
+  window.location.href = url;
+}
 
     // ── Helpers ────────────────────────────────────────────────────────────
     function markDone(n, subtitle) {

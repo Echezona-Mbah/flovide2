@@ -178,17 +178,35 @@
             </div>
           </div>
 
-        @elseif($balance->currency === 'CAD' && auth()->user()->blaaiz_id)
-          <div class="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-100">
-            <span class="text-3xl">🇨🇦</span>
-            <div class="flex-1">
-              <p class="font-bold text-sm text-gray-800 mb-3">Blaaiz — CAD (Interac)</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
-                <div><p class="text-gray-400 text-xs mb-0.5">Customer ID</p><p class="font-semibold">{{ auth()->user()->blaaiz_id }}</p></div>
-                <div><p class="text-gray-400 text-xs mb-0.5">Method</p><p class="font-semibold">Interac e-Transfer</p></div>
+       @elseif($balance->currency === 'CAD' )
+      <div class="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-100">
+        <span class="text-3xl">🇨🇦</span>
+        <div class="flex-1">
+          <p class="font-bold text-sm text-gray-800 mb-3">Flovide — CAD (Interac)</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+            {{-- <div><p class="text-gray-400 text-xs mb-0.5">Customer ID</p><p class="font-semibold">{{ auth()->user()->blaaiz_id }}</p></div> --}}
+            <div><p class="text-gray-400 text-xs mb-0.5">Method</p><p class="font-semibold">Interac e-Transfer</p></div>
+          </div>
+
+          {{-- Auto Deposit button --}}
+         {{-- Auto Deposit --}}
+          <div class="mt-4 pt-4 border-t border-red-100 flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-bolt text-red-500 text-sm"></i>
+              <div>
+                <p class="text-xs font-semibold text-gray-700">Interac Auto Deposit</p>
+                <p class="text-[11px] text-gray-400">
+                  {{ $autoDeposits->count() }} email{{ $autoDeposits->count() !== 1 ? 's' : '' }} registered
+                </p>
               </div>
             </div>
+            <a href="{{ route('balance.interac_autodeposit', $balance->id) }}"
+              class="inline-flex items-center gap-2 bg-white border border-red-200 text-red-600 text-xs font-semibold px-3.5 py-2 rounded-full hover:bg-red-50 transition no-print">
+              <i class="fas fa-list text-[11px]"></i> Manage Auto Deposit Emails
+            </a>
           </div>
+        </div>
+      </div>
 
         @else
           <div class="flex flex-col items-center justify-center py-10 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50">

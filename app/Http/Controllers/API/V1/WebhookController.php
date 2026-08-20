@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class WebhookController extends Controller
 {
+
+
     /**
      * @OA\Get(
      *     path="/api/v1/webhooks",
@@ -42,6 +44,8 @@ class WebhookController extends Controller
 
         return response()->json($this->buildPayload($user));
     }
+
+
 
     /**
      * @OA\Post(
@@ -80,6 +84,8 @@ class WebhookController extends Controller
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
+
+    
     public function store(Request $request)
     {
         $user = auth()->user();
