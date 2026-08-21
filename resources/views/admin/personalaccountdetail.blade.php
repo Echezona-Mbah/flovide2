@@ -626,6 +626,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.broadcast.personal.index', $user->id) }}">Broadcast</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.personalstatement', $user->id) }}">Statement</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">

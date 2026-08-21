@@ -1,50 +1,46 @@
 <!doctype html>
 <html lang="en">
-
-
-<!-- Mirrored from demo.dashboardpack.com/architectui-html-pro/pages-register-boxed.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 14 Oct 2025 11:54:47 GMT -->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Language" content="en">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Register Boxed - ArchitectUI HTML Bootstrap 5 Dashboard Template</title>
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
-    <meta name="description" content="ArchitectUI HTML Bootstrap 5 Dashboard Template">
+    <title>Flovide Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+    <meta name="description" content="Flovide Admin">
 
-<script defer src="{{asset('admin/assets/scripts/vendors.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/main.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/demo.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/ladda.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/blockui.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/circle_progress.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/count_up.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset("admin/assets/scripts/toastr.46b0e993b2652496c5e9.js")}}"></script>
-<script defer src="{{asset("admin/assets/scripts/sweet_alerts.46b0e993b2652496c5e9.js")}}"></script>
-<script defer src="{{asset("admin/assets/scripts/scrollbar.46b0e993b2652496c5e9.js")}}"></script>
-<script defer src="{{asset('admin/assets/scripts/sticky_elements.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/carousel_slider.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/fullcalendar.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/treeview.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/maps.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/rating.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/image_crop.46b0e993b2652496c5e9.j')}}s"></script>
-<script defer src="{{asset('admin/assets/scripts/guided_tours.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/tables.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/form_validation.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/form_wizard.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/clipboard.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/datepicker.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/input_mask.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/input_select.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/range_slider.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset("admin/assets/scripts/textarea_autosize.46b0e993b2652496c5e9.js")}}"></script>
-<script defer src="{{asset('assets/scripts/toggle_switch.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/chart_js.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/apex_charts.46b0e993b2652496c5e9.js')}}"></script>
-<script defer src="{{asset('admin/assets/scripts/sparklines.46b0e993b2652496c5e9.js')}}"></script>
-<link href="{{asset('admin/assets/styles/vendors.46b0e993b2652496c5e9.css')}}" rel="stylesheet">
-<link href="{{asset('admin/assets/styles/main.46b0e993b2652496c5e9.css')}}" rel="stylesheet">
+    <script defer src="{{asset('admin/assets/scripts/vendors.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/main.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/demo.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/ladda.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/blockui.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/circle_progress.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/count_up.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset("admin/assets/scripts/toastr.46b0e993b2652496c5e9.js")}}"></script>
+    <script defer src="{{asset("admin/assets/scripts/sweet_alerts.46b0e993b2652496c5e9.js")}}"></script>
+    <script defer src="{{asset("admin/assets/scripts/scrollbar.46b0e993b2652496c5e9.js")}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/sticky_elements.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/carousel_slider.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/fullcalendar.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/treeview.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/maps.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/rating.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/image_crop.46b0e993b2652496c5e9.j')}}s"></script>
+    <script defer src="{{asset('admin/assets/scripts/guided_tours.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/tables.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/form_validation.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/form_wizard.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/clipboard.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/datepicker.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/input_mask.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/input_select.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/range_slider.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset("admin/assets/scripts/textarea_autosize.46b0e993b2652496c5e9.js")}}"></script>
+    <script defer src="{{asset('assets/scripts/toggle_switch.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/chart_js.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/apex_charts.46b0e993b2652496c5e9.js')}}"></script>
+    <script defer src="{{asset('admin/assets/scripts/sparklines.46b0e993b2652496c5e9.js')}}"></script>
+    <link href="{{asset('admin/assets/styles/vendors.46b0e993b2652496c5e9.css')}}" rel="stylesheet">
+    <link href="{{asset('admin/assets/styles/main.46b0e993b2652496c5e9.css')}}" rel="stylesheet">
 </head>
 
 <body>
@@ -129,45 +125,35 @@
                                 </div>
         
                                 <!-- Enhanced Registration Form -->
-                                 <div id="toast-container"></div>
-                                 <form action="{{ route('admin.login.submit') }}" method="POST">
+                                <div id="toast-container"></div>
+                                <form id="loginForm" action="{{ route('admin.login.submit') }}" method="POST">
                                     @csrf
                                     <div class="row g-4">
                                         <!-- Email Field -->
-                                                <div class="col-md-6">
-                                                <div class="form-floating">
-                                                    <input name="email" type="email" class="form-control form-control-lg" >
-                                                    <label>Email Address *</label>
-                                                </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input name="email" type="email" class="form-control form-control-lg" >
+                                                <label>Email Address *</label>
                                             </div>
+                                        </div>
         
 
         
                                         <!-- Password Field -->
-                                              <div class="col-md-6">
-                                                    <div class="form-floating">
-                                                        <input name="password" type="password" class="form-control form-control-lg" >
-                                                        <label>Password *</label>
-                                                    </div>
-                                                </div>
-        
-                                    <!-- Enhanced Terms and Conditions -->
-                                    {{-- <div class="mt-4 p-4 rounded-3" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.1);">
-                                        <div class="form-check">
-                                            <input name="check" id="exampleCheck" type="checkbox" class="form-check-input" style="transform: scale(1.3);" required>
-                                            <label for="exampleCheck" class="form-check-label text-dark fw-medium">
-                                                I agree to the 
-                                                <a href="javascript:void(0);" class="text-success text-decoration-none fw-semibold">Terms of Service</a> 
-                                                and 
-                                                <a href="javascript:void(0);" class="text-success text-decoration-none fw-semibold">Privacy Policy</a>
-                                            </label>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input name="password" type="password" class="form-control form-control-lg" >
+                                                <label>Password *</label>
+                                            </div>
                                         </div>
-                                    </div> --}}
         
+                                    </div>
+
                                     <!-- Premium Gradient Submit Button -->
-                                    <button type="submit" class="btn btn-gradient-success btn-shadow btn-lg w-100 mt-4 mb-4 fw-semibold" 
+                                    <button type="submit" id="loginBtn" class="btn btn-gradient-success btn-shadow btn-lg w-100 mt-4 mb-4 fw-semibold position-relative d-flex align-items-center justify-content-center" 
                                             style="border-radius: 16px; height: 58px; font-size: 1.1rem;">
-                                        <i class="fa fa-user-plus me-2"></i>Login
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" id="loginSpinner" role="status" aria-hidden="true"></span>
+                                        <span id="loginBtnText"><i class="fa fa-sign-in-alt me-2"></i>Login</span>
                                     </button>
                                 </form>
         
@@ -220,51 +206,67 @@
     </div>
 
     
-<!-- Toastr JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
-    function showToast(message, type = "success") { 
-        var toastContainer = document.getElementById("toast-container");
-        if (!toastContainer) return;
+            function showToast(message, type = "success") { 
+                var toastContainer = document.getElementById("toast-container");
+                if (!toastContainer) return;
 
-        var toast = document.createElement("div");
-        toast.className = "toast " + type;
-        toast.textContent = message;
+                var toast = document.createElement("div");
+                toast.className = "toast " + type;
+                toast.textContent = message;
 
-        var progress = document.createElement("div");
-        progress.className = "toast-progress";
+                var progress = document.createElement("div");
+                progress.className = "toast-progress";
 
-        toast.appendChild(progress);
-        toastContainer.appendChild(toast);
+                toast.appendChild(progress);
+                toastContainer.appendChild(toast);
 
-        setTimeout(() => {
-            toast.remove();
-        }, 4000);
-    }
+                setTimeout(() => {
+                    toast.remove();
+                }, 4000);
+            }
 
-    // Laravel Validation Errors
-    @if ($errors->any())
-        @foreach ($errors->all() as $error)
-            showToast("{{ $error }}", "error");
-        @endforeach
-    @endif
+            // Laravel Validation Errors
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    showToast("{{ $error }}", "error");
+                @endforeach
+            @endif
 
-    // Success Toast
-    @if (session('success'))
-        showToast("{{ session('success') }}", "success");
-    @endif
+            // Success Toast
+            @if (session('success'))
+                showToast("{{ session('success') }}", "success");
+            @endif
 
-    // Error Toast
-    @if (session('error'))
-        showToast("{{ session('error') }}", "error");
-    @endif
+            // Error Toast
+            @if (session('error'))
+                showToast("{{ session('error') }}", "error");
+            @endif
 
-});
-</script>
+            // Login Button Spinner Handler
+            const loginForm = document.getElementById("loginForm");
+            if (loginForm) {
+                loginForm.addEventListener("submit", function () {
+                    const loginBtn = document.getElementById("loginBtn");
+                    const loginSpinner = document.getElementById("loginSpinner");
+                    const loginBtnText = document.getElementById("loginBtnText");
+
+                    if (loginSpinner) {
+                        loginSpinner.classList.remove("d-none");
+                    }
+                    if (loginBtnText) {
+                        loginBtnText.textContent = "Logging in...";
+                    }
+                    if (loginBtn) {
+                        loginBtn.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
 </body>
-
-
-<!-- Mirrored from demo.dashboardpack.com/architectui-html-pro/pages-register-boxed.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 14 Oct 2025 11:54:47 GMT -->
 </html>

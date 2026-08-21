@@ -55,6 +55,7 @@ use App\Http\Controllers\Business\WebhookController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ContactRequestController;
+use App\Http\Controllers\Admin\StatementController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
@@ -375,26 +376,23 @@ Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBan
 
 
 
-        // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
-        // Route::post('/admin/register', [RegisterController::class, 'store']);
+    // Route::get('/admin/register', [RegisterController::class, 'index'])->name('admin.register');
+    // Route::post('/admin/register', [RegisterController::class, 'store']);
 
-        Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
-        Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
-        // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
-
-
+    Route::get('/admin/login', [RegisterController::class, 'indexlogin'])->name('admin.login');
+    Route::post('/admin/login', [RegisterController::class, 'login'])->name('admin.login.submit')->middleware('throttle:5,1');
+    // Route::post('/admin/login', [AdminController::class, 'login'])->middleware('throttle:5,1');
 
 
- Route::middleware('admin.auth')->group(function () {
 
-        Route::get('/admin/dashboard', [DashboardController::class, 'index'])
-    ->middleware('admin.permission:view_dashboard')
-    ->name('admin.dashboard');
-    Route::post('/admin/referral-alerts/{id}/resolve', [\App\Http\Controllers\Admin\ReferralAlertController::class, 'resolve'])
-        ->name('admin.referral-alerts.resolve');
 
-        // Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
-        // Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
+Route::middleware('admin.auth')->group(function () {
+
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->middleware('admin.permission:view_dashboard')->name('admin.dashboard');
+    Route::post('/admin/referral-alerts/{id}/resolve', [\App\Http\Controllers\Admin\ReferralAlertController::class, 'resolve'])->name('admin.referral-alerts.resolve');
+
+    // Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
+    // Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
 
 
     Route::middleware('admin.permission:view_transactions')->group(function () {
@@ -405,6 +403,14 @@ Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBan
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
         Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
         Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+
+
+
+
+        //statement
+        Route::get('/admin/businessstatement/{id}', [StatementController::class, 'index'])->name('admin.businessstatement');
+        Route::get('/admin/personalstatement/{id}', [StatementController::class, 'personalStatement'])->name('admin.personalstatement');
+        Route::get('/admin/balance/{id}/statement', [StatementController::class, 'balanceStatement'])->name('admin.balance.statement');
     });
 
 

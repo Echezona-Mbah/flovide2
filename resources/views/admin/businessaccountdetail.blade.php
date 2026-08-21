@@ -670,6 +670,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.broadcast.index', $user->id) }}">Broadcast</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.businessstatement', $user->id) }}">Statement</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
@@ -1611,38 +1614,68 @@
             </div>
         </div>
     </div>
-<div class="modal fade" id="balanceActionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px;">
-            <form id="balanceActionForm" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="balanceActionTitle">Update Balance</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p class="mb-2 text-muted" id="balanceActionMeta"></p>
-
-                    <div class="mb-3">
-                        <label class="form-label">Amount</label>
-                        <input type="number" name="amount" step="0.01" min="0.01" class="form-control" required>
+    
+    <!-- Balance Action Modal -->
+    <div class="modal fade" id="balanceActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered shadow-none">
+            <div class="modal-content border-0 shadow-none" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                <form id="balanceActionForm" method="POST">
+                    @csrf
+                    
+                    <!-- Header -->
+                    <div class="modal-header border-0 p-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 60%, #0ea5e9 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-3 text-white" style="width: 44px; height: 44px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); font-size: 1.15rem;">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-white mb-0" id="balanceActionTitle">Update Balance</h5>
+                                <small class="text-white-50" style="font-size: 0.78rem;">Manage business account balance</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <div class="mb-0">
-                        <label class="form-label">Note (optional)</label>
-                        <input type="text" name="note" class="form-control" maxlength="255">
-                    </div>
-                </div>
+                    <!-- Body -->
+                    <div class="modal-body p-4" style="background-color: #ffffff;">
+                        
+                        <!-- Meta Description Banner -->
+                        <div class="p-3 mb-4 rounded-3 d-flex align-items-center gap-2" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <i class="fa-solid fa-circle-info text-primary fs-5 flex-shrink-0"></i>
+                            <span class="fw-semibold text-dark small" id="balanceActionMeta"></span>
+                        </div>
 
-                <div class="modal-footer">
-                    <button type="submit" id="balanceActionSubmitBtn" class="btn btn-soft-primary">Submit</button>
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+                        <!-- Amount Input -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark small mb-2">
+                                <i class="fa-solid fa-money-bill-wave me-1 text-primary"></i> Amount
+                            </label>
+                            <div class="input-group input-group-lg" style="box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);">
+                                <span class="input-group-text bg-light border-end-0 text-muted fw-bold" style="border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-color: #cbd5e1;">
+                                    <i class="fa-solid fa-coins"></i>
+                                </span>
+                                <input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-lg border-start-0 fw-bold text-dark" placeholder="0.00" style="border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-color: #cbd5e1; font-size: 1.1rem;" required>
+                            </div>
+                        </div>
+
+                        <!-- Note Input -->
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark small mb-2">
+                                <i class="fa-solid fa-note-sticky me-1 text-secondary"></i> Note <span class="text-muted fw-normal">(optional)</span>
+                            </label>
+                            <textarea name="note" class="form-control p-3" rows="2" maxlength="255" placeholder="Reason or description for this action..." style="border-radius: 12px; border-color: #cbd5e1; resize: none; font-size: 0.9rem;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer border-top-0 px-4 pb-4 pt-2" style="background-color: #ffffff;">
+                        <button type="button" class="btn btn-light rounded-3 px-4 fw-bold text-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" id="balanceActionSubmitBtn" class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 0;">Submit</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
 @include('admin.footer')
 <script>
