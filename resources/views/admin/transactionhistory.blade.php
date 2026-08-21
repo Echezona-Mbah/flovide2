@@ -294,6 +294,185 @@
     .modal-body .info-row:last-child {
         border-bottom: 0;
     }
+
+    /* Transaction Modal Redesign */
+    #transactionModal .modal-content {
+        border: 0;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 25px 70px rgba(15, 23, 42, 0.25);
+        background: #f8fafc;
+    }
+
+    #transactionModal .tx-modal-header {
+        background: linear-gradient(135deg, #0c1630 0%, #123b9f 55%, #0891b2 100%);
+        color: #ffffff;
+        position: relative;
+    }
+
+    .tx-modal-icon-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 18px;
+    }
+
+    .tx-modal-hero-banner {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(12px);
+    }
+
+    .tx-avatar-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #0891b2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        flex-shrink: 0;
+    }
+
+    .tx-header-amount {
+        font-size: 1.85rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .text-cyan-200 {
+        color: #a5f3fc;
+    }
+
+    .fs-7 {
+        font-size: 0.75rem;
+    }
+
+    .font-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    }
+
+    #transactionModal .modal-body {
+        padding: 24px;
+        background-color: #f8fafc;
+    }
+
+    .tx-section-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    }
+
+    .tx-section-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .tx-section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .tx-section-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .tx-section-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+        margin: 0;
+    }
+
+    .tx-info-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        height: 100%;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .tx-info-card:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .tx-info-card.primary-highlight {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(8, 145, 178, 0.05));
+        border: 1.5px solid rgba(37, 99, 235, 0.25);
+    }
+
+    .tx-info-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tx-info-value {
+        font-size: 0.925rem;
+        font-weight: 700;
+        color: #0f172a;
+        word-break: break-word;
+    }
+
+    .tx-info-value.amount-large {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #2563eb;
+    }
+
+    .tx-flow-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .tx-failure-alert {
+        background: rgba(220, 38, 38, 0.06);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        border-radius: 14px;
+        padding: 14px 18px;
+        color: #991b1b;
+    }
+
+    #transactionModal .modal-footer {
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        padding: 16px 24px;
+        border-bottom-left-radius: 28px;
+        border-bottom-right-radius: 28px;
+    }
 </style>
 
 <body>
@@ -303,33 +482,35 @@
         
         <div class="app-main MainAnimation-appear">
             @include('admin.sidebar')
-            @if ($errors->any())
-<script>
-  Swal.fire({
-    toast:true,
-    position:'top-end',
-    icon:'error',
-    title:@json($errors->first()),
-    showConfirmButton:false,
-    timer:4000,
-    timerProgressBar:true
-  });
-</script>
-@endif
 
-@if (session('success'))
-<script>
-  Swal.fire({
-    toast:true,
-    position:'top-end',
-    icon:'success',
-    title:@json(session('success')),
-    showConfirmButton:false,
-    timer:4000,
-    timerProgressBar:true
-  });
-</script>
-@endif
+            
+            @if ($errors->any())
+                <script>
+                    Swal.fire({
+                        toast:true,
+                        position:'top-end',
+                        icon:'error',
+                        title:@json($errors->first()),
+                        showConfirmButton:false,
+                        timer:4000,
+                        timerProgressBar:true
+                    });
+                </script>
+            @endif
+
+            @if (session('success'))
+                <script>
+                    Swal.fire({
+                        toast:true,
+                        position:'top-end',
+                        icon:'success',
+                        title:@json(session('success')),
+                        showConfirmButton:false,
+                        timer:4000,
+                        timerProgressBar:true
+                    });
+                </script>
+            @endif
 
             
             <div class="app-main__outer">
@@ -434,8 +615,19 @@
                                             <th class="text-center">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="transactionTableBody">
+                                     <tbody id="transactionTableBody">
                                         @foreach ($lastTransactions as $item)
+                                            @php
+                                                $userName = 'N/A';
+                                                if ($item->user) {
+                                                    $userName = trim(($item->user->firstname ?? '') . ' ' . ($item->user->lastname ?? '')) ?: ($item->user->business_name ?? ($item->user->name ?? 'N/A'));
+                                                } elseif ($item->personal) {
+                                                    $userName = trim(($item->personal->firstname ?? '') . ' ' . ($item->personal->lastname ?? '')) ?: ($item->personal->name ?? 'N/A');
+                                                }
+                                                if ($userName === 'N/A' && !empty($item->sender)) {
+                                                    $userName = $item->sender;
+                                                }
+                                            @endphp
                                             <tr>
                                                 <td class="text-center">{{ $item->sender ?? 'N/A' }}</td>
                                                 <td class="text-center">{{ ucfirst($item->type ?? 'N/A') }}</td>
@@ -477,6 +669,7 @@
                                                             data-bs-target="#transactionModal"
 
                                                             data-id="{{ $item->id }}"
+                                                            data-user-name="{{ $userName }}"
                                                             data-user-id="{{ $item->user_id }}"
                                                             data-personal-id="{{ $item->personal_id }}"
                                                             data-type="{{ $item->type }}"
@@ -615,99 +808,462 @@
 <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Full Transaction Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div class="row g-3">
-
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-2">Core Information</h6>
+            
+            <!-- Modern Fintech Header -->
+            <div class="modal-header tx-modal-header border-0 p-4">
+                <div class="w-100">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="tx-modal-icon-badge">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-white mb-0" id="transactionModalLabel">Transaction Details</h5>
+                                <small class="text-white-50">Full payment inspection & financial records</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <div class="col-md-6 info-row"><strong>ID:</strong> <span id="modal-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Status:</strong> <span id="modal-status" class="status-chip"></span></div>
-                    <div class="col-md-6 info-row"><strong>User ID:</strong> <span id="modal-user-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Personal ID:</strong> <span id="modal-personal-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Type:</strong> <span id="modal-type"></span></div>
-                    <div class="col-md-6 info-row"><strong>Transaction Type:</strong> <span id="modal-transaction-type"></span></div>
-                    <div class="col-md-6 info-row"><strong>Method:</strong> <span id="modal-method"></span></div>
-                    <div class="col-md-6 info-row"><strong>Payment Method:</strong> <span id="modal-payment-method"></span></div>
-                    <div class="col-md-6 info-row"><strong>Payment Provider:</strong> <span id="modal-payment-provider"></span></div>
+                    <!-- Summary Hero Card inside Header -->
+                    <div class="tx-modal-hero-banner p-3 p-md-4 rounded-4">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="tx-avatar-circle">
+                                        <i class="fa-solid fa-user text-white"></i>
+                                    </div>
+                                    <div>
+                                        <div class="tx-user-name fw-bold text-white fs-5" id="modal-header-user-name">N/A</div>
+                                        <div class="tx-user-id text-white-50 small font-mono">User ID: <span id="modal-header-user-id">N/A</span></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">Amount Information</h6>
+                            <div class="col-md-4 text-md-center">
+                                <div class="tx-header-amount-wrap">
+                                    <small class="text-white-50 text-uppercase fw-semibold d-block fs-7">Transaction Amount</small>
+                                    <div class="tx-header-amount fw-extrabold text-white my-1">
+                                        <span id="modal-header-amount">0.00</span>
+                                        <span id="modal-header-currency" class="fs-6 font-mono ms-1 text-cyan-200">USD</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 text-md-end">
+                                <div class="mb-2">
+                                    <span id="modal-header-status" class="status-chip status-warning">
+                                        <i class="fa-solid fa-clock"></i> <span>Pending</span>
+                                    </span>
+                                </div>
+                                <div class="tx-header-ref text-white-50 small font-mono text-truncate">
+                                    Ref: <span id="modal-header-reference" class="text-white">N/A</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-md-4 info-row"><strong>Amount:</strong> <span id="modal-amount"></span></div>
-                    <div class="col-md-4 info-row"><strong>Total Amount:</strong> <span id="modal-total-amount"></span></div>
-                    <div class="col-md-4 info-row"><strong>Recipient Amount:</strong> <span id="modal-recipient-amount"></span></div>
-                    <div class="col-md-4 info-row"><strong>Currency:</strong> <span id="modal-currency"></span></div>
-                    <div class="col-md-4 info-row"><strong>To Currency:</strong> <span id="modal-to-currency"></span></div>
-                    <div class="col-md-4 info-row"><strong>Fees:</strong> <span id="modal-fees"></span></div>
-                    <div class="col-md-6 info-row"><strong>Exchange Rate:</strong> <span id="modal-exchange-rate"></span></div>
-                    <div class="col-md-6 info-row"><strong>Single Rate:</strong> <span id="modal-single-rate"></span></div>
-
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">Sender & Recipient</h6>
-                    </div>
-
-                    <div class="col-md-6 info-row"><strong>Sender:</strong> <span id="modal-sender"></span></div>
-                    <div class="col-md-6 info-row"><strong>Sender ID:</strong> <span id="modal-sender-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient:</strong> <span id="modal-recipient"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient ID:</strong> <span id="modal-recipient-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient Country:</strong> <span id="modal-recipient-country"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient Type:</strong> <span id="modal-recipient-type"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient Alias:</strong> <span id="modal-recipient-alias"></span></div>
-                    <div class="col-md-6 info-row"><strong>Default Reference:</strong> <span id="modal-recipient-default-reference"></span></div>
-                    <div class="col-md-6 info-row"><strong>Recipient Created At:</strong> <span id="modal-recipient-created-at"></span></div>
-
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">Recipient Bank Details</h6>
-                    </div>
-
-                    <div class="col-md-6 info-row"><strong>Account Name:</strong> <span id="modal-recipient-account-name"></span></div>
-                    <div class="col-md-6 info-row"><strong>Account Number:</strong> <span id="modal-recipient-account-number"></span></div>
-                    <div class="col-md-6 info-row"><strong>Bank Name:</strong> <span id="modal-recipient-bank-name"></span></div>
-                    <div class="col-md-6 info-row"><strong>Bank Currency:</strong> <span id="modal-recipient-bank-currency"></span></div>
-                    <div class="col-md-6 info-row"><strong>Sort Code:</strong> <span id="modal-recipient-sort-code"></span></div>
-
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">References</h6>
-                    </div>
-
-                    <div class="col-md-6 info-row"><strong>Reference:</strong> <span id="modal-reference"></span></div>
-                    <div class="col-md-6 info-row"><strong>Payment Reference:</strong> <span id="modal-payment-reference"></span></div>
-                    <div class="col-md-6 info-row"><strong>Order ID:</strong> <span id="modal-order-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Balance ID:</strong> <span id="modal-balance-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Virtual Account ID:</strong> <span id="modal-virtual-account-id"></span></div>
-                    <div class="col-md-6 info-row"><strong>Beneficiary ID:</strong> <span id="modal-beneficias-id"></span></div>
-
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">Card Details</h6>
-                    </div>
-
-                    <div class="col-md-4 info-row"><strong>Card Number:</strong> <span id="modal-card-number"></span></div>
-                    <div class="col-md-4 info-row"><strong>Expiry Month:</strong> <span id="modal-expiry-month"></span></div>
-                    <div class="col-md-4 info-row"><strong>Expiry Year:</strong> <span id="modal-expiry-year"></span></div>
-                    <div class="col-md-4 info-row"><strong>CVV:</strong> <span id="modal-cvv"></span></div>
-
-                    <div class="col-12 mt-3">
-                        <h6 class="fw-bold text-primary mb-2">Failure & Dates</h6>
-                    </div>
-
-                    <div class="col-md-12 info-row"><strong>Failure Reason:</strong> <span id="modal-failure-reason"></span></div>
-                    <div class="col-md-4 info-row"><strong>External Created At:</strong> <span id="modal-created-at-external"></span></div>
-                    <div class="col-md-4 info-row"><strong>Created At:</strong> <span id="modal-created"></span></div>
-                    <div class="col-md-4 info-row"><strong>Updated At:</strong> <span id="modal-updated"></span></div>
-
                 </div>
             </div>
 
+            <!-- Modal Body with Organized Information Cards -->
+            <div class="modal-body p-4">
+                
+                <!-- Alert box for failure reason if populated -->
+                <div id="modal-failure-card" class="tx-failure-alert mb-4" style="display: none;">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation fs-4 text-danger mt-1"></i>
+                        <div>
+                            <strong class="d-block text-danger mb-1">Transaction Failed</strong>
+                            <span id="modal-failure-reason-alert" class="small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Transaction Overview -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-blue">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <h6 class="tx-section-title">Transaction Overview</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-hashtag me-1"></i> Transaction ID</div>
+                                <div class="tx-info-value font-mono" id="modal-id">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-sliders me-1"></i> Transaction Type</div>
+                                <div class="tx-info-value" id="modal-transaction-type">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-tag me-1"></i> Type</div>
+                                <div class="tx-info-value" id="modal-type">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-signal me-1"></i> Status</div>
+                                <div class="tx-info-value"><span id="modal-status" class="status-chip">N/A</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-gear me-1"></i> Method</div>
+                                <div class="tx-info-value" id="modal-method">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-wallet me-1"></i> Payment Method</div>
+                                <div class="tx-info-value" id="modal-payment-method">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-server me-1"></i> Payment Provider</div>
+                                <div class="tx-info-value text-uppercase" id="modal-payment-provider">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. User Information -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-blue">
+                            <i class="fa-solid fa-user-gear"></i>
+                        </div>
+                        <h6 class="tx-section-title">User Information</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card primary-highlight">
+                                <div class="tx-info-label"><i class="fa-solid fa-user me-1"></i> User Name</div>
+                                <div class="tx-info-value text-primary fw-bold" id="modal-user-name">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-id-badge me-1"></i> User ID</div>
+                                <div class="tx-info-value font-mono" id="modal-user-id">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-id-card me-1"></i> Personal ID</div>
+                                <div class="tx-info-value font-mono" id="modal-personal-id">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Amount & Fees -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-green">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                        </div>
+                        <h6 class="tx-section-title">Amount & Fees</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card primary-highlight">
+                                <div class="tx-info-label"><i class="fa-solid fa-money-bill me-1"></i> Amount</div>
+                                <div class="tx-info-value amount-large" id="modal-amount">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-calculator me-1"></i> Total Amount</div>
+                                <div class="tx-info-value font-mono" id="modal-total-amount">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Recipient Amount</div>
+                                <div class="tx-info-value font-mono" id="modal-recipient-amount">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-coins me-1"></i> Currency</div>
+                                <div class="tx-info-value font-mono" id="modal-currency">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-globe me-1"></i> To Currency</div>
+                                <div class="tx-info-value font-mono" id="modal-to-currency">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-percent me-1"></i> Fees</div>
+                                <div class="tx-info-value font-mono text-danger" id="modal-fees">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-arrows-split-up-and-left me-1"></i> Exchange Rate</div>
+                                <div class="tx-info-value font-mono" id="modal-exchange-rate">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-chart-pie me-1"></i> Single Rate</div>
+                                <div class="tx-info-value font-mono" id="modal-single-rate">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Sender & Recipient -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-blue">
+                            <i class="fa-solid fa-arrows-between-lines"></i>
+                        </div>
+                        <h6 class="tx-section-title">Sender & Recipient</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="tx-flow-card">
+                                <div class="tx-info-label text-primary"><i class="fa-solid fa-paper-plane me-1"></i> Sender Details</div>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-12">
+                                        <div class="text-muted small">Sender Name</div>
+                                        <div class="fw-bold text-dark" id="modal-sender">N/A</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="text-muted small">Sender ID</div>
+                                        <div class="font-mono text-dark" id="modal-sender-id">N/A</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="tx-flow-card">
+                                <div class="tx-info-label text-cyan"><i class="fa-solid fa-user-check me-1"></i> Recipient Details</div>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-12">
+                                        <div class="text-muted small">Recipient Name</div>
+                                        <div class="fw-bold text-dark" id="modal-recipient">N/A</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="text-muted small">Recipient ID</div>
+                                        <div class="font-mono text-dark" id="modal-recipient-id">N/A</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-earth-americas me-1"></i> Recipient Country</div>
+                                <div class="tx-info-value" id="modal-recipient-country">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-shapes me-1"></i> Recipient Type</div>
+                                <div class="tx-info-value" id="modal-recipient-type">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-at me-1"></i> Recipient Alias</div>
+                                <div class="tx-info-value" id="modal-recipient-alias">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-bookmark me-1"></i> Default Reference</div>
+                                <div class="tx-info-value font-mono" id="modal-recipient-default-reference">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-calendar-plus me-1"></i> Recipient Created At</div>
+                                <div class="tx-info-value" id="modal-recipient-created-at">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Recipient Bank Details -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-blue">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <h6 class="tx-section-title">Recipient Bank Details</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-user-tag me-1"></i> Account Name</div>
+                                <div class="tx-info-value text-dark" id="modal-recipient-account-name">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class="tx-info-card primary-highlight">
+                                <div class="tx-info-label"><i class="fa-solid fa-credit-card me-1"></i> Account Number</div>
+                                <div class="tx-info-value font-mono fs-5 text-primary" id="modal-recipient-account-number">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-bank me-1"></i> Bank Name</div>
+                                <div class="tx-info-value" id="modal-recipient-bank-name">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-money-bill-transfer me-1"></i> Bank Currency</div>
+                                <div class="tx-info-value font-mono" id="modal-recipient-bank-currency">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-12">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-code-branch me-1"></i> Sort Code</div>
+                                <div class="tx-info-value font-mono" id="modal-recipient-sort-code">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Payment & References -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-amber">
+                            <i class="fa-solid fa-link"></i>
+                        </div>
+                        <h6 class="tx-section-title">Payment & References</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-hashtag me-1"></i> Reference</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-reference">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-receipt me-1"></i> Payment Reference</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-payment-reference">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-cart-shopping me-1"></i> Order ID</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-order-id">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-scale-balanced me-1"></i> Balance ID</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-balance-id">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-vault me-1"></i> Virtual Account ID</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-virtual-account-id">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-user-check me-1"></i> Beneficiary ID</div>
+                                <div class="tx-info-value font-mono text-break" id="modal-beneficias-id">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Card Details -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-amber">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <h6 class="tx-section-title">Card Details</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-credit-card me-1"></i> Card Number</div>
+                                <div class="tx-info-value font-mono" id="modal-card-number">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-calendar me-1"></i> Expiry Month</div>
+                                <div class="tx-info-value font-mono" id="modal-expiry-month">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-calendar-days me-1"></i> Expiry Year</div>
+                                <div class="tx-info-value font-mono" id="modal-expiry-year">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-lock me-1"></i> CVV</div>
+                                <div class="tx-info-value font-mono text-muted" id="modal-cvv">***</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Failure & Timeline -->
+                <div class="tx-section-card">
+                    <div class="tx-section-header">
+                        <div class="tx-section-icon icon-red">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h6 class="tx-section-title">Failure & Timeline</h6>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-triangle-exclamation me-1"></i> Failure Reason</div>
+                                <div class="tx-info-value text-danger" id="modal-failure-reason">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-globe me-1"></i> External Created At</div>
+                                <div class="tx-info-value" id="modal-created-at-external">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-calendar-check me-1"></i> Created At</div>
+                                <div class="tx-info-value" id="modal-created">N/A</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-12">
+                            <div class="tx-info-card">
+                                <div class="tx-info-label"><i class="fa-solid fa-clock me-1"></i> Updated At</div>
+                                <div class="tx-info-value" id="modal-updated">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-soft px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -744,6 +1300,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             const fields = [
                 'id',
+                'user-name',
                 'user-id',
                 'personal-id',
                 'type',
@@ -793,18 +1350,64 @@ document.addEventListener('DOMContentLoaded', function () {
                 setText(`modal-${field}`, this.getAttribute(`data-${field}`));
             });
 
-            const statusEl = modal.querySelector('#modal-status');
-            const status = (this.getAttribute('data-status') || '').toLowerCase();
+            // Populate Modal Header Summary
+            const userName = this.getAttribute('data-user-name') || 'N/A';
+            const userId = this.getAttribute('data-user-id') || 'N/A';
+            const amount = this.getAttribute('data-amount') || '0.00';
+            const currency = (this.getAttribute('data-currency') || 'USD').toUpperCase();
+            const reference = this.getAttribute('data-reference') || 'N/A';
+            const failureReason = this.getAttribute('data-failure-reason');
 
-            statusEl.textContent = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
-            statusEl.className = 'status-chip';
+            setText('modal-header-user-name', userName);
+            setText('modal-header-user-id', userId);
+            setText('modal-header-amount', amount);
+            setText('modal-header-currency', currency);
+            setText('modal-header-reference', reference);
 
-            if (status === 'success') {
-                statusEl.classList.add('status-success');
-            } else if (status === 'failed') {
-                statusEl.classList.add('status-danger');
+            // Handle Failure Alert Banner
+            const failureCard = modal.querySelector('#modal-failure-card');
+            const failureReasonAlert = modal.querySelector('#modal-failure-reason-alert');
+            if (failureReason && failureReason !== 'N/A' && failureReason.trim() !== '') {
+                if (failureReasonAlert) failureReasonAlert.textContent = failureReason;
+                if (failureCard) failureCard.style.display = 'block';
             } else {
-                statusEl.classList.add('status-warning');
+                if (failureCard) failureCard.style.display = 'none';
+            }
+
+            // Handle Status Badges
+            const status = (this.getAttribute('data-status') || '').toLowerCase();
+            const statusLabel = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
+
+            // Modal Body Status Chip
+            const statusEl = modal.querySelector('#modal-status');
+            if (statusEl) {
+                statusEl.textContent = statusLabel;
+                statusEl.className = 'status-chip';
+                if (status === 'success') {
+                    statusEl.classList.add('status-success');
+                } else if (status === 'failed') {
+                    statusEl.classList.add('status-danger');
+                } else {
+                    statusEl.classList.add('status-warning');
+                }
+            }
+
+            // Header Status Badge
+            const headerStatusEl = modal.querySelector('#modal-header-status');
+            if (headerStatusEl) {
+                headerStatusEl.className = 'status-chip';
+                let iconClass = 'fa-clock';
+                if (status === 'success') {
+                    headerStatusEl.classList.add('status-success');
+                    iconClass = 'fa-circle-check';
+                } else if (status === 'failed') {
+                    headerStatusEl.classList.add('status-danger');
+                    iconClass = 'fa-circle-xmark';
+                } else {
+                    headerStatusEl.classList.add('status-warning');
+                    iconClass = 'fa-clock';
+                }
+                headerStatusEl.innerHTML = `<i class="fa-solid ${iconClass} me-1"></i> ${statusLabel}`;
             }
         });
     });
