@@ -52,6 +52,8 @@ class Personal extends Authenticatable
         'nin',
         'nin_status',
         'date_of_birth',
+        'proof_address',
+        'proof_address_status',
     ];
 
 

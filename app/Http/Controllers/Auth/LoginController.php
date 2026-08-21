@@ -628,7 +628,7 @@ class LoginController extends Controller
                 ];
             });
 
-            $currencyFees = \App\Models\Currency::where('is_active', true)
+        $currencyFees = \App\Models\Currency::where('is_active', true)
             ->get(['code', 'min_amount', 'max_amount', 'collection_fee'])
             ->map(function ($c) {
                 return [
@@ -639,6 +639,18 @@ class LoginController extends Controller
                 ];
             })
             ->values();
+
+        //kyc status
+        $identityStatus = strtolower($account->identity_verification_status ?? 'pending');
+        $selfieStatus = strtolower($account->selfie_verification_status ?? 'pending');
+
+        if ($identityStatus === 'completed' && $selfieStatus === 'completed') {
+            $kycStatus = 'completed';
+        } elseif ($identityStatus === 'pending' && $selfieStatus === 'pending') {
+            $kycStatus = 'pending';
+        } else {
+            $kycStatus = 'review';
+        }
 
         return response()->json([
             'success' => true,
@@ -662,6 +674,10 @@ class LoginController extends Controller
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
                     
+                ],
+                'profile_status' => [
+                    'proof_address' => $account->proof_address_status ?? 'pending',
+                    'kyc' => $kycStatus,
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,
