@@ -56,6 +56,7 @@ use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ContactRequestController;
 use App\Http\Controllers\Admin\StatementController;
+use App\Http\Controllers\Admin\ProofOfAddressController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
@@ -460,6 +461,10 @@ Route::middleware('admin.auth')->group(function () {
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
+
+
+        //proof of address
+        Route::post('/admin/personal-account/proof-of-address', [ProofOfAddressController::class,'update'])->name('admin.personal.proof-of-address.update');
     });
 
 
