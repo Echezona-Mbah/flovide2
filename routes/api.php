@@ -60,6 +60,7 @@ use App\Http\Controllers\IbanqTestController;
 use App\Http\Controllers\IbanqWebhookController;
 use App\Http\Controllers\Orchard\OrchardController;
 use App\Http\Controllers\Payaza\PayoutController;
+use App\Http\Controllers\Personal\ProofOfAddressController;
 use App\Http\Controllers\Personal\ComplianceController as PersonalComplianceController;
 use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
@@ -595,6 +596,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/personal-notifications/unread', [NotificationController::class, 'unread']);
         Route::put('/personal-notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
+        //proof of address
+        Route::post('/personal-proof-of-address', [ProofOfAddressController::class, 'uploadProofOfAddress']);
 
 
 

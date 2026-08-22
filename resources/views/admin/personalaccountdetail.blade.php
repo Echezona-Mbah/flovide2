@@ -626,6 +626,9 @@
                             <li class="nav-item">
                                 <a role="tab" class="nav-link" href="{{ route('admin.broadcast.personal.index', $user->id) }}">Broadcast</a>
                             </li>
+                            <li class="nav-item">
+                                <a role="tab" class="nav-link" href="{{ route('admin.personalstatement', $user->id) }}">Statement</a>
+                            </li>
                         </ul>
 
                         <div class="tab-content-section" id="tab-sales">
@@ -736,6 +739,94 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <section class="mb-4">
+                                <div class="card notification-card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                                    <div class="notification-head p-4 d-flex justify-content-between align-items-center flex-wrap gap-3" style="border-bottom: 1px solid #f1f5f9; background: linear-gradient(180deg, #ffffff, #f8fafc);">
+                                        <div>
+                                            <h5 class="notification-title mb-1 fw-bold text-dark d-flex align-items-center gap-2">
+                                                <i class="fa-solid fa-file-contract text-primary"></i> Proof of Address Verification
+                                            </h5>
+                                            <p class="notification-subtitle text-muted mb-0 small">Review uploaded proof of address document and manage verification status.</p>
+                                        </div>
+                                        @php
+                                            $rawStatus = strtolower($user->proof_address_status ?? $user->proof_of_address_status ?? 'pending');
+                                            $badgeClass = match($rawStatus) {
+                                                'approved', 'confirmed', 'completed' => 'bg-success-subtle text-success border-success-subtle',
+                                                'under_review', 'review' => 'bg-warning-subtle text-warning border-warning-subtle',
+                                                'rejected', 'declined' => 'bg-danger-subtle text-danger border-danger-subtle',
+                                                default => 'bg-secondary-subtle text-secondary border-secondary-subtle'
+                                            };
+                                        @endphp
+                                        <span class="badge border rounded-pill px-3 py-2 fw-bold text-capitalize {{ $badgeClass }}" style="font-size: 0.82rem;">
+                                            <i class="fa-solid fa-circle-info me-1"></i> {{ str_replace('_', ' ', $rawStatus) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body p-4">
+                                        <div class="row align-items-center g-4">
+                                            <!-- Document Viewer / Status Box -->
+                                            <div class="col-lg-7">
+                                                <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between bg-light">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="rounded-3 bg-white p-3 border d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                                                            <i class="fa-solid fa-file-lines"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold text-dark mb-1">Uploaded Proof of Address</h6>
+                                                            @if(!empty($user->proof_address ?? $user->proof_of_address))
+                                                                <small class="text-muted font-monospace d-block text-truncate" style="max-width: 280px;">
+                                                                    {{ basename($user->proof_address ?? $user->proof_of_address) }}
+                                                                </small>
+                                                            @else
+                                                                <small class="text-muted d-block">No document uploaded yet</small>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        @if(!empty($user->proof_address ?? $user->proof_of_address))
+                                                            @php
+                                                                $docFile = $user->proof_address ?? $user->proof_of_address;
+                                                                $docPath = str_starts_with($docFile, 'http') ? $docFile : asset($docFile);
+                                                            @endphp
+                                                            <a href="{{ $docPath }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold me-1">
+                                                                <i class="fa-solid fa-eye me-1"></i> View Document
+                                                            </a>
+                                                            <a href="{{ $docPath }}" download class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                                                                <i class="fa-solid fa-download me-1"></i> Download
+                                                            </a>
+                                                        @else
+                                                            <span class="badge bg-light text-muted border rounded-pill px-3 py-2">No File</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Update Status Form -->
+                                            <div class="col-lg-5">
+                                                <form action="{{ route('admin.personal.proof-of-address.update') }}" method="POST" class="p-3 rounded-3 border bg-white shadow-sm">
+                                                    @csrf
+                                                    <input type="hidden" name="id" value="{{ $user->id }}">
+                                                    
+                                                    <label for="proof_address_status" class="form-label fw-bold text-dark small mb-2">Update Verification Status</label>
+                                                    <div class="d-flex gap-2">
+                                                        <select name="proof_address_status" id="proof_address_status" class="form-select form-select-md border-1 rounded-pill" required style="font-size: 0.88rem;">
+                                                            <option value="pending" {{ $rawStatus == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="under_review" {{ in_array($rawStatus, ['under_review', 'review']) ? 'selected' : '' }}>Under Review</option>
+                                                            <option value="completed" {{ in_array($rawStatus, ['confirmed', 'completed']) ? 'selected' : '' }}>Approved / Confirmed</option>
+                                                            <option value="rejected" {{ in_array($rawStatus, ['rejected', 'declined']) ? 'selected' : '' }}>Rejected</option>
+                                                        </select>
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold text-nowrap">
+                                                            <i class="fa-solid fa-floppy-disk me-1"></i> Update
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
 
                             <section class="mb-4">
                                 <div class="card notification-card">

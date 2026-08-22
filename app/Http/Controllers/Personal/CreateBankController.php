@@ -8,6 +8,7 @@ use App\Models\Countries;
 use Illuminate\Support\Facades\Http;
 use App\Models\Balance;
 use App\Models\Currency;
+use App\Models\ExchangeRate;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TransactionHistory;
@@ -210,7 +211,7 @@ public function index(Request $request)
 
  public function dashboardapi(Request $request)
 {
-    $account = auth('personal-api')->id();
+    $account = auth('personal-api')->user();
 
     if (!$account) {
         return response()->json([
@@ -219,7 +220,7 @@ public function index(Request $request)
         ], 401);
     }
 
-    $balances = \App\Models\Balance::where('personal_id', $account)
+    $balances = Balance::where('personal_id', $account->id)
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -241,7 +242,7 @@ public function index(Request $request)
                 continue;
             }
 
-            $rate = \App\Models\ExchangeRate::whereHas('fromCurrency', function ($q) use ($balanceCurrency) {
+            $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($balanceCurrency) {
                     $q->where('code', $balanceCurrency);
                 })
                 ->whereHas('toCurrency', function ($q) use ($defaultCurrency) {
@@ -254,7 +255,7 @@ public function index(Request $request)
             }
         }
 
-    $transactions = \App\Models\TransactionHistory::where('personal_id', $account)
+    $transactions = TransactionHistory::where('personal_id', $account->id)
         ->latest()
         ->take(4)
         ->get()
@@ -285,7 +286,7 @@ public function index(Request $request)
         return now()->subMonths($i)->format('Y-m');
     })->reverse()->values();
 
-    $dbData = \App\Models\TransactionHistory::where('personal_id', $account)
+    $dbData = TransactionHistory::where('personal_id', $account->id)
         ->where('created_at', '>=', now()->subMonths(3))
         ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total_amount")
         ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
@@ -299,7 +300,7 @@ public function index(Request $request)
     });
 
     // ✅ Exchange rates included
-    $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
+    $exchangeRates = ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
         ->get()
         ->map(function ($r) {
             return [
@@ -310,29 +311,45 @@ public function index(Request $request)
                 'updated_at' => $r->updated_at?->format('Y-m-d H:i:s'),
             ];
         });
-        $currencies = \App\Models\Currency::select('code','currency_code', 'name', 'symbol', 'country_code', 'is_active')
-            ->get()
-            ->map(function ($c) {
-                return [
-                    'code' => $c->code,
-                    'currency_code' => $c->currency_code,
-                    'name' => $c->name,
-                    'symbol' => $c->symbol,
-                    'country_code' => strtolower($c->country_code ?? ''),
-                    'is_active' => $c->is_active ? 'true' : 'false',
-                ];
-            })
-            ->values()
-            ->toArray();
+    $currencies = Currency::select('code','currency_code', 'name', 'symbol', 'country_code', 'is_active')
+        ->get()
+        ->map(function ($c) {
+            return [
+                'code' => $c->code,
+                'currency_code' => $c->currency_code,
+                'name' => $c->name,
+                'symbol' => $c->symbol,
+                'country_code' => strtolower($c->country_code ?? ''),
+                'is_active' => $c->is_active ? 'true' : 'false',
+            ];
+        })
+        ->values()
+        ->toArray();
+
+    //kyc status
+    $identityStatus = strtolower($account->identity_verification_status ?? 'pending');
+    $selfieStatus = strtolower($account->selfie_verification_status ?? 'pending');
+
+    if ($identityStatus === 'completed' && $selfieStatus === 'completed') {
+        $kycStatus = 'completed';
+    } elseif ($identityStatus === 'pending' && $selfieStatus === 'pending') {
+        $kycStatus = 'pending';
+    } else {
+        $kycStatus = 'review';
+    }
 
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',
             'data' => [
-                'app_update' => [                                              // ← ADD HERE
+                'app_update' => [
                     'latest_version' => config('services.latest_version'),
                     'force_update'   => config('services.force_update', true),
+                ],
+                'profile_status' => [
+                    'proof_address' => $account->proof_address_status ?? 'pending',
+                    'kyc' => $kycStatus,
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
