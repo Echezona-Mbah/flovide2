@@ -277,6 +277,28 @@ public function dashboardapi(Request $request)
             }
         }
 
+        $autoDepositsByBalance = \App\Models\InteracAutoDeposit::where('user_id', $account->id)
+            ->get()
+            ->groupBy('balance_id');
+
+        foreach ($balances as $balance) {
+            if (strtoupper($balance->currency) === 'CAD') {
+                $balance->interac_autodeposit_emails = ($autoDepositsByBalance->get($balance->id) ?? collect())
+                    ->map(function ($ad) {
+                        return [
+                            'id'       => $ad->id,
+                            'email'    => $ad->email,
+                            'status'   => $ad->status,
+                            'added_at' => optional($ad->added_at)->format('Y-m-d H:i:s'),
+                        ];
+                    })
+                    ->values();
+            } else {
+                $balance->interac_autodeposit_emails = [];
+            }
+        }
+        $defaultBalance = $balances->first();
+
    // dd($totalBalance);
 
     $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
@@ -391,6 +413,7 @@ public function dashboardapi(Request $request)
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'balances'       => $balances,
+                'default_interac_autodeposit_email' => 'payments@flovide.com',
                 'chart_data'     => $chartData,
                 'recent_history' => $transactions,
                 'exchange_rates' => $exchangeRates, // ✅ added
@@ -812,14 +835,121 @@ public function dashboardapi(Request $request)
     return view('business.interac_autodeposit_settings', compact('balance', 'autoDeposits'));
 }
 
+// public function saveInteracAutoDepositEmail(Request $request, $id)
+// {
+//     $user = auth()->user();
+//     $mode = $request->input('mode', session('mode', 'live'));
+
+//     $validated = $request->validate([
+//         'email' => 'required|email|max:255',
+//     ]);
+
+//     $balance = Balance::where('id', $id)
+//         ->where('user_id', $user->id)
+//         ->where('mode', $mode)
+//         ->first();
+
+//     if (!$balance) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Balance not found.',
+//             'code'    => 'BALANCE_NOT_FOUND',
+//         ], 404);
+//     }
+
+//     if (strtoupper($balance->currency) !== 'CAD') {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Interac Auto Deposit is only available for CAD wallets.',
+//             'code'    => 'CAD_ONLY',
+//         ], 422);
+//     }
+
+//     $exists = \App\Models\InteracAutoDeposit::where('balance_id', $balance->id)
+//         ->where('email', $validated['email'])
+//         ->exists();
+
+//     if ($exists) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'This email is already registered for this wallet.',
+//             'code'    => 'DUPLICATE_EMAIL',
+//         ], 422);
+//     }
+
+//     $autoDeposit = \App\Models\InteracAutoDeposit::create([
+//         'user_id'    => $user->id,
+//         'balance_id' => $balance->id,
+//         'email'      => $validated['email'],
+//         'status'     => 'pending',
+//         'added_at'   => now(),
+//     ]);
+
+//     Log::info('[Interac AutoDeposit] Email added', [
+//         'balance_id' => $balance->id,
+//         'user_id'    => $user->id,
+//         'email'      => $validated['email'],
+//     ]);
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Interac Auto Deposit email added successfully.',
+//         'code'    => 'AUTODEPOSIT_EMAIL_ADDED',
+//         'data'    => [
+//             'id'       => $autoDeposit->id,
+//             'email'    => $autoDeposit->email,
+//             'status'   => $autoDeposit->status,
+//             'added_at' => $autoDeposit->added_at->toDateTimeString(),
+//         ],
+//     ], 200);
+// }
+
 public function saveInteracAutoDepositEmail(Request $request, $id)
 {
-    $user = auth()->user();
-    $mode = $request->input('mode', session('mode', 'live'));
+    $wantsJson = $request->expectsJson() || $request->is('api/*');
 
-    $validated = $request->validate([
+    $respond = function (array $payload, int $status = 200, array $errors = []) use ($request, $wantsJson) {
+        if ($wantsJson) {
+            return response()->json($payload, $status);
+        }
+
+        if (!($payload['success'] ?? false)) {
+            return redirect()->back()
+                ->withErrors($errors ?: ['message' => $payload['message']])
+                ->withInput()
+                ->with('error', $payload['message']);
+        }
+
+        return redirect()->back()
+            ->with('success', $payload['message'])
+            ->with('interac_auto_deposit', $payload['data'] ?? null);
+    };
+
+    $user = auth()->user();
+
+    if (!$user) {
+        return $respond([
+            'success' => false,
+            'message' => 'Unauthenticated.',
+            'code' => 'UNAUTHENTICATED',
+        ], 401);
+    }
+
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
         'email' => 'required|email|max:255',
     ]);
+
+    if ($validator->fails()) {
+        return $respond([
+            'success' => false,
+            'message' => 'Validation error.',
+            'code' => 'VALIDATION_ERROR',
+            'errors' => $validator->errors(),
+        ], 422, $validator->errors()->toArray());
+    }
+
+    $validated = $validator->validated();
+    $mode = $request->input('mode', session('mode', 'live'));
 
     $balance = Balance::where('id', $id)
         ->where('user_id', $user->id)
@@ -827,18 +957,18 @@ public function saveInteracAutoDepositEmail(Request $request, $id)
         ->first();
 
     if (!$balance) {
-        return response()->json([
+        return $respond([
             'success' => false,
             'message' => 'Balance not found.',
-            'code'    => 'BALANCE_NOT_FOUND',
+            'code' => 'BALANCE_NOT_FOUND',
         ], 404);
     }
 
     if (strtoupper($balance->currency) !== 'CAD') {
-        return response()->json([
+        return $respond([
             'success' => false,
             'message' => 'Interac Auto Deposit is only available for CAD wallets.',
-            'code'    => 'CAD_ONLY',
+            'code' => 'CAD_ONLY',
         ], 422);
     }
 
@@ -847,36 +977,36 @@ public function saveInteracAutoDepositEmail(Request $request, $id)
         ->exists();
 
     if ($exists) {
-        return response()->json([
+        return $respond([
             'success' => false,
             'message' => 'This email is already registered for this wallet.',
-            'code'    => 'DUPLICATE_EMAIL',
-        ], 422);
+            'code' => 'DUPLICATE_EMAIL',
+        ], 422, ['email' => 'This email is already registered for this wallet.']);
     }
 
     $autoDeposit = \App\Models\InteracAutoDeposit::create([
-        'user_id'    => $user->id,
+        'user_id' => $user->id,
         'balance_id' => $balance->id,
-        'email'      => $validated['email'],
-        'status'     => 'pending',
-        'added_at'   => now(),
+        'email' => $validated['email'],
+        'status' => 'pending',
+        'added_at' => now(),
     ]);
 
     Log::info('[Interac AutoDeposit] Email added', [
         'balance_id' => $balance->id,
-        'user_id'    => $user->id,
-        'email'      => $validated['email'],
+        'user_id' => $user->id,
+        'email' => $validated['email'],
     ]);
 
-    return response()->json([
+    return $respond([
         'success' => true,
         'message' => 'Interac Auto Deposit email added successfully.',
-        'code'    => 'AUTODEPOSIT_EMAIL_ADDED',
-        'data'    => [
-            'id'       => $autoDeposit->id,
-            'email'    => $autoDeposit->email,
-            'status'   => $autoDeposit->status,
-            'added_at' => $autoDeposit->added_at->toDateTimeString(),
+        'code' => 'AUTODEPOSIT_EMAIL_ADDED',
+        'data' => [
+            'id' => $autoDeposit->id,
+            'email' => $autoDeposit->email,
+            'status' => $autoDeposit->status,
+            'added_at' => optional($autoDeposit->added_at)->toDateTimeString(),
         ],
     ], 200);
 }

@@ -337,6 +337,7 @@ public function index(Request $request)
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'balances'        => $balances,
+                'default_interac_autodeposit_email' => 'payments@flovide.com',
                 'chart_data'      => $chartData,
                 'recent_history'  => $transactions,
                 'exchange_rates'  => $exchangeRates,

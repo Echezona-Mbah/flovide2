@@ -218,7 +218,28 @@ class LoginController extends Controller
                 $totalBalance += $balanceAmount * (float) $rate->rate;
             }
         }
+        $autoDepositsByBalance = \App\Models\InteracAutoDeposit::where('user_id', $account->id)
+            ->get()
+            ->groupBy('balance_id');
 
+        foreach ($balances as $balance) {
+            if (strtoupper($balance->currency) === 'CAD') {
+                $balance->interac_autodeposit_emails = ($autoDepositsByBalance->get($balance->id) ?? collect())
+                    ->map(function ($ad) {
+                        return [
+                            'id'       => $ad->id,
+                            'email'    => $ad->email,
+                            'status'   => $ad->status,
+                            'added_at' => optional($ad->added_at)->format('Y-m-d H:i:s'),
+                        ];
+                    })
+                    ->values();
+            } else {
+                $balance->interac_autodeposit_emails = [];
+            }
+        }
+
+        $defaultBalance = $balances->first();
 
         $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
             ->latest()
@@ -353,6 +374,7 @@ class LoginController extends Controller
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
+                'default_interac_autodeposit_email' => 'payments@flovide.com',
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'transactions' => $transactions,
@@ -668,6 +690,7 @@ class LoginController extends Controller
                 'countryrule' => $countryrule,
                 'compliance' => $account->complianceStatus($tokenResponse),
                 'balances' => $balances,
+                'default_interac_autodeposit_email' => 'payments@flovide.com',
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'transactions' => $transactions,

@@ -323,7 +323,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/total-balance', [CreateBankController::class, 'getUserTotalBalance']);
     Route::get('/dashboardapi', [CreateBankController::class, 'dashboardapi']);
     Route::get('/business-balances/{id}/statement', [CreateBankController::class, 'statement']);
-
+    Route::post('/business-balances/{id}/interac-autodeposit', [CreateBankController::class, 'saveInteracAutoDepositEmail']);
+    Route::post('/interac/autodeposit/initiate', [BlaaizController::class, 'initiateAutoDeposit']);
 
 
     // api routes for Customers details
