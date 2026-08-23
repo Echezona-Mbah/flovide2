@@ -622,6 +622,16 @@
             display: block;
         }
     }
+
+    .mobile-only {
+        display: none;
+    }
+
+    @media (max-width: 767px) {
+        .mobile-only {
+            display: block;
+        }
+    }
 </style>
 
 @php
@@ -758,6 +768,14 @@
                     <a href="{{ route('admin.transactionhistory') }}" class="{{ $isTxHistoryActive ? 'active-link' : '' }}">
                         <i class="metismenu-icon fa-solid fa-arrow-right-arrow-left"></i>
                         <span class="nav-label">Transaction History</span>
+                    </a>
+                </li>
+
+                <!-- Quick Settings -->
+                <li class="mobile-only">
+                    <a href="{{ route('admin.quick_settings') }}">
+                        <i class="metismenu-icon fa-solid fa-file-invoice"></i>
+                        <span class="nav-label">Quick Settings</span>
                     </a>
                 </li>
 

@@ -141,16 +141,15 @@ Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry
 
 Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
-    Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
 
 
 
 // HtmlMinifier::class
-Route::middleware(['auth','business.verified'])->group(function () {
+Route::middleware(['auth','business.verified', 'user.inactivity'])->group(function () {
 
 
     Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
-
 
     Route::get('/verify_bvn', [RegisteredUserController::class, 'bvn'])->name('verify_bvn');
     Route::post('/verify_bvn', [RegisteredUserController::class, 'verifyBVN'])->name('bvn.verify.submit');
@@ -394,7 +393,12 @@ Route::middleware('admin.auth')->group(function () {
 
     // Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
     // Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
-
+    
+    //quick settings
+    Route::get('/admin/quick_settings', function () {
+        return view('admin.quick_settings');
+    })->name('admin.quick_settings');
+    
 
     Route::middleware('admin.permission:view_transactions')->group(function () {
         Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
