@@ -810,6 +810,114 @@ public function initiateAutoDeposit(Request $request)
     ], 200);
 }
 
+public function initiateAutoDepositPersonal(Request $request)
+{
+    $validated = $request->validate([
+        'amount'     => 'required|numeric|min:0.1',
+        'currency'   => 'nullable|string|max:10',
+        'balance_id' => 'required|string',
+    ]);
+
+    $personalId = auth('personal-api')->id();
+
+    if (!$personalId) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthenticated',
+            'code'    => 'UNAUTHENTICATED',
+        ], 401);
+    }
+
+    $balance = \App\Models\Balance::where('id', $validated['balance_id'])
+        ->where('personal_id', $personalId)
+        ->first();
+
+    if (!$balance) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Wallet not found or does not belong to your account.',
+            'code'    => 'INVALID_WALLET',
+        ], 422);
+    }
+
+    $currency = strtoupper($validated['currency'] ?? $balance->currency ?? 'CAD');
+
+    if ($currency !== 'CAD') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Auto Deposit is only available for the CAD wallet.',
+            'code'    => 'AUTODEPOSIT_CAD_ONLY',
+        ], 422);
+    }
+
+    $amount = (float) $validated['amount'];
+
+    $currencyFee = \App\Models\Currency::where('code', $currency)
+        ->where('is_active', true)
+        ->first();
+
+    Log::info('[Interac AutoDeposit - Personal] Fee lookup', [
+        'personal_id' => $personalId,
+        'currency'    => $currency,
+        'found'       => (bool) $currencyFee,
+    ]);
+
+    if (!$currencyFee) {
+        return response()->json([
+            'success' => false,
+            'message' => "Collection is not currently available for {$currency}.",
+            'code'    => 'COLLECTION_DISABLED',
+        ], 422);
+    }
+
+    // ── No fee for personal Auto Deposit ──────────────────────────────
+    $platformFee = 0;
+    $netAmount   = $amount;
+
+    $reference = 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
+
+    $transaction = TransactionHistory::create([
+        'user_id'           => null,
+        'personal_id'       => $personalId,
+        'balance_id'        => $balance->id,
+        'payment_provider'  => 'interac',
+        'transaction_type'  => 'payment',
+        'method'            => 'credit',
+        'payment_method'    => 'wallet_autodeposit',
+        'sender'            => null,
+        'amount'            => $amount,
+        'fees'              => $platformFee,
+        'platform_fee'      => $platformFee,
+        'recipient_amount'  => $netAmount,
+        'currency'          => $currency,
+        'status'            => 'pending',
+        'reference'         => $reference,
+        'payment_reference' => $reference,
+        'order_id'          => null,
+    ]);
+
+    Log::info('[Interac AutoDeposit - Personal] Pending transaction created', [
+        'tx_id'       => $transaction->id,
+        'personal_id' => $personalId,
+        'reference'   => $reference,
+        'amount'      => $amount,
+        'currency'    => $currency,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'We are watching for your Interac e-Transfer.',
+        'code'    => 'AUTODEPOSIT_PENDING',
+        'data'    => [
+            'reference'     => $reference,
+            'deposit_email' => 'payments@flovide.com',
+            'amount'        => $amount,
+            'currency'      => $currency,
+        ],
+    ], 200);
+}
+
+
 public function checkInteracStatus(Request $request, string $reference)
 {
     $user = auth()->user();
