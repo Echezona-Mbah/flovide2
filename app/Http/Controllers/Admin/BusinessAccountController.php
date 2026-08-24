@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\UserCurrencyFee;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Models\AdminBroadcastEmail;
 
 
@@ -247,51 +248,110 @@ public function find($id)
 
 
 public function updateStatus(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+{
+    $user = User::findOrFail($id);
 
-        $field = $request->field;
-        $status = $request->status;
+    $request->validate([
+        'field' => 'required|string',
+        'status' => 'required|string',
+    ]);
 
-        $user->$field = $status;
-        $user->save();
+    $allowedFields = [
+        'cac_status',
+        'bvn_status',
+        'valid_id_status',
+        'tin_status',
+        'utility_bill_status',
+        'proof_of_identity_status',
+        'ownership_status',
+        'organisational_chart_status',
+        'register_of_directors_status',
+        'formation_document_status',
+        'nin_status',
 
-        // ── Push notification on compliance status change ──────────────────
-        // Only notify for actual document/verification status fields (fields
-        // ending in "_status"), and only for meaningful outcomes.
-        if (str_ends_with($field, '_status')) {
-            $label = $this->complianceFieldLabel($field);
+        // Identity verification
+        'identity_verification_status',
+        'selfie_verification_status',
+    ];
 
-            $normalizedStatus = strtolower(str_replace('_', ' ', $status));
 
-            if (in_array($status, ['confirmed', 'approved', 'yes'])) {
-                $this->sendComplianceNotification(
-                    $user,
-                    "{$label} Approved",
-                    "Your {$label} has been reviewed and approved.",
-                    ['document' => $field, 'status' => $status]
-                );
-            } elseif ($status === 'rejected') {
-                $this->sendComplianceNotification(
-                    $user,
-                    "{$label} Rejected",
-                    "Your {$label} was reviewed and could not be approved. Please check your account for details.",
-                    ['document' => $field, 'status' => $status]
-                );
-            }
-            // Intentionally not notifying for 'under_review' or other
-            // in-progress states here, since the compliance controller
-            // already notifies the user at upload time.
-        }
-
+    if (!in_array($request->field, $allowedFields, true)) {
         return response()->json([
-            'success' => true,
-            'label' => ucfirst(str_replace('_', ' ', $status)),
-            'class' => $status === 'confirmed' ? 'bg-success' :
-                       ($status === 'under review' ? 'bg-warning' :
-                       ($status === 'rejected' ? 'bg-danger' : 'bg-secondary'))
-        ]);
+            'success' => false,
+            'message' => 'Invalid status field.'
+        ], 422);
     }
+
+    $allowedStatuses = [
+        'pending',
+        'under review',
+        'confirmed',
+        'rejected',
+    ];
+
+    if (!in_array($request->status, $allowedStatuses, true)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid verification status.'
+        ], 422);
+    }
+
+    $field = $request->field;
+    $status = $request->status;
+
+    $user->$field = $status;
+    $user->save();
+
+    $admin = Auth::guard('admin')->user();
+
+    Log::info('User verification status updated', [
+        'admin_id' => $admin?->id,
+        'user_id' => $user->id,
+        'admin_email' => $admin?->email,
+        'field' => $field,
+        'old_status' => $user->getOriginal($field),
+        'new_status' => $status,
+        'ip_address' => $request->ip(),
+    ]);
+
+    // Push notification on compliance status change
+    // Only notify for actual document/verification status fields (fields
+    // ending in "_status"), and only for meaningful outcomes.
+    if (str_ends_with($field, '_status')) {
+        $label = $this->complianceFieldLabel($field);
+
+
+        if ($status === 'confirmed') {
+            $this->sendComplianceNotification(
+                $user,
+                "{$label} Approved",
+                "Your {$label} has been reviewed and approved.",
+                ['document' => $field, 'status' => $status]
+            );
+        } elseif ($status === 'rejected') {
+            $this->sendComplianceNotification(
+                $user,
+                "{$label} Rejected",
+                "Your {$label} was reviewed and could not be approved. Please check your account for details.",
+                ['document' => $field, 'status' => $status]
+            );
+        }
+        // Intentionally not notifying for 'under_review' or other
+        // in-progress states here, since the compliance controller
+        // already notifies the user at upload time.
+    }
+
+    return response()->json([
+        'success' => true,
+        'label' => ucfirst(str_replace('_', ' ', $status)),
+        'class' => match ($status) {
+            'confirmed' => 'bg-success',
+            'under review' => 'bg-warning',
+            'rejected' => 'bg-danger',
+            default => 'bg-secondary',
+        }
+    ]);
+}
 
 
  public function addMoney(Request $request, $userId, $balanceId)

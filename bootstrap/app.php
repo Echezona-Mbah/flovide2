@@ -18,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         'admin.auth' => \App\Http\Middleware\AdminAuth::class,
         'admin.permission' => AdminPermission::class,
         'business.verified' => \App\Http\Middleware\EnsureBusinessVerified::class,
-         'ip.whitelist' => EnsureIpWhitelisted::class,
+        'ip.whitelist' => EnsureIpWhitelisted::class,
+        'user.inactivity' => \App\Http\Middleware\CheckUserInactivity::class,
     ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
