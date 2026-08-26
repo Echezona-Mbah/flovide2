@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable; // important for login
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
 class Personal extends Authenticatable
@@ -68,6 +69,10 @@ class Personal extends Authenticatable
         'password' => 'hashed',
         'login_otp_expires_at' => 'datetime',
     ];
+
+    public function bankAccountRequest(): HasMany {
+        return $this->hasMany(PersonalBankAccountRequest::class);
+    }
 
     public function balances()
     {

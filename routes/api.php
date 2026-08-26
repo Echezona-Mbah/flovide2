@@ -516,6 +516,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/personal-dashboardapi', [PersonalCreateBankController::class, 'dashboardapi']);
         Route::get('/personal-balances/{id}/statement', [PersonalCreateBankController::class, 'statement']);
 
+        //request bank account api route 
+        Route::post('/personal-bank-account-request', [PersonalCreateBankController::class, 'store']);
+
 
         //payouts 
         Route::post('/bank-account', [PersonaladdBankAccountController::class, 'store']);

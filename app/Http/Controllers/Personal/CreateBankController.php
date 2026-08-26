@@ -15,6 +15,10 @@ use App\Models\TransactionHistory;
 use Barryvdh\DomPDF\Facade\Pdf;
 // use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\Log;
+use App\Models\PersonalBankAccountRequest;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BankAccountRequestReceived;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -708,5 +712,79 @@ public function statement(Request $request, $id)
         'closingBalance'
     ));
 }
+
+
+
+public function store(Request $request) {
+
+    $validated = $request->validate([
+        'bvn' => 'required|string|size:11',
+        'nin' => 'required|string|size:11',
+    ]);
+
+    try {
+
+        $personal = Auth::guard('personal-api')->user();
+        if (!$personal) {
+            return response()->json([
+                'data' => [
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ]
+            ], 401);
+        }
+
+        //prevent multiple pending requests
+        $existingPendingRequest = PersonalBankAccountRequest::where('personal_id', $personal->id)->where('status', ['pending', 'processing'])->first();
+        if ($existingPendingRequest) {
+            return response()->json([
+                'data' => [
+                    'success' => false,
+                    'message' => 'You already have a bank account request being processed.',
+                ]
+            ], 409);
+        }
+
+        DB::beginTransaction();
+
+        $bankAccountRequest = PersonalBankAccountRequest::create([
+            'personal_id' => $personal->id,
+            'bvn' => $request->bvn,
+            'nin' => $request->nin,
+            'status' => 'pending',
+        ]);
+
+        DB::commit();
+
+        //send admin notification
+        Mail::to(config('mail.admin_email'))->send(new BankAccountRequestReceived($bankAccountRequest));
+
+        return response()->json([
+            'data'=> [
+                'success' => true,
+                'message' => 'Your Nigerian bank account request has been submitted successfully.',
+                'status' => $bankAccountRequest->status,
+            ],
+        ], 200);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        Log::error('Bank account request failed', [
+            'error' => $e->getMessage(),
+            'personal_id' => $personal->id ?? null,
+        ]);
+
+        return response()->json([
+            'data' => [
+                'success' => false,
+                'message' => 'Unable to submit your bank account request at this time.'
+            ]
+        ], 500);
+
+    }
+    
+}
+
 
 }
