@@ -32,47 +32,76 @@
         </div>
 
         <!-- Filters -->
-        <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/40">
-          <form method="GET" action="{{ request()->url() }}"
-                class="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-            <div class="w-full md:max-w-md">
-              <input
-                type="search"
-                name="search"
-                id="search"
-                value="{{ request('search') }}"
-                placeholder="Search by reference, sender, recipient..."
-                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200"
-              />
-            </div>
+      <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/40">
+      <form method="GET" action="{{ request()->url() }}" class="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
 
-            <div class="flex gap-3 flex-wrap">
-              <select name="filter"
-                class="w-full md:w-auto border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200"
-                onchange="this.form.submit()">
-                <option value="">All transactions</option>
-                <option value="credit"     {{ request('filter') == 'credit'     ? 'selected' : '' }}>Credit</option>
-                <option value="withdrawal" {{ request('filter') == 'withdrawal' ? 'selected' : '' }}>Withdrawals</option>
-                <option value="swap"       {{ request('filter') == 'swap'       ? 'selected' : '' }}>Swap</option>
-                <option value="success"    {{ request('filter') == 'success'    ? 'selected' : '' }}>Successful</option>
-                <option value="failed"     {{ request('filter') == 'failed'     ? 'selected' : '' }}>Failed</option>
-                <option value="pending"    {{ request('filter') == 'pending'    ? 'selected' : '' }}>Pending</option>
-              </select>
-
-              <button type="submit"
-                class="bg-[#215F9C] text-white px-5 py-2.5 rounded-xl text-sm hover:bg-slate-800 transition">
-                Search
-              </button>
-
-              @if(request('search') || request('filter'))
-                <a href="{{ request()->url() }}"
-                  class="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-xl text-sm hover:bg-slate-200 transition">
-                  Clear
-                </a>
-              @endif
-            </div>
-          </form>
+        <!-- Search -->
+        <div class="relative w-full lg:max-w-md">
+          <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+          <input
+            type="search"
+            name="search"
+            id="search"
+            value="{{ request('search') }}"
+            placeholder="Search by reference, sender, recipient..."
+            class="w-full border border-slate-200 rounded-xl pl-11 pr-10 py-2.5 text-sm bg-white transition focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-[#215F9C]"
+          />
+          @if(request('search'))
+            <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white text-slate-500 flex items-center justify-center text-[10px] transition"
+              title="Clear search">
+              <i class="fas fa-xmark"></i>
+            </a>
+          @endif
         </div>
+
+        <!-- Filters -->
+        <div class="flex gap-3 flex-wrap items-center">
+
+          <div class="relative">
+            <select name="filter"
+              class="appearance-none w-full md:w-auto border border-slate-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white text-slate-700 cursor-pointer transition hover:border-[#215F9C] focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-[#215F9C]"
+              onchange="this.form.submit()">
+              <option value="">All transactions</option>
+              <option value="credit"     {{ request('filter') == 'credit'     ? 'selected' : '' }}>Credit</option>
+              <option value="withdrawal" {{ request('filter') == 'withdrawal' ? 'selected' : '' }}>Withdrawals</option>
+              <option value="swap"       {{ request('filter') == 'swap'       ? 'selected' : '' }}>Swap</option>
+              <option value="success"    {{ request('filter') == 'success'    ? 'selected' : '' }}>Successful</option>
+              <option value="failed"     {{ request('filter') == 'failed'     ? 'selected' : '' }}>Failed</option>
+              <option value="pending"    {{ request('filter') == 'pending'    ? 'selected' : '' }}>Pending</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
+
+          <div class="relative">
+            <select name="per_page"
+              class="appearance-none w-full md:w-auto border border-slate-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white text-slate-700 cursor-pointer transition hover:border-[#215F9C] focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-[#215F9C]"
+              onchange="this.form.submit()">
+              @foreach($allowedPerPage as $option)
+                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
+                  {{ $option }} per page
+                </option>
+              @endforeach
+            </select>
+            <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
+
+          <button type="submit"
+            class="inline-flex items-center gap-2 bg-[#215F9C] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm shadow-sky-900/10 hover:bg-[#1a4c7d] active:scale-[0.98] transition">
+            <i class="fas fa-magnifying-glass text-xs"></i>
+            Search
+          </button>
+
+          @if(request('search') || request('filter'))
+            <a href="{{ request()->url() }}"
+              class="inline-flex items-center gap-2 bg-slate-100 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition">
+              <i class="fas fa-rotate-left text-xs"></i>
+              Clear
+            </a>
+          @endif
+        </div>
+      </form>
+    </div>
 
         <!-- Table -->
         <div class="overflow-x-auto">

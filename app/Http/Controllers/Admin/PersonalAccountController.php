@@ -22,12 +22,40 @@ class PersonalAccountController extends Controller
         use CurrencyHelper;
 
     
-    public function index(Request $request)
-    {
-            $search = $request->search;
+    // public function index(Request $request)
+    // {
+    //         $search = $request->search;
 
-        $allpersonal = Personal::where('typeofuser', 'personal')
-                      ->when($search, function ($query) use ($search) {
+    //     $allpersonal = Personal::where('typeofuser', 'personal')
+    //                   ->when($search, function ($query) use ($search) {
+    //         $query->where(function ($q) use ($search) {
+    //             $q->where('firstname', 'like', "%{$search}%")
+    //               ->orWhere('lastname', 'like', "%{$search}%")
+    //               ->orWhere('country', 'like', "%{$search}%")
+    //               ->orWhere('email', 'like', "%{$search}%")
+    //               ->orWhere('city', 'like', "%{$search}%")
+    //               ->orWhere('person_phone', 'like', "%{$search}%");
+    //         });
+    //     })
+    //     ->orderBy('created_at', 'desc')
+    //     ->paginate(10)
+    //     ->withQueryString(); // keeps search during pagination
+    //     return view('admin.personalaccount', compact('allpersonal'));
+    // }
+
+public function index(Request $request)
+{
+    $search = $request->search;
+
+    $allowedPerPage = [25, 50, 100, 250, 500];
+    $perPage = (int) $request->input('per_page', 25);
+
+    if (!in_array($perPage, $allowedPerPage, true)) {
+        $perPage = 25;
+    }
+
+    $allpersonal = Personal::where('typeofuser', 'personal')
+        ->when($search, function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('firstname', 'like', "%{$search}%")
                   ->orWhere('lastname', 'like', "%{$search}%")
@@ -38,12 +66,11 @@ class PersonalAccountController extends Controller
             });
         })
         ->orderBy('created_at', 'desc')
-        ->paginate(10)
-        ->withQueryString(); // keeps search during pagination
-        return view('admin.personalaccount', compact('allpersonal'));
-    }
+        ->paginate($perPage)
+        ->withQueryString();
 
-
+    return view('admin.personalaccount', compact('allpersonal', 'perPage', 'allowedPerPage'));
+}
 
     public function edit($id)
 {

@@ -93,6 +93,12 @@ class RegisteredUserController extends Controller
         $email = $request->input('email');
         $existingUser = User::where('email', $email)->first();
         $existingcountry = Countries::where('code', $request->country)->first();
+        if (!$existingcountry) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid country selected. Please choose a valid country.',
+            ], 422);
+        }
         $existingcountryname = $existingcountry->name;
         $existingcountrycurrency_code = $existingcountry->currency_code;
 

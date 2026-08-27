@@ -22,7 +22,7 @@ use App\Services\FirebaseNotificationService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AdminBroadcastEmail;
-
+use App\Models\InteracAutoDeposit;
 
 class BusinessAccountController extends Controller
 {
@@ -78,9 +78,46 @@ class BusinessAccountController extends Controller
     }
 
 
+// public function index(Request $request)
+// {
+//     $search = $request->search;
+
+//     $allUser = User::where('typeofuser', 'business')
+//         ->when($search, function ($query) use ($search) {
+//             $query->where(function ($q) use ($search) {
+//                 $q->where('business_name', 'like', "%{$search}%")
+//                   ->orWhere('firstname', 'like', "%{$search}%")
+//                   ->orWhere('lastname', 'like', "%{$search}%")
+//                   ->orWhere('email', 'like', "%{$search}%")
+//                   ->orWhere('city', 'like', "%{$search}%")
+//                   ->orWhere('business_phone', 'like', "%{$search}%");
+//             });
+//         })
+//         ->orderBy('created_at', 'desc')
+//         ->paginate(10)
+//         ->withQueryString(); // keeps search during pagination
+//         $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+//         ->where('type', 'referral_bonus')
+//         ->latest()
+//         ->get();
+
+        
+
+        
+
+//     return view('admin.businessaccount', compact('allUser','search','unreadReferralAlerts'));
+// }
+
 public function index(Request $request)
 {
     $search = $request->search;
+
+    $allowedPerPage = [25, 50, 100, 250, 500];
+    $perPage = (int) $request->input('per_page', 25);
+
+    if (!in_array($perPage, $allowedPerPage, true)) {
+        $perPage = 25;
+    }
 
     $allUser = User::where('typeofuser', 'business')
         ->when($search, function ($query) use ($search) {
@@ -94,18 +131,15 @@ public function index(Request $request)
             });
         })
         ->orderBy('created_at', 'desc')
-        ->paginate(10)
-        ->withQueryString(); // keeps search during pagination
-        $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
+        ->paginate($perPage)
+        ->withQueryString();
+
+    $unreadReferralAlerts = \App\Models\AdminNotification::whereNull('read_at')
         ->where('type', 'referral_bonus')
         ->latest()
         ->get();
 
-        
-
-        
-
-    return view('admin.businessaccount', compact('allUser','search','unreadReferralAlerts'));
+    return view('admin.businessaccount', compact('allUser', 'search', 'unreadReferralAlerts', 'perPage', 'allowedPerPage'));
 }
 
 public function edit($id)
@@ -212,6 +246,9 @@ public function find($id)
     $currencyFees = UserCurrencyFee::where('user_id', $user->id)
         ->get()
         ->keyBy('currency');
+    $autoDeposits = InteracAutoDeposit::where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
     foreach ($balances as $bal) {
         $bal->currency_info = $this->getCountryCodeFromCurrency($bal->currency);
@@ -239,7 +276,8 @@ public function find($id)
         'Subaccount',
         'currencyFees',
         'unreadReferralAlerts',
-        'referrals'
+        'referrals',
+        'autoDeposits'
     ));
 }
 
@@ -591,6 +629,38 @@ public function submitToBlaaiz(Request $request, $id, BlaaizService $blaaiz)
     return back()->with('success', 'Business registered with Blaaiz successfully: ' . ($responseData['id'] ?? ''));
 }
 
+public function updateAutoDepositStatus(Request $request, $userId, $emailId)
+{
+    $request->validate([
+        'status' => 'required|in:active,inactive,pending',
+    ]);
+
+    $user = User::findOrFail($userId);
+
+    $entry = InteracAutoDeposit::where('id', $emailId)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    $entry->status = $request->status;
+    $entry->save();
+
+    Log::info('Interac Auto Deposit status updated by admin', [
+        'admin_id'    => Auth::guard('admin')->id(),
+        'user_id'     => $user->id,
+        'entry_id'    => $entry->id,
+        'email'       => $entry->email,
+        'new_status'  => $entry->status,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Status updated successfully.',
+        'data'    => [
+            'id'     => $entry->id,
+            'status' => $entry->status,
+        ],
+    ]);
+}
 
 
 

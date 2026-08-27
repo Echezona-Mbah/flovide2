@@ -21,16 +21,59 @@ class AddBeneficiariesController extends Controller
 {
         protected $beneficiaryService;
 
-    public function index(Request $request)
+//     public function index(Request $request)
+// {
+//     $user    = auth()->user();
+//     $team    = TeamMembers::where('user_id', $user->id)->first();
+//     $ownerId = $team ? $team->owner_id : $user->id;
+//     $mode    = session('mode', 'live');
+
+//     $beneficias = Beneficia::where('user_id', $ownerId)
+//         ->where('mode', $mode)
+//         ->paginate(25);
+
+//     if ($request->expectsJson()) {
+//         return response()->json([
+//             'message' => 'Beneficia records retrieved successfully',
+//             'success' => 'Beneficia records retrieved successfully',
+//             'data'    => $beneficias,
+//             'method'  => $request->method(),
+//             'url'     => $request->fullUrl()
+//         ], 200);
+//     }
+
+//     return view('business.beneficiaries', compact('beneficias', 'mode'));
+// }
+ public function index(Request $request)
 {
     $user    = auth()->user();
     $team    = TeamMembers::where('user_id', $user->id)->first();
     $ownerId = $team ? $team->owner_id : $user->id;
     $mode    = session('mode', 'live');
 
+    $search = $request->input('search');
+
+    $allowedPerPage = [25, 50, 100, 250, 500];
+    $perPage = (int) $request->input('per_page', 25);
+
+    if (!in_array($perPage, $allowedPerPage, true)) {
+        $perPage = 25;
+    }
+
     $beneficias = Beneficia::where('user_id', $ownerId)
         ->where('mode', $mode)
-        ->paginate(25);
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($q2) use ($search) {
+                $q2->where('account_name', 'like', "%{$search}%")
+                   ->orWhere('bank', 'like', "%{$search}%")
+                   ->orWhere('account_number', 'like', "%{$search}%")
+                   ->orWhere('country', 'like', "%{$search}%")
+                   ->orWhere('currency', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage)
+        ->withQueryString();
 
     if ($request->expectsJson()) {
         return response()->json([
@@ -42,9 +85,8 @@ class AddBeneficiariesController extends Controller
         ], 200);
     }
 
-    return view('business.beneficiaries', compact('beneficias', 'mode'));
+    return view('business.beneficiaries', compact('beneficias', 'mode', 'search', 'perPage', 'allowedPerPage'));
 }
- 
 
 public function create()
 {

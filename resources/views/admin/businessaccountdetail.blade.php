@@ -1549,6 +1549,61 @@
                                         </div>
 
                                         {{-- Blaaiz Interac (Canada) — unchanged, still on User --}}
+                                        {{-- CAD Auto Deposit Emails (admin management) ─────────────────────── --}}
+                                        <div class="bank-tile {{ $autoDeposits->where('status', 'active')->count() > 0 ? 'bank-tile-active' : '' }}">
+                                            <div class="bank-tile-top">
+                                                <div class="bank-flag-badge flag-ca">🇨🇦</div>
+                                                <div>
+                                                    <div class="bank-tile-name">CAD Auto Deposit</div>
+                                                    <div class="bank-tile-region">Canada · Interac e-Transfer Emails</div>
+                                                </div>
+                                                <div class="bank-tile-pulse {{ $autoDeposits->where('status', 'active')->count() > 0 ? 'pulse-on' : '' }}"></div>
+                                            </div>
+
+                                            <div class="bank-tile-body">
+                                                @if($autoDeposits->count() > 0)
+                                                    <div class="d-flex flex-column gap-2" id="autoDepositList">
+                                                        @foreach($autoDeposits as $ad)
+                                                            @php
+                                                                $adBadge = match ($ad->status) {
+                                                                    'active'   => 'status-success',
+                                                                    'pending'  => 'status-warning',
+                                                                    'inactive' => 'status-muted',
+                                                                    default    => 'status-muted',
+                                                                };
+                                                            @endphp
+                                                            <div class="bank-detail-row" data-entry-id="{{ $ad->id }}">
+                                                                <span class="text-truncate" style="max-width: 160px;" title="{{ $ad->email }}">{{ $ad->email }}</span>
+                                                                <div class="dropdown d-inline-block">
+                                                                    <button
+                                                                        type="button"
+                                                                        data-bs-toggle="dropdown"
+                                                                        class="custom-status {{ $adBadge }} autodeposit-status-btn"
+                                                                        style="border: 0; cursor: pointer;">
+                                                                        {{ ucfirst($ad->status) }} <i class="fa-solid fa-caret-down ms-1"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                                        <a href="#" class="dropdown-item autodeposit-status-change" data-status="active" data-entry-id="{{ $ad->id }}" data-user-id="{{ $user->id }}">Active</a>
+                                                                        <a href="#" class="dropdown-item autodeposit-status-change" data-status="pending" data-entry-id="{{ $ad->id }}" data-user-id="{{ $user->id }}">Pending</a>
+                                                                        <a href="#" class="dropdown-item autodeposit-status-change text-danger" data-status="inactive" data-entry-id="{{ $ad->id }}" data-user-id="{{ $user->id }}">Inactive</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="bank-tile-empty">
+                                                        This business has not registered any Interac Auto Deposit emails yet.
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <span class="custom-status status-muted bank-tile-status">
+                                                <i class="fa-solid fa-envelope"></i> {{ $autoDeposits->count() }} email{{ $autoDeposits->count() !== 1 ? 's' : '' }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Blaaiz Interac (Canada) — unchanged, still on User --}}
                                         <div class="bank-tile {{ $user->blaaiz_id ? 'bank-tile-active' : '' }}">
                                             ... (leave as-is)
                                         </div>
@@ -2423,4 +2478,45 @@ document.querySelectorAll('.save-fee-btn').forEach(btn => {
         });
 
     });
+
+
+    // status dropdown handler
+        document.querySelectorAll('.autodeposit-status-change').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const status  = this.dataset.status;
+            const entryId = this.dataset.entryId;
+            const userId  = this.dataset.userId;
+
+            fetch(`/admin/business-account/${userId}/interac-autodeposit/${entryId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ status: status }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Failed to update status.');
+                    return;
+                }
+
+                const row = document.querySelector(`.bank-detail-row[data-entry-id="${entryId}"]`);
+                const btn = row.querySelector('.autodeposit-status-btn');
+
+                btn.className = 'custom-status autodeposit-status-btn';
+                if (status === 'active') btn.classList.add('status-success');
+                else if (status === 'pending') btn.classList.add('status-warning');
+                else btn.classList.add('status-muted');
+
+                btn.innerHTML = data.data.status.charAt(0).toUpperCase() + data.data.status.slice(1) + ' <i class="fa-solid fa-caret-down ms-1"></i>';
+            })
+            .catch(() => alert('Network error while updating status.'));
+        });
+    });
 </script>
+

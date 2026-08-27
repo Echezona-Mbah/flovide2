@@ -39,15 +39,61 @@
         </div>
 
         <!-- Filters -->
-        <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/40">
-          <div class="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-            <div class="flex items-center border border-slate-200 rounded-xl px-4 py-2.5 w-full md:max-w-md bg-white">
-              <i class="fas fa-search text-slate-400 mr-3"></i>
-              <input type="search" placeholder="Search beneficiaries"
-                     class="w-full text-sm focus:outline-none bg-transparent" />
-            </div>
+      <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/40">
+        <form method="GET" action="{{ request()->url() }}" class="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+
+          <!-- Search -->
+          <div class="relative w-full lg:max-w-md">
+            <i class="fas fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+            <input
+              type="search"
+              name="search"
+              id="search"
+              value="{{ $search }}"
+              placeholder="Search by name, bank, account, country..."
+              class="w-full border border-slate-200 rounded-xl pl-11 pr-10 py-2.5 text-sm bg-white transition focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-[#215F9C]"
+            />
+            @if($search)
+              <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}"
+                class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white text-slate-500 flex items-center justify-center text-[10px] transition"
+                title="Clear search">
+                <i class="fas fa-xmark"></i>
+              </a>
+            @endif
           </div>
-        </div>
+
+          <!-- Filters -->
+          <div class="flex gap-3 flex-wrap items-center">
+
+            <div class="relative">
+              <select name="per_page"
+                class="appearance-none w-full md:w-auto border border-slate-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white text-slate-700 cursor-pointer transition hover:border-[#215F9C] focus:outline-none focus:ring-4 focus:ring-sky-100 focus:border-[#215F9C]"
+                onchange="this.form.submit()">
+                @foreach($allowedPerPage as $option)
+                  <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
+                    {{ $option }} per page
+                  </option>
+                @endforeach
+              </select>
+              <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+            </div>
+
+            <button type="submit"
+              class="inline-flex items-center gap-2 bg-[#215F9C] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm shadow-sky-900/10 hover:bg-[#1a4c7d] active:scale-[0.98] transition">
+              <i class="fas fa-magnifying-glass text-xs"></i>
+              Search
+            </button>
+
+            @if($search)
+              <a href="{{ request()->url() }}"
+                class="inline-flex items-center gap-2 bg-slate-100 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition">
+                <i class="fas fa-rotate-left text-xs"></i>
+                Clear
+              </a>
+            @endif
+          </div>
+        </form>
+      </div>
 
         <!-- Table -->
         <div class="overflow-x-auto">

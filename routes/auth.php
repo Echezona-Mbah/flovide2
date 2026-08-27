@@ -545,6 +545,7 @@ Route::middleware('admin.auth')->group(function () {
             Route::post('/admin/personal-account/{id}/submit-fidelity', [PersonalAccountController::class, 'submitToFidelity'])->name('admin.personal.submit-fidelity');
             Route::post('/admin/business-account/{id}/submit-fidelity', [BusinessAccountController::class, 'submitToFidelity'])->name('admin.business.submit-fidelity');
             Route::post('/admin/business-account/{id}/submit-blaaiz', [BusinessAccountController::class, 'submitToBlaaiz'])->name('admin.business.submit-blaaiz');
+            Route::post('/admin/business-account/{userId}/interac-autodeposit/{emailId}/status', [BusinessAccountController::class, 'updateAutoDepositStatus'])->name('admin.business.interac_autodeposit.status');
 
         });
 

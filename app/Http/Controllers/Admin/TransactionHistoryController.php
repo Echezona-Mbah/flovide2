@@ -14,13 +14,20 @@ use App\Mail\RefundProcessedMail;
 
 class TransactionHistoryController extends Controller
 {
-        public function index(Request $request)
+     public function index(Request $request)
     {
+        $allowedPerPage = [25, 50, 100, 250, 500];
+        $perPage = (int) $request->input('per_page', 25);
 
-        $lastTransactions = TransactionHistory::orderBy('created_at', 'desc')->paginate(10);
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 25;
+        }
 
-        return view('admin.transactionhistory', compact('lastTransactions'));
+        $lastTransactions = TransactionHistory::orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->appends($request->query());
 
+        return view('admin.transactionhistory', compact('lastTransactions', 'perPage'));
     }
 
     public function destroy($id)

@@ -154,25 +154,110 @@
     }
 
     .search-toolbar {
-        padding: 0 24px 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
+    padding: 0 24px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--tx-ink-soft);
+    font-size: 15px;
+}
+
+.search-input {
+    width: 100%;
+    height: 52px;
+    border-radius: 18px !important;
+    border: 1px solid #dbe3ee !important;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    padding-left: 46px;
+    padding-right: 18px;
+    color: var(--tx-ink);
+    font-weight: 600;
+    box-shadow: 0 10px 28px rgba(20, 33, 61, 0.06) !important;
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.search-input:focus {
+    border-color: var(--tx-blue) !important;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+}
+
+.per-page-control {
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px 7px 16px;
+    border: 1px solid #dbe3ee;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 10px 28px rgba(20, 33, 61, 0.06);
+}
+
+.per-page-control label {
+    margin: 0;
+    color: var(--tx-ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.per-page-select {
+    height: 38px;
+    min-width: 82px;
+    border: 0 !important;
+    border-radius: 13px !important;
+    background-color: #eef3fa;
+    color: var(--tx-ink);
+    font-weight: 800;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.per-page-select:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+@media (max-width: 576px) {
+    .search-toolbar {
+        padding: 0 16px 18px;
+        align-items: stretch;
     }
 
-    .search-input {
-        min-width: 260px;
-        height: 46px;
-        border-radius: 15px !important;
-        border: 1px solid #dbe3ee !important;
-        box-shadow: none !important;
+    .search-box,
+    .per-page-control {
+        width: 100%;
     }
 
-    .search-input:focus {
-        border-color: var(--tx-blue) !important;
-        box-shadow: 0 0 0 0.18rem rgba(37, 99, 235, 0.10) !important;
+    .per-page-control {
+        justify-content: space-between;
     }
+
+    .per-page-select {
+        min-width: 110px;
+    }
+}
 
     .btn-brand,
     .btn-soft,
@@ -597,8 +682,31 @@
                                 <div class="section-subtitle">Search, inspect, charge back, or remove transaction records.</div>
                             </div>
 
-                            <div class="search-toolbar">
+                            {{-- <div class="search-toolbar">
                                 <input type="text" id="transactionSearch" class="form-control search-input" placeholder="Search sender, type, status, amount, currency, or reference...">
+                            </div> --}}
+
+                            <div class="search-toolbar">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input
+                                        type="text"
+                                        id="transactionSearch"
+                                        class="form-control search-input"
+                                        placeholder="Search sender, type, status, amount, currency, or reference..."
+                                    >
+                                </div>
+
+                                <div class="per-page-control">
+                                    <label for="perPageSelect">Show</label>
+                                    <select id="perPageSelect" class="form-select per-page-select">
+                                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                        <option value="250" {{ $perPage == 250 ? 'selected' : '' }}>250</option>
+                                        <option value="500" {{ $perPage == 500 ? 'selected' : '' }}>500</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="table-responsive" style="overflow-x:auto;">
@@ -1511,5 +1619,19 @@ document.querySelectorAll('.refund-form').forEach(form => {
     });
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const perPageSelect = document.getElementById('perPageSelect');
+
+    perPageSelect.addEventListener('change', function () {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', this.value);
+        url.searchParams.delete('page'); // reset to page 1 when page size changes
+        window.location.href = url.toString();
+    });
+});
+
+
 </script>
 

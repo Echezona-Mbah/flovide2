@@ -152,21 +152,152 @@
         margin-bottom: 0;
     }
 
-    .search-toolbar {
+    .filter-toolbar {
         padding: 0 24px 20px;
     }
 
-    .search-input {
-        max-width: 360px;
-        height: 46px;
-        border-radius: 15px !important;
-        border: 1px solid #dbe3ee !important;
-        box-shadow: none !important;
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
-    .search-input:focus {
-        border-color: var(--bf-blue) !important;
-        box-shadow: 0 0 0 0.18rem rgba(37, 99, 235, 0.10) !important;
+    .filter-search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-width: 340px;
+        flex: 1;
+    }
+
+    .filter-search-icon {
+        position: absolute;
+        left: 16px;
+        font-size: 13px;
+        color: var(--bf-ink-soft);
+        pointer-events: none;
+    }
+
+    .filter-search-input {
+        width: 100%;
+        height: 46px;
+        border: 1px solid var(--bf-line);
+        border-radius: 15px;
+        background: #fbfcff;
+        padding: 0 40px 0 40px;
+        font-size: 14px;
+        color: var(--bf-ink);
+        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .filter-search-input::placeholder {
+        color: var(--bf-ink-soft);
+    }
+
+    .filter-search-input:focus {
+        outline: none;
+        border-color: var(--bf-blue);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .filter-search-clear {
+        position: absolute;
+        right: 12px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bf-ink-soft);
+        font-size: 11px;
+        background: #eef1f6;
+        transition: all 0.2s ease;
+    }
+
+    .filter-search-clear:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .filter-select-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-select {
+        appearance: none;
+        height: 46px;
+        border: 1px solid var(--bf-line);
+        border-radius: 15px;
+        background: #fbfcff;
+        padding: 0 34px 0 16px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--bf-ink);
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .filter-select:hover {
+        border-color: var(--bf-blue);
+        background: #fff;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--bf-blue);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .filter-select-icon {
+        position: absolute;
+        right: 14px;
+        font-size: 10px;
+        color: var(--bf-ink-soft);
+        pointer-events: none;
+    }
+
+    .filter-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 46px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 15px;
+        background: linear-gradient(135deg, var(--bf-blue), var(--bf-blue-deep));
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 700;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+        transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .filter-submit:hover {
+        opacity: 0.92;
+    }
+
+    .filter-submit:active {
+        transform: scale(0.98);
+    }
+
+    @media (max-width: 767px) {
+        .filter-search {
+            min-width: 100%;
+        }
+
+        .filter-bar {
+            width: 100%;
+        }
+
+        .filter-select-wrap,
+        .filter-submit {
+            flex: 1;
+        }
     }
 
     .table-modern thead th {
@@ -267,8 +398,8 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="hero-metric">
-                                                    <small>Live Search</small>
-                                                    <strong id="searchMeta">No filter applied</strong>
+                                                    <small>Active filter</small>
+                                                    <strong>{{ $search ?: 'All records' }}</strong>
                                                 </div>
                                             </div>
                                         </div>
@@ -290,8 +421,8 @@
                                 <div class="summary-icon icon-cyan">
                                     <i class="fa-solid fa-user-tie"></i>
                                 </div>
-                                <div class="summary-label">Visible Rows</div>
-                                <div class="summary-value" id="visibleCount">{{ $allbeneficia->count() }}</div>
+                                <div class="summary-label">Showing</div>
+                                <div class="summary-value">{{ $allbeneficia->count() }}</div>
                             </div>
 
                             <div class="summary-card">
@@ -317,8 +448,39 @@
                                 <div class="section-subtitle">Search and review beneficiary account records below.</div>
                             </div>
 
-                            <div class="search-toolbar">
-                                <input type="text" id="transactionSearch" class="form-control search-input" placeholder="Search account name, bank, account number, country, currency, or type...">
+                            <div class="filter-toolbar">
+                                <form method="GET" action="" class="filter-bar">
+                                    <div class="filter-search">
+                                        <i class="fa fa-magnifying-glass filter-search-icon"></i>
+                                        <input
+                                            type="text"
+                                            name="search"
+                                            value="{{ $search }}"
+                                            class="filter-search-input"
+                                            placeholder="Search account name, bank, account number, country, currency, or alias...">
+                                        @if($search)
+                                            <a href="{{ url()->current() }}?per_page={{ $perPage }}" class="filter-search-clear" title="Clear search">
+                                                <i class="fa fa-xmark"></i>
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    <div class="filter-select-wrap">
+                                        <select name="per_page" class="filter-select" onchange="this.form.submit()">
+                                            @foreach($allowedPerPage as $option)
+                                                <option value="{{ $option }}" {{ $perPage == $option ? 'selected' : '' }}>
+                                                    {{ $option }} / page
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="fa fa-chevron-down filter-select-icon"></i>
+                                    </div>
+
+                                    <button type="submit" class="filter-submit">
+                                        <i class="fa fa-magnifying-glass"></i>
+                                        <span>Search</span>
+                                    </button>
+                                </form>
                             </div>
 
                             <div class="table-responsive" id="beneficiaTable">
@@ -370,33 +532,4 @@
     </div>
 
 @include('admin.footer')
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('transactionSearch');
-    const tableBody = document.getElementById('beneficiaTableBody');
-    const rows = tableBody.querySelectorAll('tr');
-    const visibleCount = document.getElementById('visibleCount');
-    const searchMeta = document.getElementById('searchMeta');
-
-    function updateVisibleCount() {
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none').length;
-        visibleCount.textContent = visibleRows;
-    }
-
-    searchInput.addEventListener('input', function () {
-        const query = this.value.toLowerCase().trim();
-        searchMeta.textContent = query ? query : 'No filter applied';
-
-        rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td'));
-            const match = cells.some(td => td.textContent.toLowerCase().includes(query));
-            row.style.display = match ? '' : 'none';
-        });
-
-        updateVisibleCount();
-    });
-
-    updateVisibleCount();
-});
-</script>
+</body>

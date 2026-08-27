@@ -20,24 +20,7 @@ class TransactionHistoryController extends Controller
         $this->middleware('auth:' . (request()->is('api/*') ? 'sanctum' : 'web'));
     }
 
-    // public function transaction()
-    // {
-    //     $transactions = TransactionHistory::where('user_id', Auth::id())
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
-
-    //     if (request()->wantsJson()) {
-    //         return response()->json([
-    //             'message' => 'Transactions retrieved successfully.',
-    //             'data' => $transactions
-    //         ]);
-    //     } else {
-
-    //         $latestTransaction = $transactions->first();
-    //         // return view('business.transactionHistory', ['transactions' => $transactions]);
-    //         return view('business.transactionHistory', compact('transactions', 'latestTransaction'));
-    //     }
-    // }
+ 
 
 // public function transaction(Request $request)
 // {
@@ -47,7 +30,7 @@ class TransactionHistoryController extends Controller
 //     $mode    = session('mode', 'live');
 
 //     $search = $request->input('search');
-//     $filter = $request->input('filter'); // credit, withdrawal, success, failed, pending
+//     $filter = $request->input('filter');
 
 //     $transactions = TransactionHistory::where('user_id', $ownerId)
 //         ->where('mode', $mode)
@@ -61,7 +44,7 @@ class TransactionHistoryController extends Controller
 //             });
 //         })
 //         ->when($filter, function ($q) use ($filter) {
-//             if (in_array($filter, ['credit', 'withdrawal','swap'])) {
+//             if (in_array($filter, ['credit', 'withdrawal', 'swap'])) {
 //                 $q->where('type', $filter);
 //             } elseif (in_array($filter, ['success', 'failed', 'pending'])) {
 //                 $q->where('status', $filter);
@@ -78,24 +61,29 @@ class TransactionHistoryController extends Controller
 //             'code'    => 'TRANSACTIONS_FETCHED',
 //             'data'    => $transactions->map(function ($t) {
 //                 return [
-//                     'type'      => $t->type,
-//                     'date'      => $t->created_at->format('Y-m-d H:i:s'),
-//                     'sender'    => $t->sender ?? 'N/A',
-//                     'recipient' => $t->recipient_account_name ?? 'N/A',
-//                     'amount'    => number_format($t->amount, 2),
-//                     'currency'  => $t->currency,
-//                     'status'    => $t->status,
-//                     'reference' => $t->reference,
-//                     'method'    => $t->method,
-//                     'mode'      => $t->mode,
-//                     'fees'      => $t->fees,
+//                     'type'             => $t->type,
+//                     'date'             => $t->created_at->format('Y-m-d H:i:s'),
+//                     'sender'           => $t->sender ?? 'N/A',
+//                     'recipient'        => $t->recipient_account_name ?? 'N/A',
+//                     'amount'           => number_format($t->amount, 2),
+//                     'currency'         => $t->currency,
+//                     'status'           => $t->status,
+//                     'reference'        => $t->reference,
+//                     'method'           => $t->method,
+//                     'mode'             => $t->mode,
+//                     'fees'             => $t->fees,
+//                     'swap_from_currency' => $t->swap_from_currency,
+//                     'swap_to_currency'   => $t->swap_to_currency,
+//                     'swap_from_amount'   => $t->swap_from_amount,
+//                     'swap_to_amount'     => $t->swap_to_amount,
+//                     'swap_rate'          => $t->swap_rate,
 //                     'recipient_details' => [
-//                         'account_name'   => $t->recipient_account_name,
-//                         'account_number' => $t->recipient_account_number,
-//                         'bank_name'      => $t->recipient_bank_name,
-//                         'bank_currency'  => $t->recipient_bank_currency,
+//                         'account_name'     => $t->recipient_account_name,
+//                         'account_number'   => $t->recipient_account_number,
+//                         'bank_name'        => $t->recipient_bank_name,
+//                         'bank_currency'    => $t->recipient_bank_currency,
 //                         'recipient_amount' => $t->recipient_amount,
-//                         'fees'           => $t->fees,
+//                         'fees'             => $t->fees,
 //                     ],
 //                 ];
 //             }),
@@ -104,7 +92,6 @@ class TransactionHistoryController extends Controller
 
 //     return view('business.transactionHistory', compact('transactions', 'mode'));
 // }
-
 public function transaction(Request $request)
 {
     $user    = auth()->user();
@@ -114,6 +101,13 @@ public function transaction(Request $request)
 
     $search = $request->input('search');
     $filter = $request->input('filter');
+
+    $allowedPerPage = [12, 25, 50, 100, 250, 500];
+    $perPage = (int) $request->input('per_page', 12);
+
+    if (!in_array($perPage, $allowedPerPage, true)) {
+        $perPage = 12;
+    }
 
     $transactions = TransactionHistory::where('user_id', $ownerId)
         ->where('mode', $mode)
@@ -134,7 +128,7 @@ public function transaction(Request $request)
             }
         })
         ->orderBy('created_at', 'desc')
-        ->paginate(12)
+        ->paginate($perPage)
         ->withQueryString();
 
     if ($request->wantsJson()) {
@@ -173,9 +167,8 @@ public function transaction(Request $request)
         ], 200);
     }
 
-    return view('business.transactionHistory', compact('transactions', 'mode'));
+    return view('business.transactionHistory', compact('transactions', 'mode', 'perPage', 'allowedPerPage'));
 }
-
 
 public function showAllTransactions()
 {
