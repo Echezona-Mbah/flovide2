@@ -519,6 +519,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/personal-interac/autodeposit/initiate', [BlaaizController::class, 'initiateAutoDepositPersonal']);
 
 
+        //request bank account api route 
+        Route::post('/personal-bank-account-request', [PersonalCreateBankController::class, 'store']);
+
 
         //payouts 
         Route::post('/bank-account', [PersonaladdBankAccountController::class, 'store']);
