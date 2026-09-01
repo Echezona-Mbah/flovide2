@@ -552,7 +552,7 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a href="javascript:void(0);" class="nav-link">Campaigns</a>
+                                                    <a href="{{ route('admin.bank-account-requests') }}" class="nav-link">Bank Account Requests</a>
                                                 </li>
                                             </ul>
                                         </div>
