@@ -15,11 +15,52 @@ use App\Traits\CurrencyHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FidelityService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Services\FirebaseNotificationService;
 
 
 class PersonalAccountController extends Controller
 {
-        use CurrencyHelper;
+    use CurrencyHelper;
+
+    protected FirebaseNotificationService $firebase;
+
+    public function __construct(FirebaseNotificationService $firebase)
+    {
+        $this->firebase = $firebase;
+    }
+
+    // Shared notification helper
+    protected function sendComplianceNotification(Personal $user, string $title, string $body, array $data = []): void
+    {
+        if (empty($user->device_token)) {
+            return;
+        }
+
+        $sent = $this->firebase->sendToToken($user->device_token, $title, $body, array_merge([
+            'type' => 'compliance',
+        ], $data));
+
+        if (!$sent) {
+            Log::warning('Compliance push notification failed', [
+                'user_id' => $user->id,
+                'title' => $title,
+            ]);
+        }
+    }
+
+    // Human-readable labels for each status field
+    protected function complianceFieldLabel(string $field): string
+    {
+        return match ($field) {
+            'bvn_status' => 'BVN',
+            'nin_status' => 'NIN',
+            'identity_verification_status' => 'Identity Verification',
+            'selfie_verification_status' => 'Selfie Verification',
+            default => str_replace('_', ' ', ucfirst(str_replace('_status', '', $field))),
+        };
+    }
 
     
     // public function index(Request $request)
@@ -114,6 +155,95 @@ public function update(Request $request,$id)
     $user->update($data);
 
     return back()->with('success','User updated successfully');
+}
+
+public function updateStatus(Request $request, $id) {
+
+    $user = Personal::findOrFail($id);
+
+    $request->validate([
+        'field' => 'required|string',
+        'status' => 'required|string',
+    ]);
+
+    $allowedFields = [
+        // Identity verification
+        'identity_verification_status',
+        'selfie_verification_status',
+    ];
+
+
+    if (!in_array($request->field, $allowedFields, true)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid status field.'
+        ], 422);
+    }
+
+    $allowedStatuses = [
+        'pending',
+        'under review',
+        'confirmed',
+        'rejected',
+    ];
+
+    if (!in_array($request->status, $allowedStatuses, true)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid verification status.'
+        ], 422);
+    }
+
+    $field = $request->field;
+    $status = $request->status;
+
+    $user->$field = $status;
+    $user->save();
+
+    $admin = Auth::guard('admin')->user();
+
+    Log::info('User verification status updated', [
+        'admin_id' => $admin?->id,
+        'user_id' => $user->id,
+        'admin_email' => $admin?->email,
+        'field' => $field,
+        'old_status' => $user->getOriginal($field),
+        'new_status' => $status,
+        'ip_address' => $request->ip(),
+    ]);
+
+    // Push notification on compliance status change
+    if (str_ends_with($field, '_status')) {
+        $label = $this->complianceFieldLabel($field);
+
+        if ($status === 'confirmed') {
+            $this->sendComplianceNotification(
+                $user,
+                "{$label} Approved",
+                "Your {$label} has been reviewed and approved.",
+                ['document' => $field, 'status' => $status]
+            );
+        } elseif ($status === 'rejected') {
+            $this->sendComplianceNotification(
+                $user,
+                "{$label} Rejected",
+                "Your {$label} was reviewed and could not be approved. Please check your account for details.",
+                ['document' => $field, 'status' => $status]
+            );
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'label' => ucfirst(str_replace('_', ' ', $status)),
+        'class' => match ($status) {
+            'confirmed' => 'bg-success',
+            'under review' => 'bg-warning',
+            'rejected' => 'bg-danger',
+            default => 'bg-secondary',
+        }
+    ]);
+
 }
 
 

@@ -462,6 +462,7 @@ Route::middleware('admin.auth')->group(function () {
         Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
         Route::put('/admin/business-account/{id}/currency-fee/{currency}',[BusinessAccountController::class, 'updateCurrencyFee'])->name('admin.business.currency-fee.update');
 
+        Route::post('/admin/personal-account-status/{id}', [PersonalAccountController::class,'updateStatus']);
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);

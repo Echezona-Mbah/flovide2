@@ -26,10 +26,10 @@ use App\Models\InteracAutoDeposit;
 
 class BusinessAccountController extends Controller
 {
-        use CurrencyHelper;
+    use CurrencyHelper;
 
 
-        protected FirebaseNotificationService $firebase;
+    protected FirebaseNotificationService $firebase;
 
     public function __construct(FirebaseNotificationService $firebase)
     {
@@ -37,7 +37,7 @@ class BusinessAccountController extends Controller
     }
 
 
-     // ── Shared notification helper ──────────────────────────────────────────
+    // ── Shared notification helper ──────────────────────────────────────────
     protected function sendComplianceNotification(User $user, string $title, string $body, array $data = []): void
     {
         if (empty($user->device_token)) {
