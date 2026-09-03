@@ -331,16 +331,16 @@ public function index(Request $request)
         ->toArray();
 
     //kyc status
-    $identityStatus = strtolower($account->identity_verification_status ?? 'pending');
-    $selfieStatus = strtolower($account->selfie_verification_status ?? 'pending');
+        $identityStatus = strtolower($account->identity_verification_status ?? 'pending');
+        $selfieStatus = strtolower($account->selfie_verification_status ?? 'pending');
 
-    if ($identityStatus === 'completed' && $selfieStatus === 'completed') {
-        $kycStatus = 'completed';
-    } elseif ($identityStatus === 'pending' && $selfieStatus === 'pending') {
-        $kycStatus = 'pending';
-    } else {
-        $kycStatus = 'review';
-    }
+        if ($identityStatus === 'confirmed' && $selfieStatus === 'confirmed') {
+            $kycStatus = 'confirmed';
+        } elseif ($identityStatus === 'pending' && $selfieStatus === 'pending') {
+            $kycStatus = 'pending';
+        } else {
+            $kycStatus = 'under review';
+        }
 
     if ($request->expectsJson()) {
         return response()->json([
@@ -718,6 +718,7 @@ public function statement(Request $request, $id)
 
 public function store(Request $request) {
 
+// dd('hhh');
     $validated = $request->validate([
         'bvn' => 'required|string|size:11',
         'nin' => 'required|string|size:11',

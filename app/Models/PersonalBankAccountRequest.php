@@ -20,8 +20,8 @@ class PersonalBankAccountRequest extends Model
     protected function casts(): array
     {
         return [
-            'bvn' => 'encrypted',
-            'nin' => 'encrypted',
+            // 'bvn' => 'encrypted',
+            // 'nin' => 'encrypted',
             'processed_at' => 'datetime',
         ];
     }

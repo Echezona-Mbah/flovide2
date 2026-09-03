@@ -22,6 +22,7 @@ class TransactionHistoryController extends Controller
 
  
 
+
 // public function transaction(Request $request)
 // {
 //     $user    = auth()->user();
@@ -31,6 +32,13 @@ class TransactionHistoryController extends Controller
 
 //     $search = $request->input('search');
 //     $filter = $request->input('filter');
+
+//     $allowedPerPage = [12, 25, 50, 100, 250, 500];
+//     $perPage = (int) $request->input('per_page', 12);
+
+//     if (!in_array($perPage, $allowedPerPage, true)) {
+//         $perPage = 12;
+//     }
 
 //     $transactions = TransactionHistory::where('user_id', $ownerId)
 //         ->where('mode', $mode)
@@ -51,7 +59,7 @@ class TransactionHistoryController extends Controller
 //             }
 //         })
 //         ->orderBy('created_at', 'desc')
-//         ->paginate(12)
+//         ->paginate($perPage)
 //         ->withQueryString();
 
 //     if ($request->wantsJson()) {
@@ -90,8 +98,9 @@ class TransactionHistoryController extends Controller
 //         ], 200);
 //     }
 
-//     return view('business.transactionHistory', compact('transactions', 'mode'));
+//     return view('business.transactionHistory', compact('transactions', 'mode', 'perPage', 'allowedPerPage'));
 // }
+
 public function transaction(Request $request)
 {
     $user    = auth()->user();
@@ -102,14 +111,7 @@ public function transaction(Request $request)
     $search = $request->input('search');
     $filter = $request->input('filter');
 
-    $allowedPerPage = [12, 25, 50, 100, 250, 500];
-    $perPage = (int) $request->input('per_page', 12);
-
-    if (!in_array($perPage, $allowedPerPage, true)) {
-        $perPage = 12;
-    }
-
-    $transactions = TransactionHistory::where('user_id', $ownerId)
+    $baseQuery = TransactionHistory::where('user_id', $ownerId)
         ->where('mode', $mode)
         ->when($search, function ($q) use ($search) {
             $q->where(function ($q2) use ($search) {
@@ -127,11 +129,12 @@ public function transaction(Request $request)
                 $q->where('status', $filter);
             }
         })
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage)
-        ->withQueryString();
+        ->orderBy('created_at', 'desc');
 
+    // ── API: return everything, no pagination ────────────────────────────
     if ($request->wantsJson()) {
+        $transactions = $baseQuery->get();
+
         return response()->json([
             'success' => true,
             'message' => 'Transactions retrieved successfully.',
@@ -166,6 +169,16 @@ public function transaction(Request $request)
             }),
         ], 200);
     }
+
+    // ── Web: keep pagination ──────────────────────────────────────────────
+    $allowedPerPage = [12, 25, 50, 100, 250, 500];
+    $perPage = (int) $request->input('per_page', 12);
+
+    if (!in_array($perPage, $allowedPerPage, true)) {
+        $perPage = 12;
+    }
+
+    $transactions = $baseQuery->paginate($perPage)->withQueryString();
 
     return view('business.transactionHistory', compact('transactions', 'mode', 'perPage', 'allowedPerPage'));
 }

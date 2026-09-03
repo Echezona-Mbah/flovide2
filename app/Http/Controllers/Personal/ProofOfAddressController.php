@@ -56,7 +56,7 @@ class ProofOfAddressController extends Controller
             //update the account
             $account->update([
                 'proof_address' => 'uploads/proof-address/' . $filename,
-                'proof_address_status' => 'pending',
+                'proof_address_status' => 'under review',
             ]);
 
             //log this action

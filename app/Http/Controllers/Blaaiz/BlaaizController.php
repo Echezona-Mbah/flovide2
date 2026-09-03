@@ -909,6 +909,7 @@ public function initiateAutoDepositPersonal(Request $request)
         'message' => 'We are watching for your Interac e-Transfer.',
         'code'    => 'AUTODEPOSIT_PENDING',
         'data'    => [
+            'method'     => 'credit',
             'reference'     => $reference,
             'deposit_email' => 'payments@flovide.com',
             'amount'        => $amount,
