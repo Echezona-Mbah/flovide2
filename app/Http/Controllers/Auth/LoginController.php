@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Jenssegers\Agent\Agent;
 use App\Models\LoginActivity;
 use App\Mail\LoginOtpMail;
+use App\Models\PersonalBankAccountRequest;
 use App\Models\Bank;
 use App\Models\CountryRule;
 use Illuminate\Support\Facades\Mail;
@@ -674,6 +675,13 @@ class LoginController extends Controller
             $kycStatus = 'review';
         }
 
+        // Nigerian bank account request status
+        $bankAccountRequest = PersonalBankAccountRequest::where('personal_id', $account->id)
+            ->latest()
+            ->first();
+
+        $bankAccountRequestStatus = $bankAccountRequest?->status ?? 'pending';
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -700,6 +708,7 @@ class LoginController extends Controller
                 'profile_status' => [
                     'proof_address' => $account->proof_address_status ?? 'pending',
                     'kyc' => $kycStatus,
+                    'bank_account_request' => $bankAccountRequestStatus,
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,

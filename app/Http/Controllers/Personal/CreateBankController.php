@@ -342,6 +342,13 @@ public function index(Request $request)
         $kycStatus = 'review';
     }
 
+    //Nigerian bank account request status
+    $bankAccountRequest = PersonalBankAccountRequest::where('personal_id', $account->id)
+        ->latest()
+        ->first();
+
+    $bankAccountRequestStatus = $bankAccountRequest?->status ?? 'pending';
+
     if ($request->expectsJson()) {
         return response()->json([
             'success' => true,
@@ -354,6 +361,9 @@ public function index(Request $request)
                 'profile_status' => [
                     'proof_address' => $account->proof_address_status ?? 'pending',
                     'kyc' => $kycStatus,
+                ],
+                'bank_account_request' => [
+                    'status' => $bankAccountRequestStatus,
                 ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
