@@ -57,6 +57,7 @@ use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\ContactRequestController;
 use App\Http\Controllers\Admin\StatementController;
 use App\Http\Controllers\Admin\ProofOfAddressController;
+use App\Http\Controllers\Admin\BankAccountRequestController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
@@ -461,6 +462,7 @@ Route::middleware('admin.auth')->group(function () {
         Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
         Route::put('/admin/business-account/{id}/currency-fee/{currency}',[BusinessAccountController::class, 'updateCurrencyFee'])->name('admin.business.currency-fee.update');
 
+        Route::post('/admin/personal-account-status/{id}', [PersonalAccountController::class,'updateStatus']);
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
@@ -483,6 +485,14 @@ Route::middleware('admin.auth')->group(function () {
         ->name('admin.business.balance.toggle-lock');
         Route::post('/admin/personal-account/{personalId}/balance/{balanceId}/toggle-lock', [PersonalAccountController::class, 'toggleBalanceLock'])
         ->name('admin.personal.balance.toggle-lock');
+
+
+        //bank account request
+        Route::get('/admin/bank-account-requests', [BankAccountRequestController::class, 'index'])->name('admin.bank-account-requests');
+        // Route::post('/admin/bank-account-request/{id}/approve', [BankAccountRequestController::class, 'approve'])->name('admin.bank-account-request.approve');
+        // Route::post('/admin/bank-account-request/{id}/reject', [BankAccountRequestController::class, 'reject'])->name('admin.bank-account-request.reject');
+        Route::get('/admin/bank-account-request/{id}/show', [BankAccountRequestController::class, 'show'])->name('admin.bank-account-requests.show');
+
     });
 
 

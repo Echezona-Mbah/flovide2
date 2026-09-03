@@ -538,6 +538,112 @@
     font-size: 11px;
     color: var(--ink-soft);
 }
+
+
+
+
+
+
+
+
+/* Verification Control */
+
+.verification-control-card {
+    display: flex;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    transition: all 0.2s ease;
+}
+
+.verification-control-card:hover {
+    border-color: rgba(29, 78, 216, 0.25);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.verification-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.verification-icon.identity {
+    background: rgba(37, 99, 235, 0.12);
+    color: #2563eb;
+}
+
+.verification-icon.selfie {
+    background: rgba(124, 58, 237, 0.12);
+    color: #7c3aed;
+}
+
+.verification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.verification-title {
+    margin: 0 0 5px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.verification-description {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.verification-action {
+    margin-top: 18px;
+}
+
+.verification-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.verification-status-select {
+    border-radius: 12px;
+    border-color: var(--line);
+    height: 44px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.verification-status-select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
+}
+
+@media (max-width: 767px) {
+
+    .verification-control-card {
+        padding: 18px;
+    }
+
+    .verification-control-card .d-flex {
+        flex-direction: column;
+    }
+
+    .verification-control-card .custom-status {
+        align-self: flex-start;
+    }
+}
 </style>
 
 <body>
@@ -738,6 +844,172 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+
+                            <div class="card-body p-4">
+
+                                <div class="row g-4">
+
+                                    {{-- Identity Verification --}}
+                                    <div class="col-md-6">
+                                        <div class="verification-control-card">
+
+                                            <div class="verification-icon identity">
+                                                <i class="fa-solid fa-id-card"></i>
+                                            </div>
+
+                                            <div class="verification-content">
+
+                                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                                    <div>
+                                                        <h6 class="verification-title">
+                                                            Identity Verification
+                                                        </h6>
+
+                                                        <p class="verification-description">
+                                                            Controls whether the user's identity documents have been verified.
+                                                        </p>
+                                                    </div>
+
+                                                    @php
+                                                        $identityStatus = $user->identity_verification_status ?? 'pending';
+
+                                                        $identityBadge = match ($identityStatus) {
+                                                            'confirmed', 'verified' => 'status-success',
+                                                            'under review', 'pending' => 'status-warning',
+                                                            'rejected' => 'status-danger',
+                                                            default => 'status-muted',
+                                                        };
+                                                    @endphp
+
+                                                    <span id="identity-status-badge"
+                                                        class="custom-status {{ $identityBadge }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $identityStatus)) }}
+                                                    </span>
+                                                </div>
+
+
+                                                <div class="verification-action">
+
+                                                    <label class="verification-label">
+                                                        Update Status
+                                                    </label>
+
+                                                    <select
+                                                        class="form-select verification-status-select"
+                                                        data-field="identity_verification_status"
+                                                        data-user-id="{{ $user->id }}"
+                                                        data-badge="identity-status-badge"
+                                                    >
+                                                        <option value="pending"
+                                                            {{ $identityStatus === 'pending' ? 'selected' : '' }}>
+                                                            Pending
+                                                        </option>
+
+                                                        <option value="under review"
+                                                            {{ $identityStatus === 'under review' ? 'selected' : '' }}>
+                                                            Under Review
+                                                        </option>
+
+                                                        <option value="confirmed"
+                                                            {{ $identityStatus === 'confirmed' ? 'selected' : '' }}>
+                                                            Confirmed
+                                                        </option>
+
+                                                        <option value="rejected"
+                                                            {{ $identityStatus === 'rejected' ? 'selected' : '' }}>
+                                                            Rejected
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    {{-- Selfie Verification --}}
+                                    <div class="col-md-6">
+                                        <div class="verification-control-card">
+
+                                            <div class="verification-icon selfie">
+                                                <i class="fa-solid fa-camera"></i>
+                                            </div>
+
+                                            <div class="verification-content">
+
+                                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                                    <div>
+                                                        <h6 class="verification-title">
+                                                            Selfie Verification
+                                                        </h6>
+
+                                                        <p class="verification-description">
+                                                            Controls whether the user's selfie verification has been completed.
+                                                        </p>
+                                                    </div>
+
+                                                    @php
+                                                        $selfieStatus = $user->selfie_verification_status ?? 'pending';
+
+                                                        $selfieBadge = match ($selfieStatus) {
+                                                            'confirmed', 'verified' => 'status-success',
+                                                            'under review', 'pending' => 'status-warning',
+                                                            'rejected' => 'status-danger',
+                                                            default => 'status-muted',
+                                                        };
+                                                    @endphp
+
+                                                    <span id="selfie-status-badge"
+                                                        class="custom-status {{ $selfieBadge }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $selfieStatus)) }}
+                                                    </span>
+                                                </div>
+
+
+                                                <div class="verification-action">
+
+                                                    <label class="verification-label">
+                                                        Update Status
+                                                    </label>
+
+                                                    <select
+                                                        class="form-select verification-status-select"
+                                                        data-field="selfie_verification_status"
+                                                        data-user-id="{{ $user->id }}"
+                                                        data-badge="selfie-status-badge"
+                                                    >
+                                                        <option value="pending"
+                                                            {{ $selfieStatus === 'pending' ? 'selected' : '' }}>
+                                                            Pending
+                                                        </option>
+
+                                                        <option value="under review"
+                                                            {{ $selfieStatus === 'under review' ? 'selected' : '' }}>
+                                                            Under Review
+                                                        </option>
+
+                                                        <option value="confirmed"
+                                                            {{ $selfieStatus === 'confirmed' ? 'selected' : '' }}>
+                                                            Confirmed
+                                                        </option>
+
+                                                        <option value="rejected"
+                                                            {{ $selfieStatus === 'rejected' ? 'selected' : '' }}>
+                                                            Rejected
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
                             </div>
 
                             <section class="mb-4">
@@ -1479,4 +1751,77 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
             });
         });
     }
+
+
+
+
+    // update verification status
+    document.querySelectorAll('.verification-status-select').forEach(select => {
+
+        select.addEventListener('change', function () {
+
+            const field = this.dataset.field;
+            const userId = this.dataset.userId;
+            const badgeId = this.dataset.badge;
+            const status = this.value;
+
+            const badge = document.getElementById(badgeId);
+
+            // Disable while updating
+            this.disabled = true;
+
+            fetch("{{ url('/admin/personal-account-status') }}/" + userId, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    field: field,
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to update status.');
+                }
+
+                // Update badge text
+                badge.textContent = data.label;
+
+                // Reset badge classes
+                badge.className = 'custom-status';
+
+                // Apply correct status color
+                if (data.class.includes('success')) {
+                    badge.classList.add('status-success');
+                } else if (data.class.includes('warning')) {
+                    badge.classList.add('status-warning');
+                } else if (data.class.includes('danger')) {
+                    badge.classList.add('status-danger');
+                } else {
+                    badge.classList.add('status-muted');
+                }
+
+            })
+            .catch(error => {
+
+                console.error(error);
+
+                alert('Unable to update verification status.');
+
+                // Reload to restore original value
+                location.reload();
+
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+
+        });
+
+    });
 </script>
