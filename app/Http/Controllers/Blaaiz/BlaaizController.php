@@ -902,6 +902,9 @@ public function initiateAutoDepositPersonal(Request $request)
         'reference'   => $reference,
         'amount'      => $amount,
         'currency'    => $currency,
+        'fees'      => $platformFee,
+        'recipient_amount'   => $netAmount,
+        'payment_reference'      => $reference,
     ]);
 
     return response()->json([
@@ -914,6 +917,10 @@ public function initiateAutoDepositPersonal(Request $request)
             'deposit_email' => 'payments@flovide.com',
             'amount'        => $amount,
             'currency'      => $currency,
+            'fees'      => $platformFee,
+            'recipient_amount'   => $netAmount,
+            'payment_reference'      => $reference,
+
         ],
     ], 200);
 }

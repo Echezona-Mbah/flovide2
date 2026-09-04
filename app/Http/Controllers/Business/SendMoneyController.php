@@ -8,6 +8,8 @@ use App\Models\Beneficia;
 use App\Models\TransactionHistory;
 use App\Traits\CurrencyHelper;
 use App\Traits\SelectsBalanceId;
+use App\Models\PromoCode;
+use App\Models\PromoCodeRedemption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -25,6 +27,9 @@ use App\Models\WebhookSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use App\Notifications\GeneralNotification;
+use App\Services\FirebaseNotificationService;
 
 
 
@@ -71,252 +76,328 @@ class SendMoneyController extends Controller
 
 
     public function sendTransaction(Request $request)
-{
-    $isApi = $request->expectsJson();
-    $mode  = session('mode', 'live');
+    {
+        $isApi = $request->expectsJson();
+        $mode  = session('mode', 'live');
 
-    if (!$isApi && $mode === 'test') {
-        return redirect()->back()->withErrors(['message' => 'Sending Money in Test Mode is only available via the API.']);
-    }
+        if (!$isApi && $mode === 'test') {
+            return redirect()->back()->withErrors(['message' => 'Sending Money in Test Mode is only available via the API.']);
+        }
 
-    $request->validate([
-        'amount'             => 'required|numeric|min:1',
-        'recipient_id'       => 'required|uuid',
-        'balance_id'         => 'required',
-        'payment_reference'          => 'nullable|string',
-        'transfer_fee'       => 'nullable|numeric',
-        'total_amount'       => 'required|numeric',
-        'exchange_rate'      => 'required|string',
-        'recipient_amount'   => 'required|numeric',
-        'account_number'     => 'nullable|string',
-        'account_name'       => 'nullable|string',
-        'bank'               => 'nullable|string',
-        'bank_code'          => 'nullable|string',
-        'transfer_method'    => 'nullable|string',
-        'interac_email'      => 'nullable|email',
-        'interac_first_name' => 'nullable|string',
-        'interac_last_name'  => 'nullable|string',
+        $request->validate([
+            'amount'             => 'required|numeric|min:1',
+            'recipient_id'       => 'required|uuid',
+            'balance_id'         => 'required',
+            'payment_reference'          => 'nullable|string',
+            'transfer_fee'       => 'nullable|numeric',
+            'total_amount'       => 'required|numeric',
+            'exchange_rate'      => 'required|string',
+            'recipient_amount'   => 'required|numeric',
+            'account_number'     => 'nullable|string',
+            'account_name'       => 'nullable|string',
+            'bank'               => 'nullable|string',
+            'bank_code'          => 'nullable|string',
+            'transfer_method'    => 'nullable|string',
+            'interac_email'      => 'nullable|email',
+            'interac_first_name' => 'nullable|string',
+            'interac_last_name'  => 'nullable|string',
+            'promo_code'         => 'nullable|string|max:50',
+            'transaction_pin' => 'required|digits:4',
 
-    ]);
+        ]);
 
-    //dd($request->all());
+        //dd($request->all());
 
-    $actor = $this->resolveKeyUser($request) ?? auth()->user();
-    if (!$actor) {
-        $msg = 'Unauthorized';
-        return $isApi
-            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'UNAUTHORIZED', 'data' => null], 401)
-            : back()->withInput()->with('error', $msg);
-    }
-
-    [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
-    if (!$ownerId || !$owner) {
-        $msg = 'Owner account not found';
-        return $isApi
-            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'OWNER_NOT_FOUND', 'data' => null], 422)
-            : back()->withInput()->with('error', $msg);
-    }
-
-    $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
-    $currency        = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
-
-    $transferFee          = (float) $request->transfer_fee;
-    $amount          = (float) $request->amount;
-    $totalAmount          = (float) $request->total_amount;
-    $recipientAmount = (float) $request->recipient_amount;
-
-    // ── Currency limits (on sending amount) ───────────────────────────────
-    $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
-    if ($limit) {
-        if (!is_null($limit->min_amount) && $amount < $limit->min_amount) {
-            $msg = "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}";
+        $actor = $this->resolveKeyUser($request) ?? auth()->user();
+        if (!$actor) {
+            $msg = 'Unauthorized';
             return $isApi
-                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'AMOUNT_BELOW_MINIMUM', 'data' => null], 422)
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'UNAUTHORIZED', 'data' => null], 401)
                 : back()->withInput()->with('error', $msg);
         }
-        if (!is_null($limit->max_amount) && $amount > $limit->max_amount) {
-            $msg = "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}";
+
+        [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
+        if (!$ownerId || !$owner) {
+            $msg = 'Owner account not found';
             return $isApi
-                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'AMOUNT_ABOVE_MAXIMUM', 'data' => null], 422)
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'OWNER_NOT_FOUND', 'data' => null], 422)
                 : back()->withInput()->with('error', $msg);
         }
-    }
 
-    // ── Platform fee — based on recipient (TO) currency ───────────────────
+        // ── Transaction PIN verification ────────────────────────────────────────
+        if (empty($owner->transaction_pin)) {
+            $msg = 'You have not set a transaction PIN yet. Please set one to continue.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PIN_NOT_SET', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
 
-    // $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)
-    //     ->where('currency', $currency)
-    //     ->first();
+        if ($owner->transaction_pin_locked_until && now()->lt($owner->transaction_pin_locked_until)) {
+            $msg = 'Too many incorrect PIN attempts. Try again after ' . $owner->transaction_pin_locked_until->diffForHumans();
+            Log::warning('[Transaction PIN] Business locked out', ['owner_id' => $owner->id]);
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PIN_LOCKED', 'data' => null], 423)
+                : back()->withInput()->with('error', $msg);
+        }
+
+        if (!Hash::check($request->transaction_pin, $owner->transaction_pin)) {
+            $owner->transaction_pin_attempts += 1;
+
+            if ($owner->transaction_pin_attempts >= 5) {
+                $owner->transaction_pin_locked_until = now()->addMinutes(15);
+                $owner->transaction_pin_attempts = 0;
+            }
+
+            $owner->save();
+
+            Log::warning('[Transaction PIN] Business incorrect pin', [
+                'owner_id' => $owner->id,
+                'attempts' => $owner->transaction_pin_attempts,
+            ]);
+
+            $msg = 'Incorrect transaction PIN.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PIN_INCORRECT', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
+        // reset attempts on success
+        if ($owner->transaction_pin_attempts > 0 || $owner->transaction_pin_locked_until) {
+            $owner->transaction_pin_attempts = 0;
+            $owner->transaction_pin_locked_until = null;
+            $owner->save();
+        }
 
 
-    // if (!$userFee || !$userFee->payout_enabled) {
-    //     $msg = "Contact your marketer to enable payout pricing for {$currency}.";
-    //     return $isApi
-    //         ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PAYOUT_DISABLED', 'data' => null], 422)
-    //         : back()->withInput()->with('error', $msg);
-    //     }
-    // if ($userFee && $userFee->payout_enabled) {
+        // ── Promo code resolution ────────────────────────────────────────────
+        $promoCode = null;
 
-    //     if ($userFee->payout_min > 0 && $recipientAmount < $userFee->payout_min) {
-    //         $msg = "Minimum payout for {$currency} is " . number_format($userFee->payout_min, 2);
-    //         return $isApi
-    //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BELOW_PAYOUT_MIN', 'data' => null], 422)
-    //             : back()->withInput()->with('error', $msg);
-    //     }
+        if ($request->filled('promo_code')) {
+            $inputCode = strtoupper(trim($request->promo_code));
 
-    //     if ($userFee->payout_max > 0 && $recipientAmount > $userFee->payout_max) {
-    //         $msg = "Maximum payout for {$currency} is " . number_format($userFee->payout_max, 2);
-    //         return $isApi
-    //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'ABOVE_PAYOUT_MAX', 'data' => null], 422)
-    //             : back()->withInput()->with('error', $msg);
-    //     }
+            $promoCode = PromoCode::where('code', $inputCode)
+                ->where('owner_type', 'business')
+                ->where('status', 'active')
+                ->first();
 
-    //     // Fee calculated on recipient amount (in recipient currency)
-    //     $platformFee = round(
-    //         ($recipientAmount * $userFee->payout_percent / 100) + $userFee->payout_fixed,
-    //         2
-    //     );
+            if (!$promoCode) {
+                $msg = 'Invalid or inactive promo code.';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROMO_CODE_INVALID', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
 
-    //     $transferFee = $platformFee;
-    // }
+            if ((string) $promoCode->owner_id === (string) $ownerId) {
+                $msg = 'You cannot use your own promo code.';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROMO_CODE_SELF_USE', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
+
+        $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
+        $currency        = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
+
+        // $transferFee          = (float) $request->transfer_fee;
+        // $amount          = (float) $request->amount;
+        // $totalAmount          = (float) $request->total_amount;
+        // $recipientAmount = (float) $request->recipient_amount;
+
+        $originalTransferFee = (float) $request->transfer_fee;
+        $amount              = (float) $request->amount;
+        $totalAmount         = (float) $request->total_amount;
+        $recipientAmount     = (float) $request->recipient_amount;
+        $transferFee         = $originalTransferFee;
+
+        // ── Promo code: server-side fee waiver, never trust client-sent totals ──
+        if ($promoCode) {
+            $transferFee = 0;
+            $totalAmount = $amount; // sender pays only the amount, no fee
+        }
+
+        // ── Currency limits (on sending amount) ───────────────────────────────
+        $limit = Currency::where('code', $sendingCurrency)->where('is_active', true)->first();
+        if ($limit) {
+            if (!is_null($limit->min_amount) && $amount < $limit->min_amount) {
+                $msg = "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}";
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'AMOUNT_BELOW_MINIMUM', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+            if (!is_null($limit->max_amount) && $amount > $limit->max_amount) {
+                $msg = "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}";
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'AMOUNT_ABOVE_MAXIMUM', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
+
 
         $netRecipientAmount = (int) round($recipientAmount, 0);
-   // dd($netRecipientAmount);
+        // dd($netRecipientAmount);
 
-    // ── Balance check — deduct sender's full amount ───────────────────────
-    $balance = Balance::where('id', $request->balance_id)
-        ->where('user_id', $ownerId)
-        ->first();
-    
+        // ── Balance check — deduct sender's full amount ───────────────────────
+        $balance = Balance::where('id', $request->balance_id)
+            ->where('user_id', $ownerId)
+            ->first();
+        
 
-    if (!$balance) {
-        $msg = 'Invalid balance';
-        return $isApi
-            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INVALID_BALANCE', 'data' => null], 422)
-            : back()->withInput()->with('error', $msg);
-    }
-
-    if ($balance->is_locked) {
-    $msg = 'This balance is locked and cannot be used for payouts. Please contact support.';
-    return $isApi
-        ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BALANCE_LOCKED', 'data' => null], 422)
-        : back()->withInput()->with('error', $msg);
-    }
-
-    if ($balance->amount < $totalAmount) {
-        $msg = 'Insufficient funds';
-        return $isApi
-            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FUNDS', 'data' => null], 422)
-            : back()->withInput()->with('error', $msg);
-    }
-
-    
-    DB::beginTransaction();
-    try {
-        // Deduct full sending amount from sender's balance
-        $balance->amount -= $totalAmount;
-        $balance->save();
-
-        // ── Deduct platform fee from the payout-currency balance ───────────────
-        $feeDeductedFrom = null;
-
-        // if ($platformFee > 0) {
-        //     $payoutBalance = Balance::where('user_id', $ownerId)
-        //         ->where('currency', $currency) // payout/recipient currency
-        //         ->first();
-        //     dd($payoutBalance);
-
-        //     if ($payoutBalance) {
-        //         if ($payoutBalance->amount < $platformFee) {
-        //             DB::rollBack();
-        //             $msg = "Insufficient {$currency} balance to cover transfer fee";
-        //             return $isApi
-        //                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
-        //                 : back()->withInput()->with('error', $msg);
-        //         }
-
-        //         $payoutBalance->amount -= $platformFee;
-        //         $payoutBalance->save();
-        //         $feeDeductedFrom = $payoutBalance->id;
-        //     } else {
-        //         // No payout-currency wallet — fall back to the sending balance
-        //         if ($balance->amount < $platformFee) {
-        //             DB::rollBack();
-        //             $msg = 'Insufficient funds to cover transfer fee';
-        //             return $isApi
-        //                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FEE_BALANCE', 'data' => null], 422)
-        //                 : back()->withInput()->with('error', $msg);
-        //         }
-
-        //         $balance->amount -= $platformFee;
-        //         $balance->save();
-        //         $feeDeductedFrom = $balance->id;
-        //     }
-        // }
-
-        $tx = TransactionHistory::create([
-            'user_id'                  => $ownerId,
-            'sender_id'                => $ownerId,
-            'sender'                   => $actor->business_name ?? $actor->name,
-            'balance_id'               => $balance->id,
-            'fee_balance_id'           => $feeDeductedFrom,
-            'currency'                 => $sendingCurrency,
-            'amount'                   => $amount,
-            'fees'                     => $transferFee,
-            'total_amount'             => $totalAmount,
-            'recipient_amount'         => $netRecipientAmount,
-            'to_currency'              => $currency,
-            'recipient_bank_currency'  => $currency,
-            'recipient_country'        => strtoupper(substr($currency, 0, 2)),
-            'exchange_rate'            => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
-            'status'                   => 'success',
-            'method'                   => 'withdrawal',
-            'type'                     => 'withdrawal',
-            'payment_provider'         => 'wallect',
-            'transfer_method'         => $request->transfer_method,
-            'order_id'                 => $request->order_id  ?? null,
-            'reference'                => 'ref-' . Str::uuid(),
-            'payment_reference'                => $request->payment_reference,
-            'recipient_id'             => $request->recipient_id,
-            'recipient_account_number' => $request->account_number,
-            'recipient_account_name'   => $request->account_name
-                ?? trim(($request->interac_first_name ?? '') . ' ' . ($request->interac_last_name ?? ''))
-                ?: null,
-            'bank_code'                => $request->bank_code,
-            'recipient_bank_name'      => $request->bank,
-            'interac_email'            => $request->interac_email      ?? null,
-            'interac_first_name'       => $request->interac_first_name ?? null,
-            'interac_last_name'        => $request->interac_last_name  ?? null,
-        ]);
-            // app(\App\Services\ReferralBonusService::class)->checkAndNotify($personal, $transaction);
-        app(\App\Services\ReferralBonusService::class)->checkAndNotify($owner->fresh(), $tx->fresh());
-        // ── Route to provider ─────────────────────────────────────────────
-        if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
-        } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
-        } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-            $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
-        } elseif ($currency === 'CAD') {
-            $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
-        } else {
-            DB::rollBack();
-            $msg = 'No payment provider available for this currency';
+        if (!$balance) {
+            $msg = 'Invalid balance';
             return $isApi
-                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INVALID_BALANCE', 'data' => null], 422)
                 : back()->withInput()->with('error', $msg);
         }
 
-        DB::commit();
-        return $response;
-
-    } catch (\Exception $e) {
-        DB::rollBack();
+        if ($balance->is_locked) {
+        $msg = 'This balance is locked and cannot be used for payouts. Please contact support.';
         return $isApi
-            ? response()->json(['success' => false, 'message' => 'Transaction failed', 'code' => 'TXN_FAILED', 'data' => $e->getMessage()], 500)
-            : back()->withInput()->with('error', 'Transaction failed: ' . $e->getMessage());
+            ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BALANCE_LOCKED', 'data' => null], 422)
+            : back()->withInput()->with('error', $msg);
+        }
+
+        if ($balance->amount < $totalAmount) {
+            $msg = 'Insufficient funds';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INSUFFICIENT_FUNDS', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
+        
+        DB::beginTransaction();
+        try {
+            // Deduct full sending amount from sender's balance
+            $balance->amount -= $totalAmount;
+            $balance->save();
+
+            // ── Deduct platform fee from the payout-currency balance ───────────────
+            $feeDeductedFrom = null;
+
+        
+            $tx = TransactionHistory::create([
+                'user_id'                  => $ownerId,
+                'sender_id'                => $ownerId,
+                'sender'                   => $actor->business_name ?? $actor->name,
+                'balance_id'               => $balance->id,
+                'fee_balance_id'           => $feeDeductedFrom,
+                'currency'                 => $sendingCurrency,
+                'amount'                   => $amount,
+                'fees'                     => $transferFee,
+                'total_amount'             => $totalAmount,
+                'recipient_amount'         => $netRecipientAmount,
+                'to_currency'              => $currency,
+                'recipient_bank_currency'  => $currency,
+                'recipient_country'        => strtoupper(substr($currency, 0, 2)),
+                'exchange_rate'            => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
+                'status'                   => 'success',
+                'method'                   => 'withdrawal',
+                'type'                     => 'withdrawal',
+                'payment_provider'         => 'wallect',
+                'transfer_method'         => $request->transfer_method,
+                'order_id'                 => $request->order_id  ?? null,
+                'reference'                => 'ref-' . Str::uuid(),
+                'payment_reference'                => $request->payment_reference,
+                'recipient_id'             => $request->recipient_id,
+                'recipient_account_number' => $request->account_number,
+                'recipient_account_name'   => $request->account_name
+                    ?? trim(($request->interac_first_name ?? '') . ' ' . ($request->interac_last_name ?? ''))
+                    ?: null,
+                'bank_code'                => $request->bank_code,
+                'recipient_bank_name'      => $request->bank,
+                'interac_email'            => $request->interac_email      ?? null,
+                'interac_first_name'       => $request->interac_first_name ?? null,
+                'interac_last_name'        => $request->interac_last_name  ?? null,
+                'promo_code'    => $promoCode->code ?? null,
+                'promo_code_id' => $promoCode->id ?? null,
+                'promo_fee_waived' => $promoCode ? $originalTransferFee : null,
+            ]);
+
+            // ── Promo code reward: credit code owner's default balance ─────────────
+            if ($promoCode) {
+                $rewardAmount = $promoCode->calculateReward($amount);
+                $ownerModel   = $promoCode->ownerModel();
+
+                if ($ownerModel) {
+                    $ownerColumn  = $promoCode->owner_type === 'business' ? 'user_id' : 'personal_id';
+
+                    $ownerBalance = Balance::where($ownerColumn, $ownerModel->id)
+                        ->orderBy('created_at', 'asc')
+                        ->first();
+
+                    if ($ownerBalance) {
+                        $ownerBalance->amount += $rewardAmount;
+                        $ownerBalance->save();
+
+                        TransactionHistory::create([
+                            $ownerColumn             => $ownerModel->id,
+                            'balance_id'             => $ownerBalance->id,
+                            'amount'                 => $rewardAmount,
+                            'currency'               => $ownerBalance->currency,
+                            'status'                 => 'success',
+                            'type'                   => 'credit',
+                            'method'                 => 'credit',
+                            'payment_provider'       => 'promo_reward',
+                            'transaction_type'       => 'promo_reward',
+                            'reference'              => 'promo-' . Str::uuid(),
+                            'sender'                 => 'Promo Code Reward',
+                            'recipient_account_name' => $ownerModel->business_name ?? ($ownerModel->firstname ?? null),
+                            'mode'                   => $mode,
+                        ]);
+
+                        PromoCodeRedemption::create([
+                            'promo_code_id'          => $promoCode->id,
+                            'transaction_history_id' => $tx->id,
+                            'redeemer_type'          => 'business',
+                            'redeemer_id'            => $ownerId,
+                            'transaction_amount'     => $amount,
+                            'transaction_currency'   => $sendingCurrency,
+                            'fee_waived'             => $originalTransferFee,
+                            'reward_amount'          => $rewardAmount,
+                            'reward_currency'        => $ownerBalance->currency,
+                        ]);
+
+                        Log::info('[Promo Code] Reward credited', [
+                            'promo_code_id' => $promoCode->id,
+                            'owner_id'      => $ownerModel->id,
+                            'reward_amount' => $rewardAmount,
+                            'currency'      => $ownerBalance->currency,
+                        ]);
+                    } else {
+                        Log::warning('[Promo Code] Owner has no balance to receive reward', [
+                            'promo_code_id' => $promoCode->id,
+                            'owner_id'      => $ownerModel->id,
+                        ]);
+                    }
+                }
+            }
+            app(\App\Services\ReferralBonusService::class)->checkAndNotify($owner->fresh(), $tx->fresh());
+            // ── Route to provider ─────────────────────────────────────────────
+            if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
+            } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
+            } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+                $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
+            } elseif ($currency === 'CAD') {
+                $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
+            } else {
+                DB::rollBack();
+                $msg = 'No payment provider available for this currency';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+
+            DB::commit();
+            return $response;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $isApi
+                ? response()->json(['success' => false, 'message' => 'Transaction failed', 'code' => 'TXN_FAILED', 'data' => $e->getMessage()], 500)
+                : back()->withInput()->with('error', 'Transaction failed: ' . $e->getMessage());
+        }
     }
-}
 
 
 
@@ -993,6 +1074,208 @@ public function indexexc(Request $request)
 
     return view('business.exchange_rate', compact('beneficiaries', 'balances', 'balanceList', 'mode'));
 }
+// public function exchangeSubmit(Request $request)
+// {
+
+//     $isApi = $request->expectsJson();
+//            $mode  = session('mode', 'live');
+
+//         // ── Block web-based deletion while in Test mode ──────────────────────
+//         if (!$isApi && $mode === 'test') {
+//             $message = 'Exchange Money in Test Mode is only available via the API.';
+//             return redirect()->back()->withErrors(['message' => $message]);
+//         }
+//     $request->validate([
+//         'from_currency' => 'required|string',
+//         'to_currency' => 'required|string',
+//         'amount' => 'required|numeric|min:1',
+//     ]);
+
+//     //  dd($request->all());
+
+//     $actor = auth()->user();
+//     [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
+
+//     if (! $ownerId || ! $owner) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Owner account not found',
+//                 'code' => 'OWNER_NOT_FOUND',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Owner account not found']);
+//     }
+
+//     $from = strtoupper($request->from_currency);
+//     $to = strtoupper($request->to_currency);
+//     $amount = (float) $request->amount;
+
+//     if ($from === $to) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'From and To currency cannot be the same.',
+//                 'code' => 'SAME_CURRENCY',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'From and To currency cannot be the same.']);
+//     }
+
+//     $fromBalance = Balance::where('user_id', $ownerId)->where('currency', $from)->first();
+//     $toBalance   = Balance::where('user_id', $ownerId)->where('currency', $to)->first();
+
+//     if (! $fromBalance || ! $toBalance) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Invalid wallet selection.',
+//                 'code' => 'INVALID_WALLET',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Invalid wallet selection.']);
+//     }
+
+//     if ($fromBalance->amount < $amount) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Insufficient balance.',
+//                 'code' => 'INSUFFICIENT_BALANCE',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Insufficient balance.']);
+//     }
+
+//     $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $from))
+//         ->whereHas('toCurrency', fn($q) => $q->where('code', $to))
+//         ->first();
+
+//     if (! $rate) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Rate not found.',
+//                 'code' => 'RATE_NOT_FOUND',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Rate not found.']);
+//     }
+
+//     $converted = $amount * $rate->rate;
+
+//     DB::beginTransaction();
+//     try {
+//         $fromBalance->amount -= $amount;
+//         $fromBalance->save();
+
+//         $toBalance->amount += $converted;
+//         $toBalance->save();
+
+//         $tx = TransactionHistory::create([
+//             'amount' => $amount,
+//             'currency' => $from,
+//             'balance_id' => $fromBalance->id,
+//             'status' => 'success',
+            
+//             // 'method' => 'exchange',
+//             'type' => 'Swap',
+//             'method' => 'Swap ' . $from . ' to ' . $to,
+
+//             'reference' => 'ref-' . Str::uuid(),
+//             'user_id' => $ownerId,
+//             'created_by_member_id' => $memberId,
+//             'recipient_country' => strtoupper(substr($to, 0, 2)),
+//             'sender_id' => $ownerId,
+//             'sender' => $actor->business_name ?? $actor->name,
+//             'recipient_account_number' => $from,
+//             'recipient_account_name' => $actor->business_name ?? $actor->name,
+//             'to_currency' => $to,
+//             'recipient_amount' => $converted,
+//             'exchange_rate' => $rate->rate,
+//         ]);
+
+//         DB::commit();
+
+//     } catch (\Throwable $e) {
+//         DB::rollBack();
+
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Exchange failed.',
+//                 'code' => 'EXCHANGE_FAILED',
+//                 'data' => $e->getMessage(),
+//             ], 500)
+//             : back()->withErrors(['amount' => 'Exchange failed.']);
+//     }
+
+//     $this->sendExchangeEmail($request, $from, $to, $amount, $converted, $fromBalance->amount, $owner);
+
+//     $balances = Balance::where('user_id', $ownerId)->get()->map(function ($balance) {
+//         return [
+//             'id' => $balance->id,
+//             'currency' => $balance->currency,
+//             'amount' => $balance->amount,
+//         ];
+//     })->values();
+
+//     $transaction = [
+//         'id' => $tx->id,
+//         'reference' => $tx->reference,
+//         'status' => $tx->status,
+//         'method' => $tx->method,
+//         'type' => $tx->type,
+//         'amount' => $tx->amount,
+//         'currency' => $tx->currency,
+//         'to_currency' => $tx->to_currency,
+//         'recipient_amount' => $tx->recipient_amount,
+//         'exchange_rate' => $tx->exchange_rate,
+//         'sender' => $tx->sender,
+//         'recipient_account_number' => $tx->recipient_account_number,
+//         'recipient_account_name' => $tx->recipient_account_name,
+//         'created_at' => $tx->created_at->format('Y-m-d H:i:s'),
+//     ];
+
+//     return $request->expectsJson()
+//         ? response()->json([
+//             'success' => true,
+//             'message' => 'Exchange completed successfully!',
+//             'code' => 'EXCHANGE_SUCCESS',
+//             'data' => [
+//                 'from_currency' => $from,
+//                 'to_currency' => $to,
+//                 'amount' => $amount,
+//                 'converted' => $converted,
+//                 'reference' => $tx->reference,
+//                 'method' => $tx->method,
+//                 'type' => $tx->type,
+//                 'balances' => $balances,
+//                 'transaction' => $transaction,
+//             ]
+//         ], 200)
+//         : back()->with('success', 'Exchange completed successfully!');
+// }
+
+
+//     protected function sendExchangeEmail(Request $request, $from, $to, $amount, $converted, $currentBalance, User $owner)
+//     {
+//         $data = [
+//             'name' => $owner->business_name ?? $owner->name,
+//             'amount_sent' => number_format((float) $amount, 2),
+//             'recipient_amount' => number_format((float) $converted, 2),
+//             'fee' => number_format(0, 2),
+//             'total_amount' => number_format((float) $amount, 2),
+//             'current_balance' => number_format((float) $currentBalance, 2),
+//             'sending_currency' => $from,
+//             'recipient_currency' => $to,
+//             'reference' => 'Exchange',
+//         ];
+
+//         Mail::to($owner->email)->send(new TransactionSentMail($data));
+//     }
+    
+
 public function exchangeSubmit(Request $request)
 {
 
@@ -1130,6 +1413,7 @@ public function exchangeSubmit(Request $request)
     }
 
     $this->sendExchangeEmail($request, $from, $to, $amount, $converted, $fromBalance->amount, $owner);
+    $this->sendExchangeNotification($owner, $from, $to, $amount, $converted);
 
     $balances = Balance::where('user_id', $ownerId)->get()->map(function ($balance) {
         return [
@@ -1193,7 +1477,48 @@ public function exchangeSubmit(Request $request)
 
         Mail::to($owner->email)->send(new TransactionSentMail($data));
     }
-    
+
+    protected function sendExchangeNotification(User $owner, string $from, string $to, float $amount, float $converted): void
+    {
+        $title = 'Exchange Successful';
+        $body  = "You swapped {$from} " . number_format($amount, 2) . " to {$to} " . number_format($converted, 2) . ".";
+
+        // ── Push notification (device token required) ──────────────────────────
+        if (!empty($owner->device_token)) {
+            try {
+                $firebase = app(FirebaseNotificationService::class);
+
+                $firebase->sendToToken($owner->device_token, $title, $body, [
+                    'type' => 'exchange',
+                    'from_currency' => $from,
+                    'to_currency' => $to,
+                    'amount' => (string) $amount,
+                    'converted' => (string) $converted,
+                ]);
+
+                Log::info('[Exchange] Push notification sent', ['owner_id' => $owner->id]);
+
+            } catch (\Throwable $e) {
+                Log::warning('[Exchange] Push notification failed', [
+                    'owner_id' => $owner->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // ── In-app / DB notification (always sent, no device token needed) ─────
+        try {
+            $owner->notify(new GeneralNotification($title, $body));
+
+            Log::info('[Exchange] GeneralNotification sent', ['owner_id' => $owner->id]);
+
+        } catch (\Throwable $e) {
+            Log::warning('[Exchange] GeneralNotification failed', [
+                'owner_id' => $owner->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
     
       private function resolveKeyUser(Request $request): ?User
     {

@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\GeneralNotification;
 
 class CheckBlaaizInteracTransactions implements ShouldQueue
 {
@@ -122,12 +123,44 @@ class CheckBlaaizInteracTransactions implements ShouldQueue
         Log::info('[CheckBlaaizInterac] Job completed');
     }
 
-    protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
+    // protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
+    // {
+    //     $user = $tx->user_id ? User::find($tx->user_id) : null;
+    //     $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+
+    //     if (!$user || empty($user->device_token)) {
+    //         return;
+    //     }
+
+    //     $statusText = ucfirst((string) $tx->status);
+    //     $currency   = strtoupper((string) $tx->currency);
+    //     $amount     = number_format((float) $tx->amount, 2);
+
+    //     $title = match ($tx->status) {
+    //         'success' => 'Interac Deposit Successful',
+    //         'failed'  => 'Interac Deposit Failed',
+    //         default   => 'Interac Deposit Updated',
+    //     };
+
+    //     $body = match ($tx->status) {
+    //         'success' => "Your Interac deposit of {$currency} {$amount} was successful.",
+    //         'failed'  => "Your Interac deposit of {$currency} {$amount} failed.",
+    //         default   => "Your Interac deposit status is now {$statusText}.",
+    //     };
+
+    //     $firebase->sendToToken($user->device_token, $title, $body, [
+    //         'type'           => 'transaction',
+    //         'transaction_id' => (string) $tx->id,
+    //         'status'         => (string) $tx->status,
+    //     ]);
+    // }
+
+        protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
     {
         $user = $tx->user_id ? User::find($tx->user_id) : null;
         $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
 
-        if (!$user || empty($user->device_token)) {
+        if (!$user) {
             return;
         }
 
@@ -147,11 +180,25 @@ class CheckBlaaizInteracTransactions implements ShouldQueue
             default   => "Your Interac deposit status is now {$statusText}.",
         };
 
-        $firebase->sendToToken($user->device_token, $title, $body, [
-            'type'           => 'transaction',
-            'transaction_id' => (string) $tx->id,
-            'status'         => (string) $tx->status,
-        ]);
+        // ── Push notification (device token required) ──────────────────────────
+        if (!empty($user->device_token)) {
+            $firebase->sendToToken($user->device_token, $title, $body, [
+                'type'           => 'transaction',
+                'transaction_id' => (string) $tx->id,
+                'status'         => (string) $tx->status,
+            ]);
+        }
+
+        // ── In-app / DB notification (always sent, no device token needed) ─────
+        try {
+            $user->notify(new GeneralNotification($title, $body));
+        } catch (\Throwable $e) {
+            Log::warning('[CheckBlaaizInterac] GeneralNotification failed', [
+                'transaction_id' => $tx->id,
+                'user_id'        => $user->id,
+                'error'          => $e->getMessage(),
+            ]);
+        }
     }
 
     protected function sendTransactionEmailFromCron(TransactionHistory $tx): void

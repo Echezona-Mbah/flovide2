@@ -162,7 +162,7 @@
 
     <!-- ── Send Modal ──────────────────────────────────────────────────────── -->
     <div id="sendModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden max-h-[92vh] overflow-y-auto">
 
         <div class="px-6 pt-6 pb-4 bg-gradient-to-r from-sky-50 to-blue-50 border-b border-slate-100">
           <div class="flex items-center justify-between">
@@ -236,6 +236,27 @@
             />
           </div>
 
+          <!-- Promo Code -->
+          <div>
+            <label for="modalPromoCode" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
+              Promo Code <span class="text-slate-400 font-normal normal-case">(optional)</span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="modalPromoCode"
+                maxlength="50"
+                class="flex-1 px-4 py-3 rounded-2xl border-2 border-slate-200 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition"
+                placeholder="Enter promo code"
+              />
+              <button type="button" id="applyPromoBtn"
+                class="px-5 rounded-2xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition">
+                Apply
+              </button>
+            </div>
+            <p id="promoFeedback" class="text-xs mt-1.5 hidden"></p>
+          </div>
+
           <!-- Rate card -->
           <div class="bg-slate-50 rounded-2xl p-4 space-y-2.5 text-sm">
             <div class="flex justify-between items-center">
@@ -248,7 +269,10 @@
               <span class="text-slate-500 flex items-center gap-2">
                 <i class="fas fa-receipt text-xs text-amber-500"></i> Transfer Fee
               </span>
-              <span id="modalFee" class="font-semibold text-slate-700">--</span>
+              <span class="font-semibold text-slate-700">
+                <span id="modalFeeOriginal" class="line-through text-slate-400 mr-1 hidden"></span>
+                <span id="modalFee">--</span>
+              </span>
             </div>
             <div class="border-t border-slate-200 pt-2.5 flex justify-between items-center">
               <span class="text-slate-500 flex items-center gap-2">
@@ -305,7 +329,7 @@
     </div>
 
     <!-- ── Confirm Modal ───────────────────────────────────────────────────── -->
-    <form method="POST" action="{{ route('send') }}">
+    <form method="POST" action="{{ route('send') }}" id="sendMoneyForm">
       @csrf
       <input type="hidden" name="bank_code"          id="sort_codeInput">
       <input type="hidden" name="transfer_method"    id="transfermethodInput">
@@ -323,9 +347,10 @@
       <input type="hidden" name="interac_email"      id="interacEmailInput">
       <input type="hidden" name="interac_first_name" id="interacFirstNameInput">
       <input type="hidden" name="interac_last_name"  id="interacLastNameInput">
+      <input type="hidden" name="promo_code"         id="promoCodeInput" value="">
 
       <div id="confirmModal" class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md relative max-h-[92vh] overflow-y-auto">
 
           <div class="px-6 pt-6 pb-4 border-b border-slate-100 flex items-center justify-between">
             <h2 class="text-lg font-black text-slate-800">Confirm Transfer</h2>
@@ -368,6 +393,10 @@
                 <span class="text-slate-500">Transfer Fee</span>
                 <span id="cfmFee" class="font-semibold text-amber-600"></span>
               </div>
+              <div class="flex justify-between hidden" id="cfmPromoRow">
+                <span class="text-slate-500">Promo Code</span>
+                <span id="cfmPromoCode" class="font-semibold text-emerald-600"></span>
+              </div>
               <div class="flex justify-between border-t border-slate-200 pt-2">
                 <span class="text-slate-600 font-semibold">Total Deducted</span>
                 <span id="cfmTotal" class="font-bold text-slate-900"></span>
@@ -386,6 +415,25 @@
             <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex justify-between items-center">
               <span class="text-emerald-600 font-semibold text-sm">They Receive</span>
               <span id="cfmReceive" class="font-black text-emerald-700 text-lg"></span>
+            </div>
+
+            <!-- Transaction PIN -->
+            <div>
+              <label for="pinInput" class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">
+                Transaction PIN
+              </label>
+              <input
+                type="password"
+                id="pinInput"
+                name="transaction_pin"
+                maxlength="4"
+                inputmode="numeric"
+                pattern="\d*"
+                autocomplete="off"
+                class="w-full text-center tracking-[0.6em] text-lg px-4 py-3 rounded-2xl border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-400 transition"
+                placeholder="••••"
+              />
+              <p id="pinError" class="text-xs text-red-500 mt-1 hidden"></p>
             </div>
 
             <button type="submit"
@@ -420,6 +468,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let lastFee              = 0;   // transfer fee from the latest rate lookup
   let activeInput         = null; // 'send' or 'receive'
   let requestSeq          = 0;    // tracks the latest fetch request, prevents stale overwrites
+  let promoCode           = "";
+  let promoApplied        = false;
 
   const modalAmount          = document.getElementById("modalAmount");
   const modalCurrency        = document.getElementById("modalCurrency");
@@ -475,6 +525,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (modalReference) modalReference.value = "";
     document.getElementById("modalFee").textContent = "--";
 
+    // Reset promo state on every fresh open
+    promoCode    = "";
+    promoApplied = false;
+    document.getElementById("modalPromoCode").value = "";
+    document.getElementById("promoFeedback").classList.add("hidden");
+    document.getElementById("modalFeeOriginal").classList.add("hidden");
+
     updateBalanceHint();
     fetchRate(); // fetch from send side on open
 
@@ -509,6 +566,58 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("modalCurrencySymbol").textContent = opt.dataset.symbol || "₦";
   }
 
+  // ── Fee display: waive fee when a promo code is applied ────────────────────
+  function updateFeeDisplay() {
+    const symbol       = document.getElementById("modalCurrencySymbol").textContent || "";
+    const feeEl         = document.getElementById("modalFee");
+    const feeOriginalEl = document.getElementById("modalFeeOriginal");
+
+    if (promoApplied) {
+      feeOriginalEl.textContent = `${symbol}${lastFee.toFixed(2)}`;
+      feeOriginalEl.classList.remove("hidden");
+      feeEl.textContent = `${symbol}0.00 (waived)`;
+    } else {
+      feeOriginalEl.classList.add("hidden");
+      feeEl.textContent = (lastFee || lastFee === 0) ? `${symbol}${lastFee.toFixed(2)}` : "--";
+    }
+  }
+
+  // ── Apply Promo Code ─────────────────────────────────────────────────────
+  document.getElementById("applyPromoBtn")?.addEventListener("click", () => {
+    const input    = document.getElementById("modalPromoCode");
+    const code     = input.value.trim().toUpperCase();
+    const feedback = document.getElementById("promoFeedback");
+
+    if (!code) {
+      promoCode    = "";
+      promoApplied = false;
+      feedback.classList.add("hidden");
+      updateFeeDisplay();
+      return;
+    }
+
+    // Client-side just marks it applied for display purposes; the server
+    // remains the source of truth and re-validates the code on submit.
+    promoCode    = code;
+    promoApplied = true;
+
+    feedback.textContent = `"${code}" applied — transfer fee will be waived.`;
+    feedback.classList.remove("hidden", "text-red-500");
+    feedback.classList.add("text-emerald-600");
+
+    updateFeeDisplay();
+  });
+
+  // Clear promo if the user edits the code after applying
+  document.getElementById("modalPromoCode")?.addEventListener("input", function () {
+    if (promoApplied && this.value.trim().toUpperCase() !== promoCode) {
+      promoApplied = false;
+      promoCode    = "";
+      document.getElementById("promoFeedback").classList.add("hidden");
+      updateFeeDisplay();
+    }
+  });
+
   // ── Core: fetch rate and update the OTHER field ───────────────────────────
   async function fetchRate() {
     if (!selectedBeneficiary) return;
@@ -536,6 +645,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("modalFee").textContent  = "--";
       if (activeInput === 'send')    modalRecipientAmount.value = "";
       if (activeInput === 'receive') modalAmount.value          = "";
+      updateFeeDisplay();
       return;
     }
 
@@ -551,6 +661,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (activeInput === 'send')    modalRecipientAmount.value = sendAmt.toFixed(2);
       if (activeInput === 'receive') modalAmount.value          = receiveAmt.toFixed(2);
       document.getElementById("spinnerIcon").classList.add("hidden");
+      updateFeeDisplay();
       return;
     }
 
@@ -576,9 +687,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const fee        = parseFloat(data.data.transfer_fee || 0);
         lastFee = fee;
 
-        document.getElementById("modalFee").textContent =
-          `${symbol}${fee.toFixed(2)}`;
-
         if (activeInput === 'send') {
           // You Send → calculate They Receive
           lastRate = sendAmt > 0 ? converted / sendAmt : null;
@@ -599,7 +707,6 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         lastRate = null;
         lastFee  = 0;
-        document.getElementById("modalFee").textContent  = "--";
         document.getElementById("modalRate").textContent = data?.message || "Rate unavailable";
       }
 
@@ -607,12 +714,12 @@ document.addEventListener("DOMContentLoaded", function () {
       if (mySeq !== requestSeq) return;
       lastRate = null;
       lastFee  = 0;
-      document.getElementById("modalFee").textContent  = "--";
       document.getElementById("modalRate").textContent = "Error fetching rate";
     }
 
     if (mySeq === requestSeq) {
       document.getElementById("spinnerIcon").classList.add("hidden");
+      updateFeeDisplay();
     }
   }
 
@@ -691,8 +798,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const fee   = lastFee || 0;
-    const total = amount + fee;
+    // ── Promo-aware fee/total ────────────────────────────────────────────
+    const fee   = promoApplied ? 0 : (lastFee || 0);
+    const total = promoApplied ? amount : amount + fee;
 
     const name    = selectedBeneficiary.dataset.accountName   || "";
     const account = selectedBeneficiary.dataset.accountNumber || selectedBeneficiary.dataset.phone || "";
@@ -703,11 +811,20 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("cfmAccount").textContent   = account;
     document.getElementById("cfmBank").textContent      = bank;
     document.getElementById("cfmAmount").textContent    = `${symbol}${amount.toFixed(2)}`;
-    document.getElementById("cfmFee").textContent       = `${symbol}${fee.toFixed(2)}`;
+    document.getElementById("cfmFee").textContent       = promoApplied ? `${symbol}0.00 (waived)` : `${symbol}${fee.toFixed(2)}`;
     document.getElementById("cfmTotal").textContent     = `${symbol}${total.toFixed(2)}`;
     document.getElementById("cfmRate").textContent      = rateText;
     document.getElementById("cfmReceive").textContent   = `${currency} ${receive.toFixed(2)}`;
     document.getElementById("cfmReference").textContent = reference;
+
+    // Promo code row
+    const promoRow = document.getElementById("cfmPromoRow");
+    if (promoApplied) {
+      document.getElementById("cfmPromoCode").textContent = promoCode;
+      promoRow.classList.remove("hidden");
+    } else {
+      promoRow.classList.add("hidden");
+    }
 
     if (iEmail) {
       document.getElementById("cfmInteracEmail").textContent = iEmail;
@@ -726,7 +843,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("recipientAmountInput").value  = receive.toFixed(2);
     document.getElementById("accountNumberInput").value    = account;
     document.getElementById("accountNameInput").value      = name;
-    document.getElementById("bankInput").value             = bank;
+    document.getElementById("bankInput").value              = bank;
     document.getElementById("sort_codeInput").value        = selectedBeneficiary.dataset.sortcode       || "";
     document.getElementById("transfermethodInput").value   = selectedBeneficiary.dataset.transfermethod  || "";
     document.getElementById("recipientIdInput").value      = selectedBeneficiary.dataset.id              || "";
@@ -734,9 +851,34 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("interacEmailInput").value     = iEmail;
     document.getElementById("interacFirstNameInput").value = selectedBeneficiary.dataset.interacFirstName || "";
     document.getElementById("interacLastNameInput").value  = selectedBeneficiary.dataset.interacLastName  || "";
+    document.getElementById("promoCodeInput").value        = promoApplied ? promoCode : "";
+
+    // Reset PIN field each time the confirm modal opens
+    document.getElementById("pinInput").value = "";
+    document.getElementById("pinError").classList.add("hidden");
 
     document.getElementById("confirmModal").classList.remove("hidden");
     document.getElementById("confirmModal").classList.add("flex");
+  });
+
+  // ── PIN input: digits only ─────────────────────────────────────────────
+  document.getElementById("pinInput")?.addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 4);
+    document.getElementById("pinError").classList.add("hidden");
+  });
+
+  // ── Validate transaction PIN before submitting the transfer ────────────
+  document.getElementById("sendMoneyForm")?.addEventListener("submit", function (e) {
+    const pinInput = document.getElementById("pinInput");
+    const pinError = document.getElementById("pinError");
+    const pin      = pinInput.value.trim();
+
+    if (!/^\d{4}$/.test(pin)) {
+      e.preventDefault();
+      pinError.textContent = "Enter your 4-digit transaction PIN.";
+      pinError.classList.remove("hidden");
+      pinInput.focus();
+    }
   });
 
   // ── Sidebar ───────────────────────────────────────────────────────────────

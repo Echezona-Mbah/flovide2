@@ -84,6 +84,10 @@
           <i class="fas fa-building text-base"></i>
           {{ __('Organization') }}
         </a>
+        <a href="{{ route('business.pin.page') }}" class="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-white/80">
+          <i class="fas fa-shield-alt text-base"></i>
+          {{ __('Transaction PIN') }}
+        </a>
       </div>
     </div>
 

@@ -301,6 +301,16 @@ public function destroy($id)
         ];
     });
 
+    $promoCodes = \App\Models\PromoCode::where('owner_type', 'personal')
+    ->where('owner_id', $user->id)
+    ->orderBy('created_at', 'desc')
+    ->get()
+    ->map(function ($promo) {
+        $promo->redemption_count = \App\Models\PromoCodeRedemption::where('promo_code_id', $promo->id)->count();
+        $promo->total_rewarded   = \App\Models\PromoCodeRedemption::where('promo_code_id', $promo->id)->sum('reward_amount');
+        return $promo;
+    });
+
     return view('admin.personalaccountdetail', compact(
         'user',
         'balances',
@@ -310,6 +320,7 @@ public function destroy($id)
         'bankAccount',
         'Subaccount',
         'referrals',
+        'promoCodes'
     ));
 }
 

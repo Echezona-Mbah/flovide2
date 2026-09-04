@@ -515,6 +515,14 @@
                                                             <span>Careers</span>
                                                         </a>
                                                     </li>
+
+                                                     <li class="nav-item">
+                                                        <a href="{{ route('admin.promocodes.index') }}" class="nav-link">
+                                                            <i class="nav-link-icon fa-solid fa-briefcase"></i>
+                                                            <span>Promo Code</span>
+                                                        </a>
+                                                    </li>
+
                                                 </ul>
                                             </div>
 

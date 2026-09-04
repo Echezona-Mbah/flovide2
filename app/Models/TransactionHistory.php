@@ -67,6 +67,9 @@ class TransactionHistory extends Model
         'interac_last_name',
         'mode',
         'security_answer',
+        'promo_code',
+        'promo_code_id',
+        'promo_fee_waived',
 
     ];
 

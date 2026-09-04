@@ -49,6 +49,7 @@ use App\Http\Controllers\Personal\SendMoneyController as PersonalSendMoneyContro
 use App\Http\Controllers\Personal\TransactionHistoryController as PersonalTransactionHistoryController;
 use App\Http\Controllers\Personal\VirtualAccountController as PersonalVirtualAccountController;
 use App\Http\Controllers\Business\DonationController;
+use App\Http\Controllers\Business\TransactionPinController;
 use App\Http\Controllers\Fidelity\FidelityWebhookController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryApprovalController;
@@ -66,6 +67,7 @@ use App\Http\Controllers\Pivot\PivotController;
 use App\Services\PivotService;
 use App\Http\Controllers\Interac\InteracController;
 use App\Http\Controllers\Interac\InteracAccountController;
+use App\Http\Controllers\Personal\TransactionPinController as PersonalTransactionPinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -413,6 +415,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/team', [BusinessOrganizationController::class, 'store']);
     Route::patch('/team/{id}', [BusinessOrganizationController::class, 'updateRole'])->name('members.updateRole');
 
+    Route::get('/pin-status', [TransactionPinController::class, 'status']);
+    Route::post('/pin-set', [TransactionPinController::class, 'setPin']);
+    Route::post('/pin-update', [TransactionPinController::class, 'updatePin']);
+    Route::post('/pin-reset', [TransactionPinController::class, 'resetPin']);
+
 
 
 
@@ -603,6 +610,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         //proof of address
         Route::post('/personal-proof-of-address', [ProofOfAddressController::class, 'uploadProofOfAddress']);
+
+
+        Route::get('/personal-pin-status', [PersonalTransactionPinController::class, 'status']);
+        Route::post('/personal-pin-set', [PersonalTransactionPinController::class, 'setPin']);
+        Route::post('/personal-pin-update', [PersonalTransactionPinController::class, 'updatePin']);
+        Route::post('/personal-pin-reset', [PersonalTransactionPinController::class, 'resetPin']);
 
 
 
