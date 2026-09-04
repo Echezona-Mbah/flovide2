@@ -236,6 +236,41 @@
                                                 </tr>
                                             @endif
                                         </table>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap mt-3 pt-3 border-top">
+                                            {{-- Update (UI-only for now) --}}
+                                            <button type="button" id="btnApproveRequest"
+                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
+                                                    style="background:rgba(22,163,74,0.12);color:#16a34a;border:0;border-radius:14px;font-weight:700;">
+                                                <i class="fa-solid fa-circle-check"></i>
+                                                Update
+                                            </button>
+
+                                            {{-- Reject --}}
+                                            <form id="formReject"
+                                                  action="{{ route('admin.bank-account-request.reject', $bankAccountRequest->id) }}"
+                                                  method="POST" style="display:none;">
+                                                @csrf
+                                                <input type="hidden" name="admin_note" id="rejectNote">
+                                            </form>
+                                            <button type="button" id="btnRejectRequest"
+                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
+                                                    style="background:rgba(245,158,11,0.12);color:#d97706;border:0;border-radius:14px;font-weight:700;">
+                                                <i class="fa-solid fa-ban"></i>
+                                                Reject
+                                            </button>
+
+                                            {{-- Delete --}}
+                                            <form id="formDelete" action="{{ route('admin.bank-account-request.destroy', $bankAccountRequest->id) }}" method="POST" style="display:none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <button type="button" id="btnDeleteRequest"
+                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2 ms-auto"
+                                                    style="background:rgba(220,38,38,0.12);color:#dc2626;border:0;border-radius:14px;font-weight:700;">
+                                                <i class="fa-solid fa-trash"></i>
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -305,5 +340,50 @@
 @include('admin.footer')
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Reject
+        document.getElementById('btnRejectRequest')?.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Reject this request?',
+                html: `
+                    <p class="text-muted mb-3">You can optionally leave a note for the customer.</p>
+                    <textarea id="swalNote" class="swal2-textarea" placeholder="Admin note (optional)…" rows="3"></textarea>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Reject',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d97706',
+                focusCancel: true,
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    document.getElementById('rejectNote').value =
+                        document.getElementById('swalNote')?.value ?? '';
+                    document.getElementById('formReject').submit();
+                }
+            });
+        });
+
+        // Delete
+        document.getElementById('btnDeleteRequest')?.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Delete this request?',
+                text: 'The record will be soft-deleted and can be recovered later.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc2626',
+                focusCancel: true,
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    document.getElementById('formDelete').submit();
+                }
+            });
+        });
+
+    });
+</script>
 </body>

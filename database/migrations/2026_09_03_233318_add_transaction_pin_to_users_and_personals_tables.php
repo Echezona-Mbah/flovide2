@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('transaction_pin')->nullable()->after('password');
+            $table->string('transaction_pin', 50)->nullable()->after('password');
             $table->unsignedTinyInteger('transaction_pin_attempts')->default(0)->after('transaction_pin');
             $table->timestamp('transaction_pin_locked_until')->nullable()->after('transaction_pin_attempts');
         });
 
         Schema::table('personals', function (Blueprint $table) {
-            $table->string('transaction_pin')->nullable()->after('password');
+            $table->string('transaction_pin', 50)->nullable()->after('password');
             $table->unsignedTinyInteger('transaction_pin_attempts')->default(0)->after('transaction_pin');
             $table->timestamp('transaction_pin_locked_until')->nullable()->after('transaction_pin_attempts');
         });
