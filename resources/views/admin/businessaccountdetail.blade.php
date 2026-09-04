@@ -1882,6 +1882,103 @@
                                 </div>
                             </div>
 
+                            {{-- ── Promo Code Card ─────────────────────────────────────────────── --}}
+                            <div class="dashboard-card">
+                                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="section-title">Promo Codes</div>
+                                        <div class="section-subtitle">Generate a promo code this business can share — the referred user's fee is waived, and this business earns a reward on each transaction.</div>
+                                    </div>
+                                    <span class="custom-status status-muted">
+                                        <i class="fa-solid fa-tags"></i>
+                                        {{ $promoCodes->count() }} code{{ $promoCodes->count() !== 1 ? 's' : '' }}
+                                    </span>
+                                </div>
+
+                                <div class="card-body">
+
+                                    {{-- Existing codes --}}
+                                    @if($promoCodes->count() > 0)
+                                        <div class="table-responsive mb-4">
+                                            <table class="table table-modern align-middle mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Code</th>
+                                                        <th class="text-center">Reward</th>
+                                                        <th class="text-center">Redemptions</th>
+                                                        <th class="text-center">Total Rewarded</th>
+                                                        <th class="text-center">Status</th>
+                                                        <th class="text-end">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($promoCodes as $promo)
+                                                        <tr>
+                                                            <td class="fw-bold font-monospace">{{ $promo->code }}</td>
+                                                            <td class="text-center">
+                                                                @if($promo->reward_type === 'percent')
+                                                                    {{ rtrim(rtrim(number_format($promo->reward_value, 2), '0'), '.') }}%
+                                                                @else
+                                                                    {{ number_format($promo->reward_value, 2) }} (fixed)
+                                                                @endif
+                                                            </td>
+                                                            <td class="text-center">{{ $promo->redemption_count }}</td>
+                                                            <td class="text-center">{{ number_format($promo->total_rewarded, 2) }}</td>
+                                                            <td class="text-center">
+                                                                @if($promo->status === 'active')
+                                                                    <span class="custom-status status-success">Active</span>
+                                                                @else
+                                                                    <span class="custom-status status-muted">Inactive</span>
+                                                                @endif
+                                                            </td>
+                                                            <td class="text-end">
+                                                                <form method="POST" action="{{ route('admin.promocodes.toggle', $promo->id) }}" class="d-inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-soft-dark btn-sm">
+                                                                        {{ $promo->status === 'active' ? 'Deactivate' : 'Activate' }}
+                                                                    </button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="empty-state mb-4">This business doesn't have a promo code yet.</div>
+                                    @endif
+
+                                    {{-- Generate new code --}}
+                                    <div class="soft-panel">
+                                        <p class="fw-bold mb-3" style="font-size: 14px; color: var(--text-main);">
+                                            <i class="fa-solid fa-plus-circle text-primary me-1"></i> Generate New Promo Code
+                                        </p>
+                                        <form method="POST" action="{{ route('admin.promocodes.generate', ['ownerType' => 'business', 'ownerId' => $user->id]) }}">
+                                            @csrf
+                                            <div class="row g-3 align-items-end">
+                                                <div class="col-md-4">
+                                                    <label class="form-label" style="font-size:12px; font-weight:700;">Reward Type</label>
+                                                    <select name="reward_type" class="form-select" required>
+                                                        <option value="percent">Percentage of transaction</option>
+                                                        <option value="fixed">Fixed amount</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" style="font-size:12px; font-weight:700;">Reward Value</label>
+                                                    <input type="number" name="reward_value" step="0.01" min="0" class="form-control" placeholder="e.g. 1.5" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" class="btn btn-soft-primary w-100">
+                                                        <i class="fa-solid fa-tag me-1"></i> Generate Code
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+
 
 
 

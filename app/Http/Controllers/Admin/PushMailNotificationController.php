@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminPushNotification;
 use Throwable;
+use App\Notifications\GeneralNotification;
 
 class PushMailNotificationController extends Controller
 {
@@ -26,27 +27,60 @@ class PushMailNotificationController extends Controller
     
     
     //Shared notification helper
+    // protected function sendNotification($user, string $title, string $body, array $data = []): void
+    // {
+    //     if (empty($user->device_token)) {
+    //         return;
+    //     }
+
+    //     $sent = $this->firebase->sendNotification(
+    //         $user->device_token,
+    //         $title,
+    //         $body,
+    //         null,
+    //         $data
+    //     );
+
+    //     if (!$sent) {
+    //         Log::warning('Push notification failed', [
+    //             'user_id' => $user->id,
+    //             'title' => $title,
+    //         ]);
+    //     }
+    
+    // }
+
+    // Shared notification helper
     protected function sendNotification($user, string $title, string $body, array $data = []): void
     {
-        if (empty($user->device_token)) {
-            return;
+        // ── Push notification (device token required) ──────────────────────────
+        if (!empty($user->device_token)) {
+            $sent = $this->firebase->sendNotification(
+                $user->device_token,
+                $title,
+                $body,
+                null,
+                $data
+            );
+
+            if (!$sent) {
+                Log::warning('Push notification failed', [
+                    'user_id' => $user->id,
+                    'title' => $title,
+                ]);
+            }
         }
 
-        $sent = $this->firebase->sendNotification(
-            $user->device_token,
-            $title,
-            $body,
-            null,
-            $data
-        );
-
-        if (!$sent) {
-            Log::warning('Push notification failed', [
+        // ── In-app / DB notification (always sent, no device token needed) ─────
+        try {
+            $user->notify(new GeneralNotification($title, $body));
+        } catch (\Throwable $e) {
+            Log::warning('GeneralNotification failed', [
                 'user_id' => $user->id,
                 'title' => $title,
+                'error' => $e->getMessage(),
             ]);
         }
-    
     }
 
     public function businessPushNotificationAllUsers(Request $request)

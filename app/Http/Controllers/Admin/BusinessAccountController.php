@@ -265,6 +265,16 @@ public function find($id)
                 'progress' => $progress,
             ];
         });
+
+    $promoCodes = \App\Models\PromoCode::where('owner_type', 'business')
+    ->where('owner_id', $user->id)
+    ->orderBy('created_at', 'desc')
+    ->get()
+    ->map(function ($promo) {
+        $promo->redemption_count = \App\Models\PromoCodeRedemption::where('promo_code_id', $promo->id)->count();
+        $promo->total_rewarded   = \App\Models\PromoCodeRedemption::where('promo_code_id', $promo->id)->sum('reward_amount');
+        return $promo;
+    });
     return view('admin.businessaccountdetail', compact(
         'user',
         'balances',
@@ -277,7 +287,8 @@ public function find($id)
         'currencyFees',
         'unreadReferralAlerts',
         'referrals',
-        'autoDeposits'
+        'autoDeposits',
+        'promoCodes'
     ));
 }
 

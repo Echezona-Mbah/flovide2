@@ -667,8 +667,8 @@ class LoginController extends Controller
         $identityStatus = strtolower($account->identity_verification_status ?? 'pending');
         $selfieStatus = strtolower($account->selfie_verification_status ?? 'pending');
 
-        if ($identityStatus === 'completed' && $selfieStatus === 'completed') {
-            $kycStatus = 'completed';
+        if ($identityStatus === 'confirmed' && $selfieStatus === 'confirmed') {
+            $kycStatus = 'confirmed';
         } elseif ($identityStatus === 'pending' && $selfieStatus === 'pending') {
             $kycStatus = 'pending';
         } else {
@@ -689,10 +689,6 @@ class LoginController extends Controller
             'data' => [
                 'token' => $token,
                 'account_type' => 'personals',
-                // 'app_update' => [                          // ← ADD THIS
-                //     'latest_version' => config('app.latest_version', '1.0.0+8'),
-                //     'force_update'   => config('app.force_update', false),
-                // ],
                 'personal' => [
                     'id' => $account->id,
                     'firstname' => $account->firstname,

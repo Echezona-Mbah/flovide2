@@ -17,6 +17,7 @@ use App\Mail\TransactionSentMail;
 use App\Models\Balance;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\GeneralNotification;
 
 class CheckOrchardTransactions implements ShouldQueue
 {
@@ -67,43 +68,10 @@ class CheckOrchardTransactions implements ShouldQueue
     }
 
 
-    protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
-{
-    $user = $tx->user_id ? User::find($tx->user_id) : null;
-    $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
-
-    if (!$user || empty($user->device_token)) {
-        return;
-    }
-
-    $statusText = ucfirst((string) $tx->status);
-    $currency = strtoupper((string) $tx->currency);
-    $amount = number_format((float) $tx->amount, 2);
-
-    $title = match ($tx->status) {
-        'success' => 'Transaction Successful',
-        'failed' => 'Transaction Failed',
-        default => 'Transaction Updated',
-    };
-
-    $body = match ($tx->status) {
-        'success' => "Your transaction of {$currency} {$amount} was successful.",
-        'failed' => "Your transaction of {$currency} {$amount} failed.",
-        default => "Your transaction status is now {$statusText}.",
-    };
-
-    $firebase->sendToToken($user->device_token, $title, $body, [
-        'type' => 'transaction',
-        'transaction_id' => (string) $tx->id,
-        'status' => (string) $tx->status,
-    ]);
-}
-
-
-
 //     protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
 // {
-//     $user = User::find($tx->user_id) ?? Personal::find($tx->user_id);
+//     $user = $tx->user_id ? User::find($tx->user_id) : null;
+//     $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
 
 //     if (!$user || empty($user->device_token)) {
 //         return;
@@ -132,6 +100,51 @@ class CheckOrchardTransactions implements ShouldQueue
 //     ]);
 // }
 
+protected function sendTransactionStatusNotification(TransactionHistory $tx, FirebaseNotificationService $firebase): void
+{
+    $user = $tx->user_id ? User::find($tx->user_id) : null;
+    $user = $user ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+
+    if (!$user) {
+        return;
+    }
+
+    $statusText = ucfirst((string) $tx->status);
+    $currency = strtoupper((string) $tx->currency);
+    $amount = number_format((float) $tx->amount, 2);
+
+    $title = match ($tx->status) {
+        'success' => 'Transaction Successful',
+        'failed' => 'Transaction Failed',
+        default => 'Transaction Updated',
+    };
+
+    $body = match ($tx->status) {
+        'success' => "Your transaction of {$currency} {$amount} was successful.",
+        'failed' => "Your transaction of {$currency} {$amount} failed.",
+        default => "Your transaction status is now {$statusText}.",
+    };
+
+    // ── Push notification (device token required) ──────────────────────────
+    if (!empty($user->device_token)) {
+        $firebase->sendToToken($user->device_token, $title, $body, [
+            'type' => 'transaction',
+            'transaction_id' => (string) $tx->id,
+            'status' => (string) $tx->status,
+        ]);
+    }
+
+    // ── In-app / DB notification (always sent, no device token needed) ─────
+    try {
+        $user->notify(new GeneralNotification($title, $body));
+    } catch (\Throwable $e) {
+        Log::warning('[CheckPayazaTransactions] GeneralNotification failed', [
+            'transaction_id' => $tx->id,
+            'user_id' => $user->id,
+            'error' => $e->getMessage(),
+        ]);
+    }
+}
 
 
 protected function sendTransactionEmailFromCron(TransactionHistory $tx): void

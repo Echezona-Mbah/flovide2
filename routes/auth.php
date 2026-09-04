@@ -58,9 +58,11 @@ use App\Http\Controllers\Admin\ContactRequestController;
 use App\Http\Controllers\Admin\StatementController;
 use App\Http\Controllers\Admin\ProofOfAddressController;
 use App\Http\Controllers\Admin\BankAccountRequestController;
+use App\Http\Controllers\Admin\PromoCodeController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
+use App\Http\Controllers\Business\TransactionPinController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryAccountController;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
 use App\Http\Controllers\Orchard\OrchardController;
@@ -259,6 +261,12 @@ Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBan
     Route::post('/webhook', [WebhookController::class, 'update'])->name('business.webhooks.update');
     Route::post('/webhook/regenerate-secret', [WebhookController::class, 'regenerateSecret'])
         ->name('business.webhooks.regenerate-secret');
+
+    Route::get('/transaction-pin', [TransactionPinController::class, 'index'])->name('business.pin.page');
+    Route::get('/business/transaction-pin/status', [TransactionPinController::class, 'status'])->name('business.pin.status');
+    Route::post('/business/transaction-pin/set', [TransactionPinController::class, 'setPin'])->name('business.pin.set');
+    Route::post('/business/transaction-pin/update', [TransactionPinController::class, 'updatePin'])->name('business.pin.update');
+    Route::post('/business/transaction-pin/reset', [TransactionPinController::class, 'resetPin'])->name('business.pin.reset');
 
 
 
@@ -570,6 +578,16 @@ Route::middleware('admin.auth')->group(function () {
             Route::post('/admin/exchangerate/store', [SettingController::class, 'storeExchangeRate'])->name('admin.exchangerate.store');
 
             Route::patch('/currency-limits/{currency}', [AdminCurrencyLimitController::class, 'update'])->name('admin.currency.limits.update');
+
+            Route::get('/admin/promo-codes', [PromoCodeController::class, 'index'])->name('admin.promocodes.index');
+            Route::post('/admin/promo-codes', [PromoCodeController::class, 'store'])->name('admin.promocodes.store');
+            Route::post('/admin/promo-codes/{id}/toggle', [PromoCodeController::class, 'toggleStatus'])->name('admin.promocodes.toggle');
+            Route::delete('/admin/promo-codes/{id}', [PromoCodeController::class, 'destroy'])->name('admin.promocodes.destroy');
+            Route::post('/admin/promo-codes/generate/{ownerType}/{ownerId}', [PromoCodeController::class, 'generateForOwner'])
+                ->name('admin.promocodes.generate');
+
+            Route::post('/admin/promo-codes/{id}/toggle', [PromoCodeController::class, 'toggleStatus'])
+                ->name('admin.promocodes.toggle');
         });
 
 

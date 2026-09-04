@@ -11,6 +11,8 @@ use App\Models\TransactionHistory;
 use App\Traits\CurrencyHelper;
 use App\Traits\SelectsBalanceId;
 use Illuminate\Http\Request;
+use App\Models\PromoCode;
+use App\Models\PromoCodeRedemption;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Services\PayazaService;
@@ -19,7 +21,9 @@ use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Hash;
+use App\Notifications\GeneralNotification;
+use App\Services\FirebaseNotificationService;
 
 
 class SendMoneyController extends Controller
@@ -123,89 +127,6 @@ public function getExchangeRate(Request $request)
 
 
 
-    // public function sendTransaction(Request $request)
-    // {
-    //     $personal = auth('personal-api')->user();
-    //     if (!$personal) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Unauthorized',
-    //             'code' => 'UNAUTHORIZED',
-    //             'data' => null
-    //         ], 401);
-    //     }
-
-    //     $request->validate([
-    //         'amount' => 'required|numeric|min:1',
-    //         'recipient_id' => 'required|uuid',
-    //         'balance_id' => 'required',
-    //         'reference' => 'nullable|string',
-    //         'transfer_fee' => 'nullable',
-    //         'total_amount' => 'required|numeric',
-    //         'exchange_rate' => 'required|string',
-    //         'recipient_amount' => 'required|numeric',
-    //         'account_number' => 'required|string',
-    //         'account_name' => 'required|string',
-    //         'bank' => 'nullable|string',
-    //         'bank_code' => 'nullable|string',
-    //     ]);
-
-    //     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
-    //     $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
-
-    //     $balance = Balance::find($request->balance_id);
-    //     if (!$balance) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid balance selected',
-    //             'code' => 'INVALID_BALANCE',
-    //             'data' => null
-    //         ], 422);
-    //     }
-
-    //     if ($balance->amount < $request->total_amount) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Insufficient funds',
-    //             'code' => 'INSUFFICIENT_FUNDS',
-    //             'data' => null
-    //         ], 422);
-    //     }
-
-    //     $pivotCurrencies = ['UGX'];
-    //     $payazaCurrencies = ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES'];
-    //     $appMobileCurrencies = ['GHS'];
-
-    //       if (
-    //         in_array($currency, $pivotCurrencies) &&
-    //         filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)
-    //     ) {
-    //         return $this->sendViaPivot($request, $currency,$sendingCurrency, $balance,$personal);
-    //     }
-
-    //     if (
-    //         in_array($currency, $appMobileCurrencies) &&
-    //         filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)
-    //     ) {
-    //         return $this->sendViaAppMobile($request, $currency,$sendingCurrency, $balance ,$personal);
-    //     }
-
-    //     if (
-    //         in_array($currency,$payazaCurrencies) &&
-    //         filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)
-    //     ) {
-    //         return $this->sendViaPayaza($request, $currency,$sendingCurrency, $balance ,$personal);
-    //     }
-
-    //     return response()->json([
-    //         'success' => false,
-    //         'message' => 'No payment provider available for this currency',
-    //         'code' => 'PROVIDER_NOT_AVAILABLE',
-    //         'data' => null
-    //     ], 422);
-    // }
-
-
 
 public function sendTransaction(Request $request)
 {
@@ -231,11 +152,79 @@ public function sendTransaction(Request $request)
         'interac_email'    => 'nullable|email',    // ← ADD
         'interac_first_name' => 'nullable|string', // ← ADD
         'interac_last_name'  => 'nullable|string', 
+        'promo_code' => 'nullable|string|max:50',
+        'transaction_pin' => 'required|digits:4',
     ]);
+
+    if (empty($personal->transaction_pin)) {
+        return response()->json(['success'=>false,'message'=>'You have not set a transaction PIN yet.','code'=>'PIN_NOT_SET','data'=>null],422);
+    }
+
+    if ($personal->transaction_pin_locked_until && now()->lt($personal->transaction_pin_locked_until)) {
+        return response()->json(['success'=>false,'message'=>'Too many incorrect PIN attempts. Try again later.','code'=>'PIN_LOCKED','data'=>null],423);
+    }
+
+    if (!Hash::check($request->transaction_pin, $personal->transaction_pin)) {
+        $personal->transaction_pin_attempts += 1;
+        if ($personal->transaction_pin_attempts >= 5) {
+            $personal->transaction_pin_locked_until = now()->addMinutes(15);
+            $personal->transaction_pin_attempts = 0;
+        }
+        $personal->save();
+
+        Log::warning('[Transaction PIN] Personal incorrect pin', ['personal_id' => $personal->id]);
+
+        return response()->json(['success'=>false,'message'=>'Incorrect transaction PIN.','code'=>'PIN_INCORRECT','data'=>null],422);
+    }
+
+    if ($personal->transaction_pin_attempts > 0 || $personal->transaction_pin_locked_until) {
+        $personal->transaction_pin_attempts = 0;
+        $personal->transaction_pin_locked_until = null;
+        $personal->save();
+    }
+
+
+    $promoCode = null;
+
+    if ($request->filled('promo_code')) {
+        $inputCode = strtoupper(trim($request->promo_code));
+
+        $promoCode = PromoCode::where('code', $inputCode)
+            ->where('owner_type', 'personal')
+            ->where('status', 'active')
+            ->first();
+
+        if (!$promoCode) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or inactive promo code.',
+                'code'    => 'PROMO_CODE_INVALID',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ((string) $promoCode->owner_id === (string) $personal->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot use your own promo code.',
+                'code'    => 'PROMO_CODE_SELF_USE',
+                'data'    => null,
+            ], 422);
+        }
+    }
 
     $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
     $currency = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
     $recipientAmount = (int) round((float) $request->recipient_amount, 0);
+
+    $originalTransferFee = (float) $request->transfer_fee;
+    $amount              = (float) $request->amount;
+    $totalAmount         = (float) $request->total_amount;
+
+    // ── Promo code: server-side fee waiver ────────────────────────────────
+    if ($promoCode) {
+        $totalAmount = $amount;
+    }
 
      // Currency limits (configured from admin on currencies table)
     $limit = \App\Models\Currency::where('code', $sendingCurrency)
@@ -272,20 +261,20 @@ public function sendTransaction(Request $request)
         return response()->json(['success'=>false,'message'=>'This balance is locked and cannot be used for payouts.','code'=>'BALANCE_LOCKED','data'=>null],422);
     }
 
-    if ($balance->amount < $request->total_amount) {
+    if ($balance->amount < $totalAmount) {
         return response()->json(['success'=>false,'message'=>'Insufficient funds','code'=>'INSUFFICIENT_FUNDS','data'=>null],422);
     }
 
     DB::beginTransaction();
     try {
         // debit first
-        $balance->amount -= $request->total_amount;
+        $balance->amount -= $totalAmount;
         $balance->save();
 
         // create ONE transaction record
         $tx = TransactionHistory::create([
             'amount' => $request->amount,
-            'total_amount' => $request->total_amount,
+            'total_amount' => $totalAmount,
             'currency' => $sendingCurrency,
             'balance_id' => $balance->id,
             'status' => 'pending',
@@ -307,15 +296,69 @@ public function sendTransaction(Request $request)
             'recipient_country' => strtoupper(substr($currency,0,2)),
             'recipient_bank_currency' => $currency,
             'to_currency' => $currency,
-            'fees' => $request->transfer_fee,
+            'fees' => $promoCode ? 0 : $request->transfer_fee,
             'exchange_rate' => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
             'recipient_amount' => $recipientAmount,
             'interac_email'      => $request->interac_email      ?? null,
             'interac_first_name' => $request->interac_first_name ?? null,
             'interac_last_name'  => $request->interac_last_name  ?? null,
+            'promo_code'       => $promoCode->code ?? null,
+            'promo_code_id'    => $promoCode->id ?? null,
+            'promo_fee_waived' => $promoCode ? $originalTransferFee : null,
             
 
         ]);
+
+        // ── Promo code reward: credit code owner's default balance ─────────────
+        if ($promoCode) {
+            $rewardAmount = $promoCode->calculateReward($amount);
+            $ownerModel   = $promoCode->ownerModel();
+
+            if ($ownerModel) {
+                $ownerColumn  = $promoCode->owner_type === 'business' ? 'user_id' : 'personal_id';
+
+                $ownerBalance = Balance::where($ownerColumn, $ownerModel->id)
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+
+                if ($ownerBalance) {
+                    $ownerBalance->amount += $rewardAmount;
+                    $ownerBalance->save();
+
+                    TransactionHistory::create([
+                        $ownerColumn             => $ownerModel->id,
+                        'balance_id'             => $ownerBalance->id,
+                        'amount'                 => $rewardAmount,
+                        'currency'               => $ownerBalance->currency,
+                        'status'                 => 'success',
+                        'type'                   => 'credit',
+                        'method'                 => 'credit',
+                        'payment_provider'       => 'promo_reward',
+                        'transaction_type'       => 'promo_reward',
+                        'reference'              => 'promo-' . Str::uuid(),
+                        'sender'                 => 'Promo Code Reward',
+                        'recipient_account_name' => $ownerModel->business_name ?? ($ownerModel->firstname ?? null),
+                    ]);
+
+                    PromoCodeRedemption::create([
+                        'promo_code_id'          => $promoCode->id,
+                        'transaction_history_id' => $tx->id,
+                        'redeemer_type'          => 'personal',
+                        'redeemer_id'            => $personal->id,
+                        'transaction_amount'     => $amount,
+                        'transaction_currency'   => $sendingCurrency,
+                        'fee_waived'             => $originalTransferFee,
+                        'reward_amount'          => $rewardAmount,
+                        'reward_currency'        => $ownerBalance->currency,
+                    ]);
+                } else {
+                    Log::warning('[Promo Code] Owner has no balance to receive reward', [
+                        'promo_code_id' => $promoCode->id,
+                        'owner_id'      => $ownerModel->id,
+                    ]);
+                }
+            }
+        }
 
         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
             $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $personal, $tx->id,$recipientAmount);
@@ -688,6 +731,161 @@ protected function sendViaAppMobile(Request $request, $currency,$sendingCurrency
     }
 
 
+// public function exchangeSubmit(Request $request)
+// {
+//     $request->validate([
+//         'from_currency' => 'required|string',
+//         'to_currency' => 'required|string',
+//         'amount' => 'required|numeric|min:1',
+//     ]);
+
+//     $user = auth('personal-api')->user();
+
+//     $from = strtoupper($request->from_currency);
+//     $to = strtoupper($request->to_currency);
+//     $amount = (float) $request->amount;
+
+//     if ($from === $to) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'From and To currency cannot be the same.',
+//                 'code' => 'SAME_CURRENCY',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'From and To currency cannot be the same.']);
+//     }
+
+//     $fromBalance = Balance::where('personal_id', $user->id)->where('currency', $from)->first();
+//     $toBalance = Balance::where('personal_id', $user->id)->where('currency', $to)->first();
+
+//     if (!$fromBalance || !$toBalance) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Invalid wallet selection.',
+//                 'code' => 'INVALID_WALLET',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Invalid wallet selection.']);
+//     }
+
+//     if ($fromBalance->amount < $amount) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Insufficient balance.',
+//                 'code' => 'INSUFFICIENT_BALANCE',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Insufficient balance.']);
+//     }
+
+//     $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $from))
+//         ->whereHas('toCurrency', fn($q) => $q->where('code', $to))
+//         ->first();
+
+//     if (!$rate) {
+//         return $request->expectsJson()
+//             ? response()->json([
+//                 'success' => false,
+//                 'message' => 'Rate not found.',
+//                 'code' => 'RATE_NOT_FOUND',
+//                 'data' => null
+//             ], 422)
+//             : back()->withErrors(['amount' => 'Rate not found.']);
+//     }
+
+//     $converted = $amount * $rate->rate;
+
+//     $fromBalance->amount -= $amount;
+//     $fromBalance->save();
+
+//     $toBalance->amount += $converted;
+//     $toBalance->save();
+
+//     $tx = TransactionHistory::create([
+//         'amount' => $amount,
+//         'currency' => $from,
+//         'balance_id' => $fromBalance->id,
+//         'status' => 'success',
+//         // 'method' => 'exchange',
+//         'type'  => 'Swap',
+//         'method' => 'Swap ' . $from . ' to ' . $to,
+//         'reference' => 'ref-' . Str::uuid(),
+//         'personal_id' => $user->id,
+//         'recipient_country' => strtoupper(substr($to, 0, 2)),
+//         'sender' => $user->business_name ?? $user->name,
+//         'recipient_account_number' => $from,
+//         'recipient_account_name' => $user->business_name ?? $user->name,
+//         'to_currency' => $to,
+//         'recipient_amount' => $converted,
+//         'exchange_rate' => $rate->rate,
+//     ]);
+
+//     $this->sendExchangeEmail($user, $from, $to, $amount, $converted, $fromBalance->amount);
+
+//     $balances = Balance::where('personal_id', $user->id)
+//         ->get()
+//         ->map(function ($balance) {
+//             return [
+//                 'id' => $balance->id,
+//                 'currency' => $balance->currency,
+//                 'amount' => $balance->amount,
+//             ];
+//         })
+//         ->values();
+
+//     $transaction = [
+//         'id' => $tx->id,
+//         'reference' => $tx->reference,
+//         'status' => $tx->status,
+//         'method' => $tx->method,
+//         'amount' => $tx->amount,
+//         'currency' => $tx->currency,
+//         'to_currency' => $tx->to_currency,
+//         'recipient_amount' => $tx->recipient_amount,
+//         'exchange_rate' => $tx->exchange_rate,
+//         'sender' => $tx->sender,
+//         'recipient_account_number' => $tx->recipient_account_number,
+//         'recipient_account_name' => $tx->recipient_account_name,
+//         'created_at' => $tx->created_at->format('Y-m-d H:i:s'),
+//     ];
+
+//     return $request->expectsJson()
+//         ? response()->json([
+//             'success' => true,
+//             'message' => 'Exchange completed successfully!',
+//             'code' => 'EXCHANGE_SUCCESS',
+//             'data' => [
+//                 'from_currency' => $from,
+//                 'to_currency' => $to,
+//                 'amount' => $amount,
+//                 'converted' => $converted,
+//                 'reference' => $tx->reference,
+//                 'method' => $tx->method,
+//                 'balances' => $balances,
+//                 'transaction' => $transaction,
+//             ]
+//         ], 200)
+//         : back()->with('success', 'Exchange completed successfully!');
+// }
+// protected function sendExchangeEmail($user, $from, $to, $amount, $converted, $currentBalance)
+// {
+//     $data = [
+//         'name' => $user->name ?? 'Customer',
+//         'amount_sent' => number_format((float) $amount, 2),
+//         'recipient_amount' => number_format((float) $converted, 2),
+//         'fee' => number_format((float) 0, 2),
+//         'total_amount' => number_format((float) $amount, 2),
+//         'current_balance' => number_format((float) $currentBalance, 2),
+//         'sending_currency' => $from,
+//         'recipient_currency' => $to,
+//         'reference' => 'Exchange',
+//     ];
+
+//     Mail::to($user->email)->send(new TransactionSentMail($data));
+// }
 public function exchangeSubmit(Request $request)
 {
     $request->validate([
@@ -781,6 +979,7 @@ public function exchangeSubmit(Request $request)
     ]);
 
     $this->sendExchangeEmail($user, $from, $to, $amount, $converted, $fromBalance->amount);
+    $this->sendExchangeNotification($user, $from, $to, $amount, $converted);
 
     $balances = Balance::where('personal_id', $user->id)
         ->get()
@@ -827,6 +1026,7 @@ public function exchangeSubmit(Request $request)
         ], 200)
         : back()->with('success', 'Exchange completed successfully!');
 }
+
 protected function sendExchangeEmail($user, $from, $to, $amount, $converted, $currentBalance)
 {
     $data = [
@@ -844,6 +1044,47 @@ protected function sendExchangeEmail($user, $from, $to, $amount, $converted, $cu
     Mail::to($user->email)->send(new TransactionSentMail($data));
 }
 
+protected function sendExchangeNotification($user, string $from, string $to, float $amount, float $converted): void
+{
+    $title = 'Exchange Successful';
+    $body  = "You swapped {$from} " . number_format($amount, 2) . " to {$to} " . number_format($converted, 2) . ".";
+
+    // ── Push notification (device token required) ──────────────────────────
+    if (!empty($user->device_token)) {
+        try {
+            $firebase = app(FirebaseNotificationService::class);
+
+            $firebase->sendToToken($user->device_token, $title, $body, [
+                'type' => 'exchange',
+                'from_currency' => $from,
+                'to_currency' => $to,
+                'amount' => (string) $amount,
+                'converted' => (string) $converted,
+            ]);
+
+            Log::info('[Exchange] Personal push notification sent', ['personal_id' => $user->id]);
+
+        } catch (\Throwable $e) {
+            Log::warning('[Exchange] Personal push notification failed', [
+                'personal_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    // ── In-app / DB notification (always sent, no device token needed) ─────
+    try {
+        $user->notify(new GeneralNotification($title, $body));
+
+        Log::info('[Exchange] Personal GeneralNotification sent', ['personal_id' => $user->id]);
+
+    } catch (\Throwable $e) {
+        Log::warning('[Exchange] Personal GeneralNotification failed', [
+            'personal_id' => $user->id,
+            'error' => $e->getMessage(),
+        ]);
+    }
+}
 
 
 

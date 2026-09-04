@@ -95,6 +95,22 @@
                     <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
                 </a>
 
+
+                 <a href="{{ route('admin.promocodes.index') }}"
+                class="flex items-center gap-4 px-4 py-4 active:bg-gray-50">
+
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+
+                    <div class="flex-1">
+                        <span class="text-sm font-semibold text-gray-900">Promo codes</span>
+                        <p class="text-xs text-gray-500">Manage promocodes opportunities</p>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+                </a>
+
             </div>
         </div>
 

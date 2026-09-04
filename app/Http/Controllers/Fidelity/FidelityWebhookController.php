@@ -12,6 +12,7 @@ use App\Services\FirebaseNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\GeneralNotification;
 
 class FidelityWebhookController extends Controller
 {
@@ -114,36 +115,90 @@ class FidelityWebhookController extends Controller
         return response()->json(['message' => 'Webhook processed'], 200);
     }
 
+    // protected function sendPushNotification(TransactionHistory $tx): void
+    // {
+    //     try {
+    //         $firebase = app(FirebaseNotificationService::class);
+
+    //         $owner = $tx->user_id ? User::find($tx->user_id) : null;
+    //         $owner = $owner ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+
+    //         if (!$owner || empty($owner->device_token)) {
+    //             return;
+    //         }
+
+    //         $currency = strtoupper((string) $tx->currency);
+    //         $amount   = number_format((float) $tx->amount, 2);
+
+    //         $firebase->sendToToken(
+    //             $owner->device_token,
+    //             'Deposit Successful',
+    //             "Your deposit of {$currency} {$amount} was successful.",
+    //             [
+    //                 'type'           => 'transaction',
+    //                 'transaction_id' => (string) $tx->id,
+    //                 'status'         => 'success',
+    //             ]
+    //         );
+
+    //         Log::info('[FidelityWebhook] Push notification sent', ['tx_id' => $tx->id]);
+
+    //     } catch (\Throwable $e) {
+    //         Log::warning('[FidelityWebhook] Push notification failed', [
+    //             'tx_id' => $tx->id,
+    //             'error' => $e->getMessage(),
+    //         ]);
+    //     }
+    // }
+
     protected function sendPushNotification(TransactionHistory $tx): void
     {
-        try {
-            $firebase = app(FirebaseNotificationService::class);
+        $owner = $tx->user_id ? User::find($tx->user_id) : null;
+        $owner = $owner ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
 
-            $owner = $tx->user_id ? User::find($tx->user_id) : null;
-            $owner = $owner ?: ($tx->personal_id ? Personal::find($tx->personal_id) : null);
+        if (!$owner) {
+            return;
+        }
 
-            if (!$owner || empty($owner->device_token)) {
-                return;
+        $currency = strtoupper((string) $tx->currency);
+        $amount   = number_format((float) $tx->amount, 2);
+        $title    = 'Deposit Successful';
+        $body     = "Your deposit of {$currency} {$amount} was successful.";
+
+        // ── Push notification (device token required) ──────────────────────────
+        if (!empty($owner->device_token)) {
+            try {
+                $firebase = app(FirebaseNotificationService::class);
+
+                $firebase->sendToToken(
+                    $owner->device_token,
+                    $title,
+                    $body,
+                    [
+                        'type'           => 'transaction',
+                        'transaction_id' => (string) $tx->id,
+                        'status'         => 'success',
+                    ]
+                );
+
+                Log::info('[FidelityWebhook] Push notification sent', ['tx_id' => $tx->id]);
+
+            } catch (\Throwable $e) {
+                Log::warning('[FidelityWebhook] Push notification failed', [
+                    'tx_id' => $tx->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
+        }
 
-            $currency = strtoupper((string) $tx->currency);
-            $amount   = number_format((float) $tx->amount, 2);
+        // ── In-app / DB notification (always sent, no device token needed) ─────
+        try {
+            $owner->notify(new GeneralNotification($title, $body));
 
-            $firebase->sendToToken(
-                $owner->device_token,
-                'Deposit Successful',
-                "Your deposit of {$currency} {$amount} was successful.",
-                [
-                    'type'           => 'transaction',
-                    'transaction_id' => (string) $tx->id,
-                    'status'         => 'success',
-                ]
-            );
-
-            Log::info('[FidelityWebhook] Push notification sent', ['tx_id' => $tx->id]);
+            Log::info('[FidelityWebhook] GeneralNotification sent', ['tx_id' => $tx->id]);
 
         } catch (\Throwable $e) {
-            Log::warning('[FidelityWebhook] Push notification failed', [
+            Log::warning('[FidelityWebhook] GeneralNotification failed', [
                 'tx_id' => $tx->id,
                 'error' => $e->getMessage(),
             ]);
