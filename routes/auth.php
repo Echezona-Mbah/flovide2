@@ -497,8 +497,8 @@ Route::middleware('admin.auth')->group(function () {
 
         //bank account request
         Route::get('/admin/bank-account-requests', [BankAccountRequestController::class, 'index'])->name('admin.bank-account-requests');
-        // Route::post('/admin/bank-account-request/{id}/approve', [BankAccountRequestController::class, 'approve'])->name('admin.bank-account-request.approve');
-        // Route::post('/admin/bank-account-request/{id}/reject', [BankAccountRequestController::class, 'reject'])->name('admin.bank-account-request.reject');
+        Route::post('/admin/bank-account-request/{id}/reject', [BankAccountRequestController::class, 'reject'])->name('admin.bank-account-request.reject');
+        Route::delete('/admin/bank-account-request/{id}', [BankAccountRequestController::class, 'destroy'])->name('admin.bank-account-request.destroy');
         Route::get('/admin/bank-account-request/{id}/show', [BankAccountRequestController::class, 'show'])->name('admin.bank-account-requests.show');
 
     });

@@ -1,5 +1,52 @@
 @include('admin.head')
 
+
+<style>
+    :root {
+        --ink: #14213d;
+        --ink-soft: #5b6475;
+        --paper: #ffffff;
+        --line: #e7ecf3;
+        --blue: #1d4ed8;
+        --green: #16a34a;
+        --red: #dc2626;
+        --amber: #d97706;
+        --purple: #7c3aed;
+        --shadow: 0 18px 45px rgba(20, 33, 61, 0.08);
+    }
+
+    .bank-stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-box {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+        width: 54px; height: 54px;
+        border-radius: 18px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+
+    .stat-blue   { background: rgba(29, 78, 216, 0.12);  color: var(--blue); }
+    .stat-amber  { background: rgba(217, 119, 6, 0.12);  color: var(--amber); }
+    .stat-green  { background: rgba(22, 163, 74, 0.12);  color: var(--green); }
+    .stat-red    { background: rgba(220, 38, 38, 0.12);  color: var(--red); }
+
+    .stat-label  { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+    .stat-value  { font-size: 26px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+</style>
+
 <body>
     <div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">
      @include('admin.header')
@@ -28,6 +75,39 @@
                             </div>
                         </div>
                     </div> 
+
+                    {{-- ── Stats Cards ──────────────────────────────────────── --}}
+                    <div class="bank-stats-row">
+
+                        {{-- Total --}}
+                        <div class="stat-box">
+                            <div class="stat-icon stat-blue"><i class="fa-solid fa-layer-group"></i></div>
+                            <div class="stat-label">Total Requests</div>
+                            <div class="stat-value">{{ number_format($totalRequests) }}</div>
+                        </div>
+
+                        {{-- Pending / Processing --}}
+                        <div class="stat-box">
+                            <div class="stat-icon stat-amber"><i class="fa-solid fa-hourglass-half"></i></div>
+                            <div class="stat-label">Pending / Processing</div>
+                            <div class="stat-value">{{ number_format($pendingRequests) }}</div>
+                        </div>
+
+                        {{-- Approved / Confirmed --}}
+                        <div class="stat-box">
+                            <div class="stat-icon stat-green"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="stat-label">Confirmed / Approved</div>
+                            <div class="stat-value">{{ number_format($approvedRequests) }}</div>
+                        </div>
+
+                        {{-- Rejected --}}
+                        <div class="stat-box">
+                            <div class="stat-icon stat-red"><i class="fa-solid fa-circle-xmark"></i></div>
+                            <div class="stat-label">Rejected</div>
+                            <div class="stat-value">{{ number_format($rejectedRequests) }}</div>
+                        </div>
+
+                    </div>
         
                     
                     <div class="main-card mb-3 card">
