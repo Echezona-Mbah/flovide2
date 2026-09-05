@@ -497,6 +497,7 @@ Route::middleware('admin.auth')->group(function () {
 
         //bank account request
         Route::get('/admin/bank-account-requests', [BankAccountRequestController::class, 'index'])->name('admin.bank-account-requests');
+        Route::post('/admin/bank-account-request/{id}/confirm', [BankAccountRequestController::class, 'confirm'])->name('admin.bank-account-request.confirm');
         Route::post('/admin/bank-account-request/{id}/update', [BankAccountRequestController::class, 'update'])->name('admin.bank-account-request.update');
         Route::post('/admin/bank-account-request/{id}/reject', [BankAccountRequestController::class, 'reject'])->name('admin.bank-account-request.reject');
         Route::delete('/admin/bank-account-request/{id}', [BankAccountRequestController::class, 'destroy'])->name('admin.bank-account-request.destroy');

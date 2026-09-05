@@ -97,6 +97,60 @@ class BankAccountRequestController extends Controller
             ->with('success', 'Request updated and statuses set to under review.');
     }
 
+    public function confirm(Request $request, $id)
+    {
+        $bankAccountRequest = PersonalBankAccountRequest::with('personal')->findOrFail($id);
+
+        if ($bankAccountRequest->status === 'confirmed') {
+            return redirect()
+                ->back()
+                ->with('error', 'This bank account request has already been confirmed.');
+        }
+
+        if (!$bankAccountRequest->personal) {
+            Log::error('Bank account request has no linked personal account', [
+                'request_id' => $bankAccountRequest->id,
+                'admin_id' => Auth::guard('admin')->id(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Unable to confirm request. The linked personal account was not found.');
+        }
+
+        DB::transaction(function () use ($bankAccountRequest) {
+
+            $personal = $bankAccountRequest->personal;
+
+            // Confirm NIN if it exists and is not already confirmed
+            if (!empty($bankAccountRequest->nin) && $personal->nin_status !== 'confirmed') {
+                $personal->nin_status = 'confirmed';
+            }
+
+            // Confirm BVN if it exists and is not already confirmed
+            if (!empty($bankAccountRequest->bvn) && $personal->bvn_status !== 'confirmed') {
+                $personal->bvn_status = 'confirmed';
+            }
+
+            $personal->save();
+            
+            // Confirm bank account request
+            $bankAccountRequest->update([
+                'status' => 'confirmed',
+                'processed_at' => now(),
+            ]);
+        });
+
+        Log::info('Bank account request confirmed', [
+            'request_id' => $id,
+            'admin' => Auth::guard('admin')->id(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Bank account request has been confirmed successfully.');
+    }
+
     public function reject(Request $request, $id)
     {
         $request->validate([
