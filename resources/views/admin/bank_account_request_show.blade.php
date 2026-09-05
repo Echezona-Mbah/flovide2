@@ -17,20 +17,24 @@
         --danger-soft: rgba(220, 38, 38, 0.12);
     }
 
-    .dashboard-shell { padding-bottom: 32px; }
+    .dashboard-shell {
+        padding-bottom: 32px;
+    }
 
     .hero-banner {
         border: 0;
         border-radius: 28px;
         overflow: hidden;
         background:
-            radial-gradient(circle at top right, rgba(255,255,255,0.12), transparent 22%),
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 22%),
             linear-gradient(135deg, #0f172a 0%, #1d4ed8 60%, #0ea5e9 100%);
         box-shadow: 0 24px 55px rgba(29, 78, 216, 0.18);
         margin-bottom: 28px;
     }
 
-    .hero-banner .card-body { padding: 32px 36px; }
+    .hero-banner .card-body {
+        padding: 32px 36px;
+    }
 
     .hero-pill {
         display: inline-flex;
@@ -38,7 +42,7 @@
         gap: 8px;
         padding: 7px 14px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.12);
+        background: rgba(255, 255, 255, 0.12);
         color: #fff;
         font-size: 12px;
         font-weight: 700;
@@ -63,7 +67,9 @@
         gap: 12px;
     }
 
-    .dashboard-card .card-body { padding: 24px; }
+    .dashboard-card .card-body {
+        padding: 24px;
+    }
 
     .section-icon {
         width: 44px;
@@ -76,20 +82,68 @@
         flex-shrink: 0;
     }
 
-    .icon-blue  { background: rgba(37,99,235,0.12);  color: #2563eb; }
-    .icon-green { background: rgba(22,163,74,0.12);   color: #16a34a; }
-    .icon-amber { background: rgba(245,158,11,0.14);  color: #d97706; }
-    .icon-red   { background: rgba(220,38,38,0.12);   color: #dc2626; }
-    .icon-slate { background: rgba(100,116,139,0.12); color: #64748b; }
+    .icon-blue {
+        background: rgba(37, 99, 235, 0.12);
+        color: #2563eb;
+    }
 
-    .section-title { font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 2px; }
-    .section-subtitle { font-size: 12px; color: var(--text-soft); }
+    .icon-green {
+        background: rgba(22, 163, 74, 0.12);
+        color: #16a34a;
+    }
 
-    .detail-table { width: 100%; }
-    .detail-table tr:not(:last-child) { border-bottom: 1px solid var(--border-soft); }
-    .detail-table th, .detail-table td { padding: 13px 0; font-size: 14px; vertical-align: top; }
-    .detail-table th { color: var(--text-soft); font-weight: 700; width: 200px; }
-    .detail-table td { color: var(--text-main); font-weight: 600; }
+    .icon-amber {
+        background: rgba(245, 158, 11, 0.14);
+        color: #d97706;
+    }
+
+    .icon-red {
+        background: rgba(220, 38, 38, 0.12);
+        color: #dc2626;
+    }
+
+    .icon-slate {
+        background: rgba(100, 116, 139, 0.12);
+        color: #64748b;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 2px;
+    }
+
+    .section-subtitle {
+        font-size: 12px;
+        color: var(--text-soft);
+    }
+
+    .detail-table {
+        width: 100%;
+    }
+
+    .detail-table tr:not(:last-child) {
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .detail-table th,
+    .detail-table td {
+        padding: 13px 0;
+        font-size: 14px;
+        vertical-align: top;
+    }
+
+    .detail-table th {
+        color: var(--text-soft);
+        font-weight: 700;
+        width: 200px;
+    }
+
+    .detail-table td {
+        color: var(--text-main);
+        font-weight: 600;
+    }
 
     .status-pill {
         display: inline-flex;
@@ -101,10 +155,25 @@
         font-weight: 700;
     }
 
-    .pill-pending    { background: rgba(245,158,11,0.14); color: #d97706; }
-    .pill-processing { background: rgba(14,165,233,0.14); color: #0ea5e9; }
-    .pill-approved   { background: rgba(22,163,74,0.12);  color: #16a34a; }
-    .pill-rejected   { background: rgba(220,38,38,0.12);  color: #dc2626; }
+    .pill-pending {
+        background: rgba(245, 158, 11, 0.14);
+        color: #d97706;
+    }
+
+    .pill-processing {
+        background: rgba(14, 165, 233, 0.14);
+        color: #0ea5e9;
+    }
+
+    .pill-approved {
+        background: rgba(22, 163, 74, 0.12);
+        color: #16a34a;
+    }
+
+    .pill-rejected {
+        background: rgba(220, 38, 38, 0.12);
+        color: #dc2626;
+    }
 
     .masked-field {
         font-family: monospace;
@@ -122,12 +191,16 @@
         border-radius: 14px;
         padding: 10px 20px;
         font-weight: 700;
-        background: rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.15);
         color: #fff;
         font-size: 13px;
         transition: background 0.2s;
     }
-    .back-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+    }
 </style>
 
 <body>
@@ -159,14 +232,14 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-2 mt-2">
                                         @php
-                                            $s = $bankAccountRequest->status;
-                                            $pillClass = match($s) {
-                                                'pending'    => 'pill-pending',
-                                                'processing' => 'pill-processing',
-                                                'approved'   => 'pill-approved',
-                                                'rejected'   => 'pill-rejected',
-                                                default      => 'pill-pending',
-                                            };
+                                        $s = $bankAccountRequest->status;
+                                        $pillClass = match($s) {
+                                        'pending' => 'pill-pending',
+                                        'processing' => 'pill-processing',
+                                        'approved' => 'pill-approved',
+                                        'rejected' => 'pill-rejected',
+                                        default => 'pill-pending',
+                                        };
                                         @endphp
                                         <span class="status-pill {{ $pillClass }}">
                                             <i class="fa fa-circle" style="font-size:8px;"></i>
@@ -179,6 +252,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+                                <i class="fa-solid fa-circle-check me-2"></i>
+                                {{ session('success') }}
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+                                <i class="fa-solid fa-circle-exclamation me-2"></i>
+                                {{ session('error') }}
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
 
                         <div class="row g-4">
 
@@ -230,31 +321,32 @@
                                                 <td>{{ $bankAccountRequest->processed_at ? $bankAccountRequest->processed_at->format('d M Y, h:i A') : '—' }}</td>
                                             </tr>
                                             @if($bankAccountRequest->admin_note)
-                                                <tr>
-                                                    <th>Admin Note</th>
-                                                    <td>{{ $bankAccountRequest->admin_note }}</td>
-                                                </tr>
+                                            <tr>
+                                                <th>Admin Note</th>
+                                                <td>{{ $bankAccountRequest->admin_note }}</td>
+                                            </tr>
                                             @endif
                                         </table>
                                         <div class="d-flex align-items-center gap-2 flex-wrap mt-3 pt-3 border-top">
-                                            {{-- Update (UI-only for now) --}}
+                                            {{-- Update --}}
+                                            <form id="formUpdate" action="{{ route('admin.bank-account-request.update', $bankAccountRequest->id) }}" method="POST" style="display:none;">
+                                                @csrf
+                                            </form>
                                             <button type="button" id="btnApproveRequest"
-                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
-                                                    style="background:rgba(22,163,74,0.12);color:#16a34a;border:0;border-radius:14px;font-weight:700;">
+                                                class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
+                                                style="background:rgba(22,163,74,0.12);color:#16a34a;border:0;border-radius:14px;font-weight:700;">
                                                 <i class="fa-solid fa-circle-check"></i>
                                                 Update
                                             </button>
 
                                             {{-- Reject --}}
-                                            <form id="formReject"
-                                                  action="{{ route('admin.bank-account-request.reject', $bankAccountRequest->id) }}"
-                                                  method="POST" style="display:none;">
+                                            <form id="formReject" action="{{ route('admin.bank-account-request.reject', $bankAccountRequest->id) }}" method="POST" style="display:none;">
                                                 @csrf
                                                 <input type="hidden" name="admin_note" id="rejectNote">
                                             </form>
                                             <button type="button" id="btnRejectRequest"
-                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
-                                                    style="background:rgba(245,158,11,0.12);color:#d97706;border:0;border-radius:14px;font-weight:700;">
+                                                class="btn d-inline-flex align-items-center gap-2 px-4 py-2"
+                                                style="background:rgba(245,158,11,0.12);color:#d97706;border:0;border-radius:14px;font-weight:700;">
                                                 <i class="fa-solid fa-ban"></i>
                                                 Reject
                                             </button>
@@ -265,8 +357,8 @@
                                                 @method('DELETE')
                                             </form>
                                             <button type="button" id="btnDeleteRequest"
-                                                    class="btn d-inline-flex align-items-center gap-2 px-4 py-2 ms-auto"
-                                                    style="background:rgba(220,38,38,0.12);color:#dc2626;border:0;border-radius:14px;font-weight:700;">
+                                                class="btn d-inline-flex align-items-center gap-2 px-4 py-2 ms-auto"
+                                                style="background:rgba(220,38,38,0.12);color:#dc2626;border:0;border-radius:14px;font-weight:700;">
                                                 <i class="fa-solid fa-trash"></i>
                                                 Delete
                                             </button>
@@ -289,42 +381,42 @@
                                     </div>
                                     <div class="card-body">
                                         @if($bankAccountRequest->personal)
-                                            @php $p = $bankAccountRequest->personal; @endphp
-                                            <table class="detail-table">
-                                                <tr>
-                                                    <th>Full Name</th>
-                                                    <td>{{ $p->firstname }} {{ $p->lastname }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Email</th>
-                                                    <td>{{ $p->email }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Phone</th>
-                                                    <td>{{ $p->person_phone ?? '—' }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Country</th>
-                                                    <td>{{ $p->country ?? '—' }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Email Verified</th>
-                                                    <td>
-                                                        @if($p->email_verified_status === 'yes')
-                                                            <span class="status-pill pill-approved"><i class="fa fa-check" style="font-size:9px;"></i> Verified</span>
-                                                        @else
-                                                            <span class="status-pill pill-rejected"><i class="fa fa-times" style="font-size:9px;"></i> Unverified</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <div class="mt-3">
-                                                <!-- <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                                        @php $p = $bankAccountRequest->personal; @endphp
+                                        <table class="detail-table">
+                                            <tr>
+                                                <th>Full Name</th>
+                                                <td>{{ $p->firstname }} {{ $p->lastname }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email</th>
+                                                <td>{{ $p->email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Phone</th>
+                                                <td>{{ $p->person_phone ?? '—' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Country</th>
+                                                <td>{{ $p->country ?? '—' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email Verified</th>
+                                                <td>
+                                                    @if($p->email_verified_status === 'yes')
+                                                    <span class="status-pill pill-approved"><i class="fa fa-check" style="font-size:9px;"></i> Verified</span>
+                                                    @else
+                                                    <span class="status-pill pill-rejected"><i class="fa fa-times" style="font-size:9px;"></i> Unverified</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div class="mt-3">
+                                            <!-- <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
                                                     <i class="fa fa-user me-1"></i> View Full Profile
                                                 </a> -->
-                                            </div>
+                                        </div>
                                         @else
-                                            <p class="text-muted text-center py-3">No customer linked.</p>
+                                        <p class="text-muted text-center py-3">No customer linked.</p>
                                         @endif
                                     </div>
                                 </div>
@@ -337,53 +429,71 @@
         </div>
     </div>
 
-@include('admin.footer')
+    @include('admin.footer')
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-        // Reject
-        document.getElementById('btnRejectRequest')?.addEventListener('click', function () {
-            Swal.fire({
-                title: 'Reject this request?',
-                html: `
+            // Update
+            document.getElementById('btnApproveRequest')?.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Update this request?',
+                    text: 'Are you sure that you want to update this request?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Update',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#16a34a',
+                    focusCancel: true,
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        document.getElementById('formUpdate').submit();
+                    }
+                });
+            });
+
+            // Reject
+            document.getElementById('btnRejectRequest')?.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Reject this request?',
+                    html: `
                     <p class="text-muted mb-3">You can optionally leave a note for the customer.</p>
                     <textarea id="swalNote" class="swal2-textarea" placeholder="Admin note (optional)…" rows="3"></textarea>
                 `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Reject',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#d97706',
-                focusCancel: true,
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    document.getElementById('rejectNote').value =
-                        document.getElementById('swalNote')?.value ?? '';
-                    document.getElementById('formReject').submit();
-                }
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Reject',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#d97706',
+                    focusCancel: true,
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        document.getElementById('rejectNote').value =
+                            document.getElementById('swalNote')?.value ?? '';
+                        document.getElementById('formReject').submit();
+                    }
+                });
             });
-        });
 
-        // Delete
-        document.getElementById('btnDeleteRequest')?.addEventListener('click', function () {
-            Swal.fire({
-                title: 'Delete this request?',
-                text: 'The record will be soft-deleted and can be recovered later.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc2626',
-                focusCancel: true,
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    document.getElementById('formDelete').submit();
-                }
+            // Delete
+            document.getElementById('btnDeleteRequest')?.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Delete this request?',
+                    text: 'The record will be soft-deleted and can be recovered later.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#dc2626',
+                    focusCancel: true,
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        document.getElementById('formDelete').submit();
+                    }
+                });
             });
-        });
 
-    });
-</script>
+        });
+    </script>
 </body>

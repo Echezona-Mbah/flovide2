@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\PersonalBankAccountRequest;
@@ -47,15 +48,84 @@ class BankAccountRequestController extends Controller
         return view('admin.bank_account_request_show', compact('bankAccountRequest'));
     }
 
+    public function update(Request $request, $id)
+    {
+        $bankAccountRequest = PersonalBankAccountRequest::with('personal')->findOrFail($id);
+
+        // Prevent updating an already confirmed request
+        if ($bankAccountRequest->status === 'confirmed') {
+            return redirect()
+                ->back()
+                ->with('error', 'This bank account request has already been confirmed.');
+        }
+
+        // Make sure the request has a linked personal account
+        if (!$bankAccountRequest->personal) {
+            Log::error('Bank account request has no linked personal account', [
+                'request_id' => $bankAccountRequest->id,
+                'admin_id' => Auth::guard('admin')->id(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Unable to update request. The linked personal account was not found.');
+        }
+
+        DB::transaction(function () use ($bankAccountRequest) {
+
+            $bankAccountRequest->personal->update([
+                'nin' => $bankAccountRequest->nin,
+                'bvn' => $bankAccountRequest->bvn,
+                'nin_status' => 'under review',
+                'bvn_status' => 'under review',
+            ]);
+
+            $bankAccountRequest->update([
+                'status' => 'under review',
+                'processed_at' => now(),
+            ]);
+
+        });
+
+        Log::info('Bank account request updated to under review', [
+            'request_id' => $id,
+            'admin' => Auth::guard('admin')->id(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Request updated and statuses set to under review.');
+    }
+
     public function reject(Request $request, $id)
     {
-        $bankAccountRequest = PersonalBankAccountRequest::findOrFail($id);
-
-        $bankAccountRequest->update([
-            'status' => 'rejected',
-            'admin_note' => $request->input('admin_note'),
-            'processed_at' => now(),
+        $request->validate([
+            'admin_note' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $bankAccountRequest = PersonalBankAccountRequest::with('personal')->findOrFail($id);
+
+        // Prevent changing an already confirmed request
+        if ($bankAccountRequest->status === 'confirmed') {
+            return redirect()
+                ->back()
+                ->with('error', 'A confirmed bank account request cannot be rejected.');
+        }
+
+        // Prevent rejecting an already rejected request
+        if ($bankAccountRequest->status === 'rejected') {
+            return redirect()
+                ->back()
+                ->with('error', 'This bank account request has already been rejected.');
+        }
+
+        DB::transaction(function () use ($bankAccountRequest, $request) {
+            $bankAccountRequest->update([
+                'status' => 'rejected',
+                'admin_note' => $request->input('admin_note'),
+                'processed_at' => now(),
+            ]);
+        });
 
         Log::info('Bank account request rejected', [
             'request_id' => $id,
