@@ -1391,7 +1391,43 @@
 
                             @php
                                 $ngnBalance = $balances->firstWhere('currency', 'NGN');
+                                $latestRequest = $user->bankAccountRequest()->latest()->first();
                             @endphp
+
+                            @if($latestRequest)
+                            <div class="dashboard-card mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="section-title">Bank Account Request</div>
+                                        <div class="section-subtitle">Manage the status of the user's latest bank account request.</div>
+                                    </div>
+                                    <span class="custom-status status-{{ $latestRequest->status === 'confirmed' ? 'success' : ($latestRequest->status === 'under review' ? 'warning' : 'muted') }}">
+                                        {{ ucfirst($latestRequest->status) }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                        <div>
+                                            <p class="mb-1 text-muted">Current Request Status:</p>
+                                            <strong class="fs-5">{{ ucfirst($latestRequest->status) }}</strong>
+                                        </div>
+                                        
+                                        @if($latestRequest->status !== 'confirmed')
+                                        <form method="POST" action="{{ route('admin.bank-account-request.confirm', $latestRequest->id) }}" class="confirm-submit-form" data-confirm="Are you sure you want to confirm this bank account request?">
+                                            @csrf
+                                            <button type="submit" class="btn d-inline-flex align-items-center gap-2 px-4 py-2" style="background:rgba(22,163,74,0.12);color:#16a34a;border:0;border-radius:14px;font-weight:700;">
+                                                <i class="pe-7s-check" style="font-weight:bold;"></i> Confirm Request
+                                            </button>
+                                        </form>
+                                        @else
+                                        <button class="btn d-inline-flex align-items-center gap-2 px-4 py-2" disabled style="background:rgba(100,116,139,0.12);color:#64748b;border:0;border-radius:14px;font-weight:700;">
+                                            <i class="pe-7s-check" style="font-weight:bold;"></i> Confirmed
+                                        </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <div class="dashboard-card banking-integrations-card">
                                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -1652,6 +1688,35 @@
 
 @include('admin.footer')
 
+
+<script>
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    @if(session('success'))
+        Toast.fire({
+            icon: 'success',
+            title: @json(session('success'))
+        });
+    @endif
+
+    @if(session('error'))
+        Toast.fire({
+            icon: 'error',
+            title: @json(session('error'))
+        });
+    @endif
+</script>
+
 <script>
 document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
     btn.addEventListener('click', function () {
@@ -1706,10 +1771,21 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
 
     document.querySelectorAll('.confirm-submit-form').forEach(form => {
         form.addEventListener('submit', function (e) {
+            e.preventDefault();
             const message = this.dataset.confirm || 'Are you sure you want to submit this?';
-            if (!confirm(message)) {
-                e.preventDefault();
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
         });
     });
 
