@@ -135,6 +135,28 @@ public function sendTransaction(Request $request)
         return response()->json(['success'=>false,'message'=>'Unauthorized','code'=>'UNAUTHORIZED','data'=>null],401);
     }
 
+    // Check if personal account is locked
+    if ($personal->is_locked) {
+
+        Log::warning('[Send Transaction] Locked personal account attempted to send money', [
+            'personal_id' => $personal->id,
+            'email' => $personal->email ?? null,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'amount' => $request->amount ?? null,
+            'balance_id' => $request->balance_id ?? null,
+            'recipient_id' => $request->recipient_id ?? null,
+            'timestamp' => now()->toDateTimeString(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Your account is currently locked. You cannot send money at this time.',
+            'code' => 'ACCOUNT_LOCKED',
+            'data' => null
+        ], 423);
+    }
+
     $request->validate([
         'amount' => 'required|numeric|min:1',
         'recipient_id' => 'required|uuid',

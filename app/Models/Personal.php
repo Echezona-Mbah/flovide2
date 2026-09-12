@@ -13,6 +13,7 @@ class Personal extends Authenticatable
 
     protected $table = 'personals';
         protected $fillable = [
+        'is_locked',
         'country',
         'street_address',
         'city',

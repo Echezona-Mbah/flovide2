@@ -68,6 +68,24 @@ public function store(Request $request)
         ], 401);
     }
 
+    // Check if personal account is locked
+    if ($personal->is_locked) {
+
+        Log::warning('[Beneficiary Store] Locked personal account attempted to create beneficiary', [ 
+            'personal_id' => $personal->id, 
+            'email' => $personal->email ?? null, 
+            'ip' => $request->ip(), 'user_agent' => $request->userAgent(), 
+            'timestamp' => now()->toDateTimeString(), 
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Your account is currently locked. You cannot add beneficiaries at this time.',
+            'code' => 'ACCOUNT_LOCKED',
+            'data' => null
+        ], 423);
+    }
+
     $personalId = $personal->id;
 
     $validator = \Validator::make($request->all(), [

@@ -516,4 +516,72 @@ public function toggleBalanceLock(Request $request, $personalId, $balanceId)
     return back()->with('success', "{$balance->name} ({$balance->currency}) has been {$state}.");
 }
 
+
+
+public function toggleUserLock(Request $request, $id) {
+
+    $admin = Auth::guard('admin')->user();
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized action.',
+        ], 401);
+    }
+
+    $user = Personal::where('typeofuser', 'personal')->find($id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Personal user not found.',
+        ], 404);
+    }
+
+    try {
+
+        $oldStatus = (bool) $user->is_locked;
+        $newStatus = !$oldStatus;
+
+        DB::transaction(function () use ($user, $newStatus) {
+            $user->is_locked = $newStatus;
+            $user->save();
+        });
+
+        $state = $newStatus ? 'locked' : 'unlocked';
+
+        Log::info('Personal user lock status updated', [
+            'admin_id' => $admin->id,
+            'user_id' => $user->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'action' => $state,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_locked' => $newStatus,
+            'message' => "User account has been {$state} successfully.",
+        ], 200);
+
+    } catch (\Throwable $e) {
+
+        Log::error('Failed to update Personal user lock status', [
+            'admin_id' => $admin->id,
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to update the account status. Please try again.',
+        ], 500);
+    }
+}
+
+
+
 }

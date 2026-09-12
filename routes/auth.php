@@ -477,7 +477,7 @@ Route::middleware('admin.auth')->group(function () {
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
-
+        Route::patch('/admin/personal-account/{id}/toggle-lock', [PersonalAccountController::class, 'toggleUserLock'])->name('admin.personalaccount.toggle-lock');
 
         //proof of address
         Route::post('/admin/personal-account/proof-of-address', [ProofOfAddressController::class,'update'])->name('admin.personal.proof-of-address.update');
