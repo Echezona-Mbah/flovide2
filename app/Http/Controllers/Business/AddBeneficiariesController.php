@@ -7,6 +7,7 @@ use App\Models\Bank;
 use App\Models\Beneficia;
 use App\Models\Countries;
 use App\Models\TeamMembers;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Http;
@@ -584,6 +585,49 @@ public function store(Request $request)
     $ownerId  = $team ? $team->owner_id : $authUser->id;
     $memberId = $team ? $authUser->id : null;  // null when owner, only set for actual team members
     $role     = $team ? $team->role : 'Owner';
+
+    // Check if the business owner's account is locked
+    $owner = User::where('typeofuser', 'business')->find($ownerId);
+
+    if (!$owner) {
+        Log::error('[Beneficiary Store] Business owner not found', [
+            'authenticated_user_id' => $authUser->id,
+            'owner_id' => $ownerId,
+        ]);
+
+        $message = 'Business account could not be found.';
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $message,
+                'code' => 'BUSINESS_ACCOUNT_NOT_FOUND',
+                'data' => null,
+            ], 404)
+            : back()->with('error', $message);
+    }
+
+    if ((bool) $owner->is_locked === true) {
+
+        Log::warning('[Beneficiary Store] Blocked - business account is locked', [
+            'authenticated_user_id' => $authUser->id,
+            'owner_id' => $owner->id,
+            'member_id' => $memberId,
+            'role' => $role,
+            'ip_address' => $request->ip(),
+        ]);
+
+        $message = 'Your business account is locked. You cannot add a beneficiary at this time.';
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $message,
+                'code' => 'ACCOUNT_LOCKED',
+                'data' => null,
+            ], 403)
+            : back()->with('error', $message);
+    }
 
     Log::info('[Beneficiary Store] Auth resolved', [
         'user_id'   => $authUser->id,

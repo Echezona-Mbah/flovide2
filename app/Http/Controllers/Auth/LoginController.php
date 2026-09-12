@@ -367,7 +367,7 @@ class LoginController extends Controller
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
                     'email_verified_status' => $account->email_verified_status,
-
+                    'is_locked' => (bool) $account->is_locked,
                 ],
                 'currencies' => $currencies,
                 'exchange_rates' => $exchangeRates,

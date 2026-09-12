@@ -124,6 +124,30 @@ class SendMoneyController extends Controller
                 : back()->withInput()->with('error', $msg);
         }
 
+
+        // Check if business account is locked
+        if ((bool) $owner->is_locked === true) {
+
+            Log::warning('[Send Money] Blocked - business account is locked', [
+                'authenticated_user_id' => $actor->id,
+                'owner_id' => $owner->id,
+                'member_id' => $memberId,
+                'role' => $role,
+                'ip_address' => $request->ip(),
+            ]);
+
+            $msg = 'Your business account is locked. You cannot send money at this time.';
+
+            return $isApi
+                ? response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'code' => 'ACCOUNT_LOCKED',
+                    'data' => null,
+                ], 403)
+                : back()->withInput()->with('error', $msg);
+        }
+
         // ── Transaction PIN verification ────────────────────────────────────────
         if (empty($owner->transaction_pin)) {
             $msg = 'You have not set a transaction PIN yet. Please set one to continue.';

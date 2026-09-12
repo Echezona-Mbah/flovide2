@@ -469,6 +469,8 @@ Route::middleware('admin.auth')->group(function () {
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
         Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
         Route::put('/admin/business-account/{id}/currency-fee/{currency}',[BusinessAccountController::class, 'updateCurrencyFee'])->name('admin.business.currency-fee.update');
+        Route::patch('/admin/business-account/{id}/toggle-lock', [BusinessAccountController::class, 'toggleUserLock'])->name('admin.businessaccount.toggle-lock');
+
 
         Route::post('/admin/personal-account-status/{id}', [PersonalAccountController::class,'updateStatus']);
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
