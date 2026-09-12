@@ -362,6 +362,9 @@ public function index(Request $request)
                     'proof_address' => $account->proof_address_status ?? 'pending',
                     'kyc' => $kycStatus,
                 ],
+                'account_status' => [
+                    'is_locked' => (bool) $account->is_locked,
+                ],
                 'bank_account_request' => [
                     'status' => $bankAccountRequestStatus,
                 ],

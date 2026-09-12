@@ -410,6 +410,9 @@ public function dashboardapi(Request $request)
                     'latest_version' => config('services.latest_version'),
                     'force_update'   => config('services.force_update', true),
                 ],
+                'account_status' => [
+                    'is_locked' => (bool) $account->is_locked,
+                ],
                 'total_balance' => number_format($totalBalance, 2, '.', ''),
                 'total_balance_currency' => $defaultCurrency,
                 'balances'       => $balances,
