@@ -248,6 +248,42 @@
   </div>
 </section> --}}
 
+
+
+<!-- 
+<div class="bg-red-50 border border-red-200 rounded-xl p-4">
+    <div class="flex items-start gap-3">
+
+        <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-red-100
+                    flex items-center justify-center">
+            <i class="fa-solid fa-lock text-red-500 text-sm"></i>
+        </div>
+
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+                <p class="text-sm font-semibold text-red-800">
+                    Account Locked
+                </p>
+
+                <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600
+                             text-[10px] font-semibold">
+                    Restricted
+                </span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-red-700 leading-5">
+                Your Flovide business account is currently locked.
+                Transactions and certain account actions are temporarily restricted.
+            </p>
+
+            <p class="mt-2 text-xs text-red-600/80">
+                Please contact Flovide Support if you believe this was done in error.
+            </p>
+        </div>
+
+    </div>
+</div> -->
+
 <section class="mx-auto max-w-5xl">
   <div class="rounded-3xl bg-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.35)] border border-slate-100 overflow-hidden">
     <div class="px-6 md:px-10 py-8 bg-[#215F9C] text-white border-b border-sky-200/70">
