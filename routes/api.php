@@ -449,7 +449,7 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
     // Route::delete('/deletePersonal/{email}', [RegisterController::class, 'deletePersonal']);
 
     //API FOR PERSONAL dd
-    Route::middleware('auth:personal-api')->get('/beneficiaries', function (Request $request) {
+    Route::middleware(['auth:personal-api', 'personal.session'])->get('/beneficiaries', function (Request $request) {
         return $request->user(); 
     });
     // for personal
@@ -467,7 +467,7 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
     Route::get('/kyc/token', [PersonalComplianceController::class,'getSumsubToken']);
 
 
-    Route::group(['middleware' => ['auth:personal-api']], function () {
+    Route::group(['middleware' => ['auth:personal-api', 'personal.session']], function () {
         Route::prefix('personal')->group(function () {
 
 

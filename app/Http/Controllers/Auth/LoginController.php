@@ -532,14 +532,18 @@ class LoginController extends Controller
             ], 400);
         }
 
+        // Generate a new session ID for this personal login
+        $sessionId = (string) Str::uuid();
+
+        // Clear OTP and register this as the active session
         $account->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
             'device_token' => $request->filled('device_token') ? $request->device_token : $account->device_token,
-
+            'active_session_id' => $sessionId,
         ]);
 
-        $token = $account->createToken('PersonalToken')->plainTextToken;
+        $token = $account->createToken('PersonalToken', ['*', 'session:' . $sessionId,])->plainTextToken;
 
         $account->notify(new GeneralNotification(
             "Login Successful",
@@ -692,6 +696,7 @@ class LoginController extends Controller
             'code' => 'LOGIN_VERIFIED',
             'data' => [
                 'token' => $token,
+                'session_id' => $sessionId,
                 'account_type' => 'personals',
                 'personal' => [
                     'id' => $account->id,
