@@ -18,7 +18,7 @@ use App\Models\PersonalBankAccountRequest;
 use App\Models\Bank;
 use App\Models\CountryRule;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
 
@@ -166,16 +166,19 @@ class LoginController extends Controller
             ], 400);
         }
 
-        // Clear OTP
+        // Generate a new session ID for this login
+        $sessionId = (string) Str::uuid();
+
+        // Clear OTP and register the new active session
         $account->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
             'device_token' => $request->filled('device_token') ? $request->device_token : $account->device_token,
-
+            'active_session_id' => $sessionId,
         ]);
 
         // Generate token
-        $token = $account->createToken('BusinessToken')->plainTextToken;
+        $token = $account->createToken('BusinessToken', ['*' , 'session:' . $sessionId,])->plainTextToken;
 
         $account->notify(new GeneralNotification(
             "Login Successful",
@@ -351,6 +354,7 @@ class LoginController extends Controller
             'data' => [
                 'account_type' => 'business',
                 'token' => $token,
+                'session_id' => $sessionId,
                 // 'app_update' => [                          // ← ADD THIS
                 //     'latest_version' => config('app.latest_version', '1.0.0+8'),
                 //     'force_update'   => config('app.force_update', false),

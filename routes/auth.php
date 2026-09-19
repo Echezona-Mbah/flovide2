@@ -149,7 +149,7 @@ Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
 
 
 // HtmlMinifier::class
-Route::middleware(['auth','business.verified', 'user.inactivity'])->group(function () {
+Route::middleware(['auth','business.verified', 'user.inactivity', 'business.web.session'])->group(function () {
 
 
     Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);

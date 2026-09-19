@@ -21,6 +21,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'is_locked',
+        'active_session_id',
         'country',
         'countries_id',
         'business_name',

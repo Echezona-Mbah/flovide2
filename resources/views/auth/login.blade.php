@@ -83,34 +83,52 @@
                         <section>
                             <form class="max-w-xl md:mt-8 mt-10" method="POST" action="{{ route('login') }}">
                                 @csrf
-                                @csrf
-                                @if ($errors->any())
-                                <script>
-                                    Swal.fire({
-                                        toast: true,
-                                        position: 'top-end',
-                                        icon: 'error',
-                                        title: '{{ $errors->first() }}',
-                                        showConfirmButton: false,
-                                        timer: 4000,
-                                        timerProgressBar: true,
-                                    });
-                                </script>
+
+                                {{-- Session errors --}}
+                                @if (session('error'))
+                                    <script>
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'error',
+                                            title: @json(session('error')),
+                                            showConfirmButton: false,
+                                            timer: 4000,
+                                            timerProgressBar: true,
+                                        });
+                                    </script>
                                 @endif
 
-                                @if (session('status'))
-                                <script>
-                                    Swal.fire({
-                                        toast: true,
-                                        position: 'top-end',
-                                        icon: 'success',
-                                        title: '{{ session('status') }}',
-                                        showConfirmButton: false,
-                                        timer: 4000,
-                                        timerProgressBar: true,
-                                    });
-                                </script>
+                                {{-- Validation Errors --}}
+                                @if ($errors->any())
+                                    <script>
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'error',
+                                            title: @json($errors->first()),
+                                            showConfirmButton: false,
+                                            timer: 4000,
+                                            timerProgressBar: true,
+                                        });
+                                    </script>
                                 @endif
+
+                                {{-- Success Message --}}
+                                @if (session('status'))
+                                    <script>
+                                        Swal.fire({
+                                            toast: true,
+                                            position: 'top-end',
+                                            icon: 'success',
+                                            title: @json(session('status')),
+                                            showConfirmButton: false,
+                                            timer: 4000,
+                                            timerProgressBar: true,
+                                        });
+                                    </script>
+                                @endif
+                                
                                 <section class="flex flex-col gap-6">
                                     <!-- bussiness email -->
                                     <div>
