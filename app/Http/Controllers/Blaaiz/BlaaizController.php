@@ -792,9 +792,13 @@ public function initiateAutoDeposit(Request $request)
 
     Log::info('[Interac AutoDeposit] Pending transaction created', [
         'tx_id'     => $transaction->id,
+        'status'            => 'pending',
         'reference' => $reference,
         'amount'    => $amount,
         'currency'  => $currency,
+        'fees'              => $platformFee,
+        'platform_fee'      => $platformFee,
+        'recipient_amount'  => $netAmount,
     ]);
 
     return response()->json([
@@ -806,6 +810,10 @@ public function initiateAutoDeposit(Request $request)
             'deposit_email' => 'payment@flovide.com',
             'amount'        => $amount,
             'currency'      => $currency,
+            'status'        => 'pending',
+            'fees'              => $platformFee,
+            'platform_fee'      => $platformFee,
+            'recipient_amount'  => $netAmount,
         ],
     ], 200);
 }
@@ -905,6 +913,7 @@ public function initiateAutoDepositPersonal(Request $request)
         'fees'      => $platformFee,
         'recipient_amount'   => $netAmount,
         'payment_reference'      => $reference,
+        'status'        => 'pending',
     ]);
 
     return response()->json([
@@ -920,6 +929,7 @@ public function initiateAutoDepositPersonal(Request $request)
             'fees'      => $platformFee,
             'recipient_amount'   => $netAmount,
             'payment_reference'      => $reference,
+            'status'        => 'pending',
 
         ],
     ], 200);

@@ -6,15 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bank extends Model
 {
- protected $fillable = [
-    'name',
-    'country_iso',
-     'currency',
-    'bank_code',
-    'sort_code',
-    'provider',
-    'type',
-];
+    protected $fillable = [
+        'name',
+        'country_iso',
+        'currency',
+        'bank_code',
+        'provider_bank_id',
+        'bank_nibss_code',
+        'sort_code',
+        'provider',
+        'type',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -141,6 +141,7 @@ Route::post('/pivot/account-validation', [PivotController::class, 'accountValida
 
 Route::get('/banks/filter', [AddBeneficiariesController::class,'banks'])->name('banks.filter');
 Route::post('/payaza/account-enquiry', [PayoutController::class, 'accountEnquiry'])->name('payaza.account-enquiry');
+Route::post('/account-inquiry', [\App\Http\Controllers\AccountInquiryController::class, 'unifiedAccountInquiry'])->name('account.inquiry');
 
 Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
@@ -201,11 +202,11 @@ Route::middleware(['auth','business.verified', 'user.inactivity', 'business.web.
     Route::get('/business/balance/{id}/interac-autodeposit', [CreateBankController::class, 'interacAutoDepositSettings'])
     ->name('balance.interac_autodeposit');
 
-Route::post('/business/balance/{id}/interac-autodeposit', [CreateBankController::class, 'saveInteracAutoDepositEmail'])
-    ->name('balance.interac_autodeposit.save');
+    Route::post('/business/balance/{id}/interac-autodeposit', [CreateBankController::class, 'saveInteracAutoDepositEmail'])
+        ->name('balance.interac_autodeposit.save');
 
-Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBankController::class, 'deleteInteracAutoDepositEmail'])
-    ->name('balance.interac_autodeposit.delete');
+    Route::delete('/business/balance/{id}/interac-autodeposit/{emailId}', [CreateBankController::class, 'deleteInteracAutoDepositEmail'])
+        ->name('balance.interac_autodeposit.delete');
 
 
 
@@ -533,6 +534,15 @@ Route::middleware('admin.auth')->group(function () {
             Route::get('/admin/chargeback', [AllChargebackController::class, 'index'])->name('admin.chargeback');
             Route::post('/admin/chargeback/{id}/update-status', [AllChargebackController::class, 'updateStatus'])->name('chargeback.updateStatus');
             Route::post('/admin/chargeback/submitEvidence', [AllChargebackController::class, 'submitEvidence'])->name('admin.chargeback.submitEvidence');
+
+
+             Route::get('/provider', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'index'])->name('admin.payment-providers.index');
+            Route::post('/{provider}/toggle', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'toggleProvider'])->name('admin.payment-providers.toggle');
+            Route::post('/{provider}/priority', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'updatePriority'])->name('admin.payment-providers.priority');
+            Route::post('/{provider}/currency', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'toggleCurrency'])->name('admin.payment-providers.currency.toggle');
+            Route::delete('/{provider}/currency/{currencyId}', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'removeCurrency'])->name('admin.payment-providers.currency.remove');
+
+
         });
 
 

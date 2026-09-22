@@ -73,4 +73,20 @@ return [
         'dynamic_va_path' => env('FIDELITY_DYNAMIC_VA_PATH', '/virtual-account/generate-dynamic-virtual-account'),
     ],
 
+    'ohentpay' => [
+        'enabled'    => env('OHENTPAY_ENABLED'),
+        'api_key'    => env('OHENTPAY_API_KEY'),
+        'base_url'   => env('OHENTPAY_BASE_URL', 'https://api.ohentpay.com'),
+        'currencies' => array_filter(array_map('trim', explode(',', env('OHENTPAY_CURRENCIES', '')))),
+    ],
+
+    //     'pivot' => [
+    //     'base_url' => env('PIVOT_BASE_URL', 'https://merchant-api.dev.atlassnomad.com'),
+    //     'username' => env('PIVOT_USERNAME', 'FLOVIDE'),
+    //     'password' => env('PIVOT_PASSWORD', 'd9Dv5jy4I9qQpDefyd22Yln7AfiTMQt-C-HStI9g5zM'),
+    //     'ugx_bank_service' => env('PIVOT_UGX_BANK_SERVICE', 'PS347884'),
+    //     'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE', 'PS347884'),
+    //     'ugx_mobile_service_validation' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION', 'PS628030'),
+    // ],
+
 ];
