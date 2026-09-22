@@ -482,6 +482,71 @@
     transform: scale(0.98);
 }
 
+
+/* Lock Status */
+.lock-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.lock-status-unlocked {
+    background: rgba(22, 163, 74, 0.10);
+    color: #15803d;
+    border: 1px solid rgba(22, 163, 74, 0.16);
+}
+
+.lock-status-locked {
+    background: rgba(220, 38, 38, 0.10);
+    color: #b91c1c;
+    border: 1px solid rgba(220, 38, 38, 0.16);
+}
+
+/* Modern Lock Button */
+.btn-lock {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.10);
+    color: #4f46e5;
+    box-shadow: 0 5px 14px rgba(79, 70, 229, 0.08);
+    transition: all 0.2s ease;
+}
+
+.btn-lock:hover {
+    background: #4f46e5;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.20);
+}
+
+.btn-lock:active {
+    transform: scale(0.95);
+}
+
+.btn-lock.locked {
+    background: rgba(220, 38, 38, 0.10);
+    color: #dc2626;
+}
+
+.btn-lock.locked:hover {
+    background: #dc2626;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(220, 38, 38, 0.20);
+}
+
+
+
 @media (max-width: 767px) {
     .filter-search {
         min-width: 100%;
@@ -711,10 +776,12 @@
                                             <th style="min-width:260px;">User</th>
                                             <th>Email</th>
                                             <th class="d-none d-md-table-cell">City</th>
-                                            <th class="d-none d-lg-table-cell">Balance</th>
+                                            <!-- <th class="d-none d-lg-table-cell">Balance</th> -->
                                             <th class="d-none d-lg-table-cell">Currency</th>
                                             <th>Status</th>
                                             <th class="d-none d-lg-table-cell">Created</th>
+                                            <th class="d-none d-lg-table-cell">Lock Status</th>
+                                            <th class="d-none d-lg-table-cell">Lock</th>
                                             <th class="text-end">Actions</th>
                                         </tr>
                                     </thead>
@@ -744,7 +811,7 @@
 
                                                 <td class="d-none d-md-table-cell">{{ $user->city ?? 'N/A' }}</td>
 
-                                                <td class="d-none d-lg-table-cell">{{ $user->balance ?? '0' }}</td>
+                                                <!-- <td class="d-none d-lg-table-cell">{{ $user->balance ?? '0' }}</td> -->
 
                                                 <td class="d-none d-lg-table-cell">{{ $user->currency ?? 'N/A' }}</td>
 
@@ -758,6 +825,21 @@
 
                                                 <td class="d-none d-lg-table-cell">
                                                     {{ $user->created_at ? $user->created_at->format('d M Y H:i') : 'N/A' }}
+                                                </td>
+
+                                                <td class="d-none d-lg-table-cell">
+                                                    <span class="lock-status-chip {{ $user->is_locked ? 'lock-status-locked' : 'lock-status-unlocked' }}" data-status-id="{{ $user->id }}">
+                                                        <i class="fa-solid {{ $user->is_locked ? 'fa-lock' : 'fa-lock-open' }}"></i>
+                                                        {{ $user->is_locked ? 'Locked' : 'Unlocked' }}
+                                                    </span>
+                                                </td>
+
+                                                <td class="d-none d-lg-table-cell">
+                                                    <button type="button" class="btn-lock {{ $user->is_locked ? 'locked' : '' }}" 
+                                                        data-url="{{ route('admin.personalaccount.toggle-lock', $user->id) }}"
+                                                        data-id="{{ $user->id }}" title="{{ $user->is_locked ? 'Unlock Account' : 'Lock Account' }}">
+                                                        <i class="fa-solid {{ $user->is_locked ? 'fa-lock' : 'fa-lock-open' }}"></i>
+                                                    </button>
                                                 </td>
 
                                                 <td class="text-end">
@@ -1058,5 +1140,111 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
+
+
+
+
+
+    // Lock / unlock user account
+    document.querySelectorAll('.btn-lock').forEach(button => {
+
+        button.addEventListener('click', function () {
+
+            const url = this.dataset.url;
+            const userId = this.dataset.id;
+            const icon = this.querySelector('i');
+
+            fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    // Update lock button
+                    this.classList.toggle('locked', data.is_locked);
+
+                    // Update button icon
+                    icon.classList.remove('fa-lock', 'fa-lock-open');
+
+                    if (data.is_locked) {
+                        icon.classList.add('fa-lock');
+                        this.title = 'Unlock Account';
+                    } else {
+                        icon.classList.add('fa-lock-open');
+                        this.title = 'Lock Account';
+                    }
+
+                    // Update status badge
+                    const statusBadge = document.querySelector(
+                        `.lock-status-chip[data-status-id="${userId}"]`
+                    );
+
+                    if (statusBadge) {
+
+                        const statusIcon = statusBadge.querySelector('i');
+
+                        statusBadge.classList.remove(
+                            'lock-status-locked',
+                            'lock-status-unlocked'
+                        );
+
+                        statusIcon.classList.remove(
+                            'fa-lock',
+                            'fa-lock-open'
+                        );
+
+                        if (data.is_locked) {
+
+                            statusBadge.classList.add('lock-status-locked');
+                            statusIcon.classList.add('fa-lock');
+                            statusBadge.lastChild.textContent = ' Locked';
+
+                        } else {
+
+                            statusBadge.classList.add('lock-status-unlocked');
+                            statusIcon.classList.add('fa-lock-open');
+                            statusBadge.lastChild.textContent = ' Unlocked';
+                        }
+                    }
+
+                    // Success toast
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message,
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }
+            })
+            .catch(error => {
+
+                console.error(error);
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Unable to update account status.',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            });
+
+        });
+
+    });
+
+
+
+    
 });
 </script>

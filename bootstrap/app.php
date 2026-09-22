@@ -2,6 +2,9 @@
 
 use App\Http\Middleware\AdminPermission;
 use App\Http\Middleware\EnsureIpWhitelisted;
+use App\Http\Middleware\ValidateBusinessSession;
+use App\Http\Middleware\ValidateBusinessWebSession;
+use App\Http\Middleware\ValidatePersonalSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         'business.verified' => \App\Http\Middleware\EnsureBusinessVerified::class,
         'ip.whitelist' => EnsureIpWhitelisted::class,
         'user.inactivity' => \App\Http\Middleware\CheckUserInactivity::class,
+        'business.session' => ValidateBusinessSession::class,
+        'business.web.session' => ValidateBusinessWebSession::class,
+        'personal.session' => ValidatePersonalSession::class,
     ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,

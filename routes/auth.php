@@ -150,7 +150,7 @@ Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
 
 
 // HtmlMinifier::class
-Route::middleware(['auth','business.verified', 'user.inactivity'])->group(function () {
+Route::middleware(['auth','business.verified', 'user.inactivity', 'business.web.session'])->group(function () {
 
 
     Route::get('/dashboard/exchange-rate', [BusinessDashboardController::class, 'getExchangeRates']);
@@ -470,13 +470,15 @@ Route::middleware('admin.auth')->group(function () {
         Route::post('/admin/business-account/update/{id}', [BusinessAccountController::class,'update']);
         Route::get('/admin/business-account/{id}/document/download', [BusinessAccountController::class, 'downloadDocument'])->name('admin.document.download');
         Route::put('/admin/business-account/{id}/currency-fee/{currency}',[BusinessAccountController::class, 'updateCurrencyFee'])->name('admin.business.currency-fee.update');
+        Route::patch('/admin/business-account/{id}/toggle-lock', [BusinessAccountController::class, 'toggleUserLock'])->name('admin.businessaccount.toggle-lock');
+
 
         Route::post('/admin/personal-account-status/{id}', [PersonalAccountController::class,'updateStatus']);
         Route::get('/admin/personal-account/deactivate/{id}', [PersonalAccountController::class,'deactivate']);
         Route::delete('/admin/personal-account/delete/{id}', [PersonalAccountController::class,'destroy']);
         Route::get('/admin/personal-account/edit/{id}', [PersonalAccountController::class,'edit']);
         Route::post('/admin/personal-account/update/{id}', [PersonalAccountController::class,'update']);
-
+        Route::patch('/admin/personal-account/{id}/toggle-lock', [PersonalAccountController::class, 'toggleUserLock'])->name('admin.personalaccount.toggle-lock');
 
         //proof of address
         Route::post('/admin/personal-account/proof-of-address', [ProofOfAddressController::class,'update'])->name('admin.personal.proof-of-address.update');

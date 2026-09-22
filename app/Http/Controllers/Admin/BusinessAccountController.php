@@ -855,4 +855,68 @@ public function toggleBalanceLock(Request $request, $userId, $balanceId)
 }
 
 
+public function toggleUserLock(Request $request, $id) {
+
+    $admin = Auth::guard('admin')->user();
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized action.',
+        ], 401);
+    }
+
+    $user = User::where('typeofuser', 'business')->find($id);
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Business user not found.',
+        ], 404);
+    }
+
+    try {
+
+        $oldStatus = (bool) $user->is_locked;
+        $newStatus = !$oldStatus;
+
+        DB::transaction(function () use ($user, $newStatus) {
+            $user->is_locked = $newStatus;
+            $user->save();
+        });
+
+        $state = $newStatus ? 'locked' : 'unlocked';
+
+        Log::info('Business user lock status updated', [
+            'admin_id' => $admin->id,
+            'user_id' => $user->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'action' => $state,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_locked' => $newStatus,
+            'message' => "User account has been {$state} successfully.",
+        ], 200);
+
+    } catch (\Throwable $e) {
+
+        Log::error('Failed to update business user lock status', [
+            'admin_id' => $admin->id,
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to update the account status. Please try again.',
+        ], 500);
+    }
+}
+
 }

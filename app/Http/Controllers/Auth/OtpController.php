@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Notifications\GeneralNotification;
 use App\Models\User;
 use App\Mail\LoginOtpMail;
@@ -40,19 +41,32 @@ class OtpController extends Controller
         }
 
         // Check if OTP expired
-        if (now()->gt($user->login_otp_expires_at)) {
+        if (!$user->login_otp_expires_at || now()->gt($user->login_otp_expires_at)) {
             return redirect()->route('login')->with('error', 'OTP expired. Please login again.');
         }
+
+        //Generate a new session ID.
+        $sessionId = (string) Str::uuid();
 
         // Clear OTP after successful verification
         $user->update([
             'login_otp' => null,
             'login_otp_expires_at' => null,
+            'active_session_id' => $sessionId,
         ]);
  
+        // Remove temporary OTP session
         session()->forget('otp_user_id');
-        session()->regenerate();
+
+        // Authenticate the user
         Auth::login($user);
+
+        // Prevent session fixation
+        session()->regenerate();
+
+        // Store the account's active session ID in this browser session
+        session()->put('active_session_id', $sessionId);
+
         session()->flash('status', 'Login successful!');
 
         return redirect()->route('dashboard');
