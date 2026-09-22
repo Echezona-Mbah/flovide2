@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RemitaPaymentsTableSeeder::class);
         $this->call(PaymentRecordsBussinessSeeder::class);
         $this->call(SubscriptionRecordSeeder::class);
+        $this->call(PaymentProviderSeeder::class);
 
         $this->call([
             CategorySeeder::class,

@@ -367,6 +367,7 @@ class LoginController extends Controller
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
                     'email_verified_status' => $account->email_verified_status,
+                    'has_pin' => !empty($account->transaction_pin),
 
                 ],
                 'currencies' => $currencies,
@@ -699,6 +700,7 @@ class LoginController extends Controller
                     'email_verified_status' => $account->email_verified_status,
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
+                    'has_pin' => !empty($account->transaction_pin),
                     
                 ],
                 'profile_status' => [

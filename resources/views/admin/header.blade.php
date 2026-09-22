@@ -523,6 +523,13 @@
                                                         </a>
                                                     </li>
 
+                                                    <li class="nav-item">
+                                                        <a href="{{ route('admin.payment-providers.index') }}" class="nav-link">
+                                                            <i class="nav-link-icon fa-solid fa-server"></i>
+                                                            <span>Payment Providers</span>
+                                                        </a>
+                                                    </li>
+
                                                 </ul>
                                             </div>
 

@@ -56,6 +56,7 @@ class Beneficia extends Model
         'phone',
         'transfer_method',
         'mode',
+        'ohentpay_recipient_id',
     ];
 
     protected $table = 'beneficias';

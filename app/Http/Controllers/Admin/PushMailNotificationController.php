@@ -87,7 +87,7 @@ class PushMailNotificationController extends Controller
     {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:500',
+            'message' => 'required|string|max:1500',
             'channels' => 'required|array',
         ]);
 
@@ -182,7 +182,7 @@ class PushMailNotificationController extends Controller
     public function businessPushNotificationSingleUser(Request $request, $id) {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:500',
+            'message' => 'required|string|max:1500',
             'channels' => 'required|array',
         ]);
 
@@ -285,7 +285,7 @@ class PushMailNotificationController extends Controller
     {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:500',
+            'message' => 'required|string|max:1500',
             'channels' => 'required|array',
         ]);
 
@@ -375,7 +375,7 @@ class PushMailNotificationController extends Controller
     public function personalPushNotificationSingleUser(Request $request, $id) {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:500',
+            'message' => 'required|string|max:1500',
             'channels' => 'required|array',
         ]);
 

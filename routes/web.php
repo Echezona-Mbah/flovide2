@@ -135,13 +135,15 @@ Route::middleware(['auth', 'verified'])->prefix('business')->name('business.')->
 
 });
 
-Route::post('/switch-mode', function (\Illuminate\Http\Request $request) {
-    $mode = $request->input('mode', 'live');
-    session(['mode' => $mode]);
-    return response()->json(['success' => true, 'mode' => $mode]);
-})->name('switch.mode')->middleware('auth');
 
 
+// Route::get('/debug-pivot-env', function () {
+//     return response()->json([
+//         'config_pivot_base_url' => config('services.pivot.base_url'),
+//         'config_pivot_username' => config('services.pivot.username'),
+//         'config_pivot_all' => config('services.pivot'),
+//     ]);
+// });
 
 
 // Route::prefix('v1/interac')->group(function () {

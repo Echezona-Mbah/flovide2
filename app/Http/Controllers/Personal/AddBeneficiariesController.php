@@ -7,6 +7,7 @@ use App\Models\Bank;
 use App\Models\Beneficia;
 use App\Models\Countries;
 use App\Notifications\GeneralNotification;
+use App\Services\OhentPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -101,19 +102,31 @@ public function store(Request $request)
     $currency   = strtoupper($bank['currency']);
     $method     = $request->transfer_method;
 
-    $PAYAZA_CURRENCIES = ['NGN','TZS','KES','XOF','XAF','ZAR','GHS'];
-    $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+    Log::info('[Personal Beneficiary Store] Extracted data', [
+        'country'  => $countryIso,
+        'currency' => $currency,
+        'method'   => $method,
+        'type'     => $request->type,
+    ]);
 
-    $provider = null;
+    /* ================= PROVIDER DETECTION (DB-driven) ================= */
+    $routing = app(\App\Services\ProviderRoutingService::class);
+    $resolvedProvider = $routing->resolveForCurrency($currency, $method);
 
-    // ── CAD → Interac ────────────────────────────────────────────────────
+    $ohentPay = app(OhentPayService::class);
+ 
+    if (!$resolvedProvider) {
+        Log::warning('[Personal Beneficiary Store] No provider enabled for currency', ['currency' => $currency, 'method' => $method]);
+        return $isApi
+            ? response()->json(['success' => false, 'message' => "No provider enabled for {$currency}", 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
+            : back()->with('error', "No provider enabled for {$currency}");
+    }
+
+    $provider = $resolvedProvider->key;
+
+    // ── CAD → Interac-specific field validation still applies ───────────
     if ($currency === 'CAD') {
-        $provider = 'interac';
-        $method   = 'bank';
-
-        // Validate CAD-specific fields
+        $method = 'bank';
         if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
             return $isApi
                 ? response()->json([
@@ -124,62 +137,77 @@ public function store(Request $request)
                 ], 422)
                 : back()->with('error', 'First name, last name, and email are required for CAD Interac.');
         }
-
-    } elseif ($currency === 'GHS') {
-        if ($appmobileEnabled) {
-            $provider = 'app_mobile';
-        } elseif ($payazaEnabled) {
-            $provider = 'payaza';
-        } else {
-            Log::warning('[Beneficiary Store] No provider for GHS');
-            return $isApi
-                ? response()->json(['success' => false, 'message' => 'No provider enabled for GHS', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
-                : back()->with('error', 'No provider enabled for GHS');
-        }
-    } elseif ($currency === 'UGX') {
-        if ($pivotEnabled) {
-            $provider = 'pivot';
-        } elseif ($payazaEnabled) {
-            $provider = 'payaza';
-            $method   = 'mobile';
-        } else {
-            Log::warning('[Beneficiary Store] No provider for UGX');
-            return $isApi
-                ? response()->json(['success' => false, 'message' => 'No provider enabled for UGX', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
-                : back()->with('error', 'No provider enabled for UGX');
-        }
-    } elseif (in_array($currency, $PAYAZA_CURRENCIES)) {
-        if ($payazaEnabled) {
-            $provider = 'payaza';
-        } else {
-            Log::warning('[Beneficiary Store] Payaza disabled for currency', ['currency' => $currency]);
-            return $isApi
-                ? response()->json(['success' => false, 'message' => 'Payaza disabled', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
-                : back()->with('error', 'Payaza disabled');
-        }
-    } else {
-        if ($pivotEnabled) {
-            $provider = 'pivot';
-        } else {
-            Log::warning('[Beneficiary Store] Pivot disabled for currency', ['currency' => $currency]);
-            return $isApi
-                ? response()->json(['success' => false, 'message' => 'Pivot disabled', 'code' => 'PROVIDER_DISABLED', 'data' => null], 403)
-                : back()->with('error', 'Pivot disabled');
-        }
     }
 
-    Log::info('[Beneficiary Store] Provider resolved', [
+    if ($provider === 'payaza' && $currency === 'UGX') {
+        $method = 'mobile';
+    }
+
+    Log::info('[Personal Beneficiary Store] Provider resolved', [
         'provider' => $provider,
         'method'   => $method,
         'currency' => $currency,
     ]);
 
+    /* ================= OHENTPAY RECIPIENT CREATION ================= */
+    $ohentPayRecipientId = null;
+
+    if ($provider === 'ohentpay') {
+        $bankRow = $ohentPay->resolveBank($bank['bankCode'] ?? '', $currency);
+
+        Log::info('[Personal Beneficiary Store] OhentPay bank resolution', [
+            'input_bank_code'  => $bank['bankCode'] ?? null,
+            'currency'         => $currency,
+            'found'            => (bool) $bankRow,
+            'provider_bank_id' => $bankRow?->provider_bank_id,
+        ]);
+
+        if (!$bankRow || !$bankRow->provider_bank_id) {
+            $msg = 'Unrecognised bank code for this currency.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BANK_CODE_NOT_FOUND', 'data' => null], 422)
+                : back()->with('error', $msg);
+        }
+
+        $recipientPayload = [
+            'country'        => $countryIso,
+            'currency'       => $currency,
+            'alias'          => $bank['accountHolder'] ?? ($request->name ?? trim(($request->firstNames ?? '') . ' ' . ($request->lastName ?? ''))),
+            'type'           => $request->type === 'corporate' ? 'business' : 'personal',
+            'account_name'   => $bank['accountHolder'] ?? null,
+            'bank_id'        => $bankRow->provider_bank_id,   // ← the field OhentPay actually expects
+            'account_number' => $bank['accountNumber'] ?? null,
+        ];
+
+        $ohentPayResponse = $ohentPay->createRecipient(array_filter($recipientPayload));
+
+        Log::info('[Personal Beneficiary Store] OhentPay createRecipient response', [
+            'response' => $ohentPayResponse,
+        ]);
+
+        if (!$ohentPayResponse['success']) {
+            Log::error('[Personal Beneficiary Store] OhentPay recipient creation failed', [
+                'response' => $ohentPayResponse,
+            ]);
+
+            $msg = $ohentPayResponse['data']['message'] ?? 'Failed to create recipient with OhentPay.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'OHENTPAY_RECIPIENT_FAILED', 'data' => null], 422)
+                : back()->with('error', $msg);
+        }
+
+        // OhentPay's actual recipient id — different from provider_bank_id above,
+        // which only identifies which bank was selected.
+        $ohentPayRecipientId = $ohentPayResponse['data']['id'] ?? null;
+    }
+
     $bankName     = null;
     $mobileNumber = null;
+
     // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
     if ($currency === 'CAD') {
         $bankName = 'Interac';
-        Log::info('[Beneficiary Store] CAD Interac fields', [
+        Log::info('[Personal Beneficiary Store] CAD Interac fields', [
             'interac_first_name' => $bank['interac_first_name'] ?? null,
             'interac_last_name'  => $bank['interac_last_name']  ?? null,
             'interac_email'      => $bank['interac_email']       ?? null,
@@ -191,7 +219,7 @@ public function store(Request $request)
         })->first();
         $bankName = $bankRow?->name;
 
-        Log::info('[Beneficiary Store] Bank lookup', [
+        Log::info('[Personal Beneficiary Store] Bank lookup', [
             'bank_code' => $bank['bankCode'] ?? null,
             'bank_name' => $bankName,
         ]);
@@ -208,7 +236,7 @@ public function store(Request $request)
         $bankRow  = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
         $bankName = $bankRow?->name ?? 'mobile';
 
-        Log::info('[Beneficiary Store] Mobile lookup', [
+        Log::info('[Personal Beneficiary Store] Mobile lookup', [
             'mobile_number' => $mobileNumber,
             'bank_code'     => $bank['bankCode'] ?? null,
             'bank_name'     => $bankName,
@@ -238,6 +266,15 @@ public function store(Request $request)
             'recipient_id'       => \Str::uuid(),
             'account_id'         => \Str::uuid(),
             'personal_id' => $personalId,
+            'ohentpay_recipient_id' => $ohentPayRecipientId,
+        ]);
+
+        Log::info('[Personal Beneficiary Store] Beneficiary created', [
+            'beneficiary_id' => $beneficia->id,
+            'currency'       => $currency,
+            'provider'       => $provider,
+            'method'         => $method,
+            'personal_id'    => $personalId,
         ]);
 
         return response()->json([
