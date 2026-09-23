@@ -1342,6 +1342,15 @@
 
                                         @endforeach
                                     </div>
+                                    <div class="row">
+                                        {{-- Add More Balance Button --}}
+                                        <div class="d-flex justify-content-center mt-2">
+                                            <button type="button" class="btn btn-soft-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#addMoreBalanceModal">
+                                                <i class="fa-solid fa-plus me-2"></i>
+                                                Add More Balance
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2110,6 +2119,119 @@
         </div>
     </div>
 
+
+
+    <!-- Add More Balance Modal -->
+    <div class="modal fade" id="addMoreBalanceModal" tabindex="-1" aria-labelledby="addMoreBalanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered shadow-none">
+            <div class="modal-content border-0 shadow-lg rounded-4 shadow-none">
+
+                <!-- Modal Header -->
+                <div class="modal-header border-0 px-4 pt-4 pb-2">
+                    <div>
+                        <h5 class="modal-title fw-semibold" id="addMoreBalanceModalLabel">
+                            <i class="fa-solid fa-wallet me-2"></i>
+                            Add More Balance
+                        </h5>
+                        <p class="text-muted small mb-0 mt-1">
+                            Create an additional balance for this user.
+                        </p>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body px-4 pb-4">
+
+                    <!-- Current User -->
+                    <div class="p-3 rounded-3 bg-light border mb-4">
+                        <div class="small text-muted mb-2">
+                            Current User
+                        </div>
+
+                        <div class="d-flex flex-column gap-1">
+                            <div>
+                                <strong>{{ $user->business_name }}</strong>
+                            </div>
+
+                            <div class="small text-muted">
+                                {{ $user->email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance Form -->
+                    <form id="addMoreBalanceForm" method="POST" action="{{ route('admin.business.balance.create', $user->id) }}">
+                        
+                        @csrf
+
+                        <!-- Balance Name -->
+                        <div class="mb-3">
+                            <label for="adminBalanceName" class="form-label fw-semibold">
+                                Balance Name
+                            </label>
+
+                            <input type="text" class="form-control" id="adminBalanceName" name="name" placeholder="e.g. USD Wallet" required>
+                        </div>
+
+                        <!-- Currency -->
+                        <div class="mb-3">
+                            <label for="adminBalanceCurrency" class="form-label fw-semibold">
+                                Currency
+                            </label>
+
+                            <select class="form-select" id="adminBalanceCurrency" name="currency" required>
+
+                                <option value="" selected disabled>
+                                    Select currency
+                                </option>
+
+                                @foreach($currencies as $currency)
+                                    @if($currency->is_active)
+                                        <option value="{{ $currency->code }}">
+                                            {{ $currency->code }} - {{ $currency->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <!-- Mode -->
+                        <div class="mb-4">
+                            <label for="adminBalanceMode" class="form-label fw-semibold">
+                                Mode
+                            </label>
+
+                            <select class="form-select" id="adminBalanceMode" name="mode" required>
+                                <option value="live" selected> Live </option>
+                                <option value="test"> Test </option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button type="submit" id="createBalanceBtn" class="btn btn-primary px-4">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Create Balance
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 @include('admin.footer')
 
 <script>
@@ -2163,9 +2285,11 @@ document.querySelectorAll('.balance-action-btn').forEach((btn) => {
     document.getElementById("toggleProfileBtn").onclick = function () {
         document.getElementById("profileDetails").classList.toggle("d-none");
     };
-</script>
 
-<script>
+
+
+
+
     //
     document.querySelectorAll('.change-status').forEach(item => {
         item.addEventListener('click', function(e) {
@@ -2223,12 +2347,6 @@ document.querySelectorAll('.balance-action-btn').forEach((btn) => {
 
 
 
-
-
-
-
-
-
     document.querySelectorAll('.confirm-submit-form').forEach(form => {
         form.addEventListener('submit', function (e) {
             const message = this.dataset.confirm || 'Are you sure you want to submit this?';
@@ -2237,106 +2355,108 @@ document.querySelectorAll('.balance-action-btn').forEach((btn) => {
             }
         });
     });
-</script>
 
-<script>
-// ── Currency Pill Toggle ───────────────────────────────────────────────────
-document.querySelectorAll('.currency-pill').forEach(pill => {
-    pill.addEventListener('click', function () {
-        const cur = this.dataset.currency;
 
-        // Hide all panels
-        document.querySelectorAll('.currency-fee-panel').forEach(p => p.classList.add('d-none'));
 
-        // Deactivate all pills (keep active style if fee is on)
-        document.querySelectorAll('.currency-pill').forEach(p => {
-            p.classList.remove('btn-soft-primary');
-            p.classList.add('btn-outline-secondary');
+
+        
+    // ── Currency Pill Toggle ───────────────────────────────────────────────────
+    document.querySelectorAll('.currency-pill').forEach(pill => {
+        pill.addEventListener('click', function () {
+            const cur = this.dataset.currency;
+
+            // Hide all panels
+            document.querySelectorAll('.currency-fee-panel').forEach(p => p.classList.add('d-none'));
+
+            // Deactivate all pills (keep active style if fee is on)
+            document.querySelectorAll('.currency-pill').forEach(p => {
+                p.classList.remove('btn-soft-primary');
+                p.classList.add('btn-outline-secondary');
+            });
+
+            // Show selected panel
+            document.getElementById('fee-panel-' + cur).classList.remove('d-none');
+
+            // Highlight selected pill
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-soft-primary');
         });
-
-        // Show selected panel
-        document.getElementById('fee-panel-' + cur).classList.remove('d-none');
-
-        // Highlight selected pill
-        this.classList.remove('btn-outline-secondary');
-        this.classList.add('btn-soft-primary');
     });
-});
 
-// ── Live Fee Preview ───────────────────────────────────────────────────────
-document.querySelectorAll('.fee-preview-input').forEach(input => {
-    input.addEventListener('input', function () {
-        const cur    = this.dataset.currency;
-        const type   = this.dataset.type; // collection | payout
-        const amount = parseFloat(this.value) || 0;
-        const prefix = type === 'collection' ? 'col' : 'pay';
+    // ── Live Fee Preview ───────────────────────────────────────────────────────
+    document.querySelectorAll('.fee-preview-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const cur    = this.dataset.currency;
+            const type   = this.dataset.type; // collection | payout
+            const amount = parseFloat(this.value) || 0;
+            const prefix = type === 'collection' ? 'col' : 'pay';
 
-        const pct   = parseFloat(document.getElementById(prefix + '_percent_' + cur)?.value) || 0;
-        const fixed = parseFloat(document.getElementById(prefix + '_fixed_' + cur)?.value) || 0;
-        const fee   = ((amount * pct) / 100) + fixed;
+            const pct   = parseFloat(document.getElementById(prefix + '_percent_' + cur)?.value) || 0;
+            const fixed = parseFloat(document.getElementById(prefix + '_fixed_' + cur)?.value) || 0;
+            const fee   = ((amount * pct) / 100) + fixed;
 
-        const resultEl = document.getElementById(prefix + '_preview_' + cur);
-        if (resultEl) {
-            resultEl.textContent = 'Fee: ' + cur + ' ' + fee.toFixed(2)
-                + ' → Net: ' + cur + ' ' + (amount - fee).toFixed(2);
-        }
-    });
-});
-
-// ── Save Fee ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.save-fee-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const cur    = this.dataset.currency;
-        const userId = this.dataset.userId;
-
-        const payload = {
-            collection_enabled : document.getElementById('col_enabled_' + cur)?.checked ? 1 : 0,
-            collection_percent : document.getElementById('col_percent_' + cur)?.value || 0,
-            collection_fixed   : document.getElementById('col_fixed_'   + cur)?.value || 0,
-            collection_min     : document.getElementById('col_min_'     + cur)?.value || 0,
-            collection_max     : document.getElementById('col_max_'     + cur)?.value || 0,
-
-            payout_enabled     : document.getElementById('pay_enabled_' + cur)?.checked ? 1 : 0,
-            payout_percent     : document.getElementById('pay_percent_' + cur)?.value || 0,
-            payout_fixed       : document.getElementById('pay_fixed_'   + cur)?.value || 0,
-            payout_min         : document.getElementById('pay_min_'     + cur)?.value || 0,
-            payout_max         : document.getElementById('pay_max_'     + cur)?.value || 0,
-
-            _method: 'PUT',
-        };
-
-        const feedbackEl = document.getElementById('feedback_' + cur);
-        const errorEl    = document.getElementById('error_'    + cur);
-        feedbackEl.classList.add('d-none');
-        errorEl.classList.add('d-none');
-
-        btn.disabled = true;
-        btn.textContent = 'Saving…';
-
-        fetch(`/admin/business-account/${userId}/currency-fee/${cur}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type'  : 'application/json',
-                'X-CSRF-TOKEN'  : '{{ csrf_token() }}',
-            },
-            body: JSON.stringify(payload),
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                feedbackEl.classList.remove('d-none');
-                setTimeout(() => feedbackEl.classList.add('d-none'), 3000);
-            } else {
-                errorEl.classList.remove('d-none');
+            const resultEl = document.getElementById(prefix + '_preview_' + cur);
+            if (resultEl) {
+                resultEl.textContent = 'Fee: ' + cur + ' ' + fee.toFixed(2)
+                    + ' → Net: ' + cur + ' ' + (amount - fee).toFixed(2);
             }
-        })
-        .catch(() => errorEl.classList.remove('d-none'))
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="pe-7s-diskette me-1"></i> Save ' + cur + ' Fees';
         });
     });
-});
+
+    // ── Save Fee ───────────────────────────────────────────────────────────────
+    document.querySelectorAll('.save-fee-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const cur    = this.dataset.currency;
+            const userId = this.dataset.userId;
+
+            const payload = {
+                collection_enabled : document.getElementById('col_enabled_' + cur)?.checked ? 1 : 0,
+                collection_percent : document.getElementById('col_percent_' + cur)?.value || 0,
+                collection_fixed   : document.getElementById('col_fixed_'   + cur)?.value || 0,
+                collection_min     : document.getElementById('col_min_'     + cur)?.value || 0,
+                collection_max     : document.getElementById('col_max_'     + cur)?.value || 0,
+
+                payout_enabled     : document.getElementById('pay_enabled_' + cur)?.checked ? 1 : 0,
+                payout_percent     : document.getElementById('pay_percent_' + cur)?.value || 0,
+                payout_fixed       : document.getElementById('pay_fixed_'   + cur)?.value || 0,
+                payout_min         : document.getElementById('pay_min_'     + cur)?.value || 0,
+                payout_max         : document.getElementById('pay_max_'     + cur)?.value || 0,
+
+                _method: 'PUT',
+            };
+
+            const feedbackEl = document.getElementById('feedback_' + cur);
+            const errorEl    = document.getElementById('error_'    + cur);
+            feedbackEl.classList.add('d-none');
+            errorEl.classList.add('d-none');
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+
+            fetch(`/admin/business-account/${userId}/currency-fee/${cur}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type'  : 'application/json',
+                    'X-CSRF-TOKEN'  : '{{ csrf_token() }}',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    feedbackEl.classList.remove('d-none');
+                    setTimeout(() => feedbackEl.classList.add('d-none'), 3000);
+                } else {
+                    errorEl.classList.remove('d-none');
+                }
+            })
+            .catch(() => errorEl.classList.remove('d-none'))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="pe-7s-diskette me-1"></i> Save ' + cur + ' Fees';
+            });
+        });
+    });
 </script>
 
 <script>
@@ -2615,5 +2735,99 @@ document.querySelectorAll('.save-fee-btn').forEach(btn => {
             .catch(() => alert('Network error while updating status.'));
         });
     });
-</script>
 
+
+
+
+        
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const form = document.getElementById('addMoreBalanceForm');
+        const submitBtn = document.getElementById('createBalanceBtn');
+
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+
+            e.preventDefault();
+
+            const originalButtonHtml = submitBtn.innerHTML;
+
+            // Disable button while processing
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Creating...
+            `;
+
+            try {
+
+                const formData = new FormData(form);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+
+                    // Close modal
+                    const modalElement = document.getElementById('addMoreBalanceModal');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    // Reset form
+                    form.reset();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Balance Created',
+                        text: data.message,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#0d6efd'
+                    }).then(() => {
+                        // Refresh page so the new balance appears
+                        window.location.reload();
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unable to Create Balance',
+                        text: data.message || 'Something went wrong. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+
+            } catch (error) {
+
+                console.error('Balance creation error:', error);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Something Went Wrong',
+                    text: 'Unable to create the balance at the moment. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+
+            } finally {
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonHtml;
+
+            }
+
+        });
+
+    });
+</script>

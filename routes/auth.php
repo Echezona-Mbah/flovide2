@@ -438,9 +438,11 @@ Route::middleware('admin.auth')->group(function () {
 
         Route::get('/admin/business-account', [BusinessAccountController::class, 'index'])->name('admin.business-account');
         Route::get('/admin/business-account/{id}', [BusinessAccountController::class, 'find'])->name('admin.business-account.find');
+        Route::post('/admin/business-account/{user}/balance/create', [BusinessAccountController::class, 'createBalance'])->name('admin.business.balance.create');
 
         Route::get('/admin/personal-account', [PersonalAccountController::class, 'index'])->name('admin.personal-account');
         Route::get('/admin/personal-account/{id}', [PersonalAccountController::class, 'find'])->name('admin.personal-account.find');
+        Route::post('/admin/personal-account/{user}/balance/create', [PersonalAccountController::class, 'createBalance'])->name('admin.personal.balance.create');
 
         Route::get('/admin/allcustomer', [AllCustomersController::class, 'index'])->name('admin.allcustomer');
         Route::get('/admin/allaccount', [AllAccountController::class, 'index'])->name('admin.allaccount');
