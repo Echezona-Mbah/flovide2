@@ -25,6 +25,7 @@ class AddMoneyController extends Controller
 {
     //dd('sssssss');
     Log::info('[Interac Personal] Request received', $request->all());
+    $isApi = $request->expectsJson();
 
     $personal = auth('personal-api')->user();
     if (!$personal) {
@@ -146,6 +147,15 @@ class AddMoneyController extends Controller
         'platform_fee' => $platformFee,
         'net_amount'   => $netAmount,
     ]);
+
+     if ($currency === 'CAD' && $request->filled('email')) {
+            if (strtolower(trim($request->email)) !== strtolower(trim($personal->email))) {
+                $msg = 'For Interac transfers, please use your own registered email address (' . $personal->email . ').';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
 
     $payload = [
         'email'  => $request->email,

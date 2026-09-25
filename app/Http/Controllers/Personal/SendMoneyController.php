@@ -717,6 +717,20 @@ public function getExchangeRate(Request $request)
 
         $personal->save();
 
+        // ── CAD/Interac: email must match the sender's own registered email ──────
+        $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
+
+        if ($sendingCurrencyCheck === 'CAD' && $request->filled('interac_email')) {
+            if (strtolower(trim($request->interac_email)) !== strtolower(trim($personal->email))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'For Interac transfers, please use your own registered email address (' . $personal->email . ').',
+                    'code' => 'INTERAC_EMAIL_MISMATCH',
+                    'data' => null
+                ], 422);
+            }
+        }
+
         $promoCode = null;
 
         if ($request->filled('promo_code')) {
