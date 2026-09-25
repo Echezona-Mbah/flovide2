@@ -1312,6 +1312,15 @@
 
                                         @endforeach
                                     </div>
+                                    <div class="row">
+                                        {{-- Add More Balance Button --}}
+                                        <div class="d-flex justify-content-center mt-2">
+                                            <button type="button" class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#addMoreBalanceModal">
+                                                <i class="fa-solid fa-plus me-2"></i>
+                                                Add More Balance
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1686,6 +1695,119 @@
     </div>
 </div>
 
+
+
+
+    <!-- Add More Balance Modal -->
+    <div class="modal fade" id="addMoreBalanceModal" tabindex="-1" aria-labelledby="addMoreBalanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered shadow-none">
+            <div class="modal-content border-0 shadow-lg rounded-4 shadow-none">
+
+                <!-- Modal Header -->
+                <div class="modal-header border-0 px-4 pt-4 pb-2">
+                    <div>
+                        <h5 class="modal-title fw-semibold" id="addMoreBalanceModalLabel">
+                            <i class="fa-solid fa-wallet me-2"></i>
+                            Add More Balance
+                        </h5>
+                        <p class="text-muted small mb-0 mt-1">
+                            Create an additional balance for this user.
+                        </p>
+                    </div>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body px-4 pb-4">
+
+                    <!-- Current User -->
+                    <div class="p-3 rounded-3 bg-light border mb-4">
+                        <div class="small text-muted mb-2">
+                            Current User
+                        </div>
+
+                        <div class="d-flex flex-column gap-1">
+                            <div>
+                                <strong>{{ $user->firstname . " " . $user->lastname }}</strong>
+                            </div>
+
+                            <div class="small text-muted">
+                                {{ $user->email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance Form -->
+                    <form id="addMoreBalanceForm" method="POST" action="{{ route('admin.personal.balance.create', $user->id) }}">
+                        
+                        @csrf
+
+                        <!-- Balance Name -->
+                        <div class="mb-3">
+                            <label for="adminBalanceName" class="form-label fw-semibold">
+                                Balance Name
+                            </label>
+
+                            <input type="text" class="form-control" id="adminBalanceName" name="name" placeholder="e.g. USD Wallet" required>
+                        </div>
+
+                        <!-- Currency -->
+                        <div class="mb-3">
+                            <label for="adminBalanceCurrency" class="form-label fw-semibold">
+                                Currency
+                            </label>
+
+                            <select class="form-select" id="adminBalanceCurrency" name="currency" required>
+
+                                <option value="" selected disabled>
+                                    Select currency
+                                </option>
+
+                                @foreach($currencies as $currency)
+                                    @if($currency->is_active)
+                                        <option value="{{ $currency->code }}">
+                                            {{ $currency->code }} - {{ $currency->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+
+                            </select>
+                        </div>
+
+                        <!-- Mode -->
+                        <div class="mb-4">
+                            <label for="adminBalanceMode" class="form-label fw-semibold">
+                                Mode
+                            </label>
+
+                            <select class="form-select" id="adminBalanceMode" name="mode" required>
+                                <option value="live" selected> Live </option>
+                                <option value="test"> Test </option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button type="submit" id="createBalanceBtn" class="btn btn-primary px-4">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Create Balance
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 @include('admin.footer')
 
 
@@ -2024,6 +2146,105 @@ document.querySelectorAll('.personal-balance-action-btn').forEach((btn) => {
             .finally(() => {
                 this.disabled = false;
             });
+
+        });
+
+    });
+
+
+
+
+
+
+
+
+        
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const form = document.getElementById('addMoreBalanceForm');
+        const submitBtn = document.getElementById('createBalanceBtn');
+
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+
+            e.preventDefault();
+
+            const originalButtonHtml = submitBtn.innerHTML;
+
+            // Disable button while processing
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Creating...
+            `;
+
+            try {
+
+                const formData = new FormData(form);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+
+                    // Close modal
+                    const modalElement = document.getElementById('addMoreBalanceModal');
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    // Reset form
+                    form.reset();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Balance Created',
+                        text: data.message,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#0d6efd'
+                    }).then(() => {
+                        // Refresh page so the new balance appears
+                        window.location.reload();
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Unable to Create Balance',
+                        text: data.message || 'Something went wrong. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+
+            } catch (error) {
+
+                console.error('Balance creation error:', error);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Something Went Wrong',
+                    text: 'Unable to create the balance at the moment. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+
+            } finally {
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonHtml;
+
+            }
 
         });
 

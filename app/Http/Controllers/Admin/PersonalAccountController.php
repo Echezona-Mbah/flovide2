@@ -9,6 +9,7 @@ use App\Models\Beneficia;
 use App\Models\Customer;
 use App\Models\Personal;
 use App\Models\Subaccount;
+use App\Models\Currency;
 use App\Models\TransactionHistory;
 use App\Models\VirtualCards;
 use App\Traits\CurrencyHelper;
@@ -18,6 +19,7 @@ use App\Services\FidelityService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FirebaseNotificationService;
+use Illuminate\Support\Facades\RateLimiter;
 
 
 class PersonalAccountController extends Controller
@@ -289,11 +291,16 @@ public function destroy($id)
     $bankAccount = BankAccount::where('user_id', $user->id)->get();
     $Subaccount = Subaccount::where('user_id', $user->id)->get();
 
+
+    //Currency
+    $currencies = Currency::where('is_active', true)->get();
+
+
     foreach ($balances as $bal) {
         $bal->currency_info = $this->getCountryCodeFromCurrency($bal->currency);
     }
 
-      $referrals = Personal::where('referred_by', $user->id)->get()->map(function ($ref) {
+    $referrals = Personal::where('referred_by', $user->id)->get()->map(function ($ref) {
     $progress = app(\App\Services\ReferralBonusService::class)->getProgress($ref);
         return [
             'model'    => $ref,
@@ -316,6 +323,7 @@ public function destroy($id)
         'balances',
         'virtualCards',
         'beneficia',
+        'currencies',
         'customer',
         'bankAccount',
         'Subaccount',
@@ -323,6 +331,185 @@ public function destroy($id)
         'promoCodes'
     ));
 }
+
+
+
+public function createBalance(Request $request, $userId) {
+    
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'currency' => 'required|string|max:10',
+        'mode' => 'required|in:live,test',
+    ]);
+
+    $adminId = Auth::id();
+    $currency = strtoupper($request->currency);
+    $mode = $request->input('mode');
+
+    // Rate Limiting
+    $rateLimitKey = 'admin-create-balance|' . $adminId . '|' . $userId . '|' . $request->ip();
+
+    if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
+
+        $seconds = RateLimiter::availableIn($rateLimitKey);
+
+        Log::warning('Admin balance creation rate limit exceeded.', [
+            'admin_id' => $adminId,
+            'personal_id' => $userId,
+            'ip' => $request->ip(),
+            'currency' => $currency,
+            'mode' => $mode,
+        ]);
+
+        $errorMessage = "Too many balance creation attempts. Please try again in {$seconds} seconds.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'TOO_MANY_REQUESTS',
+                'data' => null,
+            ], 429)
+            : redirect()->back()
+                ->withErrors(['message' => $errorMessage])
+                ->withInput();
+    }
+
+    RateLimiter::hit($rateLimitKey, 60);
+
+    try {
+
+        $balance = DB::transaction(function () use ($userId, $adminId, $currency, $mode, $request) {
+
+            $user = Personal::where('id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user) {
+                throw new \RuntimeException('User not found.');
+            }
+
+            //Check that the currency is active.
+            $currencyRecord = Currency::where('code', $currency)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$currencyRecord) {
+                throw new \RuntimeException(
+                    "{$currency} is not currently available for new balances."
+                );
+            }
+
+            //Prevent duplicate balances.
+            $exists = Balance::where('personal_id', $userId)
+                ->where('currency', $currency)
+                ->where('mode', $mode)
+                ->exists();
+
+            if ($exists) {
+                Log::warning('Admin attempted to create duplicate balance.', [
+                    'admin_id' => $adminId,
+                    'personal_id' => $userId,
+                    'currency' => $currency,
+                    'mode' => $mode,
+                    'ip' => $request->ip(),
+                ]);
+
+                throw new \RuntimeException(
+                    "The user already has a {$currency} balance for {$mode} mode."
+                );
+            }
+
+            //Admin is allowed to create additional balances.
+            $balance = Balance::create([
+                'personal_id' => $userId,
+                'name' => $request->name,
+                'currency' => $currency,
+                'mode' => $mode,
+                'amount' => 0,
+            ]);
+
+            Log::info('Admin created additional user balance.', [
+                'admin_id' => $adminId,
+                'personal_id' => $userId,
+                'balance_id' => $balance->id,
+                'name' => $balance->name,
+                'currency' => $balance->currency,
+                'mode' => $balance->mode,
+                'amount' => $balance->amount,
+                'ip' => $request->ip(),
+            ]);
+
+            return $balance;
+        });
+
+        $successMessage = 'Balance created successfully for the user.';
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => true,
+                'message' => $successMessage,
+                'code' => 'BALANCE_CREATED',
+                'data' => $balance,
+            ], 201)
+            : redirect()
+                ->back()
+                ->with('success', $successMessage);
+
+    } catch (\RuntimeException $e) {
+
+        $errorMessage = $e->getMessage();
+
+        Log::warning('Admin balance creation rejected.', [
+            'admin_id' => $adminId,
+            'personal_id' => $userId,
+            'currency' => $currency,
+            'mode' => $mode,
+            'ip' => $request->ip(),
+            'reason' => $errorMessage,
+        ]);
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'BALANCE_CREATION_REJECTED',
+                'data' => null,
+            ], 422)
+            : redirect()
+                ->back()
+                ->withErrors(['message' => $errorMessage])
+                ->withInput();
+
+    } catch (\Throwable $e) {
+
+        Log::error('Admin balance creation failed unexpectedly.', [
+            'admin_id' => $adminId,
+            'personal_id' => $userId,
+            'currency' => $currency,
+            'mode' => $mode,
+            'ip' => $request->ip(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        $errorMessage = 'Unable to create the balance at the moment. Please try again later.';
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'BALANCE_CREATION_FAILED',
+                'data' => null,
+            ], 500)
+            : redirect()
+                ->back()
+                ->withErrors(['message' => $errorMessage])
+                ->withInput();
+    }
+}
+
+
 
 
 public function addMoney(Request $request, $personalId, $balanceId)

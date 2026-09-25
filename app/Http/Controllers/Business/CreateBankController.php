@@ -6,13 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Countries;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\User;
 use App\Models\Balance;
+use App\Models\TeamMembers;
+use App\Models\ExchangeRate;
 use App\Models\Currency;
 use App\Models\TransactionHistory;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 
 class CreateBankController extends Controller
@@ -65,8 +70,8 @@ public function createBalance(Request $request)
 
 
     $request->validate([
-        'name'     => 'required|string',
-        'currency' => 'required|string',
+        'name'     => 'required|string|max:255',
+        'currency' => 'required|string|max:10',
         'mode'     => 'nullable|in:live,test',
     ]);
 
@@ -74,12 +79,53 @@ public function createBalance(Request $request)
     $currency = strtoupper($request->currency);
     $mode     = $request->input('mode', session('mode', 'live'));
 
-       // 🔎 Check the currency exists and is active
+    //Rate Limiting
+    $rateLimitKey = 'create-balance|' . $userId . '|' . $request->ip();
+
+    if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+
+        $seconds = RateLimiter::availableIn($rateLimitKey);
+
+        Log::warning('Balance creation rate limit exceeded.', [
+            'user_id' => $userId,
+            'ip' => $request->ip(),
+            'currency' => $currency,
+            'mode' => $mode,
+        ]);
+
+        $errorMessage = "Too many balance creation attempts. Please try again in {$seconds} seconds.";
+
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'TOO_MANY_REQUESTS',
+                'data' => null,
+            ], 429)
+            : redirect()->back()
+                ->withErrors(['message' => $errorMessage])
+                ->withInput();
+    }
+
+    // Count this attempt
+    RateLimiter::hit($rateLimitKey, 60);
+
+
+    // Check the currency exists and is active
     $currencyRecord = Currency::where('code', $currency)
         ->where('is_active', true)
         ->first();
 
     if (!$currencyRecord) {
+
+        Log::warning('User attempted to create balance with inactive currency.', [
+            'user_id'  => $userId,
+            'currency' => $currency,
+            'mode' => $mode,
+            'ip' => $request->ip(),
+        ]);
+
+
         $errorMessage = "{$currency} is not currently available for new balances.";
 
         return $request->expectsJson()
@@ -92,48 +138,156 @@ public function createBalance(Request $request)
             : redirect()->back()->withErrors(['message' => $errorMessage]);
     }
 
-    // 🔎 Check if user already has this currency IN THIS MODE
-    $exists = Balance::where('user_id', $userId)
-        ->where('currency', $currency)
-        ->where('mode', $mode)
-        ->exists();
 
-    if ($exists) {
-        $errorMessage = "You already have a {$currency} balance in " . ucfirst($mode) . " mode. Duplicates are not allowed.";
+    try {
 
-        return $request->expectsJson()
-            ? response()->json([
+        $balance = DB::transaction(function () use ($userId, $currency, $mode, $request ) {
+
+            //Lock User Record
+            //Prevents two simultaneous requests from bypassing
+            //the maximum 3 balance limit.
+            $user = User::where('id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$user) {
+                throw new \Exception('User not found.');
+            }
+
+            //Check Duplicate Balance
+            // Check if user already has this currency IN THIS MODE
+            $exists = Balance::where('user_id', $userId)
+                ->where('currency', $currency)
+                ->where('mode', $mode)
+                ->exists();
+
+
+            if ($exists) {
+
+                Log::warning('User attempted to create duplicate balance.', [
+                    'user_id' => $userId,
+                    'currency' => $currency,
+                    'mode' => $mode,
+                    'ip' => $request->ip(),
+                ]);
+
+                throw new \RuntimeException(
+                    "You already have a {$currency} balance in "
+                    . ucfirst($mode)
+                    . " mode. Duplicates are not allowed."
+                );
+
+
+            }
+
+            //Maximum Balance Limit
+            $balanceCount = Balance::where('user_id', $userId)->count();
+
+            if ($balanceCount >= 3) {
+
+                Log::warning('User attempted to exceed maximum balance limit.', [
+                    'user_id' => $userId,
+                    'current_count' => $balanceCount,
+                    'currency' => $currency,
+                    'mode' => $mode,
+                    'ip' => $request->ip(),
+                ]);
+                
+                throw new \RuntimeException(
+                    'You can only have a maximum of 3 balances. '
+                    . 'If you need additional balances, please contact customer care.'
+                );
+            }
+
+
+            //Create Balance
+            return Balance::create([
+                'user_id'  => $userId,
+                'name'     => $request->name,
+                'currency' => $currency,
+                'mode'     => $mode,
+                'amount'   => 0,
+            ]);
+
+        });           
+        
+
+        //Log Successful Balance Creation
+        Log::info('Balance created successfully.', [
+            'user_id' => $userId,
+            'balance_id' => $balance->id,
+            'name' => $balance->name,
+            'currency' => $balance->currency,
+            'mode' => $balance->mode,
+            'amount' => $balance->amount,
+            'ip' => $request->ip(),
+        ]);
+
+        //Response
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Balance created successfully.',
+                'code'    => 'BALANCE_CREATED',
+                'mode'    => $mode,
+                'data'    => $balance,
+            ], 201);
+        }
+
+        return redirect()->route('add_account.create')->with('success', ucfirst($mode) . ' account created successfully.');
+    
+
+    } catch (\RuntimeException $e) {
+
+        $errorMessage = $e->getMessage();
+
+        if ($request->expectsJson()) {
+
+            $code = str_contains($errorMessage, 'maximum of 3 balances')
+                ? 'BALANCE_LIMIT_REACHED'
+                : 'DUPLICATE_BALANCE';
+
+            return response()->json([
                 'success' => false,
                 'message' => $errorMessage,
-                'code'    => 'DUPLICATE_BALANCE',
-                'data'    => null,
-            ], 400)
-            : redirect()->back()->withErrors(['message' => $errorMessage]);
+                'code' => $code,
+                'data' => null,
+            ], 422);
+        }
+
+        return redirect()
+            ->back()
+            ->withErrors(['message' => $errorMessage])
+            ->withInput();
+
+    } catch (\Throwable $e) {
+
+        Log::error('Balance creation failed.', [
+            'user_id'  => $userId,
+            'currency' => $currency,
+            'mode' => $mode,
+            'ip' => $request->ip(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        $errorMessage = 'Unable to create balance at the moment. Please try again later.';
+
+        if ($request->expectsJson()) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $errorMessage,
+                'code' => 'BALANCE_CREATION_FAILED',
+                'data' => null,
+            ], 500);
+        }
+
+        return redirect()
+            ->back()
+            ->withErrors(['message' => $errorMessage])
+            ->withInput();
     }
-
-
-    //  dd('lllll');
-
-
-    $balance = Balance::create([
-        'user_id'  => $userId,
-        'name'     => $request->name,
-        'currency' => $currency,
-        'mode'     => $mode,
-        'amount'   => 0,
-    ]);
-
-    if ($request->expectsJson()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Balance created successfully.',
-            'code'    => 'BALANCE_CREATED',
-            'mode'    => $mode,
-            'data'    => $balance,
-        ], 201);
-    }
-
-    return redirect()->route('add_account.create')->with('success', ucfirst($mode) . ' account created successfully.');
 }
 
 
@@ -301,7 +455,7 @@ public function dashboardapi(Request $request)
 
    // dd($totalBalance);
 
-    $transactions = \App\Models\TransactionHistory::where('user_id', $account->id)
+    $transactions = TransactionHistory::where('user_id', $account->id)
         ->latest()
         ->take(4)
         ->get()
@@ -333,7 +487,7 @@ public function dashboardapi(Request $request)
         return now()->subMonths($i)->format('Y-m');
     })->reverse()->values();
 
-    $dbData = \App\Models\TransactionHistory::where('user_id', $account->id)
+    $dbData = TransactionHistory::where('user_id', $account->id)
         ->where('created_at', '>=', now()->subMonths(3))
         ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total_amount")
         ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
@@ -347,7 +501,7 @@ public function dashboardapi(Request $request)
     });
 
     // ✅ Exchange rates
-    $exchangeRates = \App\Models\ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
+    $exchangeRates = ExchangeRate::with(['fromCurrency:id,code', 'toCurrency:id,code'])
         ->get()
         ->map(function ($r) {
             return [
