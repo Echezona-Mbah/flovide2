@@ -13,15 +13,18 @@ use App\Models\ExchangeRate;
 use App\Traits\CurrencyHelper;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TransactionHistory;
+use App\Models\PersonalBankAccountRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 // use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use App\Models\PersonalBankAccountRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BankAccountRequestReceived;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
-
+use Illuminate\Validation\ValidationException;
+use Throwable;
+use RuntimeException;
 
 
 class CreateBankController extends Controller
@@ -872,72 +875,147 @@ public function statement(Request $request, $id)
 
 public function store(Request $request) {
 
-// dd('hhh');
-    $validated = $request->validate([
-        'bvn' => 'required|string|size:11',
-        'nin' => 'required|string|size:11',
-    ]);
+    //Authentication
+    $personal = Auth::guard('personal-api')->user();
+
+    if (!$personal) {
+        return response()->json([
+            'data' => [
+                'success' => false,
+                'message' => 'Unauthenticated',
+            ]
+        ], 401);
+    }
+
+
+    //Validation
+    try {
+        $validated = $request->validate([
+            'bvn' => [
+                'required',
+                'digits:11',
+            ],
+            'nin' => [
+                'required',
+                'digits:11',
+            ],
+        ]);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'data' => [
+                'success' => false,
+                'message' => $e->validator->errors()->first(),
+                'errors' => $e->validator->errors(),
+            ],
+        ], 422);
+    }
+
+
+    //Rate Limiting
+    $rateLimitKey = 'personal-bank-account-request:' . $personal->id;
+
+    if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+        $seconds = RateLimiter::availableIn($rateLimitKey);
+
+        return response()->json([
+            'data' => [
+                'success' => false,
+                'message' => "Too many requests. Please try again in {$seconds} seconds.",
+            ],
+        ], 429);
+    }
+
+    RateLimiter::hit($rateLimitKey, 600);
+
+    //Prevent Simultaneous Requests
+    $lock = Cache::lock('personal-bank-account-request-lock:' . $personal->id, 30);
+
+    if (!$lock->get()) {
+        return response()->json([
+            'data' => [
+                'success' => false,
+                'message' => 'A bank account request is already being processed. Please wait and try again.',
+            ],
+        ], 429);
+    }
 
     try {
 
-        $personal = Auth::guard('personal-api')->user();
-        if (!$personal) {
-            return response()->json([
-                'data' => [
-                    'success' => false,
-                    'message' => 'Unauthenticated',
-                ]
-            ], 401);
-        }
+        //Database Transaction
+        $bankAccountRequest = DB::transaction(function () use ($personal, $validated) {
 
-        //prevent multiple pending requests
-        $existingPendingRequest = PersonalBankAccountRequest::where('personal_id', $personal->id)->where('status', ['pending', 'processing'])->first();
-        if ($existingPendingRequest) {
-            return response()->json([
-                'data' => [
-                    'success' => false,
-                    'message' => 'You already have a bank account request being processed.',
-                ]
-            ], 409);
-        }
+        
+            //prevent multiple pending requests
+            $existingPendingRequest = PersonalBankAccountRequest::where('personal_id', $personal->id)
+                ->whereIn('status', ['pending', 'processing'])
+                ->lockForUpdate()->first();
 
-        DB::beginTransaction();
+            if ($existingPendingRequest) {
+                throw new RuntimeException(
+                    'BANK_ACCOUNT_REQUEST_ALREADY_EXISTS'
+                );
+            }
 
-        $bankAccountRequest = PersonalBankAccountRequest::create([
-            'personal_id' => $personal->id,
-            'bvn' => $request->bvn,
-            'nin' => $request->nin,
-            'status' => 'pending',
-        ]);
 
-        DB::commit();
+            // Create Request
+            return PersonalBankAccountRequest::create([
+                'personal_id' => $personal->id,
+                'bvn' => $validated['bvn'],
+                'nin' => $validated['nin'],
+                'status' => 'pending',
+            ]);
+
+        });
 
         //send admin notification
         Mail::to(config('mail.admin_email'))->send(new BankAccountRequestReceived($bankAccountRequest));
 
+        // log
+        Log::info('Personal bank account request submitted.', [
+            'personal_id' => $personal->id,
+            'request_id' => $bankAccountRequest->id,
+            'status' => $bankAccountRequest->status,
+        ]);
+
+        //Success Response
         return response()->json([
             'data'=> [
                 'success' => true,
                 'message' => 'Your Nigerian bank account request has been submitted successfully.',
                 'status' => $bankAccountRequest->status,
             ],
-        ], 200);
+        ], 201);
 
-    } catch (\Throwable $e) {
-        DB::rollBack();
+    } catch (Throwable $e) {
 
+        //Handle Duplicate Request
+        if ($e instanceof RuntimeException && $e->getMessage() === 'BANK_ACCOUNT_REQUEST_ALREADY_EXISTS') {
+            return response()->json([
+                'data' => [
+                    'success' => false,
+                    'message' => 'You already have a bank account request being processed.',
+                ],
+            ], 409);
+        }
+
+        //log error
         Log::error('Bank account request failed', [
-            'error' => $e->getMessage(),
             'personal_id' => $personal->id ?? null,
+            'error' => $e->getMessage(),
+            'exception' => get_class($e),
         ]);
 
         return response()->json([
             'data' => [
                 'success' => false,
-                'message' => 'Unable to submit your bank account request at this time.'
+                'message' => 'Unable to submit your bank account request at this time. Please try again later.'
             ]
         ], 500);
 
+    } finally {
+
+        //Release Lock        
+        $lock->release();
     }
     
 }
