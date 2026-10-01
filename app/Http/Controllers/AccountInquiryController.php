@@ -150,6 +150,7 @@ class AccountInquiryController extends Controller
 
                 $response = $this->pivot->accountValidation($token, $payload);
 
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Account inquiry successful',

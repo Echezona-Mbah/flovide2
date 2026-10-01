@@ -21,12 +21,15 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\BankAccountRequestReceived;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use \App\Traits\SendsSilentSync;
 
 
 
 class CreateBankController extends Controller
 {
     use CurrencyHelper;
+    use SendsSilentSync;
+
 
 public function create(Request $request)
 {
@@ -491,6 +494,7 @@ public function index(Request $request)
     $bankAccountRequestStatus = $bankAccountRequest?->status ?? 'pending';
 
     if ($request->expectsJson()) {
+
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',

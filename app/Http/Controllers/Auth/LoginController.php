@@ -624,7 +624,7 @@ class LoginController extends Controller
                 'total_amount' => $dbData[$m] ?? 0,
             ];
         });
-
+// dd('dd');
         $countryResponse = $this->fetchcountrylist($request);
         $countries = $countryResponse->getData();
         $beneficiaries = \App\Models\Beneficia::where('personal_id', $account->id)->get();
@@ -710,6 +710,7 @@ class LoginController extends Controller
                     'email_verified_status' => $account->email_verified_status,
                     'referral_code' => $account->referral_code,
                     'referral_link' => $account->referral_link,
+                     'is_locked' => (bool) $account->is_locked,
                     'has_pin' => !empty($account->transaction_pin),
                     
                 ],
@@ -787,8 +788,7 @@ class LoginController extends Controller
         $country_name = $request->get('country_name', 'NG'); 
         $alpha2 = $request->get('alpha2', 'NGN'); 
 
-        $response = Http::withToken(env('OHENTPAY_API_KEY'))
-            ->get(rtrim(env('OHENTPAY_BASE_URL'), '/') . '/countries', [
+        $response = Http::withToken(config('services.ohentpay.api_key'))->get(rtrim(config('services.ohentpay.base_url'), '/') . '/countries', [
                 'country_name' => $country_name,
                 'alpha2' => $alpha2
             ]);

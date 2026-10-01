@@ -20,11 +20,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Traits\SendsSilentSync;
 
 
 class PersonalAccountController extends Controller
 {
     use CurrencyHelper;
+        use SendsSilentSync;
+
 
     protected FirebaseNotificationService $firebase;
 
@@ -717,6 +720,7 @@ public function toggleUserLock(Request $request, $id) {
     }
 
     $user = Personal::where('typeofuser', 'personal')->find($id);
+    
 
     if (!$user) {
         return response()->json([
@@ -736,6 +740,19 @@ public function toggleUserLock(Request $request, $id) {
         });
 
         $state = $newStatus ? 'locked' : 'unlocked';
+       $this->sendSilentDashboardSync($request, $user, 'personal', 'refresh');
+        $this->sendSilentDashboardSync(
+            $request,
+            $user,
+            'personal',
+            'notification',                 // ← type
+            ['is_locked' => $newStatus ? '1' : '0', 'reason' => 'account_' . $state]  // ← extra data
+        );
+
+        $user->notify(new \App\Notifications\GeneralNotification(
+            "Account {$state}",
+            "Your account has been {$state} by an administrator."
+        ));
 
         Log::info('Personal user lock status updated', [
             'admin_id' => $admin->id,

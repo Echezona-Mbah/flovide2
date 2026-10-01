@@ -80,13 +80,13 @@ return [
         'currencies' => array_filter(array_map('trim', explode(',', env('OHENTPAY_CURRENCIES', '')))),
     ],
 
-    //     'pivot' => [
-    //     'base_url' => env('PIVOT_BASE_URL', 'https://merchant-api.dev.atlassnomad.com'),
-    //     'username' => env('PIVOT_USERNAME', 'FLOVIDE'),
-    //     'password' => env('PIVOT_PASSWORD', 'd9Dv5jy4I9qQpDefyd22Yln7AfiTMQt-C-HStI9g5zM'),
-    //     'ugx_bank_service' => env('PIVOT_UGX_BANK_SERVICE', 'PS347884'),
-    //     'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE', 'PS347884'),
-    //     'ugx_mobile_service_validation' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION', 'PS628030'),
-    // ],
+        'pivot' => [
+        'base_url' => env('PIVOT_BASE_URL'),
+        'username' => env('PIVOT_USERNAME'),
+        'password' => env('PIVOT_PASSWORD'),
+        'ugx_bank_service' => env('PIVOT_UGX_BANK_SERVICE'),
+        'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE'),
+        'ugx_mobile_service_validation' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
+    ],
 
 ];
