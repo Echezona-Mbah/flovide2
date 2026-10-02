@@ -141,4 +141,80 @@ class TransactionPinController extends Controller
             'data'    => null,
         ], 200);
     }
+
+    // ── Verify PIN is correct (no transaction attached) ─────────────────────
+    public function verifyPin(Request $request)
+    {
+        dd('dd');
+        $personal = auth('personal-api')->user();
+
+        $request->validate([
+            'pin' => 'required|digits:4',
+        ]);
+
+        if (empty($personal->transaction_pin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have not set a transaction PIN yet.',
+                'code'    => 'PIN_NOT_SET',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($personal->transaction_pin_locked_until && now()->lt($personal->transaction_pin_locked_until)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many incorrect PIN attempts. Try again after ' . $personal->transaction_pin_locked_until->diffForHumans(),
+                'code'    => 'PIN_LOCKED',
+                'data'    => null,
+            ], 423);
+        }
+
+        $pinIsValid = Hash::check($request->pin, $personal->transaction_pin);
+
+        if (!$pinIsValid) {
+            $personal->transaction_pin_attempts += 1;
+
+            if ($personal->transaction_pin_attempts >= 5) {
+                $personal->transaction_pin_locked_until = now()->addMinutes(15);
+                $personal->transaction_pin_attempts = 0;
+            }
+
+            $personal->save();
+
+            Log::warning('[Transaction PIN] Personal verify failed', [
+                'personal_id' => $personal->id,
+                'attempts'    => $personal->transaction_pin_attempts,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect transaction PIN.',
+                'code'    => 'PIN_INCORRECT',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($personal->transaction_pin_attempts > 0 || $personal->transaction_pin_locked_until) {
+            $personal->transaction_pin_attempts = 0;
+            $personal->transaction_pin_locked_until = null;
+        }
+
+        if (Hash::needsRehash($personal->transaction_pin)) {
+            $personal->transaction_pin = Hash::make($request->pin);
+            Log::info('[Transaction PIN] Personal rehashed on verify', ['personal_id' => $personal->id]);
+        }
+
+        $personal->save();
+
+        Log::info('[Transaction PIN] Personal verify success', ['personal_id' => $personal->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN verified successfully.',
+            'code'    => 'PIN_VERIFIED',
+            'data'    => null,
+        ], 200);
+    }
+
 }
