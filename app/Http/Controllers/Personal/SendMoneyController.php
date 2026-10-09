@@ -985,12 +985,21 @@ public function getExchangeRate(Request $request)
         $merchantTransactionId = 'TXN_' . substr(uniqid(), 0, 10);
         $bankType = strtolower($request->transfer_method ?? 'bank');
 
-        $serviceCode = $bankType === 'mobile'
-            ? env('PIVOT_UGX_MOBILE_SERVICE')
-            : env('PIVOT_UGX_BANK_SERVICE');
+       $pivotUGXBankService   = env('PIVOT_UGX_BANK_SERVICE');
+        $pivotUGXMobileService = env('PIVOT_UGX_MOBILE_SERVICE');
+        $pivotKESBankService   = env('PIVOT_KES_BANK_SERVICE', 'KES_BANK_CODE');
+        $pivotKESMobileService = env('PIVOT_KES_MOBILE_SERVICE', 'KES_MOBILE_CODE');
 
-        $sortCode = $request->bank_code;
-
+        if ($currency === 'UGX') {
+            $serviceCode = $bankType === 'mobile' ? $pivotUGXMobileService : $pivotUGXBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_UGX_MOBILE_SORT', '000000') : $request->bank_code;
+        } elseif ($currency === 'KES') {
+            $serviceCode = $bankType === 'mobile' ? $pivotKESMobileService : $pivotKESBankService;
+            $sortCode    = $bankType === 'mobile' ? env('PIVOT_KES_MOBILE_SORT', '000000') : $request->bank_code;
+        } else {
+            $serviceCode = $bankType === 'mobile' ? 'DEFAULT_MOBILE' : 'DEFAULT_BANK';
+            $sortCode    = $bankType === 'mobile' ? '013847' : $request->bank_code;
+        }
         $payload = [
             "serviceCode" => $serviceCode,
             "msisdn" => $bankType === 'mobile' ? $request->account_number : '256755289333',

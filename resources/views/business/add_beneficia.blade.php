@@ -331,6 +331,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const payazaEnabled    = @json($payazaEnabled);
     const appmobileEnabled = @json($appmobileEnabled);
     const ohentpayEnabled  = @json($ohentpayEnabled);
+    const PROVIDER_BY_CURRENCY = @json($currencyProviderMap);
+
 
     let timer;
     let countryTom  = null;
@@ -346,6 +348,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     countrySelect.querySelectorAll("option").forEach(o => { if (o.value) o.setAttribute("data-flag", flagUrl(o.value)); });
     currencySelect.querySelectorAll("option").forEach(o => { if (o.value) o.setAttribute("data-flag", flagUrl(currencyDefaultCountry[o.value])); });
+
+    const PIVOT_VALIDATION_SERVICES = {
+        UGX: { bank: SERVICES.ugx_bank_service, mobile: SERVICES.ugx_mobile_service },
+        KES: { bank: SERVICES.kes_bank_service, mobile: SERVICES.kes_mobile_service },
+    };
+
+    function activeProvider(currency = currencySelect.value) {
+        return PROVIDER_BY_CURRENCY[String(currency || "").trim().toUpperCase()] || null;
+    }
 
     function renderOption(item, escape) {
         const flag = item.flag || (item.$option ? item.$option.getAttribute("data-flag") : "");
@@ -491,13 +502,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ── Provider loaders ─────────────────────────────────────────────────
-    function loadPivotBanks() {
+   function loadPivotBanks() {
         const country = countrySelect.value;
         if (!country) return;
         fetch(`${banksFilterUrl}?country=${country}&provider=pivot`)
             .then(r => r.json())
             .then(list => {
                 let html = '<option value="">Select Bank</option>';
+                if (!list.length) html = '<option value="">No Pivot banks configured for this country</option>';
                 list.forEach(b => { html += `<option value="${b.sort_code || b.bank_code}">${b.name}</option>`; });
                 bankSelect.innerHTML = html;
             });
@@ -590,11 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const currency = normalizeCurrency(currencySelect.value);
 
         if (currency === "CAD") {
-            // Show payment method dropdown with only Interac
-            transferMethod.innerHTML = `
-                <option value="">Select Payment Method</option>
-                <option value="interac">Interac</option>
-            `;
+            transferMethod.innerHTML = `<option value="">Select Payment Method</option><option value="interac">Interac</option>`;
             transferMethod.classList.remove("hidden");
             transferMethod.disabled = false;
             return;
@@ -602,12 +610,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         showRuleFields(currency);
 
-        // ← ADDED: OhentPay checked before Payaza (matches backend priority)
-        if (OHENTPAY_CURRENCIES.includes(currency) && ohentpayEnabled) { loadOhentpayBanks(); return; }
+        const provider = activeProvider(currency);
 
-        if (currency === "GHS" && appmobileEnabled) { loadAppmobileProviders(); return; }
-        if (PAYAZA_CURRENCIES.includes(currency))   { loadPayazaProviders();    return; }
-        if (currency === "UGX" && pivotEnabled) {
+        if (provider === "ohentpay")   { loadOhentpayBanks();    return; }
+        if (provider === "app_mobile") { loadAppmobileProviders(); return; }
+        if (provider === "payaza")     { loadPayazaProviders();  return; }
+        if (provider === "pivot") {
             transferMethod.innerHTML = `<option value="">Select Method</option><option value="bank">Bank</option><option value="mobile">Mobile</option>`;
             toggleField(transferMethod, true, true);
         }
@@ -617,57 +625,39 @@ document.addEventListener("DOMContentLoaded", function () {
     function showFieldsByMethod() {
         const currency = normalizeCurrency(currencySelect.value);
         const method   = transferMethod.value;
+        const provider = activeProvider(currency);
 
-        // Sync hidden input
         transferHidden.value = method;
 
-        // CAD + Interac selected → show interac fields
-        if (currency === "CAD" && method === "interac") {
-            showCadInteracFields();
-            setTransferMethod("bank"); // backend expects "bank" for CAD
-            return;
-        }
-
-        // CAD but nothing selected yet
-        if (currency === "CAD" && !method) {
-            hideCadFields();
-            return;
-        }
+        if (currency === "CAD" && method === "interac") { showCadInteracFields(); setTransferMethod("bank"); return; }
+        if (currency === "CAD" && !method) { hideCadFields(); return; }
 
         toggleField(bankSelect, false);
         toggleField(accountNumber, false);
         toggleField(mobileInput, false);
         resetHolderState();
 
-        const country = countrySelect.value;
-
-        if (currency === "UGX" && pivotEnabled) {
+        if (provider === "pivot") {
             if (method === "mobile") { toggleField(mobileInput, true, true); prepareMobileInput(); }
             if (method === "bank")   { loadPivotBanks(); toggleField(bankSelect, true, true); toggleField(accountNumber, true, true); }
             return;
         }
 
-        // ← ADDED: OhentPay branch
-        if (OHENTPAY_CURRENCIES.includes(currency) && ohentpayEnabled) {
+        if (provider === "ohentpay") {
             if (method === "bank") {
                 let html = '<option value="">Select Bank</option>';
                 ohentpayProviders.bank.forEach(b => { html += `<option value="${b.bank_code || b.code}">${b.name}</option>`; });
-                bankSelect.innerHTML = html;
-                toggleField(bankSelect, true, true);
-                toggleField(accountNumber, true, true);
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(accountNumber, true, true);
             }
             if (method === "mobile") {
                 let html = '<option value="">Select Provider</option>';
                 ohentpayProviders.mobile.forEach(p => { html += `<option value="${p.bank_code || p.code}">${p.name}</option>`; });
-                bankSelect.innerHTML = html;
-                toggleField(bankSelect, true, true);
-                toggleField(mobileInput, true, true);
-                prepareMobileInput();
+                bankSelect.innerHTML = html; toggleField(bankSelect, true, true); toggleField(mobileInput, true, true); prepareMobileInput();
             }
             return;
         }
 
-        if (country === "GH" && currency === "GHS" && appmobileEnabled) {
+        if (provider === "app_mobile") {
             if (method === "bank") {
                 let html = '<option value="">Select Bank</option>';
                 appmobileProvider.bank.forEach(b => { html += `<option value="${b.bank_code||b.code}">${b.name}</option>`; });
@@ -681,7 +671,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        if (PAYAZA_CURRENCIES.includes(currency)) {
+        if (provider === "payaza") {
             if (method === "bank") {
                 let html = '<option value="">Select Bank</option>';
                 payazaProviders.bank.forEach(b => { html += `<option value="${b.code||b.bank_code}">${b.name}</option>`; });
@@ -706,32 +696,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function validateAccount() {
-        const currency = normalizeCurrency(currencySelect.value);
+         const currency = normalizeCurrency(currencySelect.value);
         const method   = transferMethod.value;
+        const provider = activeProvider(currency);
         let payload = null, route = "";
 
-        if (currency === "UGX" && pivotEnabled) {
+        if (provider === "pivot") {
+            const svc = PIVOT_VALIDATION_SERVICES[currency];
+            const serviceCode = method === "mobile" ? svc?.mobile : svc?.bank;
+
+            // No validation service configured for this currency → let the user type the name
+            if (!serviceCode) {
+                setHolderManualFallback("Automatic name verification is not available for this account. Please enter the account holder name carefully.");
+                return;
+            }
+
             if (method === "mobile") {
                 const mobile = mobileInput.value.trim(); if (!mobile) return;
-                payload = { serviceCode: SERVICES.ugx_mobile_service, accountNumber: mobile, msisdn: mobile };
+                payload = { serviceCode, accountNumber: mobile, msisdn: mobile };
             }
             if (method === "bank") {
                 const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
-                payload = { serviceCode: SERVICES.ugx_bank_service, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
+                payload = { serviceCode, accountNumber: acc, msisdn: acc, extraData: { bankSortCode: code, amount: "0" } };
             }
             route = "{{ route('pivot.account.validation') }}";
-            } else if (OHENTPAY_CURRENCIES.includes(currency) && ohentpayEnabled) {
-                // Only 3 inputs required — country is derived server-side from the bank row
-                const acc  = accountNumber.value.trim();
-                const code = bankSelect.value;
-                if (!acc || !code) return;
-                payload = {
-                    currency: currency,
-                    bank_code: code,
-                    account_number: acc,
-                };
-                route = "{{ route('account.inquiry') }}";
-            }else if (PAYAZA_CURRENCIES.includes(currency)) {
+
+        } else if (provider === "ohentpay") {
+            const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
+            payload = { currency, bank_code: code, account_number: acc };
+            route = "{{ route('account.inquiry') }}";
+
+        } else if (provider === "payaza") {
             if (method === "bank") {
                 const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
                 payload = { currency, account_number: acc, bank_code: code };
@@ -741,15 +736,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 payload = { currency, account_number: mobile, bank_code: code };
             }
             route = "{{ route('payaza.account-enquiry') }}";
-        }
 
-        if (countrySelect.value === "GH" && currency === "GHS" && appmobileEnabled) {
+        } else if (provider === "app_mobile") {
             const code = bankSelect.value;
-            if (method === "bank") { const acc = accountNumber.value.trim(); if (!acc || !code) return; payload = { customer_number: acc, bank_code: code }; }
+            if (method === "bank")   { const acc = accountNumber.value.trim(); if (!acc || !code) return; payload = { customer_number: acc, bank_code: code }; }
             if (method === "mobile") { const mobile = mobileInput.value.trim(); if (!mobile || !code) return; payload = { customer_number: mobile, bank_code: code }; }
             route = "{{ route('appmobile.account-enquiry') }}";
         }
-
         if (!payload) return;
 
         try {

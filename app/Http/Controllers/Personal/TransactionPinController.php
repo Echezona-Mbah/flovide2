@@ -145,7 +145,7 @@ class TransactionPinController extends Controller
     // ── Verify PIN is correct (no transaction attached) ─────────────────────
     public function verifyPin(Request $request)
     {
-        dd('dd');
+        // dd('dd');
         $personal = auth('personal-api')->user();
 
         $request->validate([

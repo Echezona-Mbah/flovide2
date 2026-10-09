@@ -21,7 +21,7 @@ public function index(Request $request)
     $personalId = auth('personal-api')->id();
 
     $beneficias = Beneficia::where('personal_id', $personalId)
-        ->paginate(8);
+        ->paginate(40);
 
     if ($request->expectsJson()) {
         return response()->json([

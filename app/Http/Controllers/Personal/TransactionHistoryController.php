@@ -18,25 +18,31 @@ class TransactionHistoryController extends Controller
         ->get()
         ->map(function ($t) {
             return [
-                'type'      => $t->type,
-                'date'      => $t->created_at->format('Y-m-d H:i:s'),
-                'sender'    => $t->sender ?? 'N/A',
-                'recipient' => $t->recipient ?? 'N/A',
-                'amount'    => $t->currency_symbol . number_format($t->amount, 2),
-                'currency'  => $t->currency,
-                'status'    => $t->status,
-                'reference' => $t->reference,
-                'method' => $t->method,
-                'recipient_details' => [
-                    'alias'          => $t->recipient_alias,
-                    'account_name'   => $t->recipient_account_name,
-                    'account_number' => $t->recipient_account_number,
-                    'bank_name'      => $t->recipient_bank_name,
-                    'bank_currency'  => $t->recipient_bank_currency,
-                    'recipient_amount'  => $t->recipient_amount,
-                    'fees'  => $t->fees,
-                ]
-            ];
+                    'type'             => $t->type,
+                    'date'             => $t->created_at->format('Y-m-d H:i:s'),
+                    'sender'           => $t->sender ?? 'N/A',
+                    'recipient'        => $t->recipient_account_name ?? 'N/A',
+                    'amount'           => number_format($t->amount, 2),
+                    'currency'         => $t->currency,
+                    'status'           => $t->status,
+                    'reference'        => $t->reference,
+                    'method'           => $t->method,
+                    'mode'             => $t->mode,
+                    'fees'             => $t->fees,
+                    'swap_from_currency' => $t->swap_from_currency,
+                    'swap_to_currency'   => $t->swap_to_currency,
+                    'swap_from_amount'   => $t->swap_from_amount,
+                    'swap_to_amount'     => $t->swap_to_amount,
+                    'swap_rate'          => $t->swap_rate,
+                    'recipient_details' => [
+                        'account_name'     => $t->recipient_account_name,
+                        'account_number'   => $t->recipient_account_number,
+                        'bank_name'        => $t->recipient_bank_name,
+                        'bank_currency'    => $t->recipient_bank_currency,
+                        'recipient_amount' => $t->recipient_amount,
+                        'fees'             => $t->fees,
+                    ],
+                ];
         });
 
     return $request->expectsJson()
