@@ -531,6 +531,18 @@ class SendMoneyController extends Controller
 
         $owner->save();
 
+        // ── CAD/Interac: email must match the sender's own registered email ──────
+        $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
+
+        if ($sendingCurrencyCheck === 'CAD' && $request->filled('interac_email')) {
+            if (strtolower(trim($request->interac_email)) !== strtolower(trim($owner->email))) {
+                $msg = 'For Interac transfers, please use your own registered email address (' . $owner->email . ').';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
+
         // ── Promo code resolution ────────────────────────────────────────────
         $promoCode = null;
 

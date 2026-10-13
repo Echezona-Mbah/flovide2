@@ -18,11 +18,13 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use \App\Traits\SendsSilentSync;
 
 
 class CreateBankController extends Controller
 {
       use CurrencyHelper;
+      use SendsSilentSync;
 
 
 
@@ -556,6 +558,7 @@ public function dashboardapi(Request $request)
 
 
     if ($request->expectsJson()) {
+
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',

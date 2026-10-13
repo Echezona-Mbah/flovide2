@@ -25,11 +25,15 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 use RuntimeException;
+use \App\Traits\SendsSilentSync;
+
 
 
 class CreateBankController extends Controller
 {
     use CurrencyHelper;
+    use SendsSilentSync;
+
 
 public function create(Request $request)
 {
@@ -494,6 +498,7 @@ public function index(Request $request)
     $bankAccountRequestStatus = $bankAccountRequest?->status ?? 'pending';
 
     if ($request->expectsJson()) {
+
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data fetched successfully',

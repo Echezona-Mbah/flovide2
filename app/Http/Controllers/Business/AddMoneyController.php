@@ -114,6 +114,8 @@ public function interacDetails(Request $request)
 
 public function topupWithInterac(Request $request, BlaaizService $blaaiz)
 {
+
+    // Log::info('[Interac Initiate] Request received', 'ddddddd');
     Log::info('[Interac Initiate] Request received', $request->all());
    
     $isApi = $request->expectsJson();
@@ -238,6 +240,15 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
         'net_amount'     => $netAmount,
     ]);
 
+     if ($currency === 'CAD' && $request->filled('email')) {
+            if (strtolower(trim($request->email)) !== strtolower(trim($user->email))) {
+                $msg = 'For Interac transfers, please use your own registered email address (' . $user->email . ').';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
+
     $payload = [
         'email'  => $request->email,
         'amount' => $amount,
@@ -298,115 +309,6 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
         'data'    => $transaction,
     ], 200);
 }
-
-// public function topupWithInterac(Request $request, BlaaizService $blaaiz)
-// {
-//     Log::info('[Interac Initiate] Request received', $request->all());
-
-//       $isApi = $request->expectsJson();
-//     $mode  = session('mode', 'live');
-
-//     // ── Block web-based deletion while in Test mode ──────────────────────
-//     if (!$isApi && $mode === 'test') {
-//         $message = 'Collection in Test Mode is only available via the API.';
-//         return redirect()->back()->withErrors(['message' => $message]);
-//     }
-
-//     $user = Auth::user();
-//     if (!$user) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Unauthenticated',
-//             'code'    => 'UNAUTHENTICATED',
-//             'data'    => null,
-//         ], 401);
-//     }
-
-//     Log::info('[Interac Initiate] Authenticated user', ['user_id' => $user->id, 'email' => $user->email]);
-
-//     $request->validate([
-//         'balance' => 'required|string',   // ← UUID, not integer
-//         'amount'  => 'required|numeric|min:1',
-//         'email'   => 'required|email',
-//     ]);
-
-//     $balance = Balance::where('user_id', $user->id)
-//         ->where('id', $request->balance)
-//         ->first();
-
-//     Log::info('[Interac Initiate] Balance lookup', [
-//         'found'      => (bool) $balance,
-//         'balance_id' => $request->balance,
-//         'user_id'    => $user->id,
-//     ]);
-
-//     if (!$balance) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Balance account not found.',
-//             'code'    => 'BALANCE_NOT_FOUND',
-//             'data'    => null,
-//         ], 404);
-//     }
-
-//     $payload = [
-//         'email'  => $request->email,
-//         'amount' => $request->amount,
-//     ];
-
-//     $response = $blaaiz->initiateInteracMoneyRequest($payload);
-
-//     Log::info('[Interac Initiate] Blaaiz response', [
-//         'success' => $response['success'],
-//         'status'  => $response['status'],
-//         'data'    => $response['data'],
-//     ]);
-
-//     if (!$response['success']) {
-//         $errorMsg = $response['data']['message']
-//             ?? $response['data']['error_description']
-//             ?? 'Interac request failed. Please try again.';
-
-//         return response()->json([
-//             'success' => false,
-//             'message' => $errorMsg,
-//             'code'    => 'INTERAC_REQUEST_FAILED',
-//             'data'    => $response['data'] ?? null,
-//         ], $response['status']);
-//     }
-
-//     $responseData = $response['data'] ?? [];
-
-//     $transaction = TransactionHistory::create([
-//         'user_id'          => $user->id,
-//         'balance_id'       => $balance->id,
-//         'payment_provider' => 'interac',
-//         'transaction_type' => 'payment',
-//         'method'           => 'credit',
-//         'type'              => 'credit',
-//         'payment_method'   => 'auto',
-//         'sender'           => $request->email,
-//         'amount'           => $request->amount,
-//         'currency'         => $balance->currency,
-//         'status'           => 'pending',
-//         'reference'        => $responseData['reference'],
-//         'payment_reference'=> $responseData['reference'],
-//         'order_id'         => $responseData['transaction_id'],
-//     ]);
-
-//     $user->notify(new GeneralNotification(
-//         "Interac Top-up Submitted 🎉",
-//         "Your Interac deposit of {$request->amount} {$balance->currency} has been submitted. Ref: {$responseData['reference']}"  // ← fixed double $
-//     ));
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Interac deposit submitted successfully.',
-//         'code'    => 'INTERAC_TOPUP_SUBMITTED',
-//         'data'    => $transaction,
-//     ], 200);
-// }
-
 
 
 

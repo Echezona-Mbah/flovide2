@@ -153,4 +153,84 @@ public function index(){
             'data'    => null,
         ], 200);
     }
+
+
+    // ── Verify PIN is correct (no transaction attached) ─────────────────────
+    public function verifyPin(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'pin' => 'required|digits:4',
+        ]);
+
+        if (empty($user->transaction_pin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have not set a transaction PIN yet.',
+                'code'    => 'PIN_NOT_SET',
+                'data'    => null,
+            ], 422);
+        }
+
+        if ($user->transaction_pin_locked_until && now()->lt($user->transaction_pin_locked_until)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many incorrect PIN attempts. Try again after ' . $user->transaction_pin_locked_until->diffForHumans(),
+                'code'    => 'PIN_LOCKED',
+                'data'    => null,
+            ], 423);
+        }
+
+        $pinIsValid = Hash::check($request->pin, $user->transaction_pin);
+
+        if (!$pinIsValid) {
+            $user->transaction_pin_attempts += 1;
+
+            if ($user->transaction_pin_attempts >= 5) {
+                $user->transaction_pin_locked_until = now()->addMinutes(15);
+                $user->transaction_pin_attempts = 0;
+            }
+
+            $user->save();
+
+            Log::warning('[Transaction PIN] Business verify failed', [
+                'user_id'  => $user->id,
+                'attempts' => $user->transaction_pin_attempts,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect transaction PIN.',
+                'code'    => 'PIN_INCORRECT',
+                'data'    => null,
+            ], 422);
+        }
+
+        // Correct — reset attempts
+        if ($user->transaction_pin_attempts > 0 || $user->transaction_pin_locked_until) {
+            $user->transaction_pin_attempts = 0;
+            $user->transaction_pin_locked_until = null;
+        }
+
+        // Self-heal old high-cost hashes
+        if (Hash::needsRehash($user->transaction_pin)) {
+            $user->transaction_pin = Hash::make($request->pin);
+            Log::info('[Transaction PIN] Business rehashed on verify', ['user_id' => $user->id]);
+        }
+
+        $user->save();
+
+        Log::info('[Transaction PIN] Business verify success', ['user_id' => $user->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN verified successfully.',
+            'code'    => 'PIN_VERIFIED',
+            'data'    => null,
+        ], 200);
+    }
+
+
+
 }

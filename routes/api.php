@@ -419,6 +419,8 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
     Route::post('/pin-set', [TransactionPinController::class, 'setPin']);
     Route::post('/pin-update', [TransactionPinController::class, 'updatePin']);
     Route::post('/pin-reset', [TransactionPinController::class, 'resetPin']);
+    Route::post('/verify-pin', [TransactionPinController::class, 'verifyPin']);
+
 
 
 
@@ -616,6 +618,9 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
         Route::post('/personal-pin-set', [PersonalTransactionPinController::class, 'setPin']);
         Route::post('/personal-pin-update', [PersonalTransactionPinController::class, 'updatePin']);
         Route::post('/personal-pin-reset', [PersonalTransactionPinController::class, 'resetPin']);
+        Route::post('/personal-verify-pin', [PersonalTransactionPinController::class, 'verifyPin']);
+
+
 
 
 

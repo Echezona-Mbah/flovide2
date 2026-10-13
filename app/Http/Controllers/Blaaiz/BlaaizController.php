@@ -90,7 +90,9 @@ class BlaaizController extends Controller
 
      public function initiateInteracMoneyRequest(Request $request, BlaaizService $blaaiz)
     {
-        // Log::info('[Interac Initiate] Request received', $request->all());
+            $isApi = $request->expectsJson();
+
+        // Log::info('[Interac Initiate] Request received', 'dsdsdsdsde');
         $validated = $request->validate([
             'amount'   => 'required|numeric|min:0.1',
             'email'    => 'required|email',
@@ -183,6 +185,16 @@ class BlaaizController extends Controller
             ], 422);
         }
 
+        if ($currency === 'CAD' && $request->filled('email')) {
+            if (strtolower(trim($request->email)) !== strtolower(trim($user->email))) {
+                $msg = 'For Interac transfers, please use your own registered email address (' . $user->email . ').';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+        }
+
+        Log::info('[Interac Initiate] Sending payload to Blaaiz', ['currency' => $currency]);
 
     
         $payload = [

@@ -25,10 +25,12 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\AdminBroadcastEmail;
 use App\Models\InteracAutoDeposit;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Traits\SendsSilentSync;
 
 class BusinessAccountController extends Controller
 {
     use CurrencyHelper;
+    use SendsSilentSync;
 
 
     protected FirebaseNotificationService $firebase;
@@ -1069,6 +1071,20 @@ public function toggleUserLock(Request $request, $id) {
         });
 
         $state = $newStatus ? 'locked' : 'unlocked';
+               $this->sendSilentDashboardSync($request, $user, 'business', 'refresh');
+
+          $this->sendSilentDashboardSync(
+            $request,
+            $user,
+            'business',
+            'notification',                 // ← type
+            ['is_locked' => $newStatus ? '1' : '0', 'reason' => 'account_' . $state]  // ← extra data
+        );
+
+        $user->notify(new \App\Notifications\GeneralNotification(
+            "Account {$state}",
+            "Your account has been {$state} by an administrator."
+        ));
 
         Log::info('Business user lock status updated', [
             'admin_id' => $admin->id,

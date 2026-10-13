@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Ibanq\IbanqBeneficiaryController;
 use App\Models\CountryRule;
 use App\Services\OhentPayService;
+use App\Services\ProviderRoutingService;
 use Illuminate\Support\Str;
 
 class AddBeneficiariesController extends Controller
@@ -112,6 +113,8 @@ public function create()
     $pivotServices = [
         'ugx_bank_service'   => env('PIVOT_UGX_BANK_SERVICE'),
         'ugx_mobile_service' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
+         'kes_bank_service'   => env('PIVOT_KES_BANK_SERVICE'),
+        'kes_mobile_service' => env('PIVOT_KES_MOBILE_SERVICE_VALIDATION'),
     ];
 
     $mode = session('mode', 'live');
@@ -136,6 +139,11 @@ public function create()
         $ohentpayCurrencies
     )));
 
+    $currencyProviderMap = [];
+    foreach ($providerCurrencies as $cur) {
+        $currencyProviderMap[$cur] = $routing->resolveForCurrency($cur)?->key;
+    }
+
     return view('business.add_beneficia', compact(
         'countries',
         'countryRules',
@@ -150,7 +158,8 @@ public function create()
         'pivotCurrencies',
         'appmobileCurrencies',
         'ohentpayCurrencies',
-        'providerCurrencies'    
+        'providerCurrencies',
+        'currencyProviderMap'
     ));
 }
 
@@ -207,71 +216,118 @@ public function create()
         ]);
     }
 
+    // public function getBankAPI(Request $request)
+    // {
+    //     $country  = strtoupper($request->input('country'));   
+    //     $currency = strtoupper($request->input('currency'));              
+
+    //     if (!$country || !$currency) {
+    //        return response()->json([
+    //             'success' => false,
+    //             'message' => 'Country and currency are required',
+    //             'code' => 'VALIDATION_ERROR',
+    //             'data' => null
+    //         ], 422);
+
+    //     }
+
+    //     $pivotEnabled   = env('PIVOT_ENABLED', false);
+    //     $payazaEnabled  = env('PAYAZA_ENABLED', false);
+    //     $appMobile      = env('APP_MOBILE', false);
+
+    //     $banksQuery = \App\Models\Bank::where('country_iso', $country)
+    //                     ->where('currency', $currency);
+
+    //     /**
+    //      * 🎯 UGX LOGIC (FIXED)
+    //      */
+    //     if ($currency === 'UGX') {
+    //         if ($pivotEnabled) {
+    //             // ✅ Only Pivot
+    //             $banksQuery->where('provider', 'pivot');
+    //         } else {
+    //             // ✅ Only Payaza
+    //             $banksQuery->where('provider', 'payaza');
+    //         }
+    //     }
+
+    //     /**
+    //      * 🎯 GHS LOGIC
+    //      */
+    //     if ($currency === 'GHS') {
+    //         if ($appMobile) {
+    //             // ❌ Hide Payaza
+    //             $banksQuery->where('provider', '!=', 'payaza');
+    //         } else {
+    //             // ✅ Only Payaza (optional, if you want strict control)
+    //             $banksQuery->where('provider', 'payaza');
+    //         }
+    //     }
+
+    //     /**
+    //      * 🚫 Global Payaza Disable
+    //      */
+    //     if (!$payazaEnabled) {
+    //         $banksQuery->where('provider', '!=', 'payaza');
+    //     }
+
+    //     $banks = $banksQuery->get(['name', 'bank_code', 'sort_code', 'type']);
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Banks fetched',
+    //         'code' => 'BANKS_FETCHED',
+    //         'data' => $banks
+    //     ], 200);
+
+    // }
+
     public function getBankAPI(Request $request)
-    {
-        $country  = strtoupper($request->input('country'));   
-        $currency = strtoupper($request->input('currency'));              
+{
+    $country  = strtoupper((string) $request->input('country'));
+    $currency = strtoupper((string) $request->input('currency'));
 
-        if (!$country || !$currency) {
-           return response()->json([
-                'success' => false,
-                'message' => 'Country and currency are required',
-                'code' => 'VALIDATION_ERROR',
-                'data' => null
-            ], 422);
-
-        }
-
-        $pivotEnabled   = env('PIVOT_ENABLED', false);
-        $payazaEnabled  = env('PAYAZA_ENABLED', false);
-        $appMobile      = env('APP_MOBILE', false);
-
-        $banksQuery = \App\Models\Bank::where('country_iso', $country)
-                        ->where('currency', $currency);
-
-        /**
-         * 🎯 UGX LOGIC (FIXED)
-         */
-        if ($currency === 'UGX') {
-            if ($pivotEnabled) {
-                // ✅ Only Pivot
-                $banksQuery->where('provider', 'pivot');
-            } else {
-                // ✅ Only Payaza
-                $banksQuery->where('provider', 'payaza');
-            }
-        }
-
-        /**
-         * 🎯 GHS LOGIC
-         */
-        if ($currency === 'GHS') {
-            if ($appMobile) {
-                // ❌ Hide Payaza
-                $banksQuery->where('provider', '!=', 'payaza');
-            } else {
-                // ✅ Only Payaza (optional, if you want strict control)
-                $banksQuery->where('provider', 'payaza');
-            }
-        }
-
-        /**
-         * 🚫 Global Payaza Disable
-         */
-        if (!$payazaEnabled) {
-            $banksQuery->where('provider', '!=', 'payaza');
-        }
-
-        $banks = $banksQuery->get(['name', 'bank_code', 'sort_code', 'type']);
-
+    if (!$country || !$currency) {
         return response()->json([
-            'success' => true,
-            'message' => 'Banks fetched',
-            'code' => 'BANKS_FETCHED',
-            'data' => $banks
-        ], 200);
-
+            'success' => false,
+            'message' => 'Country and currency are required',
+            'code'    => 'VALIDATION_ERROR',
+            'data'    => null
+        ], 422);
     }
+
+    // Which provider is ON for this currency right now (admin-controlled, priority-aware)
+    $resolvedProvider = app(ProviderRoutingService::class)->resolveForCurrency($currency);
+
+    Log::info('[Bank API] Provider resolved', [
+        'country'  => $country,
+        'currency' => $currency,
+        'provider' => $resolvedProvider?->key,
+    ]);
+
+    if (!$resolvedProvider) {
+        return response()->json([
+            'success' => false,
+            'message' => "No provider is currently enabled for {$currency}",
+            'code'    => 'PROVIDER_NOT_AVAILABLE',
+            'data'    => []
+        ], 422);
+    }
+
+    // Only the active provider's banks are returned
+    $banks = Bank::where('country_iso', $country)
+        ->where('currency', $currency)
+        ->where('provider', $resolvedProvider->key)
+        ->orderBy('name')
+        ->get(['name', 'bank_code', 'sort_code', 'type']);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Banks fetched',
+        'code'    => 'BANKS_FETCHED',
+        'data'    => $banks
+    ], 200);
+}
 
 
 
