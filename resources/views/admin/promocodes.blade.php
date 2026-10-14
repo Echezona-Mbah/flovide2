@@ -489,6 +489,100 @@
                             </div>
                         </section>
 
+                        <!-- Create Custom Promo Code -->
+                        <section class="mb-4">
+                            <div class="card notification-card">
+                                <div class="notification-head">
+                                    <h5 class="notification-title"><i class="fa-solid fa-pen-to-square text-primary me-2" style="color: var(--purple) !important;"></i>Create Custom Promo Code</h5>
+                                    <p class="notification-subtitle">Manually specify a custom referral promo code and configure account owner and reward details.</p>
+                                </div>
+                                <div class="card-body p-4">
+                                    <form method="POST" action="{{ route('admin.promocodes.storeCustom') }}">
+                                        @csrf
+
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label form-label-strong" for="custom_promo_code">Promo Code</label>
+                                                <input type="text" name="promo_code" id="custom_promo_code"
+                                                    class="form-control form-control-pill text-uppercase @error('promo_code') is-invalid @enderror"
+                                                    placeholder="e.g. WELCOME2026"
+                                                    value="{{ strtoupper(old('promo_code', '')) }}"
+                                                    style="letter-spacing: 0.05em; font-weight: 700;"
+                                                    oninput="this.value = this.value.toUpperCase()">
+                                                @error('promo_code')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label class="form-label form-label-strong" for="custom_owner_type">Owner Type</label>
+                                                <select name="owner_type" id="custom_owner_type" class="form-select form-control-pill @error('owner_type') is-invalid @enderror">
+                                                    <option value="">Select type</option>
+                                                    <option value="business" {{ old('owner_type') === 'business' ? 'selected' : '' }}>Business</option>
+                                                    <option value="personal" {{ old('owner_type') === 'personal' ? 'selected' : '' }}>Personal</option>
+                                                </select>
+                                                @error('owner_type')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label class="form-label form-label-strong" for="custom_owner_email">Owner Email</label>
+                                                <input type="email" name="owner_email" id="custom_owner_email"
+                                                    class="form-control form-control-pill @error('owner_email') is-invalid @enderror"
+                                                    placeholder="owner@example.com"
+                                                    value="{{ old('owner_email', '') }}">
+                                                @error('owner_email')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label class="form-label form-label-strong" for="custom_reward_type">Reward Type</label>
+                                                <select name="reward_type" id="custom_reward_type" class="form-select form-control-pill @error('reward_type') is-invalid @enderror">
+                                                    <option value="">Select</option>
+                                                    <option value="percent" {{ old('reward_type') === 'percent' ? 'selected' : '' }}>Percentage (%)</option>
+                                                    <option value="fixed" {{ old('reward_type') === 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
+                                                </select>
+                                                @error('reward_type')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label class="form-label form-label-strong" for="custom_reward_value">Reward Value</label>
+                                                <input type="number" step="0.01" min="0" name="reward_value" id="custom_reward_value"
+                                                    class="form-control form-control-pill @error('reward_value') is-invalid @enderror"
+                                                    placeholder="e.g. 15"
+                                                    value="{{ old('reward_value', '') }}">
+                                                @error('reward_value')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label class="form-label form-label-strong" for="custom_status">Status</label>
+                                                <select name="status" id="custom_status" class="form-select form-control-pill @error('status') is-invalid @enderror">
+                                                    <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                </select>
+                                                @error('status')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-3 d-flex align-items-end">
+                                                <button type="submit" class="btn btn-brand w-100 d-inline-flex align-items-center justify-content-center gap-2" style="height: 46px;">
+                                                    <i class="fa-solid fa-plus-circle"></i>
+                                                    <span>Create Promo Code</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Promo Code Table -->
                         <div class="card directory-card">
                             <div class="directory-head d-flex justify-content-between align-items-center flex-wrap gap-3">

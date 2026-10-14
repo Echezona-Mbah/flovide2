@@ -605,13 +605,11 @@ Route::middleware('admin.auth')->group(function () {
 
             Route::get('/admin/promo-codes', [PromoCodeController::class, 'index'])->name('admin.promocodes.index');
             Route::post('/admin/promo-codes', [PromoCodeController::class, 'store'])->name('admin.promocodes.store');
+            Route::post('/admin/promo-codes/custom', [PromoCodeController::class, 'storeCustom'])->name('admin.promocodes.storeCustom');
             Route::post('/admin/promo-codes/{id}/toggle', [PromoCodeController::class, 'toggleStatus'])->name('admin.promocodes.toggle');
             Route::delete('/admin/promo-codes/{id}', [PromoCodeController::class, 'destroy'])->name('admin.promocodes.destroy');
             Route::post('/admin/promo-codes/generate/{ownerType}/{ownerId}', [PromoCodeController::class, 'generateForOwner'])
                 ->name('admin.promocodes.generate');
-
-            Route::post('/admin/promo-codes/{id}/toggle', [PromoCodeController::class, 'toggleStatus'])
-                ->name('admin.promocodes.toggle');
         });
 
 
