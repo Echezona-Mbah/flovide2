@@ -160,6 +160,8 @@ Route::middleware(['auth','business.verified', 'user.inactivity', 'business.web.
 
     //transaction history
     Route::get('/transactionHistory', [TransactionHistoryController::class, 'transaction'])->name('transactionHistory');
+        Route::get('/business/transactions/{id}/download', [TransactionHistoryController::class, 'downloadTransactionPdf'])
+        ->name('business.transactions.download');
 
     //refund
     Route::get('/refunds', [refundsController::class, 'index'])->name('refunds.index');

@@ -115,6 +115,7 @@
                 <th class="px-4 py-4 text-left">Amount</th>
                 <th class="px-4 py-4 text-left">Fee</th>
                 <th class="px-4 py-4 text-left">Status</th>
+                <th class="px-4 py-4 text-left">Action</th>
               </tr>
             </thead>
 
@@ -144,6 +145,7 @@
                   data-swap-to-amount="{{ number_format($transaction->swap_to_amount ?? 0, 2) }}"
                   data-swap-rate="{{ $transaction->swap_rate ?? '' }}"
                   data-date="{{ \Carbon\Carbon::parse($transaction->created_at)->format('H:i:s M j, Y') }}"
+                   data-download-url="{{ route('business.transactions.download', $transaction->id) }}"
                 >
                   <!-- Type column -->
                   <td class="px-4 py-4">
@@ -202,10 +204,20 @@
                       <span class="status processing">Processing</span>
                     @endif
                   </td>
+
+                   <td class="px-4 py-4">
+                    <button
+                      type="button"
+                      onclick="downloadTransactionReceipt(event, this)"
+                      class="inline-flex items-center gap-2 rounded-xl bg-[#215F9C] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-900/10 transition hover:bg-[#1a4c7d] active:scale-[0.98]">
+                      <i class="fas fa-download text-xs"></i>
+                      Download
+                    </button>
+                  </td>
                 </tr>
               @empty
                 <tr>
-                  <td colspan="7" class="text-center py-12 text-slate-400">
+                  <td colspan="8" class="text-center py-12 text-slate-400">
                     <i class="fas fa-inbox text-3xl mb-3 block"></i>
                     No transactions found
                   </td>
@@ -243,12 +255,25 @@
       <div id="transactionPanel"
         class="absolute right-0 top-0 h-full w-full sm:w-[480px] bg-white shadow-2xl transform translate-x-full transition duration-300 flex flex-col">
 
-        <div class="flex items-center justify-between p-5 border-b">
-          <h2 class="font-bold text-lg">Transaction Details</h2>
+        <div class="flex items-center justify-between gap-3 p-5 border-b">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[#9a7b4f]">Receipt</p>
+          <h2 class="font-bold text-lg text-slate-900">Transaction Details</h2>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a id="modalDownloadLink"
+            href="#"
+            class="inline-flex items-center gap-2 rounded-xl bg-[#215F9C] px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-900/10 transition hover:bg-[#1a4c7d]">
+            <i class="fas fa-download text-xs"></i>
+            Download
+          </a>
+
           <button onclick="closeTransaction()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100">
             <i class="fas fa-times"></i>
           </button>
         </div>
+      </div>
 
         <div class="flex-1 overflow-y-auto p-5 space-y-3">
 
@@ -303,6 +328,7 @@
   <script>
     function openTransaction(row) {
       const d      = row.dataset;
+      document.getElementById("modalDownloadLink").href = d.downloadUrl;
       const isSwap = d.type === 'swap';
 
       // Common
@@ -382,5 +408,38 @@
       }
     });
   </script>
+  <script>
+  function downloadTransactionReceipt(event, button) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const row = button.closest('tr');
+
+    if (!row) {
+      return;
+    }
+
+    openTransaction(row);
+
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Receipt download started',
+      showConfirmButton: false,
+      timer: 2200,
+      timerProgressBar: true
+    });
+
+    setTimeout(() => {
+      const frame = document.createElement('iframe');
+      frame.src = row.dataset.downloadUrl;
+      frame.style.display = 'none';
+      document.body.appendChild(frame);
+
+      setTimeout(() => frame.remove(), 10000);
+    }, 450);
+  }
+</script>
 </body>
 </html>

@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "phpseclib/phpseclib": "^3.0",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "web-token/jwt-framework": "^4.1"
     },
     "require-dev": {

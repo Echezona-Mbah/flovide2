@@ -292,6 +292,8 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
     Route::get('business/userTransactions', [TransactionHistoryController::class, 'transaction']);
     Route::get('business/userTransactions/{id}', [TransactionHistoryController::class, 'UserTransaction']);
     Route::post('business/transactions', [TransactionHistoryController::class, 'storeTransaction']);
+    Route::post('business/transactions/{id}/download', [TransactionHistoryController::class, 'apiDownloadTransactionPdf']);
+
     // api routes for beneficias details
     Route::get('/beneficias', [AddBeneficiariesController::class, 'index']);
     Route::post('/add-baneficia', [AddBeneficiariesController::class, 'store']);
@@ -604,6 +606,8 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
         Route::get('/personal-transactions', [PersonalTransactionHistoryController::class, 'personalTransactions']);
         Route::get('/personal-transactions/{status}', [PersonalTransactionHistoryController::class, 'filterPersonalTransactions']);
         Route::get('/personal-personalTransactions', [PersonalTransactionHistoryController::class, 'showAllTransactions']);
+        Route::get('/personal-transactions/{id}/download', [PersonalTransactionHistoryController::class, 'apiDownloadTransactionPdf']);
+
 
 
         Route::get('/personal-notifications', [NotificationController::class, 'index']);

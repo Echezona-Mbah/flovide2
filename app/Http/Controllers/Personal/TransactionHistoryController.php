@@ -4,10 +4,16 @@ namespace App\Http\Controllers\Personal;
 
 use App\Http\Controllers\Controller;
 use App\Models\TransactionHistory;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Traits\GeneratesTransactionReceipt;
+
 
 class TransactionHistoryController extends Controller
 {
+
+    use GeneratesTransactionReceipt;
+
    public function personalTransactions(Request $request)
 {
     $personalId = auth('personal-api')->id();
@@ -110,6 +116,86 @@ public function showAllTransactions(Request $request)
         'code' => 'PERSONAL_TRANSACTIONS_FETCHED',
         'data' => $transactions
     ], 200);
+}
+
+
+private function formatTransactionReceiptData(TransactionHistory $transaction): array
+{
+    return [
+        'title' => 'Transfer Confirmation',
+        'date' => optional($transaction->created_at)->format('d M Y'),
+        'status' => ucfirst($transaction->status ?? 'Completed'),
+        'amount' => trim(($transaction->currency_symbol ?? '') . number_format((float) $transaction->recipient_amount, 2)),
+        'transaction_id' => $transaction->id,
+        'payment_reference' => $transaction->reference,
+        'reference' => $transaction->sender ?: ($transaction->method ?: 'Transfer'),
+        'bank_name' => $transaction->recipient_bank_name ?? 'N/A',
+        'account_name' => $transaction->recipient_account_name ?? 'N/A',
+        'account_number' => $transaction->recipient_account_number ?? 'N/A',
+        'brand_name' => config('app.name', 'OhentPay'),
+    ];
+}
+
+    public function downloadReceipt(Request $request, $id)
+    {
+        $personalId = auth('personal-api')->id();
+
+        $tx = TransactionHistory::where('id', $id)->where('personal_id', $personalId)->first();
+
+        if (!$tx) {
+            return response()->json(['success' => false, 'message' => 'Transaction not found.', 'code' => 'TRANSACTION_NOT_FOUND', 'data' => null], 404);
+        }
+
+        return $this->receiptResponse($tx);
+    }
+
+public function apiDownloadTransactionPdf(Request $request, $id)
+{
+    $personal = auth('personal-api')->user();
+
+    if (! $personal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+            'code' => 'UNAUTHORIZED',
+            'data' => null,
+        ], 401);
+    }
+
+    $transaction = TransactionHistory::where('personal_id', $personal->id)
+        ->where('id', $id)
+        ->first();
+
+    if (! $transaction) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction not found.',
+            'code' => 'TRANSACTION_NOT_FOUND',
+            'data' => null,
+        ], 404);
+    }
+
+    $data = $this->formatTransactionReceiptData($transaction);
+
+    $pdf = Pdf::loadView('pdf.transfer-confirmation', $data)
+        ->setPaper('a4', 'portrait');
+
+    $filename = 'transfer-confirmation-' . $transaction->reference . '.pdf';
+
+    if ($request->boolean('base64')) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction PDF generated successfully.',
+            'code' => 'TRANSACTION_PDF_GENERATED',
+            'data' => [
+                'filename' => $filename,
+                'mime_type' => 'application/pdf',
+                'base64' => base64_encode($pdf->output()),
+            ],
+        ], 200);
+    }
+
+    return $pdf->download($filename);
 }
 
 

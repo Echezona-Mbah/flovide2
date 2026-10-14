@@ -9,11 +9,16 @@ use App\Models\TransactionHistory;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\ValidAmountBasedOnType;
 use App\Rules\ValidTransactionReference;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Traits\GeneratesTransactionReceipt;
+
 
 // use Carbon\Carbon;
 
 class TransactionHistoryController extends Controller
 {
+
+    use GeneratesTransactionReceipt;
 
     public function __construct()
     {
@@ -293,5 +298,97 @@ public function storeTransaction(Request $request)
             'data'    => $transaction
         ], 201);
     }
+
+
+
+
+
+
+    private function getBusinessOwnerId()
+{
+    $user = auth()->user();
+    $team = TeamMembers::where('user_id', $user->id)->first();
+
+    return $team ? $team->owner_id : $user->id;
+}
+
+private function formatTransactionReceiptData(TransactionHistory $transaction): array
+{
+    return [
+        'title' => 'Transfer Confirmation',
+        'date' => optional($transaction->created_at)->format('d M Y'),
+        'status' => ucfirst($transaction->status ?? 'Completed'),
+        'amount' => trim(($transaction->currency_symbol ?? '') . number_format((float) $transaction->recipient_amount, 2)),
+        'transaction_id' => $transaction->id,
+        'payment_reference' => $transaction->reference,
+        'reference' => $transaction->sender ?: ($transaction->method ?: 'Transfer'),
+        'bank_name' => $transaction->recipient_bank_name ?? 'N/A',
+        'account_name' => $transaction->recipient_account_name ?? 'N/A',
+        'account_number' => $transaction->recipient_account_number ?? 'N/A',
+        'brand_name' => config('app.name', 'Flovide'),
+    ];
+}
+
+   public function downloadTransactionPdf(Request $request, $id)
+    {
+        $user    = auth()->user();
+        $team    = TeamMembers::where('user_id', $user->id)->first();
+        $ownerId = $team ? $team->owner_id : $user->id;
+
+        $tx = TransactionHistory::where('id', $id)->where('user_id', $ownerId)->first();
+
+        if (!$tx) {
+            return $request->wantsJson()
+                ? response()->json(['success' => false, 'message' => 'Transaction not found.', 'code' => 'TRANSACTION_NOT_FOUND', 'data' => null], 404)
+                : abort(404);
+        }
+
+        return $this->receiptResponse($tx);
+    }
+
+public function apiDownloadTransactionPdf(Request $request, $id)
+{
+    $ownerId = $this->getBusinessOwnerId();
+    $mode = session('mode', 'live');
+
+    $transaction = TransactionHistory::where('user_id', $ownerId)
+        ->where('mode', $mode)
+        ->where('id', $id)
+        ->first();
+
+    if (! $transaction) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Transaction not found.',
+            'code' => 'TRANSACTION_NOT_FOUND',
+            'data' => null,
+        ], 404);
+    }
+
+    $data = $this->formatTransactionReceiptData($transaction);
+
+    $pdf = Pdf::loadView('pdf.transfer-confirmation', $data)
+        ->setPaper('a4', 'portrait');
+
+    $filename = 'transfer-confirmation-' . $transaction->reference . '.pdf';
+
+    if ($request->boolean('base64')) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction PDF generated successfully.',
+            'code' => 'TRANSACTION_PDF_GENERATED',
+            'data' => [
+                'filename' => $filename,
+                'mime_type' => 'application/pdf',
+                'base64' => base64_encode($pdf->output()),
+            ],
+        ], 200);
+    }
+
+    return $pdf->download($filename);
+}
+
+
+
 
 }
