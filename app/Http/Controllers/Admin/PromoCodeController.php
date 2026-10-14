@@ -82,6 +82,49 @@ class PromoCodeController extends Controller
         return back()->with('success', "Promo code {$code} generated for {$ownerModel->email}.");
     }
 
+    public function storeCustom(Request $request)
+    {
+        $request->validate([
+            'promo_code'   => 'required|string|min:3|max:32|regex:/^[A-Z0-9_\-]+$/|unique:promo_codes,code',
+            'owner_type'   => 'required|in:business,personal',
+            'owner_email'  => 'required|email',
+            'reward_type'  => 'required|in:percent,fixed',
+            'reward_value' => 'required|numeric|min:0',
+            'status'       => 'required|in:active,inactive',
+        ], [
+            'promo_code.unique' => 'That promo code already exists. Please choose a different one.',
+            'promo_code.regex'  => 'The promo code may only contain uppercase letters, numbers, hyphens, and underscores.',
+        ]);
+
+        if ($request->reward_type === 'percent' && $request->reward_value > 100) {
+            return back()->withErrors(['reward_value' => 'Percentage reward cannot exceed 100.'])->withInput();
+        }
+
+        $ownerModel = $request->owner_type === 'business'
+            ? User::where('email', $request->owner_email)->where('typeofuser', 'business')->first()
+            : Personal::where('email', $request->owner_email)->first();
+
+        if (!$ownerModel) {
+            return back()
+                ->withErrors(['owner_email' => 'No matching ' . $request->owner_type . ' account found with that email.'])
+                ->withInput();
+        }
+
+        $code = strtoupper(trim($request->promo_code));
+
+        PromoCode::create([
+            'code' => $code,
+            'owner_type' => $request->owner_type,
+            'owner_id' => $ownerModel->id,
+            'reward_type' => $request->reward_type,
+            'reward_value' => $request->reward_value,
+            'status' => $request->status,
+            'created_by_admin_id' => Auth::guard('admin')->id(),
+        ]);
+
+        return back()->with('success', "Custom promo code {$code} created for {$ownerModel->email}.");
+    }
+
     public function toggleStatus($id)
     {
         $promo = PromoCode::findOrFail($id);
@@ -98,40 +141,38 @@ class PromoCodeController extends Controller
     }
 
     public function generateForOwner(Request $request, string $ownerType, $ownerId)
-{
-    $request->validate([
-        'reward_type'  => 'required|in:percent,fixed',
-        'reward_value' => 'required|numeric|min:0',
-    ]);
+    {
+        $request->validate([
+            'reward_type'  => 'required|in:percent,fixed',
+            'reward_value' => 'required|numeric|min:0',
+        ]);
 
-    if ($request->reward_type === 'percent' && $request->reward_value > 100) {
-        return back()->withErrors(['reward_value' => 'Percentage reward cannot exceed 100.']);
+        if ($request->reward_type === 'percent' && $request->reward_value > 100) {
+            return back()->withErrors(['reward_value' => 'Percentage reward cannot exceed 100.']);
+        }
+
+        $ownerModel = $ownerType === 'business'
+            ? User::find($ownerId)
+            : Personal::find($ownerId);
+
+        if (!$ownerModel) {
+            return back()->with('error', 'Owner account not found.');
+        }
+
+        do {
+            $code = strtoupper(Str::random(8));
+        } while (PromoCode::where('code', $code)->exists());
+
+        PromoCode::create([
+            'code'                => $code,
+            'owner_type'          => $ownerType,
+            'owner_id'            => $ownerModel->id,
+            'reward_type'         => $request->reward_type,
+            'reward_value'        => $request->reward_value,
+            'status'              => 'active',
+            'created_by_admin_id' => Auth::guard('admin')->id(),
+        ]);
+
+        return back()->with('success', "Promo code {$code} generated successfully.");
     }
-
-    $ownerModel = $ownerType === 'business'
-        ? User::find($ownerId)
-        : Personal::find($ownerId);
-
-    if (!$ownerModel) {
-        return back()->with('error', 'Owner account not found.');
-    }
-
-    do {
-        $code = strtoupper(Str::random(8));
-    } while (PromoCode::where('code', $code)->exists());
-
-    PromoCode::create([
-        'code'                => $code,
-        'owner_type'          => $ownerType,
-        'owner_id'            => $ownerModel->id,
-        'reward_type'         => $request->reward_type,
-        'reward_value'        => $request->reward_value,
-        'status'              => 'active',
-        'created_by_admin_id' => Auth::guard('admin')->id(),
-    ]);
-
-    return back()->with('success', "Promo code {$code} generated successfully.");
-}
-
-
 }
