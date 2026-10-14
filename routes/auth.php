@@ -59,6 +59,7 @@ use App\Http\Controllers\Admin\StatementController;
 use App\Http\Controllers\Admin\ProofOfAddressController;
 use App\Http\Controllers\Admin\BankAccountRequestController;
 use App\Http\Controllers\Admin\PromoCodeController;
+use App\Http\Controllers\Admin\knowmeController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\referralLinkController;
@@ -484,6 +485,13 @@ Route::middleware('admin.auth')->group(function () {
 
         //proof of address
         Route::post('/admin/personal-account/proof-of-address', [ProofOfAddressController::class,'update'])->name('admin.personal.proof-of-address.update');
+
+
+        //knowme route
+        Route::get('/admin/employee-management', [knowmeController::class,'index'])->name('admin.employee-management');
+        Route::post('/admin/employee-management', [knowmeController::class,'create'])->name('admin.employees.store');
+        Route::delete('/admin/employee-management/{employee}', [knowmeController::class,'destroy'])->name('admin.employees.destroy');
+
     });
 
 

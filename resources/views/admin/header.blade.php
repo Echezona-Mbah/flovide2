@@ -548,6 +548,9 @@
                                                     <li class="nav-item">
                                                         <a href="{{ route('admin.blog') }}" class="nav-link">Blog Post</a>
                                                     </li>
+                                                    <li class="nav-item">
+                                                        <a href="{{ route('admin.employee-management') }}" class="nav-link">Employee Management</a>
+                                                    </li>
                                                 </ul>
                                             </div>
 

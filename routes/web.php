@@ -16,6 +16,7 @@ use App\Http\Controllers\MainPage\BlogController;
 use App\Http\Controllers\MainPage\personalController;
 use App\Http\Controllers\MainPage\DeveloperController;
 use App\Http\Controllers\MainPage\ContactController;
+use App\Http\Controllers\MainPage\knowmeController;
 use App\Http\Controllers\Pivot\PivotController as PivotPivotController;
 use App\Http\Controllers\PivotController;
 use App\Models\Career;
@@ -67,6 +68,10 @@ Route::get('/privacy-policy', function () {
 Route::get('/terms-condition', function () {
     return view('mainpage.terms-condition');
 })->name('terms-condition');
+
+
+//knowme
+Route::get('/employee/{public_id}', [knowmeController::class, 'index'])->name('employee.verify');
 
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
