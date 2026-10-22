@@ -71,186 +71,197 @@ class ReferenceDataController extends Controller
 }
 
  
-// public function banks(Request $request)
-// {
-//     $countryIso = $request->filled('country_iso') ? strtoupper($request->country_iso) : null;
-//     $currency   = $request->filled('currency') ? strtoupper($request->currency) : null;
-
-//     $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-//     $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-//     $appMobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
-
-//     $providerPriorityByCurrency = [
-//         'UGX' => ['pivot', 'payaza'],
-//         'GHS' => ['app_mobile', 'payaza'],
-//         'NGN' => ['payaza'],
-//         'KES' => ['payaza'],
-//         'XOF' => ['payaza'],
-//         'XAF' => ['payaza'],
-//     ];
-
-//     $enabledMap = [
-//         'pivot'      => $pivotEnabled,
-//         'payaza'     => $payazaEnabled,
-//         'app_mobile' => $appMobileEnabled,
-//     ];
-
-//     $query = Bank::query()
-//         ->when($countryIso, fn ($q) => $q->where('country_iso', $countryIso))
-//         ->when($currency, fn ($q) => $q->where('currency', $currency));
-
-//     if ($request->filled('provider')) {
-//         $provider = strtolower($request->provider);
-
-//         $banks = $query->where('provider', $provider)
-//             ->orderBy('name')
-//             ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
-//             ->map(fn ($b) => [
-//                 'name' => $b->name,
-//                 'country_iso' => $b->country_iso,
-//                 'currency' => $b->currency,
-//                 'bank_code' => $b->bank_code,
-//                 'sort_code' => $b->sort_code,
-//                 'type' => $b->type,
-//             ])
-//             ->values();
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Banks fetched successfully',
-//             'code' => 'BANKS_FETCHED',
-//             'data' => $banks,
-//         ], 200);
-//     }
-
-//     $banks = $query
-//         ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
-//         ->groupBy(fn ($b) => strtoupper($b->currency))
-//         ->flatMap(function ($group, $groupCurrency) use ($providerPriorityByCurrency, $enabledMap) {
-//             $priority = $providerPriorityByCurrency[$groupCurrency] ?? ['payaza', 'pivot', 'app_mobile'];
-
-//             $chosenProvider = collect($priority)->first(function ($provider) use ($group, $enabledMap) {
-//                 return ($enabledMap[$provider] ?? false) && $group->contains('provider', $provider);
-//             });
-
-//             if (!$chosenProvider) {
-//                 return collect();
-//             }
-
-//             return $group
-//                 ->where('provider', $chosenProvider)
-//                 ->unique(fn ($b) => $b->bank_code . '|' . $b->type)
-//                 ->sortBy('name')
-//                 ->values();
-//         })
-//         ->values()
-//         ->map(fn ($b) => [
-//             'name' => $b->name,
-//             'country_iso' => $b->country_iso,
-//             'currency' => $b->currency,
-//             'bank_code' => $b->bank_code,
-//             'sort_code' => $b->sort_code,
-//             'type' => $b->type,
-//         ]);
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Banks fetched successfully',
-//         'code' => 'BANKS_FETCHED',
-//         'data' => $banks->values(),
-//     ], 200);
-// }
 
 
 
+    // public function banks(Request $request)
+    // {
+    //     $user = $this->resolveKeyUser($request);
 
-public function banks(Request $request)
-{
-    $user = $this->resolveKeyUser($request);
+    //     if (! $user) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
 
-    if (! $user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid public key or secret key',
-        ], 401);
-    }
+    //     $webhookSetting = $this->resolveKeyOwner($request);
 
-    $webhookSetting = $this->resolveKeyOwner($request);
+    //     if (! $webhookSetting) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
 
-    if (! $webhookSetting) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid public key or secret key',
-        ], 401);
-    }
+    //     $path      = $request->path();
+    //     $isTestUrl = str_starts_with($path, 'api/test/');
+    //     $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
 
-    $path      = $request->path();
-    $isTestUrl = str_starts_with($path, 'api/test/');
-    $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
+    //     if ($isTestUrl && $keyMode !== 'test') {
+    //         return response()->json([
+    //             'success'  => false,
+    //             'message'  => 'Test API requires test keys',
+    //             'path'     => $path,
+    //             'key_mode' => $keyMode,
+    //         ], 403);
+    //     }
 
-    if ($isTestUrl && $keyMode !== 'test') {
-        return response()->json([
-            'success'  => false,
-            'message'  => 'Test API requires test keys',
-            'path'     => $path,
-            'key_mode' => $keyMode,
-        ], 403);
-    }
+    //     if (! $isTestUrl && $keyMode !== 'live') {
+    //         return response()->json([
+    //             'success'  => false,
+    //             'message'  => 'Live API requires live keys',
+    //             'path'     => $path,
+    //             'key_mode' => $keyMode,
+    //         ], 403);
+    //     }
 
-    if (! $isTestUrl && $keyMode !== 'live') {
-        return response()->json([
-            'success'  => false,
-            'message'  => 'Live API requires live keys',
-            'path'     => $path,
-            'key_mode' => $keyMode,
-        ], 403);
-    }
+    //     $mode = $isTestUrl ? 'test' : 'live';
 
-    $mode = $isTestUrl ? 'test' : 'live';
+    //     // ── Existing logic unchanged below ──
 
-    // ── Existing logic unchanged below ──
+    //     $countryIso = $request->filled('country_iso') ? strtoupper($request->country_iso) : null;
+    //     $currency   = $request->filled('currency') ? strtoupper($request->currency) : null;
 
-    $countryIso = $request->filled('country_iso') ? strtoupper($request->country_iso) : null;
-    $currency   = $request->filled('currency') ? strtoupper($request->currency) : null;
+    //     $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    //     $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
+    //     $appMobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
 
-    $pivotEnabled     = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $payazaEnabled    = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $appMobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+    //     $providerPriorityByCurrency = [
+    //         'UGX' => ['pivot', 'payaza'],
+    //         'GHS' => ['app_mobile', 'payaza'],
+    //         'NGN' => ['payaza'],
+    //         'KES' => ['payaza'],
+    //         'XOF' => ['payaza'],
+    //         'XAF' => ['payaza'],
+    //     ];
 
-    $providerPriorityByCurrency = [
-        'UGX' => ['pivot', 'payaza'],
-        'GHS' => ['app_mobile', 'payaza'],
-        'NGN' => ['payaza'],
-        'KES' => ['payaza'],
-        'XOF' => ['payaza'],
-        'XAF' => ['payaza'],
-    ];
+    //     $enabledMap = [
+    //         'pivot'      => $pivotEnabled,
+    //         'payaza'     => $payazaEnabled,
+    //         'app_mobile' => $appMobileEnabled,
+    //     ];
 
-    $enabledMap = [
-        'pivot'      => $pivotEnabled,
-        'payaza'     => $payazaEnabled,
-        'app_mobile' => $appMobileEnabled,
-    ];
+    //     $query = Bank::query()
+    //         ->when($countryIso, fn ($q) => $q->where('country_iso', $countryIso))
+    //         ->when($currency,   fn ($q) => $q->where('currency', $currency));
 
-    $query = Bank::query()
-        ->when($countryIso, fn ($q) => $q->where('country_iso', $countryIso))
-        ->when($currency,   fn ($q) => $q->where('currency', $currency));
+    //     if ($request->filled('provider')) {
+    //         $provider = strtolower($request->provider);
 
-    if ($request->filled('provider')) {
-        $provider = strtolower($request->provider);
+    //         $banks = $query->where('provider', $provider)
+    //             ->orderBy('name')
+    //             ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
+    //             ->map(fn ($b) => [
+    //                 'name'        => $b->name,
+    //                 'country_iso' => $b->country_iso,
+    //                 'currency'    => $b->currency,
+    //                 'bank_code'   => $b->bank_code,
+    //                 'sort_code'   => $b->sort_code,
+    //                 'type'        => $b->type,
+    //             ])
+    //             ->values();
 
-        $banks = $query->where('provider', $provider)
-            ->orderBy('name')
-            ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
-            ->map(fn ($b) => [
-                'name'        => $b->name,
-                'country_iso' => $b->country_iso,
-                'currency'    => $b->currency,
-                'bank_code'   => $b->bank_code,
-                'sort_code'   => $b->sort_code,
-                'type'        => $b->type,
-            ])
-            ->values();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Banks fetched successfully',
+    //             'code'    => 'BANKS_FETCHED',
+    //             'mode'    => $mode,
+    //             'data'    => $banks,
+    //         ], 200);
+    //     }
+
+    //     $banks = $query
+    //         ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
+    //         ->groupBy(fn ($b) => strtoupper($b->currency))
+    //         ->flatMap(function ($group, $groupCurrency) use ($providerPriorityByCurrency, $enabledMap) {
+    //             $priority = $providerPriorityByCurrency[$groupCurrency] ?? ['payaza', 'pivot', 'app_mobile'];
+
+    //             $chosenProvider = collect($priority)->first(function ($provider) use ($group, $enabledMap) {
+    //                 return ($enabledMap[$provider] ?? false) && $group->contains('provider', $provider);
+    //             });
+
+    //             if (! $chosenProvider) {
+    //                 return collect();
+    //             }
+
+    //             return $group
+    //                 ->where('provider', $chosenProvider)
+    //                 ->unique(fn ($b) => $b->bank_code . '|' . $b->type)
+    //                 ->sortBy('name')
+    //                 ->values();
+    //         })
+    //         ->values()
+    //         ->map(fn ($b) => [
+    //             'name'        => $b->name,
+    //             'country_iso' => $b->country_iso,
+    //             'currency'    => $b->currency,
+    //             'bank_code'   => $b->bank_code,
+    //             'sort_code'   => $b->sort_code,
+    //             'type'        => $b->type,
+    //         ]);
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Banks fetched successfully',
+    //         'code'    => 'BANKS_FETCHED',
+    //         'mode'    => $mode,
+    //         'data'    => $banks->values(),
+    //     ], 200);
+    // }
+
+    public function banks(Request $request)
+    {
+        $user = $this->resolveKeyUser($request);
+
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
+        }
+
+        $webhookSetting = $this->resolveKeyOwner($request);
+
+        if (! $webhookSetting) {
+            return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
+        }
+
+        $path      = $request->path();
+        $isTestUrl = str_starts_with($path, 'api/test/');
+        $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
+
+        if ($isTestUrl && $keyMode !== 'test') {
+            return response()->json(['success' => false, 'message' => 'Test API requires test keys', 'path' => $path, 'key_mode' => $keyMode], 403);
+        }
+
+        if (! $isTestUrl && $keyMode !== 'live') {
+            return response()->json(['success' => false, 'message' => 'Live API requires live keys', 'path' => $path, 'key_mode' => $keyMode], 403);
+        }
+
+        $mode = $isTestUrl ? 'test' : 'live';
+
+        $countryIso = $request->filled('country_iso') ? strtoupper($request->country_iso) : null;
+        $currency   = $request->filled('currency') ? strtoupper($request->currency) : null;
+        $method     = in_array($request->transfer_method, ['bank', 'mobile'], true) ? $request->transfer_method : null;
+
+        $resolver = app(\App\Services\BankCodeResolver::class);
+
+        if ($currency) {
+            $banks = $resolver->publicBanks($currency, $countryIso, $method);
+
+            if ($banks === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No provider is currently available for {$currency}",
+                    'code'    => 'PROVIDER_NOT_AVAILABLE',
+                    'mode'    => $mode,
+                    'data'    => [],
+                ], 422);
+            }
+        } else {
+            // No currency sent: every currency that has a live provider
+            $banks = Bank::query()->distinct()->pluck('currency')->filter()
+                ->flatMap(fn ($c) => $resolver->publicBanks($c, $countryIso, $method) ?? [])
+                ->values()->all();
+        }
 
         return response()->json([
             'success' => true,
@@ -260,45 +271,6 @@ public function banks(Request $request)
             'data'    => $banks,
         ], 200);
     }
-
-    $banks = $query
-        ->get(['id', 'name', 'country_iso', 'currency', 'bank_code', 'sort_code', 'provider', 'type'])
-        ->groupBy(fn ($b) => strtoupper($b->currency))
-        ->flatMap(function ($group, $groupCurrency) use ($providerPriorityByCurrency, $enabledMap) {
-            $priority = $providerPriorityByCurrency[$groupCurrency] ?? ['payaza', 'pivot', 'app_mobile'];
-
-            $chosenProvider = collect($priority)->first(function ($provider) use ($group, $enabledMap) {
-                return ($enabledMap[$provider] ?? false) && $group->contains('provider', $provider);
-            });
-
-            if (! $chosenProvider) {
-                return collect();
-            }
-
-            return $group
-                ->where('provider', $chosenProvider)
-                ->unique(fn ($b) => $b->bank_code . '|' . $b->type)
-                ->sortBy('name')
-                ->values();
-        })
-        ->values()
-        ->map(fn ($b) => [
-            'name'        => $b->name,
-            'country_iso' => $b->country_iso,
-            'currency'    => $b->currency,
-            'bank_code'   => $b->bank_code,
-            'sort_code'   => $b->sort_code,
-            'type'        => $b->type,
-        ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Banks fetched successfully',
-        'code'    => 'BANKS_FETCHED',
-        'mode'    => $mode,
-        'data'    => $banks->values(),
-    ], 200);
-}
 
     private function resolveKeyUser(Request $request): ?User
     {

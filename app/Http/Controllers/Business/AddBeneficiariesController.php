@@ -170,26 +170,50 @@ public function create()
     {
         $currency     = strtoupper($request->currency ?? '');
         $countryInput = strtoupper($request->country ?? '');
-        $provider     = strtolower($request->provider ?? ''); // 👈 GET PROVIDER
+        $allowedProviders     = strtolower($request->provider ?? ''); // 👈 GET PROVIDER
+
+        // $banks = Bank::query()
+
+        //     // Filter by country
+        //     ->when($countryInput, function($q) use ($countryInput) {
+        //         $q->where(function($query) use ($countryInput) {
+        //             $query->where('country_iso', $countryInput)
+        //                 ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput,0,2)])
+        //                 ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput,0,3)]);
+        //         });
+        //     })
+
+        //     // 🔒 FILTER BY PROVIDER IF SENT
+        //     ->when($provider, function($q) use ($provider) {
+        //         $q->where('provider', $provider);
+        //     })
+
+        //     ->orderBy('name')
+        //     ->get(['id','name','bank_code','type','country_iso','provider']);
+
+        // return response()->json($banks);
 
         $banks = Bank::query()
-
-            // Filter by country
-            ->when($countryInput, function($q) use ($countryInput) {
-                $q->where(function($query) use ($countryInput) {
+            ->whereIn('provider', $allowedProviders)
+            ->when($currency, fn ($q) => $q->where('currency', $currency))
+            ->when($countryInput, function ($q) use ($countryInput) {
+                $q->where(function ($query) use ($countryInput) {
                     $query->where('country_iso', $countryInput)
-                        ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput,0,2)])
-                        ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput,0,3)]);
+                        ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput, 0, 2)])
+                        ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput, 0, 3)]);
                 });
             })
-
-            // 🔒 FILTER BY PROVIDER IF SENT
-            ->when($provider, function($q) use ($provider) {
-                $q->where('provider', $provider);
-            })
-
             ->orderBy('name')
-            ->get(['id','name','bank_code','type','country_iso','provider']);
+            ->get(['id', 'name', 'bank_code', 'flovide_code', 'type', 'country_iso', 'provider'])
+            ->map(fn ($b) => [
+                'id'          => $b->id,
+                'name'        => $b->name,
+                'bank_code'   => $b->flovide_code ?? $b->bank_code,   // customers only ever see the Flovide code
+                'type'        => $b->type,
+                'country_iso' => $b->country_iso,
+                'provider'    => $b->provider,
+            ])
+            ->values();
 
         return response()->json($banks);
     }
@@ -216,118 +240,66 @@ public function create()
         ]);
     }
 
-    // public function getBankAPI(Request $request)
-    // {
-    //     $country  = strtoupper($request->input('country'));   
-    //     $currency = strtoupper($request->input('currency'));              
 
-    //     if (!$country || !$currency) {
-    //        return response()->json([
-    //             'success' => false,
-    //             'message' => 'Country and currency are required',
-    //             'code' => 'VALIDATION_ERROR',
-    //             'data' => null
-    //         ], 422);
-
-    //     }
-
-    //     $pivotEnabled   = env('PIVOT_ENABLED', false);
-    //     $payazaEnabled  = env('PAYAZA_ENABLED', false);
-    //     $appMobile      = env('APP_MOBILE', false);
-
-    //     $banksQuery = \App\Models\Bank::where('country_iso', $country)
-    //                     ->where('currency', $currency);
-
-    //     /**
-    //      * 🎯 UGX LOGIC (FIXED)
-    //      */
-    //     if ($currency === 'UGX') {
-    //         if ($pivotEnabled) {
-    //             // ✅ Only Pivot
-    //             $banksQuery->where('provider', 'pivot');
-    //         } else {
-    //             // ✅ Only Payaza
-    //             $banksQuery->where('provider', 'payaza');
-    //         }
-    //     }
-
-    //     /**
-    //      * 🎯 GHS LOGIC
-    //      */
-    //     if ($currency === 'GHS') {
-    //         if ($appMobile) {
-    //             // ❌ Hide Payaza
-    //             $banksQuery->where('provider', '!=', 'payaza');
-    //         } else {
-    //             // ✅ Only Payaza (optional, if you want strict control)
-    //             $banksQuery->where('provider', 'payaza');
-    //         }
-    //     }
-
-    //     /**
-    //      * 🚫 Global Payaza Disable
-    //      */
-    //     if (!$payazaEnabled) {
-    //         $banksQuery->where('provider', '!=', 'payaza');
-    //     }
-
-    //     $banks = $banksQuery->get(['name', 'bank_code', 'sort_code', 'type']);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Banks fetched',
-    //         'code' => 'BANKS_FETCHED',
-    //         'data' => $banks
-    //     ], 200);
-
-    // }
 
     public function getBankAPI(Request $request)
-{
-    $country  = strtoupper((string) $request->input('country'));
-    $currency = strtoupper((string) $request->input('currency'));
+    {
+        $country  = strtoupper((string) $request->input('country'));
+        $currency = strtoupper((string) $request->input('currency'));
 
-    if (!$country || !$currency) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Country and currency are required',
-            'code'    => 'VALIDATION_ERROR',
-            'data'    => null
-        ], 422);
-    }
+        if (!$country || !$currency) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Country and currency are required',
+                'code'    => 'VALIDATION_ERROR',
+                'data'    => null
+            ], 422);
+        }
 
-    // Which provider is ON for this currency right now (admin-controlled, priority-aware)
-    $resolvedProvider = app(ProviderRoutingService::class)->resolveForCurrency($currency);
+        // Which provider is ON for this currency right now (admin-controlled, priority-aware)
+        $resolvedProvider = app(ProviderRoutingService::class)->resolveForCurrency($currency);
 
-    Log::info('[Bank API] Provider resolved', [
-        'country'  => $country,
-        'currency' => $currency,
-        'provider' => $resolvedProvider?->key,
-    ]);
+        Log::info('[Bank API] Provider resolved', [
+            'country'  => $country,
+            'currency' => $currency,
+            'provider' => $resolvedProvider?->key,
+        ]);
 
-    if (!$resolvedProvider) {
-        return response()->json([
-            'success' => false,
-            'message' => "No provider is currently enabled for {$currency}",
-            'code'    => 'PROVIDER_NOT_AVAILABLE',
-            'data'    => []
-        ], 422);
-    }
+        if (!$resolvedProvider) {
+            return response()->json([
+                'success' => false,
+                'message' => "No provider is currently enabled for {$currency}",
+                'code'    => 'PROVIDER_NOT_AVAILABLE',
+                'data'    => []
+            ], 422);
+        }
 
-    // Only the active provider's banks are returned
-    $banks = Bank::where('country_iso', $country)
+        // Only the active provider's banks are returned
+        // $banks = Bank::where('country_iso', $country)
+        //     ->where('currency', $currency)
+        //     ->where('provider', $resolvedProvider->key)
+        //     ->orderBy('name')
+        //     ->get(['name', 'bank_code', 'sort_code', 'type']);
+
+        $banks = Bank::where('country_iso', $country)
         ->where('currency', $currency)
         ->where('provider', $resolvedProvider->key)
         ->orderBy('name')
-        ->get(['name', 'bank_code', 'sort_code', 'type']);
+        ->get(['name', 'bank_code', 'flovide_code', 'sort_code', 'type'])
+        ->map(fn ($b) => [
+            'name'      => $b->flovide_code ? $b->name : $b->name,
+            'bank_code' => $b->flovide_code ?? $b->bank_code,
+            'sort_code' => $b->sort_code,
+            'type'      => $b->type,
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Banks fetched',
-        'code'    => 'BANKS_FETCHED',
-        'data'    => $banks
-    ], 200);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Banks fetched',
+            'code'    => 'BANKS_FETCHED',
+            'data'    => $banks
+        ], 200);
+    }
 
 
 
@@ -590,6 +562,9 @@ public function store(Request $request)
         /* ================= DETERMINE BANK / MOBILE ================= */
         $bankName     = null;
         $mobileNumber = null;
+        $resolver = app(\App\Services\BankCodeResolver::class);
+
+
 
         // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
         if ($currency === 'CAD') {
@@ -600,16 +575,21 @@ public function store(Request $request)
                 'interac_email'      => $bank['interac_email']       ?? null,
             ]);
         } elseif ($method === 'bank') {
-            $bankRow  = Bank::where(function ($q) use ($bank) {
-                $q->where('bank_code', $bank['bankCode'] ?? null)
-                ->orWhere('sort_code', $bank['bankCode'] ?? null);
-            })->first();
+            $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
             $bankName = $bankRow?->name;
 
             Log::info('[Beneficiary Store] Bank lookup', [
                 'bank_code' => $bank['bankCode'] ?? null,
                 'bank_name' => $bankName,
             ]);
+
+            // Don't save a beneficiary with no bank name
+            if (!$bankName) {
+                $msg = 'Unrecognised bank for this currency. Please re-select the bank.';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BANK_CODE_NOT_FOUND', 'data' => null], 422)
+                    : back()->with('error', $msg);
+            }
         } elseif ($method === 'mobile') {
             $mobileNumber = $bank['mobileNumber'] ?? null;
 
@@ -620,7 +600,7 @@ public function store(Request $request)
                 }
             }
 
-            $bankRow  = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+            $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
             $bankName = $bankRow?->name ?? 'mobile';
 
             Log::info('[Beneficiary Store] Mobile lookup', [
@@ -630,7 +610,19 @@ public function store(Request $request)
             ]);
         }
         //   dd( $ohentPayResponse);
+            // print_r($bankName);die();
 
+        $flovideCode = app(\App\Services\BankCodeResolver::class)
+            ->toFlovideCode($currency, (string) ($bank['bankCode'] ?? ''));
+
+        // bank-name lookup (both the 'bank' and 'mobile' branches), now currency-scoped and Flovide-aware
+        $bankRow = Bank::where('currency', $currency)->where(function ($q) use ($bank) {
+            $q->where('flovide_code', $bank['bankCode'] ?? null)
+            ->orWhere('bank_code', $bank['bankCode'] ?? null)
+            ->orWhere('sort_code', $bank['bankCode'] ?? null);
+        })->first();
+
+    
 
         //   dd($bankName);
 
@@ -651,7 +643,8 @@ public function store(Request $request)
                 'phone'                => $mobileNumber,
                 'bank'                 => $bankName,
                 'transfer_method'      => $method,
-                'bank_code'            => $bank['bankCode'] ?? null,
+                'bank_code'         => $bank['bankCode'] ?? null,
+                'flovide_bank_code' => $flovideCode,
                 'provider'             => $provider,
                 'unique_reference'     => strtoupper(\Str::random(7)),
                 'customer_reference'   => strtoupper(\Str::random(7)),

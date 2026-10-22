@@ -16,6 +16,7 @@ class Bank extends Model
         'sort_code',
         'provider',
         'type',
+        'flovide_code'
     ];
     public function user()
     {

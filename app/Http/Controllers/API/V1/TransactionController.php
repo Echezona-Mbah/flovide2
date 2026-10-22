@@ -20,6 +20,8 @@ use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TransactionSentMail;
 use App\Models\ExchangeRate;
+use App\Services\BankCodeResolver;
+use App\Services\ProviderRoutingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -75,57 +77,7 @@ class TransactionController extends Controller
      *     @OA\Response(response=401, description="Invalid public key or secret key")
      * )
      */
-    // public function index(Request $request)
-    // {
-    //     $user = $this->resolveKeyUser($request);
-
-    //     if (! $user) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid public key or secret key',
-    //         ], 401);
-    //     }
-
-    //     $transactions = TransactionHistory::where('user_id', $user->id)
-    //         ->latest()
-    //         ->get();
-
-    //     $data = $transactions->map(function ($tx) {
-    //         return [
-    //             'id' => $tx->id,
-    //             'amount' => $tx->amount !== null ? (float) $tx->amount : 0,
-    //             'fees' => $tx->fees !== null ? (float) $tx->fees : 0,
-    //             'currency' => $tx->currency,
-    //             'to_currency' => $tx->to_currency,
-    //             'balance_id' => $tx->balance_id,
-    //             'status' => $tx->status,
-    //             'transaction_type' => $tx->transaction_type ?? $tx->method,
-    //             'recipient' => [
-    //                 'id' => $tx->recipient_id ?? $tx->beneficias_id,
-    //                 'country' => $tx->recipient_country,
-    //                 // 'default_reference' => $tx->recipient_default_reference,
-    //                 // 'alias' => $tx->recipient_alias,
-    //                 // 'type' => $tx->recipient_type,
-    //                 // 'created' => $tx->recipient_created_at,
-    //                 'bank_account' => [
-    //                     'account_name' => $tx->recipient_account_name,
-    //                     // 'sort_code' => $tx->recipient_sort_code,
-    //                     'account_number' => $tx->recipient_account_number,
-    //                     'bank_name' => $tx->recipient_bank_name,
-    //                     'currency' => $tx->recipient_bank_currency ?? $tx->to_currency,
-    //                 ],
-    //             ],
-    //         ];
-    //     })->values();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Transactions retrieved successfully',
-    //         'data' => $data,
-    //     ], 200);
-    // }
-    
-
+ 
     public function index(Request $request)
 {
     $user = $this->resolveKeyUser($request);
@@ -239,69 +191,6 @@ class TransactionController extends Controller
      *     @OA\Response(response=404, description="Transaction not found")
      * )
      */
-// public function show(Request $request, $id)
-// {
-//     $user = $this->resolveKeyUser($request);
-
-//     if (! $user) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid public key or secret key',
-//         ], 401);
-//     }
-
-//     $transaction = TransactionHistory::where('user_id', $user->id)
-//         ->where('id', $id)
-//         ->first();
-
-//     if (! $transaction) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Transaction not found',
-//         ], 404);
-//     }
-
-//     $data = [
-//         'id' => $transaction->id,
-//         'amount' => $transaction->amount !== null ? (float) $transaction->amount : 0,
-//         'fees' => $transaction->fees !== null ? (float) $transaction->fees : 0,
-//         'currency' => $transaction->currency,
-//         'to_currency' => $transaction->to_currency,
-//         'balance_id' => $transaction->balance_id,
-//         // 'virtual_account_id' => $transaction->virtual_account_id,
-//         // 'order_id' => $transaction->order_id,
-//         'payment_reference' => $transaction->payment_reference,
-//         'status' => $transaction->status,
-//         // 'failure_reason' => $transaction->failure_reason,
-//         'transaction_type' => $transaction->transaction_type ?? $transaction->method,
-//         // 'payment_method' => $transaction->payment_method,
-//         'recipient' => [
-//             'id' => $transaction->recipient_id ?? $transaction->beneficias_id,
-//             'country' => $transaction->recipient_country,
-//             // 'default_reference' => $transaction->recipient_default_reference,
-//             // 'alias' => $transaction->recipient_alias,
-//             // 'type' => $transaction->recipient_type,
-//             'created' => $transaction->recipient_created_at,
-//             'bank_account' => [
-//                 'account_name' => $transaction->recipient_account_name,
-//                 // 'sort_code' => $transaction->recipient_sort_code,
-//                 'account_number' => $transaction->recipient_account_number,
-//                 'bank_name' => $transaction->recipient_bank_name,
-//                 'currency' => $transaction->recipient_bank_currency ?? $transaction->to_currency,
-//             ],
-//         ],
-//     ];
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Transaction retrieved successfully',
-//         'data' => $data,
-//         'method' => $request->method(),
-//         'url' => $request->fullUrl(),
-//     ], 200);
-// }
-
-
 
     public function show(Request $request, $id)
 {
@@ -420,247 +309,7 @@ class TransactionController extends Controller
      */
 
 
-//  public function store(Request $request)
-// {
-//     $isApi = $request->expectsJson();
 
-//     $user = $this->resolveKeyUser($request);
-
-//     if (! $user) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid public key or secret key',
-//         ], 401);
-//     }
-
-//     $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference'];
-//     $extraFields = array_diff(array_keys($request->all()), $allowedFields);
-
-//     if (! empty($extraFields)) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid request fields',
-//             'errors' => [
-//                 'fields' => array_values($extraFields),
-//             ],
-//         ], 422);
-//     }
-
-//     $validator = Validator::make($request->all(), [
-//         'transaction_type' => 'required|in:payment',
-//         'amount' => 'required|numeric|min:1',
-//         'recipient_id' => 'required|uuid',
-//         'balance_id' => 'required|uuid',
-//         'order_id' => 'required|string|max:100',
-//         'reference' => 'nullable|uuid|unique:transactions_history,reference',
-//     ]);
-
-//     if ($validator->fails()) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Validation failed',
-//             'code' => 'VALIDATION_ERROR',
-//             'errors' => $validator->errors(),
-//         ], 422);
-//     }
-
-//     $validated = $validator->validated();
-
-//     $actor = $this->resolveKeyUser($request) ?? auth()->user();
-
-//     if (! $actor) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Unauthorized',
-//             'code' => 'UNAUTHORIZED',
-//             'data' => null,
-//         ], 401);
-//     }
-
-//     [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $actor);
-
-//     if (! $ownerId || ! $owner) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Owner account not found',
-//             'code' => 'OWNER_NOT_FOUND',
-//             'data' => null,
-//         ], 422);
-//     }
-
-//     $recipient = Beneficia::where('user_id', $ownerId)
-//         ->where('recipient_id', $validated['recipient_id'])
-//         ->first();
-
-//     if (! $recipient) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid recipient',
-//             'code' => 'INVALID_RECIPIENT',
-//             'data' => null,
-//         ], 422);
-//     }
-
-//     $balance = Balance::where('id', $validated['balance_id'])
-//         ->where('user_id', $ownerId)
-//         ->first();
-
-//     if (! $balance) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Invalid balance',
-//             'code' => 'INVALID_BALANCE',
-//             'data' => null,
-//         ], 422);
-//     }
-
-//     $sendingCurrency = strtoupper($balance->currency);
-//     $currency = strtoupper($recipient->currency);
-
-//     $rate = ExchangeRate::whereHas('fromCurrency', function ($q) use ($sendingCurrency) {
-//             $q->where('code', $sendingCurrency);
-//         })
-//         ->whereHas('toCurrency', function ($q) use ($currency) {
-//             $q->where('code', $currency);
-//         })
-//         ->first();
-
-//     if (! $rate) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => "Rate not found for {$sendingCurrency} to {$currency}",
-//             'code' => 'RATE_NOT_FOUND',
-//             'data' => null,
-//         ], 400);
-//     }
-
-//     $transferFee = (float) ($rate->transfer_fee ?? 0);
-//     $totalAmount = (float) $validated['amount'] + $transferFee;
-//     $recipientAmount = round((float) $validated['amount'] * (float) $rate->rate, 2);
-
-//       //   dd($recipientAmount);
-
-
-
-
-
-//     if ($balance->amount < $totalAmount) {
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Insufficient funds',
-//             'code' => 'INSUFFICIENT_FUNDS',
-//             'data' => null,
-//         ], 422);
-//     }
-
-//     $limit = Currency::where('code', $sendingCurrency)
-//         ->where('is_active', true)
-//         ->first();
-
-//     if ($limit) {
-//         if (! is_null($limit->min_amount) && $validated['amount'] < $limit->min_amount) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => "Minimum transfer for {$sendingCurrency} is {$limit->min_amount}",
-//                 'code' => 'AMOUNT_BELOW_MINIMUM',
-//                 'data' => null,
-//             ], 422);
-//         }
-
-//         if (! is_null($limit->max_amount) && $validated['amount'] > $limit->max_amount) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => "Maximum transfer for {$sendingCurrency} is {$limit->max_amount}",
-//                 'code' => 'AMOUNT_ABOVE_MAXIMUM',
-//                 'data' => null,
-//             ], 422);
-//         }
-//     }
-
-//     $exchangeRateText = sprintf(
-//         "%s 1.00 = %s %s",
-//         $sendingCurrency,
-//         $currency,
-//         number_format((float) $rate->rate, 6, '.', '')
-//     );
-
-//     $request->merge([
-//         'balance_id' => $balance->id,
-//         'transfer_fee' => $transferFee,
-//         'total_amount' => $totalAmount,
-//         'recipient_amount' => $recipientAmount,
-//         'exchange_rate' => $exchangeRateText,
-//         'exchange_rate_value' => (float) $rate->rate,
-//         'account_number' => $recipient->account_number ?? $recipient->phone,
-//         'account_name' => $recipient->account_name,
-//         'bank' => $recipient->bank,
-//         'bank_code' => $recipient->bank_code,
-//         'transfer_method' => $recipient->transfer_method,
-//     ]);
-
-//     DB::beginTransaction();
-
-//     try {
-//         $balance->amount -= $totalAmount;
-//         $balance->save();
-
-//         $tx = TransactionHistory::create([
-//             'amount' => $validated['amount'],
-//             'total_amount' => $totalAmount,
-//             'currency' => $sendingCurrency,
-//             'balance_id' => $balance->id,
-//             'status' => 'pending',
-//             'method' => 'withdrawal',
-//             'payment_provider' => 'wallect',
-//             'order_id' => $validated['order_id'],
-//             'reference' => $validated['reference'] ?? 'ref-' . Str::uuid(),
-//             'user_id' => $ownerId,
-//             'created_by_member_id' => $memberId,
-//             'sender_id' => $ownerId,
-//             'sender' => $actor->business_name ?? $actor->name,
-//             'recipient_account_number' => $request->account_number,
-//             'recipient_account_name' => $request->account_name,
-//             'recipient_id' => $validated['recipient_id'],
-//             'bank_code' => $request->bank_code,
-//             'recipient_country' => strtoupper(substr($currency, 0, 2)),
-//             'recipient_bank_currency' => $currency,
-//             'to_currency' => $currency,
-//             'fees' => $transferFee,
-//             'exchange_rate' => (float) $rate->rate,
-//             'recipient_amount' => $recipientAmount,
-//         ]);
-
-//         if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-//             $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-//         } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-//             $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-//         } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-//             $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner);
-//         } else {
-//             DB::rollBack();
-
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'No provider',
-//                 'code' => 'PROVIDER_NOT_AVAILABLE',
-//                 'data' => null,
-//             ], 422);
-//         }
-
-//         DB::commit();
-
-//         return $response;
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Transaction failed',
-//             'code' => 'TXN_FAILED',
-//             'data' => $e->getMessage(),
-//         ], 500);
-//     }
-// }
 
 public function store(Request $request)
 {
@@ -708,6 +357,8 @@ public function store(Request $request)
     }
 
     $mode = $isTestUrl ? 'test' : 'live';
+        $txMode = $mode ?? (str_starts_with($request->path(), 'api/test/') ? 'test' : 'live');
+
     // ── End gate ──
 
     $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference'];
@@ -763,17 +414,18 @@ public function store(Request $request)
         ], 422);
     }
 
-    $recipient = Beneficia::where('user_id', $ownerId)
-        ->where('recipient_id', $validated['recipient_id'])
+    $recipient = Beneficia::where('recipient_id', $request->recipient_id)
+        ->where('user_id', $ownerId)
         ->first();
 
     if (! $recipient) {
         return response()->json([
             'success' => false,
-            'message' => 'Invalid recipient',
-            'code'    => 'INVALID_RECIPIENT',
+            'message' => 'Recipient not found',
+            'code'    => 'RECIPIENT_NOT_FOUND',
+            'mode'    => $txMode,
             'data'    => null,
-        ], 422);
+        ], 404);
     }
 
     $balance = Balance::where('id', $validated['balance_id'])
@@ -788,6 +440,8 @@ public function store(Request $request)
             'data'    => null,
         ], 422);
     }
+
+
 
     $sendingCurrency = strtoupper($balance->currency);
     $currency        = strtoupper($recipient->currency);
@@ -864,6 +518,38 @@ public function store(Request $request)
         number_format((float) $rate->rate, 6, '.', '')
     );
 
+    $resolvedProvider = app(ProviderRoutingService::class)
+        ->resolveForCurrency($currency, $request->transfer_method ?: $recipient->transfer_method);
+
+    if (! $resolvedProvider) {
+        return response()->json([
+            'success' => false,
+            'message' => "No provider available for {$currency}",
+            'code'    => 'PROVIDER_NOT_AVAILABLE',
+            'mode'    => $txMode,
+            'data'    => null,
+        ], 422);
+    }
+
+    $resolver    = app(BankCodeResolver::class);
+    $codeWeHold  = $recipient->flovide_bank_code ?: (string) $recipient->bank_code;
+    $providerRow = $resolver->forProvider($resolvedProvider->key, $currency, $codeWeHold, $recipient->provider);
+
+    if (! $providerRow && $resolver->isLinked($currency)) {
+        return response()->json([
+            'success' => false,
+            'message' => "This recipient's bank is not currently supported for {$currency}.",
+            'code'    => 'BANK_NOT_SUPPORTED',
+            'mode'    => $txMode,
+            'data'    => null,
+        ], 422);
+    }
+
+    $providerBankCode = $providerRow
+        ? ($resolvedProvider->key === 'pivot' ? ($providerRow->sort_code ?: $providerRow->bank_code) : $providerRow->bank_code)
+        : $recipient->bank_code;   // currency not linked to Flovide codes yet: behaves as before
+
+
     $request->merge([
         'balance_id'          => $balance->id,
         'transfer_fee'        => $transferFee,
@@ -873,8 +559,8 @@ public function store(Request $request)
         'exchange_rate_value' => (float) $rate->rate,
         'account_number'      => $recipient->account_number ?? $recipient->phone,
         'account_name'        => $recipient->account_name,
-        'bank'                => $recipient->bank,
-        'bank_code'           => $recipient->bank_code,
+         'bank_code' => $providerBankCode,
+        'bank'      => $recipient->bank,
         'transfer_method'     => $recipient->transfer_method,
         'mode'                => $mode,
 

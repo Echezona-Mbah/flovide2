@@ -14,8 +14,10 @@ use App\Services\PivotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Services\BankCodeResolver;
+use App\Services\OhentPayService;
+use App\Services\ProviderRoutingService;
 use Illuminate\Support\Facades\Log;
-
 
 class BeneficiaryController extends Controller
 {
@@ -225,6 +227,10 @@ class BeneficiaryController extends Controller
      *     )
      * )
      */
+
+
+  
+
     // public function accountInquiry(Request $request)
     // {
     //     $user = $this->resolveKeyUser($request);
@@ -236,6 +242,39 @@ class BeneficiaryController extends Controller
     //         ], 401);
     //     }
 
+    //     $webhookSetting = $this->resolveKeyOwner($request);
+
+    //     if (! $webhookSetting) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid public key or secret key',
+    //         ], 401);
+    //     }
+
+    //     $path = $request->path();
+    //     $isTestUrl = str_starts_with($path, 'api/test/');
+    //     $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+
+    //     if ($isTestUrl && $keyMode !== 'test') {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Test API requires test keys',
+    //             'path' => $path,
+    //             'key_mode' => $keyMode,
+    //         ], 403);
+    //     }
+
+    //     if (! $isTestUrl && $keyMode !== 'live') {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Live API requires live keys',
+    //             'path' => $path,
+    //             'key_mode' => $keyMode,
+    //         ], 403);
+    //     }
+
+    //     $mode = $isTestUrl ? 'test' : 'live';
+
     //     $request->validate([
     //         'currency' => 'required|string|size:3',
     //         'bank_code' => 'required|string',
@@ -244,6 +283,29 @@ class BeneficiaryController extends Controller
 
     //     $currency = strtoupper($request->currency);
     //     $bankCode = strtoupper($request->bank_code);
+
+    //     /*
+    //     * Test mode: do not call Payaza/Pivot/Orchard.
+    //     */
+    //     if ($mode === 'test') {
+    //         return response()->json([
+    //             'success' => true,
+    //             'mode' => 'test',
+    //             'accountName' => 'TEST ACCOUNT NAME',
+    //             'data' => [
+    //                 'response_code' => 200,
+    //                 'response_message' => 'Approved or completely successful',
+    //                 'response_content' => [
+    //                     'account_number' => $request->account_number,
+    //                     'bank_code' => $request->bank_code,
+    //                     'account_name' => 'TEST ACCOUNT NAME',
+    //                     'account_status' => 'ACTIVE',
+    //                     'currency' => $currency,
+    //                     'transaction_reference' => 'TEST_' . strtoupper(uniqid()),
+    //                 ],
+    //             ],
+    //         ], 200);
+    //     }
 
     //     if ($currency === 'UGX' && env('PIVOT_ENABLED', false)) {
     //         $auth = $this->pivot->authenticate();
@@ -266,7 +328,7 @@ class BeneficiaryController extends Controller
     //             ];
     //         } else {
     //             $payload = [
-    //                 'serviceCode' => env('PIVOT_UGX_BANK_SERVICE'),
+    //                 'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
     //                 'accountNumber' => $request->account_number,
     //                 'msisdn' => $request->account_number,
     //                 'extraData' => [
@@ -280,7 +342,7 @@ class BeneficiaryController extends Controller
 
     //         return response()->json([
     //             'success' => true,
-    //             // 'provider' => 'pivot',
+    //             'mode' => 'live',
     //             'accountName' => $response['customerNames'] ?? null,
     //             'data' => $response,
     //         ]);
@@ -301,7 +363,7 @@ class BeneficiaryController extends Controller
 
     //         return response()->json([
     //             'success' => true,
-    //             // 'provider' => 'appmobile',
+    //             'mode' => 'live',
     //             'data' => $response,
     //         ]);
     //     }
@@ -317,7 +379,7 @@ class BeneficiaryController extends Controller
 
     //         return response()->json([
     //             'success' => true,
-    //             // 'provider' => 'payaza',
+    //             'mode' => 'live',
     //             'data' => $response,
     //         ]);
     //     }
@@ -325,173 +387,255 @@ class BeneficiaryController extends Controller
     //     return response()->json([
     //         'success' => false,
     //         'message' => 'No provider available for this currency.',
+    //         'mode' => 'live',
     //         'currency' => $currency,
     //     ], 422);
     // }
-
 
     public function accountInquiry(Request $request)
     {
         $user = $this->resolveKeyUser($request);
 
         if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
+            return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
         }
 
         $webhookSetting = $this->resolveKeyOwner($request);
 
         if (! $webhookSetting) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid public key or secret key',
-            ], 401);
+            return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
         }
 
-        $path = $request->path();
+        $path      = $request->path();
         $isTestUrl = str_starts_with($path, 'api/test/');
-        $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+        $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
 
         if ($isTestUrl && $keyMode !== 'test') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Test API requires test keys',
-                'path' => $path,
-                'key_mode' => $keyMode,
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Test API requires test keys', 'path' => $path, 'key_mode' => $keyMode], 403);
         }
 
         if (! $isTestUrl && $keyMode !== 'live') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Live API requires live keys',
-                'path' => $path,
-                'key_mode' => $keyMode,
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Live API requires live keys', 'path' => $path, 'key_mode' => $keyMode], 403);
         }
 
         $mode = $isTestUrl ? 'test' : 'live';
 
-        $request->validate([
-            'currency' => 'required|string|size:3',
-            'bank_code' => 'required|string',
-            'account_number' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'currency'        => 'required|string|size:3',
+            'bank_code'       => 'required|string',
+            'account_number'  => 'required|string',
+            'transfer_method' => 'nullable|in:bank,mobile',
         ]);
 
-        $currency = strtoupper($request->currency);
-        $bankCode = strtoupper($request->bank_code);
 
-        /*
-        * Test mode: do not call Payaza/Pivot/Orchard.
-        */
-        if ($mode === 'test') {
+        if ($validator->fails()) {
             return response()->json([
-                'success' => true,
-                'mode' => 'test',
-                'accountName' => 'TEST ACCOUNT NAME',
-                'data' => [
-                    'response_code' => 200,
-                    'response_message' => 'Approved or completely successful',
-                    'response_content' => [
-                        'account_number' => $request->account_number,
-                        'bank_code' => $request->bank_code,
-                        'account_name' => 'TEST ACCOUNT NAME',
-                        'account_status' => 'ACTIVE',
-                        'currency' => $currency,
-                        'transaction_reference' => 'TEST_' . strtoupper(uniqid()),
-                    ],
-                ],
-            ], 200);
+                'success' => false,
+                'message' => 'Validation error',
+                'code'    => 'VALIDATION_ERROR',
+                'mode'    => $mode,
+                'data'    => $validator->errors(),
+            ], 422);
         }
 
-        if ($currency === 'UGX' && env('PIVOT_ENABLED', false)) {
-            $auth = $this->pivot->authenticate();
+        $r = $this->lookupAccount(
+            $request->currency,
+            $request->bank_code,
+            $request->account_number,
+            $request->transfer_method
+        );
 
-            if (isset($auth['error'])) {
-                return response()->json($auth, 500);
-            }
-
-            $token = $auth['tokenResponse']['accessToken'];
-            $mobileCodes = ['MTN', 'AIRTEL'];
-
-            if (in_array($bankCode, $mobileCodes, true)) {
-                $payload = [
-                    'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE'),
-                    'accountNumber' => $request->account_number,
-                    'msisdn' => $request->account_number,
-                    'extraData' => [
-                        'amount' => '0',
-                    ],
-                ];
-            } else {
-                $payload = [
-                    'serviceCode' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
-                    'accountNumber' => $request->account_number,
-                    'msisdn' => $request->account_number,
-                    'extraData' => [
-                        'bankSortCode' => $request->bank_code,
-                        'amount' => '0',
-                    ],
-                ];
-            }
-
-            $response = $this->pivot->accountValidation($token, $payload);
-
-            return response()->json([
-                'success' => true,
-                'mode' => 'live',
-                'accountName' => $response['customerNames'] ?? null,
-                'data' => $response,
-            ]);
-        }
-
-        if ($currency === 'GHS' && env('APP_MOBILE', false)) {
-            $payload = [
-                'customer_number' => $request->account_number,
-                'exttrid' => uniqid('APPM_'),
-                'service_id' => env('ORCHARD_SERVICE_ID'),
-                'nw' => 'BNK',
-                'bank_code' => $request->bank_code,
-                'trans_type' => 'AII',
-                'ts' => now()->utc()->format('Y-m-d H:i:s'),
-            ];
-
-            $response = $this->orchard->accountInquiry($payload);
-
-            return response()->json([
-                'success' => true,
-                'mode' => 'live',
-                'data' => $response,
-            ]);
-        }
-
-        $payazaCurrencies = ['UGX', 'NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
-
-        if (in_array($currency, $payazaCurrencies, true) && env('PAYAZA_ENABLED', false)) {
-            $response = $this->payaza->accountEnquiry(
-                $currency,
-                $request->bank_code,
-                $request->account_number
-            );
-
-            return response()->json([
-                'success' => true,
-                'mode' => 'live',
-                'data' => $response,
-            ]);
-        }
-
+        if (! $r['success']) {
         return response()->json([
             'success' => false,
-            'message' => 'No provider available for this currency.',
-            'mode' => 'live',
-            'currency' => $currency,
-        ], 422);
+            'message' => $r['message'],
+            'code'    => $r['code'],
+            'mode'    => $mode,
+            'data'    => null,
+        ], $r['http'] ?? 422);
+    }
+
+    return response()->json([
+        'success'  => true,
+        'provider' => $r['provider'],
+        'data'     => $r['payload'],
+    ], 200);
     }
 
 
+
+   private function lookupAccount(string $currency, string $flovideCode, string $accountNumber, ?string $method = null): array
+{
+    $currency = strtoupper($currency);
+    $provider = app(ProviderRoutingService::class)->resolveForCurrency($currency, $method);
+
+    if (!$provider) {
+        return $this->inquiryFail('PROVIDER_NOT_AVAILABLE', 'No provider available for this currency.');
+    }
+
+    // Flovide code -> the live provider's own code
+    $resolver = app(BankCodeResolver::class);
+    $row      = $resolver->forProvider($provider->key, $currency, $flovideCode);
+
+
+    if (!$row && $resolver->isLinked($currency)) {
+        return $this->inquiryFail('BANK_NOT_SUPPORTED', "This bank is not supported by the current provider for {$currency}.");
+    }
+
+    $code = $row?->bank_code ?? $flovideCode;
+    $sort = $row?->sort_code ?: $code;
+
+    switch ($provider->key) {
+
+        case 'ohentpay':
+            if (!$row?->provider_bank_id) {
+                return $this->inquiryFail('BANK_CODE_NOT_FOUND', 'Unrecognised bank code for this currency.');
+            }
+
+            $res = app(OhentPayService::class)->validateRecipient([
+                'country'        => $row->country_iso,
+                'currency'       => $currency,
+                'bank_id'        => $row->provider_bank_id,
+                'account_number' => $accountNumber,
+            ]);
+
+            Log::info('[API AccountInquiry] OhentPay response', ['response' => $res]);
+
+            $name = data_get($res, 'data.account_name') ?? data_get($res, 'data.bank_account.account_name');
+
+            return ($res['success'] ?? false) && $name
+                ? $this->inquiryOk('ohentpay', $name, $accountNumber, $flovideCode)
+                : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
+
+        case 'pivot':
+            $pivot = app(PivotService::class);
+            $auth  = $pivot->authenticate();
+
+            if (isset($auth['error']) || !isset($auth['tokenResponse']['accessToken'])) {
+                Log::error('[API AccountInquiry] Pivot auth failed', ['auth' => $auth]);
+                return $this->inquiryFail('PROVIDER_UNAVAILABLE', 'Account validation is temporarily unavailable.', 502);
+            }
+
+            $payload = in_array(strtoupper($code), ['MTN', 'AIRTEL'], true)
+                ? [
+                    'serviceCode'   => config('services.pivot.ugx_mobile_service_validation'),
+                    'accountNumber' => $accountNumber,
+                    'msisdn'        => $accountNumber,
+                    'extraData'     => ['amount' => '0'],
+                ]
+                : [
+                    'serviceCode'   => config('services.pivot.ugx_bank_service'),
+                    'accountNumber' => $accountNumber,
+                    'msisdn'        => $accountNumber,
+                    'extraData'     => ['bankSortCode' => $sort, 'amount' => '0'],
+                ];
+
+            $res  = $pivot->accountValidation($auth['tokenResponse']['accessToken'], $payload);
+            $name = $res['customerNames'] ?? null;
+
+            return $name
+                ? $this->inquiryOk('pivot', $name, $accountNumber, $flovideCode)
+                : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
+
+        case 'app_mobile':
+            $res = app(OrchardService::class)->accountInquiry([
+                'customer_number' => $accountNumber,
+                'exttrid'         => uniqid('APPM_'),
+                'service_id'      => env('ORCHARD_SERVICE_ID'),
+                'nw'              => 'BNK',
+                'bank_code'       => $code,
+                'trans_type'      => 'AII',
+                'ts'              => now()->utc()->format('Y-m-d H:i:s'),
+            ]);
+
+            $name = data_get($res, 'data.name') ?? data_get($res, 'data.response_content.account_name');
+
+            return ($res['success'] ?? false) && $name
+                ? $this->inquiryOk('app_mobile', $name, $accountNumber, $flovideCode)
+                : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
+
+        case 'payaza':
+            $res = app(PayazaService::class)->accountEnquiry($currency, $code, $accountNumber);
+                    dd($res);
+
+
+            Log::info('[API AccountInquiry] Payaza response', ['response' => $res]);
+
+            $name = $this->extractAccountName($res);
+
+            // Payaza's own response is passed through untouched, which is the shape customers already get
+            return $name
+                ? $this->inquiryOk('payaza', $name, $accountNumber, $flovideCode, $res)
+                : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
+    }
+
+    return $this->inquiryFail('PROVIDER_NOT_IMPLEMENTED', 'Validation is not available for this currency.');
+}
+
+/**
+ * Every provider ends up in the same envelope Payaza returns:
+ * data.success / data.data.response_code / response_message / response_content{...}
+ */
+private function inquiryOk(string $provider, string $name, string $accountNumber, string $flovideCode, ?array $raw = null): array
+{
+    if ($raw !== null) {
+        $payload = $raw;
+
+        // The customer always sees the bank_code they sent, never the provider's own code
+        if (data_get($payload, 'data.response_content.bank_code') !== null) {
+            data_set($payload, 'data.response_content.bank_code', $flovideCode);
+        }
+    } else {
+        $payload = [
+            'success' => true,
+            'data'    => [
+                'response_code'    => 200,
+                'response_message' => 'Account validated successfully',
+                'response_content' => [
+                    'account_number'        => $accountNumber,
+                    'bank_code'             => $flovideCode,
+                    'account_name'          => $name,
+                    'account_status'        => null,   // only Payaza reports this
+                    'transaction_reference' => null,   // only Payaza reports this
+                ],
+            ],
+        ];
+    }
+
+    return [
+        'success'      => true,
+        'provider'     => $provider,
+        'account_name' => $name,
+        'payload'      => $payload,
+        'code'         => 'ACCOUNT_INQUIRY_SUCCESS',
+        'message'      => 'Account inquiry successful',
+    ];
+}
+
+private function inquiryFail(string $code, string $message, int $http = 422): array
+{
+    return ['success' => false, 'account_name' => null, 'code' => $code, 'message' => $message, 'http' => $http];
+}
+
+private function extractAccountName($res): ?string
+{
+    foreach ([
+        'data.response_content.account_name',
+        'data.response_content.accountName',
+        'data.account_name',
+        'data.data.account_name',
+        'data.name',
+        'account_name',
+    ] as $path) {
+        $value = data_get($res, $path);
+
+        if (is_string($value) && trim($value) !== '') {
+            return trim($value);
+        }
+    }
+
+    return null;
+}
 
     /**
      * @OA\Post(
@@ -792,326 +936,208 @@ public function store(Request $request)
     $user = $this->resolveKeyUser($request);
 
     if (! $user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid public key or secret key',
-        ], 401);
+        return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
     }
 
     $webhookSetting = $this->resolveKeyOwner($request);
 
     if (! $webhookSetting) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid public key or secret key',
-        ], 401);
+        return response()->json(['success' => false, 'message' => 'Invalid public key or secret key'], 401);
     }
 
-    $path = $request->path();
+    $path      = $request->path();
     $isTestUrl = str_starts_with($path, 'api/test/');
-    $keyMode = $this->resolveKeyMode($request, $webhookSetting);
+    $keyMode   = $this->resolveKeyMode($request, $webhookSetting);
 
     if ($isTestUrl && $keyMode !== 'test') {
-        return response()->json([
-            'success' => false,
-            'message' => 'Test API requires test keys',
-            'path' => $path,
-            'key_mode' => $keyMode,
-        ], 403);
+        return response()->json(['success' => false, 'message' => 'Test API requires test keys', 'path' => $path, 'key_mode' => $keyMode], 403);
     }
 
     if (! $isTestUrl && $keyMode !== 'live') {
-        return response()->json([
-            'success' => false,
-            'message' => 'Live API requires live keys',
-            'path' => $path,
-            'key_mode' => $keyMode,
-        ], 403);
+        return response()->json(['success' => false, 'message' => 'Live API requires live keys', 'path' => $path, 'key_mode' => $keyMode], 403);
     }
 
     $mode = $isTestUrl ? 'test' : 'live';
 
-    Log::info('[Beneficiary Store API] Request received', $request->all());
+    [$ownerId, $memberId, $role, $owner] = $this->resolveOwnerAndMember($request, $user);
 
-    $team = TeamMembers::where('user_id', $user->id)
-        ->where('owner_id', '!=', $user->id) // exclude self-referencing rows
-        ->first();
-
-    $ownerId  = $team ? $team->owner_id : $user->id;
-    $memberId = $team ? $user->id : null;
-    $role     = $team ? $team->role : 'Owner';
-
-    Log::info('[Beneficiary Store API] Auth resolved', [
-        'user_id'   => $user->id,
-        'owner_id'  => $ownerId,
-        'member_id' => $memberId,
-        'role'      => $role,
-    ]);
-
-    if (! in_array($role, ['Owner', 'Admin'])) {
-        Log::warning('[Beneficiary Store API] Forbidden — insufficient role', [
-            'user_id' => $user->id,
-            'role'    => $role,
-        ]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Only the business owner or an admin can add beneficiaries.',
-            'code' => 'FORBIDDEN',
-        ], 403);
+    if (! $ownerId || ! $owner) {
+        return response()->json(['success' => false, 'message' => 'Owner account not found', 'code' => 'OWNER_NOT_FOUND', 'mode' => $mode, 'data' => null], 422);
     }
 
-    $validator = Validator::make($request->all(), [
-        'type' => 'required|in:individual,corporate',
-        'firstNames' => 'nullable|required_if:type,individual|string|max:100',
-        'lastName' => 'nullable|required_if:type,individual|string|max:100',
-        'name' => 'nullable|required_if:type,corporate|string|max:200',
-        'transfer_method' => 'required|in:bank,mobile',
-        'bank.country' => 'required|string|min:2|max:3',
-        'bank.currency' => 'required|string|size:3',
-        'bank.accountHolder' => 'nullable|string|max:100',
-        'bank.accountNumber' => 'nullable|string|max:34',
-        'bank.bankCode' => 'nullable|string|max:20',
-        'bank.mobileNumber' => 'nullable|string|max:30',
+    if (! in_array($role, ['Owner', 'Admin'])) {
+        return response()->json(['success' => false, 'message' => 'Only the business owner or an admin can add beneficiaries.', 'code' => 'FORBIDDEN', 'mode' => $mode, 'data' => null], 403);
+    }
 
-        // CAD
-        'bank.interac_first_name' => 'nullable|string|max:30',
-        'bank.interac_last_name'  => 'nullable|string|max:30',
-        'bank.interac_email'      => 'nullable|string|max:30',
+    /* ================= VALIDATION ================= */
+    $validator = Validator::make($request->all(), [
+        'type'                    => 'required|in:individual,corporate',
+        'firstNames'              => 'nullable|required_if:type,individual|string|max:100',
+        'lastName'                => 'nullable|required_if:type,individual|string|max:100',
+        'name'                    => 'nullable|required_if:type,corporate|string|max:200',
+        'transfer_method'         => 'required|in:bank,mobile',
+        'bank.country'            => 'required|string|min:2|max:3',
+        'bank.currency'           => 'required|string|size:3',
+        'bank.accountHolder'      => 'nullable|string|max:100',
+        'bank.accountNumber'      => 'nullable|string|max:34',
+        'bank.bankCode'           => 'nullable|string|max:40',
+        'bank.mobileNumber'       => 'nullable|string|max:30',
+        'bank.interac_first_name' => 'nullable|string|max:50',
+        'bank.interac_last_name'  => 'nullable|string|max:50',
+        'bank.interac_email'      => 'nullable|email|max:100',
     ]);
 
     if ($validator->fails()) {
-        Log::warning('[Beneficiary Store API] Validation failed', [
-            'errors'  => $validator->errors()->toArray(),
-            'user_id' => $user->id,
-        ]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Validation error',
-            'code' => 'VALIDATION_ERROR',
-            'errors' => $validator->errors(),
-        ], 422);
+        return response()->json(['success' => false, 'message' => 'Validation error', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => $validator->errors()], 422);
     }
 
-    $bank = $request->input('bank', []);
+    $bank       = $request->input('bank', []);
     $countryIso = strtoupper($bank['country']);
-    $currency = strtoupper($bank['currency']);
-    $method = $request->transfer_method;
+    $currency   = strtoupper($bank['currency']);
+    $method     = $request->transfer_method;
 
-    Log::info('[Beneficiary Store API] Extracted data', [
-        'country'  => $countryIso,
-        'currency' => $currency,
-        'method'   => $method,
-        'type'     => $request->type,
-        'mode'     => $mode,
-    ]);
+    /* ================= PROVIDER (admin-controlled) ================= */
+    $live = app(ProviderRoutingService::class)->resolveForCurrency($currency, $method);
 
-    $payazaCurrencies = ['NGN', 'TZS', 'KES', 'XOF', 'XAF', 'ZAR', 'GHS'];
-    $pivotEnabled = filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $payazaEnabled = filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN);
-    $appmobileEnabled = filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN);
+    if (! $live) {
+        return response()->json(['success' => false, 'message' => "No provider enabled for {$currency}", 'code' => 'PROVIDER_DISABLED', 'mode' => $mode, 'data' => null], 422);
+    }
 
-    $provider = null;
+    $provider = $live->key;
 
-    if ($mode === 'test') {
-        $provider = 'flovide_test';
-    } else {
-        // ── CAD → Interac ────────────────────────────────────────────
-        if ($currency === 'CAD') {
-            $provider = 'interac';
-            $method   = 'bank';
+    // OhentPay is switched off in this API for now. Refuse instead of saving a beneficiary that can't be paid.
+    // Delete this block when OhentPay support returns.
+    if ($provider === 'ohentpay') {
+        Log::warning('[API Beneficiary Store] Live provider is ohentpay but API support is disabled', ['currency' => $currency]);
 
-            if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'First name, last name, and email are required for CAD Interac.',
-                    'code'    => 'CAD_INTERAC_FIELDS_REQUIRED',
-                    'data'    => null,
-                ], 422);
-            }
+        return response()->json(['success' => false, 'message' => "Beneficiaries for {$currency} are temporarily unavailable.", 'code' => 'PROVIDER_UNAVAILABLE', 'mode' => $mode, 'data' => null], 503);
+    }
 
-        } elseif ($currency === 'GHS') {
-            if ($appmobileEnabled) {
-                $provider = 'app_mobile';
-            } elseif ($payazaEnabled) {
-                $provider = 'payaza';
-            } else {
-                Log::warning('[Beneficiary Store API] No provider for GHS');
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No provider enabled for GHS',
-                    'code' => 'PROVIDER_DISABLED',
-                ], 403);
-            }
-        } elseif ($currency === 'UGX') {
-            if ($pivotEnabled) {
-                $provider = 'pivot';
-            } elseif ($payazaEnabled) {
-                $provider = 'payaza';
-                $method   = 'mobile';
-            } else {
-                Log::warning('[Beneficiary Store API] No provider for UGX');
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No provider enabled for UGX',
-                    'code' => 'PROVIDER_DISABLED',
-                ], 403);
-            }
-        } elseif (in_array($currency, $payazaCurrencies, true)) {
-            if ($payazaEnabled) {
-                $provider = 'payaza';
-            } else {
-                Log::warning('[Beneficiary Store API] Payaza disabled', ['currency' => $currency]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Flovide Payaza disabled',
-                    'code' => 'PROVIDER_DISABLED',
-                ], 403);
-            }
-        } else {
-            if ($pivotEnabled) {
-                $provider = 'pivot';
-            } else {
-                Log::warning('[Beneficiary Store API] Pivot disabled', ['currency' => $currency]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pivot disabled',
-                    'code' => 'PROVIDER_DISABLED',
-                ], 403);
-            }
+    if ($currency === 'CAD') {
+        $method = 'bank';
+
+        if (empty($bank['interac_first_name']) || empty($bank['interac_last_name']) || empty($bank['interac_email'])) {
+            return response()->json(['success' => false, 'message' => 'First name, last name, and email are required for CAD Interac.', 'code' => 'CAD_INTERAC_FIELDS_REQUIRED', 'mode' => $mode, 'data' => null], 422);
         }
     }
 
-    Log::info('[Beneficiary Store API] Provider resolved', [
-        'provider' => $provider,
-        'method'   => $method,
+    if ($provider === 'payaza' && $currency === 'UGX') {
+        $method = 'mobile';
+    }
+
+    Log::info('[API Beneficiary Store] Resolved', [
+        'owner_id' => $ownerId,
         'currency' => $currency,
-        'mode'     => $mode,
+        'method'   => $method,
+        'provider' => $provider,
     ]);
 
-    $bankName = null;
+    /* ================= BANK / MOBILE + FLOVIDE CODE + VALIDATION ================= */
+    $resolver     = app(BankCodeResolver::class);
+    $bankRow      = null;
+    $bankName     = null;
     $mobileNumber = null;
+    $accountName  = $bank['accountHolder'] ?? null;
 
-    // ── CAD: skip bank/mobile lookup, use interac fields ───────────────
     if ($currency === 'CAD') {
-        $bankName = 'Interac';
-        Log::info('[Beneficiary Store API] CAD Interac fields', [
-            'interac_first_name' => $bank['interac_first_name'] ?? null,
-            'interac_last_name'  => $bank['interac_last_name']  ?? null,
-            'interac_email'      => $bank['interac_email']       ?? null,
-        ]);
-    } elseif ($method === 'bank') {
-        $bankRow = Bank::where(function ($query) use ($bank) {
-            $query->where('bank_code', $bank['bankCode'] ?? null)
-                ->orWhere('sort_code', $bank['bankCode'] ?? null);
-        })->first();
+        $bankName    = 'Interac';
+        $accountName = $accountName ?: trim($bank['interac_first_name'] . ' ' . $bank['interac_last_name']);
 
+    } else {
+        $submitted = (string) ($bank['bankCode'] ?? '');
+
+        if ($submitted === '') {
+            return response()->json(['success' => false, 'message' => 'bank.bankCode is required. Use a bank_code from GET /banks.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
+        }
+
+        // Flovide code (or an old provider code during the transition) -> the live provider's row
+        $bankRow = $resolver->forProvider($provider, $currency, $submitted);
+
+        if (! $bankRow && $resolver->isLinked($currency)) {
+            return response()->json(['success' => false, 'message' => 'Invalid bank_code. Use a bank_code returned by GET /banks.', 'code' => 'INVALID_BANK_CODE', 'mode' => $mode, 'data' => null], 422);
+        }
+
+        // Currency not linked to Flovide codes yet: fall back to the plain lookup
+        $bankRow  = $bankRow ?: $resolver->findRow($currency, $submitted, $provider);
         $bankName = $bankRow?->name;
 
-        Log::info('[Beneficiary Store API] Bank lookup', [
-            'bank_code' => $bank['bankCode'] ?? null,
-            'bank_name' => $bankName,
-        ]);
-    } elseif ($method === 'mobile') {
-        $mobileNumber = $bank['mobileNumber'] ?? null;
-
-        if ($mobileNumber !== null) {
-            $mobileNumber = trim($mobileNumber);
-            if (str_starts_with($mobileNumber, '+')) {
-                $mobileNumber = substr($mobileNumber, 1);
-            }
+        if ($method === 'mobile') {
+            $mobileNumber = ltrim(trim((string) ($bank['mobileNumber'] ?? '')), '+');
+            $bankName   ??= 'mobile';
+        } elseif (! $bankName) {
+            return response()->json(['success' => false, 'message' => 'Unrecognised bank for this currency. Use a bank_code returned by GET /banks.', 'code' => 'INVALID_BANK_CODE', 'mode' => $mode, 'data' => null], 422);
         }
 
-        $bankRow = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
-        $bankName = $bankRow?->name ?? 'mobile';
+        $account = $method === 'mobile' ? $mobileNumber : (string) ($bank['accountNumber'] ?? '');
 
-        Log::info('[Beneficiary Store API] Mobile lookup', [
-            'mobile_number' => $mobileNumber,
-            'bank_code'     => $bank['bankCode'] ?? null,
-            'bank_name'     => $bankName,
-        ]);
+        if ($account === '') {
+            return response()->json(['success' => false, 'message' => $method === 'mobile' ? 'bank.mobileNumber is required.' : 'bank.accountNumber is required.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
+        }
+
+        // Validate the account (same lookup as POST /account-inquiry)
+        $check = $this->lookupAccount($currency, $submitted, $account, $method);
+
+        if (! $check['success'] && in_array($currency, ['NGN', 'UGX', 'GHS'], true)) {
+            return response()->json(['success' => false, 'message' => $check['message'], 'code' => 'ACCOUNT_VALIDATION_FAILED', 'mode' => $mode, 'data' => null], 422);
+        }
+
+        // Prefer the provider-verified name; otherwise use the name sent with the request
+        $accountName = $check['account_name'] ?? $accountName;
+
+        if (! $accountName) {
+            return response()->json(['success' => false, 'message' => 'bank.accountHolder is required when the account name cannot be verified.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
+        }
     }
 
+    /* ================= STORE ================= */
     try {
-        $beneficia = new Beneficia();
-
-        $beneficia->forceFill([
-            'mode' => $mode,
-            'country' => $countryIso,
-            'currency' => $currency,
-            'type' => $request->type,
-            'first_names' => $request->firstNames ?? null,
-            'last_name' => $request->lastName ?? null,
-            'beneficiary_name' => $request->name ?? null,
-            'account_number' => $bank['accountNumber'] ?? $mobileNumber ?? $bank['interac_email'] ?? null,
-            'account_name' => $bank['accountHolder'] ?? trim(($bank['interac_first_name'] ?? '') . ' ' . ($bank['interac_last_name'] ?? '')) ?? null,
-            'interac_first_name' => $bank['interac_first_name'] ?? null,
-            'interac_last_name' => $bank['interac_last_name'] ?? null,
-            'email' => $bank['interac_email'] ?? null,
-            'phone' => $mobileNumber,
-            'bank' => $bankName,
-            'transfer_method' => $method,
-            'bank_code' => $bank['bankCode'] ?? null,
-            // 'provider' => $provider,
-            'unique_reference' => strtoupper(Str::random(7)),
-            'customer_reference' => strtoupper(Str::random(7)),
-            'recipient_id' => (string) Str::uuid(),
-            'account_id' => (string) Str::uuid(),
-            'user_id' => $ownerId,
+        $beneficia = Beneficia::create([
+            'country'              => $countryIso,
+            'currency'             => $currency,
+            'type'                 => $request->type,
+            'first_names'          => $request->firstNames ?? null,
+            'last_name'            => $request->lastName ?? null,
+            'beneficiary_name'     => $request->name ?? null,
+            'account_number'       => $bank['accountNumber'] ?? $mobileNumber ?? ($bank['interac_email'] ?? null),
+            'account_name'         => $accountName,
+            'interac_first_name'   => $bank['interac_first_name'] ?? null,
+            'interac_last_name'    => $bank['interac_last_name'] ?? null,
+            'email'                => $bank['interac_email'] ?? null,
+            'phone'                => $mobileNumber,
+            'bank'                 => $bankName,
+            'transfer_method'      => $method,
+            'bank_code'            => $bankRow?->flovide_code ?? ($bank['bankCode'] ?? null),
+            'flovide_bank_code'    => $bankRow?->flovide_code,
+            'provider'             => $provider,
+            'unique_reference'     => strtoupper(Str::random(7)),
+            'customer_reference'   => strtoupper(Str::random(7)),
+            'recipient_id'         => Str::uuid(),
+            'account_id'           => Str::uuid(),
+            'user_id'              => $ownerId,
             'created_by_member_id' => $memberId,
-        ])->save();
-
-        Log::info('[Beneficiary Store API] Beneficiary created', [
-            'beneficiary_id' => $beneficia->id,
-            'currency'       => $currency,
-            'provider'       => $provider,
-            'method'         => $method,
-            'mode'           => $mode,
-            'user_id'        => $ownerId,
         ]);
+
+        Log::info('[API Beneficiary Store] Created', ['beneficiary_id' => $beneficia->id, 'owner_id' => $ownerId]);
 
         return response()->json([
             'success' => true,
             'message' => 'Beneficiary created successfully',
-            'mode' => $mode,
-            'data' => [
-                'id' => (string) $beneficia->id,
-                'recipient_id' => (string) $beneficia->recipient_id,
-                'country' => $beneficia->country,
-                'default_reference' => $beneficia->default_reference,
-                'alias' => $beneficia->alias,
-                'type' => $beneficia->type,
-                'created' => optional($beneficia->created_at)->toIso8601String(),
-                'bank_account' => [
-                    'account_name' => $beneficia->account_name,
-                    'sort_code' => $beneficia->sort_code,
-                    'bank_code' => $beneficia->bank_code,
-                    'account_number' => $beneficia->account_number,
-                    'bank_name' => $beneficia->bank,
-                    'currency' => $beneficia->currency,
-                ],
-            ],
+            'code'    => 'BENEFICIARY_CREATED',
+            'mode'    => $mode,
+            'data'    => $beneficia->makeHidden(['flovide_bank_code']),
         ], 201);
 
     } catch (\Throwable $e) {
-        Log::error('[Beneficiary Store API] Failed to create beneficiary', [
-            'error'   => $e->getMessage(),
-            'user_id' => $ownerId,
-            'payload' => [
-                'currency' => $currency,
-                'provider' => $provider,
-                'method'   => $method,
-            ],
+        Log::error('[API Beneficiary Store] Failed', [
+            'error'    => $e->getMessage(),
+            'class'    => get_class($e),
+            'location' => $e->getFile() . ':' . $e->getLine(),
+            'owner_id' => $ownerId,
         ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Beneficiary creation failed',
-            'code' => 'BENEFICIARY_CREATE_FAILED',
-            'data' => $e->getMessage(),
-        ], 500);
+        return response()->json(['success' => false, 'message' => 'Failed to create beneficiary', 'code' => 'BENEFICIARY_CREATE_FAILED', 'mode' => $mode, 'data' => null], 500);
     }
 }
-
 
 
 
@@ -1534,5 +1560,23 @@ public function show(Request $request, $id)
         ], 500);
     }
 }
+
+
+
+    private function resolveOwnerAndMember(Request $request, ?User $actor): array
+    {
+        if (! $actor) {
+            return [null, null, null, null];
+        }
+
+        $team = TeamMembers::where('user_id', $actor->id)->first();
+
+        $ownerId  = $team ? $team->owner_id : $actor->id;
+        $memberId = $team ? $actor->id : null;
+        $role     = $team ? $team->role : 'Owner';
+        $owner    = User::find($ownerId);
+
+        return [$ownerId, $memberId, $role, $owner];
+    }
 
 }

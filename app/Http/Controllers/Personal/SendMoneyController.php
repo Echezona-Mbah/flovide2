@@ -934,6 +934,32 @@ public function getExchangeRate(Request $request)
                     : back()->withInput()->with('error', $msg);
             }
 
+             // ── Translate the beneficiary's bank to the live provider's code ──────────
+            $beneficiary = Beneficia::where('recipient_id', $request->recipient_id)
+                ->where('personal_id', $personal->id)              // personal controller: ->where('personal_id', $personal->id)
+                ->first();
+
+            $resolver    = app(\App\Services\BankCodeResolver::class);
+            $codeWeHold  = $beneficiary?->flovide_bank_code ?: (string) $request->bank_code;
+            $providerRow = $resolver->forProvider($resolvedProvider->key, $currency, $codeWeHold, $beneficiary?->provider);
+
+            if (!$providerRow && $resolver->isLinked($currency)) {
+                DB::rollBack();
+                $msg = "This beneficiary's bank is not supported by the current provider for {$currency}.";
+
+                return $isApi                              // personal controller: return the JSON response only
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BANK_NOT_SUPPORTED', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+
+            if ($providerRow) {
+                $request->merge([
+                    'bank_code' => $resolvedProvider->key === 'pivot'
+                        ? ($providerRow->sort_code ?: $providerRow->bank_code)
+                        : $providerRow->bank_code,
+                ]);
+            }
+
             switch ($resolvedProvider->key) {
                 case 'pivot':
                     $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $personal, $tx->id, $recipientAmount);

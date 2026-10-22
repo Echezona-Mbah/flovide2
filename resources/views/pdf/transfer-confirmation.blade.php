@@ -92,10 +92,10 @@
             <br>
             {{ $brand_name }} is registered as a money service business with the United States Financial Crimes Enforcement Network (FinCEN).
             <br>
-              {{ $brand_name }} is duly registered in Canada as a Money Services Business (MSB) with FINTRAC under registration number C100000869.
+              {{-- {{ $brand_name }} is duly registered in Canada as a Money Services Business (MSB) with FINTRAC under registration number C100000869.
             <br>
               In the United States, Flovide is registered as a Money Services Business with FinCEN under registration number 31000301191487.
-            <br>
+            <br> --}}
 
         </div>
     </div>

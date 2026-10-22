@@ -222,10 +222,7 @@ public function resolveBankId(string $bankCode, string $country, ?string $curren
  */
 public function resolveBank(string $bankCode, string $currency): ?Bank
 {
-    return Bank::where('provider', 'ohentpay')
-        ->where('currency', strtoupper($currency))
-        ->where('bank_code', $bankCode)
-        ->first();
+    return app(\App\Services\BankCodeResolver::class)->forProvider('ohentpay', $currency, $bankCode);
 }
 
 

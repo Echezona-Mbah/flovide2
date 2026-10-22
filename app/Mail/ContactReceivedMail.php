@@ -36,15 +36,15 @@ class ContactReceivedMail extends Mailable
     /**
      * Get the message content definition.
      */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'email.contact-received',
-            with: [
-                'contact' => $this->contact,
-            ],
-        );
-    }
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'email.contact-received',
+    //         with: [
+    //             'contact' => $this->contact,
+    //         ],
+    //     );
+    // }
 
     /**
      * Get the attachments for the message.

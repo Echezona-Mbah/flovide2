@@ -221,6 +221,8 @@ public function store(Request $request)
 
     $bankName     = null;
     $mobileNumber = null;
+    $resolver = app(\App\Services\BankCodeResolver::class);
+
 
     // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
     if ($currency === 'CAD') {
@@ -231,16 +233,21 @@ public function store(Request $request)
             'interac_email'      => $bank['interac_email']       ?? null,
         ]);
     } elseif ($method === 'bank') {
-        $bankRow  = Bank::where(function ($q) use ($bank) {
-            $q->where('bank_code', $bank['bankCode'] ?? null)
-            ->orWhere('sort_code', $bank['bankCode'] ?? null);
-        })->first();
+        $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
         $bankName = $bankRow?->name;
 
-        Log::info('[Personal Beneficiary Store] Bank lookup', [
+        Log::info('[Beneficiary Store] Bank lookup', [
             'bank_code' => $bank['bankCode'] ?? null,
             'bank_name' => $bankName,
         ]);
+
+        // Don't save a beneficiary with no bank name
+        if (!$bankName) {
+            $msg = 'Unrecognised bank for this currency. Please re-select the bank.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'BANK_CODE_NOT_FOUND', 'data' => null], 422)
+                : back()->with('error', $msg);
+        }
     } elseif ($method === 'mobile') {
         $mobileNumber = $bank['mobileNumber'] ?? null;
 
@@ -251,7 +258,7 @@ public function store(Request $request)
             }
         }
 
-        $bankRow  = Bank::where('bank_code', $bank['bankCode'] ?? null)->first();
+        $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
         $bankName = $bankRow?->name ?? 'mobile';
 
         Log::info('[Personal Beneficiary Store] Mobile lookup', [
@@ -260,6 +267,16 @@ public function store(Request $request)
             'bank_name'     => $bankName,
         ]);
     }
+
+            $flovideCode = app(\App\Services\BankCodeResolver::class)
+            ->toFlovideCode($currency, (string) ($bank['bankCode'] ?? ''));
+
+        // bank-name lookup (both the 'bank' and 'mobile' branches), now currency-scoped and Flovide-aware
+        $bankRow = Bank::where('currency', $currency)->where(function ($q) use ($bank) {
+            $q->where('flovide_code', $bank['bankCode'] ?? null)
+            ->orWhere('bank_code', $bank['bankCode'] ?? null)
+            ->orWhere('sort_code', $bank['bankCode'] ?? null);
+        })->first();
 
     try {
         $beneficia = Beneficia::create([
@@ -277,7 +294,8 @@ public function store(Request $request)
             'phone'                => $mobileNumber,
             'bank'                 => $bankName,
             'transfer_method'      => $method,
-            'bank_code'            => $bank['bankCode'] ?? null,
+            'bank_code'         => $flovideCode ?? ($bank['bankCode'] ?? null),
+            'flovide_bank_code' => $flovideCode,
             'provider'          => $provider,
             'unique_reference'   => strtoupper(\Str::random(7)),
             'customer_reference' => strtoupper(\Str::random(7)),

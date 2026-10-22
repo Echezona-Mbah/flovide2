@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Services\BankCodeResolver;
+
 
 class Beneficia extends Model
 {
@@ -57,6 +59,7 @@ class Beneficia extends Model
         'transfer_method',
         'mode',
         'ohentpay_recipient_id',
+        'flovide_bank_code',
     ];
 
     protected $table = 'beneficias';
@@ -88,4 +91,24 @@ class Beneficia extends Model
     {
         return $query->where('mode', 'live');
     }
+
+    protected static function booted()
+{
+    static::saving(function (Beneficia $beneficiary) {
+        // Already set, or nothing to translate
+        if ($beneficiary->flovide_bank_code || !$beneficiary->bank_code || !$beneficiary->currency) {
+            return;
+        }
+
+        $code = app(BankCodeResolver::class)->toFlovideCode(
+            (string) $beneficiary->currency,
+            (string) $beneficiary->bank_code,
+            $beneficiary->provider
+        );
+
+        if ($code) {
+            $beneficiary->flovide_bank_code = $code;
+        }
+    });
+}
 }
