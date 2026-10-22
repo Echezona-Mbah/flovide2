@@ -1303,6 +1303,10 @@
                                         <label for="department">Department <span class="required">*</span></label>
                                         <div class="input-wrap">
                                             <select id="department" name="department">
+                                                <option value="CEO">CHIEF EXECUTIVE OFFICER</option>
+                                                <option value="CFO">CHIEF FINANCIAL OFFICER</option>
+                                                <option value="CTO">CHIEF TECHNOLOGY OFFICER</option>
+                                                <option value="HR MANAGER">HR MANAGER</option>
                                                 <option value="Software Engineer">Software Engineer</option>
                                                 <option value="Mobile Engineer">Mobile Engineer</option>
                                                 <option value="Digital Marketer">Digital Marketer</option>
