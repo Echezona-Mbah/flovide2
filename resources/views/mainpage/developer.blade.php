@@ -536,7 +536,7 @@
                                     <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/collections/interac</code>
                                 </div>
                                 <h3 class="text-xl font-bold mb-3">Interac collection (top-up)</h3>
-                                <p class="text-slate-600 mb-6">Sends an Interac Auto Deposit money request to the payer's email. Your CAD wallet is credited automatically once the payer approves. The collection fee (configured per account) is deducted from the amount before crediting.</p>
+                                <p class="text-slate-600 mb-6">The active CAD collection provider is selected in Payment Providers settings. Blaaiz sends an Interac Auto Deposit money request. Swappr instead returns its shared registered Interac address and a reference; Swappr deposits remain pending for manual reconciliation and are not automatically credited to an individual Flovide wallet. The collection fee (configured per account) is shown with the request.</p>
 
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>

@@ -40,7 +40,11 @@ class CollectionController extends Controller
  *     @OA\Response(response=422, description="Validation error")
  * )
  */
-public function collectInterac(Request $request, BlaaizService $blaaiz)
+public function collectInterac(
+    Request $request,
+    BlaaizService $blaaiz,
+    \App\Services\CadInteracCollectionService $collections
+)
 {
     $user = $this->resolveKeyUser($request);
 
@@ -214,6 +218,75 @@ public function collectInterac(Request $request, BlaaizService $blaaiz)
             'mode'    => 'test',
             'data'    => $this->txData($transaction->id),
         ], 200);
+    }
+
+    $provider = $collections->resolveProvider();
+    if (!$provider) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CAD Interac collection provider is enabled.',
+            'code' => 'COLLECTION_PROVIDER_DISABLED',
+            'data' => null,
+        ], 422);
+    }
+
+    if ($provider->key === 'swappr') {
+        $depositEmail = $collections->swapprRecipientEmail();
+        if (!$depositEmail) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+                'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                'data' => null,
+            ], 503);
+        }
+
+        $reference = $collections->newReference();
+        $transaction = TransactionHistory::create([
+            'user_id' => $ownerId,
+            'balance_id' => $balance->id,
+            'mode' => 'live',
+            'payment_provider' => 'swappr',
+            'transaction_type' => 'payment',
+            'method' => 'credit',
+            'type' => 'credit',
+            'payment_method' => 'manual_interac',
+            'sender' => $validated['email'],
+            'amount' => $amount,
+            'fees' => $platformFee,
+            'recipient_amount' => $netAmount,
+            'currency' => 'CAD',
+            'status' => 'pending',
+            'reference' => $reference,
+            'payment_reference' => $reference,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
+            'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+            'mode' => 'live',
+            'data' => [
+                'transaction_id' => $transaction->id,
+                'reference' => $reference,
+                'deposit_email' => $depositEmail,
+                'amount' => $amount,
+                'fees' => $platformFee,
+                'net_amount' => $netAmount,
+                'currency' => 'CAD',
+                'status' => 'pending',
+                'automatic_credit' => false,
+            ],
+        ], 200);
+    }
+
+    if ($provider->key !== 'blaaiz_interac') {
+        return response()->json([
+            'success' => false,
+            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+            'data' => null,
+        ], 422);
     }
 
     // ── Live: call Blaaiz ────────────────────────────────────────────────

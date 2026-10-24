@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Notifications\GeneralNotification;
 use App\Services\FirebaseNotificationService;
 use App\Services\ProviderRoutingService;
+use App\Services\SwapprService;
 
 
 
@@ -82,7 +83,9 @@ class SendMoneyController extends Controller
     public function sendTransaction(Request $request)
     {
         $isApi = $request->expectsJson();
-        $mode  = session('mode', 'live');
+        $mode = $isApi
+            ? ($request->input('mode') ?? session('mode', 'live'))
+            : session('mode', 'live');
 
         if (!$isApi && $mode === 'test') {
             return redirect()->back()->withErrors(['message' => 'Sending Money in Test Mode is only available via the API.']);
@@ -107,6 +110,8 @@ class SendMoneyController extends Controller
             'interac_last_name'  => 'nullable|string',
             'promo_code'         => 'nullable|string|max:50',
             'transaction_pin'    => 'required|digits:4',
+            'mode'               => 'nullable|in:test,live',
+            ...SwapprService::senderInformationValidationRules(),
         ]);
 
         $actor = $this->resolveKeyUser($request) ?? auth()->user();
@@ -201,10 +206,13 @@ class SendMoneyController extends Controller
 
         $owner->save();
 
-        // ── CAD/Interac: email must match the sender's own registered email ──────
+        // Blaaiz's Interac setup requires the sender's registered email.
         $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
+        $cadProvider = $sendingCurrencyCheck === 'CAD'
+            ? app(ProviderRoutingService::class)->resolveForCurrency('CAD', 'bank')
+            : null;
 
-        if ($sendingCurrencyCheck === 'CAD' && $request->filled('interac_email')) {
+        if ($cadProvider?->key === 'blaaiz_interac' && $request->filled('interac_email')) {
             if (strtolower(trim($request->interac_email)) !== strtolower(trim($owner->email))) {
                 $msg = 'For Interac transfers, please use your own registered email address (' . $owner->email . ').';
                 return $isApi
@@ -241,6 +249,22 @@ class SendMoneyController extends Controller
 
         $sendingCurrency = strtoupper(explode(' ', $request->exchange_rate)[1] ?? 'NGN');
         $currency        = strtoupper(explode(' ', $request->exchange_rate)[4] ?? 'NGN');
+        $resolvedProvider = app(ProviderRoutingService::class)
+            ->resolveForCurrency($currency, $request->transfer_method);
+
+        if (!$resolvedProvider) {
+            $msg = 'No payment provider available for this currency';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
+        if ($mode === 'test' && $resolvedProvider->key !== 'swappr') {
+            $msg = 'Test payouts through this endpoint are currently supported only for Swappr.';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'TEST_PROVIDER_NOT_SUPPORTED', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
 
         $originalTransferFee = (float) $request->transfer_fee;
         $amount              = (float) $request->amount;
@@ -300,8 +324,10 @@ class SendMoneyController extends Controller
 
         DB::beginTransaction();
         try {
-            $balance->amount -= $totalAmount;
-            $balance->save();
+            if ($mode === 'live') {
+                $balance->amount -= $totalAmount;
+                $balance->save();
+            }
 
             $feeDeductedFrom = null;
 
@@ -320,10 +346,11 @@ class SendMoneyController extends Controller
                 'recipient_bank_currency'  => $currency,
                 'recipient_country'        => strtoupper(substr($currency, 0, 2)),
                 'exchange_rate'            => strtoupper(explode(' ', $request->exchange_rate)[3] ?? null),
-                'status'                   => 'success',
+                'status'                   => $mode === 'test' ? 'pending' : 'success',
                 'method'                   => 'withdrawal',
                 'type'                     => 'withdrawal',
                 'payment_provider'         => 'wallect',
+                'mode'                     => $mode,
                 'transfer_method'          => $request->transfer_method,
                 'order_id'                 => $request->order_id  ?? null,
                 'reference'                => 'ref-' . Str::uuid(),
@@ -344,7 +371,7 @@ class SendMoneyController extends Controller
             ]);
 
             // ── Promo code reward ────────────────────────────────────────────
-            if ($promoCode) {
+            if ($promoCode && $mode === 'live') {
                 $rewardAmount = $promoCode->calculateReward($amount);
                 $ownerModel   = $promoCode->ownerModel();
 
@@ -401,21 +428,12 @@ class SendMoneyController extends Controller
                     }
                 }
             }
-            app(\App\Services\ReferralBonusService::class)->checkAndNotify($owner->fresh(), $tx->fresh());
+            if ($mode === 'live') {
+                app(\App\Services\ReferralBonusService::class)->checkAndNotify($owner->fresh(), $tx->fresh());
+            }
 
 
             // ── Route to provider (DB-driven) ─────────────────────────────────
-            $routing = app(ProviderRoutingService::class);
-            $resolvedProvider = $routing->resolveForCurrency($currency, $request->transfer_method);
-
-            if (!$resolvedProvider) {
-                DB::rollBack();
-                $msg = 'No payment provider available for this currency';
-                return $isApi
-                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
-                    : back()->withInput()->with('error', $msg);
-            }
-
             // ── Translate the beneficiary's bank to the live provider's code ──────────
             $beneficiary = Beneficia::where('recipient_id', $request->recipient_id)
                 ->where('user_id', $ownerId)              // personal controller: ->where('personal_id', $personal->id)
@@ -454,6 +472,9 @@ class SendMoneyController extends Controller
                     break;
                 case 'blaaiz_interac':
                     $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
+                    break;
+                case 'swappr':
+                    $response = $this->sendViaSwappr($request, $currency, $tx->id, $netRecipientAmount);
                     break;
                 case 'ohentpay':
                     $response = $this->sendViaOhentPay($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $netRecipientAmount, $transferFee);
@@ -745,6 +766,102 @@ class SendMoneyController extends Controller
             : back()->with('error', $errorMessage);
     }
 
+
+    protected function sendViaSwappr(Request $request, string $currency, string $txId, $recipientAmount)
+    {
+
+                      //  dd('payload');
+
+        $isApi = $request->expectsJson();
+        $transaction = TransactionHistory::findOrFail($txId);
+        $currency = strtoupper($currency);
+
+        $recipient = $currency === 'CAD'
+            ? [
+                'email' => $request->interac_email,
+                'first_name' => $request->interac_first_name,
+                'last_name' => $request->interac_last_name,
+            ]
+            : [
+                'account_number' => $request->account_number,
+                'bank_code' => $request->bank_code,
+            ];
+
+        if ($currency === 'CAD' && $request->filled('interac_email')) {
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'method' => 'interac',
+                'recipient' => $recipient,
+                'merchant_reference' => $transaction->reference,
+            ];
+        } elseif ($currency === 'NGN') {
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'recipient' => $recipient,
+                'sender' => SwapprService::senderInformationFromConfig(),
+                'merchant_reference' => $transaction->reference,
+            ];
+
+        } else {
+            return $isApi
+                ? response()->json([
+                    'success' => false,
+                    'message' => "Swappr payouts are not configured for {$currency}.",
+                    'code' => 'SWAPPR_CURRENCY_UNSUPPORTED',
+                    'data' => $this->txData($txId),
+                ], 422)
+                : back()->with('error', "Swappr payouts are not configured for {$currency}.");
+        }
+
+        if ($request->filled('sender')) {
+            $payload['sender'] = $request->input('sender');
+        }
+
+        $beneficiary = Beneficia::where('recipient_id', $transaction->recipient_id)
+            ->where('user_id', $transaction->user_id)
+            ->where('mode', $transaction->mode ?: 'live')
+            ->first();
+
+        if ($beneficiary?->swappr_beneficiary_id) {
+            $payload['beneficiary_id'] = $beneficiary->swappr_beneficiary_id;
+            unset($payload['recipient']);
+        }
+
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+
+        if ($response['success']) {
+            return $isApi
+                ? response()->json([
+                    'success' => true,
+                    'message' => $response['message'],
+                    'code' => 'SWAPPR_PAYOUT_SUBMITTED',
+                    'data' => $this->txData($txId),
+                ], 200)
+                : redirect()->route('transactionHistory')->with('success', $response['message']);
+        }
+
+        if ($response['uncertain'] ?? false) {
+            return $isApi
+                ? response()->json([
+                    'success' => true,
+                    'message' => $response['message'],
+                    'code' => 'SWAPPR_PAYOUT_PENDING_CONFIRMATION',
+                    'data' => $this->txData($txId),
+                ], 202)
+                : redirect()->route('transactionHistory')->with('success', $response['message']);
+        }
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $response['message'],
+                'code' => 'SWAPPR_PAYOUT_FAILED',
+                'data' => $this->txData($txId),
+            ], 422)
+            : back()->with('error', $response['message']);
+    }
 
 
     protected function sendViaBlaaizInterac(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor, User $owner,$netRecipientAmount,$c)

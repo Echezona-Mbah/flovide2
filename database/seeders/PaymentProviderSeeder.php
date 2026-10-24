@@ -60,7 +60,17 @@ class PaymentProviderSeeder extends Seeder
                 'is_enabled' => true,
                 'priority' => 30,
                 'currencies' => [
-                    ['currency' => 'CAD', 'transfer_method' => null],
+                    ['currency' => 'CAD', 'transfer_method' => null, 'collection_enabled' => true],
+                ],
+            ],
+            [
+                'key' => 'swappr',
+                'name' => 'Swappr',
+                'is_enabled' => true,
+                'priority' => 1,
+                'currencies' => [
+                    ['currency' => 'CAD', 'transfer_method' => null, 'collection_enabled' => false],
+                    ['currency' => 'NGN', 'transfer_method' => null],
                 ],
             ],
         ];
@@ -72,10 +82,18 @@ class PaymentProviderSeeder extends Seeder
             $provider = PaymentProvider::updateOrCreate(['key' => $data['key']], $data);
 
             foreach ($currencies as $c) {
-                $provider->currencies()->updateOrCreate(
+                $mapping = $provider->currencies()->firstOrCreate(
                     ['currency' => $c['currency'], 'transfer_method' => $c['transfer_method']],
-                    ['is_enabled' => true]
+                    [
+                        'is_enabled' => true,
+                        'collection_enabled' => $c['collection_enabled'] ?? false,
+                    ]
                 );
+
+                if (!$mapping->wasRecentlyCreated && !$mapping->is_enabled) {
+                    $mapping->is_enabled = true;
+                    $mapping->save();
+                }
             }
         }
     }

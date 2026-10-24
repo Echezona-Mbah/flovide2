@@ -59,7 +59,9 @@ class Beneficia extends Model
         'transfer_method',
         'mode',
         'ohentpay_recipient_id',
+        'swappr_beneficiary_id',
         'flovide_bank_code',
+        'provider',
     ];
 
     protected $table = 'beneficias';

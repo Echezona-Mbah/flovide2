@@ -74,6 +74,24 @@ class PaymentProviderController extends Controller
         return back()->with('success', "Updated {$currency} for {$provider->name}.");
     }
 
+    public function toggleCollectionCurrency(Request $request, PaymentProvider $provider, $currencyId)
+    {
+        $row = $provider->currencies()->findOrFail($currencyId);
+        if (strtoupper($row->currency) !== 'CAD') {
+            abort(422, 'Collection routing currently supports CAD Interac only.');
+        }
+
+        $row->collection_enabled = !$row->collection_enabled;
+        $row->save();
+
+        ProviderRoutingService::clearCache();
+
+        return back()->with(
+            'success',
+            "{$row->currency} collections are now " . ($row->collection_enabled ? 'enabled' : 'disabled') . " for {$provider->name}."
+        );
+    }
+
     // Remove a currency mapping from a provider entirely
     public function removeCurrency(Request $request, PaymentProvider $provider, $currencyId)
     {

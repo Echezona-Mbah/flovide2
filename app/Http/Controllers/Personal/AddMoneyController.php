@@ -21,7 +21,11 @@ class AddMoneyController extends Controller
     // ── Interac ──────────────────────────────────────────────────────────────
 
 
-    public function topupWithInteracc(Request $request, BlaaizService $blaaiz)
+    public function topupWithInteracc(
+        Request $request,
+        BlaaizService $blaaiz,
+        \App\Services\CadInteracCollectionService $collections
+    )
 {
     //dd('sssssss');
     Log::info('[Interac Personal] Request received', $request->all());
@@ -156,6 +160,88 @@ class AddMoneyController extends Controller
                     : back()->withInput()->with('error', $msg);
             }
         }
+
+    $provider = $collections->resolveProvider();
+    if (!$provider) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CAD Interac collection provider is enabled.',
+            'code' => 'COLLECTION_PROVIDER_DISABLED',
+            'data' => null,
+        ], 422);
+    }
+
+    if ($provider->key === 'swappr') {
+        if (strtolower((string) $balance->mode) === 'test') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Swappr shared-address collections are for live CAD wallets only. Use the sandbox funding simulator to test.',
+                'code' => 'SWAPPR_COLLECTION_LIVE_ONLY',
+                'data' => null,
+            ], 422);
+        }
+
+        $depositEmail = $collections->swapprRecipientEmail();
+        if (!$depositEmail) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+                'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                'data' => null,
+            ], 503);
+        }
+
+        $reference = $collections->newReference();
+        $transaction = TransactionHistory::create([
+            'personal_id' => $personal->id,
+            'balance_id' => $balance->id,
+            'payment_provider' => 'swappr',
+            'transaction_type' => 'payment',
+            'method' => 'credit',
+            'type' => 'credit',
+            'payment_method' => 'manual_interac',
+            'sender' => $request->email,
+            'amount' => $amount,
+            'fees' => $platformFee,
+            'recipient_amount' => $netAmount,
+            'currency' => $balance->currency,
+            'status' => 'pending',
+            'reference' => $reference,
+            'payment_reference' => $reference,
+            'mode' => $balance->mode ?: 'live',
+        ]);
+
+        $personal->notify(new GeneralNotification(
+            'Swappr Interac Deposit Instructions',
+            "Send {$amount} {$balance->currency} to {$depositEmail} and include reference {$reference} where supported. Manual reconciliation is required; your wallet will not be credited automatically."
+        ));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
+            'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+            'data' => [
+                'transaction_id' => $transaction->id,
+                'reference' => $reference,
+                'deposit_email' => $depositEmail,
+                'amount' => $amount,
+                'currency' => $balance->currency,
+                'fees' => $platformFee,
+                'recipient_amount' => $netAmount,
+                'status' => 'pending',
+                'automatic_credit' => false,
+            ],
+        ], 200);
+    }
+
+    if ($provider->key !== 'blaaiz_interac') {
+        return response()->json([
+            'success' => false,
+            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+            'data' => null,
+        ], 422);
+    }
 
     $payload = [
         'email'  => $request->email,

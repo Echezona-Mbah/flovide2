@@ -32,6 +32,7 @@ class TransactionHistory extends Model
         'fees',
         'to_currency',
         'balance_id',
+        'fee_balance_id',
         'virtual_account_id',
         'order_id',
         'payment_reference',

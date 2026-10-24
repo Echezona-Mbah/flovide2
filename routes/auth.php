@@ -552,6 +552,7 @@ Route::middleware('admin.auth')->group(function () {
             Route::post('/{provider}/toggle', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'toggleProvider'])->name('admin.payment-providers.toggle');
             Route::post('/{provider}/priority', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'updatePriority'])->name('admin.payment-providers.priority');
             Route::post('/{provider}/currency', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'toggleCurrency'])->name('admin.payment-providers.currency.toggle');
+            Route::post('/{provider}/currency/{currencyId}/collection-toggle', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'toggleCollectionCurrency'])->name('admin.payment-providers.collection.toggle');
             Route::delete('/{provider}/currency/{currencyId}', [\App\Http\Controllers\Admin\PaymentProviderController::class, 'removeCurrency'])->name('admin.payment-providers.currency.remove');
 
 
@@ -791,4 +792,3 @@ Route::middleware('admin.auth')->group(function () {
 
 
  });
-

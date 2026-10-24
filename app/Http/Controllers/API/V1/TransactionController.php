@@ -22,6 +22,7 @@ use App\Mail\TransactionSentMail;
 use App\Models\ExchangeRate;
 use App\Services\BankCodeResolver;
 use App\Services\ProviderRoutingService;
+use App\Services\SwapprService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
@@ -361,7 +362,7 @@ public function store(Request $request)
 
     // ── End gate ──
 
-    $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference'];
+    $allowedFields = ['transaction_type', 'amount', 'recipient_id', 'order_id', 'balance_id', 'reference', 'sender'];
     $extraFields   = array_diff(array_keys($request->all()), $allowedFields);
 
     if (! empty($extraFields)) {
@@ -379,6 +380,7 @@ public function store(Request $request)
         'balance_id'       => 'required|uuid',
         'order_id'         => 'required|string|max:100',
         'reference'        => 'nullable|uuid|unique:transactions_history,reference',
+        ...SwapprService::senderInformationValidationRules(),
     ]);
 
     if ($validator->fails()) {
@@ -653,10 +655,12 @@ public function store(Request $request)
 
        if ($mode === 'live') {
             // ── Real providers only on live ──
-            if (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
-                $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
-            } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
-                $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
+           if ($resolvedProvider->key === 'swappr') {
+               $response = $this->sendViaSwappr($request, $currency, $tx->id, $recipientAmount);
+           } elseif (in_array($currency, ['UGX']) && filter_var(env('PIVOT_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
+               $response = $this->sendViaPivot($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
+           } elseif (in_array($currency, ['GHS']) && filter_var(env('APP_MOBILE'), FILTER_VALIDATE_BOOLEAN)) {
+               $response = $this->sendViaAppMobile($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } elseif (in_array($currency, ['NGN', 'TZS', 'XOF', 'XAF', 'ZAR', 'KES']) && filter_var(env('PAYAZA_ENABLED'), FILTER_VALIDATE_BOOLEAN)) {
                 $response = $this->sendViaPayaza($request, $currency, $sendingCurrency, $balance, $tx->id, $actor, $owner, $recipientAmount, $transferFee);
             } elseif ($currency === 'CAD') {
@@ -717,6 +721,89 @@ public function store(Request $request)
 
 
 
+
+    protected function sendViaSwappr(Request $request, string $currency, string $txId, $recipientAmount)
+    {
+        $transaction = TransactionHistory::findOrFail($txId);
+        $currency = strtoupper($currency);
+
+        if ($currency === 'CAD' && $request->filled('interac_email')) {
+            $recipient = [
+                'email' => $request->interac_email,
+                'first_name' => $request->interac_first_name,
+                'last_name' => $request->interac_last_name,
+            ];
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'method' => 'interac',
+                'recipient' => $recipient,
+                'merchant_reference' => $transaction->reference,
+            ];
+        } elseif ($currency === 'NGN') {
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'recipient' => [
+                    'account_number' => $request->account_number,
+                    'bank_code' => $request->bank_code,
+                ],
+                'sender' => SwapprService::senderInformationFromConfig(),
+                'merchant_reference' => $transaction->reference,
+            ];
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "Swappr payouts are not configured for {$currency}.",
+                'code' => 'SWAPPR_CURRENCY_UNSUPPORTED',
+                'data' => $this->txData($txId),
+            ], 422);
+        }
+
+        if ($request->filled('sender')) {
+            $payload['sender'] = $request->input('sender');
+        }
+
+        $beneficiary = Beneficia::where('recipient_id', $transaction->recipient_id)
+            ->where('user_id', $transaction->user_id)
+            ->where('mode', $transaction->mode ?: 'live')
+            ->first();
+
+        if ($beneficiary?->swappr_beneficiary_id) {
+            $payload['beneficiary_id'] = $beneficiary->swappr_beneficiary_id;
+            unset($payload['recipient']);
+        }
+
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+
+        if ($response['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $response['message'],
+                'code' => 'SWAPPR_PAYOUT_SUBMITTED',
+                'mode' => $transaction->mode,
+                'data' => $this->txData($txId),
+            ], 200);
+        }
+
+        if ($response['uncertain'] ?? false) {
+            return response()->json([
+                'success' => true,
+                'message' => $response['message'],
+                'code' => 'SWAPPR_PAYOUT_PENDING_CONFIRMATION',
+                'mode' => $transaction->mode,
+                'data' => $this->txData($txId),
+            ], 202);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $response['message'],
+            'code' => 'SWAPPR_PAYOUT_FAILED',
+            'mode' => $transaction->mode,
+            'data' => $this->txData($txId),
+        ], 422);
+    }
 
 
     // -------------------- Pivot Payment --------------------

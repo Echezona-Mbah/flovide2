@@ -98,7 +98,7 @@ class User extends Authenticatable
         'nin',
         'nin_status',
         'device_token',
-        'blaaiz_id'
+        'blaaiz_id',
 
     ];
 

@@ -69,6 +69,33 @@ class ProviderRoutingService
     return null;
 }
 
+    public function resolveForCollection(string $currency, ?string $transferMethod = null): ?PaymentProvider
+    {
+        $currency = strtoupper($currency);
+        $transferMethod = $transferMethod ? strtolower($transferMethod) : null;
+
+        foreach ($this->enabledProviders() as $provider) {
+            $match = $provider->currencies->first(function ($currencyRow) use ($currency, $transferMethod) {
+                if (
+                    !$currencyRow->collection_enabled
+                    || strtoupper($currencyRow->currency) !== $currency
+                ) {
+                    return false;
+                }
+
+                return $transferMethod === null
+                    || $currencyRow->transfer_method === null
+                    || $currencyRow->transfer_method === $transferMethod;
+            });
+
+            if ($match) {
+                return $provider;
+            }
+        }
+
+        return null;
+    }
+
     public function isEnabled(string $key): bool
     {
         $provider = $this->enabledProviders()->firstWhere('key', $key);

@@ -38,6 +38,7 @@ class BankCodeResolver
             ->whereNotNull('flovide_code')
             ->where(fn ($q) => $q->where('flovide_code', $code)
                 ->orWhere('bank_code', $code)
+                ->orWhere('bank_nibss_code', $code)
                 ->orWhere('sort_code', $code));
 
         // Prefer the provider the beneficiary was saved under (avoids short-code collisions)
@@ -59,6 +60,7 @@ class BankCodeResolver
         return Bank::where('currency', strtoupper($currency))
             ->where(fn ($q) => $q->where('flovide_code', $code)
                 ->orWhere('bank_code', $code)
+                ->orWhere('bank_nibss_code', $code)
                 ->orWhere('sort_code', $code))
             // if several providers have this bank, prefer the live provider's row
             ->when($preferProvider, fn ($q) => $q->orderByRaw('provider = ? desc', [$preferProvider]))

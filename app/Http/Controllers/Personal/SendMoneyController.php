@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\Notifications\GeneralNotification;
 use App\Services\FirebaseNotificationService;
+use App\Services\SwapprService;
 
 
 class SendMoneyController extends Controller
@@ -678,6 +679,7 @@ public function getExchangeRate(Request $request)
             'interac_last_name'  => 'nullable|string',
             'promo_code' => 'nullable|string|max:50',
             'transaction_pin' => 'required|digits:4',
+            ...SwapprService::senderInformationValidationRules(),
         ]);
 
         $isApi = $request->expectsJson();
@@ -740,10 +742,13 @@ public function getExchangeRate(Request $request)
 
         $personal->save();
 
-        // ── CAD/Interac: email must match the sender's own registered email ──────
+        // Blaaiz's Interac setup requires the sender's registered email.
         $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
+        $cadProvider = $sendingCurrencyCheck === 'CAD'
+            ? app(\App\Services\ProviderRoutingService::class)->resolveForCurrency('CAD', 'bank')
+            : null;
 
-        if ($sendingCurrencyCheck === 'CAD' && $request->filled('interac_email')) {
+        if ($cadProvider?->key === 'blaaiz_interac' && $request->filled('interac_email')) {
             if (strtolower(trim($request->interac_email)) !== strtolower(trim($personal->email))) {
                 return response()->json([
                     'success' => false,
@@ -972,6 +977,9 @@ public function getExchangeRate(Request $request)
                     break;
                 case 'blaaiz_interac':
                     $response = $this->sendViaBlaaizInterac($request, $currency, $sendingCurrency, $balance, $tx->id, $personal, $recipientAmount);
+                    break;
+                case 'swappr':
+                    $response = $this->sendViaSwappr($request, $currency, $tx->id, $recipientAmount);
                     break;
                 case 'ohentpay':
                     $response = $this->sendViaOhentPay($request, $currency, $sendingCurrency, $balance, $tx->id, $personal, $recipientAmount);
@@ -1214,6 +1222,98 @@ public function getExchangeRate(Request $request)
             'code' => 'APPMOBILE_FAILED',
             'data' =>  $this->txData($txId)
         ], 422);
+    }
+
+    protected function sendViaSwappr(Request $request, string $currency, string $txId, $recipientAmount)
+    {
+        $isApi = $request->expectsJson();
+        $transaction = TransactionHistory::findOrFail($txId);
+        $currency = strtoupper($currency);
+        $recipientAmount = (float) ($request->recipient_amount ?? $recipientAmount);
+
+        $recipient = $currency === 'CAD'
+            ? [
+                'email' => $request->interac_email,
+                'first_name' => $request->interac_first_name,
+                'last_name' => $request->interac_last_name,
+            ]
+            : [
+                'account_number' => $request->account_number,
+                'bank_code' => $request->bank_code,
+            ];
+
+        if ($currency === 'CAD' && $request->filled('interac_email')) {
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'method' => 'interac',
+                'recipient' => $recipient,
+                'merchant_reference' => $transaction->reference,
+            ];
+        } elseif ($currency === 'NGN') {
+            $payload = [
+                'amount_minor' => number_format((float) $recipientAmount * 100, 0, '.', ''),
+                'currency' => $currency,
+                'recipient' => $recipient,
+                'sender' => SwapprService::senderInformationFromConfig(),
+                'merchant_reference' => $transaction->reference,
+            ];
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "Swappr payouts are not configured for {$currency}.",
+                'code' => 'SWAPPR_CURRENCY_UNSUPPORTED',
+                'data' => $this->txData($txId),
+            ], 422);
+        }
+
+        if ($request->filled('sender')) {
+            $payload['sender'] = $request->input('sender');
+        }
+
+        $transaction->update(['recipient_amount' => $recipientAmount]);
+        $beneficiary = Beneficia::where('recipient_id', $transaction->recipient_id)
+            ->where('personal_id', $transaction->personal_id)
+            ->where('mode', $transaction->mode ?: 'live')
+            ->first();
+
+        if ($beneficiary?->swappr_beneficiary_id) {
+            $payload['beneficiary_id'] = $beneficiary->swappr_beneficiary_id;
+            unset($payload['recipient']);
+        }
+
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+
+        if ($response['success']) {
+            return $isApi
+                ? response()->json([
+                    'success' => true,
+                    'message' => $response['message'],
+                    'code' => 'SWAPPR_PAYOUT_SUBMITTED',
+                    'data' => $this->txData($txId),
+                ], 200)
+                : redirect()->route('transactionHistory')->with('success', $response['message']);
+        }
+
+        if ($response['uncertain'] ?? false) {
+            return $isApi
+                ? response()->json([
+                    'success' => true,
+                    'message' => $response['message'],
+                    'code' => 'SWAPPR_PAYOUT_PENDING_CONFIRMATION',
+                    'data' => $this->txData($txId),
+                ], 202)
+                : redirect()->route('transactionHistory')->with('success', $response['message']);
+        }
+
+        return $isApi
+            ? response()->json([
+                'success' => false,
+                'message' => $response['message'],
+                'code' => 'SWAPPR_PAYOUT_FAILED',
+                'data' => $this->txData($txId),
+            ], 422)
+            : back()->with('error', $response['message']);
     }
 
 

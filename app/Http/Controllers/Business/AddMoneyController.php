@@ -112,7 +112,11 @@ public function interacDetails(Request $request)
 
     // ── Interac ──────────────────────────────────────────────────────────────
 
-public function topupWithInterac(Request $request, BlaaizService $blaaiz)
+public function topupWithInterac(
+    Request $request,
+    BlaaizService $blaaiz,
+    \App\Services\CadInteracCollectionService $collections
+)
 {
 
     // Log::info('[Interac Initiate] Request received', 'ddddddd');
@@ -248,6 +252,91 @@ public function topupWithInterac(Request $request, BlaaizService $blaaiz)
                     : back()->withInput()->with('error', $msg);
             }
         }
+
+    $provider = $collections->resolveProvider();
+    if (!$provider) {
+        $payload = [
+            'success' => false,
+            'message' => 'No CAD Interac collection provider is enabled.',
+            'code' => 'COLLECTION_PROVIDER_DISABLED',
+            'data' => null,
+        ];
+
+        return $isApi ? response()->json($payload, 422) : back()->withInput()->with('error', $payload['message']);
+    }
+
+    if ($provider->key === 'swappr') {
+        if (strtolower((string) $balance->mode) === 'test') {
+            $payload = [
+                'success' => false,
+                'message' => 'Swappr shared-address collections are for live CAD wallets only. Use the sandbox funding simulator to test.',
+                'code' => 'SWAPPR_COLLECTION_LIVE_ONLY',
+                'data' => null,
+            ];
+
+            return $isApi ? response()->json($payload, 422) : back()->withInput()->with('error', $payload['message']);
+        }
+
+        $depositEmail = $collections->swapprRecipientEmail();
+        if (!$depositEmail) {
+            $payload = [
+                'success' => false,
+                'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+                'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                'data' => null,
+            ];
+
+            return $isApi ? response()->json($payload, 503) : back()->withInput()->with('error', $payload['message']);
+        }
+
+        $reference = $collections->newReference();
+        $transaction = TransactionHistory::create([
+            'user_id' => $user->id,
+            'balance_id' => $balance->id,
+            'payment_provider' => 'swappr',
+            'transaction_type' => 'payment',
+            'method' => 'credit',
+            'type' => 'credit',
+            'payment_method' => 'manual_interac',
+            'sender' => $request->email,
+            'amount' => $amount,
+            'fees' => $platformFee,
+            'recipient_amount' => $netAmount,
+            'currency' => $currency,
+            'status' => 'pending',
+            'reference' => $reference,
+            'payment_reference' => $reference,
+            'mode' => $balance->mode ?: 'live',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
+            'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+            'data' => [
+                'transaction_id' => $transaction->id,
+                'reference' => $reference,
+                'deposit_email' => $depositEmail,
+                'amount' => $amount,
+                'currency' => $currency,
+                'fees' => $platformFee,
+                'recipient_amount' => $netAmount,
+                'status' => 'pending',
+                'automatic_credit' => false,
+            ],
+        ], 200);
+    }
+
+    if ($provider->key !== 'blaaiz_interac') {
+        $payload = [
+            'success' => false,
+            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+            'data' => null,
+        ];
+
+        return $isApi ? response()->json($payload, 422) : back()->withInput()->with('error', $payload['message']);
+    }
 
     $payload = [
         'email'  => $request->email,

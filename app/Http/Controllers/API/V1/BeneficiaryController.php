@@ -567,6 +567,12 @@ class BeneficiaryController extends Controller
             return $name
                 ? $this->inquiryOk('payaza', $name, $accountNumber, $flovideCode, $res)
                 : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
+
+        case 'swappr':
+            return $this->inquiryFail(
+                'ACCOUNT_NAME_RESOLVED_AT_PAYOUT',
+                'Swappr resolves the recipient name during payout submission; separate account inquiry is not available.'
+            );
     }
 
     return $this->inquiryFail('PROVIDER_NOT_IMPLEMENTED', 'Validation is not available for this currency.');
@@ -1074,18 +1080,22 @@ public function store(Request $request)
             return response()->json(['success' => false, 'message' => $method === 'mobile' ? 'bank.mobileNumber is required.' : 'bank.accountNumber is required.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
         }
 
-        // Validate the account (same lookup as POST /account-inquiry)
-        $check = $this->lookupAccount($currency, $submitted, $account, $method);
+        if ($provider === 'swappr') {
+            $accountName = $accountName ?: null;
+        } else {
+            // Validate the account (same lookup as POST /account-inquiry)
+            $check = $this->lookupAccount($currency, $submitted, $account, $method);
 
-        if (! $check['success'] && in_array($currency, ['NGN', 'UGX', 'GHS'], true)) {
-            return response()->json(['success' => false, 'message' => $check['message'], 'code' => 'ACCOUNT_VALIDATION_FAILED', 'mode' => $mode, 'data' => null], 422);
-        }
+            if (! $check['success'] && in_array($currency, ['NGN', 'UGX', 'GHS'], true)) {
+                return response()->json(['success' => false, 'message' => $check['message'], 'code' => 'ACCOUNT_VALIDATION_FAILED', 'mode' => $mode, 'data' => null], 422);
+            }
 
-        // Prefer the provider-verified name; otherwise use the name sent with the request
-        $accountName = $check['account_name'] ?? $accountName;
+            // Prefer the provider-verified name; otherwise use the name sent with the request
+            $accountName = $check['account_name'] ?? $accountName;
 
-        if (! $accountName) {
-            return response()->json(['success' => false, 'message' => 'bank.accountHolder is required when the account name cannot be verified.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
+            if (! $accountName) {
+                return response()->json(['success' => false, 'message' => 'bank.accountHolder is required when the account name cannot be verified.', 'code' => 'VALIDATION_ERROR', 'mode' => $mode, 'data' => null], 422);
+            }
         }
     }
 
@@ -1109,6 +1119,7 @@ public function store(Request $request)
             'bank_code'            => $bankRow?->flovide_code ?? ($bank['bankCode'] ?? null),
             'flovide_bank_code'    => $bankRow?->flovide_code,
             'provider'             => $provider,
+            'mode'                 => $mode,
             'unique_reference'     => strtoupper(Str::random(7)),
             'customer_reference'   => strtoupper(Str::random(7)),
             'recipient_id'         => Str::uuid(),
@@ -1116,6 +1127,28 @@ public function store(Request $request)
             'user_id'              => $ownerId,
             'created_by_member_id' => $memberId,
         ]);
+
+        if ($provider === 'swappr') {
+            $sync = app(\App\Services\SwapprService::class)->syncBeneficiary($beneficia);
+
+            if (!$sync['success']) {
+                Log::error('[API Beneficiary Store] Swappr sync failed', [
+                    'beneficiary_id' => $beneficia->id,
+                    'code' => $sync['code'],
+                    'status' => $sync['status'],
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $sync['message'] . ' The beneficiary was saved locally but not with Swappr.',
+                    'code' => $sync['code'],
+                    'mode' => $mode,
+                    'data' => ['beneficiary_id' => $beneficia->id, 'saved_locally' => true],
+                ], ($sync['uncertain'] ?? false) ? 503 : 422);
+            }
+
+            $beneficia->refresh();
+        }
 
         Log::info('[API Beneficiary Store] Created', ['beneficiary_id' => $beneficia->id, 'owner_id' => $ownerId]);
 

@@ -6,10 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentProviderCurrency extends Model
 {
-    protected $fillable = ['payment_provider_id', 'currency', 'transfer_method', 'is_enabled'];
+    protected $fillable = [
+        'payment_provider_id',
+        'currency',
+        'transfer_method',
+        'is_enabled',
+        'collection_enabled',
+    ];
 
     protected $casts = [
         'is_enabled' => 'boolean',
+        'collection_enabled' => 'boolean',
     ];
 
     public function provider()

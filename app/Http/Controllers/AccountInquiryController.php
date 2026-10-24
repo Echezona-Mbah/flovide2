@@ -10,6 +10,7 @@ use App\Services\OhentPayService;
 use App\Services\ProviderRoutingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AccountInquiryController extends Controller
 {
@@ -40,6 +41,7 @@ class AccountInquiryController extends Controller
             'bank_code'       => 'required|string',
             'account_number'  => 'required|string',
             'transfer_method' => 'nullable|in:bank,mobile',
+            'mode'            => 'nullable|in:test,live',
         ]);
 
         $currency = strtoupper($request->currency);
@@ -197,6 +199,93 @@ class AccountInquiryController extends Controller
                     'message' => 'Account inquiry successful',
                     'code'    => 'ACCOUNT_INQUIRY_SUCCESS',
                     'data'    => ['account_name' => data_get($response, 'data.response_content.account_name')]
+                ], 200);
+
+            case 'swappr':
+                if ($currency !== 'NGN') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Swappr name enquiry is only available for NGN.',
+                        'code'    => 'unsupported_currency',
+                        'data'    => ['currency' => $currency],
+                    ], 400);
+                }
+
+                $validated = $request->validate([
+                    'account_number' => ['required', 'regex:/^\d{10}$/'],
+                    'bank_code' => ['required', 'regex:/^\d+$/'],
+                ]);
+
+                $swapprBank = $providerRow;
+                if (!$swapprBank || $swapprBank->provider !== 'swappr') {
+                    $swapprBank = \App\Models\Bank::query()
+                        ->where('provider', 'swappr')
+                        ->where('currency', 'NGN')
+                        ->where(function ($query) use ($request) {
+                            $query->where('flovide_code', $request->bank_code)
+                                ->orWhere('bank_code', $request->bank_code)
+                                ->orWhere('bank_nibss_code', $request->bank_code);
+                        })
+                        ->first();
+                }
+
+                if (!$swapprBank) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This bank is not supported by Swappr.',
+                        'code'    => 'unknown_bank_code',
+                        'data'    => null,
+                    ], 422);
+                }
+
+                $swapprBankCode = in_array((string) $request->bank_code, [
+                    (string) $swapprBank->bank_code,
+                    (string) $swapprBank->bank_nibss_code,
+                ], true)
+                    ? (string) $request->bank_code
+                    : (string) ($swapprBank->bank_code ?: $swapprBank->bank_nibss_code);
+
+                $isTestUrl = str_starts_with($request->path(), 'api/test/');
+                $environment = $isTestUrl
+                    ? 'test'
+                    : ($request->input('mode') ?? session('mode', 'live'));
+                $response = app(\App\Services\SwapprService::class)->nameEnquiry(
+                    $validated['account_number'],
+                    $swapprBankCode,
+                    (string) $swapprBank->name,
+                    (string) Str::uuid(),
+                    $environment
+                );
+
+                if (!$response['success']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $response['message'] ?? 'Swappr name enquiry failed.',
+                        'code' => $response['code'] ?? 'SWAPPR_NAME_ENQUIRY_FAILED',
+                        'data' => $response['data'],
+                    ], $response['status'] ?: 502);
+                }
+
+                $resolvedName = data_get($response, 'data.resolved_name');
+                if (!is_string($resolvedName) || trim($resolvedName) === '') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Swappr did not return a resolved account name.',
+                        'code' => 'SWAPPR_NAME_ENQUIRY_INVALID_RESPONSE',
+                        'data' => null,
+                    ], 502);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Account inquiry successful',
+                    'code' => 'ACCOUNT_INQUIRY_SUCCESS',
+                    'data' => [
+                        'account_name' => $resolvedName,
+                        'resolved_name' => $resolvedName,
+                        'source' => data_get($response, 'data.source'),
+                        'resolved_by_provider' => data_get($response, 'data.resolved_by_provider'),
+                    ],
                 ], 200);
 
             default:

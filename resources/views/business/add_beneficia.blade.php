@@ -742,6 +742,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (method === "bank")   { const acc = accountNumber.value.trim(); if (!acc || !code) return; payload = { customer_number: acc, bank_code: code }; }
             if (method === "mobile") { const mobile = mobileInput.value.trim(); if (!mobile || !code) return; payload = { customer_number: mobile, bank_code: code }; }
             route = "{{ route('appmobile.account-enquiry') }}";
+        } else if (provider === "swappr") {
+            setHolderManualFallback("Swappr verifies the account holder when the payout is submitted. Please confirm the bank and account number.");
+            return;
         }
         if (!payload) return;
 

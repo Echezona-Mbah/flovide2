@@ -89,4 +89,25 @@ return [
         'ugx_mobile_service_validation' => env('PIVOT_UGX_MOBILE_SERVICE_VALIDATION'),
     ],
 
+    'swappr' => [
+        'base_url'       => env('SWAPPR_BASE_URL', 'https://api.swappr.me/api/v1'),
+        'test_public_key' => env('SWAPPR_TEST_PUBLIC_KEY'),
+        'live_public_key' => env('SWAPPR_LIVE_PUBLIC_KEY'),
+        'test_api_key'   => env('SWAPPR_TEST_API_KEY'),
+        'live_api_key'   => env('SWAPPR_LIVE_API_KEY'),
+        'api_key'        => env('SWAPPR_API_KEY'),
+        'webhook_secret' => env('SWAPPR_WEBHOOK_SECRET'),
+        'cad_interac_email' => env('SWAPPR_CAD_INTERAC_EMAIL'),
+        'timeout'        => env('SWAPPR_TIMEOUT', 30),
+        'sender' => [
+            'first_name' => env('SWAPPR_SENDER_FIRST_NAME'),
+            'last_name' => env('SWAPPR_SENDER_LAST_NAME'),
+            'id_type' => env('SWAPPR_SENDER_ID_TYPE'),
+            'id_number' => env('SWAPPR_SENDER_ID_NUMBER'),
+            'id_expiry' => env('SWAPPR_SENDER_ID_EXPIRY'),
+            'date_of_birth' => env('SWAPPR_SENDER_DATE_OF_BIRTH'),
+            'country' => env('SWAPPR_SENDER_COUNTRY'),
+        ],
+    ],
+
 ];

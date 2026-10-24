@@ -341,7 +341,7 @@ public function store(Request $request)
         ], 401);
     }
 
-      $mode = session('mode', 'live');
+      $mode = str_starts_with($request->path(), 'api/test/') ? 'test' : session('mode', 'live');
 
     // ── Block web-based creation while in Test mode ──────────────────────
     // Test mode beneficiaries must be created via the API only.
@@ -646,6 +646,7 @@ public function store(Request $request)
                 'bank_code'         => $bank['bankCode'] ?? null,
                 'flovide_bank_code' => $flovideCode,
                 'provider'             => $provider,
+                'mode'                 => $mode,
                 'unique_reference'     => strtoupper(\Str::random(7)),
                 'customer_reference'   => strtoupper(\Str::random(7)),
                 'recipient_id'         => \Str::uuid(),
@@ -655,6 +656,30 @@ public function store(Request $request)
                 'ohentpay_recipient_id' => $ohentPayRecipientId ?? null,
 
             ]);
+
+            if ($provider === 'swappr') {
+                $sync = app(\App\Services\SwapprService::class)->syncBeneficiary($beneficia);
+
+                if (!$sync['success']) {
+                    Log::error('[Beneficiary Store] Swappr sync failed', [
+                        'beneficiary_id' => $beneficia->id,
+                        'code' => $sync['code'],
+                        'status' => $sync['status'],
+                    ]);
+
+                    $message = $sync['message'] . ' The beneficiary was saved locally but not with Swappr.';
+                    return $isApi
+                        ? response()->json([
+                            'success' => false,
+                            'message' => $message,
+                            'code' => $sync['code'],
+                            'data' => ['beneficiary_id' => $beneficia->id, 'saved_locally' => true],
+                        ], ($sync['uncertain'] ?? false) ? 503 : 422)
+                        : back()->with('error', $message);
+                }
+
+                $beneficia->refresh();
+            }
 
             Log::info('[Beneficiary Store] Beneficiary created', [
                 'beneficiary_id' => $beneficia->id,

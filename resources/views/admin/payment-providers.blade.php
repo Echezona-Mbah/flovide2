@@ -47,16 +47,21 @@
 
                         <div class="card-body">
                             <p class="text-muted small mb-3">
-                                Currencies this provider handles. Toggle any on/off, or add a new one below.
-                                Leave "Method" blank to apply to both bank and mobile.
+                                Payment routing and collection routing have separate switches. Lower priority is selected first when multiple providers are enabled.
                             </p>
+                            @if(in_array($provider->key, ['blaaiz_interac', 'swappr'], true))
+                                <p class="text-muted small mb-3">
+                                    Use the CAD row's Collection switch to enable or disable this provider for CAD collections without changing its payout setting.
+                                </p>
+                            @endif
 
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
                                         <th>Currency</th>
                                         <th>Method</th>
-                                        <th>Status</th>
+                                        <th>Payments</th>
+                                        <th>Collections</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -76,6 +81,18 @@
                                                 </form>
                                             </td>
                                             <td>
+                                                @if(strtoupper($c->currency) === 'CAD')
+                                                    <form method="POST" action="{{ route('admin.payment-providers.collection.toggle', [$provider, $c->id]) }}" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm {{ $c->collection_enabled ? 'btn-success' : 'btn-secondary' }}">
+                                                            {{ $c->collection_enabled ? 'On' : 'Off' }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <span class="text-muted small">Not supported</span>
+                                                @endif
+                                            </td>
+                                            <td>
                                                 <form method="POST" action="{{ route('admin.payment-providers.currency.remove', [$provider, $c->id]) }}" class="d-inline"
                                                       onsubmit="return confirm('Remove this currency mapping?');">
                                                     @csrf
@@ -85,7 +102,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="4" class="text-muted">No currencies mapped yet.</td></tr>
+                                        <tr><td colspan="5" class="text-muted">No currencies mapped yet.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>

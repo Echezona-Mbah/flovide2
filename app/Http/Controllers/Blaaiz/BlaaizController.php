@@ -88,7 +88,11 @@ class BlaaizController extends Controller
 
 
 
-     public function initiateInteracMoneyRequest(Request $request, BlaaizService $blaaiz)
+     public function initiateInteracMoneyRequest(
+         Request $request,
+         BlaaizService $blaaiz,
+         \App\Services\CadInteracCollectionService $collections
+     )
     {
             $isApi = $request->expectsJson();
 
@@ -192,6 +196,83 @@ class BlaaizController extends Controller
                     ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
                     : back()->withInput()->with('error', $msg);
             }
+        }
+
+        $provider = $collections->resolveProvider();
+        if (!$provider) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No CAD Interac collection provider is enabled.',
+                'code' => 'COLLECTION_PROVIDER_DISABLED',
+                'data' => null,
+            ], 422);
+        }
+
+        if ($provider->key === 'swappr') {
+            if (strtolower((string) $balance->mode) === 'test') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Swappr shared-address collections are for live CAD wallets only. Use the sandbox funding simulator to test.',
+                    'code' => 'SWAPPR_COLLECTION_LIVE_ONLY',
+                    'data' => null,
+                ], 422);
+            }
+
+            $depositEmail = $collections->swapprRecipientEmail();
+            if (!$depositEmail) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+                    'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                    'data' => null,
+                ], 503);
+            }
+
+            $reference = $collections->newReference();
+            $transaction = TransactionHistory::create([
+                'user_id' => $user->id,
+                'balance_id' => $balance->id,
+                'payment_provider' => 'swappr',
+                'transaction_type' => 'payment',
+                'method' => 'credit',
+                'type' => 'credit',
+                'payment_method' => 'manual_interac',
+                'sender' => $validated['email'],
+                'amount' => $amount,
+                'fees' => $platformFee,
+                'recipient_amount' => $netAmount,
+                'currency' => $currency,
+                'status' => 'pending',
+                'reference' => $reference,
+                'payment_reference' => $reference,
+                'mode' => $balance->mode ?: 'live',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
+                'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+                'data' => [
+                    'transaction_id' => $transaction->id,
+                    'reference' => $reference,
+                    'deposit_email' => $depositEmail,
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'fees' => $platformFee,
+                    'recipient_amount' => $netAmount,
+                    'status' => 'pending',
+                    'automatic_credit' => false,
+                ],
+            ], 200);
+        }
+
+        if ($provider->key !== 'blaaiz_interac') {
+            return response()->json([
+                'success' => false,
+                'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+                'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+                'data' => null,
+            ], 422);
         }
 
         Log::info('[Interac Initiate] Sending payload to Blaaiz', ['currency' => $currency]);
@@ -701,7 +782,10 @@ public function registerWebhookUrls(Request $request, BlaaizService $blaaiz)
 
 
 
-public function initiateAutoDeposit(Request $request)
+public function initiateAutoDeposit(
+    Request $request,
+    \App\Services\CadInteracCollectionService $collections
+)
 {
     $validated = $request->validate([
         'amount'     => 'required|numeric|min:0.1',
@@ -780,13 +864,50 @@ public function initiateAutoDeposit(Request $request)
         ], 422);
     }
 
-    $reference = 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
+    $provider = $collections->resolveProvider();
+    if (!$provider) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CAD Interac collection provider is enabled.',
+            'code' => 'COLLECTION_PROVIDER_DISABLED',
+        ], 422);
+    }
+
+    if (!in_array($provider->key, ['blaaiz_interac', 'swappr'], true)) {
+        return response()->json([
+            'success' => false,
+            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+        ], 422);
+    }
+
+    $isSwappr = $provider->key === 'swappr';
+    if ($isSwappr && strtolower((string) $balance->mode) === 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Swappr shared-address collections are for live CAD wallets only. Use the sandbox funding simulator to test.',
+            'code' => 'SWAPPR_COLLECTION_LIVE_ONLY',
+        ], 422);
+    }
+
+    $depositEmail = $isSwappr ? $collections->swapprRecipientEmail() : 'payment@flovide.com';
+    if (!$depositEmail) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+            'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+        ], 503);
+    }
+
+    $reference = $isSwappr
+        ? $collections->newReference('SWP')
+        : 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
 
     $transaction = TransactionHistory::create([
         'user_id'           => $user->id,
         'balance_id'        => $balance->id,
         'personal_id'       => null,
-        'payment_provider'  => 'interac',
+        'payment_provider'  => $isSwappr ? 'swappr' : 'interac',
         'transaction_type'  => 'payment',
         'method'            => 'credit',
         'payment_method'    => 'wallet_autodeposit', // distinct from 'standard'/'auto' request flows
@@ -815,22 +936,28 @@ public function initiateAutoDeposit(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'We are watching for your Interac e-Transfer.',
-        'code'    => 'AUTODEPOSIT_PENDING',
+        'message' => $isSwappr
+            ? 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. Manual reconciliation is required; your wallet will not be credited automatically.'
+            : 'We are watching for your Interac e-Transfer.',
+        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION' : 'AUTODEPOSIT_PENDING',
         'data'    => [
             'reference'     => $reference,
-            'deposit_email' => 'payment@flovide.com',
+            'deposit_email' => $depositEmail,
             'amount'        => $amount,
             'currency'      => $currency,
             'status'        => 'pending',
             'fees'              => $platformFee,
             'platform_fee'      => $platformFee,
             'recipient_amount'  => $netAmount,
+            'automatic_credit' => !$isSwappr,
         ],
     ], 200);
 }
 
-public function initiateAutoDepositPersonal(Request $request)
+public function initiateAutoDepositPersonal(
+    Request $request,
+    \App\Services\CadInteracCollectionService $collections
+)
 {
     $validated = $request->validate([
         'amount'     => 'required|numeric|min:0.1',
@@ -894,13 +1021,50 @@ public function initiateAutoDepositPersonal(Request $request)
     $platformFee = 0;
     $netAmount   = $amount;
 
-    $reference = 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
+    $provider = $collections->resolveProvider();
+    if (!$provider) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No CAD Interac collection provider is enabled.',
+            'code' => 'COLLECTION_PROVIDER_DISABLED',
+        ], 422);
+    }
+
+    if (!in_array($provider->key, ['blaaiz_interac', 'swappr'], true)) {
+        return response()->json([
+            'success' => false,
+            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
+            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+        ], 422);
+    }
+
+    $isSwappr = $provider->key === 'swappr';
+    if ($isSwappr && strtolower((string) $balance->mode) === 'test') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Swappr shared-address collections are for live CAD wallets only. Use the sandbox funding simulator to test.',
+            'code' => 'SWAPPR_COLLECTION_LIVE_ONLY',
+        ], 422);
+    }
+
+    $depositEmail = $isSwappr ? $collections->swapprRecipientEmail() : 'payments@flovide.com';
+    if (!$depositEmail) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+            'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+        ], 503);
+    }
+
+    $reference = $isSwappr
+        ? $collections->newReference('SWP')
+        : 'ADEP-' . strtoupper(\Illuminate\Support\Str::random(10));
 
     $transaction = TransactionHistory::create([
         'user_id'           => null,
         'personal_id'       => $personalId,
         'balance_id'        => $balance->id,
-        'payment_provider'  => 'interac',
+        'payment_provider'  => $isSwappr ? 'swappr' : 'interac',
         'transaction_type'  => 'payment',
         'method'            => 'credit',
         'payment_method'    => 'wallet_autodeposit',
@@ -930,18 +1094,21 @@ public function initiateAutoDepositPersonal(Request $request)
 
     return response()->json([
         'success' => true,
-        'message' => 'We are watching for your Interac e-Transfer.',
-        'code'    => 'AUTODEPOSIT_PENDING',
+        'message' => $isSwappr
+            ? 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. Manual reconciliation is required; your wallet will not be credited automatically.'
+            : 'We are watching for your Interac e-Transfer.',
+        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION' : 'AUTODEPOSIT_PENDING',
         'data'    => [
             'method'     => 'credit',
             'reference'     => $reference,
-            'deposit_email' => 'payments@flovide.com',
+            'deposit_email' => $depositEmail,
             'amount'        => $amount,
             'currency'      => $currency,
             'fees'      => $platformFee,
             'recipient_amount'   => $netAmount,
             'payment_reference'      => $reference,
             'status'        => 'pending',
+            'automatic_credit' => !$isSwappr,
 
         ],
     ], 200);
