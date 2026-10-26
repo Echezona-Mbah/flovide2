@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TransactionHistory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Traits\GeneratesTransactionReceipt;
 
 
@@ -121,6 +122,20 @@ public function showAllTransactions(Request $request)
 
 private function formatTransactionReceiptData(TransactionHistory $transaction): array
 {
+    $qrContent = implode('\n', array_filter([
+        'REF: ' . $transaction->reference,
+        $transaction->recipient_account_name ?? null,
+        $transaction->recipient_account_number ?? null,
+        $transaction->recipient_bank_name ?? null,
+    ]));
+
+    $qrSvg = QrCode::format('svg')
+        ->size(120)
+        ->margin(1)
+        ->generate($qrContent);
+
+    $qrDataUri = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
+
     return [
         'title' => 'Transfer Confirmation',
         'date' => optional($transaction->created_at)->format('d M Y'),
@@ -133,6 +148,7 @@ private function formatTransactionReceiptData(TransactionHistory $transaction): 
         'account_name' => $transaction->recipient_account_name ?? 'N/A',
         'account_number' => $transaction->recipient_account_number ?? 'N/A',
         'brand_name' => config('app.name', 'OhentPay'),
+        'qr' => $qrDataUri,
     ];
 }
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Rules\ValidAmountBasedOnType;
 use App\Rules\ValidTransactionReference;
 use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Traits\GeneratesTransactionReceipt;
 
 
@@ -326,7 +327,7 @@ private function formatTransactionReceiptData(TransactionHistory $transaction): 
         $transaction->recipient_account_name ? 'To: ' . $transaction->recipient_account_name : null,
     ]));
 
-    $qrSvg = (string) \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+    $qrSvg = (string) QrCode::format('svg')
         ->size(200)
         ->margin(0)
         ->errorCorrection('M')
