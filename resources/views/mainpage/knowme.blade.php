@@ -170,7 +170,32 @@
             font-weight: 500;
         }
 
+
+
+
         .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid currentColor;
+        }
+
+        .status-badge::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* .status-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -184,16 +209,16 @@
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: #dffef7;
-        }
+        } */
 
-        .status-badge::before {
+        /* .status-badge::before {
             content: "";
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background: var(--flovide-secondary);
             box-shadow: 0 0 0 4px rgba(30,200,181,0.18);
-        }
+        } */
 
         .info-side {
             padding: 30px 30px 26px;
@@ -276,9 +301,9 @@
             word-break: break-word;
         }
 
-        .detail-value.status {
+        /* .detail-value.status {
             color: var(--flovide-success);
-        }
+        } */
 
         .footer {
             display: flex;
@@ -336,6 +361,43 @@
                 align-items: flex-start;
             }
         }
+
+        .detail-value.status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        /* Active: Green */
+        .status-active {
+            color: #15803d;
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        /* Inactive: Red */
+        .status-inactive {
+            color: #b91c1c;
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        /* On leave: Amber */
+        .status-on-leave {
+            color: #b45309;
+            background: #fef3c7;
+            border-color: #fcd34d;
+        }
+
+        /* Unknown status: Grey */
+        .status-unknown {
+            color: #475569;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
     </style>
 </head>
 <body>
@@ -349,6 +411,12 @@
             // 'employment_date' => \Carbon\Carbon::parse($employee->employment_date)->format('d F Y'),
             'id_card_expiration_date' => \Carbon\Carbon::parse($employee->id_card_expiration_date)->format('d F Y'),
             'status' => ucfirst(str_replace('_', ' ', $employee->status)),
+            'status_class' => match ($employee->status) {
+                'active' => 'status-active',
+                'inactive' => 'status-inactive',
+                'on_leave' => 'status-on-leave',
+                default => 'status-unknown',
+            },
             'photo' => $employee->photo_path
                 ? asset('storage/' . $employee->photo_path)
                 : asset('../asserts/homepage/default-avatar.png'),
@@ -379,7 +447,9 @@
                         <p class="profile-role">{{ $employee['title'] }}</p>
                     </div>
 
-                    <div class="status-badge">{{ $employee['status'] }}</div>
+                    <div class="status-badge {{ $employee['status_class'] }}">
+                        {{ $employee['status'] }}
+                    </div>
                 </aside>
 
                 <section class="info-side">
@@ -425,7 +495,9 @@
 
                         <div class="detail-item" style="grid-column: 1 / -1;">
                             <span class="detail-label">Employment Status</span>
-                            <span class="detail-value status">{{ $employee['status'] }}</span>
+                            <span class="detail-value status {{ $employee['status_class'] }}">
+                                {{ $employee['status'] }}
+                            </span>
                         </div>
                     </div>
 
