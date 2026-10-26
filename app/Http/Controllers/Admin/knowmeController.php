@@ -200,6 +200,92 @@ class knowmeController extends Controller
         }
     }
 
+    public function update(Request $request, Employee $employee)
+    {
+        $admin = Auth::guard('admin')->user();
+
+        if (!$admin) {
+            return response()->json(['success' => false, 'message' => 'Please login first.'], 401);
+        }
+
+        $adminId = $admin->getAuthIdentifier();
+
+        // Normalize inputs
+        $request->merge([
+            'name' => is_string($request->input('name')) ? trim($request->input('name')) : $request->input('name'),
+            'job_title' => is_string($request->input('job_title')) ? trim($request->input('job_title')) : $request->input('job_title'),
+            'department' => is_string($request->input('department')) ? trim($request->input('department')) : $request->input('department'),
+            'work_email' => is_string($request->input('work_email')) ? Str::lower(trim($request->input('work_email'))) : $request->input('work_email'),
+        ]);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'job_title' => ['required', 'string', 'max:255'],
+            'department' => ['required', 'string', 'max:255'],
+            'work_email' => ['required', 'email', 'max:255', Rule::unique('employees', 'work_email')->ignore($employee->id)],
+            'id_card_expiration_date' => ['required', 'date_format:Y-m-d', 'after:today'],
+            'status' => ['required', Rule::in(['active', 'inactive', 'on_leave'])],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=200,min_height=200'],
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $validated, $employee, $adminId) {
+                $data = [
+                    'name' => $validated['name'],
+                    'job_title' => $validated['job_title'],
+                    'department' => $validated['department'],
+                    'work_email' => $validated['work_email'],
+                    'id_card_expiration_date' => $validated['id_card_expiration_date'],
+                    'status' => $validated['status'],
+                ];
+
+                if ($request->hasFile('photo')) {
+                    // Delete old photo
+                    if ($employee->photo_path) {
+                        Storage::disk('public')->delete($employee->photo_path);
+                    }
+                    $data['photo_path'] = $request->file('photo')->store('employee-photos', 'public');
+                }
+
+                $employee->update($data);
+
+                Log::info('Employee updated successfully.', [
+                    'employee_record_id' => $employee->id,
+                    'admin_id' => $adminId,
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee updated successfully.',
+                'employee' => [
+                    'id' => $employee->employee_id,
+                    'name' => $employee->name,
+                    'job_title' => $employee->job_title,
+                    'department' => $employee->department,
+                    'work_email' => $employee->work_email,
+                    'status' => $employee->status,
+                    'expiration' => $employee->id_card_expiration_date
+                        ? \Carbon\Carbon::parse($employee->id_card_expiration_date)->format('d M Y')
+                        : '—',
+                    'photo_url'  => $employee->photo_path ? asset('storage/' . $employee->photo_path) : null,
+                ],
+            ]);
+
+        } catch (Throwable $e) {
+            Log::error('Failed to update employee record.', [
+                'employee_record_id' => $employee->id,
+                'admin_id' => $adminId,
+                'exception_message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to update employee right now. Please try again.',
+            ], 500);
+        }
+    }
+
 
 
 

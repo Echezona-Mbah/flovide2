@@ -1095,6 +1095,325 @@
         box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);
     }
 
+    .action-btn-edit {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        background: #f0fdf4;
+        color: #16a34a;
+        border-color: #bbf7d0;
+    }
+
+    .action-btn-edit:hover {
+        background: #16a34a;
+        color: #ffffff;
+        border-color: #16a34a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+    }
+
+    .action-btn-copy {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        background: #faf5ff;
+        color: #7c3aed;
+        border-color: #ddd6fe;
+    }
+
+    .action-btn-copy:hover {
+        background: #7c3aed;
+        color: #ffffff;
+        border-color: #7c3aed;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+    }
+
+    /* ── Edit Employee Modal ── */
+    .emp-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9000;
+        background: rgba(10, 20, 40, 0.52);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .emp-modal-overlay.is-open {
+        display: flex;
+        animation: empModalFadeIn 0.22s ease;
+    }
+
+    @keyframes empModalFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .emp-modal-box {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 32px 80px rgba(15, 23, 42, 0.22);
+        width: 100%;
+        max-width: 680px;
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: empModalSlideUp 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes empModalSlideUp {
+        from { transform: translateY(30px) scale(0.97); opacity: 0; }
+        to   { transform: translateY(0)    scale(1);    opacity: 1; }
+    }
+
+    .emp-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px 28px 18px;
+        border-bottom: 1px solid #e9f0f9;
+    }
+
+    .emp-modal-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .emp-modal-title-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.85rem;
+    }
+
+    .emp-modal-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.15s ease;
+    }
+
+    .emp-modal-close:hover {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+
+    .emp-modal-body {
+        padding: 24px 28px;
+    }
+
+    .emp-modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .emp-modal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .emp-modal-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .emp-modal-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .emp-modal-input {
+        height: 40px;
+        padding: 0 12px;
+        border: 1.5px solid #dfe7f2;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        color: #0f172a;
+        background: #f8fafc;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        outline: none;
+        font-family: inherit;
+    }
+
+    .emp-modal-input:focus {
+        border-color: #2563eb;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .emp-modal-select {
+        height: 40px;
+        padding: 0 12px;
+        border: 1.5px solid #dfe7f2;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        color: #0f172a;
+        background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") right 12px center / 10px no-repeat;
+        appearance: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        outline: none;
+        font-family: inherit;
+        cursor: pointer;
+    }
+
+    .emp-modal-select:focus {
+        border-color: #2563eb;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .emp-modal-photo-zone {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 16px;
+        border: 2px dashed #dfe7f2;
+        border-radius: 12px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .emp-modal-photo-zone:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+
+    .emp-modal-photo-preview {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 2px solid #dfe7f2;
+        flex-shrink: 0;
+    }
+
+    .emp-modal-photo-preview-fallback {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .emp-modal-photo-text {
+        font-size: 0.82rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .emp-modal-photo-text strong {
+        display: block;
+        font-size: 0.85rem;
+        color: #334155;
+        margin-bottom: 2px;
+    }
+
+    .emp-modal-footer {
+        padding: 18px 28px 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        border-top: 1px solid #e9f0f9;
+    }
+
+    .emp-modal-btn {
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.17s ease;
+        font-family: inherit;
+    }
+
+    .emp-modal-btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #dfe7f2;
+    }
+
+    .emp-modal-btn-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    .emp-modal-btn-save {
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .emp-modal-btn-save:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    }
+
+    .emp-modal-btn-save:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Copy toast */
+    #empCopyToast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #0f172a;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 100px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    #empCopyToast.is-visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
     /* No search results feedback */
     .no-results-box {
         padding: 44px 20px;
@@ -1512,6 +1831,7 @@
                                             @endphp
 
                                             <tr class="data-row"
+                                                data-emp-db-id="{{ $employee->id }}"
                                                 data-name="{{ strtolower($employeeName) }}"
                                                 data-id="{{ strtolower((string)$employeeId) }}"
                                                 data-email="{{ strtolower((string)$workEmail) }}"
@@ -1580,7 +1900,32 @@
                                                                 <i class="fas fa-external-link-alt" aria-hidden="true"></i>
                                                                 <span>View</span>
                                                             </a>
+
+                                                            <button type="button"
+                                                                class="action-btn action-btn-copy emp-copy-url-btn"
+                                                                title="Copy public profile URL"
+                                                                aria-label="Copy URL for {{ $employeeName }}"
+                                                                data-url="{{ $verifyUrl }}">
+                                                                <i class="fas fa-link" aria-hidden="true"></i>
+                                                            </button>
                                                         @endif
+
+                                                        <button type="button"
+                                                            class="action-btn action-btn-edit emp-edit-btn"
+                                                            title="Edit employee"
+                                                            aria-label="Edit {{ $employeeName }}"
+                                                            data-id="{{ $employee->id }}"
+                                                            data-name="{{ $employee->name }}"
+                                                            data-job_title="{{ $employee->job_title }}"
+                                                            data-department="{{ $employee->department }}"
+                                                            data-work_email="{{ $employee->work_email }}"
+                                                            data-status="{{ $employee->status }}"
+                                                            data-expiration="{{ $employee->id_card_expiration_date }}"
+                                                            data-photo="{{ $employee->photo_path ? asset('storage/'.$employee->photo_path) : '' }}"
+                                                            data-initials="{{ $initials }}"
+                                                            data-update-url="{{ route('admin.employees.update', $employee->id) }}">
+                                                            <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                                                        </button>
 
                                                         <form action="{{ route('admin.employees.destroy', $employee->id) }}" method="POST" class="delete-employee-form">
                                                             @csrf
@@ -1628,8 +1973,102 @@
                         @endif
                     </section>
                 </div>
-            
 
+
+
+                {{-- Edit Employee Modal --}}
+                <div id="empEditModalOverlay" class="emp-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="empEditModalHeading">
+                    <div class="emp-modal-box">
+                        <div class="emp-modal-header">
+                            <div class="emp-modal-title">
+                                <div class="emp-modal-title-icon">
+                                    <i class="fas fa-user-edit" aria-hidden="true"></i>
+                                </div>
+                                <span>
+                                    <span id="empEditModalHeading">Edit Employee</span>
+                                    <span style="font-weight:400; font-size:0.85rem; color:#64748b;"> — <span id="empEditModalEmpName"></span></span>
+                                </span>
+                            </div>
+                            <button id="empEditModalClose" class="emp-modal-close" aria-label="Close modal">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <form id="empEditForm" novalidate>
+                            @csrf
+                            <div class="emp-modal-body">
+                                <div class="emp-modal-grid">
+
+                                    {{-- Photo zone --}}
+                                    <label class="emp-modal-photo-zone full-width" for="editEmpPhotoInput" aria-label="Change employee photo">
+                                        <img id="editEmpPhoto" class="emp-modal-photo-preview" src="" alt="Employee photo" style="display:none;">
+                                        <div id="editEmpInitials" class="emp-modal-photo-preview-fallback" style="display:none;"></div>
+                                        <div class="emp-modal-photo-text">
+                                            <strong>Change Photo (optional)</strong>
+                                            Click to upload a new photo · JPG, PNG, WEBP · max 5 MB · min 200 × 200 px
+                                        </div>
+                                        <input id="editEmpPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                                    </label>
+
+                                    {{-- Name --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpName">Full Name</label>
+                                        <input id="editEmpName" class="emp-modal-input" type="text" placeholder="Full name" required>
+                                    </div>
+
+                                    {{-- Job Title --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpJobTitle">Job Title</label>
+                                        <input id="editEmpJobTitle" class="emp-modal-input" type="text" placeholder="e.g. Software Engineer" required>
+                                    </div>
+
+                                    {{-- Department --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpDept">Department</label>
+                                        <input id="editEmpDept" class="emp-modal-input" type="text" placeholder="e.g. Engineering" required>
+                                    </div>
+
+                                    {{-- Work Email --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpEmail">Work Email</label>
+                                        <input id="editEmpEmail" class="emp-modal-input" type="email" placeholder="work@company.com" required>
+                                    </div>
+
+                                    {{-- Status --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpStatus">Status</label>
+                                        <select id="editEmpStatus" class="emp-modal-select" required>
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                            <option value="on_leave">On Leave</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Expiration Date --}}
+                                    <div class="emp-modal-field">
+                                        <label class="emp-modal-label" for="editEmpExpiry">ID Card Expiry</label>
+                                        <input id="editEmpExpiry" class="emp-modal-input" type="date" required>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="emp-modal-footer">
+                            <button id="empEditModalCancel" class="emp-modal-btn emp-modal-btn-cancel" type="button">Cancel</button>
+                            <button id="empEditModalSave"   class="emp-modal-btn emp-modal-btn-save"   type="button">
+                                <i class="fas fa-check" style="margin-right:6px;" aria-hidden="true"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Copy URL Toast --}}
+                <div id="empCopyToast" role="status" aria-live="polite">
+                    <i class="fas fa-check-circle"></i>
+                    Profile URL copied!
+                </div>
+        
 
               
             </div>
@@ -2095,5 +2534,240 @@
             }
         }
     });
+
+
+    //EDIT EMPLOYEE MODAL
+    (function () {
+        const overlay = document.getElementById('empEditModalOverlay');
+        const closeBtn = document.getElementById('empEditModalClose');
+        const cancelBtn = document.getElementById('empEditModalCancel');
+        const saveBtn = document.getElementById('empEditModalSave');
+        const form = document.getElementById('empEditForm');
+
+        const fName = document.getElementById('editEmpName');
+        const fJobTitle = document.getElementById('editEmpJobTitle');
+        const fDept = document.getElementById('editEmpDept');
+        const fEmail = document.getElementById('editEmpEmail');
+        const fStatus = document.getElementById('editEmpStatus');
+        const fExpiry = document.getElementById('editEmpExpiry');
+        const fPhoto = document.getElementById('editEmpPhoto');
+        const fPhotoInput = document.getElementById('editEmpPhotoInput');
+        const fInitials = document.getElementById('editEmpInitials');
+
+        // Open modal and pre-fill fields
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.emp-edit-btn');
+            if (!btn) return;
+
+            const d = btn.dataset;
+            form.dataset.updateUrl = d.updateUrl;
+            form.dataset.rowId = d.id;
+
+            fName.value = d.name || '';
+            fJobTitle.value = d.job_title || '';
+            fDept.value = d.department || '';
+            fEmail.value = d.work_email || '';
+            fStatus.value = d.status || 'active';
+            fExpiry.value = d.expiration || '';
+            fPhoto.src = d.photo || '';
+            fPhotoInput.value = '';
+
+            if (d.photo) {
+                fPhoto.style.display = 'block';
+                fInitials.style.display = 'none';
+            } else {
+                fPhoto.style.display = 'none';
+                fInitials.style.display = 'flex';
+                fInitials.textContent = d.initials || 'EM';
+            }
+
+            // Update modal title with employee name
+            document.getElementById('empEditModalEmpName').textContent = d.name || 'Employee';
+
+            overlay.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        });
+
+        function closeModal() {
+            overlay.classList.remove('is-open');
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Photo upload preview
+        fPhotoInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                fPhoto.src = ev.target.result;
+                fPhoto.style.display    = 'block';
+                fInitials.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Submit update
+        saveBtn.addEventListener('click', async function () {
+            const url = form.dataset.updateUrl;
+            if (!url) return;
+
+            const fd = new FormData();
+            fd.append('_method', 'PUT');
+            fd.append('_token', document.querySelector('meta[name="csrf-token"]')?.content
+                || document.querySelector('input[name="_token"]')?.value || '');
+            fd.append('name', fName.value);
+            fd.append('job_title', fJobTitle.value);
+            fd.append('department', fDept.value);
+            fd.append('work_email', fEmail.value);
+            fd.append('status', fStatus.value);
+            fd.append('id_card_expiration_date', fExpiry.value);
+            if (fPhotoInput.files[0]) {
+                fd.append('photo', fPhotoInput.files[0]);
+            }
+
+            saveBtn.disabled = true;
+            const origText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Saving…';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                });
+
+                const data = await response.json();
+
+                if (response.status === 422) {
+                    const messages = Object.values(data.errors || {}).flat();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: messages.map(m => `<div>${m}</div>`).join(''),
+                        confirmButtonColor: '#1d4ed8'
+                    });
+                    return;
+                }
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Unable to update employee.');
+                }
+
+                // Patch the row's data- attributes for live filter
+                const row = document.querySelector(`[data-emp-db-id="${form.dataset.rowId}"]`);
+                if (row) {
+                    const emp = data.employee;
+                    row.dataset.name  = (emp.name  || '').toLowerCase();
+                    row.dataset.email = (emp.work_email || '').toLowerCase();
+                    row.dataset.title = (emp.job_title  || '').toLowerCase();
+                    row.dataset.dept  = (emp.department || '').toLowerCase();
+                    row.dataset.status = emp.status || '';
+
+                    // Refresh visible cells
+                    const nameEl = row.querySelector('.emp-name');
+                    const emailEl = row.querySelector('.emp-email');
+                    const titleEl = row.querySelector('.emp-title-text');
+                    const deptEl = row.querySelector('.emp-dept-pill');
+                    const statusEl = row.querySelector('.emp-status-badge');
+                    const dateEl = row.querySelectorAll('.date-cell-wrap')[0];
+                    const avatarImg = row.querySelector('.emp-avatar-img');
+                    const avatarFb = row.querySelector('.emp-avatar-fallback');
+
+                    if (nameEl) nameEl.textContent = emp.name || '';
+                    if (emailEl) emailEl.textContent = emp.work_email || '';
+                    if (titleEl) titleEl.textContent = emp.job_title || '';
+                    if (deptEl) deptEl.textContent = emp.department || '';
+                    if (dateEl) dateEl.lastChild.textContent = emp.expiration || '—';
+                    if (statusEl) {
+                        statusEl.className = `emp-status-badge status-badge-${(emp.status||'').replace(/[^a-z0-9_]/gi,'_')}`;
+                        statusEl.innerHTML = `<span class="status-dot"></span>${emp.status.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase())}`;
+                    }
+                    if (emp.photo_url && avatarImg) {
+                        avatarImg.src = emp.photo_url;
+                        avatarImg.style.display = 'block';
+                        if (avatarFb) avatarFb.style.display = 'none';
+                    }
+
+                    // Refresh the edit button data attributes
+                    const editBtn = row.querySelector('.emp-edit-btn');
+                    if (editBtn) {
+                        editBtn.dataset.name = emp.name || '';
+                        editBtn.dataset.job_title = emp.job_title || '';
+                        editBtn.dataset.department = emp.department || '';
+                        editBtn.dataset.work_email = emp.work_email || '';
+                        editBtn.dataset.status = emp.status || '';
+                        editBtn.dataset.expiration = data.employee.expiration_raw || fExpiry.value;
+                        if (emp.photo_url) editBtn.dataset.photo = emp.photo_url;
+                    }
+                }
+
+                closeModal();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Something went wrong.'
+                });
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = origText;
+            }
+        });
+    })();
+
+
+    //COPY URL FEATURE
+    (function () {
+        const toast = document.getElementById('empCopyToast');
+        let toastTimer = null;
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.emp-copy-url-btn');
+            if (!btn) return;
+
+            const url = btn.dataset.url;
+            if (!url) return;
+
+            navigator.clipboard.writeText(url).then(function () {
+                if (toastTimer) clearTimeout(toastTimer);
+                toast.classList.add('is-visible');
+                toastTimer = setTimeout(function () {
+                    toast.classList.remove('is-visible');
+                }, 2400);
+            }).catch(function () {
+                // Fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                ta.style.position = 'fixed';
+                ta.style.opacity  = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                toast.classList.add('is-visible');
+                toastTimer = setTimeout(function () {
+                    toast.classList.remove('is-visible');
+                }, 2400);
+            });
+        });
+    })();
 
 </script>

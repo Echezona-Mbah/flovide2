@@ -492,6 +492,7 @@ Route::middleware('admin.auth')->group(function () {
         //knowme route
         Route::get('/admin/employee-management', [knowmeController::class,'index'])->name('admin.employee-management');
         Route::post('/admin/employee-management', [knowmeController::class,'create'])->name('admin.employees.store');
+        Route::put('/admin/employee-management/{employee}', [knowmeController::class,'update'])->name('admin.employees.update');
         Route::delete('/admin/employee-management/{employee}', [knowmeController::class,'destroy'])->name('admin.employees.destroy');
 
     });
