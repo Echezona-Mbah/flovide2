@@ -314,25 +314,48 @@ public function storeTransaction(Request $request)
 
 private function formatTransactionReceiptData(TransactionHistory $transaction): array
 {
+    $logoPath = public_path('asserts/homepage/Logo.png');
+
+    $qrText = implode("\n", array_filter([
+        'FLOVIDE RECEIPT',
+        'Status: ' . ucfirst($transaction->status ?? 'Completed'),
+        'Amount: ' . number_format((float) $transaction->recipient_amount, 2) . ' ' . strtoupper((string) $transaction->currency),
+        'Date: ' . optional($transaction->created_at)->format('d M Y'),
+        'Ref: ' . $transaction->reference,
+        'Txn ID: ' . ($transaction->order_id ?: (string) $transaction->id),
+        $transaction->recipient_account_name ? 'To: ' . $transaction->recipient_account_name : null,
+    ]));
+
+    $qrSvg = (string) \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+        ->size(200)
+        ->margin(0)
+        ->errorCorrection('M')
+        ->encoding('UTF-8')
+        ->generate($qrText);
+
     return [
         'title' => 'Transfer Confirmation',
         'date' => optional($transaction->created_at)->format('d M Y'),
         'status' => ucfirst($transaction->status ?? 'Completed'),
         'amount' => trim(($transaction->currency_symbol ?? '') . number_format((float) $transaction->recipient_amount, 2)),
-        'transaction_id' => $transaction->id,
-        'payment_reference' => $transaction->reference,
+        'transaction_id' => $transaction->order_id ?: (string) $transaction->id,
+        'payment_reference' => $transaction->payment_reference ?: '—',
         'reference' => $transaction->sender ?: ($transaction->method ?: 'Transfer'),
         'bank_name' => $transaction->recipient_bank_name ?? 'N/A',
         'account_name' => $transaction->recipient_account_name ?? 'N/A',
-        'account_number' => $transaction->recipient_account_number ?? 'N/A',
+        'account_number' => $transaction->recipient_account_number ?? null,
         'brand_name' => config('app.name', 'Flovide'),
+        'logo' => is_file($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null,
+        'qr' => 'data:image/svg+xml;base64,' . base64_encode($qrSvg),
     ];
 }
 
    public function downloadTransactionPdf(Request $request, $id)
     {
-        $user    = auth()->user();
-        $team    = TeamMembers::where('user_id', $user->id)->first();
+        $user = auth()->user();
+        $team = TeamMembers::where('user_id', $user->id)->first();
         $ownerId = $team ? $team->owner_id : $user->id;
 
         $tx = TransactionHistory::where('id', $id)->where('user_id', $ownerId)->first();

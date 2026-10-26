@@ -4,100 +4,227 @@
     <meta charset="utf-8">
     <title>{{ $title }}</title>
     <style>
-        @page { margin: 55px 65px; }
+        /*
+         * @page margin: top right bottom left
+         * We reserve 90px at the bottom for the fixed footer so body content
+         * never overlaps it and DomPDF never creates an extra page.
+         */
+        @page {
+            margin: 48px 60px 90px 60px;
+        }
 
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
             color: #111827;
-            font-size: 14px;
-            line-height: 1.45;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
         }
 
-        .header { width: 100%; margin-bottom: 70px; }
+        /* ── Header (table layout — DomPDF handles tables better than floats) ── */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 28px;
+        }
+        .header-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+        .header-left  { width: 50%; }
+        .header-right { width: 50%; text-align: right; }
 
-        .brand { float: left; width: 45%; }
-        .logo { width: 220px; height: auto; display: block; }
-        .wordmark { font-size: 34px; font-weight: 700; color: #215F9C; }
+        .logo  { width: 160px; height: auto; display: block; }
+        .wordmark { font-size: 28px; font-weight: 700; color: #215F9C; line-height: 1; }
 
-        .header-right { float: right; width: 50%; text-align: right; }
-        h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.2; color: #000; }
-        .date { font-size: 14px; margin-bottom: 8px; }
-        .status { background: #f3f4f6; padding: 12px 14px; text-align: left; font-size: 16px; }
+        h1 { margin: 0 0 6px; font-size: 22px; line-height: 1.2; color: #000; }
+        .date-line { font-size: 12px; color: #555; margin-bottom: 6px; }
+        .status-badge {
+            display: inline-block;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #111;
+        }
 
-        .clear { clear: both; }
+        /* ── Divider ── */
+        .divider {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 0 0 18px 0;
+        }
 
-        .details { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        .details td { padding: 9px 0; vertical-align: top; }
-        .label { width: 32%; font-weight: 700; color: #000; }
-        .value { width: 68%; color: #000; word-break: break-all; }
+        /* ── Amount hero ── */
+        .amount-block {
+            margin-bottom: 20px;
+        }
+        .amount-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+        .amount-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111;
+        }
 
-        .section-title { margin-top: 48px; margin-bottom: 14px; font-size: 21px; font-weight: 700; color: #000; }
+        /* ── Detail rows ── */
+        .details {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .details tr {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .details td {
+            padding: 7px 0;
+            vertical-align: top;
+            font-size: 12.5px;
+        }
+        .label { width: 36%; font-weight: 700; color: #374151; }
+        .value { width: 64%; color: #111; word-break: break-all; }
 
+        /* ── Section title ── */
+        .section-title {
+            margin: 22px 0 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #374151;
+        }
+
+        /* Fixed footer — coordinates are relative to the full page canvas,
+              not the @page margin box, so we place it at bottom: 0 within
+              a container that fills the reserved 90px bottom margin.       */
         .footer {
             position: fixed;
-            left: 0; right: 0; bottom: 0;
-            color: #666;
-            font-size: 10.5px;
-            line-height: 1.45;
+            left:   0;
+            right:  0;
+            bottom: 0;
+            height: 82px;
+            padding: 10px 60px 0;
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
         }
-        .qr-wrap { float: left; width: 96px; margin-right: 16px; text-align: center; }
-        .qr { width: 96px; height: 96px; display: block; }
-        .qr-caption { font-size: 8px; color: #666; margin-top: 3px; }
-        .footer-text { overflow: hidden; }
+        .footer-inner {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .footer-inner td { vertical-align: middle; padding: 0; }
+        .footer-qr-cell  { width: 72px; }
+        .footer-text-cell { padding-left: 12px; }
+
+        .qr  { width: 62px; height: 62px; display: block; }
+        .qr-caption { font-size: 7px; color: #9ca3af; text-align: center; margin-top: 2px; }
+
+        .footer-text {
+            font-size: 8.5px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="brand">
-            @if($logo)
-                <img src="{{ $logo }}" alt="{{ $brand_name }}" class="logo">
-            @else
-                <div class="wordmark">{{ $brand_name }}</div>
-            @endif
-        </div>
 
-        <div class="header-right">
-            <h1>{{ $title }}</h1>
-            <div class="date">{{ $date }}</div>
-            <div class="status">Status: {{ $status }}</div>
-        </div>
-    </div>
-
-    <div class="clear"></div>
-
-    <table class="details">
-        <tr><td class="label">Amount</td><td class="value">{{ $amount }}</td></tr>
-        <tr><td class="label">Transaction ID</td><td class="value">{{ $transaction_id }}</td></tr>
-        <tr><td class="label">Payment reference</td><td class="value">{{ $payment_reference }}</td></tr>
-        <tr><td class="label">Reference</td><td class="value">{{ $reference }}</td></tr>
+    {{-- Header --}}
+    <table class="header-table">
+        <tr>
+            <td class="header-left">
+                @if(!empty($logo))
+                    <img src="{{ $logo }}" alt="{{ $brand_name }}" class="logo">
+                @else
+                    <div class="wordmark">{{ $brand_name }}</div>
+                @endif
+            </td>
+            <td class="header-right">
+                <h1>{{ $title }}</h1>
+                <div class="date-line">{{ $date }}</div>
+                <span class="status-badge">{{ $status }}</span>
+            </td>
+        </tr>
     </table>
 
-    @if($account_number)
-        <div class="section-title">Recipient details</div>
+    <hr class="divider">
 
+    {{-- Amount hero --}}
+    <div class="amount-block">
+        <div class="amount-label">Total Amount</div>
+        <div class="amount-value">{{ $amount }}</div>
+    </div>
+
+    {{-- ── Transaction details ── --}}
+    <div class="section-title">Transaction Details</div>
+    <table class="details">
+        <tr>
+            <td class="label">Transaction ID</td>
+            <td class="value">{{ $transaction_id }}</td>
+        </tr>
+        <tr>
+            <td class="label">Payment Reference</td>
+            <td class="value">{{ $payment_reference }}</td>
+        </tr>
+        <tr>
+            <td class="label">Reference</td>
+            <td class="value">{{ $reference }}</td>
+        </tr>
+        <tr>
+            <td class="label">Date</td>
+            <td class="value">{{ $date }}</td>
+        </tr>
+        <tr>
+            <td class="label">Status</td>
+            <td class="value">{{ $status }}</td>
+        </tr>
+    </table>
+
+    {{-- Recipient details (only when present) --}}
+    @if(!empty($account_number))
+        <div class="section-title">Recipient Details</div>
         <table class="details">
-            <tr><td class="label">Bank name</td><td class="value">{{ $bank_name }}</td></tr>
-            <tr><td class="label">Account name</td><td class="value">{{ $account_name }}</td></tr>
-            <tr><td class="label">Account number</td><td class="value">{{ $account_number }}</td></tr>
+            <tr>
+                <td class="label">Bank Name</td>
+                <td class="value">{{ $bank_name }}</td>
+            </tr>
+            <tr>
+                <td class="label">Account Name</td>
+                <td class="value">{{ $account_name }}</td>
+            </tr>
+            <tr>
+                <td class="label">Account Number</td>
+                <td class="value">{{ $account_number }}</td>
+            </tr>
         </table>
     @endif
 
+    {{-- ── Fixed footer ── --}}
     <div class="footer">
-        <div class="qr-wrap">
-            <img src="{{ $qr }}" class="qr" alt="QR">
-            <div class="qr-caption">Scan for details</div>
-        </div>
-        <div class="footer-text">
-            {{ $brand_name }} is registered as a money service business with the Financial Transactions and Reports Analysis Centre of Canada (FINTRAC).
-            <br>
-            {{ $brand_name }} is registered as a money service business with the United States Financial Crimes Enforcement Network (FinCEN).
-            <br>
-              {{-- {{ $brand_name }} is duly registered in Canada as a Money Services Business (MSB) with FINTRAC under registration number C100000869.
-            <br>
-              In the United States, Flovide is registered as a Money Services Business with FinCEN under registration number 31000301191487.
-            <br> --}}
-
-        </div>
+        <table class="footer-inner">
+            <tr>
+                @if(!empty($qr))
+                <td class="footer-qr-cell">
+                    <img src="{{ $qr }}" class="qr" alt="QR Code">
+                    <div class="qr-caption">Scan for details</div>
+                </td>
+                @endif
+                <td class="footer-text-cell">
+                    <div class="footer-text">
+                        {{ $brand_name }} is registered as a money service business with the Financial Transactions
+                        and Reports Analysis Centre of Canada (FINTRAC).<br>
+                        {{ $brand_name }} is registered as a money service business with the United States Financial
+                        Crimes Enforcement Network (FinCEN).
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
+
 </body>
 </html>
