@@ -111,9 +111,16 @@ class knowmeController extends Controller
                 'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:2048',
+                'max:5120',
                 'dimensions:min_width=200,min_height=200',
             ],
+            [
+                'photo.required' => 'Please upload an employee photo.',
+                'photo.image' => 'The uploaded file must be a valid image.',
+                'photo.mimes' => 'The employee photo must be JPG, JPEG, PNG, or WEBP format.',
+                'photo.max' => 'The employee photo must not be larger than 5 MB. Please choose a smaller image.',
+                'photo.dimensions' => 'The employee photo must be at least 200 × 200 pixels.',
+            ]
         ]);
 
         try {
