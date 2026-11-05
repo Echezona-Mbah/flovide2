@@ -78,12 +78,19 @@ public function interacDetails(Request $request)
     }
 
     $currency = strtoupper($balance->currency);
+    $collectionProvider = $currency === 'CAD'
+        ? app(\App\Services\CadInteracCollectionService::class)->resolveProvider()
+        : null;
+    $isSwappr = $collectionProvider?->key === 'swappr';
+    $depositEmail = $isSwappr
+        ? app(\App\Services\CadInteracCollectionService::class)->swapprRecipientEmail()
+        : 'payment@flovide.com';
 
     $fee       = 0;
     $netAmount = $amount;
     $feeLabel  = null;
 
-    if ($currency === 'CAD') {
+    if ($currency === 'CAD' && !$isSwappr) {
         $userFee = \App\Models\UserCurrencyFee::where('user_id', $user->id)
             ->where('currency', $currency)
             ->first();
@@ -104,7 +111,13 @@ public function interacDetails(Request $request)
     ]);
 
     return view('business.interac_details', compact(
-        'balance', 'amount', 'fee', 'netAmount', 'feeLabel'
+        'balance',
+        'amount',
+        'fee',
+        'netAmount',
+        'feeLabel',
+        'isSwappr',
+        'depositEmail'
     ));
 }
 
@@ -112,11 +125,7 @@ public function interacDetails(Request $request)
 
     // ── Interac ──────────────────────────────────────────────────────────────
 
-public function topupWithInterac(
-    Request $request,
-    BlaaizService $blaaiz,
-    \App\Services\CadInteracCollectionService $collections
-)
+public function topupWithInterac( Request $request, BlaaizService $blaaiz, \App\Services\CadInteracCollectionService $collections)
 {
 
     // Log::info('[Interac Initiate] Request received', 'ddddddd');
@@ -225,19 +234,6 @@ public function topupWithInterac(
     $platformFee = $collectionFee;
     $netAmount   = round($amount - $platformFee, 2); // what actually lands in the wallet
 
-        if ($amount <= $platformFee) {
-            $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
-            return response()->json([
-                'success' => false,
-                'message' => $msg,
-                'code'    => 'AMOUNT_BELOW_FEE',
-                'data'    => [
-                    'amount'       => $amount,
-                    'platform_fee' => $platformFee,
-                ],
-            ], 422);
-        }
-
     Log::info('[Interac Initiate] Fee computed', [
         'amount'         => $amount,
         'collection_fee' => $collectionFee,
@@ -289,6 +285,8 @@ public function topupWithInterac(
             return $isApi ? response()->json($payload, 503) : back()->withInput()->with('error', $payload['message']);
         }
 
+        $platformFee = 0;
+        $netAmount = $amount;
         $reference = $collections->newReference();
         $transaction = TransactionHistory::create([
             'user_id' => $user->id,
@@ -311,20 +309,35 @@ public function topupWithInterac(
 
         return response()->json([
             'success' => true,
-            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
-            'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.',
+            'code' => 'SWAPPR_COLLECTION_PENDING_WEBHOOK',
             'data' => [
                 'transaction_id' => $transaction->id,
+                'provider' => 'swappr',
                 'reference' => $reference,
                 'deposit_email' => $depositEmail,
                 'amount' => $amount,
                 'currency' => $currency,
                 'fees' => $platformFee,
+                'platform_fee' => $platformFee,
                 'recipient_amount' => $netAmount,
                 'status' => 'pending',
-                'automatic_credit' => false,
+                'automatic_credit' => true,
             ],
         ], 200);
+    }
+
+    if ($amount <= $platformFee) {
+        $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
+        return response()->json([
+            'success' => false,
+            'message' => $msg,
+            'code'    => 'AMOUNT_BELOW_FEE',
+            'data'    => [
+                'amount'       => $amount,
+                'platform_fee' => $platformFee,
+            ],
+        ], 422);
     }
 
     if ($provider->key !== 'blaaiz_interac') {

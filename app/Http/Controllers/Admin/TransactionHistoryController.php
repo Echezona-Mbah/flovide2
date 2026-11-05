@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Services\PivotService;
 use App\Services\PayazaService;
 use App\Services\OrchardService;
+use App\Services\BankCodeResolver;
+use App\Services\SwapprCadInteracService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RefundProcessedMail;
 
@@ -54,6 +56,35 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
     $currency = strtoupper((string) $tx->recipient_bank_currency);
     $transferMethod = strtolower((string) ($tx->transfer_method ?? 'bank'));
     $providerAmount = (int) round((float) $tx->recipient_amount, 0);
+    $providerBankCode = $tx->bank_code;
+
+    $bankProvider = match ($currency) {
+        'UGX' => 'pivot',
+        'GHS' => 'app$mobile',
+        default => 'payaza',
+    };
+
+    if (
+        filled($tx->bank_code)
+        && !($currency === 'UGX' && $transferMethod === 'mobile')
+    ) {
+        $bankCodeResolver = app(BankCodeResolver::class);
+        $bank = $bankCodeResolver->forProvider(
+            $bankProvider,
+            $currency,
+            (string) $tx->bank_code
+        );
+
+        if ($bank) {
+            $providerBankCode = $currency === 'UGX'
+                ? ($bank->sort_code ?: $bank->bank_code)
+                : $bank->bank_code;
+        } elseif ($bankCodeResolver->isLinked($currency)) {
+            return back()->withErrors([
+                'error' => "Unable to resolve this bank code for {$currency}. The transaction was not submitted.",
+            ]);
+        }
+    }
 
     try {
         /*
@@ -77,7 +108,7 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
 
             $sortCode = $transferMethod === 'mobile'
                 ? env('PIVOT_UGX_MOBILE_SORT', '000000')
-                : ($tx->bank_code ?? '000000');
+                : ($providerBankCode ?? '000000');
 
             $payload = [
                 'serviceCode' => $serviceCode,
@@ -133,8 +164,8 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
 
             $network = 'BNK';
 
-            if (in_array(strtoupper((string) $tx->bank_code), ['MTN', 'VOD', 'AIR', 'VIS', 'MAS'], true)) {
-                $network = strtoupper((string) $tx->bank_code);
+            if (in_array(strtoupper((string) $providerBankCode), ['MTN', 'VOD', 'AIR', 'VIS', 'MAS'], true)) {
+                $network = strtoupper((string) $providerBankCode);
             }
 
             $payload = [
@@ -143,7 +174,7 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
                 'exttrid' => $exttrid,
                 'reference' => $tx->reference ?? 'Wallet Payment',
                 'nw' => $transferMethod === 'mobile' ? $network : 'BNK',
-                'bank_code' => $tx->bank_code ?? 'BNK',
+                'bank_code' => $providerBankCode ?? 'BNK',
                 'trans_type' => 'MTC',
                 'callback_url' => route('transactionHistory'),
                 'service_id' => env('ORCHARD_SERVICE_ID'),
@@ -222,7 +253,7 @@ public function process($id, PivotService $pivot, PayazaService $payaza, Orchard
                             'credit_amount' => $providerAmount,
                             'account_number' => $tx->recipient_account_number,
                             'account_name' => $tx->recipient_account_name ?? 'N/A',
-                            'bank_code' => $tx->bank_code ?? null,
+                            'bank_code' => $providerBankCode,
                             'narration' => $tx->reference ?? 'Payment',
                             'transaction_reference' => $transactionReference,
                             'sender' => [
@@ -327,6 +358,32 @@ public function refund($id)
     return back()->with('success', 'Refund successful.');
 }
 
+public function confirmSwapprCadInterac(
+    Request $request,
+    string $id,
+    SwapprCadInteracService $swappr
+) {
+    $validated = $request->validate([
+        'ledger_entry_id' => ['required', 'string', 'max:255'],
+        'sender_email' => ['required', 'email', 'max:255'],
+        'amount' => ['required', 'numeric', 'min:0.01'],
+        'net_amount' => ['required', 'numeric', 'min:0.01'],
+    ]);
+
+    try {
+        $swappr->confirmManually(
+            $id,
+            $validated['ledger_entry_id'],
+            $validated['sender_email'],
+            (float) $validated['amount'],
+            (float) $validated['net_amount']
+        );
+    } catch (\DomainException $exception) {
+        return back()->withErrors(['swappr' => $exception->getMessage()]);
+    }
+
+    return back()->with('success', 'Swappr CAD transfer confirmed and the wallet credited.');
+}
 
 
 // public function refund($id)

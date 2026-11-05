@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class GenerateFlovideBankCodes extends Command
 {
-    protected $signature = 'banks:generate-flovide-codes {currency} {--dry-run}';
+    protected $signature = 'banks:generate-flovide-codes {currency} {--provider= : only assign codes to this provider} {--dry-run}';
 
     protected $description = 'Generate numeric Flovide bank codes';
 
     public function handle(): int
     {
         $currency = strtoupper($this->argument('currency'));
+        $provider = strtolower((string) $this->option('provider'));
         $dryRun = (bool) $this->option('dry-run');
 
         // Load existing codes too, so a provider row can reuse its bank's code.
@@ -68,7 +69,8 @@ class GenerateFlovideBankCodes extends Command
             }
 
             $missingIds = $group
-                ->filter(fn (Bank $bank) => blank($bank->flovide_code))
+                ->filter(fn (Bank $bank) => blank($bank->flovide_code)
+                    && ($provider === '' || strtolower((string) $bank->provider) === $provider))
                 ->pluck('id')
                 ->all();
 
@@ -102,9 +104,10 @@ class GenerateFlovideBankCodes extends Command
             return self::SUCCESS;
         }
 
-        DB::transaction(function () use ($updates) {
+        DB::transaction(function () use ($updates, $provider) {
             foreach ($updates as $update) {
                 Bank::whereIn('id', $update['ids'])
+                    ->when($provider !== '', fn ($query) => $query->where('provider', $provider))
                     ->whereNull('flovide_code')
                     ->update(['flovide_code' => $update['code']]);
             }

@@ -96,7 +96,7 @@ class BlaaizController extends Controller
     {
             $isApi = $request->expectsJson();
 
-        // Log::info('[Interac Initiate] Request received', 'dsdsdsdsde');
+     Log::info('[Interac Initiate] Request received', 'dsdsdsdsde');
         $validated = $request->validate([
             'amount'   => 'required|numeric|min:0.1',
             'email'    => 'required|email',
@@ -176,19 +176,6 @@ class BlaaizController extends Controller
         ]);
 
 
-        if ($amount <= $platformFee) {
-            $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
-            return response()->json([
-                'success' => false,
-                'message' => $msg,
-                'code'    => 'AMOUNT_BELOW_FEE',
-                'data'    => [
-                    'amount'       => $amount,
-                    'platform_fee' => $platformFee,
-                ],
-            ], 422);
-        }
-
         if ($currency === 'CAD' && $request->filled('email')) {
             if (strtolower(trim($request->email)) !== strtolower(trim($user->email))) {
                 $msg = 'For Interac transfers, please use your own registered email address (' . $user->email . ').';
@@ -228,6 +215,8 @@ class BlaaizController extends Controller
                 ], 503);
             }
 
+            $platformFee = 0;
+            $netAmount = $amount;
             $reference = $collections->newReference();
             $transaction = TransactionHistory::create([
                 'user_id' => $user->id,
@@ -250,10 +239,11 @@ class BlaaizController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
-                'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+                'message' => 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.',
+                'code' => 'SWAPPR_COLLECTION_PENDING_WEBHOOK',
                 'data' => [
                     'transaction_id' => $transaction->id,
+                    'provider' => 'swappr',
                     'reference' => $reference,
                     'deposit_email' => $depositEmail,
                     'amount' => $amount,
@@ -261,9 +251,22 @@ class BlaaizController extends Controller
                     'fees' => $platformFee,
                     'recipient_amount' => $netAmount,
                     'status' => 'pending',
-                    'automatic_credit' => false,
+                    'automatic_credit' => true,
                 ],
             ], 200);
+        }
+
+        if ($amount <= $platformFee) {
+            $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'code'    => 'AMOUNT_BELOW_FEE',
+                'data'    => [
+                    'amount'       => $amount,
+                    'platform_fee' => $platformFee,
+                ],
+            ], 422);
         }
 
         if ($provider->key !== 'blaaiz_interac') {
@@ -853,17 +856,6 @@ public function initiateAutoDeposit(
         ], 422);
     }
 
-    $platformFee = $userFee->calcCollectionFee($amount);
-    $netAmount   = $userFee->collectionAmountAfterFee($amount);
-
-    if ($amount <= $platformFee) {
-        return response()->json([
-            'success' => false,
-            'message' => "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.",
-            'code'    => 'AMOUNT_BELOW_FEE',
-        ], 422);
-    }
-
     $provider = $collections->resolveProvider();
     if (!$provider) {
         return response()->json([
@@ -882,6 +874,17 @@ public function initiateAutoDeposit(
     }
 
     $isSwappr = $provider->key === 'swappr';
+    $platformFee = $isSwappr ? 0 : $userFee->calcCollectionFee($amount);
+    $netAmount = $isSwappr ? $amount : $userFee->collectionAmountAfterFee($amount);
+
+    if ($amount <= $platformFee) {
+        return response()->json([
+            'success' => false,
+            'message' => "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.",
+            'code'    => 'AMOUNT_BELOW_FEE',
+        ], 422);
+    }
+
     if ($isSwappr && strtolower((string) $balance->mode) === 'test') {
         return response()->json([
             'success' => false,
@@ -911,7 +914,7 @@ public function initiateAutoDeposit(
         'transaction_type'  => 'payment',
         'method'            => 'credit',
         'payment_method'    => 'wallet_autodeposit', // distinct from 'standard'/'auto' request flows
-        'sender'            => null,
+        'sender'            => $isSwappr ? $user->email : null,
         'amount'            => $amount,
         'fees'              => $platformFee,
         'platform_fee'      => $platformFee,
@@ -937,11 +940,12 @@ public function initiateAutoDeposit(
     return response()->json([
         'success' => true,
         'message' => $isSwappr
-            ? 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. Manual reconciliation is required; your wallet will not be credited automatically.'
+            ? 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.'
             : 'We are watching for your Interac e-Transfer.',
-        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION' : 'AUTODEPOSIT_PENDING',
+        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_PENDING_WEBHOOK' : 'AUTODEPOSIT_PENDING',
         'data'    => [
             'reference'     => $reference,
+            'provider'      => $isSwappr ? 'swappr' : 'blaaiz_interac',
             'deposit_email' => $depositEmail,
             'amount'        => $amount,
             'currency'      => $currency,
@@ -949,7 +953,7 @@ public function initiateAutoDeposit(
             'fees'              => $platformFee,
             'platform_fee'      => $platformFee,
             'recipient_amount'  => $netAmount,
-            'automatic_credit' => !$isSwappr,
+            'automatic_credit' => true,
         ],
     ], 200);
 }
@@ -973,6 +977,15 @@ public function initiateAutoDepositPersonal(
             'message' => 'Unauthenticated',
             'code'    => 'UNAUTHENTICATED',
         ], 401);
+    }
+
+    $personal = \App\Models\Personal::find($personalId);
+    if (!$personal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Personal account not found.',
+            'code' => 'PERSONAL_NOT_FOUND',
+        ], 404);
     }
 
     $balance = \App\Models\Balance::where('id', $validated['balance_id'])
@@ -1068,7 +1081,7 @@ public function initiateAutoDepositPersonal(
         'transaction_type'  => 'payment',
         'method'            => 'credit',
         'payment_method'    => 'wallet_autodeposit',
-        'sender'            => null,
+        'sender'            => $isSwappr ? $personal->email : null,
         'amount'            => $amount,
         'fees'              => $platformFee,
         'platform_fee'      => $platformFee,
@@ -1095,11 +1108,12 @@ public function initiateAutoDepositPersonal(
     return response()->json([
         'success' => true,
         'message' => $isSwappr
-            ? 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. Manual reconciliation is required; your wallet will not be credited automatically.'
+            ? 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.'
             : 'We are watching for your Interac e-Transfer.',
-        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION' : 'AUTODEPOSIT_PENDING',
+        'code'    => $isSwappr ? 'SWAPPR_COLLECTION_PENDING_WEBHOOK' : 'AUTODEPOSIT_PENDING',
         'data'    => [
             'method'     => 'credit',
+            'provider'   => $isSwappr ? 'swappr' : 'blaaiz_interac',
             'reference'     => $reference,
             'deposit_email' => $depositEmail,
             'amount'        => $amount,
@@ -1108,7 +1122,7 @@ public function initiateAutoDepositPersonal(
             'recipient_amount'   => $netAmount,
             'payment_reference'      => $reference,
             'status'        => 'pending',
-            'automatic_credit' => !$isSwappr,
+            'automatic_credit' => true,
 
         ],
     ], 200);

@@ -534,7 +534,7 @@ class BeneficiaryController extends Controller
             $name = $res['customerNames'] ?? null;
 
             return $name
-                ? $this->inquiryOk('pivot', $name, $accountNumber, $flovideCode)
+                ? $this->inquiryOk('Flovide', $name, $accountNumber, $flovideCode)
                 : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
 
         case 'app_mobile':
@@ -556,7 +556,7 @@ class BeneficiaryController extends Controller
 
         case 'payaza':
             $res = app(PayazaService::class)->accountEnquiry($currency, $code, $accountNumber);
-                    dd($res);
+                    // dd($res);
 
 
             Log::info('[API AccountInquiry] Payaza response', ['response' => $res]);
@@ -565,7 +565,7 @@ class BeneficiaryController extends Controller
 
             // Payaza's own response is passed through untouched, which is the shape customers already get
             return $name
-                ? $this->inquiryOk('payaza', $name, $accountNumber, $flovideCode, $res)
+                ? $this->inquiryOk('Flovide', $name, $accountNumber, $flovideCode, $res)
                 : $this->inquiryFail('ACCOUNT_VALIDATION_FAILED', 'Account validation failed');
 
         case 'swappr':

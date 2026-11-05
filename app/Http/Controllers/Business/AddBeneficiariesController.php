@@ -327,7 +327,10 @@ public function create()
 public function store(Request $request)
 {
     $isApi = $request->expectsJson();
-    Log::info('[Beneficiary Store] Request received', $request->all());
+    Log::info('[Beneficiary Store] Request received', [
+        'is_api' => $isApi,
+        'method' => $request->method(),
+    ]);
 
     $authUser = auth('api')->user() ?? auth()->user();
 
@@ -436,9 +439,9 @@ public function store(Request $request)
         'bank.accountNumber' => 'nullable|string|max:34',
         'bank.bankCode'      => 'nullable|string|max:20',
         'bank.mobileNumber'  => 'nullable|string|max:30',
-        'bank.interac_first_name'  => 'nullable|string|max:30',
-        'bank.interac_last_name'  => 'nullable|string|max:30',
-        'bank.interac_email'  => 'nullable|string|max:30',
+        'bank.interac_first_name'  => 'nullable|string|max:60',
+        'bank.interac_last_name'  => 'nullable|string|max:60',
+        'bank.interac_email'  => 'nullable|string|max:60',
 
     ]);
 
@@ -569,11 +572,6 @@ public function store(Request $request)
         // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
         if ($currency === 'CAD') {
             $bankName = 'Interac';
-            Log::info('[Beneficiary Store] CAD Interac fields', [
-                'interac_first_name' => $bank['interac_first_name'] ?? null,
-                'interac_last_name'  => $bank['interac_last_name']  ?? null,
-                'interac_email'      => $bank['interac_email']       ?? null,
-            ]);
         } elseif ($method === 'bank') {
             $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
             $bankName = $bankRow?->name;
@@ -659,6 +657,8 @@ public function store(Request $request)
 
             if ($provider === 'swappr') {
                 $sync = app(\App\Services\SwapprService::class)->syncBeneficiary($beneficia);
+
+                // dd($sync);
 
                 if (!$sync['success']) {
                     Log::error('[Beneficiary Store] Swappr sync failed', [

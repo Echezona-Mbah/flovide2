@@ -187,6 +187,8 @@ public function getAccountReference($currency)
                 "mobile_number" => $accountNumber
             ];
         }
+        //  dd($payload);
+
 
         $response = Http::withHeaders([
             'Authorization' => 'Payaza ' . $encodedKey,
@@ -194,6 +196,7 @@ public function getAccountReference($currency)
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ])->post($url, $payload);
+       // dd($response->json());
 
         return [
             'success' => $response->successful(),

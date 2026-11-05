@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Bank;
+use App\Models\MainBank;
+use Illuminate\Support\Facades\Schema;
 
 class BankCodeResolver
 {
@@ -32,8 +34,26 @@ class BankCodeResolver
             : null;
     }
 
+    public function forFlovideCode(string $provider, string $currency, string $code): ?Bank
+    {
+        return Bank::where('provider', $provider)
+            ->where('currency', strtoupper($currency))
+            ->where('flovide_code', $code)
+            ->first();
+    }
+
     public function toFlovideCode(string $currency, string $code, ?string $savedProvider = null): ?string
     {
+        if (Schema::hasTable('mainbanks')) {
+            $mainBankCode = MainBank::where('currency', strtoupper($currency))
+                ->where('flovide_code', $code)
+                ->value('flovide_code');
+
+            if ($mainBankCode !== null) {
+                return (string) $mainBankCode;
+            }
+        }
+
         $query = Bank::where('currency', strtoupper($currency))
             ->whereNotNull('flovide_code')
             ->where(fn ($q) => $q->where('flovide_code', $code)
@@ -52,6 +72,11 @@ class BankCodeResolver
     /** True once a currency has been through banks:link-flovide-codes. */
     public function isLinked(string $currency): bool
     {
+        if (Schema::hasTable('mainbanks')
+            && MainBank::where('currency', strtoupper($currency))->exists()) {
+            return true;
+        }
+
         return Bank::where('currency', strtoupper($currency))->whereNotNull('flovide_code')->exists();
     }
 

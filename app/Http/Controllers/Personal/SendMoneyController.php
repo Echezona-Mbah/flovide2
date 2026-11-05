@@ -1282,7 +1282,7 @@ public function getExchangeRate(Request $request)
             unset($payload['recipient']);
         }
 
-        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload, $beneficiary);
 
         if ($response['success']) {
             return $isApi

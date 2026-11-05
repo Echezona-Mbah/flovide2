@@ -60,15 +60,22 @@
             <span class="text-gray-400">Amount</span>
             <span class="font-semibold text-gray-900">{{ number_format($amount, 2) }} {{ $balance->currency }}</span>
           </div>
-          <div class="flex justify-between items-center mb-2 text-sm">
-            <span class="text-gray-400 flex items-center gap-1.5">
-              Collection fee
-              @if($feeLabel)
-                <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">{{ $feeLabel }}</span>
-              @endif
-            </span>
-            <span class="font-semibold text-red-500">− {{ number_format($fee, 2) }} {{ $balance->currency }}</span>
-          </div>
+          @unless($isSwappr)
+            <div class="flex justify-between items-center mb-2 text-sm">
+              <span class="text-gray-400 flex items-center gap-1.5">
+                Collection fee
+                @if($feeLabel)
+                  <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">{{ $feeLabel }}</span>
+                @endif
+              </span>
+              <span class="font-semibold text-red-500">− {{ number_format($fee, 2) }} {{ $balance->currency }}</span>
+            </div>
+          @else
+            <div class="flex justify-between items-center mb-2 text-sm">
+              <span class="text-gray-500">Provider processing fee</span>
+              <span class="font-semibold text-green-600">Covered by Flovide</span>
+            </div>
+          @endunless
           <div class="border-t border-dashed border-gray-200 my-2"></div>
           <div class="flex justify-between items-center text-sm">
             <span class="text-gray-700 font-bold">You'll receive</span>
@@ -213,28 +220,61 @@
 
 
         {{-- Auto Deposit card (shown only when method=interac & mode=autodeposit) --}}
-<div id="autoDepositCard" class="hidden bg-white border border-gray-200 rounded-2xl overflow-hidden mb-4">
+<div id="autoDepositCard" class="hidden bg-white border border-gray-200 rounded-2xl overflow-hidden mb-4 shadow-sm">
   <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
-    <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-      <i class="fas fa-bolt text-blue-600 text-sm"></i>
+    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+      <i class="fas fa-paper-plane text-white text-sm"></i>
     </div>
     <div>
-      <p class="text-sm font-bold text-gray-900">Send Interac e-Transfer To</p>
-      <p class="text-xs text-gray-400">Use your own banking app to send the funds</p>
+      <p class="text-sm font-bold text-gray-900" id="depositCardTitle">Send Interac e-Transfer</p>
+      <p class="text-xs text-gray-500" id="depositCardSubtitle">Send from your banking app to fund your CAD wallet</p>
     </div>
   </div>
 
-  <div class="px-5 py-5">
-    <div class="flex items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3.5">
-      <span class="text-sm font-bold text-gray-900" id="depositEmailText">payment@flovide.com</span>
-      <button type="button" onclick="copyDepositEmail()" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0">
-        <i class="fas fa-copy"></i> <span id="copyLabel">Copy</span>
-      </button>
-    </div>
-    <p class="text-xs text-gray-400 mt-3 flex items-center gap-1">
-      <i class="fas fa-info-circle"></i>
-      No security question is required — the transfer is deposited automatically.
-    </p>
+  <div class="px-5 py-5 space-y-4">
+    @if($isSwappr)
+      @if($depositEmail)
+        <div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[11px] uppercase tracking-wider font-bold text-blue-700 mb-1">Send to this Interac email</p>
+              <p class="text-sm sm:text-base font-extrabold text-gray-900 break-all" id="depositEmailText">{{ $depositEmail }}</p>
+            </div>
+            <button type="button" onclick="copyDepositEmail()" class="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-blue-700 shadow-sm border border-blue-100 hover:bg-blue-600 hover:text-white transition shrink-0">
+              <i class="fas fa-copy"></i><span id="copyLabel">Copy</span>
+            </button>
+          </div>
+        </div>
+        <div id="swapprReferencePanel" class="hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p class="text-[11px] uppercase tracking-wider font-bold text-amber-800 mb-1">Important: include this reference in the transfer message</p>
+          <div class="flex items-center justify-between gap-3">
+            <code id="swapprReferenceText" class="text-sm sm:text-base font-extrabold text-gray-900 break-all"></code>
+            <button type="button" onclick="copySwapprReference()" class="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-bold text-amber-800 shadow-sm border border-amber-200 hover:bg-amber-600 hover:text-white transition shrink-0">
+              <i class="fas fa-copy"></i><span id="referenceCopyLabel">Copy</span>
+            </button>
+          </div>
+        </div>
+        <div class="rounded-xl bg-gray-50 border border-gray-100 p-3.5">
+          <p class="text-xs text-gray-600 leading-relaxed">
+            <i class="fas fa-shield-alt text-blue-600 mr-1"></i>
+            Your wallet is credited after Swappr confirms the transfer. Prepare your unique reference before sending; transfers without a clear match may need manual review.
+          </p>
+        </div>
+      @else
+        <div class="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          <i class="fas fa-exclamation-circle mr-1"></i>
+          Swappr CAD collections are selected, but the deposit email is not configured. Please contact support.
+        </div>
+      @endif
+    @else
+      <div class="flex items-center justify-between gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3.5">
+        <span class="text-sm font-bold text-gray-900" id="depositEmailText">payment@flovide.com</span>
+        <button type="button" onclick="copyDepositEmail()" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0">
+          <i class="fas fa-copy"></i> <span id="copyLabel">Copy</span>
+        </button>
+      </div>
+      <p class="text-xs text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i>No security question is required — the transfer is deposited automatically.</p>
+    @endif
   </div>
 </div>
 
@@ -249,7 +289,7 @@
 <button type="button" id="autoDepositBtn" onclick="markPaymentMade()"
   class="hidden w-full py-4 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
   <i class="fas fa-check"></i>
-  <span>I've Made Payment</span>
+  <span>{{ $isSwappr ? 'Prepare transfer details' : "I've Made Payment" }}</span>
 </button>
 
       </div>
@@ -280,6 +320,9 @@
     const currency = params.get('currency') || '';
     const symbol   = decodeURIComponent(params.get('symbol') || '');
     const method   = params.get('method')   || 'interac';
+    const isSwappr = @json($isSwappr);
+    const swapprDepositEmail = @json($depositEmail);
+    let swapprReference = null;
 
         const serverFee       = {{ $fee ?? 0 }};
     const serverNetAmount = {{ $netAmount ?? $amount ?? 0 }};
@@ -438,18 +481,39 @@
 
     const mode = params.get('mode') || 'request';
 
-if (method === 'interac' && mode === 'autodeposit') {
+if (method === 'interac' && (mode === 'autodeposit' || isSwappr)) {
   document.getElementById('interacFormCard').classList.add('hidden');
   document.getElementById('submitBtn').classList.add('hidden');
   document.getElementById('autoDepositCard').classList.remove('hidden');
-  document.getElementById('autoDepositBtn').classList.remove('hidden');
+  if (!isSwappr || swapprDepositEmail) {
+    document.getElementById('autoDepositBtn').classList.remove('hidden');
+  }
 
-  document.getElementById('heroBadgeText').textContent = 'Auto Deposit · Send it yourself';
+  document.getElementById('heroBadgeText').textContent = isSwappr
+    ? 'Swappr CAD · Send by Interac'
+    : 'Auto Deposit · Send it yourself';
+  if (isSwappr) {
+    document.getElementById('heroFooterText').innerHTML =
+      '<i class="fas fa-shield-alt text-xs"></i> Your wallet is credited after Swappr confirms your transfer';
+    document.getElementById('depositCardTitle').textContent = 'Send CAD with Interac e-Transfer';
+    document.getElementById('depositCardSubtitle').textContent = 'Prepare your transfer reference before sending';
+  }
 }
 
 function copyDepositEmail() {
-  navigator.clipboard.writeText('payment@flovide.com').then(() => {
+  const email = isSwappr ? swapprDepositEmail : 'payments@flovide.com';
+  if (!email) return;
+  navigator.clipboard.writeText(email).then(() => {
     const lbl = document.getElementById('copyLabel');
+    lbl.textContent = 'Copied!';
+    setTimeout(() => (lbl.textContent = 'Copy'), 1500);
+  });
+}
+
+function copySwapprReference() {
+  if (!swapprReference) return;
+  navigator.clipboard.writeText(swapprReference).then(() => {
+    const lbl = document.getElementById('referenceCopyLabel');
     lbl.textContent = 'Copied!';
     setTimeout(() => (lbl.textContent = 'Copy'), 1500);
   });
@@ -457,12 +521,23 @@ function copyDepositEmail() {
 
 let pollTimer = null;
 let pollAttempts = 0;
-const MAX_POLL_ATTEMPTS = 60; // ~3 minutes at 3s interval
+const MAX_POLL_ATTEMPTS = isSwappr ? 240 : 60;
 
 async function markPaymentMade() {
   const btn = document.getElementById('autoDepositBtn');
+  if (isSwappr && swapprReference) {
+    document.getElementById('autoDepositCard').classList.add('hidden');
+    btn.classList.add('hidden');
+    document.getElementById('howItWorksCard')?.classList.add('hidden');
+    document.getElementById('confirmingCard').classList.remove('hidden');
+    document.getElementById('confirmingSub').textContent =
+      `Waiting for Swappr to confirm your CAD transfer. Reference: ${swapprReference}`;
+    startPolling(swapprReference);
+    return;
+  }
+
   btn.disabled = true;
-  btn.querySelector('span').textContent = 'Registering…';
+  btn.querySelector('span').textContent = isSwappr ? 'Preparing reference…' : 'Registering…';
 
   try {
     const res = await fetch('{{ route("blaaiz.interac.autodeposit.initiate") }}', {
@@ -480,26 +555,50 @@ async function markPaymentMade() {
     if (!res.ok || !data.success) {
       Swal.fire({ icon: 'error', title: 'Could not start', text: data.message ?? 'Please try again.', confirmButtonColor: '#2563eb' });
       btn.disabled = false;
-      btn.querySelector('span').textContent = "I've Made Payment";
+      btn.querySelector('span').textContent = isSwappr
+        ? (swapprReference ? "I've sent the transfer" : 'Prepare transfer details')
+        : "I've Made Payment";
       return;
     }
 
     const reference = data.data.reference;
+
+    if (isSwappr) {
+      swapprReference = reference;
+      document.getElementById('swapprReferenceText').textContent = reference;
+      document.getElementById('swapprReferencePanel').classList.remove('hidden');
+      document.getElementById('depositCardSubtitle').textContent = 'Include the reference below in your Interac transfer message';
+      btn.disabled = false;
+      btn.querySelector('span').textContent = "I've sent the transfer";
+      await Swal.fire({
+        icon: 'info',
+        title: 'Transfer details ready',
+        html: `<p>Send <strong>${symbol}${fmt(amount)} ${currency}</strong> to <strong>${swapprDepositEmail}</strong>.</p><p>Include reference <code>${reference}</code> in the transfer message so we can match it to your wallet.</p>`,
+        confirmButtonColor: '#2563eb',
+      });
+      return;
+    }
 
     document.getElementById('autoDepositCard').classList.add('hidden');
     document.getElementById('autoDepositBtn').classList.add('hidden');
     document.getElementById('howItWorksCard')?.classList.add('hidden');
     document.getElementById('confirmingCard').classList.remove('hidden');
 
-    pollAttempts = 0;
-    pollTimer = setInterval(() => pollStatus(reference), 3000);
-    pollStatus(reference); // fire immediately too
+    startPolling(reference);
 
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.', confirmButtonColor: '#2563eb' });
     btn.disabled = false;
-    btn.querySelector('span').textContent = "I've Made Payment";
+    btn.querySelector('span').textContent = isSwappr
+      ? (swapprReference ? "I've sent the transfer" : 'Prepare transfer details')
+      : "I've Made Payment";
   }
+}
+
+function startPolling(reference) {
+  pollAttempts = 0;
+  pollTimer = setInterval(() => pollStatus(reference), 3000);
+  pollStatus(reference);
 }
 
 async function pollStatus(reference) {

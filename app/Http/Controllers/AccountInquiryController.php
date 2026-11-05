@@ -59,13 +59,14 @@ class AccountInquiryController extends Controller
 
         // ── Flovide bank code → the live provider's own code ────────────────────
         $resolver    = app(BankCodeResolver::class);
-        $providerRow = $resolver->forProvider($resolvedProvider->key, $currency, (string) $request->bank_code);
-
+        $providerRow = $resolver->isLinked($currency)
+            ? $resolver->forFlovideCode($resolvedProvider->key, $currency, (string) $request->bank_code)
+            : $resolver->forProvider($resolvedProvider->key, $currency, (string) $request->bank_code);
 
         if (!$providerRow && $resolver->isLinked($currency)) {
             return response()->json([
                 'success' => false,
-                'message' => "This bank is not supported by the current provider for {$currency}.",
+                'message' => "Provide a valid Flovide bank code supported by the current provider for {$currency}.",
                 'code'    => 'BANK_NOT_SUPPORTED',
                 'data'    => null
             ], 422);
@@ -75,6 +76,7 @@ class AccountInquiryController extends Controller
         $providerCode = $providerRow?->bank_code ?? $request->bank_code;
         $providerSort = $providerRow?->sort_code ?: $providerCode;
         $bankCode     = strtoupper($providerCode);
+        //  dd($providerCode);
 
         switch ($resolvedProvider->key) {
 
@@ -193,6 +195,7 @@ class AccountInquiryController extends Controller
 
             case 'payaza':
                 $response = $this->payaza->accountEnquiry($currency, $providerCode, $request->account_number);
+        //dd($response);
 
                 return response()->json([
                     'success' => true,

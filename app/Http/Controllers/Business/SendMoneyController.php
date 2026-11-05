@@ -207,19 +207,19 @@ class SendMoneyController extends Controller
         $owner->save();
 
         // Blaaiz's Interac setup requires the sender's registered email.
-        $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
-        $cadProvider = $sendingCurrencyCheck === 'CAD'
-            ? app(ProviderRoutingService::class)->resolveForCurrency('CAD', 'bank')
-            : null;
+        // $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
+        // $cadProvider = $sendingCurrencyCheck === 'CAD'
+        //     ? app(ProviderRoutingService::class)->resolveForCurrency('CAD', 'bank')
+        //     : null;
 
-        if ($cadProvider?->key === 'blaaiz_interac' && $request->filled('interac_email')) {
-            if (strtolower(trim($request->interac_email)) !== strtolower(trim($owner->email))) {
-                $msg = 'For Interac transfers, please use your own registered email address (' . $owner->email . ').';
-                return $isApi
-                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
-                    : back()->withInput()->with('error', $msg);
-            }
-        }
+        // if ($cadProvider?->key === 'blaaiz_interac' && $request->filled('interac_email')) {
+        //     if (strtolower(trim($request->interac_email)) !== strtolower(trim($owner->email))) {
+        //         $msg = 'For Interac transfers, please use your own registered email address (' . $owner->email . ').';
+        //         return $isApi
+        //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
+        //             : back()->withInput()->with('error', $msg);
+        //     }
+        // }
 
         // ── Promo code resolution ────────────────────────────────────────────
         $promoCode = null;
@@ -770,7 +770,7 @@ class SendMoneyController extends Controller
     protected function sendViaSwappr(Request $request, string $currency, string $txId, $recipientAmount)
     {
 
-                      //  dd('payload');
+        // dd('payload');
 
         $isApi = $request->expectsJson();
         $transaction = TransactionHistory::findOrFail($txId);
@@ -829,7 +829,9 @@ class SendMoneyController extends Controller
             unset($payload['recipient']);
         }
 
-        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload, $beneficiary);
+            //     dd($response);
+
 
         if ($response['success']) {
             return $isApi

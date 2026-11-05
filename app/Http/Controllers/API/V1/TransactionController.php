@@ -19,7 +19,6 @@ use App\Services\PivotService;
 use App\Services\OrchardService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TransactionSentMail;
-use App\Models\ExchangeRate;
 use App\Services\BankCodeResolver;
 use App\Services\ProviderRoutingService;
 use App\Services\SwapprService;
@@ -288,7 +287,7 @@ class TransactionController extends Controller
      *     path="/api/v1/transactions",
      *     tags={"Transactions"},
      *     summary="Initiate transaction",
-     *     description="Initiates a new transaction for the matched account.",
+     *     description="Initiates a new transaction for the matched account. Payouts require the selected balance currency to match the recipient currency; cross-currency payouts are rejected.",
      *     @OA\Parameter(
      *         name="X-Public-Key",
      *         in="header",
@@ -305,7 +304,7 @@ class TransactionController extends Controller
      *     ),
      *     @OA\Response(response=200, description="Transaction initiated successfully"),
      *     @OA\Response(response=401, description="Invalid public key or secret key"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(response=422, description="Validation error or payout balance currency does not match recipient currency")
      * )
      */
 
@@ -383,6 +382,7 @@ public function store(Request $request)
         ...SwapprService::senderInformationValidationRules(),
     ]);
 
+
     if ($validator->fails()) {
         return response()->json([
             'success' => false,
@@ -449,19 +449,16 @@ public function store(Request $request)
     $currency        = strtoupper($recipient->currency);
     $amount          = (float) $validated['amount'];
 
-
-    $rate = ExchangeRate::whereHas('fromCurrency', fn($q) => $q->where('code', $sendingCurrency))
-        ->whereHas('toCurrency',   fn($q) => $q->where('code', $currency))
-        ->first();
-
-    if (! $rate) {
+    if ($sendingCurrency !== $currency) {
         return response()->json([
             'success' => false,
-            'message' => "Rate not found for {$sendingCurrency} to {$currency}",
-            'code'    => 'RATE_NOT_FOUND',
+            'message' => "The selected balance currency ({$sendingCurrency}) must match the recipient currency ({$currency}).",
+            'code'    => 'CURRENCY_MISMATCH',
             'data'    => null,
-        ], 400);
+        ], 422);
     }
+
+    $exchangeRate = 1.0;
 
         $userFee = \App\Models\UserCurrencyFee::where('user_id', $ownerId)->where('currency', $currency)->first();
         $platformFee = 0;
@@ -517,7 +514,7 @@ public function store(Request $request)
         "%s 1.00 = %s %s",
         $sendingCurrency,
         $currency,
-        number_format((float) $rate->rate, 6, '.', '')
+        number_format($exchangeRate, 6, '.', '')
     );
 
     $resolvedProvider = app(ProviderRoutingService::class)
@@ -558,7 +555,7 @@ public function store(Request $request)
         'total_amount'        => $totalAmount,
         'recipient_amount'    => $recipientAmount,
         'exchange_rate'       => $exchangeRateText,
-        'exchange_rate_value' => (float) $rate->rate,
+        'exchange_rate_value' => $exchangeRate,
         'account_number'      => $recipient->account_number ?? $recipient->phone,
         'account_name'        => $recipient->account_name,
          'bank_code' => $providerBankCode,
@@ -646,7 +643,7 @@ public function store(Request $request)
             'to_currency'              => $currency,
             'fees'                     => $transferFee,
             'platform_fee'             => $transferFee,
-            'exchange_rate'            => (float) $rate->rate,
+            'exchange_rate'            => $exchangeRate,
             'recipient_amount'         => $recipientAmount,
             'interac_email'            => $request->interac_email      ?? null,
             'interac_first_name'       => $request->interac_first_name ?? null,
@@ -774,7 +771,7 @@ public function store(Request $request)
             unset($payload['recipient']);
         }
 
-        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload);
+        $response = app(\App\Services\SwapprService::class)->submitPayout($transaction, $payload, $beneficiary);
 
         if ($response['success']) {
             return response()->json([

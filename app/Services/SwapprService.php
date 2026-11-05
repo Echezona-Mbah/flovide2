@@ -8,6 +8,7 @@ use App\Models\Beneficia;
 use App\Models\TransactionHistory;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -184,7 +185,6 @@ class SwapprService
             ?: $beneficiary->beneficiary_name
             ?: $beneficiary->account_name
             ?: trim((string) $beneficiary->first_names . ' ' . (string) $beneficiary->last_name);
-
         if ($label === '') {
             return $this->beneficiaryFailure('Beneficiary name is required for Swappr.', 'SWAPPR_BENEFICIARY_NAME_REQUIRED');
         }
@@ -205,8 +205,8 @@ class SwapprService
                 'currency' => 'CAD',
                 'name' => $label,
                 'interac_email' => $email,
-                'interac_first_name' => $firstName,
-                'interac_last_name' => $lastName,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'external_reference' => (string) $beneficiary->id,
             ];
         } elseif ($currency === 'NGN') {
@@ -258,19 +258,42 @@ class SwapprService
 
         $response = $this->upsertBeneficiary(
             $payload,
-            'beneficiary-' . Str::uuid(),
+            'ben-' . Str::uuid(),
             (string) ($beneficiary->mode ?: 'live')
         );
+//dd($response);
 
         if (!$response['success']) {
             return $response;
         }
 
-        $beneficiaryId = data_get($response, 'data.id')
-            ?? data_get($response, 'data.data.id')
-            ?? data_get($response, 'data.beneficiary.id');
+        $beneficiaryId = $this->extractBeneficiaryId($response);
 
-        if (!is_string($beneficiaryId) || $beneficiaryId === '') {
+        if ($beneficiaryId === null && $currency === 'CAD') {
+            $lookup = $this->lookupCadBeneficiaryId(
+                (string) $beneficiary->email,
+                (string) $beneficiary->id,
+                (string) ($beneficiary->mode ?: 'live')
+            );
+
+            if (!$lookup['success']) {
+                return $lookup;
+            }
+
+            $beneficiaryId = $lookup['beneficiary_id'];
+        }
+
+
+        if ($beneficiaryId === null) {
+            $responseData = $response['data'] ?? null;
+            Log::warning('[Swappr] Beneficiary response did not contain a recognized ID field.', [
+                'status' => $response['status'] ?? null,
+                'response_keys' => is_array($responseData) ? array_keys($responseData) : [],
+                'nested_data_keys' => is_array(data_get($responseData, 'data'))
+                    ? array_keys(data_get($responseData, 'data'))
+                    : [],
+            ]);
+
             return $this->beneficiaryFailure(
                 'Swappr accepted the beneficiary but did not return its ID.',
                 'SWAPPR_BENEFICIARY_ID_MISSING'
@@ -280,6 +303,7 @@ class SwapprService
         $beneficiary->swappr_beneficiary_id = $beneficiaryId;
         $beneficiary->save();
 
+
         return [
             'success' => true,
             'message' => 'Beneficiary saved with Swappr.',
@@ -288,43 +312,306 @@ class SwapprService
         ];
     }
 
-    public function upsertBeneficiary(array $payload, string $idempotencyKey, string $environment = 'live'): array
+    private function extractBeneficiaryId(array $response): ?string
+    {
+        foreach ([
+            'data.id',
+            'data.beneficiary_id',
+            'data.beneficiaryId',
+            'data.data.id',
+            'data.data.beneficiary_id',
+            'data.data.beneficiaryId',
+            'data.beneficiary.id',
+            'data.data.beneficiary.id',
+        ] as $path) {
+            $value = data_get($response, $path);
+            if ((is_string($value) || is_int($value)) && (string) $value !== '') {
+                return (string) $value;
+            }
+        }
+
+        return null;
+    }
+
+    private function lookupCadBeneficiaryId(string $email, string $externalReference, string $environment): array
     {
         $apiKey = $this->apiKeyFor($environment);
+        $parameters = [
+            'currency' => 'CAD',
+            'limit' => 100,
+        ];
+        if ($externalReference !== '') {
+            $parameters['external_reference'] = $externalReference;
+        }
 
-        for ($attempt = 1; $attempt <= 3; $attempt++) {
+        do {
             try {
                 $response = Http::timeout($this->timeout)
                     ->withToken($apiKey)
-                    ->withHeaders(['Idempotency-Key' => $idempotencyKey])
                     ->acceptJson()
-                    ->asJson()
-                    ->post($this->baseUrl . '/beneficiaries', $payload);
+                    ->get($this->baseUrl . '/beneficiaries', $parameters);
             } catch (ConnectionException $exception) {
-                if ($attempt < 3) {
-                    sleep($attempt);
-                    continue;
-                }
+                Log::warning('[Swappr] CAD beneficiary ID lookup failed to connect.', [
+                    'environment' => $environment,
+                    'exception' => $exception->getMessage(),
+                ]);
 
                 return $this->beneficiaryFailure(
-                    'Swappr did not confirm whether the beneficiary was saved.',
-                    'SWAPPR_BENEFICIARY_CONFIRMATION_UNCERTAIN',
+                    'Swappr saved the CAD beneficiary but its ID lookup failed. The payout was not submitted.',
+                    'SWAPPR_BENEFICIARY_LOOKUP_FAILED',
                     503
                 );
             }
 
-            if (!$response->serverError() || $attempt === 3) {
-                return $this->formatResponse($response);
+            if (!$response->successful()) {
+                $formattedResponse = $this->formatResponse($response);
+                Log::warning('[Swappr] CAD beneficiary ID lookup returned an error.', [
+                    'environment' => $environment,
+                    'status' => $formattedResponse['status'],
+                    'code' => $formattedResponse['code'],
+                ]);
+
+                return $this->beneficiaryFailure(
+                    'Swappr saved the CAD beneficiary but its ID lookup failed. The payout was not submitted.',
+                    'SWAPPR_BENEFICIARY_LOOKUP_FAILED',
+                    (int) $formattedResponse['status']
+                );
             }
 
-            sleep($attempt);
-        }
+            $body = $response->json();
+            $beneficiaries = data_get($body, 'data', []);
 
-        return $this->beneficiaryFailure('Swappr beneficiary request failed.', 'SWAPPR_BENEFICIARY_FAILED', 502);
+            if (!is_array($beneficiaries)) {
+                $beneficiaries = [];
+            } elseif (isset($beneficiaries['data']) && is_array($beneficiaries['data'])) {
+                $body = $beneficiaries;
+                $beneficiaries = $beneficiaries['data'];
+            }
+
+            foreach ($beneficiaries as $candidate) {
+                if (!is_array($candidate)) {
+                    continue;
+                }
+
+                $candidateEmail = data_get($candidate, 'interac_email');
+                $candidateId = data_get($candidate, 'id');
+
+                if (
+                    is_string($candidateEmail)
+                    && strtolower(trim($candidateEmail)) === strtolower(trim($email))
+                    && (is_string($candidateId) || is_int($candidateId))
+                    && (string) $candidateId !== ''
+                ) {
+                    return [
+                        'success' => true,
+                        'beneficiary_id' => (string) $candidateId,
+                    ];
+                }
+            }
+
+            $hasMore = data_get($body, 'has_more') === true;
+            $lastBeneficiary = $beneficiaries === [] ? null : end($beneficiaries);
+            $cursor = is_array($lastBeneficiary) ? data_get($lastBeneficiary, 'id') : null;
+
+            if (!$hasMore || !is_string($cursor) || $cursor === '') {
+                break;
+            }
+
+            $parameters['starting_after'] = $cursor;
+        } while (true);
+
+        return [
+            'success' => true,
+            'beneficiary_id' => null,
+        ];
     }
 
-    public function submitPayout(TransactionHistory $transaction, array $payload): array
+public function upsertBeneficiary(array $payload, string $idempotencyKey, string $environment = 'live'): array
+{
+    $apiKey = $this->apiKeyFor($environment);
+    $url    = $this->baseUrl . '/beneficiaries';
+
+    Log::info('[Swappr Beneficiary] Sending upsert', [
+        'url'             => $url,
+        'environment'     => $environment,
+        'key_prefix'      => substr($apiKey, 0, 8),
+        'idempotency_key' => $idempotencyKey,
+        'payload'         => $payload,
+    ]);
+
+    for ($attempt = 1; $attempt <= 3; $attempt++) {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->withoutRedirecting()
+                ->withToken($apiKey)
+                ->withHeaders(['Idempotency-Key' => $idempotencyKey])
+                ->acceptJson()
+                ->asJson()
+                ->post($url, $payload);
+
+            Log::info('[Swappr Beneficiary] Raw response', [
+                'attempt'      => $attempt,
+                'status'       => $response->status(),
+                'content_type' => $response->header('Content-Type'),
+                'location'     => $response->header('Location'),
+                'body'         => substr($response->body(), 0, 1000),
+            ]);
+        } catch (ConnectionException $exception) {
+            Log::error('[Swappr Beneficiary] Connection exception', [
+                'attempt' => $attempt,
+                'error'   => $exception->getMessage(),
+            ]);
+
+            if ($attempt < 3) {
+                sleep($attempt);
+                continue;
+            }
+
+            return $this->beneficiaryFailure(
+                'Swappr did not confirm whether the beneficiary was saved.',
+                'SWAPPR_BENEFICIARY_CONFIRMATION_UNCERTAIN',
+                503
+            );
+        }
+
+        if ($response->serverError() && $attempt < 3) {
+            sleep($attempt);
+            continue;
+        }
+
+        $formatted = $this->formatResponse($response);
+
+        // A 2xx that isn't a JSON beneficiary object means we did not reach the Swappr API
+        if ($formatted['success'] && !is_array($formatted['data'])) {
+            return $this->beneficiaryFailure(
+                'Swappr returned a non-JSON response. Check SWAPPR_BASE_URL (expected https://api.swappr.me/api/v1).',
+                'SWAPPR_UNEXPECTED_RESPONSE',
+                502
+            );
+        }
+
+        return $formatted;
+    }
+
+    return $this->beneficiaryFailure('Swappr beneficiary request failed.', 'SWAPPR_BENEFICIARY_FAILED', 502);
+}
+
+    public function createCadBeneficiaryForPayout(Beneficia $beneficiary, string $idempotencyKey): array
     {
+        if (strtoupper((string) $beneficiary->currency) !== 'CAD') {
+            return $this->beneficiaryFailure(
+                'Only CAD beneficiaries can be prepared for a CAD payout.',
+                'SWAPPR_BENEFICIARY_CURRENCY_INVALID'
+            );
+        }
+
+        $name = $beneficiary->alias
+            ?: $beneficiary->beneficiary_name
+            ?: $beneficiary->account_name
+            ?: trim((string) $beneficiary->first_names . ' ' . (string) $beneficiary->last_name);
+        $firstName = $beneficiary->interac_first_name ?: $beneficiary->first_names;
+        $lastName = $beneficiary->interac_last_name ?: $beneficiary->last_name;
+
+        if (blank($name) || blank($beneficiary->email) || blank($firstName) || blank($lastName)) {
+            return $this->beneficiaryFailure(
+                'CAD Swappr Interac beneficiaries require a display name, email, first name, and last name.',
+                'SWAPPR_BENEFICIARY_FIELDS_REQUIRED'
+            );
+        }
+
+        $response = $this->upsertBeneficiary([
+            'currency' => 'CAD',
+            'name' => $name,
+            'interac_email' => $beneficiary->email,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'external_reference' => (string) $beneficiary->id,
+        ], $idempotencyKey, (string) ($beneficiary->mode ?: 'live'));
+
+        if (!$response['success']) {
+            return $response;
+        }
+
+        $beneficiaryId = $this->extractBeneficiaryId($response);
+
+        if ($beneficiaryId === null) {
+            $lookup = $this->lookupCadBeneficiaryId(
+                (string) $beneficiary->email,
+                (string) $beneficiary->id,
+                (string) ($beneficiary->mode ?: 'live')
+            );
+
+            if (!$lookup['success']) {
+                return $lookup;
+            }
+
+            $beneficiaryId = $lookup['beneficiary_id'];
+        }
+
+        if ($beneficiaryId === null) {
+            $responseData = $response['data'] ?? null;
+            Log::warning('[Swappr] Payout beneficiary response did not contain a recognized ID field.', [
+                'status' => $response['status'] ?? null,
+                'response_keys' => is_array($responseData) ? array_keys($responseData) : [],
+                'nested_data_keys' => is_array(data_get($responseData, 'data'))
+                    ? array_keys(data_get($responseData, 'data'))
+                    : [],
+            ]);
+
+            return $this->beneficiaryFailure(
+                'Swappr accepted the beneficiary but did not return its ID; the payout was not submitted.',
+                'SWAPPR_BENEFICIARY_ID_MISSING'
+            );
+        }
+
+        return [
+            'success' => true,
+            'message' => 'CAD beneficiary is ready for payout.',
+            'beneficiary_id' => $beneficiaryId,
+            'data' => $response['data'],
+        ];
+    }
+
+    public function submitPayout(
+        TransactionHistory $transaction,
+        array $payload,
+        ?Beneficia $beneficiary = null
+    ): array
+    {
+        if (
+            strtoupper((string) ($payload['currency'] ?? '')) === 'CAD'
+            && blank($payload['beneficiary_id'] ?? null)
+            && $beneficiary !== null
+        ) {
+            $preparedBeneficiary = $this->createCadBeneficiaryForPayout(
+                $beneficiary,
+                'payout-beneficiary-' . $transaction->id
+            );
+
+            if (!$preparedBeneficiary['success']) {
+                $message = ($preparedBeneficiary['message'] ?? 'Swappr could not prepare the CAD beneficiary.')
+                    . ' The payout was not submitted.';
+                $this->refundFailedPayout($transaction);
+                $transaction->update([
+                    'status' => 'failed',
+                    'payment_provider' => 'swappr',
+                    'failure_reason' => $message,
+                ]);
+
+                return [
+                    'success' => false,
+                    'uncertain' => false,
+                    'status' => 'failed',
+                    'code' => $preparedBeneficiary['code'] ?? 'SWAPPR_BENEFICIARY_FAILED',
+                    'message' => $message,
+                    'data' => $preparedBeneficiary['data'] ?? null,
+                ];
+            }
+
+            $payload['beneficiary_id'] = $preparedBeneficiary['beneficiary_id'];
+            unset($payload['recipient']);
+        }
+
         if (
             strtoupper((string) ($payload['currency'] ?? '')) === 'NGN'
             && (

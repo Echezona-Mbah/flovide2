@@ -228,11 +228,6 @@ public function store(Request $request)
     // ── CAD: skip bank/mobile lookup, use interac fields ─────────────────
     if ($currency === 'CAD') {
         $bankName = 'Interac';
-        Log::info('[Personal Beneficiary Store] CAD Interac fields', [
-            'interac_first_name' => $bank['interac_first_name'] ?? null,
-            'interac_last_name'  => $bank['interac_last_name']  ?? null,
-            'interac_email'      => $bank['interac_email']       ?? null,
-        ]);
     } elseif ($method === 'bank') {
         $bankRow  = $resolver->findRow($currency, (string) ($bank['bankCode'] ?? ''), $provider);
         $bankName = $bankRow?->name;

@@ -19,6 +19,7 @@ use App\Http\Controllers\MainPage\ContactController;
 use App\Http\Controllers\MainPage\knowmeController;
 use App\Http\Controllers\Pivot\PivotController as PivotPivotController;
 use App\Http\Controllers\PivotController;
+use App\Http\Controllers\Swappr\CadInteracWebhookController;
 use App\Models\Career;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -77,6 +78,11 @@ Route::get('/employee/{public_id}', [knowmeController::class, 'index'])->name('e
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/developer', [DeveloperController::class, 'index'])->name('developer');
+
+Route::post('/webhooks/swappr', [CadInteracWebhookController::class, 'handle'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+Route::post('/webhooks/swapper', [CadInteracWebhookController::class, 'handle'])
+    ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 
 Route::get('/deletion', function () {
     return view('mainpage.deletion');

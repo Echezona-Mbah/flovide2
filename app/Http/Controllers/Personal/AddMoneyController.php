@@ -133,19 +133,6 @@ class AddMoneyController extends Controller
     $platformFee = (float) $currencyRow->collection_fee;
     $netAmount   = round($amount - $platformFee, 2);
 
-    if ($amount <= $platformFee) {
-        $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
-        return response()->json([
-            'success' => false,
-            'message' => $msg,
-            'code'    => 'AMOUNT_BELOW_FEE',
-            'data'    => [
-                'amount'       => $amount,
-                'platform_fee' => $platformFee,
-            ],
-        ], 422);
-    }
-
     Log::info('[Interac Personal] Fee computed', [
         'amount'       => $amount,
         'platform_fee' => $platformFee,
@@ -191,6 +178,8 @@ class AddMoneyController extends Controller
             ], 503);
         }
 
+        $platformFee = 0;
+        $netAmount = $amount;
         $reference = $collections->newReference();
         $transaction = TransactionHistory::create([
             'personal_id' => $personal->id,
@@ -213,15 +202,16 @@ class AddMoneyController extends Controller
 
         $personal->notify(new GeneralNotification(
             'Swappr Interac Deposit Instructions',
-            "Send {$amount} {$balance->currency} to {$depositEmail} and include reference {$reference} where supported. Manual reconciliation is required; your wallet will not be credited automatically."
+            "Send {$amount} {$balance->currency} to {$depositEmail} and include reference {$reference} in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification."
         ));
 
         return response()->json([
             'success' => true,
-            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the message where supported. This Swappr deposit requires manual reconciliation and will not automatically credit your wallet.',
-            'code' => 'SWAPPR_COLLECTION_MANUAL_RECONCILIATION',
+            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.',
+            'code' => 'SWAPPR_COLLECTION_PENDING_WEBHOOK',
             'data' => [
                 'transaction_id' => $transaction->id,
+                'provider' => 'swappr',
                 'reference' => $reference,
                 'deposit_email' => $depositEmail,
                 'amount' => $amount,
@@ -229,9 +219,22 @@ class AddMoneyController extends Controller
                 'fees' => $platformFee,
                 'recipient_amount' => $netAmount,
                 'status' => 'pending',
-                'automatic_credit' => false,
+                'automatic_credit' => true,
             ],
         ], 200);
+    }
+
+    if ($amount <= $platformFee) {
+        $msg = "Amount must be greater than the platform fee of " . number_format($platformFee, 2) . " {$currency}.";
+        return response()->json([
+            'success' => false,
+            'message' => $msg,
+            'code'    => 'AMOUNT_BELOW_FEE',
+            'data'    => [
+                'amount'       => $amount,
+                'platform_fee' => $platformFee,
+            ],
+        ], 422);
     }
 
     if ($provider->key !== 'blaaiz_interac') {

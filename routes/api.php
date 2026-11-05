@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Blaaiz\BlaaizController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
+use App\Http\Controllers\Swappr\CadInteracWebhookController;
 use App\Http\Controllers\Business\addBankAccountController;
 use App\Http\Controllers\Personal\addBankAccountController as PersonaladdBankAccountController;
 use App\Http\Controllers\Business\SubAccountController;
@@ -179,6 +180,8 @@ Route::post('/orchard/account-inquiry',[OrchardController::class, 'accountInquir
     Route::post('/sumsub/webhook', [ComplianceController::class, 'handle'])->name('sumsub.webhook');
     Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
     Route::post('/webhooks/fidelity', [FidelityWebhookController::class, 'handle']);
+    Route::post('/webhooks/swappr', [CadInteracWebhookController::class, 'handle']);
+
 
 
 
@@ -606,7 +609,7 @@ Route::group(['middleware' => ['auth:sanctum', 'business.session']], function ()
         Route::get('/personal-transactions', [PersonalTransactionHistoryController::class, 'personalTransactions']);
         Route::get('/personal-transactions/{status}', [PersonalTransactionHistoryController::class, 'filterPersonalTransactions']);
         Route::get('/personal-personalTransactions', [PersonalTransactionHistoryController::class, 'showAllTransactions']);
-        Route::get('/personal-transactions/{id}/download', [PersonalTransactionHistoryController::class, 'apiDownloadTransactionPdf']);
+        Route::post('/personal-transactions/{id}/download', [PersonalTransactionHistoryController::class, 'apiDownloadTransactionPdf']);
 
 
 

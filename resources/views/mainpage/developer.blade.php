@@ -338,7 +338,7 @@
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
                                     <div class="mt-4 space-y-3">
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">currency</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
-                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank_code</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                        <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">bank_code</span><p class="mt-1 text-xs text-slate-500">Use the Flovide bank code. The provider-specific code is resolved internally.</p></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                         <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">account_number</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
                                     </div>
                                 </details>
@@ -536,7 +536,7 @@
                                     <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/collections/interac</code>
                                 </div>
                                 <h3 class="text-xl font-bold mb-3">Interac collection (top-up)</h3>
-                                <p class="text-slate-600 mb-6">The active CAD collection provider is selected in Payment Providers settings. Blaaiz sends an Interac Auto Deposit money request. Swappr instead returns its shared registered Interac address and a reference; Swappr deposits remain pending for manual reconciliation and are not automatically credited to an individual Flovide wallet. The collection fee (configured per account) is shown with the request.</p>
+                                <p class="text-slate-600 mb-6">The active CAD collection provider is selected in Payment Providers settings. Blaaiz sends an Interac Auto Deposit money request. Swappr returns its shared registered Interac address and a unique reference. When you include that reference in the transfer message, Swappr's signed CAD Interac webhook matches the transfer to the pending top-up and credits the full gross amount to the correct Flovide wallet. Flovide absorbs Swappr's processing fee for these collections. Transfers that cannot be matched safely remain pending for admin verification. Set up a Swappr webhook for wallet_funded at /api/webhooks/swappr and configure SWAPPR_WEBHOOK_SECRET.</p>
 
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
@@ -1257,7 +1257,7 @@ Console.WriteLine(body);`,
   },
   body: JSON.stringify({
     currency: 'NGN',
-    bank_code: '000007',
+    bank_code: '003',
     account_number: '6322069407'
   })
 })
@@ -1275,7 +1275,7 @@ import (
 func main() {
   jsonData := []byte(\`{
     "currency":"NGN",
-    "bank_code":"000007",
+    "bank_code":"003",
     "account_number":"6322069407"
   }\`)
 
@@ -1304,7 +1304,7 @@ response = requests.post(
     },
     json={
         "currency": "NGN",
-        "bank_code": "000007",
+        "bank_code": "003",
         "account_number": "6322069407",
     },
 )
@@ -1313,7 +1313,7 @@ print(response.json())`,
                 java: `String json = """
 {
   "currency": "NGN",
-  "bank_code": "000007",
+  "bank_code": "003",
   "account_number": "6322069407"
 }
 """;
@@ -1342,7 +1342,7 @@ client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
 var json = """
 {
   "currency": "NGN",
-  "bank_code": "000007",
+  "bank_code": "003",
   "account_number": "6322069407"
 }
 """;
@@ -1362,7 +1362,7 @@ Console.WriteLine(body);`,
       "response_message": "Approved or completely successful",
       "response_content": {
         "account_number": "6322069407",
-        "bank_code": "000007",
+        "bank_code": "003",
         "account_name": "ECHEZONA ERNEST MBAH",
         "account_status": "ACTIVE",
         "transaction_reference": 9

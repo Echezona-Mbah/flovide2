@@ -756,14 +756,33 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="action-wrap">
-                                                        @if($item->status === 'pending')
+                                                        @if($item->status === 'pending' && !($item->payment_provider === 'swappr' && strtoupper((string) $item->currency) === 'CAD'))
                                                         <form method="POST" action="{{ route('transactionhistory.process', $item->id) }}" class="process-form" style="display:inline;">
                                                             @csrf
                                                             <button type="submit" class="btn btn-brand">Process</button>
                                                             </form>
                                                         @endif
 
-                                                        @if ($item->status === 'pending')
+                                                        @if ($item->status === 'pending' && $item->payment_provider === 'swappr' && strtoupper((string) $item->currency) === 'CAD')
+                                                            <details class="mt-2 text-start">
+                                                                <summary class="btn btn-brand">Verify Swappr payment</summary>
+                                                                <p class="small mt-2">Only confirm after verifying this transfer in your Swappr dashboard.</p>
+                                                                <form method="POST" action="{{ route('transactionhistory.swappr-confirm', $item->id) }}">
+                                                                    @csrf
+                                                                    <label class="small" for="swappr-ledger-{{ $item->id }}">Swappr ledger entry ID</label>
+                                                                    <input id="swappr-ledger-{{ $item->id }}" name="ledger_entry_id" class="form-control form-control-sm mb-2" required maxlength="255">
+                                                                    <label class="small" for="swappr-sender-{{ $item->id }}">Sender email</label>
+                                                                    <input id="swappr-sender-{{ $item->id }}" name="sender_email" type="email" class="form-control form-control-sm mb-2" required maxlength="255">
+                                                                    <label class="small" for="swappr-amount-{{ $item->id }}">Amount paid (CAD)</label>
+                                                                    <input id="swappr-amount-{{ $item->id }}" name="amount" type="number" step="0.01" min="0.01" class="form-control form-control-sm mb-2" required>
+                                                                    <label class="small" for="swappr-net-amount-{{ $item->id }}">Swappr net amount (CAD)</label>
+                                                                    <input id="swappr-net-amount-{{ $item->id }}" name="net_amount" type="number" step="0.01" min="0.01" class="form-control form-control-sm mb-2" required>
+                                                                    <button type="submit" class="btn btn-brand">Confirm payment</button>
+                                                                </form>
+                                                            </details>
+                                                        @endif
+
+                                                        @if ($item->status === 'pending' && !($item->payment_provider === 'swappr' && strtoupper((string) $item->currency) === 'CAD'))
                                                         <form method="POST" action="{{ route('transactionhistory.refund', $item->id) }}" class="refund-form" style="display:inline;">
                                                         @csrf
                                                         <button type="submit" class="btn btn-delete">Refund</button>
@@ -1634,4 +1653,3 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 </script>
-

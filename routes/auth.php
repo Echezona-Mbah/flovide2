@@ -147,6 +147,8 @@ Route::post('/account-inquiry', [\App\Http\Controllers\AccountInquiryController:
 Route::post('/appmobile/account-inquiry', [OrchardController::class, 'appMobileAccountInquiry'])->name('appmobile.account-enquiry');
 
 Route::post('/webhooks/blaaiz', [BlaaizWebhookController::class, 'handle']);
+// Route::post('/webhooks/swappr', [CadInteracWebhookController::class, 'handle']);
+
 
 
 
@@ -421,6 +423,7 @@ Route::middleware('admin.auth')->group(function () {
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
         Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
         Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+        Route::post('/admin/transactionhistory/{id}/confirm-swappr-cad', [AdminTransactionHistoryController::class, 'confirmSwapprCadInterac'])->name('transactionhistory.swappr-confirm');
 
 
 

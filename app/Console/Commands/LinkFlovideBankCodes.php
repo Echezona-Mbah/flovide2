@@ -7,17 +7,23 @@ use Illuminate\Console\Command;
 
 class LinkFlovideBankCodes extends Command
 {
-    protected $signature = 'banks:link-flovide-codes {currency} {--base= : provider live today, its codes become the Flovide codes} {--dry-run}';
+    protected $signature = 'banks:link-flovide-codes {currency} {--base= : provider live today, its codes become the Flovide codes} {--provider= : only link this provider} {--dry-run}';
     protected $description = "Give every provider's banks for a currency one shared Flovide bank code";
 
     public function handle()
     {
         $currency = strtoupper($this->argument('currency'));
         $base     = strtolower((string) $this->option('base'));
+        $provider = strtolower((string) $this->option('provider'));
         $dry      = (bool) $this->option('dry-run');
 
         if (!$base) {
             $this->error('Pass --base=<provider live for this currency today>, e.g. --base=payaza');
+            return 1;
+        }
+
+        if ($provider !== '' && $provider === $base) {
+            $this->error('The target provider must be different from --base.');
             return 1;
         }
 
@@ -34,7 +40,7 @@ class LinkFlovideBankCodes extends Command
                 $row->update(['flovide_code' => $row->bank_code]);
             }
         }
-        $this->info("{$base}: {$baseRows->count()} banks now use their own code as the Flovide code.");
+        $this->info(($dry ? '[dry run] ' : '') . "{$base}: {$baseRows->count()} banks will use their own code as the Flovide code.");
 
         // Base banks whose normalised name is unique (ambiguous names are left for manual linking)
         $baseByName = $baseRows
@@ -42,9 +48,17 @@ class LinkFlovideBankCodes extends Command
             ->filter(fn ($g) => $g->count() === 1)
             ->map->first();
 
-        // 2) Every other provider: link by name
+        $baseByCode = [];
+        foreach ($baseRows as $baseRow) {
+            foreach ($this->bankCodes($baseRow) as $code) {
+                $baseByCode[$code][] = $baseRow;
+            }
+        }
+
+        // 2) Every other provider: link by a unique shared bank code, then by name
         $others = Bank::where('currency', $currency)
             ->where('provider', '!=', $base)
+            ->when($provider !== '', fn ($query) => $query->where('provider', $provider))
             ->whereNull('flovide_code')
             ->get();
 
@@ -55,10 +69,30 @@ class LinkFlovideBankCodes extends Command
 
         foreach ($others as $row) {
             $key   = $this->normalise($row->name);
-            $match = $baseByName[$key] ?? null;
-            $dupe  = ($nameCounts[$row->provider . '|' . $key] ?? 0) > 1;
+            $codeMatches = collect($this->bankCodes($row))
+                ->flatMap(fn ($code) => $baseByCode[$code] ?? [])
+                ->unique(fn ($candidate) => (string) ($candidate->flovide_code ?: $candidate->bank_code))
+                ->values();
 
-            if ($match && !$dupe) {
+            $match = null;
+            $matchedByCode = false;
+            if ($codeMatches->count() === 1) {
+                $match = $codeMatches->first();
+                $matchedByCode = true;
+            } elseif ($codeMatches->isNotEmpty()) {
+                $matchingNames = $codeMatches->filter(
+                    fn ($candidate) => $this->normalise($candidate->name) === $key
+                );
+                $match = $matchingNames->count() === 1 ? $matchingNames->first() : null;
+                $matchedByCode = $match !== null;
+            }
+
+            $dupe  = ($nameCounts[$row->provider . '|' . $key] ?? 0) > 1;
+            if ($match === null && !$dupe) {
+                $match = $baseByName[$key] ?? null;
+            }
+
+            if ($match && ($matchedByCode || !$dupe)) {
                 if (!$dry) {
                     $row->update(['flovide_code' => $match->flovide_code ?? $match->bank_code]);
                 }
@@ -76,6 +110,21 @@ class LinkFlovideBankCodes extends Command
         }
 
         return 0;
+    }
+
+    protected function bankCodes(Bank $bank): array
+    {
+        return collect([
+            $bank->bank_code,
+            $bank->bank_nibss_code,
+            $bank->sort_code,
+        ])
+            ->filter(fn ($code) => is_string($code) || is_numeric($code))
+            ->map(fn ($code) => trim((string) $code))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     protected function normalise(string $name): string
