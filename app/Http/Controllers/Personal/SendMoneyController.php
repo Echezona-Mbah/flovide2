@@ -837,6 +837,55 @@ public function getExchangeRate(Request $request)
             return response()->json(['success'=>false,'message'=>'Insufficient funds','code'=>'INSUFFICIENT_FUNDS','data'=>null],422);
         }
 
+        $routing = app(\App\Services\ProviderRoutingService::class);
+        $resolvedProvider = $routing->resolveForCurrency($currency, $request->transfer_method);
+        if (!$resolvedProvider) {
+            $msg = 'No payment provider available for this currency';
+            return $isApi
+                ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
+        if ($resolvedProvider->key === 'ohentpay') {
+            if (empty($balance->ohentpay_balance_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This balance is not linked to OhentPay',
+                    'code' => 'OHENTPAY_BALANCE_MISSING',
+                    'data' => null,
+                ], 422);
+            }
+
+            $beneficiary = Beneficia::where('recipient_id', $request->recipient_id)
+                ->where('personal_id', $personal->id)
+                ->first();
+
+            if (! $beneficiary) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Recipient not found',
+                    'code' => 'RECIPIENT_NOT_FOUND',
+                    'data' => null,
+                ], 404);
+            }
+
+            $registration = app(\App\Services\OhentPayService::class)->registerBeneficiary($beneficiary);
+            if (! $registration['success']) {
+                Log::error('[SendViaOhentPay] Personal recipient registration failed', [
+                    'beneficiary_id' => $beneficiary->id,
+                    'code' => $registration['code'] ?? null,
+                    'status' => $registration['status'] ?? null,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $registration['message'] ?? 'Failed to register recipient with OhentPay.',
+                    'code' => $registration['code'] ?? 'OHENTPAY_RECIPIENT_REGISTRATION_FAILED',
+                    'data' => null,
+                ], 422);
+            }
+        }
+
         DB::beginTransaction();
         try {
             $balance->amount -= $totalAmount;
@@ -928,17 +977,6 @@ public function getExchangeRate(Request $request)
             }
 
             // ── Route to provider (DB-driven) ─────────────────────────────────
-            $routing = app(\App\Services\ProviderRoutingService::class);
-            $resolvedProvider = $routing->resolveForCurrency($currency, $request->transfer_method);
-
-            if (!$resolvedProvider) {
-                DB::rollBack();
-                $msg = 'No payment provider available for this currency';
-                return $isApi
-                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
-                    : back()->withInput()->with('error', $msg);
-            }
-
              // ── Translate the beneficiary's bank to the live provider's code ──────────
             $beneficiary = Beneficia::where('recipient_id', $request->recipient_id)
                 ->where('personal_id', $personal->id)              // personal controller: ->where('personal_id', $personal->id)
@@ -1408,16 +1446,33 @@ public function getExchangeRate(Request $request)
             ->where('personal_id', $personal->id)
             ->first();
 
-        $ohentPayRecipientId = $beneficiary->ohentpay_recipient_id ?? null;
-
-        if (!$ohentPayRecipientId) {
+        if (! $beneficiary) {
             return response()->json([
                 'success' => false,
-                'message' => 'Recipient is not registered with OhentPay',
-                'code' => 'OHENTPAY_RECIPIENT_MISSING',
+                'message' => 'Recipient not found',
+                'code' => 'RECIPIENT_NOT_FOUND',
+                'data' => null,
+            ], 404);
+        }
+
+        $registration = app(\App\Services\OhentPayService::class)->registerBeneficiary($beneficiary);
+
+        if (! $registration['success']) {
+            Log::error('[SendViaOhentPay] Personal recipient registration failed', [
+                'beneficiary_id' => $beneficiary->id,
+                'code' => $registration['code'] ?? null,
+                'status' => $registration['status'] ?? null,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $registration['message'] ?? 'Failed to register recipient with OhentPay.',
+                'code' => $registration['code'] ?? 'OHENTPAY_RECIPIENT_REGISTRATION_FAILED',
                 'data' => null
             ], 422);
         }
+
+        $ohentPayRecipientId = $registration['recipient_id'];
 
         $ohentPayBalanceId = $balance->ohentpay_balance_id ?? null;
 

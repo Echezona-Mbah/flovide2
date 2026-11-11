@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Bank;
+use App\Models\Beneficia;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -119,6 +120,96 @@ class OhentPayService
         $response = $this->client()->post('/recipients', $payload);
 
         return $this->logAndReturn('Create recipient', $response);
+    }
+
+    public function registerBeneficiary(Beneficia $beneficiary): array
+    {
+        if (filled($beneficiary->ohentpay_recipient_id)) {
+            return [
+                'success' => true,
+                'recipient_id' => (string) $beneficiary->ohentpay_recipient_id,
+                'registered' => false,
+            ];
+        }
+
+        $currency = strtoupper((string) $beneficiary->currency);
+        $bankCode = (string) ($beneficiary->flovide_bank_code ?: $beneficiary->bank_code);
+        $bank = $this->resolveBank($bankCode, $currency);
+
+        if (! $bank || blank($bank->provider_bank_id)) {
+            return [
+                'success' => false,
+                'code' => 'OHENTPAY_BANK_NOT_FOUND',
+                'message' => 'The beneficiary bank is not available in the OhentPay bank list.',
+            ];
+        }
+
+        $accountName = $beneficiary->account_name
+            ?: $beneficiary->beneficiary_name
+            ?: trim((string) $beneficiary->first_names . ' ' . (string) $beneficiary->last_name);
+        $alias = $beneficiary->alias ?: $accountName;
+
+        if (blank($accountName) || blank($beneficiary->account_number)) {
+            return [
+                'success' => false,
+                'code' => 'OHENTPAY_RECIPIENT_FIELDS_REQUIRED',
+                'message' => 'The beneficiary needs an account name and account number before it can be registered with OhentPay.',
+            ];
+        }
+
+        $country = strtoupper((string) ($beneficiary->country ?: $bank->country_iso));
+        if (strlen($country) > 2) {
+            $country = strtoupper((string) $bank->country_iso);
+        }
+
+        $response = $this->createRecipient(array_filter([
+            'country' => $country,
+            'currency' => $currency,
+            'alias' => $alias,
+            'type' => strtolower((string) $beneficiary->type) === 'corporate' ? 'business' : 'personal',
+            'account_name' => $accountName,
+            'bank_id' => (string) $bank->provider_bank_id,
+            'account_number' => (string) $beneficiary->account_number,
+        ], fn ($value) => $value !== null && $value !== ''));
+
+        if (! $response['success']) {
+            return [
+                'success' => false,
+                'status' => $response['status'] ?? null,
+                'code' => 'OHENTPAY_RECIPIENT_REGISTRATION_FAILED',
+                'message' => data_get($response, 'data.message')
+                    ?? 'OhentPay could not register the beneficiary.',
+                'data' => $response['data'] ?? null,
+            ];
+        }
+
+        $recipientId = data_get($response, 'data.id')
+            ?? data_get($response, 'data.data.id')
+            ?? data_get($response, 'data.recipient.id');
+
+        if (! is_string($recipientId) && ! is_numeric($recipientId)) {
+            Log::error('[OhentPay] Recipient registration succeeded without a recipient ID', [
+                'beneficiary_id' => $beneficiary->id,
+                'response' => $response['data'] ?? null,
+            ]);
+
+            return [
+                'success' => false,
+                'code' => 'OHENTPAY_RECIPIENT_ID_MISSING',
+                'message' => 'OhentPay accepted the beneficiary but did not return a recipient ID.',
+                'data' => $response['data'] ?? null,
+            ];
+        }
+
+        $beneficiary->ohentpay_recipient_id = (string) $recipientId;
+        $beneficiary->save();
+
+        return [
+            'success' => true,
+            'recipient_id' => (string) $recipientId,
+            'registered' => true,
+            'data' => $response['data'] ?? null,
+        ];
     }
 
     public function getRecipient(string $id): array

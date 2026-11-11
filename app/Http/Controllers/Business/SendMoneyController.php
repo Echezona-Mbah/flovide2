@@ -322,6 +322,46 @@ class SendMoneyController extends Controller
                 : back()->withInput()->with('error', $msg);
         }
 
+        if ($resolvedProvider->key === 'ohentpay') {
+            if (empty($balance->ohentpay_balance_id)) {
+                $msg = 'This balance is not linked to OhentPay';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'OHENTPAY_BALANCE_MISSING', 'data' => null], 422)
+                    : back()->withInput()->with('error', $msg);
+            }
+
+            $beneficiary = Beneficia::where('recipient_id', $request->recipient_id)
+                ->where('user_id', $owner->id)
+                ->first();
+
+            if (! $beneficiary) {
+                $msg = 'Recipient not found';
+                return $isApi
+                    ? response()->json(['success' => false, 'message' => $msg, 'code' => 'RECIPIENT_NOT_FOUND', 'data' => null], 404)
+                    : back()->with('error', $msg);
+            }
+
+            $registration = app(\App\Services\OhentPayService::class)->registerBeneficiary($beneficiary);
+            if (! $registration['success']) {
+                $message = $registration['message'] ?? 'Failed to register recipient with OhentPay.';
+
+                Log::error('[SendViaOhentPay] Business recipient registration failed', [
+                    'beneficiary_id' => $beneficiary->id,
+                    'code' => $registration['code'] ?? null,
+                    'status' => $registration['status'] ?? null,
+                ]);
+
+                return $isApi
+                    ? response()->json([
+                        'success' => false,
+                        'message' => $message,
+                        'code' => $registration['code'] ?? 'OHENTPAY_RECIPIENT_REGISTRATION_FAILED',
+                        'data' => null,
+                    ], 422)
+                    : back()->with('error', $message);
+            }
+        }
+
         DB::beginTransaction();
         try {
             if ($mode === 'live') {
@@ -442,6 +482,8 @@ class SendMoneyController extends Controller
             $resolver    = app(\App\Services\BankCodeResolver::class);
             $codeWeHold  = $beneficiary?->flovide_bank_code ?: (string) $request->bank_code;
             $providerRow = $resolver->forProvider($resolvedProvider->key, $currency, $codeWeHold, $beneficiary?->provider);
+
+            //dd($providerRow);
 
             if (!$providerRow && $resolver->isLinked($currency)) {
                 DB::rollBack();
@@ -949,6 +991,8 @@ class SendMoneyController extends Controller
 
     protected function sendViaOhentPay(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor, User $owner, $netRecipientAmount, $transferFee)
     {
+
+   // dd($request->all());
         $isApi = $request->expectsJson();
         $ohentPay = app(\App\Services\OhentPayService::class);
 
@@ -956,13 +1000,34 @@ class SendMoneyController extends Controller
             ->where('user_id', $owner->id)
             ->first();
 
-        $ohentPayRecipientId = $beneficiary->ohentpay_recipient_id ?? null;
-
-        if (!$ohentPayRecipientId) {
+        if (! $beneficiary) {
             return $isApi
-                ? response()->json(['success' => false, 'message' => 'Recipient is not registered with OhentPay', 'code' => 'OHENTPAY_RECIPIENT_MISSING', 'data' => null], 422)
-                : back()->with('error', 'Recipient is not registered with OhentPay');
+                ? response()->json(['success' => false, 'message' => 'Recipient not found', 'code' => 'RECIPIENT_NOT_FOUND', 'data' => null], 404)
+                : back()->with('error', 'Recipient not found');
         }
+
+        $registration = $ohentPay->registerBeneficiary($beneficiary);
+
+        if (! $registration['success']) {
+            $message = $registration['message'] ?? 'Failed to register recipient with OhentPay.';
+
+            Log::error('[SendViaOhentPay] Business recipient registration failed', [
+                'beneficiary_id' => $beneficiary->id,
+                'code' => $registration['code'] ?? null,
+                'status' => $registration['status'] ?? null,
+            ]);
+
+            return $isApi
+                ? response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'code' => $registration['code'] ?? 'OHENTPAY_RECIPIENT_REGISTRATION_FAILED',
+                    'data' => null,
+                ], 422)
+                : back()->with('error', $message);
+        }
+
+        $ohentPayRecipientId = $registration['recipient_id'];
 
         $ohentPayBalanceId = $balance->ohentpay_balance_id ?? null;
 

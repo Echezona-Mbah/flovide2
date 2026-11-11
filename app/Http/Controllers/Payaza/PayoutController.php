@@ -150,34 +150,14 @@ class PayoutController extends Controller
         return response()->json($response);
     }
 
-//     public function accountEnquiry(Request $request)
-// {
-//     $request->validate([
-//         'currency' => 'required|string',
-//         'type' => 'required|string|in:bank,mobile',
-//         'account_number' => 'required|string',
-//         'bank_code' => 'sometimes|required_if:type,bank|string',
-//         'provider' => 'sometimes|required_if:type,mobile|string',
-//     ]);
 
-//     $type = $request->type;
-
-//     $response = $this->payaza->accountEnquiry(
-//         $request->currency,
-//         $type === 'bank' ? $request->bank_code : $request->provider,
-//         $request->account_number,
-//         $type
-//     );
-
-//     return response()->json($response);
-// }
 
     public function getBanks(Request $request)
     {
-
         $request->validate([
             'currency' => 'required|string'
         ]);
+
         $currency = $request->currency;
         $response = $this->payaza->getBanks($currency);
         return response()->json($response);

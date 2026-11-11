@@ -326,6 +326,7 @@ private function formatTransactionReceiptData(TransactionHistory $transaction): 
         'account_name' => $transaction->recipient_account_name ?? 'N/A',
         'account_number' => $transaction->recipient_account_number ?? 'N/A',
         'brand_name' => config('app.name', 'Flovide'),
+        ...$this->receiptAssets($transaction),
     ];
 }
 

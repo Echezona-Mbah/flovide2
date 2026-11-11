@@ -9,19 +9,26 @@ use Illuminate\Support\Facades\DB;
 
 class SyncMainBanks extends Command
 {
-    protected $signature = 'banks:sync-mainbanks {--dry-run}';
+    protected $signature = 'banks:sync-mainbanks {--currency= : only synchronize banks for this currency} {--provider= : only synchronize banks that have a row for this provider} {--dry-run}';
 
     protected $description = 'Create the main bank registry and Flovide codes from all provider bank lists';
 
     public function handle(): int
     {
+        $currency = strtoupper((string) $this->option('currency'));
+        $provider = strtolower((string) $this->option('provider'));
+
         $banks = Bank::query()
             ->whereNotNull('currency')
             ->where('currency', '!=', '')
+            ->when($currency !== '', fn ($query) => $query->where('currency', $currency))
             ->get();
 
         if ($banks->isEmpty()) {
-            $this->error('No provider banks with a currency were found.');
+            $message = $currency === ''
+                ? 'No provider banks with a currency were found.'
+                : "No provider banks found for {$currency}.";
+            $this->error($message);
 
             return self::FAILURE;
         }
@@ -71,6 +78,12 @@ class SyncMainBanks extends Command
         $conflicts = [];
 
         foreach ($groups as $identity => $group) {
+            if ($provider !== '' && ! $group->contains(
+                fn (Bank $bank) => strtolower((string) $bank->provider) === $provider
+            )) {
+                continue;
+            }
+
             $mainBank = $mainBanks->get($identity);
             $existingCodes = $group->pluck('flovide_code')
                 ->filter(fn ($code) => filled($code))
@@ -90,15 +103,27 @@ class SyncMainBanks extends Command
             }
 
             $existingCode = $existingCodes->first();
-            if ($existingCode !== null
-                && count($codeOwners[strtoupper((string) $group->first()->currency).'|'.$existingCode] ?? []) > 1) {
-                $conflicts[] = [
-                    $group->first()->currency,
-                    $group->first()->name,
-                    $existingCode,
-                ];
+            if ($existingCode !== null) {
+                $codeOwnerCount = count(
+                    $codeOwners[strtoupper((string) $group->first()->currency).'|'.$existingCode] ?? []
+                );
+                $isScopedProviderGroup = $provider !== '' && $group->contains(
+                    fn (Bank $bank) => strtolower((string) $bank->provider) === $provider
+                );
+                $codeIsUsedByAnotherMainBank = MainBank::where('currency', strtoupper((string) $group->first()->currency))
+                    ->where('flovide_code', $existingCode)
+                    ->when($mainBank, fn ($query) => $query->where('id', '!=', $mainBank->id))
+                    ->exists();
 
-                continue;
+                if ($codeOwnerCount > 1 && (! $isScopedProviderGroup || $codeIsUsedByAnotherMainBank)) {
+                    $conflicts[] = [
+                        $group->first()->currency,
+                        $group->first()->name,
+                        $existingCode,
+                    ];
+
+                    continue;
+                }
             }
 
             if ($existingCodes->count() === 1) {
