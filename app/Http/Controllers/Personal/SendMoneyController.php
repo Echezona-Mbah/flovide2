@@ -847,7 +847,8 @@ public function getExchangeRate(Request $request)
         }
 
         if ($resolvedProvider->key === 'ohentpay') {
-            if (empty($balance->ohentpay_balance_id)) {
+            $ohentPay = app(\App\Services\OhentPayService::class);
+            if (! $ohentPay->resolveBalanceId($currency, $balance->ohentpay_balance_id ?? null)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This balance is not linked to OhentPay',
@@ -869,7 +870,7 @@ public function getExchangeRate(Request $request)
                 ], 404);
             }
 
-            $registration = app(\App\Services\OhentPayService::class)->registerBeneficiary($beneficiary);
+            $registration = $ohentPay->registerBeneficiary($beneficiary);
             if (! $registration['success']) {
                 Log::error('[SendViaOhentPay] Personal recipient registration failed', [
                     'beneficiary_id' => $beneficiary->id,
@@ -1474,7 +1475,7 @@ public function getExchangeRate(Request $request)
 
         $ohentPayRecipientId = $registration['recipient_id'];
 
-        $ohentPayBalanceId = $balance->ohentpay_balance_id ?? null;
+        $ohentPayBalanceId = $ohentPay->resolveBalanceId($currency, $balance->ohentpay_balance_id ?? null);
 
         if (!$ohentPayBalanceId) {
             return response()->json([

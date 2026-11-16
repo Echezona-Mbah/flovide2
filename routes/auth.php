@@ -264,6 +264,8 @@ Route::middleware(['auth','business.verified', 'user.inactivity', 'business.web.
 
 
     Route::get('/webhook', [WebhookController::class, 'index'])->name('business.webhooks');
+    Route::get('/webhook/logs', [WebhookController::class, 'logs'])->name('business.webhooks.logs');
+    Route::post('/webhook/logs/{id}/replay', [WebhookController::class, 'replayLog'])->name('business.webhooks.logs.replay');
     Route::post('/webhook', [WebhookController::class, 'update'])->name('business.webhooks.update');
     Route::post('/webhook/regenerate-secret', [WebhookController::class, 'regenerateSecret'])
         ->name('business.webhooks.regenerate-secret');

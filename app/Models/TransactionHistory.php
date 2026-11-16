@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TransactionHistory extends Model
 {
@@ -71,13 +72,48 @@ class TransactionHistory extends Model
         'promo_code',
         'promo_code_id',
         'promo_fee_waived',
+        'api_source',
 
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'created_at' => 'datetime',
+        'api_source' => 'boolean',
     ];
+
+    public function getSourceLabelAttribute(): string
+    {
+        return $this->api_source ? 'API' : 'Normal';
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (TransactionHistory $transaction) {
+            if (! $transaction->wasChanged('status') || ! $transaction->api_source) {
+                return;
+            }
+
+            $status = strtolower((string) $transaction->status);
+            if (! in_array($status, ['success', 'successful', 'failed', 'declined'], true)) {
+                return;
+            }
+
+            $type = in_array(strtolower((string) $transaction->type), ['credit', 'collection'], true)
+                ? 'COLLECTION'
+                : 'PAYOUT';
+            $mode = $transaction->mode ?: 'live';
+            $transactionId = $transaction->id;
+
+            DB::afterCommit(function () use ($transactionId, $type, $mode) {
+                $freshTransaction = TransactionHistory::find($transactionId);
+                if ($freshTransaction) {
+                    app(\App\Services\BusinessApiWebhookService::class)
+                        ->dispatch($freshTransaction, $type, $mode);
+                }
+            });
+        });
+    }
 
     public function user()
     {

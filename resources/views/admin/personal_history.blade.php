@@ -318,6 +318,7 @@
                                             <th class="text-center">#</th>
                                             <th>Reference</th>
                                             <th class="text-center">Type</th>
+                                            <th class="text-center">Source</th>
                                             <th class="text-center">Amount</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Date</th>
@@ -345,6 +346,13 @@
                                                     <div class="badge badge-danger">Debit</div>
                                                 @else
                                                     <div class="badge badge-info">{{ ucfirst($transaction->type) }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                @if($transaction->api_source)
+                                                    <span class="badge badge-info">API</span>
+                                                @else
+                                                    <span class="badge badge-secondary">Normal</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\BusinessWebhookLog;
+use App\Models\WebhookSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -43,6 +45,45 @@ class WebhookController extends Controller
         }
 
         return response()->json($this->buildPayload($user));
+    }
+
+    public function logs(Request $request)
+    {
+        $setting = $this->resolveSetting($request);
+        if (! $setting) {
+            return response()->json([
+                'message' => 'Invalid public key or secret key',
+                'data' => null,
+            ], 401);
+        }
+
+        $mode = $this->resolveMode($request, $setting);
+        $isTestUrl = str_starts_with($request->path(), 'api/test/');
+        if (($isTestUrl && $mode !== 'test') || (! $isTestUrl && $mode !== 'live')) {
+            return response()->json([
+                'message' => ucfirst($isTestUrl ? 'test' : 'live') . ' API requires matching keys',
+                'data' => null,
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'type' => ['nullable', 'in:COLLECTION,PAYOUT'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $logs = BusinessWebhookLog::where('business_id', $setting->user_id)
+            ->where('mode', $mode)
+            ->when($validated['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
+            ->with(['businessTransaction', 'histories'])
+            ->latest()
+            ->paginate($validated['per_page'] ?? 20);
+
+        $logs->getCollection()->transform(fn (BusinessWebhookLog $log) => $this->formatLog($log));
+
+        return response()->json([
+            'message' => 'Webhook logs retrieved successfully',
+            'data' => $logs,
+        ]);
     }
 
 
@@ -151,6 +192,68 @@ class WebhookController extends Controller
             'ip_whitelist' => $user->ip_whitelist ?? [],
             'callback_url' => $user->callback_url,
             'webhook_url' => $user->webhook_url,
+        ];
+    }
+
+    private function resolveSetting(Request $request): ?WebhookSetting
+    {
+        $publicKey = $request->header('X-Public-Key');
+        $secretKey = $request->header('X-Secret-Key');
+
+        if (! $publicKey || ! $secretKey) {
+            return null;
+        }
+
+        return WebhookSetting::query()
+            ->where(fn ($query) => $query->where('live_public_key', $publicKey)->where('live_secret_key', $secretKey))
+            ->orWhere(fn ($query) => $query->where('test_public_key', $publicKey)->where('test_secret_key', $secretKey))
+            ->first();
+    }
+
+    private function resolveMode(Request $request, WebhookSetting $setting): string
+    {
+        return $setting->test_public_key === $request->header('X-Public-Key')
+            && $setting->test_secret_key === $request->header('X-Secret-Key')
+                ? 'test'
+                : 'live';
+    }
+
+    private function formatLog(BusinessWebhookLog $log): array
+    {
+        $transaction = $log->businessTransaction;
+
+        return [
+            'id' => (string) $log->id,
+            'business_id' => (string) $log->business_id,
+            'business_transaction_id' => $log->business_transaction_id,
+            'business_crypto_wallet_transaction_id' => null,
+            'type' => $log->type,
+            'webhook_url' => $log->webhook_url,
+            'payload' => $log->payload,
+            'response' => $log->response,
+            'status' => $log->status,
+            'delivery_status' => $log->delivery_status,
+            'created_at' => optional($log->created_at)->toIso8601String(),
+            'updated_at' => optional($log->updated_at)->toIso8601String(),
+            'business_transaction' => $transaction ? [
+                'id' => (string) $transaction->id,
+                'reference' => $transaction->reference,
+                'status' => $transaction->status,
+                'type' => $transaction->transaction_type,
+                'sender_local_amount' => (float) $transaction->amount,
+                'sender_local_currency' => $transaction->currency,
+                'amount' => (float) ($transaction->recipient_amount ?? $transaction->amount),
+                'payment_method' => $transaction->payment_method,
+            ] : null,
+            'business_crypto_wallet_transaction' => null,
+            'webhook_log_histories' => $log->histories->map(fn ($history) => [
+                'id' => (string) $history->id,
+                'metadata' => $history->metadata,
+                'headers' => $history->headers,
+                'http_status' => $history->http_status,
+                'response' => $history->response,
+                'created_at' => optional($history->created_at)->toIso8601String(),
+            ])->values()->all(),
         ];
     }
 }

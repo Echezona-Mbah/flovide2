@@ -95,6 +95,9 @@
                             Secure
                         </span>
                     </div>
+                    <a href="{{ route('business.webhooks.logs') }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#215F9C] hover:underline">
+                        <i class="fas fa-list"></i> View webhook logs
+                    </a>
 
                     @if (session('success'))
                         <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -147,15 +150,15 @@
                                     <textarea name="live_ip_whitelist" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">{{ old('live_ip_whitelist', $live['ip_whitelist'] ?? '') }}</textarea>
                                 </div> --}}
 
-                                {{-- <div>
-                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Live callback URL</label>
-                                    <input type="text" name="live_callback_url" value="{{ old('live_callback_url', $live['callback_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Collection URL</label>
+                                    <input type="url" name="live_collection_url" value="{{ old('live_collection_url', $live['collection_url'] ?? '') }}" placeholder="https://your-site.com/webhooks/collections" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
                                 </div>
 
                                 <div>
-                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Live webhook URL</label>
-                                    <input type="text" name="live_webhook_url" value="{{ old('live_webhook_url', $live['webhook_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
-                                </div> --}}
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Payout URL</label>
+                                    <input type="url" name="live_payout_url" value="{{ old('live_payout_url', $live['payout_url'] ?? '') }}" placeholder="https://your-site.com/webhooks/payouts" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                                </div>
                             </div>
                         </div>
 
@@ -190,15 +193,15 @@
                                     <textarea name="test_ip_whitelist" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">{{ old('test_ip_whitelist', $test['ip_whitelist'] ?? '') }}</textarea>
                                 </div>
 
-                                {{-- <div>
-                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Test callback URL</label>
-                                    <input type="text" name="test_callback_url" value="{{ old('test_callback_url', $test['callback_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Collection URL</label>
+                                    <input type="url" name="test_collection_url" value="{{ old('test_collection_url', $test['collection_url'] ?? '') }}" placeholder="https://your-site.com/test/webhooks/collections" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
                                 </div>
 
                                 <div>
-                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Test webhook URL</label>
-                                    <input type="text" name="test_webhook_url" value="{{ old('test_webhook_url', $test['webhook_url'] ?? '') }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
-                                </div> --}}
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700">Payout URL</label>
+                                    <input type="url" name="test_payout_url" value="{{ old('test_payout_url', $test['payout_url'] ?? '') }}" placeholder="https://your-site.com/test/webhooks/payouts" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                                </div>
                             </div>
                         </div>
 

@@ -183,6 +183,7 @@ public function collectInterac(
             'user_id'           => $ownerId,
             'balance_id'        => $balance->id,
             'mode'              => 'test',
+            'api_source'        => true,
             'payment_provider'  => 'interac',
             'transaction_type'  => 'payment',
             'method'            => 'credit',
@@ -198,6 +199,8 @@ public function collectInterac(
             'reference'         => 'CA' . Str::random(10),
             'order_id'          => 'TEST_' . Str::uuid(),
         ]);
+
+        app(\App\Services\BusinessApiWebhookService::class)->dispatch($transaction, 'COLLECTION', $mode);
 
         return response()->json([
             'success' => true,
@@ -236,6 +239,7 @@ public function collectInterac(
             'user_id' => $ownerId,
             'balance_id' => $balance->id,
             'mode' => 'live',
+            'api_source' => true,
             'payment_provider' => 'swappr',
             'transaction_type' => 'payment',
             'method' => 'credit',
@@ -250,6 +254,8 @@ public function collectInterac(
             'reference' => $reference,
             'payment_reference' => $reference,
         ]);
+
+        app(\App\Services\BusinessApiWebhookService::class)->dispatch($transaction, 'COLLECTION', $mode);
 
         return response()->json([
             'success' => true,
@@ -323,6 +329,7 @@ public function collectInterac(
         'user_id'           => $ownerId,
         'balance_id'        => $balance->id,
         'mode'              => 'live',
+        'api_source'        => true,
         'payment_provider'  => 'interac',
         'transaction_type'  => 'payment',
         'method'            => 'credit',
@@ -339,6 +346,8 @@ public function collectInterac(
         'payment_reference' => $responseData['reference']       ?? null,
         'order_id'          => $responseData['transaction_id']  ?? null,
     ]);
+
+    app(\App\Services\BusinessApiWebhookService::class)->dispatch($transaction, 'COLLECTION', $mode);
 
     return response()->json([
         'success' => true,

@@ -170,7 +170,7 @@ public function create()
     {
         $currency     = strtoupper($request->currency ?? '');
         $countryInput = strtoupper($request->country ?? '');
-        $allowedProviders     = strtolower($request->provider ?? ''); // 👈 GET PROVIDER
+        $provider = strtolower($request->provider ?? '');
 
         // $banks = Bank::query()
 
@@ -194,13 +194,13 @@ public function create()
         // return response()->json($banks);
 
         $banks = Bank::query()
-            ->whereIn('provider', $allowedProviders)
+            ->where('provider', $provider)
             ->when($currency, fn ($q) => $q->where('currency', $currency))
             ->when($countryInput, function ($q) use ($countryInput) {
                 $q->where(function ($query) use ($countryInput) {
                     $query->where('country_iso', $countryInput)
-                        ->orWhereRaw('LEFT(country_iso,2) = ?', [substr($countryInput, 0, 2)])
-                        ->orWhereRaw('LEFT(country_iso,3) = ?', [substr($countryInput, 0, 3)]);
+                        ->orWhere('country_iso', 'like', substr($countryInput, 0, 2) . '%')
+                        ->orWhere('country_iso', 'like', substr($countryInput, 0, 3) . '%');
                 });
             })
             ->orderBy('name')

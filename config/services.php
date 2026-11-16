@@ -78,6 +78,9 @@ return [
         'api_key'    => env('OHENTPAY_API_KEY'),
         'base_url'   => env('OHENTPAY_BASE_URL', 'https://api.ohentpay.com'),
         'currencies' => array_filter(array_map('trim', explode(',', env('OHENTPAY_CURRENCIES', '')))),
+        'balance_ids' => [
+            'KES' => env('OHENTPAY_KES_BALANCE_ID'),
+        ],
     ],
 
         'pivot' => [

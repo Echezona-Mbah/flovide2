@@ -7,7 +7,6 @@ use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\Models\AdminLoginLog;
 use Jenssegers\Agent\Agent;
 
@@ -103,91 +102,66 @@ class RegisterController extends Controller
 
 public function login(Request $request)
 {
+    $credentials = $request->validate([
+        'email' => ['required', 'email', 'max:255'],
+        'password' => ['required', 'string', 'max:1024'],
+    ]);
+
     $agent = new Agent();
-
     $device = $agent->platform().' - '.$agent->browser();
-
     $ip = $request->ip();
+    $email = mb_strtolower(trim($credentials['email']));
+    $admin = Admin::where('email', $email)->first();
+    $validPassword = Hash::check(
+        $credentials['password'],
+        $admin?->password ?? $this->dummyPasswordHash()
+    );
 
-    $location = json_decode(file_get_contents("http://ip-api.com/json/".$ip));
-    //dd($location);
-
-    $country = $location->country ?? null;
-    $city = $location->city ?? null;
-    $lat = $location->lat ?? null;
-    $lon = $location->lon ?? null;
-
-    $admin = Admin::where('email', $request->email)->first();
-
-    if (!$admin) {
-
-        AdminLoginLog::create([
-            'email' => $request->email,
-            'ip_address' => $ip,
-            'device' => $device,
-            'country' => $country,
-            'city' => $city,
-            'latitude' => $lat,
-            'longitude' => $lon,
-            'success' => false,
-            'attempted_at' => now()
-        ]);
-
-        return back()->with('error','Invalid login details');
+    if (! $admin) {
+        $this->recordLoginAttempt(null, $email, $ip, $device, false);
+        return back()->with('error', 'Invalid email or password.');
     }
 
     if ($admin->locked_until && now()->lessThan($admin->locked_until)) {
-        return back()->with('error','Account locked. Try later.');
+        $this->recordLoginAttempt($admin, $email, $ip, $device, false);
+        return back()->with('error', 'Invalid email or password.');
     }
 
-    if (!Hash::check($request->password,$admin->password)) {
-
+    if (! $validPassword) {
         $admin->failed_attempts += 1;
-
-        if ($admin->failed_attempts >= 3) {
-            $admin->locked_until = now()->addDays(2555);
-            $admin->failed_attempts = 0;
-        }
-
         $admin->save();
-
-        AdminLoginLog::create([
-            'admin_id' => $admin->id,
-            'email' => $admin->email,
-            'ip_address' => $ip,
-            'device' => $device,
-            'country' => $country,
-            'city' => $city,
-            'latitude' => $lat,
-            'longitude' => $lon,
-            'success' => false,
-            'attempted_at' => now()
-        ]);
-
-        return back()->with('error','Invalid login credentials');
+        $this->recordLoginAttempt($admin, $email, $ip, $device, false);
+        return back()->with('error', 'Invalid email or password.');
     }
 
-    $admin->update([
-        'failed_attempts' => 0,
-        'locked_until' => null
-    ]);
+    $admin->failed_attempts = 0;
+    $admin->locked_until = null;
+    $admin->save();
 
     Auth::guard('admin')->login($admin);
-
-    AdminLoginLog::create([
-        'admin_id' => $admin->id,
-        'email' => $admin->email,
-        'ip_address' => $ip,
-        'device' => $device,
-        'country' => $country,
-        'city' => $city,
-        'latitude' => $lat,
-        'longitude' => $lon,
-        'success' => true,
-        'attempted_at' => now()
-    ]);
+    $request->session()->regenerate();
+    $this->recordLoginAttempt($admin, $email, $ip, $device, true);
 
     return redirect()->route('admin.dashboard');
+}
+
+private function recordLoginAttempt(?Admin $admin, string $email, string $ip, string $device, bool $success): void
+{
+    AdminLoginLog::create([
+        'admin_id' => $admin?->id,
+        'email' => $email,
+        'ip_address' => $ip,
+        'device' => $device,
+        'success' => $success,
+        'attempted_at' => now(),
+    ]);
+}
+
+private function dummyPasswordHash(): string
+{
+    static $hash;
+
+    return $hash ??= Hash::make(bin2hex(random_bytes(32)));
 }
 
 }

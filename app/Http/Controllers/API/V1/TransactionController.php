@@ -137,6 +137,7 @@ class TransactionController extends Controller
             'balance_id' => $tx->balance_id,
             'status' => $tx->status,
             'transaction_type' => $tx->transaction_type ?? $tx->method,
+            'source' => $tx->source_label,
             'recipient' => [
                 'id' => $tx->recipient_id ?? $tx->beneficias_id,
                 'country' => $tx->recipient_country,
@@ -259,6 +260,7 @@ class TransactionController extends Controller
         'payment_reference' => $transaction->payment_reference,
         'status' => $transaction->status,
         'transaction_type' => $transaction->transaction_type ?? $transaction->method,
+        'source' => $transaction->source_label,
         'recipient' => [
             'id' => $transaction->recipient_id ?? $transaction->beneficias_id,
             'country' => $transaction->recipient_country,
@@ -627,6 +629,7 @@ public function store(Request $request)
             'status'                   => 'pending',
             'method'                   => 'withdrawal',
             'mode'                     => $mode,
+            'api_source'               => true,
             'payment_provider'         => 'wallect',
             'order_id'                 => $validated['order_id'],
             'reference'                => $validated['reference'] ?? 'ref-' . Str::uuid(),
@@ -686,6 +689,14 @@ public function store(Request $request)
         }
 
         DB::commit();
+
+        if ($response->isSuccessful()) {
+            app(\App\Services\BusinessApiWebhookService::class)->dispatch(
+                $tx->fresh(),
+                'PAYOUT',
+                $mode
+            );
+        }
 
         return $response;
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\API\V1\CollectionController;
 use App\Http\Controllers\API\V1\RateController;
 use App\Http\Controllers\API\V1\ReferenceDataController;
 use App\Http\Controllers\API\V1\TransactionController;
+use App\Http\Controllers\API\V1\SwapController;
 use App\Http\Controllers\API\V1\WebhookController;
 use App\Http\Controllers\Auth\ForgetPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -649,6 +650,7 @@ Route::prefix('v1')
     ->middleware('ip.whitelist')
     ->group(function () {
         Route::get('/webhooks', [WebhookController::class, 'index']);
+        Route::get('/webhooks/logs', [WebhookController::class, 'logs']);
         Route::post('/webhooks', [WebhookController::class, 'store']);
         Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
 
@@ -665,6 +667,7 @@ Route::prefix('v1')
         Route::get('/transactions', [TransactionController::class, 'index']);
         Route::get('/transactions/{id}', [TransactionController::class, 'show']);
         Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::post('/swap', [SwapController::class, 'store']);
 
         Route::get('/rates', [RateController::class, 'getExchangeRates']);
 
@@ -680,6 +683,7 @@ Route::prefix('test/v1')
     ->middleware('ip.whitelist')
     ->group(function () {
         Route::get('/webhooks', [WebhookController::class, 'index']);
+        Route::get('/webhooks/logs', [WebhookController::class, 'logs']);
         Route::post('/webhooks', [WebhookController::class, 'store']);
         Route::post('/webhooks/regenerate-secret', [WebhookController::class, 'regenerateSecret']);
 
@@ -696,6 +700,7 @@ Route::prefix('test/v1')
         Route::get('/transactions', [TransactionController::class, 'index']);
         Route::get('/transactions/{id}', [TransactionController::class, 'show']);
         Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::post('/swap', [SwapController::class, 'store']);
 
         Route::get('/rates', [RateController::class, 'getExchangeRates']);
 

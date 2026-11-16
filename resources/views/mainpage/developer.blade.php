@@ -78,6 +78,7 @@
             <a href="#balances" class="text-lg font-semibold text-black">Balances</a>
             <a href="#beneficiaries" class="text-lg font-semibold text-black">Beneficiaries</a>
             <a href="#transactions" class="text-lg font-semibold text-black">Transactions</a>
+            <a href="#swaps" class="text-lg font-semibold text-black">Swaps</a>
             <a href="#collections" class="text-lg font-semibold text-black">Collections</a>
             <a href="#rates" class="text-lg font-semibold text-black">Rates</a>
             <a href="#reference-data" class="text-lg font-semibold text-black">Reference Data</a>
@@ -196,6 +197,7 @@
           <a href="#balances" class="sidebar-active px-3 py-2 text-sm font-medium rounded-md transition-all">Balances</a>
           <a href="#beneficiaries" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Beneficiaries</a>
           <a href="#transactions" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Transactions</a>
+          <a href="#swaps" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Swaps</a>
           <a href="#collections" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Collections</a>
           <a href="#rates" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Rates</a>
           <a href="#reference-data" class="px-3 py-2 text-sm font-medium text-[#5b6070] hover:text-black hover:bg-white rounded-md transition-all">Reference Data</a>
@@ -521,6 +523,35 @@
                     </div>
                 </section>
 
+                <section id="swaps" class="mb-20">
+                    <div class="flex items-center gap-4 mb-8">
+                        <h2 class="text-3xl font-bold text-slate-900">Swaps API</h2>
+                        <span class="px-2 py-1 bg-slate-200 text-slate-600 rounded text-[10px] font-bold uppercase tracking-wider">Reference</span>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="p-6 md:p-8">
+                            <div class="flex flex-wrap items-center gap-3 mb-4">
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs">POST</span>
+                                <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/swap</code>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Swap between business balances</h3>
+                            <p class="text-slate-600 mb-6">Converts funds from one of your business currency balances to another using Flovide's configured exchange rate. Both currency balances must exist in the active API environment. The test endpoint is <code>/api/test/v1/swap</code>.</p>
+
+                            <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
+                                <summary class="cursor-pointer font-semibold text-slate-800">Request Body</summary>
+                                <div class="mt-4 space-y-3">
+                                    <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">from_currency</span><span class="text-xs text-slate-400 ml-2 italic">Three-letter currency code</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                    <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">to_currency</span><span class="text-xs text-slate-400 ml-2 italic">Three-letter currency code; must differ from source</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                    <div class="flex justify-between"><div><span class="font-mono text-sm font-semibold">amount</span><span class="text-xs text-slate-400 ml-2 italic">Amount to debit from the source balance; minimum 1, up to 2 decimal places</span></div><span class="text-xs text-red-500 font-semibold uppercase">Required</span></div>
+                                </div>
+                            </details>
+
+                            <div class="api-block" data-group="swap-post"></div>
+                        </div>
+                    </div>
+                </section>
+
 
                 <section id="collections" class="mb-20">
                     <div class="flex items-center gap-4 mb-8">
@@ -536,7 +567,7 @@
                                     <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/collections/interac</code>
                                 </div>
                                 <h3 class="text-xl font-bold mb-3">Interac collection (top-up)</h3>
-                                <p class="text-slate-600 mb-6">The active CAD collection provider is selected in Payment Providers settings. Blaaiz sends an Interac Auto Deposit money request. Swappr returns its shared registered Interac address and a unique reference. When you include that reference in the transfer message, Swappr's signed CAD Interac webhook matches the transfer to the pending top-up and credits the full gross amount to the correct Flovide wallet. Flovide absorbs Swappr's processing fee for these collections. Transfers that cannot be matched safely remain pending for admin verification. Set up a Swappr webhook for wallet_funded at /api/webhooks/swappr and configure SWAPPR_WEBHOOK_SECRET.</p>
+                                <p class="text-slate-600 mb-6">Initiates a CAD Interac collection using the provider configured in your Payment Providers settings. Follow the returned payment instructions to complete the top-up. Once the payment is confirmed, the corresponding CAD wallet is credited.</p>
 
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
@@ -677,8 +708,8 @@
                 <section id="webhooks" class="mb-20">
                     <h2 class="text-3xl font-bold text-slate-900 mb-6">Webhooks</h2>
                     <p class="text-slate-600 mb-6 leading-relaxed">
-                        Flovide sends a webhook to your <code>webhook_url</code> whenever a transaction changes status.
-                        Configure your endpoint from the <a href="#" class="text-indigo-600 font-semibold hover:underline">Webhooks settings</a> panel — this also generates your webhook <code>secret_key</code>, used to sign every payload.
+                        Flovide sends a signed webhook to the configured Collection URL or Payout URL when the corresponding API transaction is created.
+                        Configure separate live and test endpoints from the Webhooks settings panel. The endpoint receives the initial transaction status, which may be <code>pending</code>.
                     </p>
 
                     <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8">
@@ -700,12 +731,20 @@
                     <h3 class="text-lg font-bold text-slate-900 mb-4">Event Types</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">collection.created</h4>
+                            <p class="text-sm text-slate-500">Sent to the configured Collection URL when the API creates a collection request.</p>
+                        </div>
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">payout.created</h4>
+                            <p class="text-sm text-slate-500">Sent to the configured Payout URL when the API creates a payout request.</p>
+                        </div>
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.success</h4>
-                            <p class="text-sm text-slate-500">Sent when a transaction's status resolves to <code>success</code> — a deposit is credited, a payout clears, or a collection completes.</p>
+                            <p class="text-sm text-slate-500">Sent to the transaction's Collection or Payout URL when an API transaction status changes to successful.</p>
                         </div>
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.failed</h4>
-                            <p class="text-sm text-slate-500">Sent when a transaction's status resolves to <code>failed</code> — a payout is declined or a collection is rejected.</p>
+                            <p class="text-sm text-slate-500">Sent to the transaction's Collection or Payout URL when an API transaction status changes to failed.</p>
                         </div>
                     </div>
 
@@ -717,20 +756,24 @@
                         <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Example Payload</div>
                         <div class="p-6 overflow-x-auto hide-scrollbar">
                 <pre class="text-slate-300 text-sm leading-6">{
-                  "event": "transaction.success",
-                  "data": {
-                    "id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
-                    "reference": "CAyAHe1XxpDs",
-                    "order_id": "TEST_ae8cda30-f4a8-4c0f-a873-40e3d9436d70",
-                    "transaction_type": "payout",
-                    "status": "success",
-                    "amount": 100.00,
-                    "currency": "NGN",
-                    "balance_id": "b6820b8a-2434-11f1-a9fd-84a93e49c6d5",
-                    "created_at": "2026-07-16T16:14:44+00:00",
-                    "updated_at": "2026-07-16T16:15:02+00:00"
-                  },
-                  "created_at": "2026-07-16T16:15:02+00:00"
+                  "message": "Transaction initiated",
+                  "event_id": "01a1b1bc-6bf6-7142-a835-1cd2cf714d94",
+                  "event": "payout.created",
+                  "type": "payout",
+                  "transaction_id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+                  "transaction_reference": "CAyAHe1XxpDs",
+                  "transaction_status": "PENDING",
+                  "transaction_fee": 1.50,
+                  "transaction_amount_without_fee": 98.50,
+                  "transaction_amount": 100.00,
+                  "transaction_currency": "NGN",
+                  "customer_id": null,
+                  "recipient": {
+                    "account_number": "0123456789",
+                    "account_name": "Example Recipient",
+                    "bank_name": "Example Bank",
+                    "amount": 98.50
+                  }
                 }</pre>
                         </div>
                     </div>
@@ -752,11 +795,22 @@
                                 </tr>
                                 <tr>
                                     <td class="px-6 py-4 font-mono text-sm text-indigo-600">X-Flovide-Event</td>
-                                    <td class="px-6 py-4 text-sm text-slate-600">The event type, matching the <code>event</code> field in the body (e.g. <code>transaction.success</code>).</td>
+                                    <td class="px-6 py-4 text-sm text-slate-600">The event type, matching the <code>event</code> field in the body (e.g. <code>payout.created</code>).</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-mono text-sm text-indigo-600">X-Flovide-Event-Id</td>
+                                    <td class="px-6 py-4 text-sm text-slate-600">Unique ID for this event; use it to prevent processing duplicate deliveries.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Webhook logs</h3>
+                    <p class="text-slate-600 mb-4">
+                        Fetch recent webhook events for the environment associated with your API keys:
+                        <code>GET /api/v1/webhooks/logs</code> or <code>GET /api/test/v1/webhooks/logs</code>.
+                        Optionally filter with <code>?type=COLLECTION</code> or <code>?type=PAYOUT</code>.
+                    </p>
 
                     <!-- Signature verification -->
                     <h3 class="text-lg font-bold text-slate-900 mb-4">Verifying the Signature</h3>
@@ -897,7 +951,7 @@
                     <table class="min-w-full divide-y divide-slate-200">
                       <thead class="bg-slate-50">
                         <tr>
-                          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">HTTP Status</th>
+                          <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
                           <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Error Code</th>
                           <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Meaning</th>
                         </tr>
@@ -919,9 +973,24 @@
                           <td class="px-6 py-4 text-sm text-slate-600">Authenticated but not allowed to perform this action.</td>
                         </tr>
                         <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">403</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">INVALID_KEY_MODE</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">The API key environment does not match the endpoint (live or test).</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">403</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">WALLET_LOCKED</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">A wallet involved in the requested swap is locked.</td>
+                        </tr>
+                        <tr>
                           <td class="px-6 py-4 font-mono text-sm text-indigo-600">404</td>
                           <td class="px-6 py-4 font-mono text-sm text-slate-800">NOT_FOUND</td>
                           <td class="px-6 py-4 text-sm text-slate-600">Requested resource was not found.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">404</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">RATE_NOT_FOUND</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">No configured exchange rate is available for the requested currency pair.</td>
                         </tr>
                         <tr>
                           <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
@@ -930,8 +999,23 @@
                         </tr>
                         <tr>
                           <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">SAME_CURRENCY</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">The source and destination currencies must be different.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">INVALID_WALLET</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">A required wallet is missing for the account or API environment.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
                           <td class="px-6 py-4 font-mono text-sm text-slate-800">INSUFFICIENT_FUNDS</td>
                           <td class="px-6 py-4 text-sm text-slate-600">Wallet balance is not enough to complete the transaction.</td>
+                        </tr>
+                        <tr>
+                          <td class="px-6 py-4 font-mono text-sm text-indigo-600">422</td>
+                          <td class="px-6 py-4 font-mono text-sm text-slate-800">INSUFFICIENT_BALANCE</td>
+                          <td class="px-6 py-4 text-sm text-slate-600">The source wallet does not have enough funds for the requested swap.</td>
                         </tr>
                         <tr>
                           <td class="px-6 py-4 font-mono text-sm text-indigo-600">500</td>
@@ -2555,6 +2639,136 @@ Console.WriteLine(body);`,
 }`
 },
 
+'swap-post': {
+curl: `curl -X POST "https://flovide.com/api/v1/swap" ^
+-H "Accept: application/json" ^
+-H "Content-Type: application/json" ^
+-H "X-Public-Key: pk_live_xxxxxxxxxxxxxxxxx" ^
+-H "X-Secret-Key: sk_live_xxxxxxxxxxxxxxxxx" ^
+-d "{\"from_currency\":\"CAD\",\"to_currency\":\"NGN\",\"amount\":10}"`,
+
+javascript: `fetch('https://flovide.com/api/v1/swap', {
+method: 'POST',
+headers: {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json',
+  'X-Public-Key': 'pk_live_xxxxxxxxxxxxxxxxx',
+  'X-Secret-Key': 'sk_live_xxxxxxxxxxxxxxxxx'
+},
+body: JSON.stringify({
+  from_currency: 'CAD',
+  to_currency: 'NGN',
+  amount: 10
+})
+})
+.then(res => res.json())
+.then(data => console.log(data));`,
+
+go: `package main
+
+import (
+"bytes"
+"fmt"
+"io"
+"net/http"
+)
+
+func main() {
+jsonData := []byte(\`{"from_currency":"CAD","to_currency":"NGN","amount":10}\`)
+req, _ := http.NewRequest("POST", "https://flovide.com/api/v1/swap", bytes.NewBuffer(jsonData))
+req.Header.Set("Accept", "application/json")
+req.Header.Set("Content-Type", "application/json")
+req.Header.Set("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+req.Header.Set("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+
+resp, _ := (&http.Client{}).Do(req)
+defer resp.Body.Close()
+body, _ := io.ReadAll(resp.Body)
+fmt.Println(string(body))
+}`,
+
+python: `import requests
+
+response = requests.post(
+  "https://flovide.com/api/v1/swap",
+  headers={
+      "Accept": "application/json",
+      "X-Public-Key": "pk_live_xxxxxxxxxxxxxxxxx",
+      "X-Secret-Key": "sk_live_xxxxxxxxxxxxxxxxx",
+  },
+  json={
+      "from_currency": "CAD",
+      "to_currency": "NGN",
+      "amount": 10,
+  },
+)
+
+print(response.json())`,
+
+java: `String json = """
+{
+"from_currency": "CAD",
+"to_currency": "NGN",
+"amount": 10
+}
+""";
+
+HttpRequest request = HttpRequest.newBuilder()
+  .uri(URI.create("https://flovide.com/api/v1/swap"))
+  .header("Accept", "application/json")
+  .header("Content-Type", "application/json")
+  .header("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx")
+  .header("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx")
+  .POST(HttpRequest.BodyPublishers.ofString(json))
+  .build();
+
+HttpResponse<String> response = HttpClient.newHttpClient()
+  .send(request, HttpResponse.BodyHandlers.ofString());
+System.out.println(response.body());`,
+
+csharp: `using var client = new HttpClient();
+client.DefaultRequestHeaders.Add("X-Public-Key", "pk_live_xxxxxxxxxxxxxxxxx");
+client.DefaultRequestHeaders.Add("X-Secret-Key", "sk_live_xxxxxxxxxxxxxxxxx");
+
+var payload = new
+{
+  from_currency = "CAD",
+  to_currency = "NGN",
+  amount = 10
+};
+var response = await client.PostAsJsonAsync("https://flovide.com/api/v1/swap", payload);
+Console.WriteLine(await response.Content.ReadAsStringAsync());`,
+
+response: `{
+"success": true,
+"message": "Exchange completed successfully!",
+"code": "EXCHANGE_SUCCESS",
+"mode": "live",
+"data": {
+  "from_currency": "CAD",
+  "to_currency": "NGN",
+  "amount": 10,
+  "converted": 7500,
+  "rate": 750,
+  "reference": "ref-019f5e8a-7e9c-7c50-bc36-76a27caa2c1f",
+  "balances": [
+    { "id": "source-balance-id", "currency": "CAD", "amount": 90 },
+    { "id": "destination-balance-id", "currency": "NGN", "amount": 7500 }
+  ],
+  "transaction": {
+    "id": "019f5e8a-7e9c-7c50-bc36-76a27caa2c1f",
+    "reference": "ref-019f5e8a-7e9c-7c50-bc36-76a27caa2c1f",
+    "status": "success",
+    "type": "Swap",
+    "amount": 10,
+    "currency": "CAD",
+    "to_currency": "NGN",
+    "recipient_amount": 7500,
+    "exchange_rate": 750
+  }
+}
+}`
+},
 
 'collection-interac': {
   curl: `curl -X POST "https://flovide.com/api/v1/collections/interac" ^

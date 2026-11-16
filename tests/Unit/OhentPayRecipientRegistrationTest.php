@@ -122,6 +122,17 @@ it('does not register an already-linked beneficiary a second time', function () 
     Http::assertNothingSent();
 });
 
+it('uses the configured currency balance when a local balance has no OhentPay link', function () {
+    config(['services.ohentpay.balance_ids.KES' => 'configured-kes-balance']);
+
+    $service = app(OhentPayService::class);
+
+    expect($service->resolveBalanceId('KES'))->toBe('configured-kes-balance')
+        ->and($service->resolveBalanceId('KES', 'stale-local-kes-balance'))->toBe('configured-kes-balance')
+        ->and($service->resolveBalanceId('CAD', 'local-cad-balance'))->toBe('local-cad-balance')
+        ->and($service->resolveBalanceId('CAD'))->toBeNull();
+});
+
 it('reports a registration failure without saving a recipient id', function () {
     \App\Models\Bank::create([
         'name' => 'Kenya Test Bank',

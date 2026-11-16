@@ -120,7 +120,7 @@
                                 <!-- Logo and Brand with Premium Styling -->
                                 <div class="text-center mb-5">
                                     <div class="app-logo mx-auto mb-4"></div>
-                                    <h1 class="fw-bold text-dark mb-2" style="font-size: 2.2rem; letter-spacing: -0.02em;">Create Your Account</h1>
+                                    <h1 class="fw-bold text-dark mb-2" style="font-size: 2.2rem; letter-spacing: -0.02em;">Admin Login</h1>
                                     <p class="text-muted fs-5 mb-0">Admin Login</p>
                                 </div>
         
@@ -132,7 +132,7 @@
                                         <!-- Email Field -->
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input name="email" type="email" class="form-control form-control-lg" >
+                                                <input name="email" type="email" class="form-control form-control-lg" autocomplete="username" required maxlength="255">
                                                 <label>Email Address *</label>
                                             </div>
                                         </div>
@@ -142,7 +142,7 @@
                                         <!-- Password Field -->
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input name="password" type="password" class="form-control form-control-lg" >
+                                                <input name="password" type="password" class="form-control form-control-lg" autocomplete="current-password" required maxlength="1024">
                                                 <label>Password *</label>
                                             </div>
                                         </div>

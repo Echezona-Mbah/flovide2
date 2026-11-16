@@ -44,7 +44,8 @@ public function handle($request, Closure $next)
         if ($inactive > $timeout) {
 
             Auth::guard('admin')->logout();
-            session()->flush();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
             return redirect()->route('admin.login')
                 ->with('error','Session expired.');

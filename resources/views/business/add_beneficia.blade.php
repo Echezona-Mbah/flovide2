@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } else if (provider === "ohentpay") {
             const acc = accountNumber.value.trim(), code = bankSelect.value; if (!acc || !code) return;
-            payload = { currency, bank_code: code, account_number: acc };
+            payload = { currency, transfer_method: method, bank_code: code, account_number: acc };
             route = "{{ route('account.inquiry') }}";
 
         } else if (provider === "payaza") {

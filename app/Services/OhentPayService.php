@@ -94,6 +94,17 @@ class OhentPayService
         return $this->logAndReturn('Get single balance', $response);
     }
 
+    public function resolveBalanceId(string $currency, ?string $localBalanceId = null): ?string
+    {
+        $configuredBalanceId = config('services.ohentpay.balance_ids.' . strtoupper($currency));
+
+        if (filled($configuredBalanceId)) {
+            return (string) $configuredBalanceId;
+        }
+
+        return filled($localBalanceId) ? $localBalanceId : null;
+    }
+
     public function updateBalanceName(string $id, string $name): array
     {
         $response = $this->client()->patch("/balances/{$id}", [

@@ -34,6 +34,7 @@ class TransactionHistoryController extends Controller
                     'reference'        => $t->reference,
                     'method'           => $t->method,
                     'mode'             => $t->mode,
+                    'source'            => $t->source_label,
                     'fees'             => $t->fees,
                     'swap_from_currency' => $t->swap_from_currency,
                     'swap_to_currency'   => $t->swap_to_currency,

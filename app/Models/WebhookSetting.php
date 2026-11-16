@@ -13,11 +13,15 @@ class WebhookSetting extends Model
         'live_ip_whitelist',
         'live_callback_url',
         'live_webhook_url',
+        'live_collection_url',
+        'live_payout_url',
         'test_secret_key',
         'test_public_key',
         'test_ip_whitelist',
         'test_callback_url',
         'test_webhook_url',
+        'test_collection_url',
+        'test_payout_url',
     ];
 
     protected $casts = [

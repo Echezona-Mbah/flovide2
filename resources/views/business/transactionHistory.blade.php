@@ -109,6 +109,7 @@
             <thead class="bg-white text-slate-500 border-b border-slate-100">
               <tr>
                 <th class="px-4 py-4 text-left">Type</th>
+                <th class="px-4 py-4 text-left">Source</th>
                 <th class="px-4 py-4 text-left">Date</th>
                 <th class="px-4 py-4 text-left hidden md:table-cell">Sender</th>
                 <th class="px-4 py-4 text-left hidden md:table-cell">Recipient</th>
@@ -161,6 +162,14 @@
                       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
                         <i class="fas fa-arrow-up text-[10px]"></i> Withdrawal
                       </span>
+                    @endif
+                  </td>
+
+                  <td class="px-4 py-4">
+                    @if($transaction->api_source)
+                      <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">API</span>
+                    @else
+                      <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">Normal</span>
                     @endif
                   </td>
 
@@ -217,7 +226,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="8" class="text-center py-12 text-slate-400">
+                  <td colspan="9" class="text-center py-12 text-slate-400">
                     <i class="fas fa-inbox text-3xl mb-3 block"></i>
                     No transactions found
                   </td>

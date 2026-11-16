@@ -206,20 +206,7 @@ class SendMoneyController extends Controller
 
         $owner->save();
 
-        // Blaaiz's Interac setup requires the sender's registered email.
-        // $sendingCurrencyCheck = strtoupper(explode(' ', $request->exchange_rate)[4] ?? '');
-        // $cadProvider = $sendingCurrencyCheck === 'CAD'
-        //     ? app(ProviderRoutingService::class)->resolveForCurrency('CAD', 'bank')
-        //     : null;
-
-        // if ($cadProvider?->key === 'blaaiz_interac' && $request->filled('interac_email')) {
-        //     if (strtolower(trim($request->interac_email)) !== strtolower(trim($owner->email))) {
-        //         $msg = 'For Interac transfers, please use your own registered email address (' . $owner->email . ').';
-        //         return $isApi
-        //             ? response()->json(['success' => false, 'message' => $msg, 'code' => 'INTERAC_EMAIL_MISMATCH', 'data' => null], 422)
-        //             : back()->withInput()->with('error', $msg);
-        //     }
-        // }
+     
 
         // ── Promo code resolution ────────────────────────────────────────────
         $promoCode = null;
@@ -258,6 +245,7 @@ class SendMoneyController extends Controller
                 ? response()->json(['success' => false, 'message' => $msg, 'code' => 'PROVIDER_NOT_AVAILABLE', 'data' => null], 422)
                 : back()->withInput()->with('error', $msg);
         }
+
 
         if ($mode === 'test' && $resolvedProvider->key !== 'swappr') {
             $msg = 'Test payouts through this endpoint are currently supported only for Swappr.';
@@ -323,7 +311,8 @@ class SendMoneyController extends Controller
         }
 
         if ($resolvedProvider->key === 'ohentpay') {
-            if (empty($balance->ohentpay_balance_id)) {
+            $ohentPay = app(\App\Services\OhentPayService::class);
+            if (! $ohentPay->resolveBalanceId($currency, $balance->ohentpay_balance_id ?? null)) {
                 $msg = 'This balance is not linked to OhentPay';
                 return $isApi
                     ? response()->json(['success' => false, 'message' => $msg, 'code' => 'OHENTPAY_BALANCE_MISSING', 'data' => null], 422)
@@ -341,7 +330,7 @@ class SendMoneyController extends Controller
                     : back()->with('error', $msg);
             }
 
-            $registration = app(\App\Services\OhentPayService::class)->registerBeneficiary($beneficiary);
+            $registration = $ohentPay->registerBeneficiary($beneficiary);
             if (! $registration['success']) {
                 $message = $registration['message'] ?? 'Failed to register recipient with OhentPay.';
 
@@ -650,7 +639,7 @@ class SendMoneyController extends Controller
         $transactionReference = "TXN_" . time();
 
         $accountReference = $this->payaza->getAccountReference($currency);
-        //  dd($accountReference);
+        //dd($accountReference);
 
         if (!$accountReference) {
             return $isApi
@@ -677,7 +666,6 @@ class SendMoneyController extends Controller
         ];
 
         $transactionType = $transactionTypes[$currency] ?? ($bankType === 'mobile' ? 'mobile_money' : 'nuban');
-
         $payload = [
             "transaction_type" => $transactionType,
             "service_payload" => [
@@ -992,7 +980,6 @@ class SendMoneyController extends Controller
     protected function sendViaOhentPay(Request $request, $currency, $sendingCurrency, $balance, $txId, $actor, User $owner, $netRecipientAmount, $transferFee)
     {
 
-   // dd($request->all());
         $isApi = $request->expectsJson();
         $ohentPay = app(\App\Services\OhentPayService::class);
 
@@ -1029,7 +1016,7 @@ class SendMoneyController extends Controller
 
         $ohentPayRecipientId = $registration['recipient_id'];
 
-        $ohentPayBalanceId = $balance->ohentpay_balance_id ?? null;
+        $ohentPayBalanceId = $ohentPay->resolveBalanceId($currency, $balance->ohentpay_balance_id ?? null);
 
         if (!$ohentPayBalanceId) {
             return $isApi
@@ -1046,6 +1033,7 @@ class SendMoneyController extends Controller
             'order_id'          => 'TXN_' . substr(uniqid(), 0, 10),
             'reference'         => $request->reference ?? 'Payment',
         ]);
+    // dd($response);
 
         Log::info('[SendViaOhentPay] Business createTransaction response', ['response' => $response]);
 

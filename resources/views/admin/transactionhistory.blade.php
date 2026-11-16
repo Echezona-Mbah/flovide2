@@ -345,6 +345,35 @@
         color: var(--tx-amber);
     }
 
+    .source-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        padding: 8px 14px;
+        border: 1px solid;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        line-height: 1;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .source-pill-api {
+        color: #fff;
+        background: #4338ca;
+        border-color: #3730a3;
+        box-shadow: 0 2px 6px rgba(67, 56, 202, .25);
+    }
+
+    .source-pill-normal {
+        color: #334155;
+        background: #e2e8f0;
+        border-color: #94a3b8;
+    }
+
     .ref-text {
         font-family: monospace;
         font-size: 12px;
@@ -715,6 +744,7 @@
                                         <tr>
                                             <th class="text-center">Name</th>
                                             <th class="text-center">Type</th>
+                                            <th class="text-center">Source</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Date</th>
                                             <th class="text-center">Amount</th>
@@ -739,6 +769,13 @@
                                             <tr>
                                                 <td class="text-center">{{ $item->sender ?? 'N/A' }}</td>
                                                 <td class="text-center">{{ ucfirst($item->type ?? 'N/A') }}</td>
+                                                <td class="text-center">
+                                                    @if($item->api_source)
+                                                        <span class="source-pill source-pill-api" title="Created through the Flovide API">API Transaction</span>
+                                                    @else
+                                                        <span class="source-pill source-pill-normal" title="Created through the dashboard or a non-API flow">Normal Transaction</span>
+                                                    @endif
+                                                </td>
                                                 <td class="text-center">
                                                     @if ($item->status == 'success')
                                                         <span class="status-chip status-success">Success</span>
