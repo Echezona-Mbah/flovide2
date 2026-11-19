@@ -146,7 +146,8 @@ public function transaction(Request $request)
             'code'    => 'TRANSACTIONS_FETCHED',
             'data'    => $transactions->map(function ($t) {
                 return [
-                    'type'             => $t->type,
+                    'id'             => $t->id,
+                    'type'             => $t->display_type,
                     'date'             => $t->created_at->format('Y-m-d H:i:s'),
                     'sender'           => $t->sender ?? 'N/A',
                     'recipient'        => $t->recipient_account_name ?? 'N/A',
@@ -154,6 +155,7 @@ public function transaction(Request $request)
                     'currency'         => $t->currency,
                     'status'           => $t->status,
                     'reference'        => $t->reference,
+                    'payment_reference'             => $t->payment_reference,
                     'method'           => $t->method,
                     'mode'             => $t->mode,
                     'source'            => $t->source_label,
@@ -231,7 +233,7 @@ public function UserTransaction($id)
     }
 
     $data = [
-        'type'      => $transaction->type,
+        'type'      => $transaction->display_type,
         'date'      => $transaction->created_at->format('Y-m-d H:i:s'),
         'sender'    => $transaction->sender ?? 'N/A',
         'recipient' => $transaction->recipient ?? 'N/A',

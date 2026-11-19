@@ -12,7 +12,12 @@ use Illuminate\Support\Str;
 
 class BusinessApiWebhookService
 {
-    public function dispatch(TransactionHistory $transaction, string $type, string $mode): ?BusinessWebhookLog
+    public function dispatch(
+        TransactionHistory $transaction,
+        string $type,
+        string $mode,
+        ?string $eventTypeOverride = null
+    ): ?BusinessWebhookLog
     {
         $type = strtoupper($type);
         $mode = strtolower($mode);
@@ -38,13 +43,18 @@ class BusinessApiWebhookService
             'failed', 'declined' => 'FAILED',
             default => strtoupper((string) $transaction->status),
         };
-        $eventType = match ($status) {
+        $eventType = $eventTypeOverride ?? match ($status) {
             'SUCCESSFUL' => 'transaction.success',
             'FAILED' => 'transaction.failed',
             default => strtolower($type) . '.created',
         };
         $payload = [
-            'message' => match ($status) {
+            'message' => $eventTypeOverride !== null ? match ($status) {
+                'SUCCESS', 'SUCCESSFUL' => 'Transaction Completed',
+                'FAILED', 'DECLINED' => 'Transaction Failed',
+                'PENDING' => 'Transaction Pending',
+                default => 'Transaction status updated',
+            } : match ($status) {
                 'SUCCESS', 'SUCCESSFUL' => 'Transaction Completed',
                 'FAILED', 'DECLINED' => 'Transaction Failed',
                 default => 'Transaction initiated',
@@ -65,7 +75,14 @@ class BusinessApiWebhookService
             'customer_id' => null,
         ];
 
-        if ($type === 'PAYOUT') {
+        if ($type === 'COLLECTION') {
+            $payerEmail = $transaction->interac_email;
+            if (blank($payerEmail) && filter_var($transaction->sender, FILTER_VALIDATE_EMAIL)) {
+                $payerEmail = $transaction->sender;
+            }
+
+            $payload['payer_email'] = $payerEmail;
+        } else {
             $payload['recipient'] = [
                 'account_number' => $transaction->recipient_account_number,
                 'account_name' => $transaction->recipient_account_name,

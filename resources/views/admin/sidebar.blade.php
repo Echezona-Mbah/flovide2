@@ -650,6 +650,7 @@
     $isAccountMgmtActive = $isBeneficiasActive || $isAccountsActive || $isSubaccountsActive || $isCustomersActive;
 
     $isTxHistoryActive = request()->routeIs('admin.transactionhistory*') || request()->routeIs('admin.alltransactions*') || request()->routeIs('admin.personal-transactions*');
+    $isProviderErrorsActive = request()->routeIs('admin.provider-errors.*');
 
     $isChargebackActive = request()->routeIs('admin.chargeback*');
     $isRefundActive = request()->routeIs('admin.refund*');
@@ -768,6 +769,12 @@
                     <a href="{{ route('admin.transactionhistory') }}" class="{{ $isTxHistoryActive ? 'active-link' : '' }}">
                         <i class="metismenu-icon fa-solid fa-arrow-right-arrow-left"></i>
                         <span class="nav-label">Transaction History</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.provider-errors.index') }}" class="{{ $isProviderErrorsActive ? 'active-link' : '' }}">
+                        <i class="metismenu-icon fa-solid fa-triangle-exclamation"></i>
+                        <span class="nav-label">Provider Errors</span>
                     </a>
                 </li>
 

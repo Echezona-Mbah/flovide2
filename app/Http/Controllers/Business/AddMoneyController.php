@@ -275,9 +275,25 @@ public function topupWithInterac( Request $request, BlaaizService $blaaiz, \App\
 
         $depositEmail = $collections->swapprRecipientEmail();
         if (!$depositEmail) {
+            app(\App\Services\ProviderErrorReporter::class)->report(
+                'Swappr',
+                'CAD Interac collection',
+                'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                [
+                    'account_type' => 'business',
+                    'account_id' => $ownerId,
+                    'business_email' => $user->email,
+                    'payer_email' => $request->email,
+                    'amount' => $amount,
+                    'currency' => 'CAD',
+                    'mode' => $balance->mode ?: 'live',
+                    'required_setting' => 'SWAPPR_CAD_INTERAC_EMAIL',
+                ]
+            );
+
             $payload = [
                 'success' => false,
-                'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
+                'message' => 'The Interac collection email is not registered with our provider yet. Please contact the business.',
                 'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
                 'data' => null,
             ];
@@ -369,11 +385,28 @@ public function topupWithInterac( Request $request, BlaaizService $blaaiz, \App\
             ?? $response['data']['error_description']
             ?? 'Interac request failed. Please try again.';
 
+        app(\App\Services\ProviderErrorReporter::class)->report(
+            'Blaaiz',
+            'CAD Interac collection request',
+            'INTERAC_REQUEST_FAILED',
+            [
+                'account_type' => 'business',
+                'account_id' => $ownerId,
+                'business_email' => $user->email,
+                'payer_email' => $request->email,
+                'amount' => $amount,
+                'currency' => 'CAD',
+                'mode' => $balance->mode ?: 'live',
+                'provider_status' => $response['status'] ?? null,
+                'provider_message' => $errorMsg,
+            ]
+        );
+
         return response()->json([
             'success' => false,
-            'message' => $errorMsg,
+            'message' => 'We could not start this Interac collection. Please try again later or contact the business.',
             'code'    => 'INTERAC_REQUEST_FAILED',
-            'data'    => $response['data'] ?? null,
+            'data'    => null,
         ], $response['status']);
     }
 

@@ -59,6 +59,7 @@ use App\Http\Controllers\Admin\StatementController;
 use App\Http\Controllers\Admin\ProofOfAddressController;
 use App\Http\Controllers\Admin\BankAccountRequestController;
 use App\Http\Controllers\Admin\PromoCodeController;
+use App\Http\Controllers\Admin\ProviderErrorController;
 use App\Http\Controllers\Admin\knowmeController;
 use App\Http\Controllers\Blaaiz\BlaaizWebhookController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
@@ -419,12 +420,15 @@ Route::middleware('admin.auth')->group(function () {
 
     Route::middleware('admin.permission:view_transactions')->group(function () {
         Route::get('/admin/transactionhistory', [AdminTransactionHistoryController::class, 'index'])->name('admin.transactionhistory');
+        Route::get('/admin/provider-errors', [ProviderErrorController::class, 'index'])->name('admin.provider-errors.index');
+        Route::post('/admin/provider-errors/{id}/resolve', [ProviderErrorController::class, 'resolve'])->name('admin.provider-errors.resolve');
     });
 
     Route::middleware('admin.permission:manage_transactions')->group(function () {
         Route::delete('/admin/transactionhistory/{id}', [AdminTransactionHistoryController::class, 'destroy'])->name('transactionhistory.destroy');
         Route::post('/admin/transactionhistory/{id}/process', [AdminTransactionHistoryController::class, 'process'])->name('transactionhistory.process');
         Route::post('/admin/transactionhistory/{id}/refund', [AdminTransactionHistoryController::class, 'refund'])->name('transactionhistory.refund');
+        Route::post('/admin/alltransactions/{user}/transaction/{transaction}/send-webhook', [UserTransactionHistoryController::class, 'sendBusinessTransactionWebhook'])->name('admin.alltransactions.send-webhook');
         Route::post('/admin/transactionhistory/{id}/confirm-swappr-cad', [AdminTransactionHistoryController::class, 'confirmSwapprCadInterac'])->name('transactionhistory.swappr-confirm');
 
 
@@ -439,6 +443,7 @@ Route::middleware('admin.auth')->group(function () {
 
     Route::middleware('admin.permission:view_users')->group(function () {
         Route::get('/admin/alltransactions/{id}', [UserTransactionHistoryController::class, 'history'])->name('admin.alltransactions.history');
+        Route::get('/admin/alltransactions/{id}/webhook-activity', [UserTransactionHistoryController::class, 'webhookActivity'])->name('admin.alltransactions.webhook-activity');
         Route::get('/admin/personal-transactions/{id}', [UserTransactionHistoryController::class, 'personalHistory'])->name('admin.personal-transactions.history');
 
         Route::get('/admin/testmode/{id}', [TestModeController::class, 'index'])->name('admin.testmode');
@@ -503,6 +508,9 @@ Route::middleware('admin.auth')->group(function () {
 
 
     Route::middleware('admin.permission:manage_balances')->group(function () {
+        Route::post('/admin/testmode/{user}/balance/{balance}/add-money', [TestModeController::class, 'addTestMoney'])
+            ->name('admin.testmode.balance.add');
+
         Route::post('/admin/business-account/{user}/balance/{balance}/add-money', [BusinessAccountController::class, 'addMoney'])->name('admin.business.balance.add');
         Route::post('/admin/business-account/{user}/balance/{balance}/remove-money', [BusinessAccountController::class, 'removeMoney'])->name('admin.business.balance.remove');
 

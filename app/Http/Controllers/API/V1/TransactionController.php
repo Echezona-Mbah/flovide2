@@ -628,6 +628,7 @@ public function store(Request $request)
             'fee_balance_id'           => $feeDeductedFrom,
             'status'                   => 'pending',
             'method'                   => 'withdrawal',
+            'type'                     => 'withdrawal',
             'mode'                     => $mode,
             'api_source'               => true,
             'payment_provider'         => 'wallect',

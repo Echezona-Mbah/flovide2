@@ -741,11 +741,14 @@
                         <div id="pane-Balances-Cards" class="tab-pane-content d-none">
                             <div class="card dashboard-card">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0 fw-bold" style="color:var(--text-main)">
-                                        <i class="fa-solid fa-wallet me-2" style="color:#0ea5e9;"></i>Balances &amp; Cards
-                                    </h5>
-                                    <span class="badge px-3 py-2 rounded-pill" style="background:rgba(14,165,233,.12);color:#0369a1;font-size:0.78rem;">
-                                        <i class="fa-solid fa-credit-card me-1"></i> Account Overview
+                                    <div>
+                                        <h5 class="mb-1 fw-bold" style="color:var(--text-main)">
+                                            <i class="fa-solid fa-wallet me-2" style="color:#0ea5e9;"></i>Balances &amp; Cards
+                                        </h5>
+                                        <small class="text-muted">Fund test wallets only. Live balances are not affected.</small>
+                                    </div>
+                                    <span class="badge px-3 py-2 rounded-pill" style="background:#dbeafe;color:#1d4ed8;font-size:0.78rem;font-weight:800;">
+                                        <i class="fa-solid fa-flask me-1"></i> TEST MODE
                                     </span>
                                 </div>
                                 <div class="card-body p-0">
@@ -765,6 +768,7 @@
                                                         <th class="px-3 py-3 text-uppercase" style="font-size:0.72rem;color:var(--text-soft);font-weight:700;letter-spacing:.6px;">Currency</th>
                                                         <th class="px-3 py-3 text-uppercase" style="font-size:0.72rem;color:var(--text-soft);font-weight:700;letter-spacing:.6px;">Amount</th>
                                                         <th class="px-3 py-3 text-uppercase" style="font-size:0.72rem;color:var(--text-soft);font-weight:700;letter-spacing:.6px;">Created</th>
+                                                        <th class="px-3 py-3 text-uppercase text-end" style="font-size:0.72rem;color:var(--text-soft);font-weight:700;letter-spacing:.6px;">Add test funds</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -782,6 +786,22 @@
                                                             </td>
                                                             <td class="px-3 py-3" style="color:var(--text-soft);white-space:nowrap;">
                                                                 {{ $bal->created_at?->format('d M Y, H:i') ?? '—' }}
+                                                            </td>
+                                                            <td class="px-3 py-3" style="min-width:290px;">
+                                                                @if(auth()->guard('admin')->user()?->hasPermission('manage_balances'))
+                                                                    <form method="POST" action="{{ route('admin.testmode.balance.add', [$user->id, $bal->id]) }}" class="d-flex align-items-center justify-content-end gap-2">
+                                                                        @csrf
+                                                                        <div class="input-group input-group-sm" style="max-width:145px;">
+                                                                            <span class="input-group-text">{{ strtoupper($bal->currency) }}</span>
+                                                                            <input type="number" name="amount" class="form-control" min="0.01" max="1000000000" step="0.01" placeholder="Amount" required aria-label="Amount to add to test balance">
+                                                                        </div>
+                                                                        <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+                                                                            <i class="fa-solid fa-plus me-1"></i>Add funds
+                                                                        </button>
+                                                                    </form>
+                                                                @else
+                                                                    <span class="text-muted small">Balance management permission required</span>
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach

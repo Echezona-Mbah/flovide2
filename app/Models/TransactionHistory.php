@@ -87,6 +87,40 @@ class TransactionHistory extends Model
         return $this->api_source ? 'API' : 'Normal';
     }
 
+    public function getDisplayTypeAttribute(): string
+    {
+        $type = strtolower((string) $this->type);
+        $method = strtolower((string) $this->method);
+        $transactionType = strtolower((string) $this->transaction_type);
+
+        if ($type === 'swap' || $method === 'swap' || $transactionType === 'swap') {
+            return 'Swap';
+        }
+
+        if (in_array($type, ['payout', 'withdrawal'], true)
+            || in_array($method, ['payout', 'withdrawal'], true)
+            || $transactionType === 'payout') {
+            return 'Payout';
+        }
+
+        if ($this->api_source
+            && in_array($type, ['credit', 'collection'], true)
+            && in_array($method, ['credit', 'collection'], true)
+            && $transactionType === 'payment') {
+            return 'Collection';
+        }
+
+        if ($type !== '') {
+            return ucfirst($type);
+        }
+
+        if ($method !== '') {
+            return ucfirst($method);
+        }
+
+        return $transactionType !== '' ? ucfirst($transactionType) : 'Unknown';
+    }
+
     protected static function booted(): void
     {
         static::updated(function (TransactionHistory $transaction) {
@@ -95,21 +129,23 @@ class TransactionHistory extends Model
             }
 
             $status = strtolower((string) $transaction->status);
-            if (! in_array($status, ['success', 'successful', 'failed', 'declined'], true)) {
-                return;
-            }
-
             $type = in_array(strtolower((string) $transaction->type), ['credit', 'collection'], true)
                 ? 'COLLECTION'
                 : 'PAYOUT';
             $mode = $transaction->mode ?: 'live';
             $transactionId = $transaction->id;
+            $event = match ($status) {
+                'success', 'successful' => 'transaction.success',
+                'failed', 'declined' => 'transaction.failed',
+                'pending' => 'transaction.pending',
+                default => 'transaction.status_updated',
+            };
 
-            DB::afterCommit(function () use ($transactionId, $type, $mode) {
+            DB::afterCommit(function () use ($transactionId, $type, $mode, $event) {
                 $freshTransaction = TransactionHistory::find($transactionId);
                 if ($freshTransaction) {
                     app(\App\Services\BusinessApiWebhookService::class)
-                        ->dispatch($freshTransaction, $type, $mode);
+                        ->dispatch($freshTransaction, $type, $mode, $event);
                 }
             });
         });

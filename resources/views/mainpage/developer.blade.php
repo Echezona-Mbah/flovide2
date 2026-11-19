@@ -567,7 +567,7 @@
                                     <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">/api/v1/collections/interac</code>
                                 </div>
                                 <h3 class="text-xl font-bold mb-3">Interac collection (top-up)</h3>
-                                <p class="text-slate-600 mb-6">Initiates a CAD Interac collection using the provider configured in your Payment Providers settings. Follow the returned payment instructions to complete the top-up. Once the payment is confirmed, the corresponding CAD wallet is credited.</p>
+                                <p class="text-slate-600 mb-6">Create a Flovide CAD collection with one API request. Flovide returns the payment instructions and credits the matching CAD wallet after the payment is confirmed. Track the final result with your collection webhook.</p>
 
                                 <details class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4" open>
                                     <summary class="cursor-pointer font-semibold text-slate-800">Body Parameters</summary>
@@ -581,45 +581,6 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                          <div class="p-6 md:p-8">
-                              <div class="flex flex-wrap items-center gap-3 mb-4">
-                                  <span class="px-3 py-1 bg-slate-200 text-slate-600 rounded-md font-bold text-xs">DASHBOARD</span>
-                                  <code class="text-sm font-semibold text-slate-700 bg-slate-50 px-2 py-1 rounded">Interac Auto Deposit (CAD)</code>
-                              </div>
-                              <h3 class="text-xl font-bold mb-3">Setting up Auto Deposit</h3>
-                              <p class="text-slate-600 mb-6 leading-relaxed">
-                                  Auto Deposit is a standing setup, not an API call. Once you register an email address for a CAD wallet, anyone who sends an Interac e-Transfer to that email is credited to your wallet automatically — no request needs to be sent first, and no <code>collections/interac</code> call is required for each payment.
-                              </p>
-
-                              <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6">
-                                  <div class="flex">
-                                      <div class="flex-shrink-0">
-                                          <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
-                                              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                          </svg>
-                                      </div>
-                                      <div class="ml-3">
-                                          <p class="text-sm text-amber-700">
-                                              There is no API endpoint for this — Auto Deposit emails are registered from your dashboard, since they're a wallet-level setting rather than a per-transaction request.
-                                          </p>
-                                      </div>
-                                  </div>
-                              </div>
-
-                              <h4 class="font-bold text-slate-900 mb-3">Where to set it up</h4>
-                              <ol class="list-decimal list-inside space-y-2 text-slate-600 mb-6">
-                                  <li>Go to <strong>Wallets</strong> in your dashboard and open your <strong>CAD</strong> wallet.</li>
-                                  <li>Under <strong>Account Details</strong>, find the <strong>Interac Auto Deposit</strong> panel and click <strong>Manage Auto Deposit Emails</strong>.</li>
-                                  <li>Click <strong>Add Email</strong> and enter the email address you want customers to send e-Transfers to. Auto Deposit emails must end with <strong>@flovide.com</strong>, for example <code>payment@flovide.com</code>.</li>
-                                  <li>You can register more than one email per wallet — useful if you route different products or channels to different addresses.</li>
-                              </ol>
-
-                              <p class="text-slate-600 mb-2">
-                                  Once an email is active, any e-Transfer sent to it is matched to your wallet and credited automatically, and you'll receive a <code>transaction.success</code> webhook just like any other collection — see the <a href="#webhooks" class="text-indigo-600 font-semibold hover:underline">Webhooks</a> section for the payload shape.
-                              </p>
-                          </div>
-                      </div>
                     </div>
                 </section>
 
@@ -708,8 +669,8 @@
                 <section id="webhooks" class="mb-20">
                     <h2 class="text-3xl font-bold text-slate-900 mb-6">Webhooks</h2>
                     <p class="text-slate-600 mb-6 leading-relaxed">
-                        Flovide sends a signed webhook to the configured Collection URL or Payout URL when the corresponding API transaction is created.
-                        Configure separate live and test endpoints from the Webhooks settings panel. The endpoint receives the initial transaction status, which may be <code>pending</code>.
+                        Flovide sends a signed webhook to the configured Collection URL or Payout URL when an API transaction is created and whenever its status changes.
+                        Configure separate live and test endpoints from the Webhooks settings panel. Status changes such as pending, processing, successful, or failed are reported as separate events.
                     </p>
 
                     <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8">
@@ -732,28 +693,36 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">collection.created</h4>
-                            <p class="text-sm text-slate-500">Sent to the configured Collection URL when the API creates a collection request.</p>
+                            <p class="text-sm text-slate-500">Sent to the configured Collection URL when the API creates a collection request, including its initial status.</p>
                         </div>
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">payout.created</h4>
-                            <p class="text-sm text-slate-500">Sent to the configured Payout URL when the API creates a payout request.</p>
+                            <p class="text-sm text-slate-500">Sent to the configured Payout URL when the API creates a payout request, including its initial status.</p>
                         </div>
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.success</h4>
-                            <p class="text-sm text-slate-500">Sent to the transaction's Collection or Payout URL when an API transaction status changes to successful.</p>
+                            <p class="text-sm text-slate-500">Sent when an API transaction status changes to successful.</p>
                         </div>
                         <div class="p-4 bg-white border border-slate-200 rounded-lg">
                             <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.failed</h4>
-                            <p class="text-sm text-slate-500">Sent to the transaction's Collection or Payout URL when an API transaction status changes to failed.</p>
+                            <p class="text-sm text-slate-500">Sent when an API transaction status changes to failed.</p>
+                        </div>
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.pending</h4>
+                            <p class="text-sm text-slate-500">Sent when an API transaction status changes to pending.</p>
+                        </div>
+                        <div class="p-4 bg-white border border-slate-200 rounded-lg">
+                            <h4 class="font-bold text-slate-900 mb-2 font-mono text-sm">transaction.status_updated</h4>
+                            <p class="text-sm text-slate-500">Sent when an API transaction changes to a status not covered by the success, failed, or pending events.</p>
                         </div>
                     </div>
 
                     <!-- Payload shape -->
-                    <h3 class="text-lg font-bold text-slate-900 mb-4">Payload</h3>
-                    <p class="text-slate-600 mb-4">Every webhook request is a <code>POST</code> with a JSON body in this shape:</p>
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Payloads</h3>
+                    <p class="text-slate-600 mb-4">Every webhook request is a <code>POST</code> with a JSON body. Collection events are sent to the Collection URL and payout events to the Payout URL. Both use the common transaction fields; payout events also include recipient details.</p>
 
                     <div class="mb-10 bg-slate-900 rounded-xl overflow-hidden">
-                        <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Example Payload</div>
+                        <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Payout webhook payload</div>
                         <div class="p-6 overflow-x-auto hide-scrollbar">
                 <pre class="text-slate-300 text-sm leading-6">{
                   "message": "Transaction initiated",
@@ -775,6 +744,44 @@
                     "amount": 98.50
                   }
                 }</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 bg-slate-900 rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Collection webhook payload</div>
+                        <div class="p-6 overflow-x-auto hide-scrollbar">
+                <pre class="text-slate-300 text-sm leading-6">{
+                  "message": "Transaction initiated",
+                  "event_id": "01a1b1bc-6bf6-7142-a835-1cd2cf714d94",
+                  "event": "collection.created",
+                  "type": "collection",
+                  "transaction_id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+                  "transaction_reference": "CA1MRs5KvbNb",
+                  "transaction_status": "PENDING",
+                  "transaction_fee": 1.30,
+                  "transaction_amount_without_fee": 198.70,
+                  "transaction_amount": 200.00,
+                  "transaction_currency": "CAD",
+                  "payer_email": "payer@example.com",
+                  "customer_id": null
+                }</pre>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-10">
+                        For a collection, <code>payer_email</code> is the payer's email address when supplied with the collection request. It is separate from <code>customer_id</code>, which is an optional Flovide customer identifier and may be <code>null</code>. <code>transaction_amount</code> is the gross amount and <code>transaction_amount_without_fee</code> is the amount after the Flovide fee. Collection payloads do not include a <code>recipient</code> object. Subsequent status changes are delivered as separate events, such as <code>transaction.success</code> or <code>transaction.failed</code>.
+                    </p>
+
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Acknowledge a webhook</h3>
+                    <p class="text-slate-600 mb-4">After verifying and handling the request, respond with an HTTP <code>2xx</code> status. The response body may be JSON; Flovide records the HTTP status and response for delivery logs.</p>
+                    <div class="mb-10 bg-slate-900 rounded-xl overflow-hidden">
+                        <div class="px-4 py-3 text-xs font-bold text-white border-b border-slate-800">Example collection endpoint response</div>
+                        <div class="p-6 overflow-x-auto hide-scrollbar">
+                <pre class="text-slate-300 text-sm leading-6">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "message": "Webhook processed"
+}</pre>
                         </div>
                     </div>
 
@@ -2882,14 +2889,18 @@ Console.WriteLine(body);`,
 
   response: `{
   "success": true,
-  "message": "Interac money request sent successfully.",
+  "message": "Flovide collection request created. Payment will be credited after confirmation.",
   "code": "INTERAC_COLLECTION_INITIATED",
   "mode": "live",
   "data": {
-    "id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
+    "transaction_id": "019f6bb5-7f5f-724d-8999-8a86b98c0f2a",
     "reference": "CAyAHe1XxpDs",
-    "order_id": "TEST_ae8cda30-f4a8-4c0f-a873-40e3d9436d70",
-    "created_at": "2026-07-16T16:14:44+00:00"
+    "expires_at": "2026-11-20T16:14:44+00:00",
+    "amount": 100,
+    "fee": 1.30,
+    "net_amount": 98.70,
+    "currency": "CAD",
+    "email": "payer@example.com"
   }
 }`
 },

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\URL;
 use App\Models\GeneralNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
 use App\Models\AdminNotification;
 
 use Illuminate\Http\Response as HttpResponse;
@@ -107,10 +108,14 @@ class AppServiceProvider extends ServiceProvider
 
 
      View::composer('admin.header', function ($view) {
-        $view->with('unreadReferralAlerts', AdminNotification::whereNull('read_at')
-            ->where('type', 'referral_bonus')
-            ->latest()
-            ->get());
+        $alerts = Schema::hasTable('admin_notifications')
+            ? AdminNotification::whereNull('read_at')
+                ->where('type', 'referral_bonus')
+                ->latest()
+                ->get()
+            : collect();
+
+        $view->with('unreadReferralAlerts', $alerts);
     });
 
     }

@@ -24,6 +24,7 @@ class TransactionHistoryController extends Controller
         ->get()
         ->map(function ($t) {
             return [
+                    'id'             => $t->id,
                     'type'             => $t->type,
                     'date'             => $t->created_at->format('Y-m-d H:i:s'),
                     'sender'           => $t->sender ?? 'N/A',
@@ -32,6 +33,7 @@ class TransactionHistoryController extends Controller
                     'currency'         => $t->currency,
                     'status'           => $t->status,
                     'reference'        => $t->reference,
+                    'payment_reference'             => $t->payment_reference,
                     'method'           => $t->method,
                     'mode'             => $t->mode,
                     'source'            => $t->source_label,

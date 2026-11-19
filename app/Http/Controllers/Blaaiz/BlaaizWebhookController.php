@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Blaaiz;
 use App\Http\Controllers\Controller;
 use App\Mail\TransactionSentMail;
 use App\Models\Balance;
+use App\Models\InteracAutoDeposit;
 use App\Models\Personal;
 use App\Models\TransactionHistory;
 use App\Models\User;
+use App\Models\UserCurrencyFee;
 use App\Services\FirebaseNotificationService;
 use Blaaiz\LaravelSdk\Exceptions\BlaaizException;
 use Blaaiz\LaravelSdk\Facades\Blaaiz;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class BlaaizWebhookController extends Controller
 {
@@ -81,7 +85,11 @@ class BlaaizWebhookController extends Controller
         $data = $payload['data'] ?? $payload;
 
         $transactionId = $data['transaction_id'] ?? $data['id'] ?? null;
-        $reference     = $data['transaction_reference'] ?? $data['reference'] ?? null;
+        $reference     = $data['transaction_reference']
+            ?? $data['interac_reference']
+            ?? $data['merchant_reference']
+            ?? $data['reference']
+            ?? null;
         $rawStatus     = strtolower($data['transaction_status'] ?? $data['status'] ?? '');
 
         return [$data, $transactionId, $reference, $rawStatus];
@@ -266,25 +274,106 @@ class BlaaizWebhookController extends Controller
             'mapped_status'  => $mapped,
         ]);
 
-        // Collections aren't restricted to payment_provider = interac,
-        // unlike handleInterac() — match on id/reference only.
-        $tx = TransactionHistory::where(function ($q) use ($transactionId, $reference) {
-                $q->where('order_id', $transactionId)
-                  ->orWhere('reference', $reference)
-                  ->orWhere('payment_reference', $reference);
+        if ($transactionId === null && $reference === null) {
+            Log::warning('[BlaaizWebhook] Collection event has no transaction identifier or reference');
+
+            return response()->json(['message' => 'Transaction identifier or reference missing'], 422);
+        }
+
+        // Blaaiz includes the destination address (the business's registered
+        // collection email) separately from the payer's email. Resolve that
+        // address to a business CAD wallet first, then only match a business
+        // transaction tied to that wallet. Personal transactions must never
+        // be eligible for this callback.
+        $payeeCollectionEmail = strtolower(trim((string) data_get($data, 'payee_collection_email')));
+        if ($payeeCollectionEmail === '') {
+            Log::warning('[BlaaizWebhook] Collection event has no payee collection email', [
+                'transaction_id' => $transactionId,
+                'reference' => $reference,
+            ]);
+
+            return response()->json(['message' => 'Business collection email missing'], 422);
+        }
+
+        $destinations = InteracAutoDeposit::query()
+            ->with('balance')
+            ->whereNotNull('user_id')
+            ->whereNotNull('balance_id')
+            ->whereRaw('LOWER(email) = ?', [$payeeCollectionEmail])
+            ->get()
+            ->filter(function (InteracAutoDeposit $destination) {
+                $balance = $destination->balance;
+
+                return $balance
+                    && (string) $balance->user_id === (string) $destination->user_id
+                    && $balance->personal_id === null
+                    && strtoupper((string) $balance->currency) === 'CAD';
             })
-            ->first();
+            ->values();
+
+        if ($destinations->isEmpty()) {
+            Log::warning('[BlaaizWebhook] Collection email is not linked to a business wallet', [
+                'payee_collection_email' => $payeeCollectionEmail,
+                'transaction_id' => $transactionId,
+                'reference' => $reference,
+            ]);
+
+            return response()->json(['message' => 'Business collection email not found'], 404);
+        }
+
+        $destinations = $destinations
+            ->unique(fn (InteracAutoDeposit $item) => (string) $item->user_id . ':' . (string) $item->balance_id)
+            ->values();
+
+        if ($destinations->count() !== 1) {
+            Log::error('[BlaaizWebhook] Collection email maps to multiple business wallets', [
+                'payee_collection_email' => $payeeCollectionEmail,
+                'wallets' => $destinations->map(fn (InteracAutoDeposit $item) => [
+                    'user_id' => $item->user_id,
+                    'balance_id' => $item->balance_id,
+                ])->all(),
+            ]);
+
+            return response()->json(['message' => 'Business collection email maps to multiple wallets'], 409);
+        }
+
+        $destination = $destinations->first();
+
+        $txQuery = TransactionHistory::query()
+            ->whereNotNull('user_id')
+            ->whereNull('personal_id')
+            ->where('user_id', $destination->user_id)
+            ->where(function ($q) use ($transactionId, $reference) {
+                if ($transactionId !== null) {
+                    $q->where('id', $transactionId)
+                        ->orWhere('order_id', $transactionId);
+                }
+
+                if ($reference !== null) {
+                    if ($transactionId !== null) {
+                        $q->orWhere('reference', $reference)
+                            ->orWhere('payment_reference', $reference);
+                    } else {
+                        $q->where('reference', $reference)
+                            ->orWhere('payment_reference', $reference);
+                    }
+                }
+            });
+
+        $tx = $txQuery->first();
 
         if (!$tx) {
-            Log::warning('[BlaaizWebhook] No matching collection transaction found', [
+            Log::info('[BlaaizWebhook] No pre-existing business collection found; recording the signed collection event', [
                 'transaction_id' => $transactionId,
                 'reference'      => $reference,
+                'payee_collection_email' => $payeeCollectionEmail,
+                'business_id' => $destination->user_id,
+                'balance_id' => $destination->balance_id,
             ]);
-            return response()->json(['message' => 'Transaction not found'], 404);
         }
 
         // ── Email mismatch guard ────────────────────────────────────────────────
-        if (!$this->interacEmailMatches($tx, $data)) {
+        if ($tx && ! $this->interacEmailMatches($tx, $data)) {
             Log::warning('[BlaaizWebhook] Collection email mismatch — update skipped', [
                 'tx_id'           => $tx->id,
                 'expected_email'  => $tx->interac_email ?? $tx->sender,
@@ -296,36 +385,219 @@ class BlaaizWebhookController extends Controller
             return response()->json(['message' => 'Email mismatch — transaction not updated, admin notified'], 200);
         }
 
-        if ($tx->status === $mapped) {
-            Log::info('[BlaaizWebhook] Status unchanged, skipping', ['tx_id' => $tx->id]);
+        $amount = data_get($data, 'transaction_amount');
+        $fee = data_get($data, 'transaction_fee', 0);
+        $netAmount = data_get($data, 'transaction_amount_without_fee');
+        $currency = strtoupper((string) data_get($data, 'transaction_currency', ''));
+
+        if (! is_numeric($amount) || ! is_numeric($fee) || ($netAmount !== null && ! is_numeric($netAmount)) || $currency !== 'CAD') {
+            Log::warning('[BlaaizWebhook] Invalid business CAD collection amount fields', [
+                'transaction_id' => $transactionId,
+                'reference' => $reference,
+                'currency' => $currency,
+            ]);
+
+            return response()->json(['message' => 'Invalid CAD collection amount fields'], 422);
+        }
+
+        $amount = round((float) $amount, 2);
+        $providerFee = round((float) $fee, 2);
+        $providerNetAmount = $netAmount === null
+            ? round($amount - $fee, 2)
+            : round((float) $netAmount, 2);
+        $payerEmail = data_get($data, 'source_information.collection_email');
+        $storedReference = (string) ($reference ?: $transactionId);
+
+        if ($amount <= 0 || $providerFee < 0 || $providerFee > $amount || $providerNetAmount < 0 || $providerNetAmount > $amount) {
+            return response()->json(['message' => 'Invalid CAD collection amount fields'], 422);
+        }
+
+        // Blaaiz's fee is a provider cost. The merchant's collection fee is
+        // calculated independently from the business pricing configured in
+        // UserCurrencyFee and deducted from the amount Blaaiz settles.
+        $businessFee = UserCurrencyFee::query()
+            ->where('user_id', $destination->user_id)
+            ->where('currency', $currency)
+            ->first();
+        $platformFee = $businessFee && $businessFee->collection_enabled
+            ? $businessFee->calcCollectionFee($amount)
+            : 0.0;
+        // The customer pays the gross amount. Blaaiz deducts its fee from
+        // Flovide's settlement, so it must not reduce the merchant's credit.
+        $recipientAmount = round($amount - $platformFee, 2);
+
+        if ($platformFee < 0 || $platformFee > $amount) {
+            Log::warning('[BlaaizWebhook] Business collection fee exceeds settled amount', [
+                'business_id' => $destination->user_id,
+                'amount' => $amount,
+                'provider_fee' => $providerFee,
+                'provider_net_amount' => $providerNetAmount,
+                'business_fee' => $platformFee,
+            ]);
+
+            return response()->json(['message' => 'Business collection fee exceeds settled amount'], 422);
+        }
+
+        $result = DB::transaction(function () use (
+            $tx,
+            $mapped,
+            $destination,
+            $transactionId,
+            $storedReference,
+            $payerEmail,
+            $amount,
+            $platformFee,
+            $recipientAmount,
+            $currency
+        ) {
+            $balance = Balance::query()
+                ->whereKey($destination->balance_id)
+                ->where('user_id', $destination->user_id)
+                ->whereNull('personal_id')
+                ->where('currency', $currency)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $balance) {
+                return ['changed' => false, 'missing' => true];
+            }
+
+            $lockedTx = null;
+            if ($tx) {
+                $lockedTx = TransactionHistory::query()
+                    ->whereKey($tx->getKey())
+                    ->where('user_id', $destination->user_id)
+                    ->whereNotNull('user_id')
+                    ->whereNull('personal_id')
+                    ->lockForUpdate()
+                    ->first();
+            } else {
+                $lockedTx = TransactionHistory::query()
+                    ->where('user_id', $destination->user_id)
+                    ->whereNotNull('user_id')
+                    ->whereNull('personal_id')
+                    ->where(function ($query) use ($transactionId, $storedReference) {
+                        $query->where('reference', $storedReference)
+                            ->orWhere('payment_reference', $storedReference);
+
+                        if ($transactionId !== null) {
+                            $query->orWhere('id', $transactionId)
+                                ->orWhere('order_id', $transactionId);
+                        }
+                    })
+                    ->lockForUpdate()
+                    ->first();
+            }
+
+            if ($lockedTx) {
+                $currentStatus = strtolower((string) $lockedTx->status);
+                if ($currentStatus === $mapped || in_array($currentStatus, ['success', 'successful', 'failed', 'declined'], true)) {
+                    return ['changed' => false, 'missing' => false, 'transaction' => $lockedTx];
+                }
+
+                $lockedTx->balance_id = $balance->id;
+                $lockedTx->amount = $amount;
+                $lockedTx->fees = $platformFee;
+                $lockedTx->recipient_amount = $recipientAmount;
+                $lockedTx->currency = $currency;
+                $referenceOwnedByAnotherTransaction = TransactionHistory::query()
+                    ->where('reference', $storedReference)
+                    ->where('id', '!=', $lockedTx->id)
+                    ->exists();
+                if (! $referenceOwnedByAnotherTransaction) {
+                    $lockedTx->reference = $storedReference;
+                } elseif (blank($lockedTx->reference)) {
+                    $lockedTx->reference = 'FLV-' . Str::uuid();
+                }
+                $lockedTx->payment_reference = $storedReference;
+                $lockedTx->order_id = $transactionId ?: $lockedTx->order_id;
+                $lockedTx->interac_email = $payerEmail ?: $lockedTx->interac_email;
+                $lockedTx->sender = $payerEmail ?: $lockedTx->sender;
+                $lockedTx->payment_provider = $lockedTx->payment_provider ?: 'interac';
+                $lockedTx->status = $mapped;
+                $lockedTx->save();
+            } else {
+                $historyReference = $storedReference;
+                if (TransactionHistory::query()->where('reference', $historyReference)->exists()) {
+                    // The provider reference is kept in payment_reference. A
+                    // globally unique local reference prevents a collision
+                    // with a personal transaction without touching that row.
+                    $historyReference = 'FLV-' . Str::uuid();
+                }
+
+                $lockedTx = TransactionHistory::create([
+                    'user_id' => $destination->user_id,
+                    'personal_id' => null,
+                    'balance_id' => $balance->id,
+                    'type' => 'credit',
+                    'method' => 'credit',
+                    'transaction_type' => 'payment',
+                    'payment_method' => 'wallet_autodeposit',
+                    'payment_provider' => 'interac',
+                    'sender' => $payerEmail,
+                    'interac_email' => $payerEmail,
+                    'amount' => $amount,
+                    'fees' => $platformFee,
+                    'recipient_amount' => $recipientAmount,
+                    'currency' => $currency,
+                    'status' => $mapped,
+                    'reference' => $historyReference,
+                    'payment_reference' => $storedReference,
+                    'order_id' => $transactionId,
+                    'mode' => $balance->mode ?: 'live',
+                    'api_source' => true,
+                ]);
+            }
+
+            if ($mapped === 'success') {
+                $balance->amount = (float) $balance->amount + $recipientAmount;
+                $balance->save();
+            }
+
+            return [
+                'changed' => true,
+                'missing' => false,
+                'transaction' => $lockedTx->fresh(),
+                'balance' => $mapped === 'success' ? $balance->fresh() : null,
+            ];
+        }, 3);
+
+        if ($result['missing']) {
+            Log::error('[BlaaizWebhook] Business wallet or transaction disappeared during update', [
+                'tx_id' => $tx?->id,
+                'user_id' => $destination->user_id,
+                'balance_id' => $destination->balance_id,
+            ]);
+
+            return response()->json(['message' => 'Business wallet not found'], 404);
+        }
+
+        if (! $result['changed']) {
+            $unchangedTransaction = $result['transaction'] ?? $tx;
+            Log::info('[BlaaizWebhook] Business transaction already terminal, skipping duplicate event', [
+                'tx_id' => $unchangedTransaction?->id,
+                'status' => $unchangedTransaction?->status,
+            ]);
+
             return response()->json(['message' => 'No change'], 200);
         }
 
-        if ($tx->status === $mapped) {
-            Log::info('[BlaaizWebhook] Status unchanged, skipping', ['tx_id' => $tx->id]);
-            return response()->json(['message' => 'No change'], 200);
-        }
-
-        $tx->status = $mapped;
-        $tx->save();
+        $tx = $result['transaction'];
 
         Log::info('[BlaaizWebhook] Collection transaction status updated', [
             'tx_id'      => $tx->id,
             'new_status' => $mapped,
         ]);
 
-        if ($mapped === 'success' && $tx->balance_id) {
-            $balance = Balance::find($tx->balance_id);
-            if ($balance) {
-                $balance->amount += $tx->recipient_amount;
-                $balance->save();
-
-                Log::info('[BlaaizWebhook] Balance credited', [
-                    'balance_id'  => $balance->id,
-                    'amount'      => $tx->recipient_amount,
-                    'new_balance' => $balance->amount,
-                ]);
-            }
+        if ($mapped === 'success' && $result['balance']) {
+            Log::info('[BlaaizWebhook] Business balance credited', [
+                'balance_id' => $result['balance']->id,
+                'business_id' => $tx->user_id,
+                'amount' => $tx->recipient_amount,
+                'provider_fee' => $providerFee,
+                'business_fee' => $platformFee,
+                'new_balance' => $result['balance']->amount,
+            ]);
         }
 
         $this->sendPushNotification($tx);

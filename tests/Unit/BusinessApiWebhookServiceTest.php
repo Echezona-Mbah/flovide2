@@ -42,6 +42,8 @@ beforeEach(function () {
         $table->decimal('recipient_amount', 12, 2)->nullable();
         $table->string('currency')->nullable();
         $table->string('mode')->nullable();
+        $table->string('sender')->nullable();
+        $table->string('interac_email')->nullable();
         $table->string('recipient_account_number')->nullable();
         $table->string('recipient_account_name')->nullable();
         $table->string('recipient_bank_name')->nullable();
@@ -90,6 +92,7 @@ it('delivers and records a signed collection webhook', function () {
         'type' => 'credit',
         'status' => 'success',
         'reference' => 'COLLECTION-REF',
+        'sender' => 'payer@example.com',
         'amount' => 200,
         'fees' => 1.3,
         'recipient_amount' => 198.7,
@@ -108,6 +111,8 @@ it('delivers and records a signed collection webhook', function () {
         ->and($log->payload['event'])->toBe('transaction.success')
         ->and($log->payload['transaction_status'])->toBe('SUCCESSFUL')
         ->and($log->payload['transaction_amount_without_fee'])->toBe(198.7)
+        ->and($log->payload['payer_email'])->toBe('payer@example.com')
+        ->and($log->payload['customer_id'])->toBeNull()
         ->and($log->response)->toBe(['message' => 'Webhook processed'])
         ->and($log->histories)->toHaveCount(1)
         ->and($log->histories[0]->http_status)->toBe(200);
@@ -247,6 +252,35 @@ it('sends a terminal webhook when an API transaction status changes', function (
     Http::assertSent(fn (Request $request) =>
         $request->hasHeader('X-Flovide-Event', 'transaction.success')
     );
+});
+
+it('sends a webhook when an API transaction moves back to pending', function () {
+    WebhookSetting::create([
+        'user_id' => 42,
+        'live_secret_key' => 'live-secret',
+        'live_payout_url' => 'https://merchant.example/hooks/payout',
+    ]);
+
+    $transaction = TransactionHistory::create([
+        'id' => '019e8eb3-29cc-7011-b742-ca8a1b2c3d4e',
+        'user_id' => 42,
+        'type' => 'withdrawal',
+        'status' => 'processing',
+        'amount' => 10,
+        'currency' => 'CAD',
+        'mode' => 'live',
+        'api_source' => true,
+    ]);
+
+    Http::fake(['merchant.example/*' => Http::response(['received' => true], 200)]);
+
+    $transaction->status = 'pending';
+    $transaction->save();
+
+    $log = \App\Models\BusinessWebhookLog::first();
+    expect($log)->not->toBeNull()
+        ->and($log->payload['event'])->toBe('transaction.pending')
+        ->and($log->payload['transaction_status'])->toBe('PENDING');
 });
 
 it('replays the original event and records a second attempt', function () {

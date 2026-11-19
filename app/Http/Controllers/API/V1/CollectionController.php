@@ -21,8 +21,8 @@ class CollectionController extends Controller
  * @OA\Post(
  *     path="/api/v1/collections/interac",
  *     tags={"Collections"},
- *     summary="Initiate Interac collection (top-up)",
- *     description="Sends an Interac Auto Deposit money request to the payer's email, crediting the account's CAD wallet once approved.",
+ *     summary="Create a Flovide Interac collection",
+ *     description="Creates a CAD collection request in one API call. Flovide returns payment instructions and credits the CAD wallet after payment confirmation.",
  *     @OA\Parameter(
  *         name="X-Public-Key",
  *         in="header",
@@ -213,10 +213,25 @@ public function collectInterac(
 
     $provider = $collections->resolveProvider();
     if (!$provider) {
+        app(\App\Services\ProviderErrorReporter::class)->report(
+            'CAD Interac collection',
+            'Provider routing',
+            'COLLECTION_PROVIDER_DISABLED',
+            [
+                'account_type' => 'business',
+                'account_id' => $ownerId,
+                'business_email' => $owner->email,
+                'payer_email' => $validated['email'],
+                'amount' => $amount,
+                'currency' => 'CAD',
+                'mode' => $mode,
+            ]
+        );
+
         return response()->json([
             'success' => false,
-            'message' => 'No CAD Interac collection provider is enabled.',
-            'code' => 'COLLECTION_PROVIDER_DISABLED',
+            'message' => 'Flovide CAD collections are temporarily unavailable.',
+            'code' => 'COLLECTION_UNAVAILABLE',
             'data' => null,
         ], 422);
     }
@@ -224,10 +239,26 @@ public function collectInterac(
     if ($provider->key === 'swappr') {
         $depositEmail = $collections->swapprRecipientEmail();
         if (!$depositEmail) {
+            app(\App\Services\ProviderErrorReporter::class)->report(
+                'Swappr',
+                'CAD Interac collection',
+                'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                [
+                    'account_type' => 'business',
+                    'account_id' => $ownerId,
+                    'business_email' => $owner->email,
+                    'payer_email' => $validated['email'],
+                    'amount' => $amount,
+                    'currency' => 'CAD',
+                    'mode' => $mode,
+                    'required_setting' => 'SWAPPR_CAD_INTERAC_EMAIL',
+                ]
+            );
+
             return response()->json([
                 'success' => false,
-                'message' => 'Set SWAPPR_CAD_INTERAC_EMAIL to the registered Swappr CAD Interac address.',
-                'code' => 'SWAPPR_COLLECTION_NOT_CONFIGURED',
+                'message' => 'Flovide could not prepare this CAD collection. Please contact the business.',
+                'code' => 'COLLECTION_UNAVAILABLE',
                 'data' => null,
             ], 503);
         }
@@ -259,12 +290,12 @@ public function collectInterac(
 
         return response()->json([
             'success' => true,
-            'message' => 'Send the Interac e-Transfer to the address below and include the reference in the transfer message. Swappr will notify Flovide when it settles; unmatched transfers remain pending for admin verification.',
-            'code' => 'SWAPPR_COLLECTION_PENDING_WEBHOOK',
+            'message' => 'Flovide has prepared your CAD collection. Follow the payment instructions and include the reference so the payment can be matched and your wallet credited after confirmation.',
+            'code' => 'FLOVIDE_COLLECTION_PENDING',
             'mode' => 'live',
             'data' => [
                 'transaction_id' => $transaction->id,
-                'provider' => 'swappr',
+                'provider' => 'Flovide',
                 'reference' => $reference,
                 'deposit_email' => $depositEmail,
                 'amount' => $amount,
@@ -292,8 +323,8 @@ public function collectInterac(
     if ($provider->key !== 'blaaiz_interac') {
         return response()->json([
             'success' => false,
-            'message' => "The selected provider {$provider->name} does not support CAD Interac collections.",
-            'code' => 'COLLECTION_PROVIDER_UNSUPPORTED',
+            'message' => 'Flovide CAD collections are temporarily unavailable.',
+            'code' => 'COLLECTION_UNAVAILABLE',
             'data' => null,
         ], 422);
     }
@@ -315,11 +346,28 @@ public function collectInterac(
             ?? $response['data']['error_description']
             ?? 'Interac request failed. Please try again.';
 
+        app(\App\Services\ProviderErrorReporter::class)->report(
+            $provider->name,
+            'CAD Interac collection request',
+            'INTERAC_REQUEST_FAILED',
+            [
+                'account_type' => 'business',
+                'account_id' => $ownerId,
+                'business_email' => $owner->email,
+                'payer_email' => $validated['email'],
+                'amount' => $amount,
+                'currency' => 'CAD',
+                'mode' => $mode,
+                'provider_status' => $response['status'] ?? null,
+                'provider_message' => $errorMsg,
+            ]
+        );
+
         return response()->json([
             'success' => false,
-            'message' => $errorMsg,
+            'message' => 'We could not start this Interac collection. Please try again later or contact the business.',
             'code'    => 'INTERAC_REQUEST_FAILED',
-            'data'    => $response['data'] ?? null,
+            'data'    => null,
         ], $response['status']);
     }
 
@@ -351,7 +399,7 @@ public function collectInterac(
 
     return response()->json([
         'success' => true,
-        'message' => $responseData['message'] ?? 'Interac collection request sent successfully.',
+        'message' => 'Flovide collection request created. The payer can complete payment from the request sent to their email.',
         'code'    => 'INTERAC_COLLECTION_INITIATED',
         'mode'    => 'live',
         'data'    => [

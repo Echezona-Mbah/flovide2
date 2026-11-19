@@ -114,7 +114,7 @@
                 <th class="px-4 py-4 text-left hidden md:table-cell">Sender</th>
                 <th class="px-4 py-4 text-left hidden md:table-cell">Recipient</th>
                 <th class="px-4 py-4 text-left">Amount</th>
-                <th class="px-4 py-4 text-left">Fee</th>
+                <th class="px-4 py-4 text-left">Fee charged</th>
                 <th class="px-4 py-4 text-left">Status</th>
                 <th class="px-4 py-4 text-left">Action</th>
               </tr>
@@ -123,7 +123,7 @@
             <tbody class="divide-y divide-slate-100">
               @forelse($transactions as $transaction)
                 @php
-                  $type = strtolower($transaction->type ?? $transaction->method ?? '');
+                  $type = strtolower($transaction->display_type);
                 @endphp
                 <tr onclick="openTransaction(this)"
                   class="cursor-pointer hover:bg-sky-50 transition"
@@ -150,17 +150,21 @@
                 >
                   <!-- Type column -->
                   <td class="px-4 py-4">
-                    @if($type === 'credit')
+                    @if(in_array($type, ['credit', 'collection'], true))
                       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                        <i class="fas fa-arrow-down text-[10px]"></i> Credit
+                        <i class="fas fa-arrow-down text-[10px]"></i> {{ ucfirst($type) }}
                       </span>
                     @elseif($type === 'swap')
                       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700">
                         <i class="fas fa-exchange-alt text-[10px]"></i> Swap
                       </span>
-                    @else
+                    @elseif(in_array($type, ['payout', 'withdrawal'], true))
                       <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
-                        <i class="fas fa-arrow-up text-[10px]"></i> Withdrawal
+                        <i class="fas fa-arrow-up text-[10px]"></i> Payout
+                      </span>
+                    @else
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                        {{ ucfirst($type) }}
                       </span>
                     @endif
                   </td>
@@ -202,6 +206,9 @@
 
                   <td class="px-4 py-4 text-slate-500">
                     {{ number_format($transaction->fees ?? 0, 2) }} {{ $transaction->currency }}
+                    @if((float) ($transaction->fees ?? 0) > 0)
+                      <span class="block text-xs text-slate-400">Fixed/percentage fee</span>
+                    @endif
                   </td>
 
                   <td class="px-4 py-4">
